@@ -12,6 +12,7 @@
   --mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* ---------- размеры текста по ролям (точные значения мокапа) ---------- */
+  --fs-nano: 9.5px; /* подпись под логотипом кабинета */
   --fs-tiny: 10px; /* подписи над значением в меню телефона */
   --fs-micro: 10.5px; /* подписи KPI, бейджи */
   --fs-label: 11px; /* моно-подписи, eyebrow */
@@ -22,6 +23,7 @@
   --fs-control: 14px;
   --fs-control-l: 14.5px; /* кнопки */
   --fs-body: 15px;
+  --fs-input: 15.5px; /* текст в полях формы */
   --fs-h4: 16px;
   --fs-lead: 17px;
   --fs-h3: 20px;
@@ -29,6 +31,8 @@
   --fs-kpi: 30px;
   --fs-stat: 34px;
   --fs-h2: clamp(30px, 3.05vw, 46px);
+  --fs-login-title: clamp(30px, 3.05vw, 46px); /* «Кабинет сотрудника»: на телефоне 30 px, не 27 (К1.3) */
+  --fs-admin-title: 22px; /* заголовок раздела кабинета */
   --fs-h1: clamp(42px, 4.7vw, 68px);
 
   --lh-tight: 0.98;
@@ -160,6 +164,35 @@
   --over-photo-button: rgba(15, 12, 8, 0.26);
   --over-photo-shade: linear-gradient(180deg, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0));
   --over-photo-filter: blur(8px);
+  --photo-bg: #0b0a09; /* подложка тёмных фото-блоков до загрузки картинки */
+
+  /* ---------- кабинет (мокап, раздел «кабинет» светлой темы) ---------- */
+  --admin-side-bg: #fbf9f5;
+  --admin-nav-fg: #4f483e;
+  --admin-nav-hover: rgba(40, 28, 12, 0.04);
+  --admin-nav-on-bg: #fff3df;
+  --admin-nav-on-ring: rgba(240, 160, 48, 0.55);
+  --admin-nav-on-icon: #c46a00;
+  --admin-pill-on-glow: 0 0 16px rgba(248, 155, 13, 0.165);
+  --admin-topbar-h: 74px;
+  --admin-content-pad: 30px;
+  --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.216));
+
+  /* ---------- экран входа (К1) ---------- */
+  --login-card-w: 440px;
+  --login-card-bg: linear-gradient(180deg, rgba(253, 251, 247, 0.88), rgba(253, 251, 247, 0.92));
+  /* Фото стройки — тёмный островок в обеих темах (PLAN §3.7): затемнение 40–55 % под карточкой. */
+  --login-shade: radial-gradient(120% 90% at 50% 50%, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0.6)),
+    linear-gradient(180deg, rgba(10, 8, 6, 0.45), rgba(10, 8, 6, 0.4));
+  --field-bg: rgba(255, 255, 255, 0.54);
+  --field-ring: 0 0 0 4px rgba(248, 155, 13, 0.16);
+  --field-ring-error: 0 0 0 4px rgba(201, 64, 47, 0.12);
+  --beam-color: rgba(255, 181, 71, 0.9);
+  --beam-tip: #ffffff;
+  --dur-beam: 5s; /* луч по рамке карточки — один круг */
+  --dur-shine: 3.6s; /* блик по янтарной кнопке */
+  --dur-rise: 0.6s; /* появление карточки в full */
+  --rise-offset: 16px;
 }
 
 /* ---------- тёмная тема: набор телефона (контраст приглушённого текста 5,3:1) ---------- */
@@ -233,6 +266,19 @@
   --seg-on-bg: rgba(248, 155, 13, 0.12);
   --seg-on-shadow: 0 0 0 1px #f89b0d inset, 0 0 18px rgba(248, 155, 13, 0.35);
   --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.35));
+
+  --admin-side-bg: #0e0d0c;
+  --admin-nav-fg: var(--fg-2);
+  --admin-nav-hover: var(--glass-2);
+  --admin-nav-on-bg: rgba(248, 155, 13, 0.1);
+  --admin-nav-on-ring: rgba(248, 155, 13, 0.35);
+  --admin-nav-on-icon: var(--amber-2);
+  --admin-pill-on-glow: 0 0 16px rgba(248, 155, 13, 0.3);
+  --panel-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.04), rgba(255, 240, 220, 0.012));
+
+  --login-card-bg: linear-gradient(180deg, rgba(28, 26, 23, 0.88), rgba(16, 15, 13, 0.92));
+  --field-bg: rgba(255, 240, 220, 0.03);
+  --field-ring-error: 0 0 0 4px rgba(255, 122, 107, 0.12);
 }
 
 /* ---------- режимы анимации (CLAUDE.md §3): компоненты читают только токены ---------- */
@@ -265,6 +311,8 @@
 @media (max-width: 980px) {
   :root {
     --header-h: 60px;
+    --admin-content-pad: 16px;
+    --fs-admin-title: 20px;
   }
 }
 

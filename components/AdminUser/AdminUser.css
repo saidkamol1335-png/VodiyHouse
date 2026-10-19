@@ -1,0 +1,30 @@
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+}
+
+.admin-user__text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Имя в одну строку с многоточием, полное — в подсказке (К2.4). */
+.admin-user__name {
+  display: block;
+  overflow: hidden;
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.admin-user__role {
+  display: block;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}

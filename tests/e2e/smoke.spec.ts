@@ -13,12 +13,12 @@ test.describe("каркас открывается", () => {
     });
   }
 
-  test("/admin: экран входа, кабинет на русском", async ({ page }) => {
+  test("/admin/vhod: экран входа, кабинет на русском", async ({ page }) => {
     const errors = collectPageErrors(page);
-    const response = await page.goto("/admin");
+    const response = await page.goto("/admin/vhod");
     expect(response?.status()).toBe(200);
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-    await expect(page.getByRole("heading", { name: "Вход для сотрудников" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Кабинет сотрудника" })).toBeVisible();
     expect(errors).toEqual([]);
   });
 });

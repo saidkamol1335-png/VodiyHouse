@@ -1,0 +1,20 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form__submit {
+  margin-top: 6px;
+}
+
+.login-form__status {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-s);
+  background: var(--amber-soft);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}

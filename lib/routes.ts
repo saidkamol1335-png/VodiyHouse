@@ -12,6 +12,13 @@ export const ROUTES = {
   privacy: "/privacy",
 } as const;
 
+/** Публичные страницы, которые уже есть в коде. Остальные адреса шапки — разделы фазы 3. */
+const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home]);
+
+export function isRouteReady(pathname: string | null | undefined): boolean {
+  return typeof pathname === "string" && READY_ROUTES.has(pathname);
+}
+
 /** Кабинет — без префикса языка. */
 export const ADMIN_ROUTE = "/admin";
 

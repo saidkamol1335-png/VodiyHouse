@@ -1,0 +1,149 @@
+/* ---------- боковая панель (мокап: .anav) ---------- */
+.admin-nav__track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: var(--r-s);
+  color: var(--admin-nav-fg);
+  font-size: var(--fs-control);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.admin-nav__link:hover {
+  background: var(--admin-nav-hover);
+  color: var(--fg);
+}
+
+.admin-nav__link--active,
+.admin-nav__link--active:hover {
+  background: var(--admin-nav-on-bg);
+  box-shadow: 0 0 0 1px var(--admin-nav-on-ring) inset;
+  color: var(--fg);
+}
+
+.admin-nav__icon {
+  flex: none;
+}
+
+.admin-nav__link--active .admin-nav__icon {
+  color: var(--admin-nav-on-icon);
+}
+
+/* Подписи в одну строку (К2.4): длинное обрезается, а не переносится. */
+.admin-nav__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.admin-nav__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 21px;
+  margin-left: auto;
+  padding: 0 8px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-pill);
+  background: var(--amber-soft);
+  color: var(--amber-3);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+
+.admin-nav__section {
+  margin: 0;
+  padding: 12px 12px 4px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-tiny);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---------- лента пилюль до 980 px (мокап: .adm-mnav) ---------- */
+.admin-nav--strip {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .admin-nav--side {
+    display: none;
+  }
+
+  /* Прилипает со стеклом решения Э2 — в мокапе фон 90 % без blur, и текст просвечивал (К3.2). */
+  .admin-nav--strip {
+    position: sticky;
+    top: 0;
+    z-index: 31;
+    display: block;
+    border-bottom: 1px dashed var(--dash);
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--glass-filter);
+    backdrop-filter: var(--glass-filter);
+  }
+
+  .admin-nav--strip .admin-nav__track {
+    flex-direction: row;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .admin-nav--strip .admin-nav__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-nav--strip .admin-nav__track[data-fade-end] {
+    mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  }
+
+  .admin-nav--strip .admin-nav__track[data-fade-start] {
+    mask-image: linear-gradient(90deg, transparent, #000 24px);
+  }
+
+  .admin-nav--strip .admin-nav__track[data-fade-start][data-fade-end] {
+    mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+  }
+
+  .admin-nav--strip .admin-nav__link {
+    flex: none;
+    gap: 7px;
+    height: 36px;
+    padding: 0 13px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-pill);
+    color: var(--fg-2);
+    font-size: var(--fs-small);
+    font-weight: 700;
+  }
+
+  .admin-nav--strip .admin-nav__link--active {
+    border-color: var(--amber);
+    background: none;
+    box-shadow: var(--admin-pill-on-glow);
+    color: var(--fg);
+  }
+
+  .admin-nav--strip .admin-nav__badge {
+    margin-left: 2px;
+  }
+
+  .admin-nav--strip .admin-nav__section {
+    display: none;
+  }
+}

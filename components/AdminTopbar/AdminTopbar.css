@@ -1,0 +1,61 @@
+/* Мокап: .adm__top. Прилипает со стеклом решения Э2 (К4.2). */
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--admin-topbar-h);
+  padding: 12px var(--admin-content-pad);
+  border-bottom: 1px dashed var(--dash);
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+.admin-topbar__text {
+  min-width: 0;
+}
+
+.admin-topbar__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-admin-title);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.admin-topbar__subtitle {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.admin-topbar__tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+}
+
+/* До 980 px прилипает лента пилюль, а строка раздела уезжает со страницей (мокап). */
+@media (max-width: 980px) {
+  .admin-topbar {
+    position: static;
+    align-items: flex-start;
+    min-height: 0;
+    padding: 14px var(--admin-content-pad) 6px;
+    border-bottom: 0;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .admin-topbar__tools {
+    gap: 8px;
+  }
+}

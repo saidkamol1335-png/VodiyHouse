@@ -1,0 +1,32 @@
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.admin-brand__mark {
+  flex: none;
+  width: 28px;
+  height: 21px;
+  filter: var(--logo-glow);
+}
+
+.admin-brand__name {
+  display: block;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: var(--lh-snug);
+}
+
+.admin-brand__sub {
+  display: block;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

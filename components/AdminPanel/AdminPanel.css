@@ -1,0 +1,20 @@
+.admin-panel {
+  position: relative;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.admin-panel__title {
+  margin: 0 0 8px;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.admin-panel__body {
+  max-width: 70ch;
+  color: var(--fg-2);
+}

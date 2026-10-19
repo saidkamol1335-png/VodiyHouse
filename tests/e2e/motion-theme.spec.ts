@@ -19,6 +19,22 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
     await expect(html(page)).toHaveAttribute("data-motion", "lite");
   });
 
+  // Приёмка §3: автоопределение без ?motion — 1440 с мышью → full, 390 с CPU ×4 → lite.
+  test("1440 без подсказки: сигналы + проба FPS → full", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "только десктоп");
+    await page.goto("/uz");
+    await expect(html(page)).toHaveAttribute("data-motion", "full", { timeout: 5000 });
+  });
+
+  test("390 с CPU ×4 без подсказки → lite", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-390", "только телефон");
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    await page.goto("/uz");
+    await page.waitForTimeout(1000);
+    await expect(html(page)).toHaveAttribute("data-motion", "lite");
+  });
+
   test("prefers-reduced-motion — none поверх ?motion=full", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();

@@ -1,0 +1,35 @@
+.login-screen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.login-screen__bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px var(--gutter);
+}
+
+/* Кнопка лежит на тёмном фото — как иконки шапки поверх фото (решение Ш6). */
+.login-screen__theme.icon-button {
+  border-color: transparent;
+  background: var(--over-photo-button);
+  box-shadow: none;
+  color: var(--over-photo-fg);
+  -webkit-backdrop-filter: var(--over-photo-filter);
+  backdrop-filter: var(--over-photo-filter);
+}
+
+.login-screen__theme.icon-button:hover {
+  border-color: var(--amber-line);
+}
+
+.login-screen__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px 56px;
+}

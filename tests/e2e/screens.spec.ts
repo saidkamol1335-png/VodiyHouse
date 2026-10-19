@@ -5,6 +5,7 @@ import { test } from "@playwright/test";
 const PAGES = [
   ["home-uz", "/uz"],
   ["home-ru", "/ru"],
+  ["admin-login", "/admin/vhod"],
   ["admin", "/admin"],
   ["dev-preview", "/dev/preview"],
 ] as const;
