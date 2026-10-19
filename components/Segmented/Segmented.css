@@ -1,0 +1,63 @@
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--seg-border);
+  border-radius: var(--r-pill);
+  background: var(--seg-bg);
+}
+
+.segmented__item {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.segmented__item:hover {
+  color: var(--fg);
+}
+
+.segmented__item--active {
+  background: var(--seg-on-bg);
+  box-shadow: var(--seg-on-shadow);
+  color: var(--fg);
+}
+
+.segmented--sm .segmented__item {
+  height: 27px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+/* Большой сегмент — как в мобильном мокапе: серый фон, активный — карточка с лёгкой тенью. */
+.segmented--lg {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+  border-color: var(--line);
+  background: var(--bg-4);
+}
+
+.segmented--lg .segmented__item {
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: var(--fs-control);
+  font-weight: 650;
+}
+
+.segmented--lg .segmented__item--active {
+  background: var(--bg-2);
+  box-shadow: var(--shadow-1);
+}

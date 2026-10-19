@@ -1,0 +1,25 @@
+/* Служебная сцена /dev/header. «Фото»: на десктопе светлое, как обложка мокапа, на телефоне тёмное. */
+.dev-header-stage__photo {
+  height: 520px;
+  background:
+    repeating-linear-gradient(115deg, rgba(40, 28, 12, 0.06) 0 22px, transparent 22px 44px),
+    linear-gradient(180deg, #e9e2d6, #f4f1eb);
+}
+
+.dev-header-stage__content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 40px var(--gutter) 600px;
+  color: var(--fg-2);
+}
+
+@media (max-width: 760px) {
+  .dev-header-stage__photo {
+    background:
+      repeating-linear-gradient(115deg, #2b2620 0 18px, #4a3c2a 18px 36px, #8a6a3e 36px 54px),
+      #2b2620;
+  }
+}

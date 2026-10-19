@@ -1,0 +1,281 @@
+/* =====================================================================
+   Токены Vodiy House. Источник — CSS мокапа (docs/mockup/source/_blob/a8c8…, 64c3…).
+   Имена как в мокапе (--bg, --fg, --amber…), чтобы CSS мокапа переносился почти дословно.
+   Решения фазы 0 (PROGRESS.md): тёмная тема — набор телефона, мелкий янтарный текст —
+   #A35704, радиусы — 6 ступеней. Компоненты не знают про тему: меняются только токены.
+   ===================================================================== */
+
+:root {
+  /* ---------- шрифты (переменные --font-* задаёт next/font в layout) ---------- */
+  --font: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---------- размеры текста по ролям (точные значения мокапа) ---------- */
+  --fs-tiny: 10px; /* подписи над значением в меню телефона */
+  --fs-micro: 10.5px; /* подписи KPI, бейджи */
+  --fs-label: 11px; /* моно-подписи, eyebrow */
+  --fs-label-l: 11.5px; /* .mono */
+  --fs-caption: 12.5px;
+  --fs-small: 13px;
+  --fs-small-l: 13.5px;
+  --fs-control: 14px;
+  --fs-control-l: 14.5px; /* кнопки */
+  --fs-body: 15px;
+  --fs-h4: 16px;
+  --fs-lead: 17px;
+  --fs-h3: 20px;
+  --fs-menu: 25px; /* пункты меню телефона */
+  --fs-kpi: 30px;
+  --fs-stat: 34px;
+  --fs-h2: clamp(30px, 3.05vw, 46px);
+  --fs-h1: clamp(42px, 4.7vw, 68px);
+
+  --lh-tight: 0.98;
+  --lh-heading: 1.04;
+  --lh-snug: 1.25;
+  --lh-body: 1.55;
+  --lh-lead: 1.62;
+
+  --ls-h1: -0.048em;
+  --ls-h2: -0.04em;
+  --ls-h3: -0.022em;
+  --ls-body: -0.006em;
+  --ls-mono: 0.06em;
+  --ls-label: 0.1em;
+  --ls-eyebrow: 0.16em;
+
+  /* ---------- радиусы: 6 ступеней + pill (в мокапе было 11 значений) ---------- */
+  --r-xs: 4px;
+  --r-s: 12px;
+  --r-m: 16px;
+  --r-l: 20px;
+  --r-xl: 24px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  /* ---------- раскладка ---------- */
+  --container: 1280px;
+  --gutter: 32px;
+  --header-h: 68px;
+  --demo-h: 0px;
+  --admin-side-w: 250px;
+  --cols: 6; /* линии колонок фона */
+
+  /* ---------- анимации ---------- */
+  --ease: cubic-bezier(0.19, 1, 0.22, 1); /* expo-out, основная кривая мокапа */
+  --ease-2: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 200ms;
+  --dur-base: 300ms;
+  --dur-slow: 450ms;
+  --dur-slower: 600ms;
+  --dur-reveal: 900ms;
+  --dur-roll: 550ms; /* перекат букв в меню шапки */
+  --roll-stagger: 18ms;
+  --stagger: 40ms; /* появление пунктов списка по очереди */
+  --dim-siblings: 0.45; /* соседние пункты меню при наведении */
+
+  /* ---------- стекло ---------- */
+  --glass-blur: 18px;
+  --glass-saturate: 1.4;
+  --glass-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
+
+  /* ---------- цвета: светлая тема (основная) ---------- */
+  color-scheme: light;
+  --bg: #f4f1eb;
+  --bg-2: #ffffff;
+  --bg-3: #fbf9f5;
+  --bg-4: #efeae2;
+  --fg: #17140f;
+  --fg-2: #555046;
+  --fg-3: #6d665a;
+  --fg-heading: #141109;
+
+  --line: rgba(40, 28, 12, 0.1);
+  --line-2: rgba(40, 28, 12, 0.15);
+  --line-3: rgba(40, 28, 12, 0.26);
+  --dash: rgba(40, 28, 12, 0.2);
+  --cols-line: rgba(40, 28, 12, 0.055);
+
+  --glass: rgba(250, 248, 244, 0.84); /* шапка и панели со стеклом */
+  --glass-solid: rgba(250, 248, 244, 0.95); /* то же без blur — режим lite */
+  --glass-2: rgba(255, 255, 255, 0.78);
+  --glass-3: rgba(40, 28, 12, 0.055);
+
+  --amber: #f89b0d; /* акцент из логотипа: кнопки, активные элементы */
+  --amber-hover: #ffa826;
+  --amber-2: #a35704; /* мелкий янтарный текст, 4,75:1 на --bg */
+  --amber-3: #9a5300;
+  --amber-soft: rgba(248, 155, 13, 0.13);
+  --amber-line: rgba(207, 115, 0, 0.42);
+  --on-amber: #17140f; /* текст на янтарном — тёмный (ТЗ 2) */
+  --gold: #b8650a; /* курсив Cormorant в крупных заголовках */
+
+  --ok: #178048;
+  --ok-soft: rgba(23, 128, 72, 0.1);
+  --bad: #c9402f;
+  --bad-soft: rgba(201, 64, 47, 0.08);
+  --blue: #2a66cc;
+  --blue-soft: rgba(42, 102, 204, 0.09);
+  --violet: #6a4bd1;
+  --violet-soft: rgba(106, 75, 209, 0.09);
+  --teal: #0f8580;
+  --teal-soft: rgba(15, 133, 128, 0.09);
+
+  /* статусы квартир: свободна / бронь / продана */
+  --s-free: rgba(26, 143, 76, 0.11);
+  --s-free-b: rgba(26, 143, 76, 0.42);
+  --s-free-t: #0f5a33;
+  --s-res: rgba(248, 155, 13, 0.22);
+  --s-res-b: rgba(207, 115, 0, 0.58);
+  --s-res-t: #6e3d00;
+  --s-sold: rgba(201, 64, 47, 0.065);
+  --s-sold-b: rgba(201, 64, 47, 0.26);
+  --s-sold-t: #9e3a2e;
+
+  --shadow-1: 0 1px 2px rgba(40, 28, 12, 0.04), 0 10px 28px rgba(40, 28, 12, 0.05);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(40, 28, 12, 0.04),
+    0 12px 32px rgba(40, 28, 12, 0.07);
+  --shadow-hover: 0 2px 4px rgba(40, 28, 12, 0.05), 0 22px 44px rgba(40, 28, 12, 0.11);
+  --shadow-3: 0 30px 80px rgba(40, 28, 12, 0.18), 0 4px 14px rgba(40, 28, 12, 0.06);
+  --shadow-sheet: 0 -18px 50px rgba(18, 14, 9, 0.22);
+  --glow-amber: 0 0 0 1px rgba(207, 115, 0, 0.25) inset, 0 8px 22px rgba(248, 155, 13, 0.25);
+  --spot-fill: rgba(248, 155, 13, 0.12); /* подсветка карточки за курсором */
+  --spot-edge: rgba(255, 181, 71, 0.65);
+
+  --page-glow: radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.09), transparent 62%),
+    radial-gradient(700px 600px at 100% 110%, rgba(248, 155, 13, 0.05), transparent 60%);
+
+  /* кнопки-обводки, круглые кнопки, сегменты (шапка мокапа) */
+  --control-bg: #ffffff;
+  --control-border: rgba(40, 28, 12, 0.14);
+  --control-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+  --seg-bg: rgba(40, 28, 12, 0.045);
+  --seg-border: rgba(40, 28, 12, 0.08);
+  --seg-on-bg: #ffffff;
+  --seg-on-shadow: 0 0 0 1px rgba(240, 160, 48, 0.9) inset, 0 2px 8px rgba(248, 155, 13, 0.2);
+  --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.19));
+  /* иконки шапки поверх фото (телефон) */
+  --over-photo-fg: #ffffff;
+  --over-photo-button: rgba(15, 12, 8, 0.26);
+  --over-photo-shade: linear-gradient(180deg, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0));
+  --over-photo-filter: blur(8px);
+}
+
+/* ---------- тёмная тема: набор телефона (контраст приглушённого текста 5,3:1) ---------- */
+[data-theme="dark"],
+[data-theme-island="dark"] {
+  color-scheme: dark;
+  --bg: #0b0a09;
+  --bg-2: #151311;
+  --bg-3: #1a1815;
+  --bg-4: #24211d;
+  --fg: #f4efe7;
+  --fg-2: #b1aaa0;
+  --fg-3: #938c82;
+  --fg-heading: #f4efe7;
+
+  --line: rgba(255, 240, 220, 0.09);
+  --line-2: rgba(255, 240, 220, 0.15);
+  --line-3: rgba(255, 240, 220, 0.27);
+  --dash: rgba(255, 237, 215, 0.2);
+  --cols-line: rgba(255, 240, 220, 0.05);
+
+  --glass: rgba(11, 10, 9, 0.72);
+  --glass-solid: rgba(11, 10, 9, 0.95);
+  --glass-2: rgba(255, 240, 220, 0.045);
+  --glass-3: rgba(255, 240, 220, 0.08);
+
+  --amber-hover: #ffb547;
+  --amber-2: #ffb547;
+  --amber-3: #ffd08a;
+  --amber-soft: rgba(248, 155, 13, 0.15);
+  --amber-line: rgba(248, 155, 13, 0.46);
+  --on-amber: #0b0a09;
+  --gold: #f2c27e;
+
+  --ok: #5bd48c;
+  --ok-soft: rgba(91, 212, 140, 0.13);
+  --bad: #ff7a6b;
+  --bad-soft: rgba(255, 122, 107, 0.12);
+  --blue: #7cb4ff;
+  --blue-soft: rgba(124, 180, 255, 0.13);
+  --violet: #b9a2ff;
+  --violet-soft: rgba(185, 162, 255, 0.13);
+  --teal: #62d6d0;
+  --teal-soft: rgba(98, 214, 208, 0.13);
+
+  --s-free: rgba(91, 212, 140, 0.16);
+  --s-free-b: rgba(91, 212, 140, 0.45);
+  --s-free-t: #c6f7da;
+  --s-res: rgba(248, 155, 13, 0.26);
+  --s-res-b: rgba(255, 181, 71, 0.7);
+  --s-res-t: #ffe2b3;
+  --s-sold: rgba(255, 122, 107, 0.08);
+  --s-sold-b: rgba(255, 122, 107, 0.26);
+  --s-sold-t: #eba89f;
+
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px rgba(0, 0, 0, 0.42);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 50px rgba(0, 0, 0, 0.45);
+  --shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 30px 90px rgba(0, 0, 0, 0.6);
+  --shadow-sheet: 0 -20px 60px rgba(0, 0, 0, 0.6);
+  --glow-amber: 0 0 0 1px rgba(255, 208, 138, 0.5) inset, 0 8px 28px rgba(248, 155, 13, 0.22);
+
+  --page-glow: radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.1), transparent 62%),
+    radial-gradient(700px 600px at 100% 110%, rgba(220, 80, 0, 0.08), transparent 60%);
+
+  --control-bg: rgba(255, 240, 220, 0.045);
+  --control-border: rgba(255, 240, 220, 0.15);
+  --control-shadow: none;
+  --seg-bg: rgba(255, 240, 220, 0.045);
+  --seg-border: rgba(255, 240, 220, 0.09);
+  --seg-on-bg: rgba(248, 155, 13, 0.12);
+  --seg-on-shadow: 0 0 0 1px #f89b0d inset, 0 0 18px rgba(248, 155, 13, 0.35);
+  --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.35));
+}
+
+/* ---------- режимы анимации (CLAUDE.md §3): компоненты читают только токены ---------- */
+/* lite: переходы ≤ 200 мс, без blur и стекла */
+[data-motion="lite"] {
+  --dur-base: 200ms;
+  --dur-slow: 200ms;
+  --dur-slower: 200ms;
+  --dur-reveal: 200ms;
+  --glass-filter: none;
+  --glass: var(--glass-solid);
+  --over-photo-button: rgba(15, 12, 8, 0.45); /* без blur кружок темнее, чтобы иконка читалась */
+  --over-photo-filter: none;
+}
+
+/* none: prefers-reduced-motion — анимаций нет */
+[data-motion="none"] {
+  --dur-fast: 0ms;
+  --dur-base: 0ms;
+  --dur-slow: 0ms;
+  --dur-slower: 0ms;
+  --dur-reveal: 0ms;
+  --glass-filter: none;
+  --glass: var(--glass-solid);
+  --over-photo-button: rgba(15, 12, 8, 0.45);
+  --over-photo-filter: none;
+}
+
+/* ---------- телефон: размеры заголовков из мобильного мокапа (390) ---------- */
+@media (max-width: 980px) {
+  :root {
+    --header-h: 60px;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --gutter: 16px;
+    --header-h: 56px;
+    --fs-h1: 34px;
+    --fs-h2: 27px;
+    --fs-h3: 19px;
+    --lh-tight: 1.03;
+    --lh-heading: 1.07;
+  }
+}

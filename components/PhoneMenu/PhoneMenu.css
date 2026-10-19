@@ -1,0 +1,157 @@
+/* Меню телефона на весь экран — значения мобильного мокапа (.mn). */
+.phone-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  animation: phone-menu-in var(--dur-slow) var(--ease) both;
+}
+
+.phone-menu__head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.phone-menu__close {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+}
+
+.phone-menu__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 16px 24px;
+  scrollbar-width: none;
+}
+
+.phone-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 66px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.phone-menu__item svg {
+  color: var(--fg-3);
+}
+
+/* Пункты появляются по очереди только в full; в lite — общий короткий fade всего меню. */
+[data-motion="full"] .phone-menu__item {
+  animation: phone-menu-item-in var(--dur-slower) var(--ease) both;
+  animation-delay: calc(var(--d, 0) * var(--stagger));
+}
+
+.phone-menu__number {
+  width: 22px;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  color: var(--amber-2);
+}
+
+.phone-menu__title {
+  flex: 1;
+  font-size: var(--fs-menu);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.phone-menu__contacts {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.phone-menu__contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.phone-menu__contact > svg:first-child {
+  color: var(--amber-2);
+}
+
+.phone-menu__contact-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.phone-menu__contact-text small {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--fs-tiny);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.phone-menu__settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.phone-menu__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin-top: 16px;
+}
+
+.phone-menu__footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+
+/* От 761 px то же состояние меню показывает выпадающий список планшета (TabletMenu). */
+@media (min-width: 761px) {
+  .phone-menu {
+    display: none;
+  }
+}
+
+/* Под полноэкранным меню страница не прокручивается (класс ставит useMenu). */
+@media (max-width: 760px) {
+  html.has-open-menu {
+    overflow: hidden;
+  }
+}
+
+@keyframes phone-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes phone-menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}

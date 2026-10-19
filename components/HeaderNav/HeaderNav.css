@@ -1,0 +1,50 @@
+.header-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.header-nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 9px;
+  border-radius: var(--r-pill);
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+  font-weight: 550;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color var(--dur-fast) var(--ease),
+    opacity var(--dur-base) var(--ease);
+}
+
+.header-nav__link:hover,
+.header-nav__link--active {
+  color: var(--fg);
+}
+
+/* Текущий раздел — пунктир янтарём под словом. */
+.header-nav__link--active::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 4px;
+  border-bottom: 1px dotted var(--amber-2);
+}
+
+/* Соседи гаснут только в full: в lite наведение меняет лишь цвет. */
+@media (hover: hover) {
+  [data-motion="full"] .header-nav:hover .header-nav__link:not(:hover) {
+    opacity: var(--dim-siblings);
+  }
+}
+
+/* Пункты помещаются от 1280 px, уже — кнопка меню (мокап, PLAN §7). */
+@media (max-width: 1279px) {
+  .header-nav {
+    display: none;
+  }
+}

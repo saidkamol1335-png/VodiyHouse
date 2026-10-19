@@ -1,0 +1,50 @@
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-motion="full"] .spotlight::before,
+[data-motion="full"] .spotlight::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+
+/* Заливка под содержимым карточки. */
+[data-motion="full"] .spotlight::before {
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    380px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--spot-fill),
+    transparent 45%
+  );
+}
+
+/* Светящийся край: градиент виден только в рамке шириной 1 px (маска вычитает внутренность). */
+[data-motion="full"] .spotlight::after {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    var(--spot-edge),
+    transparent 50%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-motion="full"] .spotlight:hover::before,
+  [data-motion="full"] .spotlight:hover::after {
+    opacity: 1;
+  }
+}

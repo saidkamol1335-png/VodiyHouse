@@ -1,0 +1,62 @@
+/* Базовые стили страницы. Значения — из мокапа (.vh, v3 · типографика). */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  letter-spacing: var(--ls-body);
+  color: var(--fg);
+  background: var(--page-glow), var(--bg);
+  /* Цены и площади — табличные цифры одной ширины (ТЗ 2). */
+  font-variant-numeric: tabular-nums lining-nums;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+/* Содержимое страницы — над фоновыми линиями колонок (BackgroundColumns, z-index 0). */
+.page-layer {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: rgba(248, 155, 13, 0.3);
+  color: var(--fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* prefers-reduced-motion поверх обоих режимов: data-motion="none" ставит скрипт в <head>,
+   это правило — страховка до его выполнения. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

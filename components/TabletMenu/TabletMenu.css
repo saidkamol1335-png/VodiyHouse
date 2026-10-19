@@ -1,0 +1,44 @@
+.tablet-menu {
+  display: none;
+}
+
+@media (min-width: 761px) and (max-width: 1279px) {
+  .tablet-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px var(--gutter) 14px;
+    border-top: 1px dashed var(--dash);
+    background: var(--glass-solid);
+    animation: tablet-menu-in var(--dur-base) var(--ease) both;
+  }
+}
+
+.tablet-menu__link {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--fg);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tablet-menu__link:hover {
+  color: var(--amber-2);
+}
+
+.tablet-menu__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@keyframes tablet-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}

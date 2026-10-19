@@ -1,0 +1,140 @@
+/* Витрина /dev/preview — инструмент разработки, на сайт не попадает. */
+.token-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding: 32px var(--gutter) 96px;
+}
+
+.token-preview__bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--glass);
+  backdrop-filter: var(--glass-filter);
+}
+
+.token-preview__button {
+  height: 36px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small-l);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease);
+}
+
+.token-preview__button:hover {
+  border-color: var(--amber-line);
+}
+
+.token-preview__section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.token-preview__themes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.token-preview__panel {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.token-preview__swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token-preview__swatch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.token-preview__chip {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-s);
+}
+
+.token-preview__caption {
+  font-size: var(--fs-small);
+  color: var(--fg-2);
+}
+
+.token-preview__type-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: baseline;
+  gap: 16px;
+  padding-block: 10px;
+  border-top: 1px dashed var(--dash);
+}
+
+.token-preview__lead {
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+  font-weight: 450;
+  color: var(--fg-2);
+}
+
+.token-preview__body {
+  font-size: var(--fs-body);
+}
+
+.token-preview__mono {
+  font-family: var(--mono);
+  font-size: var(--fs-label-l);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.token-preview__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.token-preview__radius,
+.token-preview__shadow {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 80px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  font-size: var(--fs-caption);
+}
+
+.token-preview__shadow {
+  border-radius: var(--r-l);
+}

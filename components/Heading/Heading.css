@@ -1,0 +1,44 @@
+.heading {
+  margin: 0;
+  color: var(--fg-heading);
+}
+
+.heading--h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  font-weight: 600;
+  letter-spacing: var(--ls-h1);
+}
+
+.heading--h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-heading);
+  font-weight: 600;
+  letter-spacing: var(--ls-h2);
+}
+
+.heading--h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  font-weight: 650;
+  letter-spacing: var(--ls-h3);
+}
+
+.heading--h4 {
+  font-size: var(--fs-h4);
+  line-height: 1.35;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+}
+
+/* Акцент крупнее на 14 %: у Cormorant низкие строчные, в том же кегле он выглядит мельче Manrope. */
+.heading__accent {
+  padding-right: 0.04em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.14em;
+  line-height: 0.9;
+  letter-spacing: -0.012em;
+  color: var(--gold);
+}

@@ -1,0 +1,42 @@
+.bg-columns {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 82%, transparent);
+}
+
+.bg-columns__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  width: 100%;
+  max-width: var(--container);
+  height: 100%;
+  padding-inline: var(--gutter);
+}
+
+.bg-columns__line {
+  display: block;
+  border-left: 1px dashed var(--cols-line);
+}
+
+.bg-columns__line:nth-child(6) {
+  border-right: 1px dashed var(--cols-line);
+}
+
+/* Телефон: три линии — края полей и центр (мобильный мокап: 16 / 195 / 373 px). */
+@media (max-width: 760px) {
+  .bg-columns__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bg-columns__line:nth-child(n + 3) {
+    display: none;
+  }
+
+  .bg-columns__line:nth-child(2) {
+    border-right: 1px dashed var(--cols-line);
+  }
+}

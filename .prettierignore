@@ -1,0 +1,10 @@
+.next
+node_modules
+package-lock.json
+docs/mockup/source
+docs/mockup/screens
+docs/*.pdf
+docs/*.txt
+playwright-report
+test-results
+supabase/.temp

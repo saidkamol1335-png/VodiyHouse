@@ -1,0 +1,664 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "CabHome.dc.html": {
+      "expand": "fill",
+      "h": 1746,
+      "is_interactive": true,
+      "title": "Главная менеджера",
+      "w": 1440,
+      "x": 0,
+      "y": 8520
+    },
+    "CabHomeDark.dc.html": {
+      "expand": "fill",
+      "h": 1744,
+      "is_interactive": true,
+      "title": "Кабинет · главная · тёмная тема",
+      "w": 1440,
+      "x": 3040,
+      "y": 13277
+    },
+    "CabLeads.dc.html": {
+      "expand": "fill",
+      "h": 1294,
+      "is_interactive": true,
+      "title": "Заявки · только в Vodiy House",
+      "w": 1440,
+      "x": 1520,
+      "y": 8520
+    },
+    "CabLogin.dc.html": {
+      "expand": "fill",
+      "h": 1211,
+      "is_interactive": true,
+      "title": "Вход для сотрудников",
+      "w": 1440,
+      "x": 9120,
+      "y": 8520
+    },
+    "CabProg.dc.html": {
+      "expand": "fill",
+      "h": 4237,
+      "is_interactive": true,
+      "title": "Программы оплаты · руководитель",
+      "w": 1440,
+      "x": 7600,
+      "y": 8520
+    },
+    "CabReview.dc.html": {
+      "expand": "fill",
+      "h": 1549,
+      "is_interactive": true,
+      "title": "Видео · проверка и ссылки клиентам",
+      "w": 1440,
+      "x": 4560,
+      "y": 8520
+    },
+    "CabStats.dc.html": {
+      "expand": "fill",
+      "h": 2242,
+      "is_interactive": true,
+      "title": "Статистика сайта · руководитель",
+      "w": 1440,
+      "x": 6080,
+      "y": 8520
+    },
+    "CabVideo.dc.html": {
+      "expand": "fill",
+      "h": 2267,
+      "is_interactive": true,
+      "title": "Видеограф · загрузка отчёта",
+      "w": 1440,
+      "x": 3040,
+      "y": 8520
+    },
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Главная · спецпредложения, подбор, каталог",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "MainDark.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Главная · тёмная тема",
+      "w": 1440,
+      "x": 0,
+      "y": 13277
+    },
+    "MobCatalog.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Каталог · карточки ЖК, панель фильтров",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "MobDark.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Тёмная тема · каталог",
+      "w": 390,
+      "x": 1880,
+      "y": 3792
+    },
+    "MobDev.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Застройщик · страница",
+      "w": 390,
+      "x": 470,
+      "y": 3792
+    },
+    "MobDevs.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Застройщики · список",
+      "w": 390,
+      "x": 0,
+      "y": 3792
+    },
+    "MobFav.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Избранное · подборка",
+      "w": 390,
+      "x": 2820,
+      "y": 2528
+    },
+    "MobFilters.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Фильтры · шторка снизу",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "MobFlat.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Квартира · цена и программы",
+      "w": 390,
+      "x": 0,
+      "y": 2528
+    },
+    "MobFlatBank.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Через банк · проценты, комиссии, итог",
+      "w": 390,
+      "x": 940,
+      "y": 2528
+    },
+    "MobFlatCmp.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Все программы для квартиры",
+      "w": 390,
+      "x": 1410,
+      "y": 2528
+    },
+    "MobFlatTerm.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Взнос 50% · свой срок 17 мес.",
+      "w": 390,
+      "x": 470,
+      "y": 2528
+    },
+    "MobJk.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "ЖК Shodlik · первый экран",
+      "w": 390,
+      "x": 0,
+      "y": 1264
+    },
+    "MobJkAvail.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Наличие квартир · live",
+      "w": 390,
+      "x": 470,
+      "y": 1264
+    },
+    "MobJkFacade.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Выбор квартиры · фасад",
+      "w": 390,
+      "x": 940,
+      "y": 1264
+    },
+    "MobJkFloor.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Этаж и план подъезда",
+      "w": 390,
+      "x": 1410,
+      "y": 1264
+    },
+    "MobJkPlans.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Планировки · «осталось N»",
+      "w": 390,
+      "x": 1880,
+      "y": 1264
+    },
+    "MobJkProg.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Ход строительства · видео",
+      "w": 390,
+      "x": 2350,
+      "y": 1264
+    },
+    "MobLead.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Запись на просмотр",
+      "w": 390,
+      "x": 1880,
+      "y": 2528
+    },
+    "MobMenu.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Меню · RU/UZ, тема",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "MobPartners.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Застройщикам",
+      "w": 390,
+      "x": 1410,
+      "y": 3792
+    },
+    "MobQuiz.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Подбор за 1 минуту",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    },
+    "MobSpecials.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Спецпредложения и подборки",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "MobTg.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Telegram · готовый текст",
+      "w": 390,
+      "x": 2350,
+      "y": 2528
+    },
+    "MobUz.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "O‘zbekcha · bosh sahifa",
+      "w": 390,
+      "x": 2350,
+      "y": 3792
+    },
+    "MobVideo.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Видео квартиры для клиента",
+      "w": 390,
+      "x": 940,
+      "y": 3792
+    },
+    "Mobile.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "page": "phone",
+      "title": "Главная · первый экран",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "PhoneCatalog.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Главная · телефон · UZ",
+      "w": 390,
+      "x": 0,
+      "y": 21797
+    },
+    "PhoneJk.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "ЖК Shodlik · телефон",
+      "w": 390,
+      "x": 470,
+      "y": 21797
+    },
+    "PhoneJkCalc.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Калькулятор квартиры · телефон",
+      "w": 390,
+      "x": 940,
+      "y": 21797
+    },
+    "PhonePartners.dc.html": {
+      "expand": "fill",
+      "h": 5524,
+      "is_interactive": true,
+      "title": "Застройщикам · телефон",
+      "w": 390,
+      "x": 2350,
+      "y": 21797
+    },
+    "PhoneAbout.dc.html": {
+      "expand": "fill",
+      "h": 5750,
+      "is_interactive": true,
+      "title": "О Vodiy House · телефон",
+      "w": 390,
+      "x": 2820,
+      "y": 21797
+    },
+    "PhoneCalc.dc.html": {
+      "expand": "fill",
+      "h": 4700,
+      "is_interactive": true,
+      "title": "Калькулятор · телефон",
+      "w": 390,
+      "x": 1410,
+      "y": 21797
+    },
+    "PhoneVideo.dc.html": {
+      "expand": "fill",
+      "h": 4973,
+      "is_interactive": true,
+      "title": "Видео квартиры · телефон",
+      "w": 390,
+      "x": 1880,
+      "y": 21797
+    },
+    "SiteDev.dc.html": {
+      "expand": "fill",
+      "h": 3696,
+      "is_interactive": true,
+      "title": "Застройщик · Farg‘ona Sifat Qurilish",
+      "w": 1440,
+      "x": 10640,
+      "y": 0
+    },
+    "SiteDevs.dc.html": {
+      "expand": "fill",
+      "h": 1919,
+      "is_interactive": true,
+      "title": "Застройщики · список",
+      "w": 1440,
+      "x": 12160,
+      "y": 0
+    },
+    "SiteJk.dc.html": {
+      "expand": "fill",
+      "h": 7835,
+      "is_interactive": true,
+      "title": "ЖК Shodlik · наличие, планировки, ход стройки",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "SiteJkCalc1.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Калькулятор квартиры · 3-комн., 2 года, Ipoteka Bank",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "SiteJkCalc2.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "Калькулятор квартиры · 4-комн. 132 м², 3 года, Ipak Yuli Bank",
+      "w": 1440,
+      "x": 4560,
+      "y": 0
+    },
+    "SiteCalc1.dc.html": {
+      "expand": "fill",
+      "h": 2700,
+      "is_interactive": true,
+      "title": "Калькулятор · 120 м², 2 года, Ipoteka Bank",
+      "w": 1440,
+      "x": 6080,
+      "y": 0
+    },
+    "SiteCalc2.dc.html": {
+      "expand": "fill",
+      "h": 2700,
+      "is_interactive": true,
+      "title": "Калькулятор · 145 м², 3 года, Ipak Yuli Bank",
+      "w": 1440,
+      "x": 7600,
+      "y": 0
+    },
+    "SiteJkDark.dc.html": {
+      "expand": "fill",
+      "h": 7834,
+      "is_interactive": true,
+      "title": "ЖК Shodlik · тёмная тема",
+      "w": 1440,
+      "x": 1520,
+      "y": 13277
+    },
+    "SiteJkPick.dc.html": {
+      "expand": "fill",
+      "h": 8000,
+      "is_interactive": true,
+      "title": "ЖК · выбор квартиры на фасаде и плане этажа + расчёт",
+      "w": 1440,
+      "x": 15200,
+      "y": 0
+    },
+    "SiteAbout.dc.html": {
+      "expand": "fill",
+      "h": 4300,
+      "is_interactive": true,
+      "title": "О Vodiy House · страница в шапке",
+      "w": 1440,
+      "x": 16720,
+      "y": 0
+    },
+    "SitePartners.dc.html": {
+      "expand": "fill",
+      "h": 3167,
+      "is_interactive": true,
+      "title": "Застройщикам · реклама и совместные продажи",
+      "w": 1440,
+      "x": 13680,
+      "y": 0
+    },
+    "SiteVideo.dc.html": {
+      "expand": "fill",
+      "h": 3480,
+      "is_interactive": true,
+      "title": "Видео квартиры для клиента + расчёт",
+      "w": 1440,
+      "x": 9120,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-03T17:53:52Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "file": "Main.dc.html",
+    "view": "focused"
+  },
+  "notes": {
+    "demo": {
+      "fill": "gray",
+      "maxH": 520,
+      "text": "DEMO: ЖК, цены, люди и телефоны вымышленные. На части фото заказчика водяные знаки сторонних сайтов — для публичного запуска заменить на свои.\n\nДанные живут в памяти страницы: наличие квартир меняется само (имитация обновлений от застройщиков), заявки приходят примерно раз в минуту.",
+      "w": 520,
+      "x": -640,
+      "y": 1820
+    },
+    "m_about": {
+      "fill": "orange",
+      "maxH": 900,
+      "page": "phone",
+      "text": "Телефон · отдельный дизайн под 390 px\n\nКаждый экран собран под палец, а не сжат с десктопа: шапка поверх фото, липкая навигация по разделам ЖК, нижняя панель «Позвонить · Telegram · Записаться» после первого экрана, шторки снизу для фильтров, сортировки, квартиры и заявок, свайп-галереи.\n\nВыбор квартиры: фасад → этаж → план одного подъезда (переключатель подъездов) → шторка квартиры с расчётом.\n\nРасчёт по PLAN v4: на сайте цена и платёж без уменьшений; срок — кнопки 12/24/36/48, которые допускает застройщик при взносе, + «Свой срок» (17 мес. и т.д.), сверх максимума — подсказка с максимумом.\n\nВсе артборды живые: нажимайте Play — это один прототип, открытый на разных экранах.",
+      "w": 520,
+      "x": -640,
+      "y": 0
+    },
+    "m_row1": {
+      "kind": "title1",
+      "maxW": 2740,
+      "page": "phone",
+      "text": "Главная и каталог",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "m_row2": {
+      "kind": "title1",
+      "maxW": 2740,
+      "page": "phone",
+      "text": "Страница ЖК",
+      "w": 240,
+      "x": 0,
+      "y": 964
+    },
+    "m_row3": {
+      "kind": "title1",
+      "maxW": 3210,
+      "page": "phone",
+      "text": "Квартира, расчёт и заявки",
+      "w": 240,
+      "x": 0,
+      "y": 2228
+    },
+    "m_row4": {
+      "kind": "title1",
+      "maxW": 2740,
+      "page": "phone",
+      "text": "Застройщики, видео, партнёры",
+      "w": 240,
+      "x": 0,
+      "y": 3492
+    },
+    "t_cab": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "Кабинет Vodiy House · 1440",
+      "w": 240,
+      "x": 0,
+      "y": 8220
+    },
+    "t_dark": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "Тёмная тема · переключатель ☀/☾ в шапке сайта и кабинета",
+      "w": 240,
+      "x": 0,
+      "y": 12977
+    },
+    "t_phone": {
+      "kind": "title1",
+      "maxW": 3210,
+      "text": "Адаптив десктопа · 390",
+      "w": 240,
+      "x": 0,
+      "y": 21497
+    },
+    "t_site": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "Сайт для клиентов · 1440",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "tasks": {
+      "fill": "orange",
+      "maxH": 1700,
+      "size": 24,
+      "text": "Проект-1 · задачи ТЗ → где смотреть\n\n1. Каталог для клиентов и менеджеров — «Главная», «ЖК Shodlik», телефон\n\n2. Видео состояния квартиры раз в месяц — «Видео квартиры для клиента», «Видеограф · загрузка», «Видео · проверка и ссылки»\n\n3. Застройщик и ЖК, заявки только в Vodiy House — «Застройщик», «Заявки»\n\n4. Статистика за любой период — «Статистика сайта»\n\n5. Калькулятор по застройщику и банку — страница «Калькулятор» (в меню сайта; примеры ТЗ — «Калькулятор · 120 м²…» и «…145 м²…») и расчёт у каждой квартиры: кнопка «Рассчитать платёж» в планировках ЖК, при выборе на фасаде и на странице видео\n\n6. Остатки «3-комн. — осталось 5» — карточки каталога и «Наличие квартир» в ЖК Shodlik\n\n7. Шахматка менеджера — убрана, больше не нужна. В кабинете вместо неё — «Остатки по ЖК» на главной\n\nНовое: «Спецпредложения от застройщиков» и «Подбор за 1 минуту» на главной, страница «Застройщикам» с заявкой на рекламу и совместные продажи (заявка приходит в кабинет). Страница «О Vodiy House» — пункт «О нас» в шапке: история, команда, офис на карте.\n\nВыбор квартиры на фасаде — на странице ЖК, раздел «Выбрать квартиру»: корпус → этаж → план → расчёт платежа и бронь.\n\nТема: светлая — основная; тёмная включается кнопкой ☾ в шапке сайта и кабинета (или «Светлая / Тёмная» в демо-панели). Примеры — ряд «Тёмная тема».",
+      "w": 520,
+      "x": -640,
+      "y": 0
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "SiteJk.dc.html",
+    "SiteJkCalc1.dc.html",
+    "SiteJkCalc2.dc.html",
+    "SiteCalc1.dc.html",
+    "SiteCalc2.dc.html",
+    "SiteVideo.dc.html",
+    "SiteDev.dc.html",
+    "SiteDevs.dc.html",
+    "SitePartners.dc.html",
+    "SiteJkPick.dc.html",
+    "SiteAbout.dc.html",
+    "CabHome.dc.html",
+    "CabLeads.dc.html",
+    "CabVideo.dc.html",
+    "CabReview.dc.html",
+    "CabStats.dc.html",
+    "CabProg.dc.html",
+    "CabLogin.dc.html",
+    "MainDark.dc.html",
+    "SiteJkDark.dc.html",
+    "CabHomeDark.dc.html",
+    "PhoneCatalog.dc.html",
+    "PhoneJk.dc.html",
+    "PhoneJkCalc.dc.html",
+    "PhoneCalc.dc.html",
+    "PhoneVideo.dc.html",
+    "PhonePartners.dc.html",
+    "PhoneAbout.dc.html",
+    "Mobile.dc.html",
+    "MobSpecials.dc.html",
+    "MobCatalog.dc.html",
+    "MobFilters.dc.html",
+    "MobQuiz.dc.html",
+    "MobMenu.dc.html",
+    "MobJk.dc.html",
+    "MobJkAvail.dc.html",
+    "MobJkFacade.dc.html",
+    "MobJkFloor.dc.html",
+    "MobJkPlans.dc.html",
+    "MobJkProg.dc.html",
+    "MobFlat.dc.html",
+    "MobFlatTerm.dc.html",
+    "MobFlatBank.dc.html",
+    "MobFlatCmp.dc.html",
+    "MobLead.dc.html",
+    "MobTg.dc.html",
+    "MobFav.dc.html",
+    "MobDevs.dc.html",
+    "MobDev.dc.html",
+    "MobVideo.dc.html",
+    "MobPartners.dc.html",
+    "MobDark.dc.html",
+    "MobUz.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "site",
+      "name": "Сайт и кабинет · 1440"
+    },
+    {
+      "id": "phone",
+      "name": "Телефон · 390"
+    }
+  ],
+  "title": "Vodiy House — живой прототип · Проект-1"
+}

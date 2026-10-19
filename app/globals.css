@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/glass.css";
+
+/* Тёмная тема — атрибут data-theme на <html>, а не системная настройка (PLAN 3.7). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Tailwind знает только наши токены: без стандартной палитры случайный bg-blue-500 не соберётся.
+   Имена ниже — те, что ждёт shadcn/ui. */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--bg-2);
+  --color-card-foreground: var(--fg);
+  --color-popover: var(--bg-2);
+  --color-popover-foreground: var(--fg);
+  --color-primary: var(--amber);
+  --color-primary-foreground: var(--on-amber);
+  --color-secondary: var(--glass-3);
+  --color-secondary-foreground: var(--fg);
+  --color-muted: var(--bg-4);
+  --color-muted-foreground: var(--fg-2);
+  --color-accent: var(--amber-soft);
+  --color-accent-foreground: var(--fg);
+  --color-destructive: var(--bad);
+  --color-border: var(--line-2);
+  --color-input: var(--line-2);
+  --color-ring: var(--amber);
+
+  --font-sans: var(--font);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-s);
+  --radius-md: var(--r-m);
+  --radius-lg: var(--r-l);
+  --radius-xl: var(--r-xl);
+  --radius-2xl: var(--r-2xl);
+
+  --ease-out: var(--ease);
+}
+
+/* Компоненты (БЭМ) — по одному файлу на блок. */
+@import "../components/BackgroundColumns/BackgroundColumns.css";
+@import "../components/Container/Container.css";
+@import "../components/DevHeaderStage/DevHeaderStage.css";
+@import "../components/EffectsPreview/EffectsPreview.css";
+@import "../components/Eyebrow/Eyebrow.css";
+@import "../components/FilmGrain/FilmGrain.css";
+@import "../components/HeaderNav/HeaderNav.css";
+@import "../components/Heading/Heading.css";
+@import "../components/IconButton/IconButton.css";
+@import "../components/Logo/Logo.css";
+@import "../components/PhoneButton/PhoneButton.css";
+@import "../components/PhoneMenu/PhoneMenu.css";
+@import "../components/RollText/RollText.css";
+@import "../components/Segmented/Segmented.css";
+@import "../components/SiteHeader/SiteHeader.css";
+@import "../components/Spotlight/Spotlight.css";
+@import "../components/TabletMenu/TabletMenu.css";
+@import "../components/TokenPreview/TokenPreview.css";

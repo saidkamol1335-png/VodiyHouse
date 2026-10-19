@@ -1,0 +1,32 @@
+# зависимости
+/node_modules
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# тесты
+/coverage
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+
+# секреты: в git только .env.example
+.env*
+!.env.example
+
+# supabase CLI
+/supabase/.temp/
+/supabase/.branches/
+
+# система
+.DS_Store
+*.pem
+npm-debug.log*
+
+# Скриншоты мокапа пересобираются docs/mockup/tools/capture.mjs (~40 МБ, 83 файла)
+docs/mockup/screens/

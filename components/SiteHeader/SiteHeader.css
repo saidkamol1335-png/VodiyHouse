@@ -1,0 +1,151 @@
+/* Метка в начале страницы: пока она видна, шапка над обложкой прозрачная. */
+.site-header__sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 8px;
+  pointer-events: none;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  isolation: isolate;
+  color: var(--fg);
+}
+
+/* Над обложкой шапка лежит поверх неё: следующий блок заходит под шапку. */
+.site-header--transparent {
+  margin-bottom: calc(-1 * var(--header-h));
+}
+
+/* Стекло — отдельным слоем: появляется через opacity, а не анимацией фона (CLAUDE.md §3). */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-bottom: 1px solid var(--line);
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+
+.site-header--solid::before {
+  opacity: 1;
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: var(--header-h);
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.site-header__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.site-header__wide-only {
+  display: contents;
+}
+
+.site-header__menu-button,
+.site-header__call,
+.site-header__back,
+.site-header__title {
+  display: none;
+}
+
+@media (max-width: 1279px) {
+  .site-header__menu-button {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 980px) {
+  .site-header__inner {
+    gap: 12px;
+  }
+}
+
+/* ---------- телефон: отдельная шапка 56 px из мобильного мокапа ---------- */
+@media (max-width: 760px) {
+  .site-header__inner {
+    gap: 2px;
+    padding-inline: 6px;
+  }
+
+  .site-header__tools {
+    gap: 2px;
+  }
+
+  .site-header__wide-only,
+  .site-header__phone {
+    display: none;
+  }
+
+  .site-header__call,
+  .site-header__back {
+    display: inline-flex;
+  }
+
+  .site-header .icon-button {
+    border-color: transparent;
+    background: none;
+    box-shadow: none;
+  }
+
+  .site-header__title {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-h4);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+
+  .site-header__title--visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Поверх фото: белые иконки на тёмных кружках и лёгкое затемнение сверху. */
+  .site-header--over-photo,
+  .site-header--over-photo .logo {
+    color: var(--over-photo-fg);
+  }
+
+  .site-header--over-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--over-photo-shade);
+  }
+
+  .site-header--over-photo .icon-button {
+    background: var(--over-photo-button);
+    color: var(--over-photo-fg);
+    -webkit-backdrop-filter: var(--over-photo-filter);
+    backdrop-filter: var(--over-photo-filter);
+  }
+}

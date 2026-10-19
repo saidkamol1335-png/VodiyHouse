@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "title": "Vodiy House — Farg‘ona viloyati yangi uylari",
+    "description": "Farg‘ona viloyati yangi uylar agentligi. Xaridor uchun — bepul: komissiyani quruvchi to‘laydi."
+  },
+  "nav": {
+    "new": "Yangi uylar",
+    "specials": "Maxsus takliflar",
+    "developers": "Quruvchilar",
+    "calculator": "Kalkulyator",
+    "about": "Biz haqimizda",
+    "forDevelopers": "Quruvchilarga",
+    "quiz": "1 daqiqada tanlash"
+  },
+  "header": {
+    "close": "Yopish",
+    "home": "Vodiy House — bosh sahifa",
+    "navLabel": "Sayt bo‘limlari",
+    "menu": "Menyu",
+    "openMenu": "Menyuni ochish",
+    "closeMenu": "Menyuni yopish",
+    "back": "Orqaga",
+    "favorites": "Saralangan",
+    "showPhone": "Telefonni ko‘rsatish",
+    "call": "Qo‘ng‘iroq",
+    "language": "Til",
+    "languageRu": "Русский",
+    "languageUz": "O‘zbekcha",
+    "theme": "Mavzu",
+    "themeLight": "Yorug‘",
+    "themeDark": "Qorong‘i",
+    "themeToDark": "Qorong‘i mavzuni yoqish",
+    "themeToLight": "Yorug‘ mavzuni yoqish"
+  },
+  "contacts": {
+    "phone": "Vodiy House telefoni",
+    "telegram": "Telegram",
+    "officeLabel": "Ofis",
+    "office": "Farg‘ona, Sayilgoh ko‘chasi, 4",
+    "staffLogin": "Xodimlar uchun kirish",
+    "privacy": "Maxfiylik siyosati"
+  },
+  "home": {
+    "eyebrow": "Farg‘ona viloyati yangi uylari",
+    "title": "Farg‘ona yangi uylaridagi kvartiralar — ",
+    "titleAccent": "quruvchi narxida",
+    "skeleton": "Sayt karkasi · 0-bosqich"
+  }
+}

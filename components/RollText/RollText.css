@@ -1,0 +1,39 @@
+/* Текст для скринридера: виден ему, но не на экране. */
+.roll-text__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.roll-text {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.roll-text__char {
+  display: inline-block;
+  height: 1.3em;
+  overflow: hidden;
+  line-height: 1.3em;
+  vertical-align: top;
+}
+
+.roll-text__char > span {
+  display: block;
+}
+
+/* Только full: в lite и none наведение меняет лишь цвет. */
+[data-motion="full"] .roll-text__char > span {
+  transition: transform var(--dur-roll) var(--ease);
+  transition-delay: calc(var(--i, 0) * var(--roll-stagger));
+}
+
+@media (hover: hover) {
+  [data-motion="full"] .roll-trigger:hover .roll-text__char > span,
+  [data-motion="full"] .roll-trigger:focus-visible .roll-text__char > span {
+    transform: translateY(-100%);
+  }
+}
