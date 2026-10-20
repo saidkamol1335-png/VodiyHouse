@@ -14,7 +14,9 @@ export type FieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "className"
 export function Field({ id, label, error, hint, trailing, ...input }: FieldProps) {
   const errorId = `${id}-error`;
   const hintId = `${id}-hint`;
-  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
+  // Ошибка заменяет подсказку: обычно она повторяет то же правило («Не короче 10 символов»).
+  const showHint = Boolean(hint) && !error;
+  const describedBy = [showHint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
@@ -30,7 +32,7 @@ export function Field({ id, label, error, hint, trailing, ...input }: FieldProps
         />
         {trailing ? <span className="field__trailing">{trailing}</span> : null}
       </div>
-      {hint ? (
+      {showHint ? (
         <p id={hintId} className="field__meta">
           {hint}
         </p>

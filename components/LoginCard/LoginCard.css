@@ -94,6 +94,10 @@
   margin-top: 12px;
 }
 
+.login-card__logout {
+  margin-top: 16px;
+}
+
 /* Старт с 0,01, а не с 0: элемент с opacity 0 Chrome не берёт в LCP, и замер скорости ломается. */
 @keyframes login-card-rise {
   from {

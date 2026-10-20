@@ -1,16 +1,21 @@
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
 import { Button } from "@/components/Button";
-import { LoginForm } from "@/components/LoginForm";
 import { LogoMark } from "@/components/Logo";
-import { signInAction } from "@/lib/admin/actions/auth";
+import { LogoutButton } from "@/components/LogoutButton";
 
 type LoginCardProps = {
-  devOpenHref: string | null;
+  title: string;
+  lead: string;
+  /** Форма карточки: вход или смена пароля. */
+  children: ReactNode;
+  /** login — «Забыли пароль?» и «На сайт»; password — «Выйти» (смена пароля после входа). */
+  footer: "login" | "password";
 };
 
-/** Карточка входа мокапа: 440 px, стекло, луч по рамке (решения К1.2, К1.3). */
-export async function LoginCard({ devOpenHref }: LoginCardProps) {
+/** Карточка входа мокапа: 440 px, стекло, луч по рамке (решения К1.2, К1.3, С4). */
+export async function LoginCard({ title, lead, children, footer }: LoginCardProps) {
   const t = await getTranslations("admin.login");
   return (
     <section className="login-card" aria-labelledby="login-title">
@@ -20,15 +25,23 @@ export async function LoginCard({ devOpenHref }: LoginCardProps) {
         Vodiy House
       </div>
       <h1 id="login-title" className="login-card__title">
-        {t("title")}
+        {title}
       </h1>
-      <p className="login-card__lead">{t("lead")}</p>
-      <LoginForm action={signInAction} devOpenHref={devOpenHref} />
-      <p className="login-card__forgot">{t("forgot")}</p>
-      <Button href="/" variant="ghost" size="sm" className="login-card__to-site">
-        <ArrowLeft size={16} strokeWidth={1.8} aria-hidden />
-        {t("toSite")}
-      </Button>
+      <p className="login-card__lead">{lead}</p>
+      {children}
+      {footer === "login" ? (
+        <>
+          <p className="login-card__forgot">{t("forgot")}</p>
+          <Button href="/" variant="ghost" size="sm" className="login-card__to-site">
+            <ArrowLeft size={16} strokeWidth={1.8} aria-hidden />
+            {t("toSite")}
+          </Button>
+        </>
+      ) : (
+        <div className="login-card__logout">
+          <LogoutButton variant="ghost" />
+        </div>
+      )}
     </section>
   );
 }

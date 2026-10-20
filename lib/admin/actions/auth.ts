@@ -1,12 +1,15 @@
 "use server";
 
 import { redirect, RedirectType } from "next/navigation";
-import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { isCabinetOpenWithoutLogin, STAFF_ROLES } from "@/lib/admin/access";
+import { changeFirstPassword } from "@/lib/admin/auth/changePassword";
 import { signIn } from "@/lib/admin/auth/signIn";
-import type { SignInState } from "@/lib/admin/auth/types";
-import { parseSignIn } from "@/lib/admin/credentials";
-import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import { signInDeps } from "@/lib/admin/server/deps";
+import type { PasswordState, SignInState } from "@/lib/admin/auth/types";
+import type { PasswordErrorCode } from "@/lib/admin/authErrors";
+import { parsePasswordChange, parseSignIn } from "@/lib/admin/credentials";
+import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
+import { passwordDeps, signInDeps } from "@/lib/admin/server/deps";
+import { requireActionViewer, type ActionGuardCode } from "@/lib/admin/session";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -24,6 +27,28 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
   const outcome = await signIn(signInDeps(supabase), parsed.value);
   if (outcome.kind === "error") return { email, error: outcome.code, fieldErrors: {} };
   // Вне try: redirect() бросает NEXT_REDIRECT. replace — «Назад» не вернёт на форму входа.
+  redirect(outcome.to, RedirectType.replace);
+}
+
+const GUARD_TO_PASSWORD_ERROR = {
+  notConfigured: "notConfigured",
+  session: "session",
+  // Отключённого или чужую роль на этом экране просим войти заново — кабинет объяснит причину.
+  forbidden: "session",
+  network: "network",
+} as const satisfies Record<ActionGuardCode, PasswordErrorCode>;
+
+/** Первая смена пароля (/admin/parol): временный пароль, новый и повтор. */
+export async function changePasswordAction(_previous: PasswordState, formData: FormData): Promise<PasswordState> {
+  const guard = await requireActionViewer(STAFF_ROLES, { allowPasswordChange: true });
+  if (!guard.ok) return { error: GUARD_TO_PASSWORD_ERROR[guard.code], fieldErrors: {} };
+  const { viewer, email, supabase } = guard;
+  if (!viewer.mustChangePassword) redirect(landingPath(viewer.role), RedirectType.replace);
+  if (!email) return { error: "session", fieldErrors: {} };
+
+  const fields = parsePasswordChange(formData);
+  const outcome = await changeFirstPassword(passwordDeps(supabase), { ...fields, userId: viewer.id, email, role: viewer.role });
+  if (outcome.kind === "error") return { error: outcome.code, fieldErrors: outcome.fieldErrors };
   redirect(outcome.to, RedirectType.replace);
 }
 

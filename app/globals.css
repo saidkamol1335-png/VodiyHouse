@@ -83,6 +83,7 @@
 @import "../components/LogoutButton/LogoutButton.css";
 @import "../components/MediaDrop/MediaDrop.css";
 @import "../components/MediaLab/MediaLab.css";
+@import "../components/PasswordChangeForm/PasswordChangeForm.css";
 @import "../components/PhoneButton/PhoneButton.css";
 @import "../components/PhoneMenu/PhoneMenu.css";
 @import "../components/QuarterSelect/QuarterSelect.css";
