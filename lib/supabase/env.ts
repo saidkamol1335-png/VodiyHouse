@@ -1,5 +1,6 @@
 // Ключи Supabase — только из окружения (PLAN §0.13). Публичные — с префиксом NEXT_PUBLIC_.
-// Подходят и новые ключи (sb_publishable_… / sb_secret_…), и старые (anon / service_role).
+// Работают и новые ключи (sb_publishable_… / sb_secret_…), и старые (anon / service_role), но IP
+// посетителя Auth принимает только с sb_secret_… (authForwarding.ts) — в проекте нужны новые.
 
 export type SupabasePublicEnv = { url: string; publishableKey: string };
 

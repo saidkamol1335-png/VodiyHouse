@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { authForwardingOption, clientIpFrom } from "./authForwarding";
 import { supabasePublicEnv } from "./env";
 
 // Без server-only: модуль тестируется с подменой @supabase/ssr (proxySession.test.ts).
@@ -22,6 +23,7 @@ export async function refreshAdminSession(request: NextRequest): Promise<AdminSe
   const { url, publishableKey } = supabasePublicEnv();
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, publishableKey, {
+    ...authForwardingOption(clientIpFrom(request.headers)),
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet, headers) => {

@@ -12,11 +12,17 @@ type SetAll = (cookies: CookieWrite[], headers: Record<string, string>) => void;
 // Подмена клиента: getClaims ведёт себя как настоящий при обновлении токена — пишет cookie через setAll.
 const claims = vi.hoisted(() => ({
   run: (async () => ({ data: null, error: null })) as (setAll: SetAll) => Promise<unknown>,
+  lastGlobal: undefined as { fetch?: unknown } | undefined,
 }));
 vi.mock("@supabase/ssr", () => ({
-  createServerClient: (_url: string, _key: string, options: { cookies: { setAll: SetAll } }) => ({
-    auth: { getClaims: () => claims.run(options.cookies.setAll) },
-  }),
+  createServerClient: (
+    _url: string,
+    _key: string,
+    options: { cookies: { setAll: SetAll }; global?: { fetch?: unknown } },
+  ) => {
+    claims.lastGlobal = options.global;
+    return { auth: { getClaims: () => claims.run(options.cookies.setAll) } };
+  },
 }));
 
 const NO_STORE = { "cache-control": "private, no-cache, no-store, must-revalidate, max-age=0", expires: "0", pragma: "no-cache" };
@@ -51,6 +57,19 @@ describe("сессия кабинета в proxy", () => {
     expect(await refreshAdminSession(request())).toMatchObject({ hasSession: false, transient: false });
     claims.run = async () => ({ data: null, error: new AuthRetryableFetchError("сбой", 503) });
     expect(await refreshAdminSession(request())).toMatchObject({ hasSession: false, transient: true });
+  });
+
+  it("обновление сессии уходит в Auth с IP посетителя, если есть ключ sb_secret_", async () => {
+    claims.run = async () => ({ data: null, error: null });
+    await refreshAdminSession(request());
+    expect(claims.lastGlobal).toBeUndefined();
+
+    vi.stubEnv("SUPABASE_SECRET_KEY", "sb_secret_demo");
+    const withIp = new NextRequest("http://localhost:3000/admin/nastroyki", {
+      headers: { cookie: "sb-abcd-auth-token=old", "x-nf-client-connection-ip": "203.0.113.7" },
+    });
+    await refreshAdminSession(withIp);
+    expect(typeof claims.lastGlobal?.fetch).toBe("function");
   });
 
   it("copySessionCookies переносит cookie и заголовки на редирект", () => {

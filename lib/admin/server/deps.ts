@@ -36,7 +36,7 @@ export function signInDeps(supabase: SupabaseClient): SignInDeps {
 
 /** Временный пароль: отдельный вход без cookie; его сессия сразу закрывается. */
 async function verifyPassword(email: string, password: string): ReturnType<ChangePasswordDeps["verifyCurrentPassword"]> {
-  const verifier = createSupabaseVerifierClient();
+  const verifier = await createSupabaseVerifierClient();
   const { error } = await verifier.auth.signInWithPassword({ email, password });
   if (error) return error.code === "invalid_credentials" ? "wrong" : { error };
   await signOutQuietly(verifier, "local");

@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { authForwardingOption, clientIpFrom } from "./authForwarding";
 import { supabasePublicEnv } from "./env";
 
 /**
@@ -9,8 +10,9 @@ import { supabasePublicEnv } from "./env";
  */
 export async function createSupabaseServerClient() {
   const { url, publishableKey } = supabasePublicEnv();
-  const cookieStore = await cookies();
+  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
   return createServerClient(url, publishableKey, {
+    ...authForwardingOption(clientIpFrom(headerStore)),
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) => {
