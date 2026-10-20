@@ -1,0 +1,26 @@
+/* Квартал + год: два списка в одну строку, стрелка своя — системная разная в каждом браузере. */
+.quarter-select {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 8px;
+}
+
+.quarter-select__control {
+  position: relative;
+  display: block;
+}
+
+.quarter-select__select {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.quarter-select__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}

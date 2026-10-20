@@ -1,0 +1,19 @@
+/* Статус слева, вкладки справа от него; на телефоне вкладки — лента во всю ширину. */
+.admin-entity-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-entity-head .admin-tabs {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .admin-entity-head .admin-tabs {
+    flex-basis: 100%;
+  }
+}

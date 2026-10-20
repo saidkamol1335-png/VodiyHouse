@@ -17,7 +17,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { isNavItemActive, type AdminNavKey } from "@/lib/admin/nav";
-import { useStripScroll } from "./useStripScroll";
+import { useStripScroll } from "@/lib/ui/useStripScroll";
 
 export type AdminNavEntry = {
   key: AdminNavKey;

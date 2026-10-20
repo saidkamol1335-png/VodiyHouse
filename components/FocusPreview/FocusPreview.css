@@ -5,11 +5,11 @@
   gap: 14px;
 }
 
-/* Вертикальное фото не растягивает экран: высота сцены — не больше 60 % окна. */
+/* Фото не занимает весь экран: высота сцены — не больше 46 % окна, кадры видны сразу под ней. */
 .focus-preview__stage {
   position: relative;
   display: block;
-  width: min(100%, calc(60vh * var(--focus-ratio)));
+  width: min(100%, calc(46vh * var(--focus-ratio)));
   aspect-ratio: var(--focus-ratio);
   padding: 0;
   overflow: hidden;

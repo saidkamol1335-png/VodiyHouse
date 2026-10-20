@@ -1,0 +1,47 @@
+/* Служебная вкладка «Основное» (/dev/admin-kit): раскладка формы застройщика. */
+.admin-kit-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 8px;
+}
+
+/* По низу: подпись в две строки не сдвигает поле вниз относительно соседей. */
+.admin-kit-main__facts {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.admin-kit-main__media {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.admin-kit-main__save {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 1100px) {
+  .admin-kit-main__facts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .admin-kit-main__facts > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-kit-main__media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-kit-main__save .button {
+    width: 100%;
+  }
+}

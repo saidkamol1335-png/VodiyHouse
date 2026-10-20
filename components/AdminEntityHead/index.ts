@@ -1,0 +1,1 @@
+export { AdminEntityHead } from "./AdminEntityHead";

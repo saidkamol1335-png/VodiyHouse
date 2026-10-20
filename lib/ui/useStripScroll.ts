@@ -10,14 +10,22 @@ const EDGE_TOLERANCE = 1;
 
 function readEdges(track: HTMLElement): Edges {
   const maxScroll = track.scrollWidth - track.clientWidth;
-  return { start: track.scrollLeft > EDGE_TOLERANCE, end: track.scrollLeft < maxScroll - EDGE_TOLERANCE };
+  return {
+    start: track.scrollLeft > EDGE_TOLERANCE,
+    end: track.scrollLeft < maxScroll - EDGE_TOLERANCE,
+  };
 }
 
 /**
  * Лента пилюль (К3.4): затухание у того края, за которым ещё есть пункты,
- * и активная пилюля — в зоне видимости после каждого перехода.
+ * и активная пилюля — в зоне видимости после каждого перехода. activeKey — что сменилось
+ * при переходе (адрес, вкладка): по нему лента заново прокручивается к активной пилюле.
  */
-export function useStripScroll(trackRef: RefObject<HTMLElement | null>, enabled: boolean, pathname: string): Edges {
+export function useStripScroll(
+  trackRef: RefObject<HTMLElement | null>,
+  enabled: boolean,
+  activeKey: string,
+): Edges {
   const [edges, setEdges] = useState<Edges>(NO_EDGES);
 
   useEffect(() => {
@@ -39,7 +47,7 @@ export function useStripScroll(trackRef: RefObject<HTMLElement | null>, enabled:
     const active = track?.querySelector<HTMLElement>('[aria-current="page"]');
     if (!enabled || !track || !active) return;
     track.scrollLeft = active.offsetLeft - (track.clientWidth - active.offsetWidth) / 2;
-  }, [trackRef, enabled, pathname]);
+  }, [trackRef, enabled, activeKey]);
 
   return edges;
 }

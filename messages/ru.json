@@ -120,7 +120,68 @@
         "card": "Карточка · 4:3",
         "phone": "Телефон · 4:5"
       },
-      "focusHint": "Нажмите на главное на фото — кадры подстроятся сами."
+      "focusHint": "Нажмите на главное на фото — кадры подстроятся сами.",
+      "upload": "Загрузить фото",
+      "add": "Добавить",
+      "replace": "Заменить",
+      "remove": "Удалить",
+      "processing": "Готовлю фото…",
+      "dropHint": "или перетащите файл сюда",
+      "hint": "от {minLongSide} px · JPEG, PNG или WebP до {maxMegabytes} МБ",
+      "uploadFailed": "Не получилось загрузить фото. Проверьте связь и попробуйте ещё раз."
+    },
+    "publication": {
+      "draft": "Черновик",
+      "published": "Опубликован",
+      "hidden": "Скрыт",
+      "archived": "В архиве"
+    },
+    "bilingual": {
+      "missingUz": "Нужен текст на узбекском",
+      "missingRu": "Нужен текст на русском",
+      "counter": "{count}/{max}"
+    },
+    "quarters": {
+      "quarter": "Квартал",
+      "year": "Год",
+      "none": "—",
+      "quarterOption": "{quarter} кв.",
+      "short": "{quarter} кв. {year}",
+      "onTime": "Сдан в срок",
+      "delayed": "Перенос на {months} мес."
+    },
+    "developers": {
+      "tabs": {
+        "label": "Разделы застройщика",
+        "main": "Основное",
+        "projects": "Сданные объекты",
+        "private": "Внутреннее",
+        "log": "Журнал"
+      },
+      "fields": {
+        "title": "Основное",
+        "name": "Название",
+        "foundedYear": "Год основания",
+        "flatsDelivered": "Сдано квартир",
+        "deliveredCheckedAt": "Сданные проверены",
+        "about": "О компании",
+        "aboutUz": "Kompaniya haqida",
+        "founders": "Основатели",
+        "foundersUz": "Asoschilar",
+        "logo": "Логотип",
+        "cover": "Фон",
+        "save": "Сохранить вкладку"
+      },
+      "projects": {
+        "title": "Сданные объекты",
+        "name": "Объект",
+        "nameUz": "Obyekt",
+        "planned": "План",
+        "delivered": "Факт",
+        "add": "Добавить объект",
+        "remove": "Удалить объект"
+      },
+      "later": "Появится вместе с данными из базы (шаг 10)."
     }
   }
 }

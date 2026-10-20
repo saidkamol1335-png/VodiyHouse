@@ -1,0 +1,12 @@
+/* RU и UZ рядом (мокап: .form__two в форме видеографа); поля — блок .field. */
+.bilingual-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .bilingual-field {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

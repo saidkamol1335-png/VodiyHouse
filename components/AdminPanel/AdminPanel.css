@@ -18,3 +18,8 @@
   max-width: 70ch;
   color: var(--fg-2);
 }
+
+.admin-panel__body--wide {
+  max-width: none;
+  color: var(--fg);
+}

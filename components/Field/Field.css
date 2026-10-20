@@ -72,3 +72,44 @@
   font-size: var(--fs-caption);
   font-weight: 600;
 }
+
+/* Многострочное поле (мокап: textarea.inp). */
+.field__input--multiline {
+  height: auto;
+  min-height: 84px;
+  padding: 12px 15px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+/* Второй язык пуст, а первый заполнен — подсказка, не ошибка (решение Д3). */
+.field__input--missing {
+  border-style: dashed;
+  border-color: var(--amber-line);
+}
+
+/* Строка под полем: подсказка слева, счётчик символов справа. */
+.field__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 16px;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.field__note--missing {
+  color: var(--amber-2);
+  font-weight: 600;
+}
+
+.field__counter {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.field__counter--near {
+  color: var(--amber-2);
+}

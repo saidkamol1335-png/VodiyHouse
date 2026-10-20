@@ -1,0 +1,60 @@
+/* Плашки мокапа (.badge): 25 px, пилюля, жирный 12 px; цвета — токены обеих тем. */
+.badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 25px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge--sm {
+  height: 21px;
+  padding: 0 8px;
+  font-size: var(--fs-label);
+}
+
+.badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+}
+
+.badge--ok {
+  border-color: var(--badge-ok-border);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+}
+
+.badge--amber {
+  border-color: var(--badge-amber-border);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.badge--bad {
+  border-color: var(--badge-bad-border);
+  background: var(--bad-soft);
+  color: var(--badge-bad-fg);
+}
+
+.badge--blue {
+  border-color: var(--badge-blue-border);
+  background: var(--blue-soft);
+  color: var(--badge-blue-fg);
+}
+
+.badge--line {
+  border-style: dashed;
+  border-color: var(--dash);
+  background: transparent;
+  color: var(--badge-line-fg);
+}

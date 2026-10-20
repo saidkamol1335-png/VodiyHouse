@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { PUBLICATION_STATUSES } from "@/lib/admin/publication";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import {
   anon,
@@ -146,6 +147,13 @@ describe("застройщики, ЖК и медиа", () => {
       { status: "archived", archived: true },
       { status: "archived", archived: true },
     ]);
+  });
+
+  it("статусы публикации в коде — как enum в базе", async () => {
+    const { rows } = await db.admin.query<{ statuses: string[] }>(
+      "select enum_range(null::public.publication_status)::text[] as statuses",
+    );
+    expect(rows[0]?.statuses).toEqual([...PUBLICATION_STATUSES]);
   });
 
   it("в публичных таблицах нет полей сотрудников", async () => {

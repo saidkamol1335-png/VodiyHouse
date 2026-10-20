@@ -1,0 +1,166 @@
+/* Загрузка фото (решение Д4, мокап видеографа): плитка «+» (.shot--add) и зона (.drop + .upl__ic). */
+.media-drop {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* Поле выбора файла скрыто, но остаётся в фокусе с клавиатуры: Enter открывает выбор. */
+.media-drop__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.media-drop__input:focus-visible + .media-drop__target {
+  border-radius: var(--r-m);
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.media-drop__target {
+  min-width: 0;
+}
+
+/* ---------- плитка: логотип ---------- */
+.media-drop__tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px dashed var(--line-3);
+  border-radius: var(--r-s);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.media-drop__tile:hover,
+.media-drop__target--dragging .media-drop__tile {
+  border-color: var(--amber);
+  color: var(--fg);
+}
+
+.media-drop__tile--filled {
+  border-style: solid;
+  border-color: var(--line);
+  background: var(--bg-2);
+  cursor: default;
+}
+
+.media-drop__tile-pick {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Логотип целиком, с полями: обрезать знак застройщика нельзя. */
+.media-drop__tile-image {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  object-fit: contain;
+}
+
+.media-drop__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.media-drop__busy {
+  padding: 6px;
+  font-size: var(--fs-label);
+  text-align: center;
+}
+
+/* ---------- зона: фон, фото ---------- */
+.media-drop__zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 22px;
+  border: 1px dashed var(--line-3);
+  border-radius: var(--r-m);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.media-drop__zone:hover,
+.media-drop__target--dragging .media-drop__zone {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.media-drop__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-s);
+  background: var(--amber-soft);
+  color: var(--amber-2);
+}
+
+.media-drop__title {
+  color: var(--fg);
+  font-size: var(--fs-control-l);
+}
+
+.media-drop__hint {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.media-drop__filled {
+  display: grid;
+  gap: 12px;
+}
+
+.media-drop__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.media-drop__issue {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+
+/* На телефоне перетаскивать нечего — подсказку про перетаскивание прячем. */
+@media (pointer: coarse) {
+  .media-drop__hint--desktop {
+    display: none;
+  }
+}

@@ -1,0 +1,1 @@
+export { DeliveryBadge } from "./DeliveryBadge";
