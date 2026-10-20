@@ -1,0 +1,126 @@
+/* Служебная страница /dev/media — стенд подготовки фото (шаг 9). */
+/* minmax(0, 1fr): широкий ребёнок не раздвигает колонку и страницу. */
+.media-lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 980px;
+  margin-inline: auto;
+  padding: 40px var(--gutter) 80px;
+}
+
+.media-lab__title {
+  color: var(--fg-heading);
+  font-size: var(--fs-admin-title);
+  font-weight: 700;
+  letter-spacing: var(--ls-h3);
+}
+
+.media-lab__lead,
+.media-lab__status {
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  line-height: var(--lh-body);
+}
+
+.media-lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Пять видов на телефоне не помещаются: ряд прокручивается сам, страница — нет. */
+.media-lab__kinds {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.media-lab__input {
+  font-size: var(--fs-small);
+}
+
+.media-lab__issue {
+  padding: 14px 16px;
+  border: 1px solid var(--bad);
+  border-radius: var(--r-s);
+  background: var(--bad-soft);
+  color: var(--fg);
+  font-size: var(--fs-control);
+  line-height: var(--lh-body);
+}
+
+.media-lab__note {
+  color: var(--amber-2);
+  font-size: var(--fs-small);
+}
+
+.media-lab__result {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-1);
+}
+
+.media-lab__summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.media-lab__facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.media-lab__fact {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+}
+
+.media-lab__fact-label {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+}
+
+.media-lab__fact-value {
+  margin: 0;
+  color: var(--fg);
+  font-size: var(--fs-small-l);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Заглушка в том виде, как её растянет next/image (до загрузки фото). */
+.media-lab__blur {
+  flex: none;
+  width: 120px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-s);
+  object-fit: cover;
+}
+
+@media (max-width: 760px) {
+  .media-lab {
+    padding: 24px 16px 60px;
+  }
+
+  .media-lab__summary {
+    flex-direction: column;
+  }
+
+  .media-lab__fact {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

@@ -16,6 +16,18 @@ export function hourIn(date: Date, timeZone: string = APP_TIME_ZONE): number {
   return Number(hour);
 }
 
+const KILOBYTE = 1024;
+const MEGABYTE = 1024 * 1024;
+
+/** Вес файла для кабинета: «512 КБ», «2,4 МБ» (одна цифра после запятой — до 10 МБ). */
+export function formatFileSize(bytes: number): string {
+  if (bytes < MEGABYTE) return `${Math.max(1, Math.round(bytes / KILOBYTE))} КБ`;
+  const megabytes = bytes / MEGABYTE;
+  const digits = megabytes < 10 ? 1 : 0;
+  const value = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(megabytes);
+  return `${value} МБ`;
+}
+
 /** Инициалы для аватара: «Дилноза Юсупова» → «ДЮ», одно слово — одна буква. */
 export function initialsOf(name: string): string {
   return name

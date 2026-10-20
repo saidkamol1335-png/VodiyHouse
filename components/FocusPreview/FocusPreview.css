@@ -1,0 +1,103 @@
+/* Точка фокуса и три кадра сайта (решение фазы 1, в. 4). Кадры — те же object-fit: cover,
+   что будут у next/image на сайте, поэтому превью совпадает с тем, что увидит клиент. */
+.focus-preview {
+  display: grid;
+  gap: 14px;
+}
+
+/* Вертикальное фото не растягивает экран: высота сцены — не больше 60 % окна. */
+.focus-preview__stage {
+  position: relative;
+  display: block;
+  width: min(100%, calc(60vh * var(--focus-ratio)));
+  aspect-ratio: var(--focus-ratio);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: var(--bg-4);
+  cursor: crosshair;
+}
+
+.focus-preview__stage:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.focus-preview__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Маркер ставится мгновенно: без анимации left / top (анимируем только transform и opacity). */
+.focus-preview__marker {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--bg-2);
+  border-radius: var(--r-pill);
+  background: var(--amber-soft);
+  box-shadow:
+    0 0 0 2px var(--amber),
+    var(--shadow-1);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.focus-preview__hint {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.focus-preview__frames {
+  display: grid;
+  grid-template-columns: 16fr 12fr 7fr;
+  align-items: start;
+  gap: 12px;
+}
+
+.focus-preview__frame {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.focus-preview__frame-image {
+  display: block;
+  width: 100%;
+  border-radius: var(--r-s);
+  background: var(--bg-4);
+  object-fit: cover;
+}
+
+.focus-preview__frame--cover .focus-preview__frame-image {
+  aspect-ratio: 16 / 9;
+}
+
+.focus-preview__frame--card .focus-preview__frame-image {
+  aspect-ratio: 4 / 3;
+}
+
+.focus-preview__frame--phone .focus-preview__frame-image {
+  aspect-ratio: 4 / 5;
+}
+
+.focus-preview__caption {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}
+
+@media (max-width: 760px) {
+  .focus-preview__frames {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .focus-preview__frame--cover {
+    grid-column: 1 / -1;
+  }
+}

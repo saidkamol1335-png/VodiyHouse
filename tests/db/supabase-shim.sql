@@ -46,6 +46,38 @@ grant execute on function auth.jwt(), auth.uid(), auth.role() to anon, authentic
 create schema extensions;
 grant usage on schema extensions to anon, authenticated, service_role;
 
+-- Storage: только таблицы, на которые опираются наши политики. Как в облаке, строки
+-- objects пишет сам сервис Storage от имени пользователя — права ролям API открыты, защищает RLS.
+create schema storage;
+grant usage on schema storage to anon, authenticated, service_role;
+
+create table storage.buckets (
+  id text primary key,
+  name text not null unique,
+  owner uuid,
+  public boolean default false,
+  file_size_limit bigint,
+  allowed_mime_types text[],
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text references storage.buckets (id),
+  name text,
+  owner uuid,
+  metadata jsonb,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  last_accessed_at timestamptz default now(),
+  unique (bucket_id, name)
+);
+
+alter table storage.buckets enable row level security;
+alter table storage.objects enable row level security;
+grant all on storage.buckets, storage.objects to anon, authenticated, service_role;
+
 -- Права по умолчанию как в облаке: всё новое в public доступно ролям Data API,
 -- защищает только RLS. Миграции обязаны сами отзывать лишнее — тесты это проверяют.
 grant usage on schema public to anon, authenticated, service_role;

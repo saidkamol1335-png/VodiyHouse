@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { greetingOf } from "./admin/greeting";
-import { formatWeekdayDate, hourIn, initialsOf } from "./format";
+import { formatFileSize, formatWeekdayDate, hourIn, initialsOf } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
 const MOCKUP_NOON = new Date("2026-10-19T07:00:00Z");
@@ -39,5 +39,14 @@ describe("инициалы", () => {
     expect(initialsOf("Дилноза Юсупова")).toBe("ДЮ");
     expect(initialsOf("  бахтиёр  ")).toBe("Б");
     expect(initialsOf("Сардор Алиев Ўғли")).toBe("СА");
+  });
+});
+
+describe("вес файла", () => {
+  it("КБ до мегабайта, МБ с одной цифрой до 10 МБ, дальше целые", () => {
+    expect(formatFileSize(300)).toBe("1 КБ");
+    expect(formatFileSize(512 * 1024)).toBe("512 КБ");
+    expect(formatFileSize(2.44 * 1024 * 1024)).toBe("2,4 МБ");
+    expect(formatFileSize(25 * 1024 * 1024)).toBe("25 МБ");
   });
 });

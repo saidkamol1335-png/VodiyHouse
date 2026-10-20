@@ -63,6 +63,7 @@
 @import "../components/Eyebrow/Eyebrow.css";
 @import "../components/Field/Field.css";
 @import "../components/FilmGrain/FilmGrain.css";
+@import "../components/FocusPreview/FocusPreview.css";
 @import "../components/HeaderNav/HeaderNav.css";
 @import "../components/Heading/Heading.css";
 @import "../components/IconButton/IconButton.css";
@@ -71,6 +72,7 @@
 @import "../components/LoginForm/LoginForm.css";
 @import "../components/LoginScreen/LoginScreen.css";
 @import "../components/Logo/Logo.css";
+@import "../components/MediaLab/MediaLab.css";
 @import "../components/PhoneButton/PhoneButton.css";
 @import "../components/PhoneMenu/PhoneMenu.css";
 @import "../components/RollText/RollText.css";

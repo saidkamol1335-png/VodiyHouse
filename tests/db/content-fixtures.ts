@@ -49,11 +49,12 @@ export async function seedContent(admin: Db): Promise<ContentIds> {
       rooms,
       area,
     ]);
-  const photo = (complexId: string, path: string) =>
+  // Путь — в папке своего ЖК, как у загрузки из кабинета (lib/media/path.ts).
+  const photo = (complexId: string) =>
     insertId(
       admin,
       "insert into media_assets (complex_id, kind, path, width, height) values ($1, 'photo', $2, 2400, 1600)",
-      [complexId, path],
+      [complexId, `complexes/${complexId}/${crypto.randomUUID()}.jpg`],
     );
 
   const publicDeveloper = await developer("public-dev", "published");
@@ -94,8 +95,8 @@ export async function seedContent(admin: Db): Promise<ContentIds> {
     `insert into developer_past_projects (developer_id, name) values ($1, '{"ru": "Скрытый дом", "uz": "Yashirin uy"}')`,
     [draftDeveloper],
   );
-  const publicPhoto = await photo(publicComplex, "complexes/public-zhk/1.jpg");
-  const draftPhoto = await photo(draftComplex, "complexes/draft-zhk/1.jpg");
+  const publicPhoto = await photo(publicComplex);
+  const draftPhoto = await photo(draftComplex);
 
   return {
     publicDeveloper,
