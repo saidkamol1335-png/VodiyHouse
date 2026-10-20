@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/Button";
 import { LoginForm } from "@/components/LoginForm";
 import { LogoMark } from "@/components/Logo";
+import { signInAction } from "@/lib/admin/actions/auth";
 
 type LoginCardProps = {
   devOpenHref: string | null;
@@ -22,7 +23,7 @@ export async function LoginCard({ devOpenHref }: LoginCardProps) {
         {t("title")}
       </h1>
       <p className="login-card__lead">{t("lead")}</p>
-      <LoginForm devOpenHref={devOpenHref} />
+      <LoginForm action={signInAction} devOpenHref={devOpenHref} />
       <p className="login-card__forgot">{t("forgot")}</p>
       <Button href="/" variant="ghost" size="sm" className="login-card__to-site">
         <ArrowLeft size={16} strokeWidth={1.8} aria-hidden />

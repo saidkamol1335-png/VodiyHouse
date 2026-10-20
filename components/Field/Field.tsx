@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 
-type FieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "className" | "id"> & {
+export type FieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "className" | "id"> & {
   id: string;
   label: string;
   error?: string;

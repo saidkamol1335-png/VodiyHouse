@@ -1,11 +1,9 @@
 "use client";
 
-import { LogOut } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
-import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import { LogoutButton } from "@/components/LogoutButton";
 import type { CabinetPerson } from "@/lib/admin/person";
 
 const PANEL_ID = "admin-user-menu";
@@ -48,10 +46,7 @@ export function AdminUserMenu({ person }: { person: CabinetPerson }) {
         <div id={PANEL_ID} className="admin-user-menu__panel">
           <p className="admin-user-menu__name">{person.name}</p>
           <p className="admin-user-menu__role">{person.roleLabel}</p>
-          <Link className="admin-user-menu__logout" href={ADMIN_ROUTES.login}>
-            <LogOut size={16} strokeWidth={1.8} aria-hidden />
-            {t("logout")}
-          </Link>
+          <LogoutButton variant="menu" />
         </div>
       ) : null}
     </div>

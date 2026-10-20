@@ -10,6 +10,10 @@ import { cabinetPerson, type CabinetPerson } from "@/lib/admin/person";
 import { requireSection } from "@/lib/admin/session";
 import { formatWeekdayDate } from "@/lib/format";
 
+// Страница сама читает сессию (переход между разделами не перерисовывает layout) — и тоже
+// ждёт её на сервере: instant = false у layout на страницу не распространяется.
+export const instant = false;
+
 // Приветствие зависит от текущего часа по Ташкенту (К4.3): считается на каждый запрос,
 // а в статичной оболочке стоит заглушка той же высоты.
 async function HomeTopbar({ person }: { person: CabinetPerson }) {

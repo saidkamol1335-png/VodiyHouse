@@ -66,6 +66,19 @@
   width: 100%;
 }
 
+.button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+
+.button:disabled:active {
+  transform: none;
+}
+
+.button--pending {
+  cursor: progress;
+}
+
 @keyframes button-shine {
   0%,
   55% {

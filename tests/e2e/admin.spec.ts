@@ -27,13 +27,35 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(password).toHaveAttribute("type", "password");
   });
 
-  test("фаза 0: вход сообщает о фазе 1 и никуда не отправляет", async ({ page }) => {
+  test("без ключей Supabase: форма отправляется, «сервер не настроен», email остаётся", async ({ page }) => {
+    test.skip(Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL), "с ключами — настоящий вход (auth.spec.ts)");
     await page.goto("/admin/vhod");
-    await page.getByLabel("Email").fill("staff@example.com");
+    await page.getByLabel("Email").fill("Staff@Example.com ");
     await page.getByLabel("Пароль", { exact: true }).fill("demo-password");
     await page.getByRole("button", { name: "Войти" }).click();
-    await expect(page.getByRole("status")).toContainText("Вход заработает в фазе 1");
+    // У Next.js в разработке свой role=alert (объявления маршрута) — ищем внутри формы.
+    await expect(page.locator(".login-form .form-status--error")).toHaveText("Вход временно недоступен — сервер не настроен.");
+    await expect(page.getByLabel("Email")).toHaveValue("staff@example.com");
     await expect(page).toHaveURL(/\/admin\/vhod$/);
+  });
+
+  test("пустые поля — ошибки под полями, без перехода", async ({ page }) => {
+    await page.goto("/admin/vhod");
+    await page.getByRole("button", { name: "Войти" }).click();
+    await expect(page.locator(".login-form .field__error")).toHaveText(["Введите email", "Введите пароль"]);
+    await page.getByLabel("Email").fill("staff");
+    await page.getByRole("button", { name: "Войти" }).click();
+    await expect(page.locator(".login-form .field__error").first()).toHaveText("Проверьте email");
+    await expect(page).toHaveURL(/\/admin\/vhod$/);
+  });
+
+  test("отключённого сотрудника встречает уведомление", async ({ page }) => {
+    await page.goto("/admin/vhod?prichina=otklyuchen");
+    await expect(page.locator(".login-form .form-status--notice")).toHaveText(
+      "Ваш доступ отключён. Обратитесь к руководителю.",
+    );
+    await page.goto("/admin/vhod");
+    await expect(page.locator(".form-status")).toHaveCount(0);
   });
 
   test("К1.2: луч по рамке только в full, вращается через transform", async ({ page }) => {
@@ -92,8 +114,11 @@ test.describe("оболочка кабинета /admin (разработка �
     const side = page.locator(".admin-shell__side");
     expect((await side.boundingBox())?.width).toBe(250);
     await expect(side.getByText("Руководитель")).toBeVisible();
-    await expect(side.getByRole("link", { name: "Выйти" })).toHaveAttribute("href", "/admin/vhod");
     await expect(page.locator(".admin-user-menu")).toBeHidden();
+    // Выход — POST-форма (Server Action), а не ссылка.
+    await expect(side.getByRole("link", { name: "Выйти" })).toHaveCount(0);
+    await side.getByRole("button", { name: "Выйти" }).click();
+    await expect(page).toHaveURL(/\/admin\/vhod$/);
   });
 
   test("К4.2: верхняя строка прилипает на десктопе", async ({ page }, testInfo) => {
@@ -110,9 +135,12 @@ test.describe("оболочка кабинета /admin (разработка �
     const toggle = page.getByRole("button", { name: /Сотрудник:/ });
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
-    await expect(page.getByRole("link", { name: "Выйти" })).toHaveAttribute("href", "/admin/vhod");
+    await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
+    await page.getByRole("button", { name: "Выйти" }).click();
+    await expect(page).toHaveURL(/\/admin\/vhod$/);
   });
 
   test("линий колонок в кабинете нет (Э1)", async ({ page }) => {

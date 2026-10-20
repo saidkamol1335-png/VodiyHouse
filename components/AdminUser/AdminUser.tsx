@@ -1,13 +1,9 @@
-import { LogOut } from "lucide-react";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/Avatar";
-import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import { LogoutButton } from "@/components/LogoutButton";
 import type { CabinetPerson } from "@/lib/admin/person";
 
 /** Карточка сотрудника внизу боковой панели: инициалы, имя, роль, выход (мокап: .adm__user). */
-export async function AdminUser({ person }: { person: CabinetPerson }) {
-  const t = await getTranslations("admin.user");
+export function AdminUser({ person }: { person: CabinetPerson }) {
   return (
     <div className="admin-user">
       <Avatar name={person.name} />
@@ -17,10 +13,7 @@ export async function AdminUser({ person }: { person: CabinetPerson }) {
         </span>
         <span className="admin-user__role">{person.roleLabel}</span>
       </span>
-      {/* Фаза 0: сессии нет, выход ведёт на экран входа; signOut Supabase — фаза 1. */}
-      <Link className="icon-button icon-button--sm icon-button--bare" href={ADMIN_ROUTES.login} aria-label={t("logout")} title={t("logout")}>
-        <LogOut size={18} strokeWidth={1.8} aria-hidden />
-      </Link>
+      <LogoutButton variant="icon" />
     </div>
   );
 }

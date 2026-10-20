@@ -1,0 +1,33 @@
+/* «Выйти» — форма: снаружи ведёт себя как сама кнопка. */
+.logout-button {
+  display: flex;
+  margin: 0;
+}
+
+/* Строка меню аватара (≤ 980 px), пунктир сверху — как у пунктов меню мокапа. */
+.logout-button--menu {
+  margin: 0 -6px;
+  border-top: 1px dashed var(--dash);
+}
+
+.logout-button__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small-l);
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.logout-button__menu-item:hover {
+  color: var(--amber-2);
+}

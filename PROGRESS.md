@@ -169,8 +169,8 @@
     - 8.3 [x] чистые модули: пароль, проверка форм, коды ошибок → `messages`, `gate`, список сотрудников
     - 8.4 [x] `proxy.ts`: сессия кабинета + язык сайта
     - 8.5 [x] DAL `lib/admin/session.ts`, оболочка кабинета, «раздел недоступен», ошибка «кабинет недоступен»
-    - 8.6 [ ] вход: `signInAction`, `LoginForm`, `FormStatus`, `PasswordField`, уведомление «доступ отключён»
-    - 8.7 [ ] выход — POST-действие, `LogoutButton`
+    - 8.6 [x] вход: `signInAction`, `LoginForm`, `FormStatus`, `PasswordField`, уведомление «доступ отключён»
+    - 8.7 [x] выход — POST-действие, `LogoutButton`
     - 8.8 [ ] `/admin/parol` — первая смена пароля, `/dev/parol`
     - 8.9 [ ] «Настройки → Сотрудники»: список, `/dev/staff` (DEMO)
     - 8.10 [ ] создание сотрудника → пароль один раз → «Скопировать для Telegram»
@@ -240,6 +240,7 @@
 - Dev и прод-сервер одновременно: dev — `.next/dev`, прод — `.next`. Перед новым `next start` остановить старый: иначе он отдаёт старый манифест и чанки 404/500.
 - Фото: файл в бакете `media` — `complexes/<id ЖК>/<uuid>.jpg` или `developers/<id>/<uuid>.png` (`lib/media/path.ts` = `private.is_media_path`, тест сверяет). Строки `media_assets` при удалении ЖК удаляются каскадом, а файлы — нет: окончательное удаление ЖК (фаза 3, pg_cron) должно удалять и папку ЖК через Storage API.
 - Кабинет: оболочка `app/admin/layout` статичная и уходит сразу, поэтому `redirect()` из `(cabinet)/layout` приходит потоком (200 + `NEXT_REDIRECT` в теле, браузер переходит сам), даже с `instant = false`. Настоящий 307 на вход даёт `proxy.ts` (нет cookie сессии, или продакшен без ключей). Данных кабинета в таком ответе нет — layout бросает редирект до детей.
+- Каждая страница кабинета читает сессию сама (`requireViewer` / `requireSection`) и объявляет `export const instant = false` — как и `(cabinet)/layout.tsx`: `false` у layout на страницу не распространяется, без него в разработке ошибка «uncached data … connection() outside of <Suspense>».
 - В облаке прямой `delete from storage.objects` без флага `storage.allow_delete_query` запрещён триггером Storage (так удаляет только сам сервис) — тест удаления ставит флаг; в коде удалять файлы только через `supabase.storage.remove()`.
 
 ## Вопросы по материалам

@@ -45,24 +45,6 @@
   font-size: var(--fs-caption);
 }
 
-.admin-user-menu__logout {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  margin: 0 -6px;
-  padding: 0 6px;
-  border-top: 1px dashed var(--dash);
-  color: var(--fg);
-  font-size: var(--fs-small-l);
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.admin-user-menu__logout:hover {
-  color: var(--amber-2);
-}
-
 @keyframes admin-user-menu-in {
   from {
     opacity: 0;
