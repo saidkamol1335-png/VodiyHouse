@@ -10,6 +10,9 @@ type ButtonProps = {
   /** Ссылка без префикса языка: кабинет и переходы на сайт из кабинета. */
   href?: string;
   type?: "button" | "submit";
+  /** Кнопка отправки с name и value: одна форма — несколько действий («Опубликовать», «Скрыть»). */
+  name?: string;
+  value?: string;
   onClick?: () => void;
   disabled?: boolean;
   /** Форма отправляется: кнопка недоступна и помечена aria-busy. */
@@ -19,7 +22,13 @@ type ButtonProps = {
 
 type ButtonLook = Pick<ButtonProps, "variant" | "size" | "block" | "pending" | "className">;
 
-function buttonClasses({ variant = "primary", size = "md", block = false, pending = false, className }: ButtonLook): string {
+function buttonClasses({
+  variant = "primary",
+  size = "md",
+  block = false,
+  pending = false,
+  className,
+}: ButtonLook): string {
   const classes = ["button", `button--${variant}`];
   if (size === "sm") classes.push("button--sm");
   if (block) classes.push("button--block");
@@ -28,7 +37,16 @@ function buttonClasses({ variant = "primary", size = "md", block = false, pendin
   return classes.join(" ");
 }
 
-export function Button({ children, href, type = "button", onClick, disabled = false, ...look }: ButtonProps) {
+export function Button({
+  children,
+  href,
+  type = "button",
+  name,
+  value,
+  onClick,
+  disabled = false,
+  ...look
+}: ButtonProps) {
   const classes = buttonClasses(look);
   if (href) {
     return (
@@ -40,6 +58,8 @@ export function Button({ children, href, type = "button", onClick, disabled = fa
   return (
     <button
       type={type}
+      name={name}
+      value={value}
       className={classes}
       onClick={onClick}
       disabled={disabled || look.pending}

@@ -42,8 +42,9 @@ export type DeveloperMainInput = {
 export type DeveloperFieldIssue =
   BilingualIssue | "tooShort" | "outOfRange" | "notWholeNumber" | "dateInvalid";
 export type DeveloperMainErrors = Partial<Record<keyof DeveloperMainFields, DeveloperFieldIssue>>;
+/** fields — введённое как есть: React сбрасывает форму после действия, его возвращают в форму. */
 export type DeveloperMainParse =
-  | { ok: true; value: DeveloperMainInput }
+  | { ok: true; value: DeveloperMainInput; fields: DeveloperMainFields }
   | { ok: false; fields: DeveloperMainFields; fieldErrors: DeveloperMainErrors };
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -116,6 +117,7 @@ export function parseDeveloperMain(formData: FormData): DeveloperMainParse {
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fields, fieldErrors };
   return {
     ok: true,
+    fields,
     value: {
       name: fields.name,
       foundedYear: year.value,

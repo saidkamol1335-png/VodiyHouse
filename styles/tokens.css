@@ -175,6 +175,9 @@
   --admin-nav-on-ring: rgba(240, 160, 48, 0.55);
   --admin-nav-on-icon: #c46a00;
   --admin-pill-on-glow: 0 0 16px rgba(248, 155, 13, 0.165);
+  /* знак-инициалы застройщика (мокап: «FS» в «Программах оплаты») */
+  --admin-mark-bg: #24384f;
+  --admin-mark-fg: #ffffff;
   /* плашки (мокап: .badge, светлая тема) */
   --badge-bg: rgba(40, 28, 12, 0.055);
   --badge-fg: #3f392f;
@@ -295,6 +298,8 @@
   --admin-nav-on-ring: rgba(248, 155, 13, 0.35);
   --admin-nav-on-icon: var(--amber-2);
   --admin-pill-on-glow: 0 0 16px rgba(248, 155, 13, 0.3);
+  --admin-mark-bg: #2f4560;
+  --admin-mark-fg: #f3eee6;
   --badge-bg: var(--glass-3);
   --badge-fg: var(--fg);
   --badge-amber-bg: var(--amber-soft);

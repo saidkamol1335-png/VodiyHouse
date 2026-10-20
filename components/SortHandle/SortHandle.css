@@ -1,0 +1,40 @@
+/* Ручка порядка: палец не прокручивает страницу, пока тянет строку (touch-action: none). */
+.sort-handle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--fg-3);
+  cursor: grab;
+  touch-action: none;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.sort-handle:hover,
+.sort-handle--active {
+  border-color: var(--line-2);
+  color: var(--fg);
+}
+
+.sort-handle--active {
+  cursor: grabbing;
+}
+
+.sort-handle:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .sort-handle {
+    width: 44px;
+    height: 44px;
+  }
+}

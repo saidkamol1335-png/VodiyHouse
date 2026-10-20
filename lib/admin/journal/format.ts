@@ -1,3 +1,4 @@
+import type { ContentErrorCode } from "../developers/errors";
 import { PUBLICATION_STATUSES, type PublicationStatus } from "../publication";
 
 // Журнал изменений для людей (ТЗ 13.1: «кто и когда поменял»): строки journal_entries() →
@@ -135,3 +136,7 @@ export function journalPage(
     nextBefore: records.length >= limit && last ? Number(last.id) : null,
   };
 }
+
+/** Ответ «Показать ещё» (lib/admin/actions/journal.ts). */
+export type JournalLoadResult =
+  { status: "ok"; page: JournalPage } | { status: "error"; error: ContentErrorCode };

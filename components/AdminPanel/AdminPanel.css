@@ -23,3 +23,12 @@
   max-width: none;
   color: var(--fg);
 }
+
+/* Строка-пояснение под заголовком панели: что здесь и кто это видит. */
+.admin-panel__lead {
+  max-width: 70ch;
+  margin: 0 0 14px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}

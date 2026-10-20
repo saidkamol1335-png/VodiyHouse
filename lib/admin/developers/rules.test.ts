@@ -98,3 +98,15 @@ describe("ошибки базы → коды", () => {
     expect(contentDbErrorCode({ code: "XX000" })).toBe("unknown");
   });
 });
+
+describe("DEMO стендов", () => {
+  it("id — настоящие uuid: сервер принимает сохранение вкладки как есть", async () => {
+    const { DEMO_DEVELOPER_ROWS, DEMO_PROJECTS } = await import("./demo");
+    const { parseProjects } = await import("./projects");
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    for (const row of DEMO_DEVELOPER_ROWS) expect(row.id).toMatch(UUID);
+    const form = new FormData();
+    form.append("projects", JSON.stringify(DEMO_PROJECTS));
+    expect(parseProjects(form).ok).toBe(true);
+  });
+});

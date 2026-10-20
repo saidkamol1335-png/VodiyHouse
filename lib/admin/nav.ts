@@ -1,7 +1,8 @@
 import { ADMIN_ROUTE } from "@/lib/routes";
 import type { StaffRole } from "./access";
 
-export type AdminNavKey = "home" | "leads" | "complexes" | "developers" | "programs" | "video" | "stats" | "settings";
+export type AdminNavKey =
+  "home" | "leads" | "complexes" | "developers" | "programs" | "video" | "stats" | "settings";
 
 /** Адреса кабинета латиницей, как у публичных страниц (ТЗ 3). */
 export const ADMIN_ROUTES = {
@@ -33,15 +34,23 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "home", href: ADMIN_ROUTES.home, roles: ["head", "manager"], ready: true },
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
   { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: false },
-  { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: false },
+  { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
   { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: false },
-  { key: "video", href: ADMIN_ROUTES.video, roles: ["head", "manager", "videographer"], ready: false },
+  {
+    key: "video",
+    href: ADMIN_ROUTES.video,
+    roles: ["head", "manager", "videographer"],
+    ready: false,
+  },
   { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: false },
   { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
 ];
 
 /** Пункты меню для роли: недоступное роли и ещё не сделанное не показываются (PLAN §3а). */
-export function visibleNav(role: StaffRole, items: readonly AdminNavItem[] = ADMIN_NAV): AdminNavItem[] {
+export function visibleNav(
+  role: StaffRole,
+  items: readonly AdminNavItem[] = ADMIN_NAV,
+): AdminNavItem[] {
   return items.filter((item) => item.ready && item.roles.includes(role));
 }
 
@@ -52,7 +61,11 @@ export function isNavItemActive(href: string, pathname: string): boolean {
 }
 
 /** Раздел открыт роли (готовность не важна): так страница решает, показать ли «доступно руководителю». */
-export function canOpen(role: StaffRole, key: AdminNavKey, items: readonly AdminNavItem[] = ADMIN_NAV): boolean {
+export function canOpen(
+  role: StaffRole,
+  key: AdminNavKey,
+  items: readonly AdminNavItem[] = ADMIN_NAV,
+): boolean {
   return items.some((item) => item.key === key && item.roles.includes(role));
 }
 
@@ -63,13 +76,18 @@ export function landingPath(role: StaffRole, items: readonly AdminNavItem[] = AD
 
 export type SettingsTabKey = "staff" | "dictionaries" | "journal";
 
-export type SettingsTab = { key: SettingsTabKey; segment: string | null; href: string; ready: boolean };
+export type SettingsTab = {
+  key: SettingsTabKey;
+  segment: string | null;
+  href: string;
+  ready: boolean;
+};
 
-/** Вкладки «Настроек» (решение Д6) — отдельные адреса; справочники и журнал — шаг 10.2. */
+/** Вкладки «Настроек» (решение Д6) — отдельные адреса. */
 export const SETTINGS_TABS: readonly SettingsTab[] = [
   { key: "staff", segment: null, href: ADMIN_ROUTES.settings, ready: true },
-  { key: "dictionaries", segment: "spravochniki", href: ADMIN_ROUTES.dictionaries, ready: false },
-  { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: false },
+  { key: "dictionaries", segment: "spravochniki", href: ADMIN_ROUTES.dictionaries, ready: true },
+  { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true },
 ];
 
 export function readySettingsTabs(tabs: readonly SettingsTab[] = SETTINGS_TABS): SettingsTab[] {

@@ -35,7 +35,8 @@ function emailIssue(email: string): EmailIssue | null {
 
 export type SignInInput = { email: string; password: string };
 export type SignInFieldErrors = Partial<{ email: EmailIssue; password: "passwordRequired" }>;
-export type SignInParse = { ok: true; value: SignInInput } | { ok: false; email: string; fieldErrors: SignInFieldErrors };
+export type SignInParse =
+  { ok: true; value: SignInInput } | { ok: false; email: string; fieldErrors: SignInFieldErrors };
 
 /** Вход: email без пробелов и в нижнем регистре, пароль — как введён. */
 export function parseSignIn(formData: FormData): SignInParse {
@@ -53,7 +54,9 @@ export type StaffInput = { fullName: string; email: string; role: StaffRole };
 export type StaffFieldIssue = EmailIssue | "fullNameRequired" | "fullNameTooLong" | "roleInvalid";
 export type StaffFieldErrors = Partial<Record<"fullName" | "email" | "role", StaffFieldIssue>>;
 export type StaffFields = { fullName: string; email: string; role: string };
-export type StaffParse = { ok: true; value: StaffInput } | { ok: false; fields: StaffFields; fieldErrors: StaffFieldErrors };
+export type StaffParse =
+  | { ok: true; value: StaffInput }
+  | { ok: false; fields: StaffFields; fieldErrors: StaffFieldErrors };
 
 function fullNameIssue(fullName: string): StaffFieldIssue | null {
   if (!fullName) return "fullNameRequired";
@@ -73,14 +76,19 @@ export function parseStaffInput(formData: FormData): StaffParse {
   const mailIssue = emailIssue(fields.email);
   if (mailIssue) fieldErrors.email = mailIssue;
   if (!isStaffRole(fields.role)) fieldErrors.role = "roleInvalid";
-  if (Object.keys(fieldErrors).length > 0 || !isStaffRole(fields.role)) return { ok: false, fields, fieldErrors };
+  if (Object.keys(fieldErrors).length > 0 || !isStaffRole(fields.role))
+    return { ok: false, fields, fieldErrors };
   return { ok: true, value: { fullName: fields.fullName, email: fields.email, role: fields.role } };
 }
 
-/** id сотрудника из скрытого поля: только uuid, иначе null. */
-export function readStaffId(formData: FormData): string | null {
-  const id = readText(formData, "id");
+/** uuid из скрытого поля (id сотрудника, застройщика): только uuid, иначе null. */
+export function readUuid(formData: FormData, name: string = "id"): string | null {
+  const id = readText(formData, name);
   return id && UUID_PATTERN.test(id) ? id.toLowerCase() : null;
+}
+
+export function readStaffId(formData: FormData): string | null {
+  return readUuid(formData);
 }
 
 /** Смена пароля: три поля как введены — проверяет lib/admin/password.ts. */

@@ -1,0 +1,72 @@
+/* Вкладка «Основное» застройщика (Д2–Д4): факты в ряд, тексты RU | UZ, логотип и фон. */
+.developer-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 8px;
+}
+
+/* Подпись, поле и подсказка — общие строки сетки (subgrid): подпись в две строки
+   или подсказка у одного поля не сдвигают поля соседей. */
+.developer-main__facts {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.developer-main__facts > .field {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.developer-main__facts .field__label {
+  align-self: end;
+}
+
+.developer-main__media {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+/* «Сохранить вкладку» и ответ сервера — в одной строке справа. */
+.developer-main__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .developer-main__facts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Название и дата проверки (подпись и подсказка длинные) — на всю ширину. */
+  .developer-main__facts > :first-child,
+  .developer-main__facts > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .developer-main__media {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .developer-main__save .button {
+    width: 100%;
+  }
+}
+
+.developer-main__slug {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  overflow-wrap: anywhere;
+}

@@ -3,7 +3,7 @@ export { DEFAULT_FOCUS, MEDIA_FRAMES, clampFocus, focusCrop, objectPosition } fr
 export { MAX_CANVAS_AREA, downscaleSteps, fitWithin } from "./fit";
 export { hasExif } from "./metadata";
 export type { MediaOwner, StoredImageType } from "./path";
-export { MEDIA_BUCKET, MEDIA_PATH_PATTERN, mediaFolder, mediaPath, ownerTypeOf } from "./path";
+export { MEDIA_BUCKET, MEDIA_PATH_PATTERN, isOwnMediaPath, mediaFolder, mediaPath, mediaPublicUrl, ownerTypeOf } from "./path";
 export type { ProcessResult, ProcessedImage } from "./process";
 export { processImage } from "./process";
 export type { ImageSize, MediaIssue, MediaKind } from "./rules";

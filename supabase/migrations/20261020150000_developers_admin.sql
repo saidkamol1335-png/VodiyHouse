@@ -97,6 +97,11 @@ set search_path = ''
 as $$
   select a.id, a.at, a.action, a.entity, a.entity_id, a.changes, p.full_name,
          coalesce(
+           -- Сданный объект — своим названием, а не названием застройщика.
+           case when a.entity = 'developer_past_projects' then coalesce(
+             (select pp.name ->> 'ru' from public.developer_past_projects pp where pp.id::text = a.entity_id),
+             a.changes -> 'name' ->> 'ru')
+           end,
            (select d.name from public.developers d where d.id = a.developer_id),
            (select c.name ->> 'ru' from public.complexes c where c.id = a.complex_id),
            (select s.full_name from public.profiles s where a.entity = 'profiles' and s.id::text = a.entity_id),
@@ -200,6 +205,84 @@ create trigger developers_check_publishable
   for each row
   when (new.status = 'published' and old.status is distinct from 'published')
   execute function private.check_developer_publishable();
+
+-- ─── Логотип и фон застройщика (шаг 9.4, решение Д4) ─────────────────────────────────────
+-- Файл браузер уже положил в бакет (политика Storage: руководитель, папка застройщика).
+-- Замена — одной транзакцией: старая строка уходит, новая встаёт; путь старого файла
+-- возвращается — сервер удалит его из бакета через Storage API (прямой delete там запрещён).
+create function public.set_developer_media(
+  p_developer uuid,
+  p_kind public.media_kind,
+  p_path text,
+  p_width integer,
+  p_height integer,
+  p_blur text,
+  p_focus_x real default 0.5,
+  p_focus_y real default 0.5
+)
+returns text
+language plpgsql
+set search_path = ''
+as $$
+declare
+  old_path text;
+begin
+  if not private.has_role('head') then
+    raise exception 'Фото застройщика загружает руководитель'
+      using errcode = 'insufficient_privilege', hint = 'vh:forbidden';
+  end if;
+  if p_kind not in ('logo', 'cover') then
+    raise exception 'У застройщика только логотип и фон' using errcode = 'invalid_parameter_value', hint = 'vh:invalid';
+  end if;
+  delete from public.media_assets
+  where developer_id = p_developer and kind = p_kind
+  returning path into old_path;
+  insert into public.media_assets (developer_id, kind, path, width, height, blur, focus_x, focus_y)
+  values (p_developer, p_kind, p_path, p_width, p_height, p_blur, p_focus_x, p_focus_y);
+  return old_path;
+end;
+$$;
+
+-- Опубликованный застройщик без логотипа — пустая карточка на сайте: логотип у него только
+-- заменяют. Ответ — путь удалённого файла (null — удалять нечего).
+create function public.remove_developer_media(p_developer uuid, p_kind public.media_kind)
+returns text
+language plpgsql
+set search_path = ''
+as $$
+declare
+  old_path text;
+begin
+  if not private.has_role('head') then
+    raise exception 'Фото застройщика удаляет руководитель'
+      using errcode = 'insufficient_privilege', hint = 'vh:forbidden';
+  end if;
+  if p_kind = 'logo' and exists (
+    select 1 from public.developers d where d.id = p_developer and d.status = 'published'
+  ) then
+    raise exception 'У опубликованного застройщика логотип можно только заменить'
+      using errcode = 'check_violation', hint = 'vh:not_ready';
+  end if;
+  delete from public.media_assets
+  where developer_id = p_developer and kind = p_kind
+  returning path into old_path;
+  return old_path;
+end;
+$$;
+
+comment on function public.set_developer_media(uuid, public.media_kind, text, integer, integer, text, real, real) is
+  'Логотип или фон застройщика: заменяет прежний одной транзакцией, возвращает путь старого файла.';
+comment on function public.remove_developer_media(uuid, public.media_kind) is
+  'Удаляет логотип или фон (логотип опубликованного — нельзя), возвращает путь файла.';
+
+revoke all on function
+  public.set_developer_media(uuid, public.media_kind, text, integer, integer, text, real, real),
+  public.remove_developer_media(uuid, public.media_kind)
+from public, anon;
+grant execute on function
+  public.set_developer_media(uuid, public.media_kind, text, integer, integer, text, real, real),
+  public.remove_developer_media(uuid, public.media_kind)
+to authenticated;
 
 -- ─── Сданные объекты: вкладка сохраняется целиком (решение Д2) ───────────────────────────
 -- Одна транзакция: правка, новые, удалённые и порядок. Журнал пишет только изменённое.

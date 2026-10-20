@@ -1,0 +1,27 @@
+/* Вкладка «Внутреннее»: два многострочных поля и кнопка справа; ширина строки — для чтения. */
+.developer-private {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.developer-private__lead {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
+.developer-private__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .developer-private__save .button {
+    width: 100%;
+  }
+}

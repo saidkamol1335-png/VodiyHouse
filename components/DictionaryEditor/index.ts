@@ -1,0 +1,1 @@
+export { DictionaryEditor } from "./DictionaryEditor";

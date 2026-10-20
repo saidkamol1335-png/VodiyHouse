@@ -31,3 +31,13 @@ export function mediaPath(
   const extension = type === "image/png" ? "png" : "jpg";
   return `${mediaFolder(owner)}/${fileId}.${extension}`;
 }
+
+/** Публичная ссылка на файл: бакет media публичный (шаг 9.1), сайт читает его мимо RLS. */
+export function mediaPublicUrl(supabaseUrl: string, path: string): string {
+  return `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/${MEDIA_BUCKET}/${path}`;
+}
+
+/** Путь из формы — файл ровно в папке этого владельца (иначе руководитель привязал бы чужой). */
+export function isOwnMediaPath(owner: MediaOwner, path: string): boolean {
+  return MEDIA_PATH_PATTERN.test(path) && path.startsWith(`${mediaFolder(owner)}/`);
+}

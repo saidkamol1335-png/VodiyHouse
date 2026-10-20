@@ -2,10 +2,9 @@
 
 import { useState, type ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
+import { EMPTY_BILINGUAL, type BilingualValue, type Language } from "@/lib/admin/bilingual";
 
-type Language = "ru" | "uz";
-
-export type BilingualValue = Record<Language, string>;
+export type { BilingualValue };
 
 type BilingualFieldProps = {
   id: string;
@@ -24,14 +23,17 @@ type BilingualFieldProps = {
 };
 
 const LANGUAGES: readonly Language[] = ["ru", "uz"];
-const EMPTY: BilingualValue = { ru: "", uz: "" };
 // С 90 % лимита счётчик янтарный: пора сокращать, пока текст не упёрся в край.
 const NEAR_LIMIT = 0.9;
 
 const otherLanguage = (language: Language): Language => (language === "ru" ? "uz" : "ru");
 
 /** Текст на двух языках (решение Д3): RU и UZ рядом, на телефоне друг под другом. */
-export function BilingualField({ defaultValue = EMPTY, onChange, ...field }: BilingualFieldProps) {
+export function BilingualField({
+  defaultValue = EMPTY_BILINGUAL,
+  onChange,
+  ...field
+}: BilingualFieldProps) {
   const [value, setValue] = useState<BilingualValue>(defaultValue);
 
   const change = (language: Language) => (text: string) => {

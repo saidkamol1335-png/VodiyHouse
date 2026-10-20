@@ -10,17 +10,27 @@ import {
 } from "./nav";
 
 const allReady = ADMIN_NAV.map((item) => ({ ...item, ready: true }));
-const keysFor = (role: Parameters<typeof visibleNav>[0]) => visibleNav(role, allReady).map((item) => item.key);
+const keysFor = (role: Parameters<typeof visibleNav>[0]) =>
+  visibleNav(role, allReady).map((item) => item.key);
 
 describe("меню кабинета", () => {
-  it("сейчас: руководитель — Главная и Настройки; менеджер — Главная; видеограф — ничего", () => {
-    expect(visibleNav("head").map((item) => item.key)).toEqual(["home", "settings"]);
+  it("сейчас: руководитель — Главная, Застройщики и Настройки; менеджер — Главная; видеограф — ничего", () => {
+    expect(visibleNav("head").map((item) => item.key)).toEqual(["home", "developers", "settings"]);
     expect(visibleNav("manager").map((item) => item.key)).toEqual(["home"]);
     expect(visibleNav("videographer")).toEqual([]);
   });
 
   it("руководитель видит все 8 разделов в порядке PLAN §7", () => {
-    expect(keysFor("head")).toEqual(["home", "leads", "complexes", "developers", "programs", "video", "stats", "settings"]);
+    expect(keysFor("head")).toEqual([
+      "home",
+      "leads",
+      "complexes",
+      "developers",
+      "programs",
+      "video",
+      "stats",
+      "settings",
+    ]);
   });
 
   it("менеджер: заявки, наличие квартир, расчёт и видео — без застройщиков, статистики, настроек", () => {
@@ -55,9 +65,11 @@ describe("доступ к разделам", () => {
     expect(landingPath("videographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 
-  it("вкладки настроек до шага 10.2 — только «Сотрудники» по адресу /admin/nastroyki", () => {
+  it("вкладки настроек (Д6): Сотрудники · Справочники · Журнал — отдельные адреса", () => {
     expect(readySettingsTabs().map((tab) => [tab.key, tab.href, tab.segment])).toEqual([
       ["staff", "/admin/nastroyki", null],
+      ["dictionaries", "/admin/nastroyki/spravochniki", "spravochniki"],
+      ["journal", "/admin/nastroyki/zhurnal", "zhurnal"],
     ]);
   });
 });

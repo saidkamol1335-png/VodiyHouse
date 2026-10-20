@@ -11,6 +11,10 @@ const GUARD = /^\s*const guard = await (requireActionViewer|headGuard)\(/;
 
 const files = readdirSync(DIR).filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"));
 
+// Git на Windows (autocrlf) отдаёт файлы с CRLF — разбираем текст с одними LF.
+const readSource = (file: string) =>
+  readFileSync(path.join(DIR, file), "utf8").replace(/\r\n/g, "\n");
+
 function exportedFunctions(source: string): { name: string; body: string }[] {
   const pattern = /export async function (\w+)\([^)]*\)[^{]*\{\n([\s\S]*?)\n\}/g;
   return [...source.matchAll(pattern)].map((match) => ({ name: match[1]!, body: match[2]! }));
@@ -18,14 +22,14 @@ function exportedFunctions(source: string): { name: string; body: string }[] {
 
 describe("Server Actions кабинета", () => {
   it.each(files)("%s: только async-функции и \"use server\" первой строкой", (file) => {
-    const source = readFileSync(path.join(DIR, file), "utf8");
+    const source = readSource(file);
     expect(source.startsWith('"use server";')).toBe(true);
     const exports = [...source.matchAll(/^export (?!async function)(.+)$/gm)].map((match) => match[1]);
     expect(exports).toEqual([]);
   });
 
   it.each(files)("%s: каждое действие первой строкой проверяет сотрудника", (file) => {
-    const source = readFileSync(path.join(DIR, file), "utf8");
+    const source = readSource(file);
     const actions = exportedFunctions(source);
     expect(actions.length).toBeGreaterThan(0);
     for (const { name, body } of actions) {
@@ -36,7 +40,7 @@ describe("Server Actions кабинета", () => {
   });
 
   it("headGuard сам спрашивает Auth заново (fresh) и пускает только руководителя", () => {
-    const source = readFileSync(path.join(DIR, "staff.ts"), "utf8");
+    const source = readSource("staff.ts");
     expect(source).toMatch(/requireActionViewer\(\["head"\], \{ fresh: true \}\)/);
   });
 });

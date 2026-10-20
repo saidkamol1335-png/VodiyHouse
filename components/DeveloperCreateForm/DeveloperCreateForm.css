@@ -1,0 +1,25 @@
+/* «+ Добавить застройщика»: кнопка справа над списком → панель с одним полем (как С2). */
+.developer-create {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+
+.developer-create--closed {
+  flex-direction: row;
+  justify-content: flex-end;
+  max-width: none;
+}
+
+.developer-create__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .developer-create__actions .button {
+    flex: 1 1 auto;
+  }
+}

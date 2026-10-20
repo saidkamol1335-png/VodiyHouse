@@ -11,6 +11,15 @@
   padding: 20px var(--admin-content-pad) 56px;
 }
 
+/* Пояснение над содержимым раздела: что здесь и как этим пользоваться. */
+.admin-page__lead {
+  max-width: 80ch;
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
 /* Служебная пометка режима разработки. */
 .admin-page__note {
   margin: 0;

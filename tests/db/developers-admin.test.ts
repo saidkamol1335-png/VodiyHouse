@@ -95,6 +95,64 @@ describe("кабинет застройщиков", () => {
     });
   });
 
+  describe("логотип и фон", () => {
+    const filePath = (developerId: string, extension = "png") =>
+      `developers/${developerId}/${crypto.randomUUID()}.${extension}`;
+    const setMedia = (developerId: string, kind: string, path: string, actor = head) =>
+      db.as(user(actor), async (tx) => {
+        const { rows } = await tx.query<{ old: string | null }>(
+          "select set_developer_media($1, $2, $3, 800, 800, null) as old",
+          [developerId, kind, path],
+        );
+        return rows[0]!.old;
+      });
+    const removeMedia = (developerId: string, kind: string) =>
+      asHead(async (tx) => {
+        const { rows } = await tx.query<{ old: string | null }>(
+          "select remove_developer_media($1, $2) as old",
+          [developerId, kind],
+        );
+        return rows[0]!.old;
+      });
+
+    it("замена отдаёт путь старого файла; строка у застройщика одна", async () => {
+      const id = await createDeveloper("Yulduz Qurilish", "yulduz-qurilish");
+      const first = filePath(id);
+      const second = filePath(id);
+      expect(await setMedia(id, "logo", first)).toBeNull();
+      expect(await setMedia(id, "logo", second)).toBe(first);
+      const { rows } = await db.admin.query<{ path: string }>(
+        "select path from media_assets where developer_id = $1 and kind = 'logo'",
+        [id],
+      );
+      expect(rows).toEqual([{ path: second }]);
+    });
+
+    it("файл из чужой папки, фото ЖК и менеджер — отказ", async () => {
+      const id = await createDeveloper("Bog‘ Qurilish", "bog-qurilish");
+      const other = await createDeveloper("Boshqa Qurilish", "boshqa-qurilish");
+      await expect(setMedia(id, "logo", filePath(other))).rejects.toThrow();
+      await expectHint(setMedia(id, "photo", filePath(id, "jpg")), "vh:invalid");
+      await expectHint(setMedia(id, "cover", filePath(id, "jpg"), manager), "vh:forbidden");
+    });
+
+    it("логотип опубликованного только заменяют; фон удаляется", async () => {
+      const id = await createDeveloper("Nur Qurilish", "nur-qurilish");
+      await setMedia(id, "logo", filePath(id));
+      const cover = filePath(id, "jpg");
+      await setMedia(id, "cover", cover);
+      await asHead((tx) =>
+        tx.query("update developers set about = $2, status = 'published' where id = $1", [
+          id,
+          JSON.stringify(ABOUT),
+        ]),
+      );
+      await expectHint(removeMedia(id, "logo"), "vh:not_ready");
+      expect(await removeMedia(id, "cover")).toBe(cover);
+      expect(await removeMedia(id, "cover")).toBeNull();
+    });
+  });
+
   describe("сданные объекты", () => {
     let developer: string;
     const save = (projects: unknown, actor = head) =>
@@ -296,6 +354,30 @@ describe("кабинет застройщиков", () => {
         ),
       );
       expect(all[0]).toEqual({ entity: "detail_topics", subject: "Качество и стиль" });
+    });
+
+    it("сданный объект в журнале — своим названием, и после удаления тоже", async () => {
+      const save = (projects: unknown) =>
+        asHead((tx) =>
+          tx.query("select save_developer_past_projects($1, $2)", [
+            developer,
+            JSON.stringify(projects),
+          ]),
+        );
+      await save([
+        { name: name("Дом у парка", "Bog‘ yonidagi uy"), planned_on: null, delivered_on: null },
+      ]);
+      await save([]);
+      const { rows } = await asHead((tx) =>
+        tx.query<{ action: string; subject: string | null }>(
+          "select action, subject from journal_entries($1) where entity = 'developer_past_projects'",
+          [developer],
+        ),
+      );
+      expect(rows).toEqual([
+        { action: "delete", subject: "Дом у парка" },
+        { action: "insert", subject: "Дом у парка" },
+      ]);
     });
 
     it("весь журнал видит менеджер; видеограф — нет", async () => {

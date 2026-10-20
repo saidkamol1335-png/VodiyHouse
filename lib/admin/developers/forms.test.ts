@@ -46,7 +46,7 @@ describe("пределы совпадают с check в базе", () => {
 describe("вкладка «Основное»", () => {
   it("правильная форма — значения для базы: пробелы убраны, пустые основатели — null", () => {
     const parsed = parseDeveloperMain(form(GOOD_MAIN));
-    expect(parsed).toEqual({
+    expect(parsed).toMatchObject({
       ok: true,
       value: {
         name: "Farg‘ona Sifat Qurilish",

@@ -1,0 +1,118 @@
+/* Журнал изменений: строка — время (моно) · что сделано и поля «было → стало» · кто;
+   пунктир между строками, как в списках кабинета. На телефоне — время и автор над текстом. */
+.journal-list {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.journal-list__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.journal-list__entries {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal-list__entry {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr) minmax(0, 180px);
+  align-items: start;
+  gap: 6px 16px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.journal-list__entry:first-child {
+  border-top: 0;
+}
+
+.journal-list__time {
+  padding-top: 3px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}
+
+.journal-list__body {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.journal-list__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.journal-list__entity {
+  color: var(--fg-2);
+}
+
+.journal-list__subject {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.journal-list__changes {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+
+.journal-list__field {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.journal-list__value {
+  overflow-wrap: anywhere;
+}
+
+.journal-list__value--empty {
+  color: var(--fg-3);
+}
+
+.journal-list__actor {
+  padding-top: 2px;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .journal-list__entry {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "time actor"
+      "body body";
+  }
+
+  .journal-list__time {
+    grid-area: time;
+  }
+
+  .journal-list__actor {
+    grid-area: actor;
+  }
+
+  .journal-list__body {
+    grid-area: body;
+  }
+}

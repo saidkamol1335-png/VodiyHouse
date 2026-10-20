@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { MEDIA_PATH_PATTERN, mediaFolder, mediaPath, ownerTypeOf } from "./path";
+import {
+  isOwnMediaPath,
+  MEDIA_PATH_PATTERN,
+  mediaFolder,
+  mediaPath,
+  mediaPublicUrl,
+  ownerTypeOf,
+} from "./path";
 import { MEDIA_KINDS } from "./rules";
 
 const COMPLEX_ID = "8a6e0804-2bd0-4672-b79d-d97027f9071a";
@@ -32,5 +39,24 @@ describe("путь файла в бакете", () => {
       logo: "developer",
       cover: "developer",
     });
+  });
+});
+
+describe("ссылка и проверка пути из формы", () => {
+  const developer = { type: "developer", id: COMPLEX_ID } as const;
+
+  it("публичная ссылка на файл бакета media", () => {
+    expect(
+      mediaPublicUrl("https://abcd.supabase.co/", `developers/${COMPLEX_ID}/${FILE_ID}.png`),
+    ).toBe(
+      `https://abcd.supabase.co/storage/v1/object/public/media/developers/${COMPLEX_ID}/${FILE_ID}.png`,
+    );
+  });
+
+  it("только файл в папке своего владельца", () => {
+    expect(isOwnMediaPath(developer, `developers/${COMPLEX_ID}/${FILE_ID}.png`)).toBe(true);
+    expect(isOwnMediaPath(developer, `developers/${FILE_ID}/${FILE_ID}.png`)).toBe(false);
+    expect(isOwnMediaPath(developer, `complexes/${COMPLEX_ID}/${FILE_ID}.jpg`)).toBe(false);
+    expect(isOwnMediaPath(developer, `developers/${COMPLEX_ID}/../x.png`)).toBe(false);
   });
 });

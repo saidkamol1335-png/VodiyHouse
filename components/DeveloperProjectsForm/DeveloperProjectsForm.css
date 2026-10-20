@@ -1,0 +1,142 @@
+/* Вкладка «Сданные объекты» (Д5): строки как таблица на сайте — ручка порядка · объект RU | UZ ·
+   план · факт · плашка и корзина; пунктир между строками. */
+.developer-projects {
+  display: grid;
+  gap: 14px;
+}
+
+.developer-projects__lead {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.developer-projects__rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Последняя колонка — по самой длинной плашке («Перенос на 24 мес.») и корзине: ширина своя у
+   каждой строки-сетки, поэтому фиксированная, иначе колонки соседних строк разъезжаются. */
+.developer-projects__row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 2.3fr) minmax(0, 1fr) minmax(0, 1fr) 190px;
+  align-items: start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--dash);
+}
+
+/* Перетаскиваемая строка чуть приподнята: только transform и тень, без перерисовки раскладки. */
+.developer-projects__row--dragging {
+  box-shadow: var(--shadow-hover);
+  transform: scale(1.005);
+}
+
+/* Ручка и корзина — на уровне полей, под подписями. */
+.developer-projects__handle,
+.developer-projects__end {
+  margin-top: 29px;
+}
+
+.developer-projects__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.developer-projects__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.developer-projects__remove:hover {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.developer-projects__issues {
+  grid-column: 2 / -1;
+  margin: 0;
+}
+
+.developer-projects__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.developer-projects__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.developer-projects__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Уже 1280 px строка — карточка: ручка слева на всю высоту, название, под ним план и факт
+   (иначе квартал «2 кв.» не помещается в список). */
+@media (max-width: 1280px) {
+  .developer-projects__row {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .developer-projects__handle {
+    grid-row: 1 / span 3;
+  }
+
+  .developer-projects__name,
+  .developer-projects__end {
+    grid-column: 2 / -1;
+  }
+
+  .developer-projects__end {
+    justify-content: space-between;
+    margin-top: 0;
+  }
+}
+
+/* Телефон: «План» и «Факт» друг под другом — иначе год не помещается в список. */
+@media (max-width: 560px) {
+  .developer-projects__row {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .developer-projects__handle {
+    grid-row: 1 / span 4;
+  }
+
+  .developer-projects__name,
+  .developer-projects__end,
+  .developer-projects__row > .field {
+    grid-column: 2;
+  }
+
+  .developer-projects__actions,
+  .developer-projects__save {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -1,0 +1,196 @@
+/* Справочник (Д6): панель со строками — ручка · название RU и UZ · плашки · кнопки;
+   правка и подтверждение удаления — прямо в строке, без окон. */
+.dictionary-editor {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.dictionary-editor > * {
+  width: 100%;
+}
+
+.dictionary-editor > .button {
+  width: auto;
+}
+
+.dictionary-editor__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dictionary-editor__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.dictionary-editor__count {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}
+
+.dictionary-editor__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictionary-editor__row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.dictionary-editor__row:first-child {
+  border-top: 0;
+}
+
+.dictionary-editor__row--editing {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dictionary-editor__row--dragging {
+  box-shadow: var(--shadow-hover);
+  transform: scale(1.005);
+}
+
+.dictionary-editor__row--hidden .dictionary-editor__text {
+  opacity: var(--opacity-disabled);
+}
+
+.dictionary-editor__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
+.dictionary-editor__name {
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.dictionary-editor__uz {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.dictionary-editor__second {
+  flex-basis: 100%;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.dictionary-editor__badges,
+.dictionary-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.dictionary-editor__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 2 / -1;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-s);
+  background: var(--amber-soft);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+/* Правка на месте: поля RU | UZ, вид у городов, кнопки. */
+.dictionary-form {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-m);
+}
+
+.dictionary-form__kind {
+  max-width: 240px;
+}
+
+.dictionary-form__select {
+  position: relative;
+  display: block;
+}
+
+.dictionary-form__select-input {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.dictionary-form__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.dictionary-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Телефон: плашка — справа от названия, кнопки — одной строкой под ним (отступы кнопок
+   уже: три «Изменить · Скрыть · Удалить» помещаются в 390 px), ручка — слева на всю высоту. */
+@media (max-width: 760px) {
+  .dictionary-editor {
+    padding: 16px;
+  }
+
+  .dictionary-editor__row {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+  }
+
+  .dictionary-editor__row > .sort-handle {
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+
+  .dictionary-editor__badges {
+    grid-row: 1;
+    grid-column: 3;
+    align-self: start;
+  }
+
+  .dictionary-editor__actions,
+  .dictionary-editor__confirm {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+  }
+
+  .dictionary-editor__actions {
+    gap: 2px;
+    margin-left: -10px;
+  }
+
+  .dictionary-editor__actions .button {
+    padding: 0 10px;
+  }
+}

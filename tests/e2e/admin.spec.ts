@@ -28,14 +28,21 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(password).toHaveAttribute("type", "password");
   });
 
-  test("без ключей Supabase: форма отправляется, «сервер не настроен», email остаётся", async ({ page }) => {
-    test.skip(Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL), "с ключами — настоящий вход (auth.spec.ts)");
+  test("без ключей Supabase: форма отправляется, «сервер не настроен», email остаётся", async ({
+    page,
+  }) => {
+    test.skip(
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+      "с ключами — настоящий вход (auth.spec.ts)",
+    );
     await page.goto("/admin/vhod");
     await page.getByLabel("Email").fill("Staff@Example.com ");
     await page.getByLabel("Пароль", { exact: true }).fill("demo-password");
     await page.getByRole("button", { name: "Войти" }).click();
     // У Next.js в разработке свой role=alert (объявления маршрута) — ищем внутри формы.
-    await expect(page.locator(".login-form .form-status--error")).toHaveText("Вход временно недоступен — сервер не настроен.");
+    await expect(page.locator(".login-form .form-status--error")).toHaveText(
+      "Вход временно недоступен — сервер не настроен.",
+    );
     await expect(page.getByLabel("Email")).toHaveValue("staff@example.com");
     await expect(page).toHaveURL(/\/admin\/vhod$/);
   });
@@ -43,7 +50,10 @@ test.describe("экран входа /admin/vhod", () => {
   test("пустые поля — ошибки под полями, без перехода", async ({ page }) => {
     await page.goto("/admin/vhod");
     await page.getByRole("button", { name: "Войти" }).click();
-    await expect(page.locator(".login-form .field__error")).toHaveText(["Введите email", "Введите пароль"]);
+    await expect(page.locator(".login-form .field__error")).toHaveText([
+      "Введите email",
+      "Введите пароль",
+    ]);
     await page.getByLabel("Email").fill("staff");
     await page.getByRole("button", { name: "Войти" }).click();
     await expect(page.locator(".login-form .field__error").first()).toHaveText("Проверьте email");
@@ -63,7 +73,9 @@ test.describe("экран входа /admin/vhod", () => {
     await page.goto("/admin/vhod?motion=full");
     const beam = page.locator(".login-card__beam");
     await expect(beam).toBeVisible();
-    const beamAnimation = await beam.evaluate((element) => getComputedStyle(element, "::before").animationName);
+    const beamAnimation = await beam.evaluate(
+      (element) => getComputedStyle(element, "::before").animationName,
+    );
     expect(beamAnimation).toBe("login-card-beam");
     await page.goto("/admin/vhod?motion=lite");
     await expect(beam).toBeHidden();
@@ -88,20 +100,25 @@ test.describe("оболочка кабинета /admin", () => {
   // Без ключей кабинет открыт без входа; с ключами — сохранённая сессия руководителя (auth.setup.ts).
   test.use({ storageState: cabinetState("head") });
 
-  test("меню руководителя: Главная, Настройки и Сайт; Главная активна", async ({ page }, testInfo) => {
+  test("меню руководителя: Главная, Застройщики, Настройки и Сайт; Главная активна", async ({
+    page,
+  }, testInfo) => {
     const errors = collectPageErrors(page);
     await page.goto("/admin");
     const nav = page.getByRole("navigation", { name: "Разделы кабинета" });
     await expect(nav).toHaveCount(1);
     const links = nav.getByRole("link");
-    await expect(links).toHaveText(["Главная", "Настройки", /сайт/i]);
+    await expect(links).toHaveText(["Главная", "Застройщики", "Настройки", /сайт/i]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
-    await expect(links.nth(1)).toHaveAttribute("href", "/admin/nastroyki");
+    await expect(links.nth(1)).toHaveAttribute("href", "/admin/zastroyshchiki");
+    await expect(links.nth(2)).toHaveAttribute("href", "/admin/nastroyki");
     await expect(links.last()).toHaveAttribute("href", "/");
-    for (const hidden of ["Заявки", "ЖК", "Застройщики", "Статистика"]) {
+    for (const hidden of ["Заявки", "ЖК", "Статистика"]) {
       await expect(nav.getByRole("link", { name: hidden })).toHaveCount(0);
     }
-    await expect(page.locator(isPhone(testInfo.project.name) ? ".admin-nav--strip" : ".admin-shell__side")).toBeVisible();
+    await expect(
+      page.locator(isPhone(testInfo.project.name) ? ".admin-nav--strip" : ".admin-shell__side"),
+    ).toBeVisible();
     expect(errors).toEqual([]);
   });
 
@@ -109,10 +126,14 @@ test.describe("оболочка кабинета /admin", () => {
     await page.goto("/admin");
     const title = page.getByRole("heading", { level: 1 });
     await expect(title).toHaveText(/^(Доброе утро|Добрый день|Добрый вечер)(, .+)?$/);
-    await expect(page.locator(".admin-topbar__subtitle")).toContainText(/\d{2}\.\d{2}\.\d{4} · кабинет Vodiy House/);
+    await expect(page.locator(".admin-topbar__subtitle")).toContainText(
+      /\d{2}\.\d{2}\.\d{4} · кабинет Vodiy House/,
+    );
   });
 
-  test("К2: десктоп — панель 250 px и карточка сотрудника с выходом", async ({ page }, testInfo) => {
+  test("К2: десктоп — панель 250 px и карточка сотрудника с выходом", async ({
+    page,
+  }, testInfo) => {
     test.skip(isPhone(testInfo.project.name), "боковая панель — только ≥ 981 px");
     await page.goto("/admin");
     const side = page.locator(".admin-shell__side");
@@ -133,7 +154,9 @@ test.describe("оболочка кабинета /admin", () => {
     await expect(page.locator(".admin-topbar")).toHaveCSS("position", "sticky");
   });
 
-  test("К3: телефон — лента пилюль прилипает, «Выйти» в меню аватара", async ({ page }, testInfo) => {
+  test("К3: телефон — лента пилюль прилипает, «Выйти» в меню аватара", async ({
+    page,
+  }, testInfo) => {
     test.skip(!isPhone(testInfo.project.name), "лента — только ≤ 980 px");
     await page.goto("/admin");
     await expect(page.locator(".admin-nav--strip")).toHaveCSS("position", "sticky");
@@ -150,18 +173,59 @@ test.describe("оболочка кабинета /admin", () => {
     await expect(page).toHaveURL(/\/admin\/vhod$/);
   });
 
-  test("«Настройки»: вкладка «Сотрудники», без ключей — панель «Supabase не подключён»", async ({ page }) => {
-    test.skip(Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL), "с ключами — список из базы (staff.spec.ts)");
+  test("«Настройки»: вкладки Сотрудники · Справочники · Журнал, без ключей — панель «Supabase не подключён»", async ({
+    page,
+  }) => {
+    test.skip(
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+      "с ключами — список из базы (staff.spec.ts)",
+    );
     const errors = collectPageErrors(page);
     await page.goto("/admin/nastroyki");
     await expect(page.getByRole("heading", { level: 1, name: "Настройки" })).toBeVisible();
     const tabs = page.getByRole("navigation", { name: "Разделы настроек" });
-    await expect(tabs.getByRole("link")).toHaveText(["Сотрудники"]);
-    await expect(tabs.getByRole("link", { name: "Сотрудники" })).toHaveAttribute("aria-current", "page");
-    await expect(page.getByText("Supabase не подключён — список сотрудников появится")).toBeVisible();
+    await expect(tabs.getByRole("link")).toHaveText(["Сотрудники", "Справочники", "Журнал"]);
+    await expect(tabs.getByRole("link", { name: "Сотрудники" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await expect(
+      page.getByText("Supabase не подключён — список сотрудников появится"),
+    ).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Разделы кабинета" });
-    await expect(nav.getByRole("link", { name: "Настройки" })).toHaveAttribute("aria-current", "page");
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+    await expect(nav.getByRole("link", { name: "Настройки" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+    ).toBe(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("без ключей «Застройщики», «Справочники» и «Журнал» говорят, что база не подключена", async ({
+    page,
+  }) => {
+    test.skip(
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+      "с ключами — данные из базы (шаг 10.2 в облаке)",
+    );
+    const errors = collectPageErrors(page);
+    for (const path of [
+      "/admin/zastroyshchiki",
+      "/admin/nastroyki/spravochniki",
+      "/admin/nastroyki/zhurnal",
+    ]) {
+      await page.goto(path);
+      await expect(
+        page.getByText("Облачная база не подключена — данные появятся после шага 7"),
+      ).toBeVisible();
+    }
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы настроек" })
+        .getByRole("link", { name: "Журнал" }),
+    ).toHaveAttribute("aria-current", "page");
     expect(errors).toEqual([]);
   });
 

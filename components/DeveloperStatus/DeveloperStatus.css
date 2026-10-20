@@ -1,0 +1,57 @@
+/* Статус застройщика в шапке (AdminEntityHead): плашка и кнопки переходов — одна пунктирная
+   капсула, чтобы «Скрыть с сайта» не читалось как ещё одна вкладка; подтверждение архива и
+   ответы — строкой ниже, во всю ширину шапки. */
+.developer-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-pill);
+}
+
+.developer-status > .badge {
+  margin-right: 4px;
+}
+
+.developer-status__notes {
+  display: grid;
+  flex-basis: 100%;
+  order: 3;
+  gap: 10px;
+}
+
+.developer-status__notes:empty {
+  display: none;
+}
+
+/* Подтверждение архива: пунктирная янтарная рамка, как уведомления кабинета. */
+.developer-status__confirm {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+  padding: 16px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-m);
+  background: var(--amber-soft);
+}
+
+.developer-status__confirm-title {
+  margin: 0;
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.developer-status__confirm-lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
+.developer-status__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -70,3 +70,15 @@ export type DeveloperActionSet = {
   saveProjects: FormAction<SaveProjectsResult>;
   savePrivate: FormAction<SavePrivateResult>;
 };
+
+export type MediaActionResult = { status: "done" } | { status: "error"; error: ContentErrorCode };
+
+/** Логотип и фон: файл кладёт браузер, строку media_assets и удаление старого — сервер. */
+export type DeveloperMediaActions = {
+  /** Поля: id, kind, path, width, height, blur, focusX, focusY. */
+  attach: FormAction<MediaActionResult>;
+  /** Поля: id, kind. */
+  remove: FormAction<MediaActionResult>;
+  /** Поля: id, kind, focusX, focusY. */
+  setFocus: FormAction<MediaActionResult>;
+};
