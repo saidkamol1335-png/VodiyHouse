@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { greetingOf } from "./admin/greeting";
-import { formatFileSize, formatWeekdayDate, hourIn, initialsOf } from "./format";
+import { formatDate, formatDateTime, formatFileSize, formatWeekdayDate, hourIn, initialsOf } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
 const MOCKUP_NOON = new Date("2026-10-19T07:00:00Z");
@@ -17,6 +17,12 @@ describe("даты", () => {
 
   it("час суток по Ташкенту", () => {
     expect(hourIn(MOCKUP_NOON)).toBe(12);
+  });
+
+  it("дата и дата со временем для списков кабинета — по Ташкенту", () => {
+    expect(formatDate(new Date("2026-10-19T19:30:00Z"))).toBe("20.10.2026");
+    expect(formatDateTime(new Date("2026-10-19T04:05:00Z"))).toBe("19.10.2026 09:05");
+    expect(formatDateTime(new Date("2026-10-19T19:30:00Z"))).toBe("20.10.2026 00:30");
   });
 });
 

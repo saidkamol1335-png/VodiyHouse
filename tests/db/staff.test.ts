@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   anon,
+  createAuthUser,
   createStaff,
   createTestDb,
   expectDenied,
@@ -100,15 +101,18 @@ describe("сотрудники и роли", () => {
     expect(await roleOf(head)).toEqual({ role: "head", is_active: true });
   });
 
-  it("создать профиль может только сервер", async () => {
-    const created = await db.admin.query<{ id: string }>(
-      "insert into auth.users (email) values ('new@test.local') returning id",
-    );
-    const id = created.rows[0]!.id;
+  it("профиль добавляют руководитель своей сессией и сервер; менеджер — нет (шаг 8)", async () => {
     const insert = "insert into profiles (id, full_name, role) values ($1, 'Новый', 'manager')";
-    await expectDenied(db.as(user(head), (tx) => tx.query(insert, [id])));
-    await db.as(service, (tx) => tx.query(insert, [id]));
-    expect((await roleOf(id))?.role).toBe("manager");
+    const byHead = await createAuthUser(db.admin);
+    await db.as(user(head), (tx) => tx.query(insert, [byHead]));
+    expect((await roleOf(byHead))?.role).toBe("manager");
+
+    const byManager = await createAuthUser(db.admin);
+    await expectDenied(db.as(user(manager), (tx) => tx.query(insert, [byManager])));
+
+    const byServer = await createAuthUser(db.admin);
+    await db.as(service, (tx) => tx.query(insert, [byServer]));
+    expect((await roleOf(byServer))?.role).toBe("manager");
   });
 
   it("новый сотрудник обязан сменить пароль при первом входе", async () => {

@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/AdminShell";
-import { getCabinetViewer } from "@/lib/admin/access";
-import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import { requireViewer } from "@/lib/admin/session";
 
-// Разделы кабинета — только для вошедшего сотрудника. Фаза 0: без входа — только в разработке.
-export default function CabinetLayout({ children }: { children: ReactNode }) {
-  const viewer = getCabinetViewer();
-  if (!viewer) redirect(ADMIN_ROUTES.login);
+// Сессия читается на каждый запрос и не попадает в статичную оболочку: раздел ждёт её на сервере,
+// чтобы редирект на вход был настоящим 307, а не тегом после начала потока (docs: instant-navigation).
+export const instant = false;
+
+// Разделы кабинета — только для вошедшего сотрудника (lib/admin/session.ts).
+export default async function CabinetLayout({ children }: { children: ReactNode }) {
+  const viewer = await requireViewer();
   return <AdminShell viewer={viewer}>{children}</AdminShell>;
 }

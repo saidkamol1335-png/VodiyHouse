@@ -1,0 +1,15 @@
+/* «Кабинет временно недоступен»: панель по центру экрана, без оболочки кабинета. */
+.admin-unavailable {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 16px;
+}
+
+.admin-unavailable__card {
+  width: min(100%, 440px);
+}
+
+.admin-unavailable__lead {
+  margin: 0 0 16px;
+}

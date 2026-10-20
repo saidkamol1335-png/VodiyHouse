@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
@@ -8,6 +9,10 @@ export default defineConfig({
     exclude: ["node_modules", "tests/e2e/**", "docs/**"],
     projects: [
       {
+        // server-only в jsdom бросает исключение — серверные адаптеры тестируются с заглушкой.
+        resolve: {
+          alias: { "server-only": fileURLToPath(new URL("./tests/unit/server-only-stub.ts", import.meta.url)) },
+        },
         test: {
           name: "unit",
           environment: "jsdom",

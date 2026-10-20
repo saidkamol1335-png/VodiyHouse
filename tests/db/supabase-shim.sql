@@ -15,6 +15,9 @@ create table auth.users (
   email text unique,
   raw_app_meta_data jsonb not null default '{}',
   raw_user_meta_data jsonb not null default '{}',
+  -- Есть в облаке; читает public.staff_directory() (шаг 8).
+  last_sign_in_at timestamptz,
+  banned_until timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

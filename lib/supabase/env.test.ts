@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { supabasePublicEnv, supabaseSecretKey } from "./env";
+import { hasSupabaseAdminEnv, hasSupabaseEnv, supabasePublicEnv, supabaseSecretKey } from "./env";
 
 describe("переменные Supabase", () => {
   afterEach(() => vi.unstubAllEnvs());
@@ -22,5 +22,25 @@ describe("переменные Supabase", () => {
   it("секретный ключ обязателен для admin-клиента", () => {
     vi.stubEnv("SUPABASE_SECRET_KEY", "");
     expect(() => supabaseSecretKey()).toThrow(/SUPABASE_SECRET_KEY/);
+  });
+
+  it("hasSupabaseEnv: false без адреса, без ключа и при пустых строках; true с обоими", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_demo");
+    expect(hasSupabaseEnv()).toBe(false);
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://demo.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
+    expect(hasSupabaseEnv()).toBe(false);
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_demo");
+    expect(hasSupabaseEnv()).toBe(true);
+  });
+
+  it("hasSupabaseAdminEnv требует ещё SUPABASE_SECRET_KEY", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://demo.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_demo");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
+    expect(hasSupabaseAdminEnv()).toBe(false);
+    vi.stubEnv("SUPABASE_SECRET_KEY", "sb_secret_demo");
+    expect(hasSupabaseAdminEnv()).toBe(true);
   });
 });

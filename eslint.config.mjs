@@ -7,6 +7,24 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   prettier,
+  {
+    // Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета.
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["lib/admin/server/**", "lib/supabase/admin.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/lib/supabase/admin",
+              message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   globalIgnores([
     ".next/**",
     "out/**",

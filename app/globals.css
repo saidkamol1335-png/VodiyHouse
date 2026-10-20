@@ -56,6 +56,7 @@
 @import "../components/AdminShell/AdminShell.css";
 @import "../components/AdminTabs/AdminTabs.css";
 @import "../components/AdminTopbar/AdminTopbar.css";
+@import "../components/AdminUnavailable/AdminUnavailable.css";
 @import "../components/AdminUser/AdminUser.css";
 @import "../components/AdminUserMenu/AdminUserMenu.css";
 @import "../components/Avatar/Avatar.css";

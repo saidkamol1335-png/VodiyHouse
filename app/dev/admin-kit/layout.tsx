@@ -5,7 +5,7 @@ import { AdminEntityHead } from "@/components/AdminEntityHead";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminShell } from "@/components/AdminShell";
 import { AdminTopbar } from "@/components/AdminTopbar";
-import { getCabinetViewer } from "@/lib/admin/access";
+import { DEV_VIEWER } from "@/lib/admin/access";
 import { cabinetPerson } from "@/lib/admin/person";
 
 const BASE = "/dev/admin-kit";
@@ -14,7 +14,7 @@ const BASE = "/dev/admin-kit";
 // Вкладки — отдельные адреса, как будут у /admin/zastroyshchiki/<id>. В продакшене её нет.
 export default async function DevAdminKitLayout({ children }: { children: ReactNode }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const viewer = getCabinetViewer(true)!;
+  const viewer = DEV_VIEWER;
   const person = await cabinetPerson(viewer);
   const t = await getTranslations("admin.developers.tabs");
   const tabs = [

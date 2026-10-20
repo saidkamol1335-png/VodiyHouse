@@ -7,6 +7,7 @@ export type AdminNavKey = "home" | "leads" | "complexes" | "developers" | "progr
 export const ADMIN_ROUTES = {
   home: ADMIN_ROUTE,
   login: `${ADMIN_ROUTE}/vhod`,
+  password: `${ADMIN_ROUTE}/parol`,
   leads: `${ADMIN_ROUTE}/zayavki`,
   complexes: `${ADMIN_ROUTE}/zhk`,
   developers: `${ADMIN_ROUTE}/zastroyshchiki`,
@@ -14,6 +15,8 @@ export const ADMIN_ROUTES = {
   video: `${ADMIN_ROUTE}/video`,
   stats: `${ADMIN_ROUTE}/statistika`,
   settings: `${ADMIN_ROUTE}/nastroyki`,
+  dictionaries: `${ADMIN_ROUTE}/nastroyki/spravochniki`,
+  journal: `${ADMIN_ROUTE}/nastroyki/zhurnal`,
 } as const;
 
 export type AdminNavItem = {
@@ -46,4 +49,29 @@ export function visibleNav(role: StaffRole, items: readonly AdminNavItem[] = ADM
 export function isNavItemActive(href: string, pathname: string): boolean {
   if (href === ADMIN_ROUTES.home) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** Раздел открыт роли (готовность не важна): так страница решает, показать ли «доступно руководителю». */
+export function canOpen(role: StaffRole, key: AdminNavKey, items: readonly AdminNavItem[] = ADMIN_NAV): boolean {
+  return items.some((item) => item.key === key && item.roles.includes(role));
+}
+
+/** Куда вести после входа: первый пункт меню роли, а пока его нет — Главная с заглушкой роли. */
+export function landingPath(role: StaffRole, items: readonly AdminNavItem[] = ADMIN_NAV): string {
+  return visibleNav(role, items)[0]?.href ?? ADMIN_ROUTES.home;
+}
+
+export type SettingsTabKey = "staff" | "dictionaries" | "journal";
+
+export type SettingsTab = { key: SettingsTabKey; segment: string | null; href: string; ready: boolean };
+
+/** Вкладки «Настроек» (решение Д6) — отдельные адреса; справочники и журнал — шаг 10.2. */
+export const SETTINGS_TABS: readonly SettingsTab[] = [
+  { key: "staff", segment: null, href: ADMIN_ROUTES.settings, ready: true },
+  { key: "dictionaries", segment: "spravochniki", href: ADMIN_ROUTES.dictionaries, ready: false },
+  { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: false },
+];
+
+export function readySettingsTabs(tabs: readonly SettingsTab[] = SETTINGS_TABS): SettingsTab[] {
+  return tabs.filter((tab) => tab.ready);
 }

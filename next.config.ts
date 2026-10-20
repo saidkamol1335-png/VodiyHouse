@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Значок Next.js в углу закрывает контент на скриншотах для сверки с мокапом; ошибки dev-оверлей покажет и без него.
   devIndicators: false,
+  // В разработке Next.js пишет в терминал аргументы Server Actions — а это пароли входа и сотрудников.
+  logging: { serverFunctions: false },
+  async headers() {
+    return [
+      {
+        // Кабинет не открывается во фрейме чужого сайта (кликджекинг) и не отдаёт адрес наружу.
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          { key: "Referrer-Policy", value: "same-origin" },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Несколько корневых layout (/[locale], /admin, /dev) — общий 404 собирается отдельно.
     globalNotFound: true,

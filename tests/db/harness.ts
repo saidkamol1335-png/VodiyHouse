@@ -86,20 +86,33 @@ export async function expectDenied(promise: Promise<unknown>): Promise<void> {
   await expect(promise).rejects.toThrow(/permission denied|row-level security/);
 }
 
+/** Отказ базы с машиночитаемым кодом (hint 'vh:…', см. lib/admin/authErrors.ts). */
+export async function expectHint(promise: Promise<unknown>, hint: string): Promise<void> {
+  await expect(promise).rejects.toMatchObject({ hint });
+}
+
+type StaffOptions = { fullName?: string; isActive?: boolean; mustChangePassword?: boolean; email?: string };
+
 /** Создаёт пользователя Auth и профиль сотрудника в обход RLS (как сервер с ключом service_role). */
-export async function createStaff(
-  admin: Db,
-  role: StaffRole,
-  { fullName = `Тест · ${role}`, isActive = true }: { fullName?: string; isActive?: boolean } = {},
-): Promise<string> {
-  const created = await admin.query<{ id: string }>(
-    "insert into auth.users (email) values ($1) returning id",
-    [`${role}-${crypto.randomUUID()}@test.local`],
-  );
+export async function createStaff(admin: Db, role: StaffRole, options: StaffOptions = {}): Promise<string> {
+  const { fullName = `Тест · ${role}`, isActive = true, mustChangePassword = true } = options;
+  const email = options.email ?? `${role}-${crypto.randomUUID()}@test.local`;
+  const created = await admin.query<{ id: string }>("insert into auth.users (email) values ($1) returning id", [
+    email,
+  ]);
   const id = created.rows[0]!.id;
   await admin.query(
-    "insert into public.profiles (id, full_name, role, is_active) values ($1, $2, $3, $4)",
-    [id, fullName, role, isActive],
+    `insert into public.profiles (id, full_name, role, is_active, must_change_password)
+     values ($1, $2, $3, $4, $5)`,
+    [id, fullName, role, isActive, mustChangePassword],
   );
   return id;
+}
+
+/** Пользователь Auth без профиля — как после auth.admin.createUser, до вставки профиля. */
+export async function createAuthUser(admin: Db, email = `new-${crypto.randomUUID()}@test.local`): Promise<string> {
+  const created = await admin.query<{ id: string }>("insert into auth.users (email) values ($1) returning id", [
+    email,
+  ]);
+  return created.rows[0]!.id;
 }

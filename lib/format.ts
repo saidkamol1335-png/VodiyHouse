@@ -10,6 +10,19 @@ export function formatWeekdayDate(date: Date, timeZone: string = APP_TIME_ZONE):
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${day}`;
 }
 
+/** «20.10.2026» — дата в списках кабинета. */
+export function formatDate(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", timeZone }).format(date);
+}
+
+/** «20.10.2026 14:05» — дата и время (последний вход сотрудника). */
+export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  const time = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone }).format(
+    date,
+  );
+  return `${formatDate(date, timeZone)} ${time}`;
+}
+
 /** Час суток 0–23 в часовом поясе. */
 export function hourIn(date: Date, timeZone: string = APP_TIME_ZONE): number {
   const hour = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone }).format(date);

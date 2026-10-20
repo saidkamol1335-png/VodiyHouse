@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { getCabinetViewer } from "./access";
-import { ADMIN_NAV, ADMIN_ROUTES, isNavItemActive, visibleNav } from "./nav";
+import {
+  ADMIN_NAV,
+  ADMIN_ROUTES,
+  canOpen,
+  isNavItemActive,
+  landingPath,
+  readySettingsTabs,
+  visibleNav,
+} from "./nav";
 
 const allReady = ADMIN_NAV.map((item) => ({ ...item, ready: true }));
 const keysFor = (role: Parameters<typeof visibleNav>[0]) => visibleNav(role, allReady).map((item) => item.key);
@@ -30,9 +37,25 @@ describe("меню кабинета", () => {
   });
 });
 
-describe("доступ без входа", () => {
-  it("в разработке — руководитель без имени, в продакшене — никого", () => {
-    expect(getCabinetViewer(true)).toEqual({ role: "head", name: null });
-    expect(getCabinetViewer(false)).toBeNull();
+describe("доступ к разделам", () => {
+  it("canOpen: настройки — только руководителю; Главная — не видеографу; готовность не важна", () => {
+    expect(canOpen("head", "settings")).toBe(true);
+    expect(canOpen("manager", "settings")).toBe(false);
+    expect(canOpen("videographer", "settings")).toBe(false);
+    expect(canOpen("manager", "home")).toBe(true);
+    expect(canOpen("videographer", "home")).toBe(false);
+    expect(canOpen("videographer", "video")).toBe(true);
+  });
+
+  it("после входа — первый пункт меню роли; нет пунктов — Главная", () => {
+    expect(landingPath("head")).toBe("/admin");
+    expect(landingPath("videographer")).toBe("/admin");
+    expect(landingPath("videographer", allReady)).toBe(ADMIN_ROUTES.video);
+  });
+
+  it("вкладки настроек до шага 10.2 — только «Сотрудники» по адресу /admin/nastroyki", () => {
+    expect(readySettingsTabs().map((tab) => [tab.key, tab.href, tab.segment])).toEqual([
+      ["staff", "/admin/nastroyki", null],
+    ]);
   });
 });
