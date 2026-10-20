@@ -47,6 +47,7 @@
 
 /* Компоненты (БЭМ) — по одному файлу на блок. */
 @import "../components/AdminBrand/AdminBrand.css";
+@import "../components/AdminDenied/AdminDenied.css";
 @import "../components/AdminEntityHead/AdminEntityHead.css";
 @import "../components/AdminKitMain/AdminKitMain.css";
 @import "../components/AdminKitProjects/AdminKitProjects.css";
@@ -91,5 +92,6 @@
 @import "../components/Segmented/Segmented.css";
 @import "../components/SiteHeader/SiteHeader.css";
 @import "../components/Spotlight/Spotlight.css";
+@import "../components/StaffList/StaffList.css";
 @import "../components/TabletMenu/TabletMenu.css";
 @import "../components/TokenPreview/TokenPreview.css";

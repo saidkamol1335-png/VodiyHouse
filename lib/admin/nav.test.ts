@@ -13,8 +13,10 @@ const allReady = ADMIN_NAV.map((item) => ({ ...item, ready: true }));
 const keysFor = (role: Parameters<typeof visibleNav>[0]) => visibleNav(role, allReady).map((item) => item.key);
 
 describe("меню кабинета", () => {
-  it("фаза 0: видна только «Главная»", () => {
-    expect(visibleNav("head").map((item) => item.key)).toEqual(["home"]);
+  it("сейчас: руководитель — Главная и Настройки; менеджер — Главная; видеограф — ничего", () => {
+    expect(visibleNav("head").map((item) => item.key)).toEqual(["home", "settings"]);
+    expect(visibleNav("manager").map((item) => item.key)).toEqual(["home"]);
+    expect(visibleNav("videographer")).toEqual([]);
   });
 
   it("руководитель видит все 8 разделов в порядке PLAN §7", () => {

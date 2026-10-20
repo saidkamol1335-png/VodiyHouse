@@ -1,0 +1,127 @@
+/* «Сотрудники» (С1): панель мокапа, строки как «Остатки по ЖК» (.ostl__r — пунктир между строками). */
+.staff-list {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.staff-list__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.staff-list__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.staff-list__count {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}
+
+.staff-list__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Десктоп: аватар · имя и email · плашки · даты · действия; предупреждение — строкой ниже. */
+.staff-list__row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 2px;
+  border-top: 1px dashed var(--line);
+}
+
+.staff-list__row:first-child {
+  border-top: 0;
+}
+
+.staff-list__row--inactive .staff-list__person,
+.staff-list__row--inactive .avatar {
+  opacity: var(--opacity-disabled);
+}
+
+.staff-list__person {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.staff-list__name {
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.staff-list__email {
+  overflow-wrap: anywhere;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.staff-list__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.staff-list__meta {
+  display: flex;
+  flex-direction: column;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.staff-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.staff-list__warning {
+  grid-column: 2 / -1;
+  margin: 0;
+  color: var(--badge-bad-fg);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+/* Телефон и узкий кабинет: карточка — аватар и имя, под ними плашки, даты и кнопки. */
+@media (max-width: 1100px) {
+  .staff-list__row {
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .staff-list__badges,
+  .staff-list__meta,
+  .staff-list__warning {
+    grid-column: 2;
+  }
+
+  .staff-list__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .staff-list {
+    padding: 16px;
+  }
+}

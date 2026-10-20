@@ -84,17 +84,17 @@ test.describe("экран входа /admin/vhod", () => {
 });
 
 test.describe("оболочка кабинета /admin (разработка — без входа)", () => {
-  test("фаза 0: в меню только «Главная» и «Сайт», Главная активна", async ({ page }, testInfo) => {
+  test("меню руководителя: Главная, Настройки и Сайт; Главная активна", async ({ page }, testInfo) => {
     const errors = collectPageErrors(page);
     await page.goto("/admin");
     const nav = page.getByRole("navigation", { name: "Разделы кабинета" });
     await expect(nav).toHaveCount(1);
     const links = nav.getByRole("link");
-    await expect(links).toHaveCount(2);
-    await expect(links.first()).toHaveText("Главная");
+    await expect(links).toHaveText(["Главная", "Настройки", /сайт/i]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
+    await expect(links.nth(1)).toHaveAttribute("href", "/admin/nastroyki");
     await expect(links.last()).toHaveAttribute("href", "/");
-    for (const hidden of ["Заявки", "ЖК", "Застройщики", "Статистика", "Настройки"]) {
+    for (const hidden of ["Заявки", "ЖК", "Застройщики", "Статистика"]) {
       await expect(nav.getByRole("link", { name: hidden })).toHaveCount(0);
     }
     await expect(page.locator(isPhone(testInfo.project.name) ? ".admin-nav--strip" : ".admin-shell__side")).toBeVisible();
@@ -141,6 +141,21 @@ test.describe("оболочка кабинета /admin (разработка �
     await toggle.click();
     await page.getByRole("button", { name: "Выйти" }).click();
     await expect(page).toHaveURL(/\/admin\/vhod$/);
+  });
+
+  test("«Настройки»: вкладка «Сотрудники», без ключей — панель «Supabase не подключён»", async ({ page }) => {
+    test.skip(Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL), "с ключами — список из базы (staff.spec.ts)");
+    const errors = collectPageErrors(page);
+    await page.goto("/admin/nastroyki");
+    await expect(page.getByRole("heading", { level: 1, name: "Настройки" })).toBeVisible();
+    const tabs = page.getByRole("navigation", { name: "Разделы настроек" });
+    await expect(tabs.getByRole("link")).toHaveText(["Сотрудники"]);
+    await expect(tabs.getByRole("link", { name: "Сотрудники" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByText("Supabase не подключён — список сотрудников появится")).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Разделы кабинета" });
+    await expect(nav.getByRole("link", { name: "Настройки" })).toHaveAttribute("aria-current", "page");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
+    expect(errors).toEqual([]);
   });
 
   test("линий колонок в кабинете нет (Э1)", async ({ page }) => {

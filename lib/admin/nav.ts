@@ -37,7 +37,7 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: false },
   { key: "video", href: ADMIN_ROUTES.video, roles: ["head", "manager", "videographer"], ready: false },
   { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: false },
-  { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: false },
+  { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
 ];
 
 /** Пункты меню для роли: недоступное роли и ещё не сделанное не показываются (PLAN §3а). */

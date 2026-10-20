@@ -5,6 +5,7 @@ import { createSupabaseVerifierClient } from "@/lib/supabase/verifier";
 import type { ChangePasswordDeps } from "../auth/changePassword";
 import type { SignInDeps } from "../auth/signIn";
 import { readOwnProfile } from "../session";
+import { parseDirectoryRows, type DirectoryRow, type StaffMember } from "../staff/directory";
 
 // Адаптеры ядер кабинета к Supabase. Единственное место, где разрешён ключ service_role
 // (правило ESLint в eslint.config.mjs): сюда приходят только после проверки сотрудника.
@@ -37,6 +38,13 @@ async function verifyPassword(email: string, password: string): ReturnType<Chang
   if (error) return error.code === "invalid_credentials" ? "wrong" : { error };
   await signOutQuietly(verifier, "local");
   return "ok";
+}
+
+/** «Сотрудники» сессией руководителя: функция базы отдаёт строки только ему. */
+export async function readStaffDirectory(supabase: SupabaseClient): Promise<StaffMember[]> {
+  const { data, error } = await supabase.rpc("staff_directory");
+  if (error) throw new Error("staff-directory-unavailable", { cause: error });
+  return parseDirectoryRows((data ?? []) as DirectoryRow[]);
 }
 
 /** supabase — сессия самого сотрудника (cookie). */
