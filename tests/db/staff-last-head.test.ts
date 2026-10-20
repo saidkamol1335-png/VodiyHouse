@@ -64,6 +64,17 @@ describe("хотя бы один активный руководитель", () 
     expect(await activeHeads()).toEqual([headA, headC, headD].sort());
   });
 
+  // Гонку двух руководителей (каждый отключает другого одновременно) в одном соединении PGlite
+  // не воспроизвести — проверяем, что замок, который её закрывает, на месте.
+  it("проверка берёт замок транзакции до подсчёта руководителей", async () => {
+    const { rows } = await db.admin.query<{ body: string }>(
+      "select pg_get_functiondef('private.keep_active_head'::regproc) as body",
+    );
+    const body = rows[0]?.body ?? "";
+    expect(body).toContain("pg_advisory_xact_lock");
+    expect(body.indexOf("pg_advisory_xact_lock")).toBeLessThan(body.indexOf("not exists"));
+  });
+
   it("А одним запросом отключает всех руководителей, кроме себя", async () => {
     const result = await db.as(user(headA), (tx) =>
       tx.query("update profiles set is_active = false where role = 'head' and id <> $1", [headA]),

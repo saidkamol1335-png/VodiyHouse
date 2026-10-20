@@ -117,7 +117,7 @@ test.describe("оболочка кабинета /admin", () => {
     await page.goto("/admin");
     const side = page.locator(".admin-shell__side");
     expect((await side.boundingBox())?.width).toBe(250);
-    await expect(side.getByText("Руководитель")).toBeVisible();
+    await expect(side.locator(".admin-user__role")).toHaveText("Руководитель");
     await expect(page.locator(".admin-user-menu")).toBeHidden();
     // Выход — POST-форма (Server Action), а не ссылка. С облаком нажатие закрыло бы общую
     // сессию остальных тестов — там выход проверяет auth.spec.ts своим входом.

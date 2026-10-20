@@ -98,13 +98,18 @@ export function passwordDeps(supabase: SupabaseClient): ChangePasswordDeps {
       const { error } = await supabase.auth.updateUser({ password });
       return error;
     },
+    // Пароль в Auth уже сменён: любой сбой здесь — «вход не завершён», а не падение страницы.
     async clearMustChange(userId) {
-      const { data, error } = await createSupabaseAdminClient()
-        .from("profiles")
-        .update({ must_change_password: false })
-        .eq("id", userId)
-        .select("id");
-      return !error && data?.length === 1;
+      try {
+        const { data, error } = await createSupabaseAdminClient()
+          .from("profiles")
+          .update({ must_change_password: false })
+          .eq("id", userId)
+          .select("id");
+        return !error && data?.length === 1;
+      } catch {
+        return false;
+      }
     },
     signOutOthers: () => signOutQuietly(supabase, "others"),
   };

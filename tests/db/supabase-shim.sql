@@ -10,8 +10,9 @@ create role service_role nologin noinherit bypassrls;
 create schema auth;
 grant usage on schema auth to anon, authenticated, service_role;
 
+-- id без default, как в облаке: его выдаёт Auth — тесты обязаны передавать его сами.
 create table auth.users (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key,
   email text unique,
   raw_app_meta_data jsonb not null default '{}',
   raw_user_meta_data jsonb not null default '{}',

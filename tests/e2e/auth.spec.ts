@@ -49,16 +49,20 @@ test.describe("руководитель", () => {
     expect(errors).toEqual([]);
   });
 
-  test("cookie сессии: SameSite=Lax, путь /; секретного ключа нет в загруженном JS", async ({ page, context }) => {
-    const scripts: string[] = [];
-    page.on("response", async (response) => {
-      if (response.request().resourceType() === "script") scripts.push(await response.text().catch(() => ""));
-    });
+  test("cookie сессии: SameSite=Lax, путь /; секретного ключа нет ни в HTML, ни в JS, ни в ответах", async ({ page, context }) => {
+    // Все тела ответов (документ, RSC, скрипты) — ждём их явно, а не в обработчике события.
+    const bodies: Promise<string>[] = [];
+    page.on("response", (response) => bodies.push(response.text().catch(() => "")));
     await page.goto("/admin");
+    await page.goto("/admin/nastroyki");
+    await page.waitForLoadState("networkidle");
+    const sources = [...(await Promise.all(bodies)), await page.content()];
+    expect(sources.filter((source) => source.includes("<script") || source.includes("function")).length).toBeGreaterThan(0);
+
     const session = (await context.cookies()).find((cookie) => /^sb-.+-auth-token/.test(cookie.name));
     expect(session).toMatchObject({ sameSite: "Lax", path: "/" });
     const secret = process.env.SUPABASE_SECRET_KEY ?? "";
-    for (const source of scripts) {
+    for (const source of sources) {
       expect(source).not.toContain("sb_secret_");
       if (secret) expect(source).not.toContain(secret);
     }
@@ -106,11 +110,15 @@ test.describe("первый вход и выход", () => {
     await expect(page.locator(".password-change-form .field__error")).toHaveText(["Совпадает с временным — придумайте другой"]);
     await fill(newcomer.password, "e2e-новый-пароль", "e2e-новый-пароль");
     await expect(page).toHaveURL(/\/admin$/);
+    // Настоящая запись кабинета в истории — чтобы «Назад» после выхода было куда нажать.
+    await page.goto("/admin");
+    await expect(page.locator(".admin-shell")).toHaveCount(1);
 
     await page.getByRole("button", { name: "Выйти" }).first().click();
     await expect(page).toHaveURL(/\/admin\/vhod$/);
     await page.goBack();
-    await expect(page).not.toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin\/vhod/);
+    await expect(page.locator(".admin-shell")).toHaveCount(0);
     await signIn(page, newcomer.email, "e2e-новый-пароль");
     await expect(page).toHaveURL(/\/admin$/);
   });

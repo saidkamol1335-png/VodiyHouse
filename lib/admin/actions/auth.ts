@@ -1,6 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
+import { hasAuthCookie } from "@/lib/admin/gate";
 import { isCabinetOpenWithoutLogin, STAFF_ROLES } from "@/lib/admin/access";
 import { changeFirstPassword } from "@/lib/admin/auth/changePassword";
 import { signIn } from "@/lib/admin/auth/signIn";
@@ -10,7 +12,7 @@ import { parsePasswordChange, parseSignIn } from "@/lib/admin/credentials";
 import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
 import { passwordDeps, signInDeps } from "@/lib/admin/server/deps";
 import { requireActionViewer, type ActionGuardCode } from "@/lib/admin/session";
-import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { hasSupabaseAdminEnv, hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Действия возвращают коды ошибок — тексты переводит форма (в действиях next-intl без языка падает).
@@ -42,6 +44,9 @@ const GUARD_TO_PASSWORD_ERROR = {
 export async function changePasswordAction(_previous: PasswordState, formData: FormData): Promise<PasswordState> {
   const guard = await requireActionViewer(STAFF_ROLES, { allowPasswordChange: true });
   if (!guard.ok) return { error: GUARD_TO_PASSWORD_ERROR[guard.code], fieldErrors: {} };
+  // Флаг снимает сервер секретным ключом: без него пароль в Auth сменился бы, а сотрудник
+  // застрял бы на этом экране. Проверяем до любых изменений.
+  if (!hasSupabaseAdminEnv()) return { error: "notConfigured", fieldErrors: {} };
   const { viewer, email, supabase } = guard;
   if (!viewer.mustChangePassword) redirect(landingPath(viewer.role), RedirectType.replace);
   if (!email) return { error: "session", fieldErrors: {} };
@@ -52,11 +57,19 @@ export async function changePasswordAction(_previous: PasswordState, formData: F
   redirect(outcome.to, RedirectType.replace);
 }
 
-/** Выход только на этом устройстве (по умолчанию Supabase закрыл бы все сессии сотрудника). */
+/**
+ * Выход только на этом устройстве (по умолчанию Supabase закрыл бы все сессии сотрудника).
+ * Если Supabase не ответил, cookie сессии удаляем сами: иначе на общем компьютере следующий
+ * открыл бы кабинет под этим сотрудником, хотя экран показал «вход».
+ */
 export async function signOutAction(): Promise<void> {
   if (hasSupabaseEnv() && !isCabinetOpenWithoutLogin) {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut({ scope: "local" });
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) {
+      const store = await cookies();
+      for (const { name } of store.getAll()) if (hasAuthCookie([name])) store.delete({ name, path: "/" });
+    }
   }
   redirect(ADMIN_ROUTES.login, RedirectType.replace);
 }

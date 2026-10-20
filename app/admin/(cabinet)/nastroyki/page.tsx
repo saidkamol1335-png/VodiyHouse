@@ -7,6 +7,7 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { createStaffAction, resetStaffPasswordAction, setStaffActiveAction } from "@/lib/admin/actions/staff";
 import { readStaffDirectory } from "@/lib/admin/server/deps";
 import { requireSection } from "@/lib/admin/session";
+import { staffState } from "@/lib/admin/staff/directory";
 import type { StaffRowActionSet } from "@/lib/admin/staff/types";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -36,7 +37,7 @@ export default async function SettingsStaffPage() {
             id={member.id}
             name={member.fullName}
             email={member.email}
-            isActive={member.isActive}
+            state={staffState(member)}
             actions={ROW_ACTIONS}
           />
         )}

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { DEMO_TEMPORARY_PASSWORD } from "../../app/dev/parol/demo";
+import { hasCloud } from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Первая смена пароля (шаг 8, решение С4) на стенде /dev/parol: настоящая форма и ядро,
@@ -55,8 +56,9 @@ test.describe("первая смена пароля", () => {
   test("успех — в кабинет; пароли не попадают в адрес", async ({ page }) => {
     await page.goto(PAGE);
     await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "мой-новый-пароль", "мой-новый-пароль");
-    await expect(page).toHaveURL(/\/admin$/);
-    expect(page.url()).not.toContain("пароль");
+    // С ключами у стенда нет сессии: кабинет отправит на вход.
+    await expect(page).toHaveURL(hasCloud ? /\/admin\/vhod$/ : /\/admin$/);
+    expect(decodeURIComponent(page.url())).not.toContain("пароль");
   });
 
   test("/admin/parol в режиме разработки без ключей — сразу в кабинет", async ({ page }) => {

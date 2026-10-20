@@ -97,7 +97,7 @@ type StaffOptions = { fullName?: string; isActive?: boolean; mustChangePassword?
 export async function createStaff(admin: Db, role: StaffRole, options: StaffOptions = {}): Promise<string> {
   const { fullName = `Тест · ${role}`, isActive = true, mustChangePassword = true } = options;
   const email = options.email ?? `${role}-${crypto.randomUUID()}@test.local`;
-  const created = await admin.query<{ id: string }>("insert into auth.users (email) values ($1) returning id", [
+  const created = await admin.query<{ id: string }>("insert into auth.users (id, email) values (gen_random_uuid(), $1) returning id", [
     email,
   ]);
   const id = created.rows[0]!.id;
@@ -111,7 +111,7 @@ export async function createStaff(admin: Db, role: StaffRole, options: StaffOpti
 
 /** Пользователь Auth без профиля — как после auth.admin.createUser, до вставки профиля. */
 export async function createAuthUser(admin: Db, email = `new-${crypto.randomUUID()}@test.local`): Promise<string> {
-  const created = await admin.query<{ id: string }>("insert into auth.users (email) values ($1) returning id", [
+  const created = await admin.query<{ id: string }>("insert into auth.users (id, email) values (gen_random_uuid(), $1) returning id", [
     email,
   ]);
   return created.rows[0]!.id;

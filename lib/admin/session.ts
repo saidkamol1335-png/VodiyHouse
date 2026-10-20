@@ -110,10 +110,20 @@ export async function requireActionViewer(
   } catch {
     return { ok: false, code: "network" };
   }
-  const result = resolveViewer(user.id, profile);
-  if (result.kind === "login") return { ok: false, code: "session" };
-  if (result.kind === "noAccess") return { ok: false, code: "forbidden" };
-  if (result.kind === "changePassword" && !options.allowPasswordChange) return { ok: false, code: "forbidden" };
-  if (!roles.includes(result.viewer.role)) return { ok: false, code: "forbidden" };
-  return { ok: true, viewer: result.viewer, email: user.email, supabase };
+  const decision = decideActionGuard(resolveViewer(user.id, profile), roles, options.allowPasswordChange ?? false);
+  if ("code" in decision) return { ok: false, code: decision.code };
+  return { ok: true, viewer: decision.viewer, email: user.email, supabase };
+}
+
+/** Пускать ли в действие (чистая функция — юнит-тест без Supabase). */
+export function decideActionGuard(
+  result: ViewerResult,
+  roles: readonly StaffRole[],
+  allowPasswordChange: boolean,
+): { viewer: CabinetViewer } | { code: "session" | "forbidden" } {
+  if (result.kind === "login") return { code: "session" };
+  if (result.kind === "noAccess") return { code: "forbidden" };
+  if (result.kind === "changePassword" && !allowPasswordChange) return { code: "forbidden" };
+  if (!roles.includes(result.viewer.role)) return { code: "forbidden" };
+  return { viewer: result.viewer };
 }

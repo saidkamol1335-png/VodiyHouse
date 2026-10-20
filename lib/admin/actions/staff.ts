@@ -14,8 +14,12 @@ import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 // это руководитель, и спрашивает Auth заново (fresh) — дальше работает секретный ключ.
 // Пароли не логируются; в ответ уходит только новый временный — один раз.
 
-const EMPTY_FIELDS: StaffFields = { fullName: "", email: "", role: "" };
 const EMAIL_FIELD_ERRORS: readonly StaffErrorCode[] = ["emailTaken", "emailInvalid"];
+
+function typedFields(formData: FormData): StaffFields {
+  const parsed = parseStaffInput(formData);
+  return parsed.ok ? parsed.value : parsed.fields;
+}
 
 async function headGuard() {
   const guard = await requireActionViewer(["head"], { fresh: true });
@@ -31,7 +35,8 @@ function createError(code: StaffErrorCode, fields: StaffFields): CreateStaffResu
 /** «Создать и показать пароль». Принимает только FormData — прошлое состояние сюда не приходит. */
 export async function createStaffAction(formData: FormData): Promise<CreateStaffResult> {
   const guard = await headGuard();
-  if (!guard.ok) return createError(guard.code, EMPTY_FIELDS);
+  // React сбрасывает форму после действия — введённое возвращаем и при отказе проверки.
+  if (!guard.ok) return createError(guard.code, typedFields(formData));
   const parsed = parseStaffInput(formData);
   if (!parsed.ok) return { status: "error", error: null, fieldErrors: parsed.fieldErrors, fields: parsed.fields };
 

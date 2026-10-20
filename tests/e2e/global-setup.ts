@@ -34,7 +34,8 @@ async function createPersona(admin: SupabaseClient, runId: string, persona: Pers
 }
 
 export default async function globalSetup(): Promise<void> {
-  if (!hasCloud || !process.env.SUPABASE_SECRET_KEY) return;
+  if (!hasCloud) return;
+  // Публичные ключи без секретного или без E2E_SUPABASE_PROJECT_REF — понятная ошибка до тестов.
   const { url, secret } = assertE2eProject();
   const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
   const runId = Date.now().toString(36);

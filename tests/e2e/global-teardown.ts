@@ -6,7 +6,7 @@ import { assertE2eProject, E2E_EMAIL, hasCloud } from "./cloud";
 const PAGE_SIZE = 200;
 
 export default async function globalTeardown(): Promise<void> {
-  if (!hasCloud || !process.env.SUPABASE_SECRET_KEY) return;
+  if (!hasCloud) return;
   const { url, secret } = assertE2eProject();
   const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
   const doomed: string[] = [];

@@ -89,8 +89,11 @@ async function findUserId(admin, email) {
 async function resetHeadPassword(admin, { email }) {
   const id = await findUserId(admin, email);
   if (!id) fail(`Пользователя ${email} в Auth нет.`);
-  const { data: profile } = await admin.from("profiles").select("role").eq("id", id).maybeSingle();
+  const { data: profile } = await admin.from("profiles").select("role, is_active").eq("id", id).maybeSingle();
   if (profile?.role !== "head") fail(`${email} — не руководитель. Пароль сотрудника меняют в «Настройки → Сотрудники».`);
+  // Отключённому бан не снимаем: отключение — решение другого руководителя (он всегда есть —
+  // триггер базы), и вернуть доступ можно только «Включить» в «Сотрудниках».
+  if (!profile.is_active) fail(`${email} отключён — включите его в «Настройки → Сотрудники», потом сбросьте пароль.`);
 
   const flagged = await admin.from("profiles").update({ must_change_password: true }).eq("id", id);
   if (flagged.error) fail(`Не удалось отметить смену пароля: ${flagged.error.message}`);
@@ -105,7 +108,7 @@ async function resetHeadPassword(admin, { email }) {
 const options = readArguments();
 if (options.dryRun) {
   const plan = options.reset
-    ? `сбросить пароль руководителя ${options.email} (флаг смены пароля, снять бан)`
+    ? `сбросить пароль руководителя ${options.email} (только активного: флаг смены пароля, снять бан)`
     : `создать руководителя «${options.name}» <${options.email}>${options.allowSecond ? " (разрешён второй)" : ""}`;
   console.log(`Пробный запуск, без обращения к Supabase. План: ${plan}.`);
   console.log(`Генератор пароля загружен: ${generatePassword().length} символов.`);

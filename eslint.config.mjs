@@ -8,17 +8,23 @@ const eslintConfig = defineConfig([
   ...nextTs,
   prettier,
   {
-    // Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета.
+    // Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета. patterns, а не
+    // paths: ловят и относительный импорт (../supabase/admin), и сам ключ из env.
     files: ["**/*.{ts,tsx}"],
-    ignores: ["lib/admin/server/**", "lib/supabase/admin.ts"],
+    ignores: ["lib/admin/server/**", "lib/supabase/admin.ts", "lib/supabase/env.test.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
-          paths: [
+          patterns: [
             {
-              name: "@/lib/supabase/admin",
+              group: ["**/supabase/admin", "**/supabase/admin.ts"],
               message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
+            },
+            {
+              group: ["**/supabase/env", "**/supabase/env.ts", "./env"],
+              importNames: ["supabaseSecretKey"],
+              message: "Секретный ключ читает только lib/supabase/admin.ts.",
             },
           ],
         },

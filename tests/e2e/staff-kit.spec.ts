@@ -137,6 +137,18 @@ test.describe("«Сотрудники» — действия", () => {
     await expect(row(page, "Нигора Саидова").getByRole("status")).toHaveText("Нигора Саидова: доступ включён");
   });
 
+  test("расхождение базы и Auth: предупреждение называет кнопку, которая есть в строке", async ({ page }) => {
+    await page.goto(PAGE);
+    await page.waitForLoadState("networkidle");
+    // Жасур отключён в базе, а вход ещё открыт: «нажмите «Отключить» ещё раз».
+    const jasur = row(page, "Жасур Тошматов");
+    await expect(jasur.locator(".staff-list__warning")).toContainText("«Отключить»");
+    await expect(jasur.getByRole("button", { name: "Включить" })).toHaveCount(0);
+    await jasur.getByRole("button", { name: "Отключить" }).click();
+    await jasur.getByRole("button", { name: "Да" }).click();
+    await expect(jasur.getByRole("status")).toHaveText("Жасур Тошматов: доступ отключён");
+  });
+
   test("«Новый пароль» → подтверждение → пароль один раз под строкой", async ({ page }) => {
     await page.goto(PAGE);
     await page.waitForLoadState("networkidle");

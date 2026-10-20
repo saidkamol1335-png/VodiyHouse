@@ -10,6 +10,7 @@ import { StaffRowActions } from "@/components/StaffRowActions";
 import { DEV_VIEWER } from "@/lib/admin/access";
 import { cabinetPerson } from "@/lib/admin/person";
 import { DEMO_STAFF, DEMO_VIEWER_ID } from "@/lib/admin/staff/demoStaff";
+import { staffState } from "@/lib/admin/staff/directory";
 import type { StaffRowActionSet } from "@/lib/admin/staff/types";
 import { demoCreateStaffAction, demoResetStaffPasswordAction, demoSetStaffActiveAction } from "./actions";
 
@@ -38,7 +39,7 @@ export default async function DevStaffPage() {
               id={member.id}
               name={member.fullName}
               email={member.email}
-              isActive={member.isActive}
+              state={staffState(member)}
               actions={DEMO_ROW_ACTIONS}
             />
           )}
