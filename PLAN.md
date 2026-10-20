@@ -90,6 +90,7 @@ Vodiy House — агентство новостроек в Фергане. По�
 **Защита от «дешёвого вида»:**
 - Фото (источник — рендеры застройщика): обложка ≥ 2400 px, галерея ≥ 1600 px по длинной стороне, чертежи ≥ 1200 px; лимит 25 МБ. Меньше — загрузка отклоняется с понятным текстом
 - Автоматически: AVIF/WebP, 4 размера под `next/image`, blurhash-заглушка, удаление EXIF. Кадрирование обложки и карточки под пропорции мокапа (обложка 16:9, карточка 4:3, телефон 4:5) с превью
+  - *Решение фазы 1 (19.10.2026):* браузер перед загрузкой проверяет разрешение, уменьшает до 3200 px, убирает EXIF и считает blur, файл идёт напрямую в Storage; размеры и AVIF/WebP делает `next/image` по запросу (Netlify Image CDN). Кадрирование — точкой фокуса (три пропорции считаются сами, превью трёх рамок)
 - Чертежи планировок: PNG / SVG / PDF → единый вид (фон, поля, ширина)
 - Перед публикацией — отметка «на рендерах нет водяных знаков, логотипов и контактов застройщика» (правило 1.2)
 - Тексты: лимиты под вёрстку (название ЖК — до 28 символов, короткое описание — до 140, адрес, ориентир), счётчик символов, обязательные `ru` и `uz`
@@ -209,6 +210,7 @@ layouts            block_id · rooms (0 = студия) · area · drawing_url �
 units              block_id · layout_id · entrance · floor · position · number · rooms · area · price? · price_per_m2?
                    · status (free | reserved | sold) · updated_by · updated_at
                    простой список наличия: без клиентов, броней, продаж и истории сделок
+                   (фаза 1: rooms и area не дублируются — берутся у layout, одна правда для «осталось N»)
 payment_programs   developer_id · блоки (m2m) · bank_id? · type (full | installment | bank_installment | mortgage)
                    · method (down_discount | markup | annuity | differentiated)
                    · tiers: [{min_down_pct, discount_pct, min_months, max_months}]     (для down_discount)
@@ -219,8 +221,9 @@ calculations       input · result · program_snapshot · channel (site | cabine
 specials           developer_id · complex_id? · title{ru,uz} · text{ru,uz} · image · valid_from/to · is_active [ф.3]
 collections        title{ru,uz} · slug · cover · mode (manual | filter) · complex_ids[] · filter · sort · is_active [ф.3]
 ads                image_desktop · image_mobile · link · advertiser · valid_from/to · is_active                [ф.3]
-media_assets       owner (complex / developer / special / collection / ad) · original_path · variants (размеры AVIF/WebP)
-                   · blur · width · height · crop · sort                                              [ф.1]
+media_assets       owner (complex / developer / special / collection / ad) · original_path (≤ 3200 px, без EXIF)
+                   · blur · width · height · focus_x · focus_y (точка фокуса) · sort                  [ф.1]
+                   (размеры и AVIF/WebP — next/image по запросу, решение фазы 1)
 complex_media · complex_videos · complex_details · complex_documents
 progress_reports   complex_id · block_id? · unit_id? · month · photos[] · youtube_url? · video_path?
                    · comment{ru,uz} · author_id · is_published                                        [ф.5]
