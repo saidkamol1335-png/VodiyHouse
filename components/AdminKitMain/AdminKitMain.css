@@ -6,12 +6,22 @@
   margin-top: 8px;
 }
 
-/* По низу: подпись в две строки не сдвигает поле вниз относительно соседей. */
+/* Подпись, поле и подсказка — общие строки сетки (subgrid): подпись в две строки
+   или подсказка у одного поля не сдвигают поля соседей. */
 .admin-kit-main__facts {
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
-  align-items: end;
   gap: 12px;
+}
+
+.admin-kit-main__facts > .field {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.admin-kit-main__facts .field__label {
+  align-self: end;
 }
 
 .admin-kit-main__media {
@@ -31,7 +41,9 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .admin-kit-main__facts > :first-child {
+  /* Название и дата проверки (подпись и подсказка длинные) — на всю ширину. */
+  .admin-kit-main__facts > :first-child,
+  .admin-kit-main__facts > :last-child {
     grid-column: 1 / -1;
   }
 }

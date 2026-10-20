@@ -61,6 +61,7 @@ export function AdminKitMain() {
           <Field
             id="developer-checked"
             label={t("deliveredCheckedAt")}
+            hint={t("deliveredCheckedAtHint")}
             type="date"
             defaultValue="2026-09-14"
           />

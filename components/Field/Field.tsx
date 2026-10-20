@@ -4,13 +4,17 @@ type FieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "className" | "id"
   id: string;
   label: string;
   error?: string;
+  /** Строка под полем: что значит пустое значение, формат. */
+  hint?: string;
   /** Кнопка внутри поля справа: «показать пароль». */
   trailing?: ReactNode;
 };
 
 /** Поле формы мокапа: подпись моно-шрифтом, поле 48 px, янтарное кольцо в фокусе. */
-export function Field({ id, label, error, trailing, ...input }: FieldProps) {
+export function Field({ id, label, error, hint, trailing, ...input }: FieldProps) {
   const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
@@ -21,11 +25,16 @@ export function Field({ id, label, error, trailing, ...input }: FieldProps) {
           id={id}
           className={error ? "field__input field__input--error" : "field__input"}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
+          aria-describedby={describedBy || undefined}
           {...input}
         />
         {trailing ? <span className="field__trailing">{trailing}</span> : null}
       </div>
+      {hint ? (
+        <p id={hintId} className="field__meta">
+          {hint}
+        </p>
+      ) : null}
       {error ? (
         <p id={errorId} className="field__error">
           {error}
