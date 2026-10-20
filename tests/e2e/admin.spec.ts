@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { cabinetState, hasCloud } from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Вход и оболочка кабинета по решениям К1–К4 (docs/design-decisions.md, 19.10.2026).
@@ -83,7 +84,10 @@ test.describe("экран входа /admin/vhod", () => {
   });
 });
 
-test.describe("оболочка кабинета /admin (разработка — без входа)", () => {
+test.describe("оболочка кабинета /admin", () => {
+  // Без ключей кабинет открыт без входа; с ключами — сохранённая сессия руководителя (auth.setup.ts).
+  test.use({ storageState: cabinetState("head") });
+
   test("меню руководителя: Главная, Настройки и Сайт; Главная активна", async ({ page }, testInfo) => {
     const errors = collectPageErrors(page);
     await page.goto("/admin");
@@ -104,7 +108,7 @@ test.describe("оболочка кабинета /admin (разработка �
   test("К4: заголовок — приветствие по времени Ташкента, подпись — дата", async ({ page }) => {
     await page.goto("/admin");
     const title = page.getByRole("heading", { level: 1 });
-    await expect(title).toHaveText(/^(Доброе утро|Добрый день|Добрый вечер)$/);
+    await expect(title).toHaveText(/^(Доброе утро|Добрый день|Добрый вечер)(, .+)?$/);
     await expect(page.locator(".admin-topbar__subtitle")).toContainText(/\d{2}\.\d{2}\.\d{4} · кабинет Vodiy House/);
   });
 
@@ -115,8 +119,10 @@ test.describe("оболочка кабинета /admin (разработка �
     expect((await side.boundingBox())?.width).toBe(250);
     await expect(side.getByText("Руководитель")).toBeVisible();
     await expect(page.locator(".admin-user-menu")).toBeHidden();
-    // Выход — POST-форма (Server Action), а не ссылка.
+    // Выход — POST-форма (Server Action), а не ссылка. С облаком нажатие закрыло бы общую
+    // сессию остальных тестов — там выход проверяет auth.spec.ts своим входом.
     await expect(side.getByRole("link", { name: "Выйти" })).toHaveCount(0);
+    if (hasCloud) return;
     await side.getByRole("button", { name: "Выйти" }).click();
     await expect(page).toHaveURL(/\/admin\/vhod$/);
   });
@@ -138,6 +144,7 @@ test.describe("оболочка кабинета /admin (разработка �
     await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    if (hasCloud) return; // выход с облаком — auth.spec.ts (см. К2)
     await toggle.click();
     await page.getByRole("button", { name: "Выйти" }).click();
     await expect(page).toHaveURL(/\/admin\/vhod$/);

@@ -18,6 +18,7 @@
     "db:push": "node --env-file-if-exists=.env.local scripts/db-push.mjs",
     "demo:seed": "node --env-file-if-exists=.env.local scripts/demo.mjs seed",
     "demo:remove": "node --env-file-if-exists=.env.local scripts/demo.mjs remove",
+    "staff:create-head": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-create-head.mjs",
     "format": "prettier --write .",
     "mockup:serve": "node docs/mockup/tools/serve.mjs",
     "mockup:capture": "node docs/mockup/tools/capture.mjs"
