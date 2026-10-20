@@ -174,6 +174,18 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     ).toBe(realEntriesBefore);
   });
 
+  it("удалённые из кабинета сданные объекты DEMO уходят из журнала вместе с DEMO", async () => {
+    await seed();
+    const head = await createStaff(db.admin, "head");
+    const sifat = (await db.admin.query<{ id: string }>("select id from developers where slug = 'demo-sifat'")).rows[0]!.id;
+    await db.as(user(head), (tx) => tx.query("select save_developer_past_projects($1, '[]')", [sifat]));
+    const logged = `select count(*)::int as n from audit_log where developer_id = '${sifat}'`;
+    expect(await count(logged)).toBeGreaterThan(0);
+
+    await db.admin.exec(await readDemo("remove.sql"));
+    expect(await count(logged)).toBe(0);
+  });
+
   it("настоящий ЖК у DEMO-застройщика останавливает удаление — ничего не удаляется", async () => {
     await seed();
     await db.admin.query(

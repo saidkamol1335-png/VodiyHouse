@@ -21,9 +21,11 @@ begin
 end;
 $$;
 
--- Правки DEMO из кабинета (например, проба смены статуса) — тоже DEMO.
+-- Правки DEMO из кабинета (например, проба смены статуса) — тоже DEMO. developer_id есть
+-- с шага 10.2 и ловит и удалённые сданные объекты; старые записи — по сущности и id.
 delete from public.audit_log
 where complex_id in (select id from public.complexes where slug like 'demo-%')
+   or developer_id in (select id from public.developers where slug like 'demo-%')
    or (entity in ('developers', 'developer_private')
        and entity_id in (select id::text from public.developers where slug like 'demo-%'))
    or (entity = 'developer_past_projects'
