@@ -74,6 +74,8 @@ revoke all on function private.audit_developer_id(text, jsonb) from public;
 
 -- Журнал для кабинета: застройщик или всё подряд («Настройки → Журнал»), страницами от новых
 -- к старым. Права — RLS журнала (руководитель и менеджер); имя автора — из profiles.
+-- subject — о ком запись: застройщик, ЖК, сотрудник по текущему названию, иначе — название из
+-- самой записи (добавленное или удалённое значение справочника).
 create function public.journal_entries(
   p_developer uuid default null,
   p_before bigint default null,
@@ -86,13 +88,26 @@ returns table (
   entity text,
   entity_id text,
   changes jsonb,
-  actor_name text
+  actor_name text,
+  subject text
 )
 language sql
 stable
 set search_path = ''
 as $$
-  select a.id, a.at, a.action, a.entity, a.entity_id, a.changes, p.full_name
+  select a.id, a.at, a.action, a.entity, a.entity_id, a.changes, p.full_name,
+         coalesce(
+           (select d.name from public.developers d where d.id = a.developer_id),
+           (select c.name ->> 'ru' from public.complexes c where c.id = a.complex_id),
+           (select s.full_name from public.profiles s where a.entity = 'profiles' and s.id::text = a.entity_id),
+           a.changes ->> 'full_name',
+           case jsonb_typeof(a.changes -> 'name')
+             when 'string' then a.changes ->> 'name'
+             when 'object' then a.changes -> 'name' ->> 'ru'
+           end,
+           a.changes -> 'term' ->> 'ru',
+           a.changes ->> 'key'
+         )
   from public.audit_log a
   left join public.profiles p on p.id = a.actor_id
   where (p_developer is null or a.developer_id = p_developer)
