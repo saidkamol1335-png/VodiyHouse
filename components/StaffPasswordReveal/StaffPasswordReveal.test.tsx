@@ -33,7 +33,7 @@ describe("пароль один раз", () => {
   });
 
   it("«Скопировать для Telegram» кладёт адрес входа, email и пароль — каждый на своей строке", async () => {
-    const writeText = vi.fn(async () => undefined);
+    const writeText = vi.fn<(text: string) => Promise<void>>(async () => undefined);
     mockClipboard(writeText);
     renderReveal();
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Скопировать для Telegram" })));
