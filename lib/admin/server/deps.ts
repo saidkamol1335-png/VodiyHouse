@@ -4,8 +4,11 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseVerifierClient } from "@/lib/supabase/verifier";
 import type { ChangePasswordDeps } from "../auth/changePassword";
 import type { SignInDeps } from "../auth/signIn";
+import { generatePassword } from "../password";
 import { readOwnProfile } from "../session";
+import type { CreateStaffDeps } from "../staff/createStaff";
 import { parseDirectoryRows, type DirectoryRow, type StaffMember } from "../staff/directory";
+import { BAN_DURATION, type ManageStaffDeps } from "../staff/manageStaff";
 
 // Адаптеры ядер кабинета к Supabase. Единственное место, где разрешён ключ service_role
 // (правило ESLint в eslint.config.mjs): сюда приходят только после проверки сотрудника.
@@ -38,6 +41,46 @@ async function verifyPassword(email: string, password: string): ReturnType<Chang
   if (error) return error.code === "invalid_credentials" ? "wrong" : { error };
   await signOutQuietly(verifier, "local");
   return "ok";
+}
+
+/**
+ * «Сотрудники»: session — сессия руководителя (профиль, отключение, «Новый пароль» идут через RLS
+ * и журнал), Auth — секретным ключом. Вызывать только после requireActionViewer(["head"], { fresh }).
+ */
+export function staffDeps(session: SupabaseClient): CreateStaffDeps & ManageStaffDeps {
+  const admin = createSupabaseAdminClient();
+  return {
+    generatePassword: () => generatePassword(),
+    async createAuthUser({ email, password }) {
+      const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+      if (error || !data.user) return { error: error ?? {} };
+      return { id: data.user.id };
+    },
+    async insertProfile({ id, fullName, role }) {
+      const { error } = await session.from("profiles").insert({ id, full_name: fullName, role });
+      return error;
+    },
+    async deleteAuthUser(id) {
+      const { error } = await admin.auth.admin.deleteUser(id);
+      return !error;
+    },
+    async updateActive(id, active) {
+      const { data, error } = await session.from("profiles").update({ is_active: active }).eq("id", id).select("id");
+      return error ? { error } : { rows: data?.length ?? 0 };
+    },
+    async setBan(id, banned) {
+      const { error } = await admin.auth.admin.updateUserById(id, { ban_duration: banned ? BAN_DURATION : "none" });
+      return !error;
+    },
+    async requirePasswordChange(id) {
+      const { error } = await session.rpc("require_password_change", { staff_id: id });
+      return error;
+    },
+    async setPassword(id, password) {
+      const { error } = await admin.auth.admin.updateUserById(id, { password });
+      return !error;
+    },
+  };
 }
 
 /** «Сотрудники» сессией руководителя: функция базы отдаёт строки только ему. */

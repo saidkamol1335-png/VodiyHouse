@@ -1,0 +1,51 @@
+/* Кнопки и панели строки встают прямо в сетку строки .staff-list__row:
+   кнопки — в последнюю колонку, подтверждение и пароль — на всю ширину под строкой. */
+.staff-actions {
+  display: contents;
+}
+
+.staff-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.staff-actions__panel {
+  grid-column: 2 / -1;
+}
+
+/* Подтверждение в строке (С5): вопрос и «Да / Отмена», без окна. */
+.staff-actions__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 10px 14px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-s);
+  background: var(--amber-soft);
+}
+
+.staff-actions__question {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.staff-actions__answers {
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 1100px) {
+  .staff-actions__buttons {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .staff-actions__panel {
+    grid-column: 1 / -1;
+  }
+}

@@ -35,10 +35,12 @@
   list-style: none;
 }
 
-/* Десктоп: аватар · имя и email · плашки · даты · действия; предупреждение — строкой ниже. */
+/* Десктоп: аватар · имя и email · плашки · даты · действия; предупреждение — строкой ниже.
+   Только доли minmax(0, …fr): колонки не зависят от содержимого и совпадают во всех строках,
+   даже в своей строке без кнопок. */
 .staff-list__row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1.4fr) minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr);
   align-items: center;
   gap: 8px 14px;
   padding: 12px 2px;
@@ -86,11 +88,9 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Кнопки строки раскладывает сам StaffRowActions — прямо в сетке строки. */
 .staff-list__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
+  display: contents;
 }
 
 .staff-list__warning {
@@ -112,11 +112,6 @@
   .staff-list__meta,
   .staff-list__warning {
     grid-column: 2;
-  }
-
-  .staff-list__actions {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
   }
 }
 

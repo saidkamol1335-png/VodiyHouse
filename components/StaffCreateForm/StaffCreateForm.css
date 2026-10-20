@@ -1,0 +1,57 @@
+/* «Добавить сотрудника» (С2): поля в ряд (Д3 — раскладка форм кабинета), на телефоне друг под другом. */
+.staff-create {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.staff-create--closed {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.staff-create__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.staff-create__role {
+  position: relative;
+  display: block;
+}
+
+.staff-create__select {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.staff-create__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.staff-create__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .staff-create__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .staff-create--closed .button,
+  .staff-create__actions .button {
+    width: 100%;
+  }
+}

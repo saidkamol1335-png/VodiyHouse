@@ -1,13 +1,19 @@
 import { getTranslations } from "next-intl/server";
 import { AdminPanel } from "@/components/AdminPanel";
+import { StaffCreateForm } from "@/components/StaffCreateForm";
 import { StaffList } from "@/components/StaffList";
+import { StaffRowActions } from "@/components/StaffRowActions";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { createStaffAction, resetStaffPasswordAction, setStaffActiveAction } from "@/lib/admin/actions/staff";
 import { readStaffDirectory } from "@/lib/admin/server/deps";
 import { requireSection } from "@/lib/admin/session";
+import type { StaffRowActionSet } from "@/lib/admin/staff/types";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const instant = false;
+
+const ROW_ACTIONS: StaffRowActionSet = { setActive: setStaffActiveAction, resetPassword: resetStaffPasswordAction };
 
 /** «Настройки → Сотрудники»: список из базы сессией руководителя (staff_directory). */
 export default async function SettingsStaffPage() {
@@ -19,5 +25,22 @@ export default async function SettingsStaffPage() {
     return <AdminPanel title={t("title")}>{t("notConfigured")}</AdminPanel>;
   }
   const members = await readStaffDirectory(await createSupabaseServerClient());
-  return <StaffList members={members} viewerId={viewer.id} />;
+  return (
+    <>
+      <StaffCreateForm action={createStaffAction} />
+      <StaffList
+        members={members}
+        viewerId={viewer.id}
+        actionsFor={(member) => (
+          <StaffRowActions
+            id={member.id}
+            name={member.fullName}
+            email={member.email}
+            isActive={member.isActive}
+            actions={ROW_ACTIONS}
+          />
+        )}
+      />
+    </>
+  );
 }
