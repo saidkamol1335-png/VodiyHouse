@@ -70,6 +70,8 @@ export async function attachDeveloperMediaAction(formData: FormData): Promise<Me
     p_blur: blur || null,
     p_focus_x: focus.x,
     p_focus_y: focus.y,
+    // У опубликованного застройщика файл сразу на сайте: без отметки правила 1.2 база откажет.
+    p_rule12: readText(formData, "rule12") === "on",
   });
   if (error) return fail(contentDbErrorCode(error));
   await removeFile(guard.supabase, data);

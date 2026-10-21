@@ -16,7 +16,13 @@ import {
 import { draftsFrom, type ProjectDraft } from "../developers/projects";
 import type { PrivateNotes } from "../developers/privateNotes";
 import type { DeveloperRecord } from "../developers/types";
-import { journalPage, JOURNAL_PAGE, type JournalPage, type JournalRecord } from "../journal/format";
+import {
+  journalPage,
+  JOURNAL_PAGE,
+  type JournalPage,
+  type JournalRecord,
+  type JournalScope,
+} from "../journal/format";
 import { PUBLICATION_STATUSES, type PublicationStatus } from "../publication";
 
 // Чтение данных кабинета застройщиков и справочников сессией сотрудника (RLS). Ошибка сети или
@@ -145,14 +151,15 @@ export async function readPrivateNotes(
   return { contacts: data?.contacts ?? "", notes: data?.notes ?? "" };
 }
 
-/** Страница журнала: застройщика или весь (null). before — продолжение «Показать ещё». */
+/** Страница журнала: застройщика, ЖК или весь. before — продолжение «Показать ещё». */
 export async function readJournal(
   supabase: SupabaseClient,
-  developerId: string | null,
+  scope: JournalScope,
   before: number | null = null,
 ): Promise<JournalPage> {
   const { data, error } = await supabase.rpc("journal_entries", {
-    p_developer: developerId,
+    p_developer: scope.developerId,
+    p_complex: scope.complexId,
     p_before: before,
     p_limit: JOURNAL_PAGE,
   });

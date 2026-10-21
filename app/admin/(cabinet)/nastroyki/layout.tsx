@@ -15,7 +15,9 @@ export default async function SettingsLayout({ children }: { children: ReactNode
   const { viewer, allowed } = await requireSection("settings");
   const person = await cabinetPerson(viewer);
   const t = await getTranslations("admin");
-  const topbar = <AdminTopbar title={t("settings.title")} subtitle={t("settings.subtitle")} person={person} />;
+  const topbar = (
+    <AdminTopbar title={t("settings.title")} subtitle={t("settings.subtitle")} person={person} />
+  );
   if (!allowed) {
     return (
       <AdminPage topbar={topbar}>

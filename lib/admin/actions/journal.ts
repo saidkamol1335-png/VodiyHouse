@@ -6,29 +6,34 @@ import {
   JOURNAL_PAGE,
   type JournalLoadResult,
   type JournalRecord,
+  type JournalScope,
 } from "@/lib/admin/journal/format";
 import { requireActionViewer } from "@/lib/admin/session";
 
-// «Показать ещё» в журнале застройщика и в «Настройки → Журнал»: следующая страница от
+// «Показать ещё» в журнале застройщика, ЖК и в «Настройки → Журнал»: следующая страница от
 // последней показанной строки. Разделы — руководителю (PLAN §7).
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const isScopeId = (id: unknown) => id === null || (typeof id === "string" && UUID.test(id));
+
 export async function loadJournalAction(
-  developerId: string | null,
+  scope: JournalScope,
   before: number,
 ): Promise<JournalLoadResult> {
   const guard = await requireActionViewer(["head"]);
   if (!guard.ok) return { status: "error", error: guard.code };
   if (
-    (developerId !== null && !UUID.test(developerId)) ||
+    !isScopeId(scope?.developerId) ||
+    !isScopeId(scope?.complexId) ||
     !Number.isSafeInteger(before) ||
     before < 1
   ) {
     return { status: "error", error: "invalid" };
   }
   const { data, error } = await guard.supabase.rpc("journal_entries", {
-    p_developer: developerId,
+    p_developer: scope.developerId,
+    p_complex: scope.complexId,
     p_before: before,
     p_limit: JOURNAL_PAGE,
   });

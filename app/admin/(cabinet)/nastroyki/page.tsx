@@ -4,7 +4,11 @@ import { StaffCreateForm } from "@/components/StaffCreateForm";
 import { StaffList } from "@/components/StaffList";
 import { StaffRowActions } from "@/components/StaffRowActions";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
-import { createStaffAction, resetStaffPasswordAction, setStaffActiveAction } from "@/lib/admin/actions/staff";
+import {
+  createStaffAction,
+  resetStaffPasswordAction,
+  setStaffActiveAction,
+} from "@/lib/admin/actions/staff";
 import { readStaffDirectory } from "@/lib/admin/server/deps";
 import { requireSection } from "@/lib/admin/session";
 import { staffState } from "@/lib/admin/staff/directory";
@@ -14,7 +18,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const instant = false;
 
-const ROW_ACTIONS: StaffRowActionSet = { setActive: setStaffActiveAction, resetPassword: resetStaffPasswordAction };
+const ROW_ACTIONS: StaffRowActionSet = {
+  setActive: setStaffActiveAction,
+  resetPassword: resetStaffPasswordAction,
+};
 
 /** «Настройки → Сотрудники»: список из базы сессией руководителя (staff_directory). */
 export default async function SettingsStaffPage() {

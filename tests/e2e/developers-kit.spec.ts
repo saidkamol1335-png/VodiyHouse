@@ -162,6 +162,9 @@ test.describe("кабинет · застройщики", () => {
   test("логотип: плитка «+», превью, удаление; маленький — понятная ошибка", async ({ page }) => {
     await page.goto(SIFAT);
     const logo = page.locator("#developer-logo");
+    // Застройщик опубликован: файл сразу на сайте — сначала отметка правила 1.2 (И8).
+    await expect(logo).toBeDisabled();
+    await page.getByRole("checkbox", { name: /Правило 1.2/ }).check();
     await logo.setInputFiles(await imageFile(page, { width: 300, height: 300, type: "image/png" }));
     await expect(issueOf(page, "developer-logo")).toHaveText(/300 px .*от 400 px/);
     await logo.setInputFiles(await imageFile(page, { width: 800, height: 800, type: "image/png" }));
@@ -174,6 +177,7 @@ test.describe("кабинет · застройщики", () => {
   test("фон: точка фокуса и три кадра", async ({ page }) => {
     await page.goto(SIFAT);
     const cover = page.locator("#developer-cover");
+    await page.getByRole("checkbox", { name: /Правило 1.2/ }).check();
     await cover.setInputFiles(
       await imageFile(page, { width: 1200, height: 800, type: "image/jpeg" }),
     );

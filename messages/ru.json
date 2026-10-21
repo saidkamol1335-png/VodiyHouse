@@ -493,7 +493,36 @@
         "must_change_password": "Сменить пароль при входе",
         "slug": "Адрес на сайте",
         "price": "Цена",
-        "finishing_id": "Отделка"
+        "finishing_id": "Отделка",
+        "short_description": "Короткое описание",
+        "class": "Класс",
+        "location_id": "Город или район",
+        "address": "Адрес",
+        "landmark": "Ориентир",
+        "minutes_to_center": "До центра, мин",
+        "lat": "Широта",
+        "lng": "Долгота",
+        "house_type": "Тип дома",
+        "ceiling_height": "Потолки",
+        "parking": "Парковка",
+        "permit_checked_at": "Разрешение проверено",
+        "land_checked_at": "Земля оформлена",
+        "staff_visited_at": "Визит сотрудника",
+        "files_checked_at": "Проверка файлов по правилу 1.2",
+        "build_status": "Стройка",
+        "progress_pct": "Готовность, %",
+        "floors_total": "Этажей всего",
+        "floors_built": "Построено этажей",
+        "deadline_year": "Срок сдачи · год",
+        "deadline_quarter": "Срок сдачи · квартал",
+        "cadastre": "Кадастр",
+        "cadastre_expected_on": "Кадастр ожидается",
+        "currency": "Валюта",
+        "rooms": "Комнаты",
+        "area": "Площадь",
+        "price_from": "Цена от",
+        "available": "Доступна",
+        "alt": "Подпись"
       }
     },
     "dictionaries": {
@@ -864,6 +893,34 @@
           "outOfRange": "Проверьте число",
           "notNumber": "Нужно число"
         }
+      },
+      "units": {
+        "title": "Квартиры",
+        "lead": "Генератор блока, стояки и список квартир со статусами — следующим шагом. Пока — что есть по блокам.",
+        "empty": "Блоков пока нет — добавьте их на вкладке «Блоки».",
+        "blockName": "Блок {name}",
+        "listed": "список из {count, plural, one {# квартиры} few {# квартир} many {# квартир} other {# квартиры}}",
+        "free": "свободно {count}",
+        "noList": "списка квартир нет — наличие по флагу «доступна» у планировок"
+      },
+      "photos": {
+        "title": "Фото",
+        "count": "Фото · {count} · для публикации от {min}, всего до {max}. Первое — обложка: от 2400 px. Подписей нет — как вся галерея. Сохраняется сразу.",
+        "add": "Добавить фото",
+        "open": "Фото {index}",
+        "panel": "Фото {index}",
+        "cover": "Обложка",
+        "isCover": "Это обложка — первое фото",
+        "makeCover": "Сделать обложкой",
+        "notCover": "Обложкой стать не может: для неё нужно от {min} px.",
+        "left": "Левее",
+        "right": "Правее",
+        "remove": "Удалить фото",
+        "removeConfirm": "Удалить фото?",
+        "removeYes": "Да, удалить",
+        "removeCancel": "Отмена",
+        "dismiss": "Убрать",
+        "size": "{width} × {height} px"
       }
     }
   }

@@ -17,11 +17,12 @@ export default async function DeveloperJournalPage({
   const developer = await developerForTab(params);
   if (!developer) return null;
   const t = await getTranslations("admin");
-  const page = await readJournal(await createSupabaseServerClient(), developer.id);
+  const scope = { developerId: developer.id, complexId: null };
+  const page = await readJournal(await createSupabaseServerClient(), scope);
   return (
     <AdminPanel title={t("developers.tabs.log")} wide>
       <p className="admin-panel__lead">{t("developers.journalLead")}</p>
-      <JournalList page={page} developerId={developer.id} load={loadJournalAction} />
+      <JournalList page={page} scope={scope} load={loadJournalAction} />
     </AdminPanel>
   );
 }

@@ -26,6 +26,8 @@ type UseDeveloperMediaParams = {
   initial: MediaPreview | null;
   /** null — без облака: только превью в браузере. */
   actions: DeveloperMediaActions | null;
+  /** Отметка правила 1.2 — у опубликованного застройщика без неё база отказывает (И8). */
+  rule12?: boolean;
 };
 
 const FOCUS_SAVE_DELAY_MS = 400;
@@ -61,6 +63,7 @@ async function uploadToCloud(
       blur: image.blur,
       focusX: DEFAULT_FOCUS.x,
       focusY: DEFAULT_FOCUS.y,
+      ...(params.rule12 ? { rule12: "on" } : {}),
     }),
   );
   if (result.status === "error") {

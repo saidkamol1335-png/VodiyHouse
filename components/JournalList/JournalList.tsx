@@ -11,19 +11,17 @@ import type {
   JournalEntry,
   JournalLoadResult,
   JournalPage,
+  JournalScope,
   JournalValue,
 } from "@/lib/admin/journal/format";
 import { formatDate, formatDateTime } from "@/lib/format";
 
-export type JournalLoader = (
-  developerId: string | null,
-  before: number,
-) => Promise<JournalLoadResult>;
+export type JournalLoader = (scope: JournalScope, before: number) => Promise<JournalLoadResult>;
 
 type JournalListProps = {
   page: JournalPage;
-  /** null — весь журнал («Настройки → Журнал»). */
-  developerId: string | null;
+  /** Чей журнал: застройщика, ЖК или весь («Настройки → Журнал»). */
+  scope: JournalScope;
   /** «Показать ещё» — Server Action; null — без продолжения (служебный стенд). */
   load: JournalLoader | null;
 };
@@ -35,7 +33,7 @@ const ACTION_TONES: Record<JournalAction, BadgeTone> = {
 };
 
 /** Журнал изменений (ТЗ 13.1): кто, когда и что поменял — от новых к старым, страницами. */
-export function JournalList({ page, developerId, load }: JournalListProps) {
+export function JournalList({ page, scope, load }: JournalListProps) {
   const t = useTranslations("admin");
   const [entries, setEntries] = useState(page.entries);
   const [nextBefore, setNextBefore] = useState(page.nextBefore);
@@ -45,7 +43,7 @@ export function JournalList({ page, developerId, load }: JournalListProps) {
   const more = () =>
     startLoading(async () => {
       if (!load || nextBefore === null) return;
-      const result = await load(developerId, nextBefore);
+      const result = await load(scope, nextBefore);
       if (result.status === "error") return setError(result.error);
       setError(null);
       setEntries((current) => [...current, ...result.page.entries]);

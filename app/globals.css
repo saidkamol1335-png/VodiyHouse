@@ -69,8 +69,10 @@
 @import "../components/ComplexLayoutsForm/ComplexLayoutsForm.css";
 @import "../components/ComplexList/ComplexList.css";
 @import "../components/ComplexMainForm/ComplexMainForm.css";
+@import "../components/ComplexPhotos/ComplexPhotos.css";
 @import "../components/ComplexReadiness/ComplexReadiness.css";
 @import "../components/ComplexStatus/ComplexStatus.css";
+@import "../components/ComplexUnitsSummary/ComplexUnitsSummary.css";
 @import "../components/Container/Container.css";
 @import "../components/DeveloperCreateForm/DeveloperCreateForm.css";
 @import "../components/DeveloperList/DeveloperList.css";

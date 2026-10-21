@@ -74,13 +74,11 @@ export const DEMO_FINISHING_OPTIONS = SEED_DICTIONARIES.finishings.map((item) =>
 export function demoBlocks(complexId: string): BlockDraft[] {
   const slug = DEMO_COMPLEX_ROWS.find((row) => row.id === complexId)?.slug;
   return blockDraftsFrom(
-    BLOCKS.filter((block) => block.complexSlug === slug).map(
-      ({ finishing: key, ...block }) => ({
-        ...block,
-        finishing_id: finishing(key),
-        price_includes: [],
-        cadastre_expected_on: null,
-      }),
-    ),
+    BLOCKS.filter((block) => block.complexSlug === slug).map(({ finishing: key, ...block }) => ({
+      ...block,
+      finishing_id: finishing(key),
+      price_includes: [],
+      cadastre_expected_on: null,
+    })),
   );
 }

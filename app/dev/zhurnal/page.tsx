@@ -8,7 +8,7 @@ import { AdminTopbar } from "@/components/AdminTopbar";
 import { JournalList } from "@/components/JournalList";
 import { DEV_VIEWER } from "@/lib/admin/access";
 import { DEMO_JOURNAL } from "@/lib/admin/developers/demo";
-import { journalPage } from "@/lib/admin/journal/format";
+import { journalPage, WHOLE_JOURNAL } from "@/lib/admin/journal/format";
 import { cabinetPerson } from "@/lib/admin/person";
 
 // Стенд «Настройки → Журнал» на DEMO-записях (правки DEMO-руководителя мокапа).
@@ -31,7 +31,7 @@ export default async function DevJournalPage() {
         <AdminTabs label={t("settings.tabsLabel")} tabs={tabs} />
         <AdminPanel title={t("journal.title")} wide>
           <p className="admin-panel__lead">{t("journal.lead")}</p>
-          <JournalList page={journalPage(DEMO_JOURNAL)} developerId={null} load={null} />
+          <JournalList page={journalPage(DEMO_JOURNAL)} scope={WHOLE_JOURNAL} load={null} />
         </AdminPanel>
       </AdminPage>
     </AdminShell>

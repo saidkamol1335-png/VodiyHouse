@@ -22,7 +22,7 @@ export default async function DevDeveloperJournalPage({
   return (
     <AdminPanel title={t("developers.tabs.log")} wide>
       <p className="admin-panel__lead">{t("developers.journalLead")}</p>
-      <JournalList page={page} developerId={developer.id} load={null} />
+      <JournalList page={page} scope={{ developerId: developer.id, complexId: null }} load={null} />
     </AdminPanel>
   );
 }

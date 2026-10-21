@@ -1,13 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
 import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
 import { MediaDrop, type MediaPreview } from "@/components/MediaDrop";
+import { Rule12Check } from "@/components/Rule12Check";
 import { EMPTY_BILINGUAL } from "@/lib/admin/bilingual";
 import { DEVELOPER_LIMITS, type DeveloperMainFields } from "@/lib/admin/developers/mainForm";
 import type {
@@ -123,7 +124,12 @@ export function DeveloperMainForm({
           maxLength={DEVELOPER_LIMITS.foundersMax}
           defaultValue={fields.founders}
         />
-        <DeveloperMediaFields developerId={developer.id} media={media} actions={mediaActions} />
+        <DeveloperMediaFields
+          developerId={developer.id}
+          published={developer.status === "published"}
+          media={media}
+          actions={mediaActions}
+        />
         <div className="developer-main__save">
           <SaveFeedback state={state} />
           <Button type="submit" pending={pending}>
@@ -137,24 +143,33 @@ export function DeveloperMainForm({
 
 type MediaFieldsProps = {
   developerId: string;
+  /** Опубликован — файл сразу на сайте: загрузка с отметкой правила 1.2 (И8). */
+  published: boolean;
   media: DeveloperMainFormProps["media"];
   actions: DeveloperMediaActions | null;
 };
 
 /** Логотип — плитка «+», фон — широкая зона с точкой фокуса (Д4). Сохраняются сразу, без кнопки. */
-function DeveloperMediaFields({ developerId, media, actions }: MediaFieldsProps) {
+function DeveloperMediaFields({ developerId, published, media, actions }: MediaFieldsProps) {
   const t = useTranslations("admin.developers");
-  const logo = useDeveloperMedia({ developerId, kind: "logo", initial: media.logo, actions });
-  const cover = useDeveloperMedia({ developerId, kind: "cover", initial: media.cover, actions });
+  const [rule12, setRule12] = useState(false);
+  const locked = published && !rule12;
+  const params = { developerId, actions, rule12 };
+  const logo = useDeveloperMedia({ ...params, kind: "logo", initial: media.logo });
+  const cover = useDeveloperMedia({ ...params, kind: "cover", initial: media.cover });
   const error = logo.error ?? cover.error;
   return (
     <>
+      {published ? (
+        <Rule12Check id="developer-rule12" checked={rule12} onChange={setRule12} />
+      ) : null}
       <div className="developer-main__media">
         <MediaDrop
           id="developer-logo"
           kind="logo"
           variant="tile"
           label={t("fields.logo")}
+          disabled={locked}
           value={logo.preview}
           onPrepared={logo.upload}
           onRemove={logo.remove}
@@ -164,6 +179,7 @@ function DeveloperMediaFields({ developerId, media, actions }: MediaFieldsProps)
           kind="cover"
           variant="wide"
           label={t("fields.cover")}
+          disabled={locked}
           value={cover.preview}
           onPrepared={cover.upload}
           onRemove={cover.remove}

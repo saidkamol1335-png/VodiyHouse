@@ -3,6 +3,7 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { JournalList } from "@/components/JournalList";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { loadJournalAction } from "@/lib/admin/actions/journal";
+import { WHOLE_JOURNAL } from "@/lib/admin/journal/format";
 import { readJournal } from "@/lib/admin/server/developers";
 import { requireSection } from "@/lib/admin/session";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -20,11 +21,11 @@ export default async function SettingsJournalPage() {
       <AdminPanel title={t("journal.title")}>{t("developers.errors.notConfigured")}</AdminPanel>
     );
   }
-  const page = await readJournal(await createSupabaseServerClient(), null);
+  const page = await readJournal(await createSupabaseServerClient(), WHOLE_JOURNAL);
   return (
     <AdminPanel title={t("journal.title")} wide>
       <p className="admin-panel__lead">{t("journal.lead")}</p>
-      <JournalList page={page} developerId={null} load={loadJournalAction} />
+      <JournalList page={page} scope={WHOLE_JOURNAL} load={loadJournalAction} />
     </AdminPanel>
   );
 }

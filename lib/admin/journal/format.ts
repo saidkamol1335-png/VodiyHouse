@@ -51,6 +51,10 @@ const HIDDEN_FIELDS = new Set([
   "path",
   "width",
   "height",
+  // ЖК (шаг 11): ссылка на файл чертежа и составные списки — в журнале как «изменено» без смысла.
+  "drawing_id",
+  "price_includes",
+  "nearby",
 ]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
 const TEXT_LIMIT = 140;
@@ -140,3 +144,8 @@ export function journalPage(
 /** Ответ «Показать ещё» (lib/admin/actions/journal.ts). */
 export type JournalLoadResult =
   { status: "ok"; page: JournalPage } | { status: "error"; error: ContentErrorCode };
+
+/** Чей журнал: застройщика, ЖК или весь («Настройки → Журнал»). */
+export type JournalScope = { developerId: string | null; complexId: string | null };
+
+export const WHOLE_JOURNAL: JournalScope = { developerId: null, complexId: null };

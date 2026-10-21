@@ -1,0 +1,30 @@
+/* «Квартиры» до шага 12: строки блоков, как строки «Остатков по ЖК» мокапа. */
+.complex-units__lead,
+.complex-units__empty {
+  margin: 0 0 8px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-units__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-units__rows > li + li {
+  border-top: 1px dashed var(--line);
+}
+
+.complex-units__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 0;
+  font-size: var(--fs-small);
+}
+
+.complex-units__none {
+  color: var(--fg-3);
+}

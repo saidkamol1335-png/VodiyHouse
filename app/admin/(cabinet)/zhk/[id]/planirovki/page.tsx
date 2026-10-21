@@ -4,7 +4,7 @@ import { attachComplexDrawingAction } from "@/lib/admin/actions/complexMedia";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { complexForTab } from "@/lib/admin/server/complexPage";
-import { readBlockLayouts } from "@/lib/admin/server/complexes";
+import { readBlockLayouts } from "@/lib/admin/server/complexTabs";
 import { mediaSrc } from "@/lib/admin/server/developerPage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 

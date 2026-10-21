@@ -27,6 +27,8 @@ type MediaDropProps = {
   onPrepared: (image: ProcessedImage) => Promise<void>;
   onRemove: () => void;
   onFocusChange?: (focus: FocusPoint) => void;
+  /** Нельзя выбрать файл: нет отметки правила 1.2 у опубликованного застройщика. */
+  disabled?: boolean;
 };
 
 const MEGABYTE = 1024 * 1024;
@@ -40,7 +42,10 @@ export function MediaDrop(props: MediaDropProps) {
   });
 
   return (
-    <div className={`media-drop media-drop--${props.variant}`}>
+    <div
+      className={`media-drop media-drop--${props.variant}`}
+      aria-disabled={props.disabled || undefined}
+    >
       <label className="field__label" htmlFor={props.id}>
         {props.label}
       </label>
@@ -49,6 +54,7 @@ export function MediaDrop(props: MediaDropProps) {
         className="media-drop__input"
         type="file"
         accept={MEDIA_LIMITS.acceptedTypes.join(",")}
+        disabled={props.disabled}
         onChange={(event) => {
           void pick(event.target.files?.[0]);
           event.target.value = "";

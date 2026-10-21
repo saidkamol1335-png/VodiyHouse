@@ -1,7 +1,7 @@
 import { ComplexBlocksForm } from "@/components/ComplexBlocksForm";
 import { saveComplexBlocksAction } from "@/lib/admin/actions/complexes";
 import { complexForTab } from "@/lib/admin/server/complexPage";
-import { readBlocks } from "@/lib/admin/server/complexes";
+import { readBlocks } from "@/lib/admin/server/complexTabs";
 import { readDictionary } from "@/lib/admin/server/developers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 

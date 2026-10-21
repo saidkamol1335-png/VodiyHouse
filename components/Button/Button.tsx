@@ -18,6 +18,10 @@ type ButtonProps = {
   /** Форма отправляется: кнопка недоступна и помечена aria-busy. */
   pending?: boolean;
   className?: string;
+  /** Кнопка-иконка (← →) — подпись для экранного диктора. */
+  "aria-label"?: string;
+  /** Кнопка раскрывает часть страницы («Изменить» у карточки блока). */
+  "aria-expanded"?: boolean;
 };
 
 type ButtonLook = Pick<ButtonProps, "variant" | "size" | "block" | "pending" | "className">;
@@ -45,6 +49,8 @@ export function Button({
   value,
   onClick,
   disabled = false,
+  "aria-label": ariaLabel,
+  "aria-expanded": ariaExpanded,
   ...look
 }: ButtonProps) {
   const classes = buttonClasses(look);
@@ -64,6 +70,8 @@ export function Button({
       onClick={onClick}
       disabled={disabled || look.pending}
       aria-busy={look.pending || undefined}
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
     >
       {children}
     </button>
