@@ -41,10 +41,12 @@ export type { LayoutChange, Riser, RiserIssue } from "./risers";
 export {
   applyRisers,
   defaultRisers,
+  fitRisersToPlan,
   layoutForSlot,
   riserChanges,
   riserEdits,
   riserForSlot,
+  uncoveredSlots,
   validateRisers,
 } from "./risers";
 export type { RoomGroup } from "./rooms";

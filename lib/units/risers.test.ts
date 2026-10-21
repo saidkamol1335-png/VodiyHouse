@@ -3,8 +3,10 @@ import { generateUnits, type BlockPlan } from "./blockPlan";
 import {
   applyRisers,
   defaultRisers,
+  fitRisersToPlan,
   layoutForSlot,
   riserChanges,
+  uncoveredSlots,
   validateRisers,
   type Riser,
 } from "./risers";
@@ -127,5 +129,76 @@ describe("стояки · проверка", () => {
       { code: "riserFloorsOutOfRange", riser: 2 },
       { code: "riserEntranceOutOfRange", riser: 3 },
     ]);
+  });
+});
+
+describe("стояки генератора под изменившийся план", () => {
+  it("выбранные планировки остаются, этажи — в пределах, лишние подъезды и позиции отпадают", () => {
+    const risers: Riser[] = [
+      general(1, "1k"),
+      { entrance: 3, position: 1, floorFrom: 2, floorTo: 16, layoutId: "1k-wide" },
+      general(4, "3k"),
+    ];
+    const smaller: BlockPlan = { ...PLAN, entrances: 2, floors: 12, unitsPerFloor: [3, 3] };
+    expect(fitRisersToPlan(risers, smaller)).toEqual([
+      general(1, "1k", 2, 12),
+      general(2, null, 2, 12),
+      general(3, null, 2, 12),
+    ]);
+  });
+
+  it("свой стояк подъезда остаётся, пока подъезд и позиция есть; нижний этаж поднимается", () => {
+    const risers: Riser[] = [
+      general(1, "1k"),
+      { entrance: 2, position: 1, floorFrom: 2, floorTo: 5, layoutId: "1k-wide" },
+    ];
+    const plan: BlockPlan = { ...PLAN, firstResidentialFloor: 3, unitsPerFloor: [1, 1, 1] };
+    expect(fitRisersToPlan(risers, plan)).toEqual([
+      general(1, "1k", 3, 16),
+      { entrance: 2, position: 1, floorFrom: 3, floorTo: 5, layoutId: "1k-wide" },
+    ]);
+  });
+});
+
+describe("стояки генератора: смена первого жилого этажа", () => {
+  const floors = (plan: BlockPlan, first: number): BlockPlan => ({
+    ...plan,
+    firstResidentialFloor: first,
+  });
+
+  it("первый жилой ниже — стояки, начинавшиеся с прежнего, тянутся вниз", () => {
+    const plan = { ...PLAN, entrances: 2, unitsPerFloor: [2, 2] };
+    const risers = defaultRisers(plan).map((riser) => ({ ...riser, layoutId: "1k" }));
+    const fitted = fitRisersToPlan(risers, floors(plan, 1), plan);
+    expect(fitted.every((riser) => riser.floorFrom === 1 && riser.floorTo === 16)).toBe(true);
+    expect(uncoveredSlots(floors(plan, 1), fitted)).toBe(0);
+  });
+
+  it("первый жилой выше раздела — нижняя строка отпадает, без пересечений", () => {
+    const plan = { ...PLAN, entrances: 1, unitsPerFloor: [1] };
+    const risers: Riser[] = [general(1, "a", 2, 8), general(1, "b", 9, 16)];
+    const higher = floors(plan, 10);
+    const fitted = fitRisersToPlan(risers, higher, plan);
+    expect(fitted).toEqual([general(1, "b", 10, 16)]);
+    expect(validateRisers(higher, fitted)).toEqual([]);
+  });
+
+  it("без прежнего плана этажи только подтягиваются в пределы", () => {
+    const plan = { ...PLAN, entrances: 1, unitsPerFloor: [1] };
+    expect(fitRisersToPlan([general(1, "a", 5, 16)], floors(plan, 2))).toEqual([
+      general(1, "a", 5, 16),
+    ]);
+  });
+});
+
+describe("места вне стояков", () => {
+  it("убранная строка оставляет её этажи без стояка", () => {
+    const plan = { ...PLAN, entrances: 2, unitsPerFloor: [2, 2] };
+    const risers = defaultRisers(plan);
+    expect(uncoveredSlots(plan, risers)).toBe(0);
+    const shrunk = risers.map((riser, index) => (index === 0 ? { ...riser, floorTo: 11 } : riser));
+    // Позиция 1, эт. 12–16, в двух подъездах.
+    expect(uncoveredSlots(plan, shrunk)).toBe(10);
+    expect(uncoveredSlots({ ...plan, entrances: 0 }, risers)).toBe(0);
   });
 });

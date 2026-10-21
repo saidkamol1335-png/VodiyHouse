@@ -1,0 +1,85 @@
+/* «Стояки · N строк» готового блока: свёрнутая плашка над списком квартир, раскрывается на месте. */
+.units-risers {
+  --units-risers-pad: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-3);
+}
+
+.units-risers__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--units-risers-pad);
+  border: 0;
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.units-risers__toggle:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-risers__chevron {
+  flex: none;
+  color: var(--fg-3);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.units-risers--open .units-risers__chevron {
+  transform: rotate(180deg);
+}
+
+.units-risers__body {
+  display: grid;
+  gap: 8px;
+  padding: 0 var(--units-risers-pad) var(--units-risers-pad);
+}
+
+.units-risers__body[hidden] {
+  display: none;
+}
+
+.units-risers__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-risers__warning {
+  margin: 0;
+  color: var(--amber-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.units-risers__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .units-risers__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 calc(-1 * var(--units-risers-pad)) calc(-1 * var(--units-risers-pad));
+    padding: 12px var(--units-risers-pad) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 var(--r-m) var(--r-m);
+    background: var(--glass-solid);
+  }
+}

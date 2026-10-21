@@ -1,0 +1,168 @@
+/* Генератор списка (№8, Н6): поля в ряд, живой итог плашкой, стояки, пометки и «Создать N». */
+.units-generator {
+  display: grid;
+  gap: 14px;
+}
+
+.units-generator__title,
+.units-generator__subtitle {
+  margin: 0;
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.units-generator__title {
+  font-size: var(--fs-h4);
+}
+
+.units-generator__subtitle {
+  font-size: var(--fs-body);
+}
+
+.units-generator__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-generator__fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px 16px;
+}
+
+.units-generator__per-entrance {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+}
+
+.units-generator__check {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.units-generator__check input {
+  accent-color: var(--amber);
+}
+
+.units-generator__entrances {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+/* Живой итог для диктора: вне сетки (absolute), на экране — плашка ниже. */
+.units-generator__announce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Итог — плашкой, как «Итого» в «Программах оплаты»: число крупно, диапазон моно. */
+.units-generator__total {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-3);
+}
+
+.units-generator__total--error {
+  margin: 0;
+  border-color: var(--bad);
+  color: var(--bad);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.units-generator__count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.units-generator__count b {
+  color: var(--fg);
+  font-size: var(--fs-h3);
+}
+
+.units-generator__range,
+.units-generator__by-entrance {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label-l);
+}
+
+.units-generator__by-entrance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.units-generator__risers {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+
+.units-generator__notes {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.units-generator__note {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-generator__note--warn {
+  color: var(--amber-2);
+  font-weight: 600;
+}
+
+.units-generator__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .units-generator__fields,
+  .units-generator__entrances {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* «Создать N квартир» прилипает к низу: стояков у блока бывает много. */
+  .units-generator__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 calc(-1 * var(--admin-panel-pad));
+    padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
+  }
+}

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { collectPageErrors, imageFile } from "./helpers";
 
 // Шаг 11 фазы 1: вкладки ЖК на служебном стенде (/dev/zhk/<id>, DEMO мокапа) — «Блоки» (И4),
-// «Планировки» (И5), «Фото» (И6), «Квартиры» до шага 12 и «Журнал».
+// «Планировки» (И5), «Фото» (И6) и «Журнал»; «Квартиры» — complexes-units.spec.ts.
 
 const complexUrl = (n: number) => `/dev/zhk/00000000-0000-4000-8000-0000000000c${n}`;
 const SHODLIK = complexUrl(1);
@@ -161,7 +161,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   });
 });
 
-test.describe("кабинет · ЖК · фото, квартиры, журнал", () => {
+test.describe("кабинет · ЖК · фото и журнал", () => {
   let errors: string[];
 
   test.beforeEach(({ page }) => {
@@ -224,19 +224,7 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
     await expect(page.getByRole("button", { name: "Сохранить вкладку" })).toHaveCount(0);
   });
 
-  test("«Квартиры» до шага 12 и «Журнал» ЖК", async ({ page }) => {
-    await open(page, `${SHODLIK}/kvartiry`);
-    const rows = page.locator(".complex-units__row");
-    await expect(rows.first()).toContainText("Блок A");
-    await expect(rows.first()).toContainText("список из 88 квартир");
-    await expect(rows.first()).toContainText("свободно 12");
-    await open(page, `${NAMUNA}/kvartiry`);
-    await expect(page.locator(".complex-units__row")).toContainText("списка квартир нет");
-    await expect(page.getByRole("link", { name: "Отметить доступность →" })).toHaveAttribute(
-      "href",
-      `${NAMUNA}/planirovki`,
-    );
-
+  test("«Журнал» ЖК: блоки и планировки с названием ЖК", async ({ page }) => {
     await open(page, `${SHODLIK}/zhurnal`);
     await expect(page.getByText("Блок B").first()).toBeVisible();
     await expect(page.getByText("Готовность, %")).toBeVisible();

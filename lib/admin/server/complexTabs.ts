@@ -122,30 +122,6 @@ export async function readBlockLayouts(
   });
 }
 
-/** «Квартиры» до шага 12: блоки, число квартир в списке и свободные (block_availability). */
-export async function readBlockUnitLines(
-  supabase: SupabaseClient,
-  complexId: string,
-): Promise<{ blockId: string; name: string; units: number; free: number | null }[]> {
-  const [blocks, stock] = await Promise.all([
-    readBlocks(supabase, complexId),
-    supabase.rpc("block_availability", { target_complex: complexId }),
-  ]);
-  if (stock.error) unavailable("block-availability", stock.error);
-  const freeOf = new Map(
-    ((stock.data ?? []) as { block_id: string; free_count: number | null }[]).map((row) => [
-      row.block_id,
-      row.free_count,
-    ]),
-  );
-  return blocks.map((block) => ({
-    blockId: block.id!,
-    name: block.name,
-    units: block.units,
-    free: freeOf.get(block.id!) ?? null,
-  }));
-}
-
 type PhotoRow = {
   id: string;
   path: string;

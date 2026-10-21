@@ -1,7 +1,7 @@
 // Стояки (PLAN §7, фаза 1): позиция в подъезде → планировка на диапазон этажей.
 // Так одна строка «поз. 1 → 1-комн. 42,5 м², эт. 2–16» назначает планировку сразу 45 квартирам.
 
-import type { BlockPlan, UnitSlot } from "./blockPlan";
+import { generateUnits, validateBlockPlan, type BlockPlan, type UnitSlot } from "./blockPlan";
 
 export type Riser = {
   /** null — во всех подъездах; номер — только в этом (уточняет общий стояк). */
@@ -29,6 +29,54 @@ export function defaultRisers(plan: BlockPlan): Riser[] {
     floorTo: plan.floors,
     layoutId: null,
   }));
+}
+
+/**
+ * Стояки генератора под изменившийся план. Зовётся при смене полей плана, а не при правке
+ * стояков: иначе этаж «12» не набрать — «1» подтянулся бы к первому жилому. Выбранные
+ * планировки остаются; стояки исчезнувших подъездов и позиций и целиком вне жилых этажей
+ * отпадают; граница, стоявшая на прежнем первом жилом или последнем этаже, переезжает на новый
+ * (previous — план, под который стояки подгоняли в прошлый раз); у позиции без общего стояка
+ * он появляется.
+ */
+export function fitRisersToPlan(
+  risers: readonly Riser[],
+  plan: BlockPlan,
+  previous?: BlockPlan,
+): Riser[] {
+  const first = plan.firstResidentialFloor;
+  const clamp = (floor: number) => Math.min(Math.max(floor, first), plan.floors);
+  const fitted = risers
+    .filter(
+      (riser) =>
+        riser.position <= maxPositionFor(plan, riser.entrance) &&
+        (riser.entrance === null || riser.entrance <= plan.entrances),
+    )
+    .map((riser) => ({
+      ...riser,
+      floorFrom: riser.floorFrom === previous?.firstResidentialFloor ? first : riser.floorFrom,
+      floorTo: riser.floorTo === previous?.floors ? plan.floors : riser.floorTo,
+    }))
+    .filter((riser) => !(riser.floorTo < first || riser.floorFrom > plan.floors))
+    .map((riser) => ({
+      ...riser,
+      floorFrom: clamp(riser.floorFrom),
+      floorTo: clamp(riser.floorTo),
+    }));
+  const missing = defaultRisers(plan).filter(
+    (fresh) =>
+      !fitted.some((riser) => riser.entrance === null && riser.position === fresh.position),
+  );
+  return [...fitted, ...missing].sort(
+    (a, b) =>
+      a.position - b.position || (a.entrance ?? 0) - (b.entrance ?? 0) || a.floorFrom - b.floorFrom,
+  );
+}
+
+/** Сколько мест плана не покрывает ни один стояк — их планировку сохранение не тронет. */
+export function uncoveredSlots(plan: BlockPlan, risers: readonly Riser[]): number {
+  if (validateBlockPlan(plan).length > 0) return 0;
+  return generateUnits(plan).filter((slot) => riserForSlot(slot, risers) === undefined).length;
 }
 
 export function validateRisers(plan: BlockPlan, risers: readonly Riser[]): RiserIssue[] {

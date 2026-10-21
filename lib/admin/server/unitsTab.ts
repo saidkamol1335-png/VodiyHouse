@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { parseUnitRecords, type UnitRecord } from "@/lib/units";
+import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "../units/types";
 import { readDictionary } from "./developers";
 
 // Вкладка «Квартиры» (шаг 12) сессией сотрудника: блоки ЖК, планировки и квартиры выбранного
@@ -10,27 +11,6 @@ import { readDictionary } from "./developers";
 function unavailable(what: string, cause: unknown): never {
   throw new Error(`${what}-unavailable`, { cause });
 }
-
-export type UnitsBlock = {
-  id: string;
-  name: string;
-  floorsTotal: number | null;
-  /** Отделка блока — у квартиры без своей серым «как в блоке». */
-  finishingId: number | null;
-  currency: "USD" | "UZS";
-  unitCount: number;
-};
-
-export type UnitsLayout = {
-  id: string;
-  rooms: number;
-  area: number;
-  /** Ручной флаг «доступна» — только у блока без списка квартир (Н7). */
-  available: boolean;
-  priceFrom: number | null;
-};
-
-export type UnitsFinishing = { id: number; name: string; isActive: boolean };
 
 export type UnitsTab = {
   blocks: UnitsBlock[];

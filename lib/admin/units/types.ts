@@ -77,3 +77,41 @@ export type SaveRisersInput = { blockId: string; base: readonly Riser[]; risers:
 export type SaveRisersResult = UnitsResult<{ changed: number; skipped: string[] }>;
 export type SetLayoutAvailableInput = { layoutId: string; available: boolean };
 export type ChangedResult = UnitsResult<{ changed: number }>;
+
+// ─── Вкладка «Квартиры»: что видит экран ────────────────────────────────────────────────────
+
+export type UnitsBlock = {
+  id: string;
+  name: string;
+  floorsTotal: number | null;
+  /** Отделка блока — у квартиры без своей серым «как в блоке». */
+  finishingId: number | null;
+  currency: "USD" | "UZS";
+  unitCount: number;
+};
+
+export type UnitsLayout = {
+  id: string;
+  rooms: number;
+  area: number;
+  /** Ручной флаг «доступна» — только у блока без списка квартир (Н7). */
+  available: boolean;
+  priceFrom: number | null;
+};
+
+export type UnitsFinishing = { id: number; name: string; isActive: boolean };
+
+/** Готовый блок: стояки собраны из квартир, границы — для их проверки (Н5). */
+export type ReadyBlockView = { count: number; plan: BlockPlan; risers: Riser[] };
+
+/** Вкладка «Квартиры» в браузере: без списка квартир — его экран читает сам (12.4). */
+export type UnitsTabView = {
+  blocks: UnitsBlock[];
+  /** null — у ЖК нет блоков. */
+  block: UnitsBlock | null;
+  layouts: UnitsLayout[];
+  ready: ReadyBlockView | null;
+};
+
+/** Действие вкладки пропсом: настоящее — Server Action, на стенде — ответ без базы. */
+export type UnitsAction<I, R> = (input: I) => Promise<R>;

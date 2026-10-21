@@ -1,0 +1,22 @@
+/* Вкладка «Квартиры» (Н6): пояснение, переключатель блоков, генератор или стояки и список. */
+.complex-units {
+  display: grid;
+  gap: 14px;
+}
+
+.complex-units__lead,
+.complex-units__note {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-units__listed {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+}
+
+.complex-units__listed b {
+  color: var(--fg);
+}

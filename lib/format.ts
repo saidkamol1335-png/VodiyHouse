@@ -6,26 +6,43 @@ export const APP_TIME_ZONE = "Asia/Tashkent";
 /** «Понедельник, 19.10.2026» — подпись под заголовком Главной кабинета (мокап). */
 export function formatWeekdayDate(date: Date, timeZone: string = APP_TIME_ZONE): string {
   const weekday = new Intl.DateTimeFormat("ru-RU", { weekday: "long", timeZone }).format(date);
-  const day = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", timeZone }).format(date);
+  const day = new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone,
+  }).format(date);
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${day}`;
 }
 
 /** «20.10.2026» — дата в списках кабинета. */
 export function formatDate(date: Date, timeZone: string = APP_TIME_ZONE): string {
-  return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", timeZone }).format(date);
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone,
+  }).format(date);
 }
 
 /** «20.10.2026 14:05» — дата и время (последний вход сотрудника). */
 export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
-  const time = new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone }).format(
-    date,
-  );
+  const time = new Intl.DateTimeFormat("ru-RU", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  }).format(date);
   return `${formatDate(date, timeZone)} ${time}`;
 }
 
 /** Час суток 0–23 в часовом поясе. */
 export function hourIn(date: Date, timeZone: string = APP_TIME_ZONE): number {
-  const hour = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone }).format(date);
+  const hour = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  }).format(date);
   return Number(hour);
 }
 
@@ -61,6 +78,13 @@ const SUM_STEP = 1000;
 export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
   if (currency === "USD") return `$${GROUPED.format(Math.round(amount))}`;
   return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
+}
+
+const AREA = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+
+/** «42,5 м²» — площадь планировки (как подпись базы в журнале). */
+export function formatArea(area: number): string {
+  return `${AREA.format(area)} м²`;
 }
 
 /** «$620/м²», «4 100 000 сум/м²» — цена за м² квартиры (Н3). */

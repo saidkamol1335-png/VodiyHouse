@@ -1,0 +1,13 @@
+/* Переключатель блоков «Квартир» (Н6): ширина — по блокам, лишнее прокручивается вбок. */
+.units-block-switch {
+  justify-self: start;
+  width: auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.units-block-switch__count {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
