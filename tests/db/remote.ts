@@ -40,6 +40,10 @@ export async function createRemoteTestDb(): Promise<TestDb> {
 
   // Каждая служебная команда — отдельным запросом: медленнее, но откат после ошибки проходит
   // наверняка, иначе транзакция файла остаётся прерванной и следующие тесты падают не по своей вине.
+  // SET ROLE не применяет statement_timeout роли (у authenticated в Supabase — 8 с), а PostgREST
+  // применяет на каждом запросе: без этого тест 5000 квартир прошёл бы там, где кабинет упадёт.
+  const ownTimeout = (await client.query<{ value: string }>("select current_setting('statement_timeout') as value")).rows[0]!.value;
+  const timeouts = await roleTimeouts(client);
   let savepoints = 0;
   const as = async <T>(actor: Actor, run: (db: Db) => Promise<T>): Promise<T> => {
     const savepoint = `as_${(savepoints += 1)}`;
@@ -47,9 +51,17 @@ export async function createRemoteTestDb(): Promise<TestDb> {
     try {
       await client.query("select set_config('request.jwt.claims', $1, true)", [claimsOf(actor)]);
       await client.query(`set local role ${PG_ROLE[actor.kind]}`);
+      const timeout = timeouts.get(PG_ROLE[actor.kind]);
+      if (timeout) await client.query("select set_config('statement_timeout', $1, true)", [timeout]);
       const result = await run(admin);
       await client.query("reset role");
+      await client.query("select set_config('statement_timeout', $1, true)", [ownTimeout]);
       await client.query("select set_config('request.jwt.claims', '', true)");
+      // В PGlite каждый as() — своя транзакция, и настройки теста гаснут на commit; здесь они
+      // пережили бы release savepoint. Флаг сводки квартир не сбрасываем: его утечку прогон ловит.
+      await client.query(
+        "select set_config('vodiy.skip_audit', '', true), set_config('storage.allow_delete_query', '', true)",
+      );
       await client.query(`release savepoint ${savepoint}`);
       return result;
     } catch (error) {
@@ -67,6 +79,17 @@ export async function createRemoteTestDb(): Promise<TestDb> {
       await client.end();
     },
   };
+}
+
+/** statement_timeout из настроек ролей API (ALTER ROLE … SET), как их видит PostgREST. */
+async function roleTimeouts(client: pg.Client): Promise<Map<string, string>> {
+  const { rows } = await client.query<{ role: string; value: string }>(
+    `select r.rolname as role, split_part(c.setting, '=', 2) as value
+     from pg_roles r cross join lateral unnest(r.rolconfig) as c (setting)
+     where r.rolname = any ($1) and c.setting like 'statement_timeout=%'`,
+    [Object.values(PG_ROLE)],
+  );
+  return new Map(rows.map((row) => [row.role, row.value]));
 }
 
 async function assertMigrationsApplied(client: pg.Client): Promise<void> {

@@ -8,7 +8,7 @@ import {
   type BlockPlan,
 } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
-import { createStaff, createTestDb, user, type Db, type TestDb } from "./harness";
+import { createStaff, createTestDb, expectHint, user, type Db, type TestDb } from "./harness";
 
 // Приёмка фазы 1: блок 16 эт. × 3 подъезда × 4 кв. создаётся генератором; здесь — та часть,
 // что идёт в базу: строки генератора проходят ограничения и права руководителя.
@@ -20,15 +20,14 @@ const PLAN: BlockPlan = {
   startNumber: 1,
 };
 
-async function insertUnits(tx: Db, rows: unknown[]): Promise<number> {
-  const result = await tx.query(
-    `insert into units (block_id, layout_id, entrance, floor, "position", number)
-     select r.block_id, r.layout_id, r.entrance, r.floor, r."position", r.number
-     from jsonb_to_recordset($1::jsonb)
-       as r(block_id uuid, layout_id uuid, entrance smallint, floor smallint, "position" smallint, number text)`,
-    [JSON.stringify(rows)],
+// Генератор создаёт список функцией базы (Н6): строки считает lib/units, база проверяет и
+// вставляет одной транзакцией.
+async function createBlockUnits(tx: Db, blockId: string, rows: unknown[]): Promise<number> {
+  const result = await tx.query<{ created: number }>(
+    "select (create_block_units($1, $2::jsonb) ->> 'created')::int as created",
+    [blockId, JSON.stringify(rows)],
   );
-  return result.affectedRows ?? 0;
+  return result.rows[0]!.created;
 }
 
 describe("генератор блока → база", () => {
@@ -76,7 +75,7 @@ describe("генератор блока → база", () => {
         layoutId: layoutIds[index]!,
       }));
       const rows = toUnitInsertRows(blockId, applyRisers(generateUnits(PLAN), risers));
-      return { blockId, inserted: await insertUnits(tx, rows) };
+      return { blockId, inserted: await createBlockUnits(tx, blockId, rows) };
     });
     const elapsed = performance.now() - started;
 
@@ -96,19 +95,37 @@ describe("генератор блока → база", () => {
       { rooms: 3, free_count: 45 },
     ]);
 
-    const journal = await db.admin.query<{ n: number }>(
-      "select count(*)::int as n from audit_log where entity = 'units' and action = 'insert' and complex_id = $1",
-      [ids.publicComplex],
+    // Одна запись на действие, а не 180 (решение «Решаю сам» шага 12).
+    const journal = await db.admin.query<{ action: string; changes: { summary: unknown } }>(
+      `select a.action, a.changes from audit_log a
+       where a.entity = 'units' and a.complex_id = $1
+         and (a.entity_id = $2 or a.changes ->> 'block_id' = $2)`,
+      [ids.publicComplex, blockId],
     );
-    expect(journal.rows[0]?.n).toBeGreaterThanOrEqual(180);
+    expect(journal.rows).toEqual([
+      expect.objectContaining({
+        action: "insert",
+        changes: expect.objectContaining({
+          summary: { kind: "create", count: 180, numbers: "1–180", unassigned: 0 },
+        }),
+      }),
+    ]);
   });
 
-  it("второй прогон генератора в тот же блок отклоняется базой — номера заняты", async () => {
+  it("второй прогон генератора в тот же блок отклоняется — список уже есть", async () => {
     const block = await db.admin.query<{ id: string }>(
       "select id from blocks where name = 'Г'",
     );
     const blockId = block.rows[0]!.id;
     const rows = toUnitInsertRows(blockId, applyRisers(generateUnits(PLAN), []));
-    await expect(db.as(user(head), (tx) => insertUnits(tx, rows))).rejects.toThrow(/duplicate key/);
+    await expectHint(
+      db.as(user(head), (tx) => createBlockUnits(tx, blockId, rows)),
+      "vh:list_exists",
+    );
+    const left = await db.admin.query<{ n: number }>(
+      "select count(*)::int as n from units where block_id = $1",
+      [blockId],
+    );
+    expect(left.rows[0]?.n).toBe(180);
   });
 });

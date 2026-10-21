@@ -86,9 +86,9 @@ export async function expectDenied(promise: Promise<unknown>): Promise<void> {
   await expect(promise).rejects.toThrow(/permission denied|row-level security/);
 }
 
-/** Отказ базы с машиночитаемым кодом (hint 'vh:…', см. lib/admin/authErrors.ts). */
-export async function expectHint(promise: Promise<unknown>, hint: string): Promise<void> {
-  await expect(promise).rejects.toMatchObject({ hint });
+/** Отказ базы с машиночитаемым кодом (hint 'vh:…', см. lib/admin/authErrors.ts); detail — какое поле. */
+export async function expectHint(promise: Promise<unknown>, hint: string, detail?: string): Promise<void> {
+  await expect(promise).rejects.toMatchObject(detail === undefined ? { hint } : { hint, detail });
 }
 
 type StaffOptions = { fullName?: string; isActive?: boolean; mustChangePassword?: boolean; email?: string };

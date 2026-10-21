@@ -134,7 +134,8 @@ describe("вход сотрудников и «Сотрудники»", () => {
 
   it("отключение действует со следующего запроса; включение возвращает доступ", async () => {
     const staff = await createStaff(db.admin, "manager");
-    const setStatus = "select public.set_units_status(array[]::uuid[], 'free') as changed";
+    const setStatus =
+      "select (public.set_units_status(null, array[]::uuid[], 'free') ->> 'changed')::int as changed";
     expect((await db.as(user(staff), (tx) => tx.query(setStatus))).rows[0]).toEqual({ changed: 0 });
 
     await db.as(user(head), (tx) => tx.query("update profiles set is_active = false where id = $1", [staff]));

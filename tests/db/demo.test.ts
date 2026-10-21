@@ -137,17 +137,17 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
   });
 
   it("удаление убирает DEMO целиком, включая журнал правок DEMO, и не трогает настоящие данные", async () => {
-    const shodlikUnit = (
-      await db.admin.query<{ id: string }>(
-        `select u.id from units u join blocks b on b.id = u.block_id join complexes c on c.id = b.complex_id
+    const shodlik = (
+      await db.admin.query<{ id: string; block_id: string }>(
+        `select u.id, u.block_id from units u join blocks b on b.id = u.block_id join complexes c on c.id = b.complex_id
          where c.slug = 'demo-shodlik' and u.status = 'free' limit 1`,
       )
-    ).rows[0]!.id;
+    ).rows[0]!;
     await db.as(user(manager), (tx) =>
-      tx.query("select set_units_status($1, 'reserved')", [[shodlikUnit]]),
+      tx.query("select set_units_status($1, $2, 'reserved')", [shodlik.block_id, [shodlik.id]]),
     );
     await db.as(user(manager), (tx) =>
-      tx.query("select set_units_status($1, 'sold')", [[real.units[0]]]),
+      tx.query("select set_units_status($1, $2, 'sold')", [real.publicBlock, [real.units[0]]]),
     );
     const realEntriesBefore = await count(
       `select count(*)::int as n from audit_log where complex_id = '${real.publicComplex}'`,
@@ -160,10 +160,11 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     expect(await count("select count(*)::int as n from blocks")).toBe(2);
     expect(await count("select count(*)::int as n from layouts")).toBe(2);
     expect(await count("select count(*)::int as n from developer_past_projects")).toBe(2);
+    // Сводка смены статуса привязана к блоку и ЖК DEMO — уходит вместе с ними.
     expect(
       await count(
         `select count(*)::int as n from audit_log
-         where entity = 'units' and entity_id = '${shodlikUnit}'`,
+         where entity = 'units' and entity_id = '${shodlik.block_id}'`,
       ),
     ).toBe(0);
     expect(await count("select count(*)::int as n from complexes")).toBe(4);
