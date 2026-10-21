@@ -4,20 +4,33 @@ import {
   ADMIN_ROUTES,
   canOpen,
   isNavItemActive,
+  isSectionOpen,
   landingPath,
   readySettingsTabs,
   visibleNav,
 } from "./nav";
 
-const allReady = ADMIN_NAV.map((item) => ({ ...item, ready: true }));
+// План целиком (PLAN §7): все разделы готовы для всех своих ролей.
+const allReady = ADMIN_NAV.map((item) => ({ ...item, ready: true, readyFor: undefined }));
 const keysFor = (role: Parameters<typeof visibleNav>[0]) =>
   visibleNav(role, allReady).map((item) => item.key);
 
 describe("меню кабинета", () => {
-  it("сейчас: руководитель — Главная, Застройщики и Настройки; менеджер — Главная; видеограф — ничего", () => {
-    expect(visibleNav("head").map((item) => item.key)).toEqual(["home", "developers", "settings"]);
+  it("сейчас: руководитель — Главная, ЖК, Застройщики и Настройки; менеджер — Главная (ЖК — шаг 12)", () => {
+    expect(visibleNav("head").map((item) => item.key)).toEqual([
+      "home",
+      "complexes",
+      "developers",
+      "settings",
+    ]);
     expect(visibleNav("manager").map((item) => item.key)).toEqual(["home"]);
     expect(visibleNav("videographer")).toEqual([]);
+  });
+
+  it("раздел, готовый не для всех ролей: руководителю открыт, менеджеру — пока нет", () => {
+    expect(isSectionOpen("head", "complexes")).toBe(true);
+    expect(isSectionOpen("manager", "complexes")).toBe(false);
+    expect(isSectionOpen("manager", "home")).toBe(true);
   });
 
   it("руководитель видит все 8 разделов в порядке PLAN §7", () => {

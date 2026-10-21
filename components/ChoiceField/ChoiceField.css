@@ -1,0 +1,65 @@
+/* Выбор из 2–4 значений: большой сегмент мокапа (меню телефона) во всю ширину поля. */
+.choice-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice-field__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.choice-field__row .choice-field__options {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.choice-field__option {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Радио невидимо, но фокусируется: кольцо — у подписи. */
+.choice-field__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice-field__option:has(.choice-field__input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: 1px;
+}
+
+.choice-field__clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.choice-field__clear:hover {
+  color: var(--fg);
+}
+
+/* Телефон: четыре класса ЖК в одну строку — плотнее (Эконом · Комфорт · Бизнес · Премиум). */
+@media (max-width: 760px) {
+  .choice-field__row .choice-field__option {
+    padding: 0 6px;
+    font-size: var(--fs-small);
+  }
+}

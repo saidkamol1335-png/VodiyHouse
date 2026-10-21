@@ -58,4 +58,10 @@
   .admin-topbar__tools {
     gap: 8px;
   }
+
+  .admin-topbar__subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

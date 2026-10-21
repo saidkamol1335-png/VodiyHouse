@@ -1,7 +1,7 @@
 import type { DbErrorLike } from "../authErrors";
 
-// Ошибки действий «Застройщиков» и «Справочников» → коды для messages/ru.json
-// (admin.developers.errors). Отказы базы — по hint 'vh:…' и коду Postgres, не по тексту.
+// Ошибки действий контента кабинета — застройщики, ЖК, справочники, журнал → коды для
+// messages/ru.json (admin.developers.errors). Отказы базы — по hint 'vh:…' и коду Postgres, не по тексту.
 // Без импорта SDK: модуль подключают и клиентские формы.
 
 export const CONTENT_ERRORS = [
@@ -15,6 +15,11 @@ export const CONTENT_ERRORS = [
   "duplicate",
   "statusMove",
   "confirmName",
+  "hasUnits",
+  "rule12",
+  "developerArchived",
+  "galleryFull",
+  "contacts",
   "network",
   "notConfigured",
   "unknown",
@@ -28,6 +33,10 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:not_ready": "notReady",
   "vh:invalid": "invalid",
   "vh:slug_reserved": "slugReserved",
+  "vh:has_units": "hasUnits",
+  "vh:rule12": "rule12",
+  "vh:developer_archived": "developerArchived",
+  "vh:too_many": "galleryFull",
 };
 
 // Нарушение check или домена (пустой перевод, лишний символ) — форма такое уже не пропускает,

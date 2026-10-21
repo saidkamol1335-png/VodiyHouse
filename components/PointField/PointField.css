@@ -1,0 +1,46 @@
+/* Точка на карте (И2): поле с булавкой, как «или ссылка YouTube» у видеографа мокапа. */
+.point-field__control {
+  position: relative;
+}
+
+.point-field__icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.point-field__input {
+  padding-left: 40px;
+}
+
+.point-field__result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: var(--fs-caption);
+}
+
+.point-field__coords {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  letter-spacing: var(--ls-mono);
+}
+
+.point-field__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+.point-field__warning {
+  flex-basis: 100%;
+  color: var(--amber-2);
+  font-weight: 600;
+}

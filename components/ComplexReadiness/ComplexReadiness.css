@@ -1,0 +1,81 @@
+/* Готовность к публикации (И9): строка под капсулой статуса, раскрывается в список-ссылки. */
+.complex-readiness {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.complex-readiness__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-pill);
+  background: var(--amber-soft);
+  color: var(--badge-amber-fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.complex-readiness--ready .complex-readiness__toggle {
+  border-color: var(--badge-ok-border);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+}
+
+.complex-readiness__more {
+  color: var(--fg-2);
+  font-weight: 600;
+}
+
+.complex-readiness__chevron {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.complex-readiness__toggle[aria-expanded="true"] .complex-readiness__chevron {
+  transform: rotate(180deg);
+}
+
+.complex-readiness__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--panel-bg);
+  list-style: none;
+  font-size: var(--fs-small);
+}
+
+.complex-readiness__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--amber-2);
+}
+
+.complex-readiness__item a {
+  color: var(--fg);
+  font-weight: 650;
+}
+
+.complex-readiness__item--ok {
+  color: var(--ok);
+}
+
+.complex-readiness__item--ok a {
+  color: var(--fg-3);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.complex-readiness__note {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}

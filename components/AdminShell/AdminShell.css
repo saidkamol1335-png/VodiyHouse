@@ -1,8 +1,20 @@
 /* Мокап: .adm, .adm__side, .adm__main. */
 .admin-shell {
+  position: relative;
   display: grid;
   grid-template-columns: var(--admin-side-w) minmax(0, 1fr);
   min-height: 100vh;
+}
+
+/* Фон и граница колонки меню — на всю высоту страницы: сама панель прилипает и кончается
+   на высоте экрана, и на длинной странице под ней был бы разрыв. */
+.admin-shell::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--admin-side-w);
+  border-right: 1px solid var(--line);
+  background: var(--admin-side-bg);
+  content: "";
 }
 
 .admin-shell__side {
@@ -30,6 +42,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .admin-shell::before,
   .admin-shell__side {
     display: none;
   }

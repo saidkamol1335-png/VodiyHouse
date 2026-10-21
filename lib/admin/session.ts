@@ -15,7 +15,7 @@ import {
   type ViewerResult,
 } from "./access";
 import { DISABLED_LOGIN_PATH } from "./landing";
-import { ADMIN_ROUTES, canOpen, type AdminNavKey } from "./nav";
+import { ADMIN_ROUTES, isSectionOpen, type AdminNavKey } from "./nav";
 
 // Слой доступа кабинета (DAL): кто открыл страницу. Proxy проверяет только наличие сессии,
 // а layout не перерисовывается при переходах — поэтому каждая страница и действие спрашивают здесь.
@@ -67,7 +67,7 @@ export async function requireViewer(options: { allowPasswordChange?: boolean } =
 /** Сотрудник и открыт ли ему раздел (недоступное показывает «Раздел доступен руководителю»). */
 export async function requireSection(key: AdminNavKey): Promise<{ viewer: CabinetViewer; allowed: boolean }> {
   const viewer = await requireViewer();
-  return { viewer, allowed: canOpen(viewer.role, key) };
+  return { viewer, allowed: isSectionOpen(viewer.role, key) };
 }
 
 export type ActionGuardCode = "notConfigured" | "session" | "forbidden" | "network";

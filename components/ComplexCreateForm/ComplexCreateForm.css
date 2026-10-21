@@ -1,0 +1,36 @@
+/* «+ Добавить ЖК»: кнопка справа над списком → панель «Застройщик» + «Название» RU | UZ. */
+.complex-create {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.complex-create--closed {
+  flex-direction: row;
+  justify-content: flex-end;
+  max-width: none;
+}
+
+.complex-create__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.complex-create__empty {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-create__empty a {
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .complex-create__actions .button {
+    flex: 1 1 auto;
+  }
+}

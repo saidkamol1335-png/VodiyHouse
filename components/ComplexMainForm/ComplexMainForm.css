@@ -1,0 +1,83 @@
+/* Вкладка «Основное» ЖК (И1): три панели одной формы, «Сохранить вкладку» — под ними;
+   на телефоне кнопка прилипает к низу экрана, как «Создать N квартир» в генераторе. */
+.complex-main {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.complex-main__grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Подпись и поле — общие строки сетки (subgrid): длинная подпись не сдвигает соседей. */
+.complex-main__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.complex-main__row--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Колонка поля — не шире строки: иначе сегмент «Класс» растянул бы её по длине подписей. */
+.complex-main__row > .field {
+  display: grid;
+  grid-row: span 3;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: subgrid;
+  align-content: start;
+}
+
+.complex-main__row .field__label {
+  align-self: end;
+}
+
+/* «Этажность — по блокам: 12 этажей · Блоки →» (И3): одна правда вместо двух. */
+.complex-main__floors {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-main__floors a {
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+.complex-main__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 1100px) {
+  .complex-main__row--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .complex-main__row,
+  .complex-main__row--three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .complex-main__save {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
+  }
+
+  .complex-main__save .button {
+    width: 100%;
+  }
+}

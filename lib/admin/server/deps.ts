@@ -35,7 +35,10 @@ export function signInDeps(supabase: SupabaseClient): SignInDeps {
 }
 
 /** Временный пароль: отдельный вход без cookie; его сессия сразу закрывается. */
-async function verifyPassword(email: string, password: string): ReturnType<ChangePasswordDeps["verifyCurrentPassword"]> {
+async function verifyPassword(
+  email: string,
+  password: string,
+): ReturnType<ChangePasswordDeps["verifyCurrentPassword"]> {
   const verifier = await createSupabaseVerifierClient();
   const { error } = await verifier.auth.signInWithPassword({ email, password });
   if (error) return error.code === "invalid_credentials" ? "wrong" : { error };
@@ -52,7 +55,11 @@ export function staffDeps(session: SupabaseClient): CreateStaffDeps & ManageStaf
   return {
     generatePassword: () => generatePassword(),
     async createAuthUser({ email, password }) {
-      const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+      const { data, error } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
       if (error || !data.user) return { error: error ?? {} };
       return { id: data.user.id };
     },
@@ -65,11 +72,17 @@ export function staffDeps(session: SupabaseClient): CreateStaffDeps & ManageStaf
       return !error;
     },
     async updateActive(id, active) {
-      const { data, error } = await session.from("profiles").update({ is_active: active }).eq("id", id).select("id");
+      const { data, error } = await session
+        .from("profiles")
+        .update({ is_active: active })
+        .eq("id", id)
+        .select("id");
       return error ? { error } : { rows: data?.length ?? 0 };
     },
     async setBan(id, banned) {
-      const { error } = await admin.auth.admin.updateUserById(id, { ban_duration: banned ? BAN_DURATION : "none" });
+      const { error } = await admin.auth.admin.updateUserById(id, {
+        ban_duration: banned ? BAN_DURATION : "none",
+      });
       return !error;
     },
     async requirePasswordChange(id) {

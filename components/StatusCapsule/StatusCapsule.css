@@ -1,7 +1,7 @@
-/* Статус застройщика в шапке (AdminEntityHead): плашка и кнопки переходов — одна пунктирная
+/* Статус ЖК или застройщика в шапке (AdminEntityHead): плашка и кнопки переходов — одна пунктирная
    капсула, чтобы «Скрыть с сайта» не читалось как ещё одна вкладка; подтверждение архива и
    ответы — строкой ниже, во всю ширину шапки. */
-.developer-status {
+.status-capsule {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -11,23 +11,23 @@
   border-radius: var(--r-pill);
 }
 
-.developer-status > .badge {
+.status-capsule > .badge {
   margin-right: 4px;
 }
 
-.developer-status__notes {
+.status-capsule__notes {
   display: grid;
   flex-basis: 100%;
   order: 3;
   gap: 10px;
 }
 
-.developer-status__notes:empty {
+.status-capsule__notes:empty {
   display: none;
 }
 
 /* Подтверждение архива: пунктирная янтарная рамка, как уведомления кабинета. */
-.developer-status__confirm {
+.status-capsule__confirm {
   display: grid;
   gap: 10px;
   max-width: 560px;
@@ -37,20 +37,20 @@
   background: var(--amber-soft);
 }
 
-.developer-status__confirm-title {
+.status-capsule__confirm-title {
   margin: 0;
   font-size: var(--fs-small-l);
   font-weight: 700;
 }
 
-.developer-status__confirm-lead {
+.status-capsule__confirm-lead {
   margin: 0;
   color: var(--fg-2);
   font-size: var(--fs-small);
   line-height: var(--lh-snug);
 }
 
-.developer-status__confirm-actions {
+.status-capsule__confirm-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

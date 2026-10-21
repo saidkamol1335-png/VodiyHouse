@@ -67,3 +67,14 @@
     font-size: var(--fs-control);
   }
 }
+
+/* Точка «не хватает для публикации» (И9): янтарная, справа от подписи. Позиционирована —
+   скрытая подпись внутри (sr-only) не уезжает за ленту и не расширяет страницу. */
+.admin-tabs__dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+}

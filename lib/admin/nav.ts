@@ -26,6 +26,8 @@ export type AdminNavItem = {
   roles: readonly StaffRole[];
   /** Раздел уже есть в коде. Пустые разделы в меню не показываются (PLAN §7, фаза 0). */
   ready: boolean;
+  /** Готов пока не для всех ролей: «ЖК» менеджеру нужен вкладкой «Квартиры» (шаг 12). */
+  readyFor?: readonly StaffRole[];
 };
 
 // Порядок и доступ — PLAN §7 и §3а: менеджер видит заявки, наличие квартир (ЖК) и расчёт
@@ -33,7 +35,13 @@ export type AdminNavItem = {
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "home", href: ADMIN_ROUTES.home, roles: ["head", "manager"], ready: true },
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
-  { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: false },
+  {
+    key: "complexes",
+    href: ADMIN_ROUTES.complexes,
+    roles: ["head", "manager"],
+    ready: true,
+    readyFor: ["head"],
+  },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
   { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: false },
   {
@@ -46,12 +54,28 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
 ];
 
+/** Раздел сделан для этой роли (готовность по шагам плана). */
+export function isReadyFor(item: AdminNavItem, role: StaffRole): boolean {
+  return item.ready && (item.readyFor?.includes(role) ?? true);
+}
+
 /** Пункты меню для роли: недоступное роли и ещё не сделанное не показываются (PLAN §3а). */
 export function visibleNav(
   role: StaffRole,
   items: readonly AdminNavItem[] = ADMIN_NAV,
 ): AdminNavItem[] {
-  return items.filter((item) => item.ready && item.roles.includes(role));
+  return items.filter((item) => isReadyFor(item, role) && item.roles.includes(role));
+}
+
+/** Страница раздела открыта роли сейчас: по правам PLAN §7 и готовности для неё. */
+export function isSectionOpen(
+  role: StaffRole,
+  key: AdminNavKey,
+  items: readonly AdminNavItem[] = ADMIN_NAV,
+): boolean {
+  return items.some(
+    (item) => item.key === key && item.roles.includes(role) && isReadyFor(item, role),
+  );
 }
 
 /** Главная активна только на своём адресе, остальные разделы — и на вложенных страницах. */

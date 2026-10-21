@@ -10,18 +10,22 @@ export type AdminTab = {
   segment: string | null;
   href: string;
   label: string;
+  /** На вкладке не хватает данных для публикации — янтарная точка (ЖК, И9). */
+  attention?: boolean;
 };
 
 type AdminTabsProps = {
   label: string;
   tabs: readonly AdminTab[];
+  /** Подпись точки для экранного диктора: «не хватает для публикации». */
+  attentionLabel?: string;
 };
 
 /**
  * Вкладки-пилюли страницы ЖК и застройщика (решения фазы 1, в. 6, и Д2). Каждая вкладка —
  * свой адрес: работает «назад», ссылку на вкладку можно отправить. Стоит в layout раздела.
  */
-export function AdminTabs({ label, tabs }: AdminTabsProps) {
+export function AdminTabs({ label, tabs, attentionLabel }: AdminTabsProps) {
   const segment = useSelectedLayoutSegment();
   const track = useRef<HTMLDivElement>(null);
   const edges = useStripScroll(track, true, segment ?? "");
@@ -44,6 +48,11 @@ export function AdminTabs({ label, tabs }: AdminTabsProps) {
               aria-current={active ? "page" : undefined}
             >
               {tab.label}
+              {tab.attention ? (
+                <span className="admin-tabs__dot" title={attentionLabel}>
+                  <span className="sr-only">{attentionLabel}</span>
+                </span>
+              ) : null}
             </Link>
           );
         })}

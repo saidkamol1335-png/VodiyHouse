@@ -41,10 +41,11 @@ export type SaveMainResult =
       fields: DeveloperMainFields;
     };
 
-export type StatusResult =
+/** missing — чего не хватает для публикации: у застройщика свои пункты, у ЖК — свои. */
+export type StatusResult<Missing extends string = PublishRequirement> =
   | { status: "idle" }
   | { status: "done"; to: PublicationStatus; at: number }
-  | { status: "error"; error: ContentErrorCode; missing: PublishRequirement[] };
+  | { status: "error"; error: ContentErrorCode; missing: Missing[] };
 
 export type SaveProjectsResult =
   | { status: "idle" }

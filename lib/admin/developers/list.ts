@@ -1,7 +1,14 @@
-import { PUBLICATION_STATUSES, type PublicationStatus } from "../publication";
+import type { PublicationStatus } from "../publication";
+import {
+  PUBLICATION_FILTERS,
+  countByPublicationFilter,
+  isPublicationStatus,
+  matchesPublicationFilter,
+  searchableText,
+  type PublicationFilter,
+} from "../publicationFilter";
 
 // Список «Застройщики» (решение Д1): строки из developer_rows(), поиск и пилюли статусов.
-// Застройщиков немного (на старте 10–15), поэтому ищем и считаем в браузере, без запросов.
 
 export type DeveloperListRow = {
   id: string;
@@ -29,15 +36,12 @@ export type DeveloperRowRecord = {
   logo_path: string | null;
 };
 
-const isStatus = (value: string): value is PublicationStatus =>
-  (PUBLICATION_STATUSES as readonly string[]).includes(value);
-
 export function parseDeveloperRows(records: readonly DeveloperRowRecord[]): DeveloperListRow[] {
   return records.map((record) => ({
     id: record.id,
     slug: record.slug,
     name: record.name,
-    status: isStatus(record.status) ? record.status : "draft",
+    status: isPublicationStatus(record.status) ? record.status : "draft",
     foundedYear: record.founded_year,
     flatsDelivered: record.flats_delivered,
     deliveredCheckedAt: record.delivered_checked_at,
@@ -47,35 +51,22 @@ export function parseDeveloperRows(records: readonly DeveloperRowRecord[]): Deve
   }));
 }
 
-/** «Все» — без архива: архив — корзина на 30 дней, у него своя пилюля. */
-export type DeveloperFilter = "all" | PublicationStatus;
-export const DEVELOPER_FILTERS: readonly DeveloperFilter[] = ["all", ...PUBLICATION_STATUSES];
-
-const APOSTROPHES = /['‘’ʻʼ`´]/g;
-const searchable = (text: string) => text.replace(APOSTROPHES, "").toLowerCase();
-
-function matchesFilter(row: DeveloperListRow, filter: DeveloperFilter): boolean {
-  return filter === "all" ? row.status !== "archived" : row.status === filter;
-}
+export type DeveloperFilter = PublicationFilter;
+export const DEVELOPER_FILTERS = PUBLICATION_FILTERS;
 
 /** Поиск по названию и адресу: «fargona» найдёт «Farg‘ona». */
 export function filterDevelopers(
   rows: readonly DeveloperListRow[],
   { query, filter }: { query: string; filter: DeveloperFilter },
 ): DeveloperListRow[] {
-  const needle = searchable(query.trim());
+  const needle = searchableText(query.trim());
   return rows.filter(
     (row) =>
-      matchesFilter(row, filter) &&
-      (!needle || searchable(row.name).includes(needle) || row.slug.includes(needle)),
+      matchesPublicationFilter(row.status, filter) &&
+      (!needle || searchableText(row.name).includes(needle) || row.slug.includes(needle)),
   );
 }
 
 export function filterCounts(rows: readonly DeveloperListRow[]): Record<DeveloperFilter, number> {
-  return Object.fromEntries(
-    DEVELOPER_FILTERS.map((filter) => [
-      filter,
-      rows.filter((row) => matchesFilter(row, filter)).length,
-    ]),
-  ) as Record<DeveloperFilter, number>;
+  return countByPublicationFilter(rows.map((row) => row.status));
 }

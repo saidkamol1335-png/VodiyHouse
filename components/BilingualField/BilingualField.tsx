@@ -20,6 +20,10 @@ type BilingualFieldProps = {
   required?: boolean;
   placeholder?: Partial<BilingualValue>;
   onChange?: (value: BilingualValue) => void;
+  /** Подсказка UZ из RU (создание ЖК): пока UZ не трогали, он повторяет RU латиницей. */
+  mirrorUz?: (ru: string) => string;
+  /** Ошибка сервера под парой полей («в тексте контакты»). */
+  error?: string;
 };
 
 const LANGUAGES: readonly Language[] = ["ru", "uz"];
@@ -32,12 +36,17 @@ const otherLanguage = (language: Language): Language => (language === "ru" ? "uz
 export function BilingualField({
   defaultValue = EMPTY_BILINGUAL,
   onChange,
+  mirrorUz,
+  error,
   ...field
 }: BilingualFieldProps) {
   const [value, setValue] = useState<BilingualValue>(defaultValue);
+  const [uzTouched, setUzTouched] = useState(false);
 
   const change = (language: Language) => (text: string) => {
-    const next = { ...value, [language]: text };
+    const mirrored = language === "ru" && mirrorUz && !uzTouched;
+    const next = mirrored ? { ru: text, uz: mirrorUz(text) } : { ...value, [language]: text };
+    if (language === "uz") setUzTouched(true);
     setValue(next);
     onChange?.(next);
   };
@@ -54,11 +63,15 @@ export function BilingualField({
           onText={change(language)}
         />
       ))}
+      {error ? <p className="field__error bilingual-field__error">{error}</p> : null}
     </div>
   );
 }
 
-type LanguageInputProps = Omit<BilingualFieldProps, "defaultValue" | "onChange"> & {
+type LanguageInputProps = Omit<
+  BilingualFieldProps,
+  "defaultValue" | "onChange" | "mirrorUz" | "error"
+> & {
   language: Language;
   text: string;
   missing: boolean;
