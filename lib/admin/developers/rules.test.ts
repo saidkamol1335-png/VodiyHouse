@@ -97,6 +97,25 @@ describe("ошибки базы → коды", () => {
     expect(contentDbErrorCode({ code: "", message: "TypeError: fetch failed" })).toBe("network");
     expect(contentDbErrorCode({ code: "XX000" })).toBe("unknown");
   });
+
+  it("квартиры: свой код у каждого отказа, detail различает номер и место", () => {
+    const db = (hint: string, details: string | null = null, code = "23514") => ({
+      code,
+      hint,
+      details,
+    });
+    expect(contentDbErrorCode(db("vh:list_exists"))).toBe("listExists");
+    expect(contentDbErrorCode(db("vh:units_limit"))).toBe("unitsLimit");
+    expect(contentDbErrorCode(db("vh:whole_list"))).toBe("wholeList");
+    expect(contentDbErrorCode(db("vh:confirm_name", null, "22023"))).toBe("confirmName");
+    expect(contentDbErrorCode(db("vh:unit_taken", "number", "23505"))).toBe("unitNumberTaken");
+    expect(contentDbErrorCode(db("vh:unit_taken", "slot", "23505"))).toBe("unitSlotTaken");
+    expect(contentDbErrorCode(db("vh:invalid", "no_list", "22023"))).toBe("noList");
+    // Остальные detail у vh:invalid — поле формы, код общий.
+    expect(contentDbErrorCode(db("vh:invalid", "price", "22023"))).toBe("invalid");
+    expect(contentDbErrorCode({ code: "57014" })).toBe("timeout");
+    expect(contentDbErrorCode({ code: "23503" })).toBe("notFound");
+  });
 });
 
 describe("DEMO стендов", () => {

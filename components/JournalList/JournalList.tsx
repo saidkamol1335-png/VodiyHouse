@@ -8,13 +8,15 @@ import { FormStatus } from "@/components/FormStatus";
 import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 import type {
   JournalAction,
+  JournalChange,
   JournalEntry,
   JournalLoadResult,
   JournalPage,
   JournalScope,
   JournalValue,
 } from "@/lib/admin/journal/format";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatPrice, formatPricePerM2 } from "@/lib/format";
+import { JournalSummary } from "./JournalSummary";
 
 export type JournalLoader = (scope: JournalScope, before: number) => Promise<JournalLoadResult>;
 
@@ -24,6 +26,8 @@ type JournalListProps = {
   scope: JournalScope;
   /** «Показать ещё» — Server Action; null — без продолжения (служебный стенд). */
   load: JournalLoader | null;
+  /** Названия отделок по id — в записи только номер справочника. */
+  finishings?: Readonly<Record<number, string>>;
 };
 
 const ACTION_TONES: Record<JournalAction, BadgeTone> = {
@@ -33,7 +37,7 @@ const ACTION_TONES: Record<JournalAction, BadgeTone> = {
 };
 
 /** Журнал изменений (ТЗ 13.1): кто, когда и что поменял — от новых к старым, страницами. */
-export function JournalList({ page, scope, load }: JournalListProps) {
+export function JournalList({ page, scope, load, finishings = {} }: JournalListProps) {
   const t = useTranslations("admin");
   const [entries, setEntries] = useState(page.entries);
   const [nextBefore, setNextBefore] = useState(page.nextBefore);
@@ -55,7 +59,7 @@ export function JournalList({ page, scope, load }: JournalListProps) {
     <div className="journal-list">
       <ol className="journal-list__entries">
         {entries.map((entry) => (
-          <JournalRow key={entry.id} entry={entry} />
+          <JournalRow key={entry.id} entry={entry} finishings={finishings} />
         ))}
       </ol>
       {error ? <FormStatus tone="error">{t(`developers.errors.${error}`)}</FormStatus> : null}
@@ -68,12 +72,25 @@ export function JournalList({ page, scope, load }: JournalListProps) {
   );
 }
 
-function JournalRow({ entry }: { entry: JournalEntry }) {
+type Finishings = Readonly<Record<number, string>>;
+
+/** Подпись сущности или поля; незнакомый ключ — как есть. */
+function useJournalLabel() {
   const t = useTranslations("admin.journal");
-  const label = (group: "entities" | "fields", key: string) => {
+  return (group: "entities" | "fields", key: string) => {
     const path = `${group}.${key}` as Parameters<typeof t>[0];
     return t.has(path) ? t(path) : key;
   };
+}
+
+function JournalRow({ entry, finishings }: { entry: JournalEntry; finishings: Finishings }) {
+  const t = useTranslations("admin.journal");
+  const label = useJournalLabel();
+  // Сводка на несколько квартир — «Квартиры», а не «Квартира · Блок A» на 180 квартир.
+  const entity =
+    entry.summary && entry.summary.count !== 1
+      ? t("entities.units_many")
+      : label("entities", entry.entity);
   return (
     <li className="journal-list__entry">
       <time className="journal-list__time" dateTime={entry.at}>
@@ -84,23 +101,14 @@ function JournalRow({ entry }: { entry: JournalEntry }) {
           <Badge tone={ACTION_TONES[entry.action]} size="sm">
             {t(`actions.${entry.action}`)}
           </Badge>
-          <span className="journal-list__entity">{label("entities", entry.entity)}</span>
+          <span className="journal-list__entity">{entity}</span>
           {entry.subject ? <span className="journal-list__subject">{entry.subject}</span> : null}
         </p>
+        {entry.summary ? <JournalSummary summary={entry.summary} /> : null}
         {entry.changes.length > 0 ? (
           <ul className="journal-list__changes">
             {entry.changes.map((change) => (
-              <li key={change.field} className="journal-list__change">
-                <span className="journal-list__field">{label("fields", change.field)}</span>{" "}
-                {change.opaque ? (
-                  <span className="journal-list__value">{t("changed")}</span>
-                ) : (
-                  <>
-                    <JournalValueText value={change.before} /> {t("arrow")}{" "}
-                    <JournalValueText value={change.after} />
-                  </>
-                )}
-              </li>
+              <JournalChangeRow key={change.field} change={change} finishings={finishings} />
             ))}
           </ul>
         ) : null}
@@ -110,10 +118,43 @@ function JournalRow({ entry }: { entry: JournalEntry }) {
   );
 }
 
+/** «Поле было → стало»; файл и составной список — «изменено»; у сводки — только «стало». */
+function JournalChangeRow({
+  change,
+  finishings,
+}: {
+  change: JournalChange;
+  finishings: Finishings;
+}) {
+  const t = useTranslations("admin.journal");
+  const label = useJournalLabel();
+  return (
+    <li className="journal-list__change">
+      <span className="journal-list__field">{label("fields", change.field)}</span>{" "}
+      {change.opaque ? (
+        <span className="journal-list__value">{t("changed")}</span>
+      ) : change.afterOnly ? (
+        <JournalValueText value={change.after} finishings={finishings} />
+      ) : (
+        <>
+          <JournalValueText value={change.before} finishings={finishings} /> {t("arrow")}{" "}
+          <JournalValueText value={change.after} finishings={finishings} />
+        </>
+      )}
+    </li>
+  );
+}
+
+type ValueProps = { value: JournalValue; finishings: Finishings };
+
 /** Значение «было» или «стало»: пусто — «—», текст на двух языках — оба. */
-function JournalValueText({ value }: { value: JournalValue }) {
+function JournalValueText({ value, finishings }: ValueProps) {
   const t = useTranslations("admin");
   switch (value.kind) {
+    case "unitStatus":
+    case "money":
+    case "finishing":
+      return <UnitValueText value={value} finishings={finishings} />;
     case "empty":
       return (
         <span className="journal-list__value journal-list__value--empty">
@@ -143,4 +184,29 @@ function JournalValueText({ value }: { value: JournalValue }) {
     case "text":
       return <span className="journal-list__value">{value.text}</span>;
   }
+}
+
+/** Значения квартир (шаг 12): статус, цена с валютой блока, отделка из справочника. */
+function UnitValueText({ value, finishings }: ValueProps) {
+  const t = useTranslations("admin.journal");
+  if (value.kind === "unitStatus")
+    return <span className="journal-list__value">{t(`unitStatus.${value.status}`)}</span>;
+  if (value.kind === "money")
+    return <span className="journal-list__value">{moneyText(value)}</span>;
+  if (value.kind !== "finishing") return null;
+  if (value.id === null)
+    return (
+      <span className="journal-list__value journal-list__value--empty">
+        {value.inherit ? t("summary.inherit") : t("empty_value")}
+      </span>
+    );
+  return <span className="journal-list__value">{finishings[value.id] ?? `#${value.id}`}</span>;
+}
+
+/** Цена с валютой блока; старые записи без валюты — просто числом. */
+function moneyText(value: Extract<JournalValue, { kind: "money" }>): string {
+  if (!value.currency) return String(value.amount);
+  return value.perM2
+    ? formatPricePerM2(value.amount, value.currency)
+    : formatPrice(value.amount, value.currency);
 }

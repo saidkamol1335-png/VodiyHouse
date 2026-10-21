@@ -245,7 +245,7 @@ describe("квартиры: статус, «Отменить» и журнал",
       await generate(db, head, listed, SMALL_PLAN);
       const call = (tx: Db, expr: string, params: unknown[]) =>
         tx.query<{ result: { undo?: unknown } }>(`select ${expr} as result`, params);
-      const freshRows = JSON.stringify(planRows(fresh, SMALL_PLAN));
+      const freshRows = JSON.stringify(planRows(SMALL_PLAN));
       const toTwoRoom = JSON.stringify([{ id: target.id, layout_id: twoRoom }]);
       const batches: [string, (tx: Db) => Promise<unknown>][] = [
         [
@@ -347,6 +347,17 @@ describe("квартиры: статус, «Отменить» и журнал",
         "select count(*)::int as n from audit_log where entity = 'units' and complex_id is null",
       );
       expect(orphan.rows[0]?.n).toBe(0);
+    });
+
+    it("во всём журнале у квартиры — название ЖК, во вкладке ЖК — без него", async () => {
+      const unit = await unitByNumber(db.admin, block, "14");
+      await callAs(db, manager, "set_units_status($1, $2, 'reserved')", [block, [unit.id]]);
+      const subjectOf = (complex: string | null) =>
+        callAs<string>(db, head, "(select j.subject from journal_entries(null, null, 1, $1) j)", [
+          complex,
+        ]);
+      expect(await subjectOf(null)).toBe("draft-zhk · Блок С · кв. 14");
+      expect(await subjectOf(ids.draftComplex)).toBe("Блок С · кв. 14");
     });
 
     it("номера в сводке: сплошной ряд, перечисление, «и ещё N», буквы, ведущие нули", async () => {

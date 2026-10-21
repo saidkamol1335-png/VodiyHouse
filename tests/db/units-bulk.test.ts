@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { riserChanges, type Riser } from "@/lib/units";
+import { riserChanges, toUnitLayoutItems, type Riser } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import { createStaff, createTestDb, expectHint, user, type TestDb } from "./harness";
 import {
@@ -175,7 +175,7 @@ describe("квартиры: цена, отделка, стояки, удален
       expect(
         await callAs(db, head, "set_units_layouts($1, $2::jsonb)", [
           block,
-          JSON.stringify(pairs.map((p) => ({ id: p.id, layout_id: p.layoutId }))),
+          JSON.stringify(toUnitLayoutItems(pairs)),
         ]),
       ).toMatchObject({ changed: 2 });
       const entry = (await unitEntries(db.admin, block)).filter((e) => e.id > since);
@@ -293,6 +293,23 @@ describe("квартиры: цена, отделка, стояки, удален
           },
         },
       });
+
+      // Устаревший черновик «Планировок» без «цены от» и «доступна» их не затирает.
+      await callAs(db, head, "save_block_layouts($1, $2::jsonb)", [
+        target,
+        JSON.stringify([
+          { id: studio, rooms: 0, area: 30 },
+          { id: soldOut, rooms: 3, area: 80 },
+        ]),
+      ]);
+      const kept = await db.admin.query<{ id: string; available: boolean; price_from: string }>(
+        "select id, available, price_from from layouts where block_id = $1 order by rooms",
+        [target],
+      );
+      expect(kept.rows.map(({ available, price_from }) => [available, price_from])).toEqual([
+        [true, "25000.00"],
+        [false, "90000.00"],
+      ]);
 
       // Список снова создаётся генератором, а блок без списка удаляется вкладкой «Блоки».
       await generate(db, head, target, SMALL_PLAN, [studio, soldOut]);

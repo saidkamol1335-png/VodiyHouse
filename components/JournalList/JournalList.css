@@ -88,6 +88,55 @@
   color: var(--fg-3);
 }
 
+/* Сводка о квартирах: что сделано и сколько, номера моноширинным, группы статусов плашками,
+   пометки — янтарным текстом (без планировки, не тронуты). */
+.journal-list__summary {
+  display: grid;
+  gap: 4px;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+
+/* Части строки («Создан список: 88 квартир», «№ 1–88») — отдельные элементы с отступом:
+   пробелы в разметке не нужны. */
+.journal-list__summary-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.journal-list__numbers {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  overflow-wrap: anywhere;
+}
+
+.journal-list__groups {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal-list__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.journal-list__note {
+  margin: 0;
+  color: var(--amber-2);
+  overflow-wrap: anywhere;
+}
+
 .journal-list__actor {
   padding-top: 2px;
   color: var(--fg-2);

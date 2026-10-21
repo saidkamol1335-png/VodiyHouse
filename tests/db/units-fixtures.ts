@@ -72,12 +72,12 @@ export function newLayout(
 }
 
 /** Строки генератора, как их считает кабинет: стояк позиции i — планировка layoutIds[i]. */
-export function planRows(blockId: string, plan: BlockPlan, layoutIds: readonly string[] = []) {
+export function planRows(plan: BlockPlan, layoutIds: readonly string[] = []) {
   const risers = defaultRisers(plan).map((riser, index) => ({
     ...riser,
     layoutId: layoutIds[index] ?? null,
   }));
-  return toUnitInsertRows(blockId, applyRisers(generateUnits(plan), risers));
+  return toUnitInsertRows(applyRisers(generateUnits(plan), risers));
 }
 
 /** Вызов функции от имени сотрудника: `select <expr> as result`, ответ jsonb — объект. */
@@ -102,7 +102,7 @@ export function generate(
 ) {
   return callAs(db, headId, "create_block_units($1, $2::jsonb)", [
     blockId,
-    JSON.stringify(planRows(blockId, plan, layoutIds)),
+    JSON.stringify(planRows(plan, layoutIds)),
   ]);
 }
 

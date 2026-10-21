@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { readText, readUuid } from "@/lib/admin/credentials";
+import { expireDeveloper } from "@/lib/cache";
 import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
 import {
   developerMainRow,
@@ -85,7 +86,7 @@ export async function saveDeveloperMainAction(formData: FormData): Promise<SaveM
     .select("id");
   if (error) return fail(contentDbErrorCode(error));
   if (!data?.length) return fail("notFound");
-  refresh();
+  expireDeveloper(id);
   return { status: "saved", at: Date.now() };
 }
 
@@ -155,7 +156,7 @@ export async function setDeveloperStatusAction(formData: FormData): Promise<Stat
     to === "published" ? { status: to, files_checked_at: new Date().toISOString() } : { status: to };
   const { error } = await guard.supabase.from("developers").update(change).eq("id", id);
   if (error) return statusError(contentDbErrorCode(error));
-  refresh();
+  expireDeveloper(id);
   return { status: "done", to, at: Date.now() };
 }
 
@@ -178,7 +179,7 @@ export async function saveDeveloperProjectsAction(formData: FormData): Promise<S
     p_projects: parsed.payload,
   });
   if (error) return fail(contentDbErrorCode(error));
-  refresh();
+  expireDeveloper(id);
   return { status: "saved", at: Date.now() };
 }
 

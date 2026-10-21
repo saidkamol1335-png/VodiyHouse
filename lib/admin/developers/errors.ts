@@ -16,6 +16,14 @@ export const CONTENT_ERRORS = [
   "statusMove",
   "confirmName",
   "hasUnits",
+  "layoutHasUnits",
+  "listExists",
+  "noList",
+  "unitsLimit",
+  "unitNumberTaken",
+  "unitSlotTaken",
+  "wholeList",
+  "timeout",
   "floorsBelowUnits",
   "rule12",
   "developerArchived",
@@ -39,6 +47,18 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:rule12": "rule12",
   "vh:developer_archived": "developerArchived",
   "vh:too_many": "galleryFull",
+  "vh:list_exists": "listExists",
+  "vh:units_limit": "unitsLimit",
+  "vh:unit_taken": "unitNumberTaken",
+  "vh:whole_list": "wholeList",
+  "vh:confirm_name": "confirmName",
+};
+
+// Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.
+const BY_HINT_DETAIL: Record<string, ContentErrorCode> = {
+  "vh:unit_taken:number": "unitNumberTaken",
+  "vh:unit_taken:slot": "unitSlotTaken",
+  "vh:invalid:no_list": "noList",
 };
 
 // Нарушение check или домена (пустой перевод, лишний символ) — форма такое уже не пропускает,
@@ -50,10 +70,20 @@ const BY_CODE: Record<string, ContentErrorCode> = {
   "23514": "invalid",
   "22P02": "invalid",
   "22023": "invalid",
+  // Ссылка на уже удалённую строку (планировка, отделка) — гонка: «обновите страницу».
+  "23503": "notFound",
+  // Выход числа за предел колонки — данные в обход формы.
+  "22003": "invalid",
+  // statement_timeout роли API (8 с): большая пачка не успела.
+  "57014": "timeout",
 };
 
 /** Отказ базы через PostgREST; сбой сети (fetch failed) — у ошибки нет кода Postgres. */
-export function contentDbErrorCode(error: DbErrorLike & { message?: string }): ContentErrorCode {
+export function contentDbErrorCode(
+  error: DbErrorLike & { message?: string; details?: string | null },
+): ContentErrorCode {
+  const byDetail = BY_HINT_DETAIL[`${error.hint ?? ""}:${error.details ?? ""}`];
+  if (byDetail) return byDetail;
   const byHint = BY_HINT[error.hint ?? ""];
   if (byHint) return byHint;
   const byCode = BY_CODE[error.code ?? ""];

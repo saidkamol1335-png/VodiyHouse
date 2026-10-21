@@ -1,11 +1,11 @@
 "use server";
 
-import { refresh } from "next/cache";
 import { requirementsFromDetail } from "@/lib/admin/complexes/readiness";
 import type { ComplexMediaResult } from "@/lib/admin/complexes/types";
 import { readText, readUuid } from "@/lib/admin/credentials";
 import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
 import { removeMediaFiles } from "@/lib/admin/server/mediaFiles";
+import { expireComplex, markComplexStale } from "@/lib/cache";
 import { requireActionViewer } from "@/lib/admin/session";
 import { clampFocus, isOwnMediaPath } from "@/lib/media";
 
@@ -71,7 +71,7 @@ export async function attachComplexPhotoAction(formData: FormData): Promise<Comp
   const guard = await headGuard();
   if (!guard.ok) return fail(guard.code);
   const result = await attach(guard.supabase, formData, "add_complex_photo");
-  if (result.status === "done") refresh();
+  if (result.status === "done") expireComplex(readUuid(formData));
   return result;
 }
 
@@ -100,7 +100,7 @@ export async function reorderComplexPhotosAction(formData: FormData): Promise<Co
     p_ids: order,
   });
   if (error) return fail(contentDbErrorCode(error), error);
-  refresh();
+  expireComplex(id);
   return { status: "done", id };
 }
 
@@ -117,7 +117,7 @@ export async function removeComplexPhotoAction(formData: FormData): Promise<Comp
   });
   if (error) return fail(contentDbErrorCode(error), error);
   await removeMediaFiles(guard.supabase, data);
-  refresh();
+  expireComplex(id);
   return { status: "done", id: photo };
 }
 
@@ -139,5 +139,7 @@ export async function setComplexPhotoFocusAction(formData: FormData): Promise<Co
     .eq("complex_id", id)
     .select("id");
   if (error) return fail(contentDbErrorCode(error), error);
-  return data?.length ? { status: "done", id: photo } : fail("notFound");
+  if (!data?.length) return fail("notFound");
+  markComplexStale(id);
+  return { status: "done", id: photo };
 }

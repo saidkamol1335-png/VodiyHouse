@@ -74,7 +74,7 @@ describe("генератор блока → база", () => {
         ...riser,
         layoutId: layoutIds[index]!,
       }));
-      const rows = toUnitInsertRows(blockId, applyRisers(generateUnits(PLAN), risers));
+      const rows = toUnitInsertRows(applyRisers(generateUnits(PLAN), risers));
       return { blockId, inserted: await createBlockUnits(tx, blockId, rows) };
     });
     const elapsed = performance.now() - started;
@@ -117,7 +117,7 @@ describe("генератор блока → база", () => {
       "select id from blocks where name = 'Г'",
     );
     const blockId = block.rows[0]!.id;
-    const rows = toUnitInsertRows(blockId, applyRisers(generateUnits(PLAN), []));
+    const rows = toUnitInsertRows(applyRisers(generateUnits(PLAN), []));
     await expectHint(
       db.as(user(head), (tx) => createBlockUnits(tx, blockId, rows)),
       "vh:list_exists",

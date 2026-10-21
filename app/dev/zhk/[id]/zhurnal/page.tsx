@@ -4,7 +4,8 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { JournalList } from "@/components/JournalList";
 import { DEMO_COMPLEX_JOURNAL } from "@/lib/admin/complexes/demoJournal";
 import { demoComplex } from "@/lib/admin/complexes/demoPage";
-import { journalPage } from "@/lib/admin/journal/format";
+import { SEED_DICTIONARIES } from "@/lib/admin/dictionaries/seed";
+import { finishingNames, journalPage } from "@/lib/admin/journal/format";
 
 // Адрес с [id] известен только на запросе: страница ждёт его на сервере, как разделы кабинета
 // (docs: instant-navigation) — иначе меню и вкладки (usePathname) вне <Suspense> падают.
@@ -23,7 +24,12 @@ export default async function DevComplexJournalPage({
   return (
     <AdminPanel title={t("tabs.log")} wide>
       <p className="admin-panel__lead">{t("journalLead")}</p>
-      <JournalList page={page} scope={{ developerId: null, complexId: complex.id }} load={null} />
+      <JournalList
+        page={page}
+        scope={{ developerId: null, complexId: complex.id }}
+        load={null}
+        finishings={finishingNames(SEED_DICTIONARIES.finishings)}
+      />
     </AdminPanel>
   );
 }

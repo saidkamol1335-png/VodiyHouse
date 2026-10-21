@@ -12,9 +12,44 @@ export {
   summarizeBlockPlan,
   validateBlockPlan,
 } from "./blockPlan";
-export type { Riser, RiserIssue } from "./risers";
-export { applyRisers, defaultRisers, layoutForSlot, riserChanges, validateRisers } from "./risers";
+export type {
+  RoomsByLayout,
+  UnitFilter,
+  UnitFilterOptions,
+  UnitRoomFilter,
+  UnitStatusCounts,
+} from "./list";
+export {
+  EMPTY_UNIT_FILTER,
+  countUnitStatuses,
+  filterUnits,
+  sortUnitsByNumber,
+  unitFilterOptions,
+} from "./list";
+export {
+  UNIT_NUMBER_PATTERN,
+  compareUnitNumbers,
+  foldUnitNumber,
+  isUnitNumber,
+  normalizeUnitNumber,
+  unitNumberMatches,
+} from "./number";
+export { planFromUnits, risersFromUnits } from "./readyBlock";
+export type { UnitRecord } from "./record";
+export { parseUnitRecord, parseUnitRecords } from "./record";
+export type { LayoutChange, Riser, RiserIssue } from "./risers";
+export {
+  applyRisers,
+  defaultRisers,
+  layoutForSlot,
+  riserChanges,
+  riserEdits,
+  riserForSlot,
+  validateRisers,
+} from "./risers";
+export type { RoomGroup } from "./rooms";
+export { ROOM_GROUPS, roomGroupOf } from "./rooms";
 export type { UnitInsertRow } from "./rows";
-export { toUnitInsertRows } from "./rows";
-export type { UnitStatus } from "./status";
-export { UNIT_STATUSES, isUnitStatus } from "./status";
+export { toUnitInsertRows, toUnitLayoutItems } from "./rows";
+export type { UnitStatus, UnitsUndo } from "./status";
+export { UNIT_STATUSES, isUnitStatus, parseUnitsUndo } from "./status";

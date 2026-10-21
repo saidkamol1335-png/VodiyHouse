@@ -1,8 +1,8 @@
 "use server";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { refresh } from "next/cache";
 import { readText, readUuid } from "@/lib/admin/credentials";
+import { expireDeveloper, markDeveloperStale } from "@/lib/cache";
 import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
 import type { MediaActionResult } from "@/lib/admin/developers/types";
 import { requireActionViewer } from "@/lib/admin/session";
@@ -75,7 +75,7 @@ export async function attachDeveloperMediaAction(formData: FormData): Promise<Me
   });
   if (error) return fail(contentDbErrorCode(error));
   await removeFile(guard.supabase, data);
-  refresh();
+  expireDeveloper(id);
   return { status: "done" };
 }
 
@@ -93,7 +93,7 @@ export async function removeDeveloperMediaAction(formData: FormData): Promise<Me
   });
   if (error) return fail(contentDbErrorCode(error));
   await removeFile(guard.supabase, data);
-  refresh();
+  expireDeveloper(id);
   return { status: "done" };
 }
 
@@ -113,5 +113,7 @@ export async function setDeveloperMediaFocusAction(formData: FormData): Promise<
     .eq("kind", kind)
     .select("id");
   if (error) return fail(contentDbErrorCode(error));
-  return data?.length ? { status: "done" } : fail("notFound");
+  if (!data?.length) return fail("notFound");
+  markDeveloperStale(id);
+  return { status: "done" };
 }

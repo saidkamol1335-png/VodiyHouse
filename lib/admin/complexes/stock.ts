@@ -2,8 +2,9 @@
 // и пилюля «свободно N». Данные — room_availability(): по числу комнат и валюте. Блок без списка
 // квартир не знает числа (free_count = null) — тип показывается без числа (PLAN §3.1).
 
-export const ROOM_GROUPS = ["studio", "1", "2", "3", "4plus"] as const;
-export type RoomGroup = (typeof ROOM_GROUPS)[number];
+import { ROOM_GROUPS, roomGroupOf, type RoomGroup } from "@/lib/units/rooms";
+
+export { ROOM_GROUPS, roomGroupOf, type RoomGroup };
 
 export type RoomAvailabilityRecord = {
   complex_id: string;
@@ -22,11 +23,6 @@ export const EMPTY_STOCK: ComplexStock = { groups: [], free: 0, partial: false }
 
 /** Мокап: 0 — «нет», до 10 — янтарная пилюля, больше — зелёная. */
 export const LOW_STOCK = 10;
-
-export function roomGroupOf(rooms: number): RoomGroup {
-  if (rooms <= 0) return "studio";
-  return rooms >= 4 ? "4plus" : (String(rooms) as RoomGroup);
-}
 
 function stockOf(records: readonly RoomAvailabilityRecord[]): ComplexStock {
   const byGroup = new Map<RoomGroup, number | null>();

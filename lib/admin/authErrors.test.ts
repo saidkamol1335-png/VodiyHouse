@@ -1,4 +1,6 @@
 import { AuthApiError, AuthRetryableFetchError, AuthSessionMissingError, AuthWeakPasswordError } from "@supabase/supabase-js";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import ru from "@/messages/ru.json";
 import {
@@ -10,6 +12,7 @@ import {
   staffAuthErrorCode,
   staffDbErrorCode,
 } from "./authErrors";
+import { CONTENT_ERRORS, contentDbErrorCode } from "./developers/errors";
 
 const api = (code: string, status = 400) => new AuthApiError("текст Supabase", status, code);
 
@@ -66,6 +69,7 @@ describe("у каждого кода есть текст в messages/ru.json", (
     ["admin.login.errors", SIGN_IN_ERRORS, ru.admin.login.errors],
     ["admin.password.errors", PASSWORD_ERRORS, ru.admin.password.errors],
     ["admin.staff.errors", STAFF_ERRORS, ru.admin.staff.errors],
+    ["admin.developers.errors", CONTENT_ERRORS, ru.admin.developers.errors],
   ];
   for (const [namespace, codes, texts] of cases) {
     it(namespace, () => {
@@ -73,4 +77,22 @@ describe("у каждого кода есть текст в messages/ru.json", (
       expect(Object.keys(texts).sort()).toEqual([...codes].sort());
     });
   }
+});
+
+// Новая миграция с новым отказом без сопоставления показала бы «Не получилось сохранить».
+describe("каждый hint vh:… из миграций знает кабинет", () => {
+  const dir = path.join("supabase", "migrations");
+  const hints = new Set(
+    readdirSync(dir)
+      .filter((file) => file.endsWith(".sql"))
+      .flatMap((file) => [...readFileSync(path.join(dir, file), "utf8").matchAll(/hint = '(vh:[a-z_0-9]+)'/g)])
+      .map((match) => match[1]!),
+  );
+
+  it.each([...hints].sort())("%s", (hint) => {
+    const known =
+      contentDbErrorCode({ code: "XX000", hint }) !== "unknown" ||
+      staffDbErrorCode({ code: "XX000", hint }) !== "unknown";
+    expect(known).toBe(true);
+  });
 });

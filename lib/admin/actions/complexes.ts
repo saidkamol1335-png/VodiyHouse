@@ -29,6 +29,7 @@ import type { PublicationStatus } from "@/lib/admin/publication";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { removeMediaFiles } from "@/lib/admin/server/mediaFiles";
 import { requireActionViewer } from "@/lib/admin/session";
+import { expireComplex } from "@/lib/cache";
 import { contentSlug } from "@/lib/slug";
 
 // «ЖК» (шаг 11). Каждое действие — открытый POST: первой строкой проверяет, что это
@@ -64,6 +65,13 @@ export async function createComplexAction(formData: FormData): Promise<CreateCom
 }
 
 type DbError = { code?: string; hint?: string; message?: string; details?: string | null };
+
+/** ЖК блока — из базы, а не из формы; не нашли — хотя бы перерисовать страницу кабинета. */
+async function expireComplexOfBlock(supabase: SupabaseClient, block: string): Promise<void> {
+  const { data } = await supabase.from("blocks").select("complex_id").eq("id", block).maybeSingle();
+  if (data?.complex_id) expireComplex(data.complex_id);
+  else refresh();
+}
 
 /** vh:not_ready несёт в detail, какие условия публикации не выполнены: «address,point». */
 const brokenOf = (error: DbError): ComplexRequirement[] =>
@@ -101,7 +109,7 @@ export async function saveComplexMainAction(formData: FormData): Promise<SaveCom
     p_complex: id,
     p_slug: contentSlug(parsed.value.name.uz, SLUG_FALLBACK),
   });
-  refresh();
+  expireComplex(id);
   if (slug.error) return fail(contentDbErrorCode(slug.error));
   return { status: "saved", at: Date.now() };
 }
@@ -164,7 +172,7 @@ export async function setComplexStatusAction(formData: FormData): Promise<Comple
       : { status: to };
   const { error } = await guard.supabase.from("complexes").update(change).eq("id", id);
   if (error) return statusError(contentDbErrorCode(error), brokenOf(error));
-  refresh();
+  expireComplex(id);
   return { status: "done", to, at: Date.now() };
 }
 
@@ -196,7 +204,7 @@ export async function saveComplexBlocksAction(formData: FormData): Promise<SaveR
   if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
   // Чертежи удалённых блоков: строк уже нет — файлы убираем из бакета.
   await removeMediaFiles(guard.supabase, data);
-  refresh();
+  expireComplex(id);
   return { status: "saved", at: Date.now() };
 }
 
@@ -219,8 +227,10 @@ export async function saveBlockLayoutsAction(formData: FormData): Promise<SaveRo
     p_block: block,
     p_layouts: parsed.payload,
   });
-  if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
+  // vh:has_units здесь — про планировку со стояками, а не про блок со списком квартир.
+  const code = error ? contentDbErrorCode(error) : null;
+  if (error) return fail(code === "hasUnits" ? "layoutHasUnits" : code, { broken: brokenOf(error) });
   await removeMediaFiles(guard.supabase, data);
-  refresh();
+  await expireComplexOfBlock(guard.supabase, block);
   return { status: "saved", at: Date.now() };
 }

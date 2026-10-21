@@ -243,6 +243,54 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
     await expect(page.getByText("Блок A · 1-комн. · 42,5 м²")).toBeVisible();
   });
 
+  test("журнал квартир (12.2): сводки — сколько, номера, статусы плашками, без сырых ключей", async ({
+    page,
+  }) => {
+    await open(page, `${SHODLIK}/zhurnal`);
+    const entries = page.locator(".journal-list__entry");
+    const unitsEntry = (text: string) => entries.filter({ hasText: text });
+
+    await expect(unitsEntry("Удалён весь список")).toContainText(
+      "свободных 10, в брони 2, продано 76",
+    );
+    await expect(unitsEntry("Удалён весь список")).toContainText("были в брони: № 30, 77");
+    await expect(unitsEntry("Создан список: 88 квартир")).toContainText("№ 1–88");
+    // Стояки на разные планировки — запись без пары не пропала.
+    await expect(unitsEntry("Стояки")).toContainText("без планировки");
+    await expect(unitsEntry("Стояки")).toContainText("3-комн. · 78 м²");
+    await expect(unitsEntry("White box")).toContainText("№ 85–88");
+    await expect(unitsEntry("$700/м²")).toContainText("22 квартиры");
+    await expect(unitsEntry("Создан список")).toContainText("88 квартир");
+    const mixed = unitsEntry("1 квартира").filter({ hasText: "№ 47" });
+    await expect(mixed).toContainText("Квартиры");
+    // Смену статуса показывают группы плашками — пары «Статус было → стало» нет.
+    await expect(mixed.locator(".journal-list__change")).toHaveCount(0);
+    await expect(mixed.locator(".journal-list__group")).toHaveCount(2);
+    await expect(mixed.locator(".badge").filter({ hasText: "бронь" })).toBeVisible();
+    await expect(unitsEntry("Отмена смены статуса")).toContainText("не тронуты");
+    // Одна квартира — номер в подписи, без «№» и числа в теле.
+    const single = unitsEntry("Блок A · кв. 41");
+    await expect(single).toContainText("Дилноза Юсупова");
+    await expect(single.locator(".journal-list__numbers")).toHaveCount(0);
+
+    await expect(page.locator(".journal-list")).not.toContainText(
+      /price_per_m2|finishing_id|units_many|\bsold\b|\breserved\b|summary\./,
+    );
+    expect(await noHorizontalScroll(page)).toBe(0);
+  });
+
+  for (const theme of ["light", "dark"] as const) {
+    test(`журнал квартир · скриншот · ${theme}`, async ({ page }, testInfo) => {
+      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
+      await open(page, `${SHODLIK}/zhurnal`);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        path: `test-results/screens/${testInfo.project.name}/s12-journal-${theme}.png`,
+        fullPage: true,
+      });
+    });
+  }
+
   test("вкладки не шире экрана", async ({ page }) => {
     for (const url of [`${SHODLIK}/foto`, `${SHODLIK}/kvartiry`, `${SHODLIK}/zhurnal`]) {
       await open(page, url);

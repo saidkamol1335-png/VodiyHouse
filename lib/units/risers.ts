@@ -51,13 +51,17 @@ export function validateRisers(plan: BlockPlan, risers: readonly Riser[]): Riser
 }
 
 /**
- * Планировка квартиры по стоякам: стояк своего подъезда важнее общего, иначе первый
- * подходящий. null — квартира не попала ни в один стояк с выбранной планировкой.
+ * Стояк квартиры: стояк своего подъезда важнее общего, иначе первый подходящий. Стояк без
+ * планировки — тоже стояк: у готового блока он снимает планировку. undefined — вне стояков.
  */
+export function riserForSlot(slot: UnitSlot, risers: readonly Riser[]): Riser | undefined {
+  const covering = risers.filter((riser) => covers(riser, slot));
+  return covering.find((riser) => riser.entrance === slot.entrance) ?? covering[0];
+}
+
+/** Планировка квартиры по стоякам; null — без планировки или вне стояков. */
 export function layoutForSlot(slot: UnitSlot, risers: readonly Riser[]): string | null {
-  const covering = risers.filter((riser) => riser.layoutId !== null && covers(riser, slot));
-  const own = covering.find((riser) => riser.entrance === slot.entrance);
-  return (own ?? covering[0])?.layoutId ?? null;
+  return riserForSlot(slot, risers)?.layoutId ?? null;
 }
 
 /** Квартиры с назначенной по стоякам планировкой — для создания блока генератором. */
@@ -68,20 +72,51 @@ export function applyRisers<T extends UnitSlot>(
   return units.map((unit) => ({ ...unit, layoutId: layoutForSlot(unit, risers) }));
 }
 
+export type LayoutChange = { id: string; layoutId: string | null };
+
 /**
- * Для уже созданных квартир: какие планировки поменяются, если сохранить стояки.
- * Квартиры вне стояков не трогаем — их планировку могли назначить вручную.
+ * Для уже созданных квартир: какие планировки поменяются, если сохранить стояки. null —
+ * снять планировку (стояк без неё). Квартиры вне стояков не трогаем — их могли править вручную.
  */
 export function riserChanges<T extends UnitSlot & { id: string; layoutId: string | null }>(
   units: readonly T[],
   risers: readonly Riser[],
-): Array<{ id: string; layoutId: string }> {
-  const changes: Array<{ id: string; layoutId: string }> = [];
+): LayoutChange[] {
+  const changes: LayoutChange[] = [];
   for (const unit of units) {
-    const layoutId = layoutForSlot(unit, risers);
-    if (layoutId !== null && layoutId !== unit.layoutId) changes.push({ id: unit.id, layoutId });
+    const riser = riserForSlot(unit, risers);
+    if (riser && riser.layoutId !== unit.layoutId) {
+      changes.push({ id: unit.id, layoutId: riser.layoutId });
+    }
   }
   return changes;
+}
+
+/**
+ * Сохранение стояков готового блока по снимку (Н5): base — стояки, от которых начинала панель,
+ * next — что в ней теперь. Меняются только квартиры, где next даёт другую планировку, чем base;
+ * квартиру, которую поправили после снимка (её планировка уже не та, что по base), не трогаем —
+ * она в skipped, иначе правка коллеги молча откатилась бы.
+ */
+export function riserEdits<T extends UnitSlot & { id: string; layoutId: string | null }>(
+  units: readonly T[],
+  base: readonly Riser[],
+  next: readonly Riser[],
+): { changes: LayoutChange[]; skipped: T[] } {
+  const changes: LayoutChange[] = [];
+  const skipped: T[] = [];
+  for (const unit of units) {
+    const after = riserForSlot(unit, next);
+    if (!after) continue;
+    const before = riserForSlot(unit, base);
+    if (before && before.layoutId === after.layoutId) continue;
+    // Вне снимка (новый стояк) ожидаем то, что есть сейчас.
+    const expected = before ? before.layoutId : unit.layoutId;
+    if (unit.layoutId !== expected) skipped.push(unit);
+    else if (unit.layoutId !== after.layoutId)
+      changes.push({ id: unit.id, layoutId: after.layoutId });
+  }
+  return { changes, skipped };
 }
 
 function covers(riser: Riser, slot: UnitSlot): boolean {

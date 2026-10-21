@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { BLOCK_PLAN_LIMITS, type BlockPlan } from "@/lib/units";
+import { unitTotalPrice } from "@/lib/calc/unitPrice";
+import { BLOCK_PLAN_LIMITS, compareUnitNumbers, isUnitNumber, type BlockPlan } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import {
   anon,
@@ -10,6 +11,7 @@ import {
   createTestDb,
   expectDenied,
   expectHint,
+  user,
   type TestDb,
 } from "./harness";
 import {
@@ -145,6 +147,51 @@ describe("квартиры в кабинете: права, генератор, 
       expect(rows[0]?.n).toBe(BLOCK_PLAN_LIMITS.totalUnits);
     });
 
+    it("номер: проверка и порядок в lib/units — как в базе", async () => {
+      const samples = [
+        "1",
+        "12А",
+        "12a",
+        "3/1",
+        "7-Б",
+        " 41 ",
+        "",
+        "12 Б",
+        "12Ё",
+        "№12",
+        "12345678901",
+      ];
+      const { rows } = await db.admin.query<{ n: string; ok: boolean }>(
+        "select n, private.is_unit_number(n) as ok from unnest($1::text[]) as t (n)",
+        [samples],
+      );
+      for (const row of rows) expect(isUnitNumber(row.n), JSON.stringify(row.n)).toBe(row.ok);
+
+      const numbers = ["12А", "2", "Б", "10", "12", "1", "А1", "13", "01"];
+      const sorted = await db.admin.query<{ n: string }>(
+        `select n from unnest($1::text[]) as t (n)
+         order by nullif(substring(n from '^[0-9]+'), '')::numeric nulls last, n`,
+        [numbers],
+      );
+      expect([...numbers].sort(compareUnitNumbers)).toEqual(sorted.rows.map((row) => row.n));
+    });
+
+    it("цена квартиры в lib/calc — как «цена от» базы (целиком или площадь × цена м²)", async () => {
+      const block = await newBlock(db.admin, ids.draftComplex, "Ц", 5);
+      const layout = await newLayout(db.admin, block, 2, 58.7);
+      await generate(db, head, block, SMALL_PLAN, [layout, layout]);
+      const [first, second] = await unitsOf(db.admin, block);
+      await callAs(db, head, "set_units_price($1, $2, 'per_m2', 621)", [block, [first!.id]]);
+      await callAs(db, head, "set_units_price($1, $2, 'total', 99999999)", [block, [second!.id]]);
+      const { rows } = await db.as(user(head), (tx) =>
+        tx.query<{ price_from: string }>(
+          "select price_from from layout_availability($1) where layout_id = $2",
+          [ids.draftComplex, layout],
+        ),
+      );
+      expect(Number(rows[0]?.price_from)).toBe(unitTotalPrice({ price: null, pricePerM2: 621 }, 58.7));
+    });
+
     it("5000 квартир — одной транзакцией и одной записью; 5001 — отказ без вставки", async () => {
       const big: BlockPlan = {
         entrances: 50,
@@ -155,7 +202,7 @@ describe("квартиры в кабинете: права, генератор, 
       };
       const tooBig = await newBlock(db.admin, ids.draftComplex, "Т", 100);
       const rows = [
-        ...planRows(tooBig, big),
+        ...planRows(big),
         { entrance: 1, floor: 1, position: 2, number: "5001", layout_id: null },
       ];
       await expectHint(
@@ -189,7 +236,7 @@ describe("квартиры в кабинете: права, генератор, 
     it("неверные строки отклоняются целиком понятным кодом, без частичной вставки", async () => {
       const block = await newBlock(db.admin, ids.draftComplex, "Н", 5);
       const foreignLayout = await newLayout(db.admin, ids.draftBlock, 1, 40);
-      const good = planRows(block, SMALL_PLAN);
+      const good = planRows(SMALL_PLAN);
       const cases: unknown[][] = [
         [],
         [{ ...good[0], floor: 6 }],

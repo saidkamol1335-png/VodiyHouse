@@ -21,7 +21,7 @@ describe("значения в журнале", () => {
       kind: "status",
       status: "published",
     });
-    expect(journalValue("units", "status", "sold")).toEqual({ kind: "text", text: "sold" });
+    expect(journalValue("units", "status", "sold")).toEqual({ kind: "unitStatus", status: "sold" });
     expect(journalValue("developers", "about", { ru: "Строит", uz: "Quradi" })).toEqual({
       kind: "bilingual",
       ru: "Строит",
@@ -64,6 +64,7 @@ describe("записи журнала", () => {
           after: { kind: "text", text: "2015" },
         },
       ],
+      summary: null,
     });
   });
 
@@ -81,8 +82,9 @@ describe("записи журнала", () => {
       record({ id: 2, entity: "blocks", changes: { name: "A", price_includes: [[], [{}]] } }),
       record({ id: 1, entity: "layouts", changes: { block_id: "b", drawing_id: ["x", "y"] } }),
     ]);
-    expect(entries.map((entry) => entry.changes.map((change) => [change.field, change.opaque])))
-      .toEqual([[["price_includes", true]], [["drawing_id", true]]]);
+    expect(
+      entries.map((entry) => entry.changes.map((change) => [change.field, change.opaque])),
+    ).toEqual([[["price_includes", true]], [["drawing_id", true]]]);
   });
 
   it("«Показать ещё» — с последней строки базы, даже если она скрыта из вида", () => {

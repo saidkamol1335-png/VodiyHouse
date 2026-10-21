@@ -145,7 +145,10 @@ describe("«Блоки» (И4)", () => {
     });
     expect(
       parseBlocks(formWith("blocks", [block({ priceIncludes: [priced("8 000")] })])),
-    ).toMatchObject({ ok: true, payload: [{ price_includes: [{ included: false, price: 8000 }] }] });
+    ).toMatchObject({
+      ok: true,
+      payload: [{ price_includes: [{ included: false, price: 8000 }] }],
+    });
     // Повтор виден с первого «Сохранить», даже если у первой «A» есть другие ошибки.
     expect(
       parseBlocks(
@@ -208,6 +211,31 @@ describe("«Планировки» (И5)", () => {
     expect(parsed).toEqual({
       ok: true,
       payload: [{ rooms: 1, area: 42.5, drawing_id: drawing, price_from: 31000, available: true }],
+    });
+    // Прочитанная из базы строка шлёт «цену от» и «доступна», только если их правили (Н7):
+    // устаревший черновик не затрёт «нет в наличии» менеджера.
+    const saved = { available: true, priceFrom: "31 000" };
+    expect(
+      parseLayouts(formWith("layouts", [layout({ id: drawing, priceFrom: "31 000", saved })])),
+    ).toEqual({ ok: true, payload: [{ id: drawing, rooms: 1, area: 42.5, drawing_id: null }] });
+    expect(
+      parseLayouts(
+        formWith("layouts", [
+          layout({ id: drawing, priceFrom: "32 000", available: false, saved }),
+        ]),
+      ),
+    ).toEqual({
+      ok: true,
+      payload: [
+        {
+          id: drawing,
+          rooms: 1,
+          area: 42.5,
+          drawing_id: null,
+          price_from: 32000,
+          available: false,
+        },
+      ],
     });
     expect(parseLayouts(formWith("layouts", [layout({ drawingId: "../evil" })]))).toEqual({
       ok: false,

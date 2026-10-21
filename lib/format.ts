@@ -63,8 +63,16 @@ export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
   return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
 }
 
+/** «$620/м²», «4 100 000 сум/м²» — цена за м² квартиры (Н3). */
+export function formatPricePerM2(amount: number, currency: "USD" | "UZS"): string {
+  return `${formatPrice(amount, currency)}/м²`;
+}
+
 /** Предел цены — numeric(14,2) в базе. */
 export const PRICE_MAX = 999_999_999_999;
+
+/** Предел цены за м²: площадь (до 999,99 м²) × цена м² должна влезать в «цену от» планировки. */
+export const PRICE_PER_M2_MAX = 999_999_999;
 
 export type PriceInput = { value: number | null; issue?: "notNumber" | "outOfRange" };
 
@@ -72,10 +80,10 @@ export type PriceInput = { value: number | null; issue?: "notNumber" | "outOfRan
  * Цена, набранная руками: целое, группы — пробелами («31 000»). Запятую и точку не угадываем:
  * «31,000» с клавиатуры ПК — это 31 000, а Number() дал бы 31, поэтому такой ввод — ошибка.
  */
-export function parsePriceInput(raw: string): PriceInput {
+export function parsePriceInput(raw: string, max: number = PRICE_MAX): PriceInput {
   const digits = raw.replace(/\s+/g, "");
   if (!digits) return { value: null };
   if (!/^\d+$/.test(digits)) return { value: null, issue: "notNumber" };
   const value = Number(digits);
-  return value <= 0 || value > PRICE_MAX ? { value: null, issue: "outOfRange" } : { value };
+  return value <= 0 || value > max ? { value: null, issue: "outOfRange" } : { value };
 }

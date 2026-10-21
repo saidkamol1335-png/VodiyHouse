@@ -1,5 +1,7 @@
+import { isUnitStatus, type UnitStatus } from "@/lib/units";
 import type { ContentErrorCode } from "../developers/errors";
 import { PUBLICATION_STATUSES, type PublicationStatus } from "../publication";
+import { parseUnitsSummary, type UnitsSummary } from "./unitsSummary";
 
 // Журнал изменений для людей (ТЗ 13.1: «кто и когда поменял»): строки journal_entries() →
 // записи с изменёнными полями. Подписи полей и значений переводит компонент (messages).
@@ -17,20 +19,31 @@ export type JournalRecord = {
   subject: string | null;
 };
 
+export type JournalCurrency = "USD" | "UZS";
+
 export type JournalValue =
   | { kind: "empty" }
   | { kind: "text"; text: string }
   | { kind: "bilingual"; ru: string; uz: string }
   | { kind: "date"; iso: string }
   | { kind: "flag"; on: boolean }
-  | { kind: "status"; status: PublicationStatus };
+  | { kind: "status"; status: PublicationStatus }
+  | { kind: "unitStatus"; status: UnitStatus }
+  /** Цена квартиры: валюта блока — из самой записи (changes.currency). */
+  | { kind: "money"; amount: number; currency: JournalCurrency | null; perM2: boolean }
+  /** Отделка: название — из справочника; null у квартиры — «как в блоке». */
+  | { kind: "finishing"; id: number | null; inherit: boolean };
 
-/** opaque — поле изменилось, но «было → стало» не показываем (файл, составной список). */
+/**
+ * opaque — поле изменилось, но «было → стало» не показываем (файл, составной список); afterOnly —
+ * только «стало»: у сводки пустое «было» значит и «было пусто», и «было по-разному».
+ */
 export type JournalChange = {
   field: string;
   before: JournalValue;
   after: JournalValue;
   opaque?: true;
+  afterOnly?: true;
 };
 
 export type JournalEntry = {
@@ -41,6 +54,8 @@ export type JournalEntry = {
   entity: string;
   subject: string | null;
   changes: JournalChange[];
+  /** Сводная запись о квартирах: сколько, номера, группы статусов. */
+  summary: UnitsSummary | null;
 };
 
 // Служебные поля людям ничего не говорят: ключи, пути файлов, превью, отметки времени.
@@ -64,6 +79,8 @@ const HIDDEN_FIELDS = new Set([
 // правка (деньги и файл на сайте) должна быть в журнале — «изменено» без «было → стало».
 const OPAQUE_FIELDS = new Set(["drawing_id", "price_includes"]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
+const MONEY_FIELDS = new Set(["price", "price_per_m2"]);
+const FINISHING_ENTITIES = new Set(["units", "blocks"]);
 const TEXT_LIMIT = 140;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T/;
@@ -79,12 +96,34 @@ function isBilingual(value: unknown): value is { ru: string; uz: string } {
   return typeof ru === "string" && typeof uz === "string";
 }
 
+export type JournalValueContext = { currency: JournalCurrency | null };
+
+const isBlank = (raw: unknown) => raw === null || raw === undefined || raw === "";
+
 /** Значение поля в журнале: как показать «было» и «стало». */
-export function journalValue(entity: string, field: string, raw: unknown): JournalValue {
-  if (raw === null || raw === undefined || raw === "") return { kind: "empty" };
+export function journalValue(
+  entity: string,
+  field: string,
+  raw: unknown,
+  context: JournalValueContext = { currency: null },
+): JournalValue {
+  if (field === "finishing_id" && FINISHING_ENTITIES.has(entity))
+    return isBlank(raw)
+      ? { kind: "finishing", id: null, inherit: entity === "units" }
+      : { kind: "finishing", id: Number(raw), inherit: false };
+  if (isBlank(raw)) return { kind: "empty" };
   if (typeof raw === "boolean") return { kind: "flag", on: raw };
   if (field === "status" && PUBLICATION_ENTITIES.has(entity) && isStatus(raw))
     return { kind: "status", status: raw };
+  if (entity === "units" && field === "status" && isUnitStatus(raw))
+    return { kind: "unitStatus", status: raw };
+  if (entity === "units" && MONEY_FIELDS.has(field) && typeof raw === "number")
+    return {
+      kind: "money",
+      amount: raw,
+      currency: context.currency,
+      perM2: field === "price_per_m2",
+    };
   if (isBilingual(raw)) return { kind: "bilingual", ru: clip(raw.ru), uz: clip(raw.uz) };
   if (typeof raw === "string" && (ISO_DATE.test(raw) || ISO_TIMESTAMP.test(raw)))
     return { kind: "date", iso: raw };
@@ -93,23 +132,34 @@ export function journalValue(entity: string, field: string, raw: unknown): Journ
   return { kind: "text", text: clip(JSON.stringify(raw)) };
 }
 
+const currencyOf = (changes: Record<string, unknown>): JournalCurrency | null =>
+  changes.currency === "USD" || changes.currency === "UZS" ? changes.currency : null;
+
 /** Правка — только изменённые поля {поле: [было, стало]}; добавление и удаление — без полей. */
-function changesOf(record: JournalRecord): JournalChange[] {
+function changesOf(record: JournalRecord, summary: UnitsSummary | null): JournalChange[] {
   if (record.action !== "update" || !record.changes || typeof record.changes !== "object")
     return [];
-  return Object.entries(record.changes as Record<string, unknown>)
+  const changes = record.changes as Record<string, unknown>;
+  const context = { currency: currencyOf(changes) };
+  return Object.entries(changes)
     .filter(
-      ([field, pair]) => !HIDDEN_FIELDS.has(field) && Array.isArray(pair) && pair.length === 2,
+      ([field, pair]) =>
+        !HIDDEN_FIELDS.has(field) &&
+        Array.isArray(pair) &&
+        pair.length === 2 &&
+        // Смену статуса сводка показывает группами «свободна → бронь» — пара повторила бы их.
+        !(summary?.kind === "status" && field === "status"),
     )
     .map(([field, pair]): JournalChange => {
       const [before, after] = pair as [unknown, unknown];
       if (OPAQUE_FIELDS.has(field))
         return { field, before: { kind: "empty" }, after: { kind: "empty" }, opaque: true };
-      return {
+      const change: JournalChange = {
         field,
-        before: journalValue(record.entity, field, before),
-        after: journalValue(record.entity, field, after),
+        before: journalValue(record.entity, field, before, context),
+        after: journalValue(record.entity, field, after, context),
       };
+      return summary && isBlank(before) ? { ...change, afterOnly: true } : change;
     });
 }
 
@@ -120,18 +170,30 @@ export function journalEntries(records: readonly JournalRecord[]): JournalEntry[
   return (
     records
       .filter((record) => isAction(record.action))
-      .map((record) => ({
-        id: Number(record.id),
-        at: record.at,
-        actor: record.actor_name,
-        action: record.action as JournalAction,
-        entity: record.entity,
-        subject: record.subject,
-        changes: changesOf(record),
-      }))
-      // Правка только служебных полей (новый файл фото, отметка времени) — не шум в журнале.
-      .filter((entry) => entry.action !== "update" || entry.changes.length > 0)
+      .map((record) => {
+        const summary = record.entity === "units" ? parseUnitsSummary(record.changes) : null;
+        return {
+          id: Number(record.id),
+          at: record.at,
+          actor: record.actor_name,
+          action: record.action as JournalAction,
+          entity: record.entity,
+          subject: record.subject,
+          changes: changesOf(record, summary),
+          summary,
+        };
+      })
+      // Правка только служебных полей (новый файл фото, отметка времени) — не шум в журнале;
+      // сводка квартир без пар (стояки на разные планировки) — не шум.
+      .filter((entry) => entry.action !== "update" || entry.changes.length > 0 || entry.summary)
   );
+}
+
+/** Названия отделок для журнала (id → «White box»): в записи только номер справочника. */
+export function finishingNames(
+  items: readonly { id: number; name: { ru: string } }[],
+): Record<number, string> {
+  return Object.fromEntries(items.map((item) => [item.id, item.name.ru]));
 }
 
 export const JOURNAL_PAGE = 30;

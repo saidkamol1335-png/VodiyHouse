@@ -1,7 +1,6 @@
 "use server";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { refresh } from "next/cache";
 import { readText } from "@/lib/admin/credentials";
 import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/lib/admin/dictionaries/definitions";
 import type { DictionaryActionResult } from "@/lib/admin/dictionaries/types";
 import { requireActionViewer } from "@/lib/admin/session";
+import { expireDictionaries } from "@/lib/cache";
 import { contentSlug } from "@/lib/slug";
 
 // «Настройки → Справочники» (решение Д6): правит руководитель (PLAN §5), права ещё раз
@@ -88,7 +88,7 @@ export async function addDictionaryItemAction(formData: FormData): Promise<Dicti
   if (typeof sort !== "number") return fail(sort);
   const error = await insertItem(at, parsed.value, sort);
   if (error) return fail(error);
-  refresh();
+  expireDictionaries();
   return done();
 }
 
@@ -111,7 +111,7 @@ export async function updateDictionaryItemAction(
     .select("id");
   if (error) return fail(contentDbErrorCode(error));
   if (!data?.length) return fail("notFound");
-  refresh();
+  expireDictionaries();
   return done();
 }
 
@@ -133,7 +133,7 @@ export async function setDictionaryItemActiveAction(
     .select("id");
   if (error) return fail(contentDbErrorCode(error));
   if (!data?.length) return fail("notFound");
-  refresh();
+  expireDictionaries();
   return done();
 }
 
@@ -152,7 +152,7 @@ export async function removeDictionaryItemAction(
     p_id: id,
   });
   if (error) return fail(contentDbErrorCode(error));
-  refresh();
+  expireDictionaries();
   return done(data === "hidden" ? "hidden" : "deleted");
 }
 
@@ -169,6 +169,6 @@ export async function reorderDictionaryAction(formData: FormData): Promise<Dicti
     p_ids: order,
   });
   if (error) return fail(contentDbErrorCode(error));
-  refresh();
+  expireDictionaries();
   return done();
 }
