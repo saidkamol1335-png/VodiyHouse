@@ -117,9 +117,17 @@ test.describe("кабинет · застройщики", () => {
     await expect(formStatus(page, "Отправлен в архив")).toBeVisible();
   });
 
-  test("публикация черновика говорит, чего не хватает", async ({ page }) => {
+  test("публикация черновика: логотип и фон по правилу 1.2, потом — чего не хватает", async ({
+    page,
+  }) => {
     await page.goto(NAVROZ);
     await page.getByRole("button", { name: "Опубликовать" }).click();
+    const panel = page.locator(".publish-check");
+    await expect(panel).toContainText("Опубликовать застройщика?");
+    const submit = panel.getByRole("button", { name: "Опубликовать на сайте" });
+    await expect(submit).toBeDisabled();
+    await panel.getByRole("checkbox").check();
+    await submit.click();
     await expect(
       formStatus(page, "Чтобы опубликовать, добавьте: текст «О компании» на двух языках · логотип"),
     ).toBeVisible();
@@ -147,12 +155,20 @@ test.describe("кабинет · застройщики", () => {
     await page.getByLabel("Основатели · RU").fill("Инженеры-строители");
     await expect(page.getByText("Нужен текст на узбекском")).toBeVisible();
     await page.getByLabel("Год основания").fill("1890");
+    // Правило 1.2: контакт в «О компании» — ошибка под парой полей, с причиной.
+    await page.getByLabel("О компании · RU").fill("Звоните +998 90 123 45 67");
+    await page.getByLabel("Kompaniya haqida · UZ").fill("2012 yildan beri quradi.");
     await page.getByRole("button", { name: "Сохранить вкладку" }).click();
     await expect(page.getByText("Проверьте число")).toBeVisible();
     await expect(formStatus(page, "Проверьте поля и сохраните ещё раз")).toBeVisible();
+    await expect(page.locator("#developer-about-error")).toContainText("В тексте контакты");
+    // Пустой перевод «Основателей» — тоже под своей парой, а не только общим итогом.
+    await expect(page.locator("#developer-founders-error")).toHaveText("Нужен текст на узбекском");
+    await expect(page.getByLabel("О компании · RU")).toHaveAttribute("aria-invalid", "true");
     // Введённое не потерялось после отказа сервера.
     await expect(page.getByLabel("Основатели · RU")).toHaveValue("Инженеры-строители");
 
+    await page.getByLabel("О компании · RU").fill("Строит с 2012 года.");
     await page.getByLabel("Год основания").fill("2012");
     await page.getByLabel("Asoschilar · UZ").fill("Quruvchi muhandislar");
     await page.getByRole("button", { name: "Сохранить вкладку" }).click();
@@ -170,6 +186,9 @@ test.describe("кабинет · застройщики", () => {
     await logo.setInputFiles(await imageFile(page, { width: 800, height: 800, type: "image/png" }));
     await expect(issueOf(page, "developer-logo")).toHaveCount(0);
     await expect(page.locator(".media-drop__tile-image")).toBeVisible();
+    // Отметка — на одну загрузку (И8): следующий файл — с новой отметкой, «Удалить» доступно и так.
+    await expect(page.getByRole("checkbox", { name: /Правило 1.2/ })).not.toBeChecked();
+    await expect(logo).toBeDisabled();
     await page.getByRole("button", { name: "Удалить" }).click();
     await expect(page.getByTestId("developer-logo-pick")).toBeVisible();
   });

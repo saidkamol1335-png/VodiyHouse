@@ -25,7 +25,13 @@ export type JournalValue =
   | { kind: "flag"; on: boolean }
   | { kind: "status"; status: PublicationStatus };
 
-export type JournalChange = { field: string; before: JournalValue; after: JournalValue };
+/** opaque — поле изменилось, но «было → стало» не показываем (файл, составной список). */
+export type JournalChange = {
+  field: string;
+  before: JournalValue;
+  after: JournalValue;
+  opaque?: true;
+};
 
 export type JournalEntry = {
   id: number;
@@ -51,11 +57,12 @@ const HIDDEN_FIELDS = new Set([
   "path",
   "width",
   "height",
-  // ЖК (шаг 11): ссылка на файл чертежа и составные списки — в журнале как «изменено» без смысла.
-  "drawing_id",
-  "price_includes",
+  // «Что рядом» до фазы 3 не правится.
   "nearby",
 ]);
+// Ссылка на файл чертежа и список «Что входит в цену»: значения людям не прочитать, но сама
+// правка (деньги и файл на сайте) должна быть в журнале — «изменено» без «было → стало».
+const OPAQUE_FIELDS = new Set(["drawing_id", "price_includes"]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
 const TEXT_LIMIT = 140;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -94,8 +101,10 @@ function changesOf(record: JournalRecord): JournalChange[] {
     .filter(
       ([field, pair]) => !HIDDEN_FIELDS.has(field) && Array.isArray(pair) && pair.length === 2,
     )
-    .map(([field, pair]) => {
+    .map(([field, pair]): JournalChange => {
       const [before, after] = pair as [unknown, unknown];
+      if (OPAQUE_FIELDS.has(field))
+        return { field, before: { kind: "empty" }, after: { kind: "empty" }, opaque: true };
       return {
         field,
         before: journalValue(record.entity, field, before),

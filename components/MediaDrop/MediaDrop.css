@@ -165,9 +165,10 @@
   }
 }
 
-/* Нет отметки правила 1.2 у опубликованного застройщика — зона недоступна. */
-.media-drop[aria-disabled] .media-drop__tile,
-.media-drop[aria-disabled] .media-drop__zone {
+/* Нет отметки правила 1.2 у опубликованного застройщика — новый файл не выбрать; «Удалить» и
+   точка фокуса работают. */
+.media-drop--locked .media-drop__tile,
+.media-drop--locked .media-drop__zone {
   opacity: 0.45;
   cursor: not-allowed;
 }

@@ -1,7 +1,7 @@
 .admin-panel {
   position: relative;
   min-width: 0;
-  padding: 20px;
+  padding: var(--admin-panel-pad);
   border: 1px solid var(--line);
   border-radius: var(--r-l);
   background: var(--panel-bg);

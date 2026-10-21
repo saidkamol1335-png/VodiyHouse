@@ -50,11 +50,17 @@ type Panel = "archive" | "publish" | null;
 export function StatusCapsule(props: StatusCapsuleProps) {
   const { entity, messages, publishPanel } = props;
   const t = useTranslations(messages as "admin.developers.status");
+  const [panel, setPanel] = useState<Panel>(null);
+  // Удачный переход закрывает панель: иначе «Опубликовать ЖК?» висит над «Опубликован», а
+  // подтверждение архива всплывает само после «Восстановить».
   const [state, formAction, pending] = useActionState(
-    (_previous: StatusResult<string>, formData: FormData) => props.action(formData),
+    async (_previous: StatusResult<string>, formData: FormData) => {
+      const result = await props.action(formData);
+      if (result.status === "done") setPanel(null);
+      return result;
+    },
     IDLE,
   );
-  const [panel, setPanel] = useState<Panel>(null);
   const moves = STATUS_MOVES[entity.status];
   const canArchive = moves.includes("archived");
 

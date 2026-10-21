@@ -1,4 +1,6 @@
 import { ComplexUnitsSummary } from "@/components/ComplexUnitsSummary";
+import { complexTabHref } from "@/lib/admin/complexes/tabs";
+import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { complexForTab } from "@/lib/admin/server/complexPage";
 import { readBlockUnitLines } from "@/lib/admin/server/complexTabs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -10,5 +12,12 @@ export default async function ComplexUnitsPage({ params }: { params: Promise<{ i
   const complex = await complexForTab(params);
   if (!complex) return null;
   const blocks = await readBlockUnitLines(await createSupabaseServerClient(), complex.id);
-  return <ComplexUnitsSummary blocks={blocks} />;
+  const base = `${ADMIN_ROUTES.complexes}/${complex.id}`;
+  return (
+    <ComplexUnitsSummary
+      blocks={blocks}
+      blocksHref={complexTabHref(base, "blocks")}
+      layoutsHref={complexTabHref(base, "layouts")}
+    />
+  );
 }

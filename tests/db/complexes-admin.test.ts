@@ -96,6 +96,11 @@ describe("кабинет ЖК", () => {
       expect(await setSlug(id, "shodlik-city")).toBe("shodlik-2");
     });
 
+    it("число из прежнего названия не остаётся в адресе, если адрес без него свободен", async () => {
+      const id = await createComplex("Lola 2", "lola-2");
+      expect(await setSlug(id, "lola")).toBe("lola");
+    });
+
     it("адрес demo-… не выдаётся и не меняется; менеджер — отказ", async () => {
       const id = await createComplex("Orzu Park", "orzu-park");
       expect(await setSlug(id, "demo-orzu")).toBe("orzu-park");
@@ -321,6 +326,66 @@ describe("кабинет ЖК", () => {
       );
       await expectHint(save(id, []), "vh:has_units");
     });
+
+    it("обмен названиями сохраняется, повтор названия — отказ", async () => {
+      const id = await createComplex("Almaz", "almaz");
+      await save(id, [
+        { name: "1", floors_total: 9 },
+        { name: "2", floors_total: 12 },
+      ]);
+      const [one, two] = await blockRows(id);
+      await save(id, [
+        { id: one!.id, name: "2", floors_total: 9 },
+        { id: two!.id, name: "1", floors_total: 12 },
+      ]);
+      expect((await blockRows(id)).map((row) => row.name)).toEqual(["2", "1"]);
+      await save(id, [
+        { name: "A", floors_total: 9 },
+        { id: one!.id, name: "B", floors_total: 9 },
+        { id: two!.id, name: "1", floors_total: 12 },
+      ]);
+      expect((await blockRows(id)).map((row) => row.name)).toEqual(["A", "B", "1"]);
+      await expect(
+        save(id, [
+          { name: "C", floors_total: 9 },
+          { name: "C", floors_total: 9 },
+        ]),
+      ).rejects.toMatchObject({ code: "23505" });
+    });
+
+    it("этажность не ниже квартир", async () => {
+      const id = await createComplex("Baland", "baland");
+      await save(id, [{ name: "A", floors_total: 12 }]);
+      const [block] = await blockRows(id);
+      await db.admin.query(
+        "insert into units (block_id, entrance, floor, position, number) values ($1, 1, 12, 1, '121')",
+        [block!.id],
+      );
+      await expectHint(save(id, [{ id: block!.id, name: "A", floors_total: 9 }]), "vh:floors_below_units");
+      await save(id, [{ id: block!.id, name: "A", floors_total: 12 }]);
+    });
+
+    it("удаление блока отдаёт пути его чертежей и убирает их строки", async () => {
+      const id = await createComplex("Chiroq", "chiroq");
+      await save(id, [{ name: "A", floors_total: 9 }]);
+      const [block] = await blockRows(id);
+      const path = drawingPath(id);
+      const drawing = await scalar<string>(
+        head,
+        "select add_complex_drawing($1, $2, 1600, 1200, null, false) as value",
+        [id, path],
+      );
+      await asHead((tx) =>
+        tx.query("select save_block_layouts($1, $2)", [
+          block!.id,
+          JSON.stringify([{ rooms: 1, area: 40, drawing_id: drawing }]),
+        ]),
+      );
+      const removed = await scalar<string[]>(head, "select save_complex_blocks($1, '[]') as value", [id]);
+      expect(removed).toEqual([path]);
+      const left = await db.admin.query("select id from media_assets where id = $1", [drawing]);
+      expect(left.rows).toEqual([]);
+    });
   });
 
   describe("планировки и чертежи", () => {
@@ -444,6 +509,78 @@ describe("кабинет ЖК", () => {
         "select id from audit_log where entity = 'layouts' and action = 'delete' and complex_id is null",
       );
       expect(orphans.rows).toEqual([]);
+    });
+
+    it("порядок планировок не шумит в журнале; правка удалённой планировки сохраняет подпись", async () => {
+      const id = await createComplex("Tartib", "tartib");
+      await asHead((tx) =>
+        tx.query("select save_complex_blocks($1, $2)", [id, JSON.stringify([{ name: "A", floors_total: 9 }])]),
+      );
+      const blockId = (
+        await db.admin.query<{ id: string }>("select id from blocks where complex_id = $1", [id])
+      ).rows[0]!.id;
+      const saveLayouts = (layouts: unknown[]) =>
+        asHead((tx) => tx.query("select save_block_layouts($1, $2)", [blockId, JSON.stringify(layouts)]));
+      const entries = async () =>
+        asHead(async (tx) =>
+          (
+            await tx.query<{ entity: string; action: string; subject: string }>(
+              "select entity, action, subject from journal_entries(null, null, 50, $1)",
+              [id],
+            )
+          ).rows.filter((row) => row.entity === "layouts"),
+        );
+
+      await saveLayouts([{ rooms: 2, area: 64.5 }]);
+      const big = (
+        await db.admin.query<{ id: string }>("select id from layouts where block_id = $1", [blockId])
+      ).rows[0]!.id;
+      await saveLayouts([{ id: big, rooms: 2, area: 64.5 }, { rooms: 1, area: 40 }]);
+      expect((await entries()).map((row) => row.action)).toEqual(["insert", "insert"]);
+
+      await saveLayouts([{ id: big, rooms: 2, area: 64.5, price_from: 35000 }]);
+      await saveLayouts([]);
+      const update = (await entries()).find((row) => row.action === "update");
+      expect(update?.subject).toBe("Блок A · 2-комн. · 64,5 м²");
+      // Удалён и сам блок — подпись из записи (название блока сохранено контекстом).
+      await asHead((tx) => tx.query("select save_complex_blocks($1, '[]')", [id]));
+      expect((await entries()).find((row) => row.action === "update")?.subject).toBe(
+        "Блок A · 2-комн. · 64,5 м²",
+      );
+    });
+
+    it("удаление блока с чертежами — одна запись о блоке, без «Фото · удалено»", async () => {
+      const id = await createComplex("Chizma", "chizma");
+      await asHead((tx) =>
+        tx.query("select save_complex_blocks($1, $2)", [id, JSON.stringify([{ name: "A", floors_total: 9 }])]),
+      );
+      const blockId = (
+        await db.admin.query<{ id: string }>("select id from blocks where complex_id = $1", [id])
+      ).rows[0]!.id;
+      const drawing = await scalar<string>(
+        head,
+        "select add_complex_drawing($1, $2, 1600, 1200, null, false) as value",
+        [id, drawingPath(id)],
+      );
+      await asHead((tx) =>
+        tx.query("select save_block_layouts($1, $2)", [
+          blockId,
+          JSON.stringify([{ rooms: 1, area: 40, drawing_id: drawing }]),
+        ]),
+      );
+      await asHead((tx) => tx.query("select save_complex_blocks($1, '[]')", [id]));
+      const rows = await asHead(async (tx) =>
+        (
+          await tx.query<{ entity: string; action: string }>(
+            "select entity, action from journal_entries(null, null, 50, $1)",
+            [id],
+          )
+        ).rows,
+      );
+      expect(rows.filter((row) => row.action === "delete")).toEqual([
+        { entity: "blocks", action: "delete" },
+      ]);
+      expect(rows.some((row) => row.entity === "media_assets")).toBe(false);
     });
   });
 

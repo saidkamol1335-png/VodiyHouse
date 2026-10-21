@@ -73,12 +73,15 @@
   font-weight: 600;
 }
 
-/* Многострочное поле (мокап: textarea.inp). */
+/* Многострочное поле (мокап: textarea.inp). Высота — по тексту («О компании» на 600 знаков не
+   обрезается на 4 строках), до ~14 строк; где field-sizing нет — 4 строки и ручной resize. */
 .field__input--multiline {
   height: auto;
   min-height: 84px;
+  max-height: var(--field-multiline-max);
   padding: 12px 15px;
   line-height: 1.45;
+  field-sizing: content;
   resize: vertical;
 }
 

@@ -89,6 +89,30 @@ export function filterComplexes(
   );
 }
 
+export type ComplexListScope = {
+  developer: { id: string; name: string } | null;
+  /** Застройщик не среди выбираемых (в архиве): список — сразу «Архив», в «+ Добавить ЖК» его нет. */
+  archived: boolean;
+};
+
+/**
+ * «ЖК застройщика →» (?zastroyshchik=<id>): застройщик из списка выбора, а у архивного — имя из
+ * строк его ЖК; без ЖК и вне списка — весь список.
+ */
+export function complexListScope(
+  scopeId: unknown,
+  options: readonly { id: string; name: string }[],
+  rows: readonly ComplexListRow[],
+): ComplexListScope {
+  if (typeof scopeId !== "string") return { developer: null, archived: false };
+  const option = options.find((developer) => developer.id === scopeId);
+  if (option) return { developer: option, archived: false };
+  const row = rows.find((item) => item.developerId === scopeId);
+  return row
+    ? { developer: { id: row.developerId, name: row.developerName }, archived: true }
+    : { developer: null, archived: false };
+}
+
 export function complexFilterCounts(
   rows: readonly ComplexListRow[],
   developerId?: string | null,

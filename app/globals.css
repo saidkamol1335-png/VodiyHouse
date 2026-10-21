@@ -71,7 +71,6 @@
 @import "../components/ComplexMainForm/ComplexMainForm.css";
 @import "../components/ComplexPhotos/ComplexPhotos.css";
 @import "../components/ComplexReadiness/ComplexReadiness.css";
-@import "../components/ComplexStatus/ComplexStatus.css";
 @import "../components/ComplexUnitsSummary/ComplexUnitsSummary.css";
 @import "../components/Container/Container.css";
 @import "../components/DeveloperCreateForm/DeveloperCreateForm.css";
@@ -105,6 +104,7 @@
 @import "../components/PhoneButton/PhoneButton.css";
 @import "../components/PhoneMenu/PhoneMenu.css";
 @import "../components/PointField/PointField.css";
+@import "../components/PublishCheck/PublishCheck.css";
 @import "../components/QuarterSelect/QuarterSelect.css";
 @import "../components/RollText/RollText.css";
 @import "../components/Rule12Check/Rule12Check.css";

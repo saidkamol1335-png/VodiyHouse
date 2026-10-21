@@ -51,6 +51,8 @@ export function BilingualField({
     onChange?.(next);
   };
 
+  // Ошибка сервера относится к паре: оба поля ссылаются на неё и подсвечиваются, как у Field.
+  const errorId = error ? `${field.id}-error` : undefined;
   return (
     <div className="bilingual-field">
       {LANGUAGES.map((language) => (
@@ -60,10 +62,15 @@ export function BilingualField({
           language={language}
           text={value[language]}
           missing={!value[language].trim() && Boolean(value[otherLanguage(language)].trim())}
+          errorId={errorId}
           onText={change(language)}
         />
       ))}
-      {error ? <p className="field__error bilingual-field__error">{error}</p> : null}
+      {error ? (
+        <p id={errorId} className="field__error bilingual-field__error">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -75,24 +82,37 @@ type LanguageInputProps = Omit<
   language: Language;
   text: string;
   missing: boolean;
+  errorId?: string;
   onText: (text: string) => void;
 };
 
-function LanguageInput({ language, text, missing, onText, ...field }: LanguageInputProps) {
+function inputClassOf(multiline: boolean | undefined, missing: boolean, invalid: boolean) {
+  return [
+    "field__input",
+    multiline ? "field__input--multiline" : null,
+    missing ? "field__input--missing" : null,
+    invalid ? "field__input--error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function LanguageInput(props: LanguageInputProps) {
+  const { language, text, missing, errorId, onText, ...field } = props;
   const inputId = `${field.id}-${language}`;
   const metaId = `${inputId}-meta`;
   const label = language === "uz" ? (field.uzLabel ?? field.label) : field.label;
-  const inputClass = `field__input${field.multiline ? " field__input--multiline" : ""}${missing ? " field__input--missing" : ""}`;
   const input = {
     id: inputId,
     name: `${field.name}.${language}`,
     lang: language,
-    className: inputClass,
+    className: inputClassOf(field.multiline, missing, Boolean(errorId)),
     value: text,
     maxLength: field.maxLength,
     required: field.required,
     placeholder: field.placeholder?.[language],
-    "aria-describedby": metaId,
+    "aria-describedby": errorId ? `${metaId} ${errorId}` : metaId,
+    "aria-invalid": errorId ? true : undefined,
     onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       onText(event.target.value),
   };

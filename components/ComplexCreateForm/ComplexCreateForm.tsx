@@ -89,12 +89,9 @@ function ComplexCreatePanel({
           maxLength={COMPLEX_NAME_MAX}
           defaultValue={failed?.fields.name}
           mirrorUz={toUzbekLatin}
+          error={nameIssue ? t(`developers.issues.${nameIssue}`, { min: 0 }) : undefined}
         />
-        {nameIssue ? (
-          <p className="field__error">{t(`developers.issues.${nameIssue}`, { min: 0 })}</p>
-        ) : (
-          <p className="field__meta">{t("complexes.create.nameHint")}</p>
-        )}
+        {nameIssue ? null : <p className="field__meta">{t("complexes.create.nameHint")}</p>}
         {failed?.error ? (
           <FormStatus tone="error">{t(`developers.errors.${failed.error}`)}</FormStatus>
         ) : null}

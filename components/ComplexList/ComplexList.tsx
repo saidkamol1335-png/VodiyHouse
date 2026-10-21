@@ -25,15 +25,22 @@ type ComplexListProps = {
   baseHref: string;
   /** «ЖК застройщика»: ?zastroyshchik=<id>; крестик ведёт на весь список. */
   developer?: { id: string; name: string } | null;
+  /** У застройщика в архиве его ЖК — тоже в архиве: список открывается на «Архиве». */
+  initialFilter?: PublicationFilter;
 };
 
 const STOCK_TONES: Record<StockTone, BadgeTone> = { none: "neutral", low: "amber", ok: "ok" };
 
 /** «ЖК» (в. 5): поиск и пилюли статусов сверху, строки как «Остатки по ЖК» мокапа. */
-export function ComplexList({ rows, baseHref, developer = null }: ComplexListProps) {
+export function ComplexList({
+  rows,
+  baseHref,
+  developer = null,
+  initialFilter = "all",
+}: ComplexListProps) {
   const t = useTranslations("admin.complexes");
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<PublicationFilter>("all");
+  const [filter, setFilter] = useState<PublicationFilter>(initialFilter);
   const developerId = developer?.id ?? null;
   const counts = useMemo(() => complexFilterCounts(rows, developerId), [rows, developerId]);
   const visible = filterComplexes(rows, { query, filter, developerId });
@@ -89,7 +96,8 @@ function ComplexRow({ row, href }: { row: ComplexListRow; href: string }) {
   const name = t("namePrefixed", { name: row.name.ru });
   return (
     <li>
-      <Link className="complex-list__row" href={href} aria-label={t("open", { name })}>
+      {/* Имя ссылки — всё содержимое строки: диктор слышит остатки, статус и «скрыт застройщиком». */}
+      <Link className="complex-list__row" href={href}>
         <span className="complex-list__main">
           <span className="complex-list__name">{name}</span>
           <span className="complex-list__meta">{metaLine(row, t)}</span>

@@ -3,6 +3,7 @@
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
+import { MEDIA_LIMITS } from "@/lib/media";
 
 type DrawingTileProps = {
   id: string;
@@ -32,7 +33,7 @@ export function DrawingTile({
       id={id}
       className="drawing-tile__input"
       type="file"
-      accept="image/jpeg,image/png,image/webp"
+      accept={MEDIA_LIMITS.acceptedTypes.join(",")}
       disabled={disabled || busy}
       onChange={(event) => {
         onPick(event.target.files?.[0]);
@@ -67,11 +68,17 @@ export function DrawingTile({
         onClick={() => dialog.current?.showModal()}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- превью чертежа в кабинете; next/image — на сайте */}
-        <img className="drawing-tile__image" src={src} alt="" />
+        <img className="drawing-tile__image" src={src} alt="" loading="lazy" decoding="async" />
       </button>
       <dialog ref={dialog} className="drawing-tile__dialog" aria-label={t("drawingTitle")}>
         {/* eslint-disable-next-line @next/next/no-img-element -- чертёж крупно, как «Клик по чертежу» ТЗ 7.4 */}
-        <img className="drawing-tile__large" src={src} alt={t("drawingTitle")} />
+        <img
+          className="drawing-tile__large"
+          src={src}
+          alt={t("drawingTitle")}
+          loading="lazy"
+          decoding="async"
+        />
         <div className="drawing-tile__actions">
           <label
             className="button button--ghost button--sm"

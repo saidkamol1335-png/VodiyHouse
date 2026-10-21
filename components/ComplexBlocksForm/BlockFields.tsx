@@ -138,14 +138,22 @@ type CurrencyFieldProps = {
   onChange: (patch: Partial<BlockDraft>) => void;
 };
 
-/** У планировок уже есть цены — смена валюты спрашивает: числа не пересчитываются (курс — фаза 2). */
+/**
+ * Цены в валюте блока: «цена от» планировок, квартиры (у квартиры своей валюты нет) и пункты
+ * «отдельно». Есть хоть одна — смена валюты спрашивает: числа не пересчитываются (курс — фаза 2).
+ */
+const hasPrices = (block: BlockDraft) =>
+  block.pricedLayouts > 0 ||
+  block.units > 0 ||
+  block.priceIncludes.some((row) => !row.included && row.price.trim() !== "");
+
 function CurrencyField({ block, options, onChange }: CurrencyFieldProps) {
   const t = useTranslations("admin.complexes.blocks");
   const [pending, setPending] = useState<Currency | null>(null);
   const pick = (value: string) => {
     const next = value as Currency;
     if (next === block.currency) return;
-    if (block.pricedLayouts > 0) setPending(next);
+    if (hasPrices(block)) setPending(next);
     else onChange({ currency: next });
   };
   return (
@@ -160,7 +168,7 @@ function CurrencyField({ block, options, onChange }: CurrencyFieldProps) {
       />
       {pending ? (
         <p className="block-fields__confirm">
-          {t("currencyConfirm", { count: block.pricedLayouts, currency: t(`values.${pending}`) })}{" "}
+          {t("currencyConfirm", { currency: t(`values.${pending}`) })}{" "}
           <Button
             size="sm"
             variant="ghost"

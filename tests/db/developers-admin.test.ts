@@ -71,7 +71,12 @@ describe("кабинет застройщиков", () => {
 
   describe("публикация", () => {
     const publish = (id: string) =>
-      asHead((tx) => tx.query("update developers set status = 'published' where id = $1", [id]));
+      asHead((tx) =>
+        tx.query(
+          "update developers set status = 'published', files_checked_at = now() where id = $1",
+          [id],
+        ),
+      );
 
     it("без «О компании» или без логотипа — отказ; с ними — опубликован", async () => {
       const id = await createDeveloper("Marg‘ilon Invest", "margilon-invest");
@@ -83,6 +88,20 @@ describe("кабинет застройщиков", () => {
       await addLogo(id);
       await publish(id);
       expect((await developerRow(id)).status).toBe("published");
+    });
+
+    it("без отметки 1.2 в том же действии — отказ; прошлой отметки мало", async () => {
+      const id = await createDeveloper("Oydin Qurilish", "oydin-qurilish");
+      await asHead((tx) =>
+        tx.query("update developers set about = $2 where id = $1", [id, JSON.stringify(ABOUT)]),
+      );
+      await addLogo(id);
+      const statusOnly = (status: string) =>
+        asHead((tx) => tx.query("update developers set status = $2 where id = $1", [id, status]));
+      await expectHint(statusOnly("published"), "vh:rule12");
+      await publish(id);
+      await statusOnly("hidden");
+      await expectHint(statusOnly("published"), "vh:rule12");
     });
 
     it("скрыть и вернуть в черновик можно без проверки; DEMO вставляется опубликованным", async () => {
@@ -142,10 +161,10 @@ describe("кабинет застройщиков", () => {
       const cover = filePath(id, "jpg");
       await setMedia(id, "cover", cover);
       await asHead((tx) =>
-        tx.query("update developers set about = $2, status = 'published' where id = $1", [
-          id,
-          JSON.stringify(ABOUT),
-        ]),
+        tx.query(
+          "update developers set about = $2, status = 'published', files_checked_at = now() where id = $1",
+          [id, JSON.stringify(ABOUT)],
+        ),
       );
       await expectHint(removeMedia(id, "logo"), "vh:not_ready");
       expect(await removeMedia(id, "cover")).toBe(cover);

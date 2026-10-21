@@ -8,6 +8,7 @@ import {
   formatWeekdayDate,
   hourIn,
   initialsOf,
+  parsePriceInput,
 } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
@@ -71,5 +72,16 @@ describe("formatPrice", () => {
     expect(plain(formatPrice(31000, "USD"))).toBe("$31 000");
     expect(plain(formatPrice(40270.4, "USD"))).toBe("$40 270");
     expect(plain(formatPrice(354_123_456, "UZS"))).toBe("354 123 000 сум");
+  });
+
+  it("ввод цены: разряды пробелами (и неразрывными); запятая, точка, минус и 10¹² — ошибка", () => {
+    expect(parsePriceInput("31 000")).toEqual({ value: 31000 });
+    expect(parsePriceInput("354 000 000")).toEqual({ value: 354_000_000 });
+    expect(parsePriceInput("  ")).toEqual({ value: null });
+    for (const raw of ["31,000", "31.000", "-5000", "5k"])
+      expect(parsePriceInput(raw)).toEqual({ value: null, issue: "notNumber" });
+    expect(parsePriceInput("0")).toEqual({ value: null, issue: "outOfRange" });
+    expect(parsePriceInput("1000000000000")).toEqual({ value: null, issue: "outOfRange" });
+    expect(parsePriceInput("999 999 999 999")).toEqual({ value: 999_999_999_999 });
   });
 });

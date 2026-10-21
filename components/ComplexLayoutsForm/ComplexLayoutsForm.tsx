@@ -19,6 +19,8 @@ import type { ComplexMediaResult, SaveRowsResult } from "@/lib/admin/complexes/t
 import { UploadRefused, uploadComplexFile } from "@/lib/admin/complexes/upload";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { processImage } from "@/lib/media";
+import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
+import { useDraftRows } from "@/lib/ui/useDraftRows";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 import { LayoutRow } from "./LayoutRow";
 
@@ -64,25 +66,43 @@ type BlockFormProps = ComplexLayoutsFormProps & {
   onSwitch: (blockId: string) => void;
 };
 
-/** Строки блока: после сохранения сервер присылает список с id — берём его вместо черновика. */
-function useLayoutRows(layouts: readonly LayoutDraft[], markDirty: () => void) {
-  const [rows, setRows] = useState<LayoutDraft[]>([...layouts]);
-  const [source, setSource] = useState(layouts);
-  if (layouts !== source) {
-    setSource(layouts);
-    setRows([...layouts]);
-  }
-  const change = (next: LayoutDraft[]) => {
-    setRows(next);
-    markDirty();
+type DrawingUpload = Pick<BlockFormProps, "complexId" | "attach"> & {
+  rule12: boolean;
+  /** После загрузки: строка получает чертёж, отметка 1.2 снимается (И8: при каждой загрузке). */
+  onUploaded: (key: string, drawing: Pick<LayoutDraft, "drawingId" | "drawingSrc">) => void;
+};
+
+/**
+ * Чертёж строки: подготовка в браузере → бакет → строка media_assets; ответ — текст ошибки.
+ * uploading — пока идёт загрузка, вкладку не сохраняют: новая строка получит id с сервера, и
+ * ответ загрузки уже не найдёт её по ключу.
+ */
+function useDrawingUpload({ complexId, attach, rule12, onUploaded }: DrawingUpload) {
+  const t = useTranslations("admin");
+  const [uploads, setUploads] = useState(0);
+  const prepareAndAttach = async (key: string, file: File): Promise<string | null> => {
+    const result = await processImage(file, "drawing");
+    if (!result.ok) return t(`media.issues.${result.issue.code}`, result.issue);
+    try {
+      const { id, src } = await uploadComplexFile({ complexId, image: result.image, attach, rule12 });
+      onUploaded(key, { drawingId: id, drawingSrc: src });
+      return null;
+    } catch (error) {
+      return error instanceof UploadRefused
+        ? t(`developers.errors.${error.code}`)
+        : t("media.uploadFailed");
+    }
   };
-  return {
-    rows,
-    update: (key: string, patch: Partial<LayoutDraft>) =>
-      change(rows.map((row) => (row.key === key ? { ...row, ...patch } : row))),
-    add: (copies: LayoutDraft[] = [newLayoutDraft()]) => change([...rows, ...copies]),
-    remove: (key: string) => change(rows.filter((row) => row.key !== key)),
+  const upload = async (key: string, file: File | undefined): Promise<string | null> => {
+    if (!file) return null;
+    setUploads((count) => count + 1);
+    try {
+      return await prepareAndAttach(key, file);
+    } finally {
+      setUploads((count) => count - 1);
+    }
   };
+  return { upload, uploading: uploads > 0 };
 }
 
 function BlockLayoutsForm({
@@ -96,7 +116,6 @@ function BlockLayoutsForm({
 }: BlockFormProps) {
   const t = useTranslations("admin");
   const guard = useUnsavedGuard(t("complexes.layouts.unsaved"));
-  const { rows, update, add, remove } = useLayoutRows(block.layouts, guard.onInput);
   const [rule12, setRule12] = useState(false);
   const [state, formAction, pending] = useActionState(
     (_previous: SaveRowsResult, formData: FormData) => action(formData),
@@ -104,49 +123,59 @@ function BlockLayoutsForm({
   );
   const savedAt = state.status === "saved" ? state.at : null;
   const { reset, dirty } = guard;
+  const { rows, update, change, remove } = useDraftRows(block.layouts, {
+    dirty,
+    savedAt,
+    markDirty: guard.onInput,
+  });
+  const add = (copies: LayoutDraft[] = [newLayoutDraft()]) =>
+    change((current) => [...current, ...copies]);
   useEffect(() => {
     if (savedAt) reset();
   }, [savedAt, reset]);
   const rowErrors = (state.status === "error" ? state.rowErrors : {}) as LayoutRowErrors;
+  const drawings = useDrawingUpload({
+    complexId,
+    attach,
+    rule12,
+    onUploaded: (key, drawing) => {
+      update(key, drawing);
+      setRule12(false);
+    },
+  });
 
   const switchTo = (next: string) => {
     if (next === block.blockId) return;
     if (dirty && !window.confirm(t("complexes.layouts.unsaved"))) return;
     onSwitch(next);
   };
-  const uploadDrawing = async (key: string, file: File | undefined): Promise<string | null> => {
-    if (!file) return null;
-    const result = await processImage(file, "drawing");
-    if (!result.ok) return t(`media.issues.${result.issue.code}`, result.issue);
-    try {
-      const { id, src } = await uploadComplexFile({
-        complexId,
-        image: result.image,
-        attach,
-        rule12,
-      });
-      update(key, { drawingId: id, drawingSrc: src });
-      return null;
-    } catch (error) {
-      return error instanceof UploadRefused
-        ? t(`developers.errors.${error.code}`)
-        : t("media.uploadFailed");
-    }
-  };
   const others = blocks.filter((item) => item.blockId !== block.blockId && item.layouts.length > 0);
 
   return (
     <AdminPanel title={t("complexes.layouts.title")} wide>
-      <form className="complex-layouts" action={formAction} onInput={guard.onInput} noValidate>
+      {/* Отметка 1.2 — не правка вкладки: вне формы, иначе «Уйти без сохранения?» без правок. */}
+      {published ? (
+        <Rule12Check
+          id={`rule12-${block.blockId}`}
+          checked={rule12}
+          onChange={setRule12}
+          context="drawing"
+        />
+      ) : (
+        <p className="field__meta">{t("media.rule12Hint")}</p>
+      )}
+      <form
+        className="complex-layouts"
+        onSubmit={submitKeepingForm(formAction)}
+        onInput={guard.onInput}
+        noValidate
+      >
         <input type="hidden" name="block" value={block.blockId} />
         <input type="hidden" name="layouts" value={JSON.stringify(rows)} />
         {blocks.length > 1 ? (
           <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={switchTo} />
         ) : null}
         <p className="complex-layouts__lead">{t("complexes.layouts.lead")}</p>
-        {published ? (
-          <Rule12Check id={`rule12-${block.blockId}`} checked={rule12} onChange={setRule12} />
-        ) : null}
         {rows.length === 0 ? (
           <EmptyBlock
             others={others}
@@ -163,7 +192,7 @@ function BlockLayoutsForm({
               issues={rowErrors[row.key]}
               uploadLocked={published && !rule12}
               onChange={(patch) => update(row.key, patch)}
-              onDrawing={(file) => uploadDrawing(row.key, file)}
+              onDrawing={(file) => drawings.upload(row.key, file)}
               onDuplicate={() => add([newLayoutDraft(row)])}
               onRemove={() => remove(row.key)}
             />
@@ -180,7 +209,7 @@ function BlockLayoutsForm({
           </Button>
           <div className="complex-layouts__save">
             <ComplexSaveFeedback state={state} />
-            <Button type="submit" pending={pending}>
+            <Button type="submit" pending={pending} disabled={drawings.uploading}>
               {pending ? t("complexes.pending") : t("complexes.save")}
             </Button>
           </div>

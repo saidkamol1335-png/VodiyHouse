@@ -27,7 +27,10 @@ type MediaDropProps = {
   onPrepared: (image: ProcessedImage) => Promise<void>;
   onRemove: () => void;
   onFocusChange?: (focus: FocusPoint) => void;
-  /** Нельзя выбрать файл: нет отметки правила 1.2 у опубликованного застройщика. */
+  /**
+   * Нельзя выбрать новый файл: нет отметки правила 1.2 у опубликованного застройщика. «Удалить» и
+   * точка фокуса остаются — они ничего нового на сайт не кладут.
+   */
   disabled?: boolean;
 };
 
@@ -43,8 +46,7 @@ export function MediaDrop(props: MediaDropProps) {
 
   return (
     <div
-      className={`media-drop media-drop--${props.variant}`}
-      aria-disabled={props.disabled || undefined}
+      className={`media-drop media-drop--${props.variant}${props.disabled ? " media-drop--locked" : ""}`}
     >
       <label className="field__label" htmlFor={props.id}>
         {props.label}
@@ -60,7 +62,7 @@ export function MediaDrop(props: MediaDropProps) {
           event.target.value = "";
         }}
       />
-      <DropTarget onFile={pick}>
+      <DropTarget onFile={pick} disabled={props.disabled}>
         {props.variant === "tile" ? (
           <Tile {...props} busy={state.status === "busy"} />
         ) : (
@@ -73,9 +75,17 @@ export function MediaDrop(props: MediaDropProps) {
   );
 }
 
+type DropTargetProps = {
+  children: ReactNode;
+  onFile: (file?: File) => void;
+  /** Без обработчиков браузер сам покажет «нельзя» и файл не примет. */
+  disabled?: boolean;
+};
+
 /** Перетаскивание файла на десктопе; на телефоне — обычный выбор файла. */
-function DropTarget({ children, onFile }: { children: ReactNode; onFile: (file?: File) => void }) {
+function DropTarget({ children, onFile, disabled }: DropTargetProps) {
   const [dragging, setDragging] = useState(false);
+  if (disabled) return <div className="media-drop__target">{children}</div>;
   const over = (event: DragEvent) => {
     event.preventDefault();
     setDragging(true);
@@ -101,11 +111,17 @@ function DropTarget({ children, onFile }: { children: ReactNode; onFile: (file?:
 
 type PartProps = MediaDropProps & { busy: boolean };
 
-function Tile({ id, value, busy, onRemove }: PartProps) {
+function Tile({ id, value, busy, disabled, onRemove }: PartProps) {
   const t = useTranslations("admin.media");
   if (!value) {
     return (
-      <label className="media-drop__tile" htmlFor={id} aria-busy={busy} data-testid={`${id}-pick`}>
+      <label
+        className="media-drop__tile"
+        htmlFor={id}
+        aria-busy={busy}
+        aria-disabled={disabled || undefined}
+        data-testid={`${id}-pick`}
+      >
         {busy ? (
           <span className="media-drop__busy">{t("processing")}</span>
         ) : (
@@ -116,7 +132,12 @@ function Tile({ id, value, busy, onRemove }: PartProps) {
   }
   return (
     <div className="media-drop__tile media-drop__tile--filled">
-      <label htmlFor={id} className="media-drop__tile-pick" aria-label={t("replace")}>
+      <label
+        htmlFor={id}
+        className="media-drop__tile-pick"
+        aria-label={t("replace")}
+        aria-disabled={disabled || undefined}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element -- превью до загрузки — blob: URL */}
         <img className="media-drop__tile-image" src={value.src} alt="" />
       </label>
@@ -132,11 +153,18 @@ function Tile({ id, value, busy, onRemove }: PartProps) {
   );
 }
 
-function Wide({ id, value, busy, hint, onRemove, onFocusChange }: PartProps & { hint: string }) {
+function Wide(props: PartProps & { hint: string }) {
+  const { id, value, busy, hint, disabled, onRemove, onFocusChange } = props;
   const t = useTranslations("admin.media");
   if (!value) {
     return (
-      <label className="media-drop__zone" htmlFor={id} aria-busy={busy} data-testid={`${id}-pick`}>
+      <label
+        className="media-drop__zone"
+        htmlFor={id}
+        aria-busy={busy}
+        aria-disabled={disabled || undefined}
+        data-testid={`${id}-pick`}
+      >
         <span className="media-drop__icon" aria-hidden="true">
           <Upload size={18} />
         </span>
@@ -155,7 +183,11 @@ function Wide({ id, value, busy, hint, onRemove, onFocusChange }: PartProps & { 
         onFocusChange={onFocusChange ?? (() => {})}
       />
       <div className="media-drop__actions">
-        <label htmlFor={id} className="button button--ghost button--sm">
+        <label
+          htmlFor={id}
+          className="button button--ghost button--sm"
+          aria-disabled={disabled || undefined}
+        >
           {busy ? t("processing") : t("replace")}
         </label>
         <button type="button" className="button button--ghost button--sm" onClick={onRemove}>

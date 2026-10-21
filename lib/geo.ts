@@ -9,10 +9,15 @@ const DECIMALS = 6;
 const NUMBER = String.raw`(-?\d{1,3}(?:\.\d+)?)`;
 
 const LAT_LNG_TEXT = new RegExp(String.raw`^\s*${NUMBER}\s*[,;\s]\s*${NUMBER}\s*$`);
-const YANDEX_PARAM = new RegExp(
-  String.raw`[?&](?:pt|ll|whatshere%5Bpoint%5D|whatshere\[point\])=${NUMBER}(?:,|%2C)${NUMBER}`,
-  "i",
-);
+const yandexParam = (name: string) =>
+  new RegExp(String.raw`[?&](?:${name})=${NUMBER}(?:,|%2C)${NUMBER}`, "i");
+// Метка и «Что здесь?» — сама точка; ll — центр окна карты, он стоит в ссылке раньше и смещён
+// на сотни метров. Поэтому порядок — по смыслу, а не по месту в ссылке.
+const YANDEX_PARAMS = [
+  yandexParam("pt"),
+  yandexParam(String.raw`whatshere%5Bpoint%5D|whatshere\[point\]`),
+  yandexParam("ll"),
+];
 const GOOGLE_AT = new RegExp(String.raw`@${NUMBER},${NUMBER}`);
 const GOOGLE_QUERY = new RegExp(
   String.raw`[?&](?:q|query|ll|destination)=${NUMBER}(?:,|%2C)\+?${NUMBER}`,
@@ -42,7 +47,13 @@ export function parseCoordinates(raw: string): GeoPoint | null {
   const text = raw.trim();
   if (!text) return null;
   if (!/^https?:\/\//i.test(text)) return fromMatch(LAT_LNG_TEXT.exec(text), "latLng");
-  if (/yandex\./i.test(text)) return fromMatch(YANDEX_PARAM.exec(text), "lngLat");
+  if (/yandex\./i.test(text)) {
+    for (const pattern of YANDEX_PARAMS) {
+      const found = fromMatch(pattern.exec(text), "lngLat");
+      if (found) return found;
+    }
+    return null;
+  }
   return (
     fromMatch(GOOGLE_DATA.exec(text), "latLng") ??
     fromMatch(GOOGLE_AT.exec(text), "latLng") ??

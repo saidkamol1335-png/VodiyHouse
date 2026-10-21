@@ -7,6 +7,7 @@ import { ComplexCreateForm } from "@/components/ComplexCreateForm";
 import { ComplexList } from "@/components/ComplexList";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { createComplexAction } from "@/lib/admin/actions/complexes";
+import { complexListScope } from "@/lib/admin/complexes/list";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
 import { readComplexRows, readDeveloperOptions } from "@/lib/admin/server/complexes";
@@ -45,17 +46,24 @@ export default async function ComplexesPage({ searchParams }: ComplexesPageProps
     readComplexRows(supabase),
     readDeveloperOptions(supabase),
   ]);
-  const scopeId = (await searchParams).zastroyshchik;
-  const scope = developers.find((developer) => developer.id === scopeId) ?? null;
+  const scope = complexListScope((await searchParams).zastroyshchik, developers, rows);
   return (
     <AdminPage topbar={topbar}>
       <ComplexCreateForm
         action={createComplexAction}
         developers={developers}
-        developerId={scope?.id}
+        developerId={scope.archived ? undefined : scope.developer?.id}
         developersHref={ADMIN_ROUTES.developers}
       />
-      <ComplexList rows={rows} baseHref={ADMIN_ROUTES.complexes} developer={scope} />
+      {/* ?zastroyshchik= не сбрасывает состояние страницы (и Activity хранит её): ключ по области
+          — список с новым начальным фильтром. */}
+      <ComplexList
+        key={scope.developer?.id ?? "all"}
+        rows={rows}
+        baseHref={ADMIN_ROUTES.complexes}
+        developer={scope.developer}
+        initialFilter={scope.archived ? "archived" : "all"}
+      />
     </AdminPage>
   );
 }

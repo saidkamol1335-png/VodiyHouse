@@ -76,6 +76,15 @@ describe("записи журнала", () => {
     expect(entries.map((entry) => [entry.id, entry.changes])).toEqual([[3, []]]);
   });
 
+  it("«Что входит в цену» и чертёж — «изменено» без значений, но запись есть", () => {
+    const entries = journalEntries([
+      record({ id: 2, entity: "blocks", changes: { name: "A", price_includes: [[], [{}]] } }),
+      record({ id: 1, entity: "layouts", changes: { block_id: "b", drawing_id: ["x", "y"] } }),
+    ]);
+    expect(entries.map((entry) => entry.changes.map((change) => [change.field, change.opaque])))
+      .toEqual([[["price_includes", true]], [["drawing_id", true]]]);
+  });
+
   it("«Показать ещё» — с последней строки базы, даже если она скрыта из вида", () => {
     const records = [record({ id: 5 }), record({ id: 4, changes: { path: ["a", "b"] } })];
     expect(journalPage(records, 2).nextBefore).toBe(4);

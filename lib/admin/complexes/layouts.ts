@@ -1,4 +1,5 @@
 import { readText } from "../credentials";
+import { parsePriceInput, PRICE_MAX } from "@/lib/format";
 import type { Currency } from "./blocks";
 
 // Вкладка «Планировки» (И5): планировки выбранного блока — строки Д5. Форма шлёт список блока
@@ -9,7 +10,7 @@ export const LAYOUT_LIMITS = {
   maxRows: 60,
   roomsMax: 10,
   areaMax: 999.99,
-  priceMax: 1e12,
+  priceMax: PRICE_MAX,
 } as const;
 
 /** Комнаты чипами (И5): студия и 1–6; больше — редкость, остаётся у уже сохранённых. */
@@ -105,7 +106,7 @@ function payloadOf(
     return null;
   const rooms = typeof row.rooms === "number" ? row.rooms : null;
   const area = decimal(text(row.area), LAYOUT_LIMITS.areaMax);
-  const price = decimal(text(row.priceFrom), LAYOUT_LIMITS.priceMax);
+  const price = parsePriceInput(text(row.priceFrom));
   const issues = {
     rooms:
       rooms === null || !Number.isInteger(rooms) || rooms < 0 || rooms > LAYOUT_LIMITS.roomsMax

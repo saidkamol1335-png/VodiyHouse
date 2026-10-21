@@ -4,7 +4,12 @@ import { describe, expect, it } from "vitest";
 import { containsContact } from "../contactGuard";
 import { COMPLEX_NAME_MAX, normalizeComplexName, parseComplexCreate } from "./create";
 import { DEMO_COMPLEX_ROWS } from "./demo";
-import { complexFilterCounts, filterComplexes, isHiddenByDeveloper } from "./list";
+import {
+  complexFilterCounts,
+  complexListScope,
+  filterComplexes,
+  isHiddenByDeveloper,
+} from "./list";
 import { roomGroupOf, stockByComplex, stockTone, type RoomAvailabilityRecord } from "./stock";
 import { toUzbekLatin } from "@/lib/translit";
 
@@ -90,6 +95,24 @@ describe("список ЖК", () => {
     expect(complexFilterCounts(DEMO_COMPLEX_ROWS)).toMatchObject({ all: 6, draft: 1, archived: 1 });
   });
 
+  it("«ЖК застройщика →» у застройщика в архиве: имя из его ЖК, список — на «Архиве»", () => {
+    const [row] = DEMO_COMPLEX_ROWS;
+    const options = [{ id: row!.developerId, name: row!.developerName }];
+    expect(complexListScope(row!.developerId, options, DEMO_COMPLEX_ROWS)).toEqual({
+      developer: options[0],
+      archived: false,
+    });
+    expect(complexListScope(row!.developerId, [], DEMO_COMPLEX_ROWS)).toEqual({
+      developer: { id: row!.developerId, name: row!.developerName },
+      archived: true,
+    });
+    for (const scopeId of [undefined, ["a", "b"], "00000000-0000-4000-8000-000000000000"])
+      expect(complexListScope(scopeId, options, DEMO_COMPLEX_ROWS)).toEqual({
+        developer: null,
+        archived: false,
+      });
+  });
+
   it("опубликованный ЖК у неопубликованного застройщика на сайте не виден", () => {
     const bahor = DEMO_COMPLEX_ROWS.find((row) => row.name.ru === "Bahor")!;
     expect(isHiddenByDeveloper(bahor)).toBe(true);
@@ -145,6 +168,15 @@ describe("правило 1.2 в текстах", () => {
       "https://example.com",
       "t.me/sifat_sales",
       "пишите @sifat_sales",
+      "Telegram:@fargona_sifat",
+      "«@fargona_sifat»",
+      "+998 90 123–45–67",
+      "90/123/45/67",
+      "+998 901 234 567",
+      "fargonasifat.online",
+      "info@sifat.uz",
+      "от 450 000 000 сум, звоните +998 90 123 45 67",
+      "90.123.45.67",
     ]) {
       expect(containsContact(text), text).toBe(true);
     }
@@ -155,6 +187,16 @@ describe("правило 1.2 в текстах", () => {
       "напротив центрального парка · до центра 7 мин",
       "Farg‘ona Sifat Qurilish",
       "e-mail нет",
+      "Квартиры от 450 000 000 сум",
+      "Narxi 450 000 000 so‘m dan",
+      "Паркинг 150 000 000 сум",
+      "Акция 01.10.2026–31.12.2026",
+      "Цены от 450 000 000 до 900 000 000 сум",
+      "120 000 000–150 000 000 so‘m",
+      "450.000.000 so'm",
+      "Narxi 450 000 000 sum",
+      "Kvartiralar 450000000 so‘m dan",
+      "Разрешение № 0123/45-6789",
     ]) {
       expect(containsContact(text), text).toBe(false);
     }

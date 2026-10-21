@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ComplexUnitsSummary } from "@/components/ComplexUnitsSummary";
 import { demoBlocks } from "@/lib/admin/complexes/demoBlocks";
 import { demoComplex } from "@/lib/admin/complexes/demoPage";
+import { complexTabHref } from "@/lib/admin/complexes/tabs";
 
 // Адрес с [id] известен только на запросе: страница ждёт его на сервере, как разделы кабинета
 // (docs: instant-navigation) — иначе меню и вкладки (usePathname) вне <Suspense> падают.
@@ -20,5 +21,12 @@ export default async function DevComplexUnitsPage({ params }: { params: Promise<
     units: block.units,
     free: block.units > 0 ? (DEMO_FREE[block.name] ?? 0) : null,
   }));
-  return <ComplexUnitsSummary blocks={blocks} />;
+  const base = `/dev/zhk/${complex.id}`;
+  return (
+    <ComplexUnitsSummary
+      blocks={blocks}
+      blocksHref={complexTabHref(base, "blocks")}
+      layoutsHref={complexTabHref(base, "layouts")}
+    />
+  );
 }

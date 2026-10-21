@@ -4,6 +4,7 @@ import {
   type BilingualIssue,
   type BilingualValue,
 } from "../bilingual";
+import { bilingualHasContact } from "../contactGuard";
 import { readText } from "../credentials";
 import { isoDateIssue } from "./mainForm";
 
@@ -21,7 +22,7 @@ export type ProjectDraft = {
   deliveredOn: string | null;
 };
 
-export type ProjectRowIssue = BilingualIssue | "dateInvalid";
+export type ProjectRowIssue = BilingualIssue | "dateInvalid" | "contacts";
 export type ProjectRowErrors = Record<
   string,
   Partial<Record<"name" | "plannedOn" | "deliveredOn", ProjectRowIssue>>
@@ -69,7 +70,9 @@ function rowIssues(row: ProjectDraft): ProjectRowErrors[string] {
   const date = (value: string | null) =>
     value && isoDateIssue(value, yearMin, yearMax) ? "dateInvalid" : undefined;
   const issues = {
-    name: bilingualIssue(row.name, { max: nameMax, required: true }) ?? undefined,
+    name:
+      bilingualIssue(row.name, { max: nameMax, required: true }) ??
+      (bilingualHasContact(row.name) ? ("contacts" as const) : undefined),
     plannedOn: date(row.plannedOn),
     deliveredOn: date(row.deliveredOn),
   };

@@ -164,6 +164,13 @@
   .layout-row__end {
     grid-column: 1 / -1;
   }
+
+  /* Окно ~1024 (меню ещё сбоку): цена и «доступна» — под комнатами и площадью, не в колонке
+     чертежа 64 px. */
+  .layout-row__price,
+  .layout-row__offer {
+    grid-column: 2 / -1;
+  }
 }
 
 @media (max-width: 760px) {
@@ -181,5 +188,16 @@
 
   .layout-row__end {
     margin-top: 0;
+  }
+
+  /* «Сохранить вкладку» прилипает к низу, как на «Основном»: планировок у блока бывает много. */
+  .complex-layouts__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 calc(-1 * var(--admin-panel-pad));
+    padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
   }
 }

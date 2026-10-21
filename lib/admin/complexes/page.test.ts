@@ -27,6 +27,15 @@ describe("точка на карте (И2)", () => {
     expect(parseCoordinates("https://yandex.ru/maps/?pt=71.7864,40.3864&z=17&l=map")).toEqual(
       fergana,
     );
+    // «Что здесь?»: ll (центр окна) стоит раньше отмеченной точки — берём точку.
+    expect(
+      parseCoordinates(
+        "https://yandex.uz/maps/?ll=71.7846%2C40.3890&mode=whatshere&whatshere%5Bpoint%5D=71.7864%2C40.3864&z=17",
+      ),
+    ).toEqual(fergana);
+    expect(
+      parseCoordinates("https://yandex.uz/maps/?ll=71.7846%2C40.3890&pt=71.7864%2C40.3864&z=17"),
+    ).toEqual(fergana);
     expect(parseCoordinates("https://www.google.com/maps/place/x/@40.3864,71.7864,17z")).toEqual(
       fergana,
     );

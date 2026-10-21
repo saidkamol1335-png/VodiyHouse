@@ -28,6 +28,24 @@ export type PhotoActions = {
 /** Обложкой встаёт только фото от 2400 px (PLAN 3а). */
 export const canBeCover = (photo: PhotoItem) => canBeComplexCover(photo);
 
+/**
+ * Перестановка поставила бы обложкой фото меньше 2400 px вместо годного (стрелка «Левее» у
+ * второго, «Правее» у обложки, перетаскивание на первую плитку) — не переставляем.
+ */
+export function worsensCover(before: readonly PhotoItem[], after: readonly PhotoItem[]): boolean {
+  const [was, now] = [before[0], after[0]];
+  return Boolean(was && now && was.id !== now.id && canBeCover(was) && !canBeCover(now));
+}
+
+/** Откат порядка после отказа: прежний порядок, а фото, загруженные за это время, — в конце. */
+export function restoreOrder(current: readonly PhotoItem[], ids: readonly string[]): PhotoItem[] {
+  const place = (photo: PhotoItem) => {
+    const index = ids.indexOf(photo.id);
+    return index < 0 ? ids.length : index;
+  };
+  return [...current].sort((a, b) => place(a) - place(b));
+}
+
 export function movePhoto(photos: readonly PhotoItem[], id: string, to: number): PhotoItem[] {
   const from = photos.findIndex((photo) => photo.id === id);
   if (from < 0 || to < 0 || to >= photos.length || from === to) return [...photos];

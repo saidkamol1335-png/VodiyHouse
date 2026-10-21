@@ -7,6 +7,7 @@ import { ComplexCreateForm } from "@/components/ComplexCreateForm";
 import { ComplexList } from "@/components/ComplexList";
 import { DEV_VIEWER } from "@/lib/admin/access";
 import { DEMO_COMPLEX_ROWS, DEMO_DEVELOPER_OPTIONS } from "@/lib/admin/complexes/demo";
+import { complexListScope } from "@/lib/admin/complexes/list";
 import { cabinetPerson } from "@/lib/admin/person";
 import { demoCreateComplexAction } from "./actions";
 
@@ -20,8 +21,11 @@ export default async function DevComplexesPage({ searchParams }: DevComplexesPag
   if (process.env.NODE_ENV === "production") notFound();
   const person = await cabinetPerson(DEV_VIEWER);
   const t = await getTranslations("admin.complexes");
-  const scopeId = (await searchParams).zastroyshchik;
-  const scope = DEMO_DEVELOPER_OPTIONS.find((developer) => developer.id === scopeId) ?? null;
+  const scope = complexListScope(
+    (await searchParams).zastroyshchik,
+    DEMO_DEVELOPER_OPTIONS,
+    DEMO_COMPLEX_ROWS,
+  );
   return (
     <AdminShell viewer={DEV_VIEWER}>
       <AdminPage
@@ -32,10 +36,16 @@ export default async function DevComplexesPage({ searchParams }: DevComplexesPag
         <ComplexCreateForm
           action={demoCreateComplexAction}
           developers={DEMO_DEVELOPER_OPTIONS}
-          developerId={scope?.id}
+          developerId={scope.archived ? undefined : scope.developer?.id}
           developersHref="/dev/zastroyshchiki"
         />
-        <ComplexList rows={DEMO_COMPLEX_ROWS} baseHref="/dev/zhk" developer={scope} />
+        <ComplexList
+          key={scope.developer?.id ?? "all"}
+          rows={DEMO_COMPLEX_ROWS}
+          baseHref="/dev/zhk"
+          developer={scope.developer}
+          initialFilter={scope.archived ? "archived" : "all"}
+        />
       </AdminPage>
     </AdminShell>
   );

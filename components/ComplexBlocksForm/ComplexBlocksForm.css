@@ -59,6 +59,11 @@
   border-color: var(--line-3);
 }
 
+/* Свёрнута, но с ошибками последнего сохранения: видно без раскрытия. */
+.block-card--error {
+  border-color: var(--bad);
+}
+
 .block-card__head {
   display: flex;
   flex-wrap: wrap;
@@ -209,7 +214,9 @@
   gap: 10px;
 }
 
+/* Корзина — всегда в своей колонке, есть ли поле цены («Отдельно») или нет. */
 .block-fields__include-remove {
+  grid-column: -2 / -1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -232,11 +239,29 @@
     padding: 14px;
   }
 
+  /* Пункт — RU | UZ на всю ширину, ниже «Входит / Отдельно» и корзина, ещё ниже — цена. */
   .block-fields__include {
     grid-template-columns: minmax(0, 1fr) 32px;
   }
 
-  .block-fields__include > :first-child {
+  .block-fields__include > :first-child,
+  .block-fields__include > .field:not(.choice-field) {
     grid-column: 1 / -1;
+  }
+
+  .block-fields__include-remove {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  /* «Сохранить вкладку» прилипает к низу, как на «Основном»: карточка блока длинная. */
+  .complex-blocks__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 calc(-1 * var(--admin-panel-pad));
+    padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
   }
 }

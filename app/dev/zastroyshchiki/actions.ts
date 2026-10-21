@@ -58,6 +58,9 @@ export async function demoSetStatusAction(formData: FormData): Promise<StatusRes
   if (to === "archived" && !archiveConfirmed(readText(formData, "confirm") ?? "", developer.name)) {
     return { status: "error", error: "confirmName", missing: [] };
   }
+  if (to === "published" && readText(formData, "rule12") !== "on") {
+    return { status: "error", error: "rule12", missing: [] };
+  }
   const missing =
     to === "published"
       ? missingForPublish({ hasAbout: Boolean(developer.about), hasLogo: false })

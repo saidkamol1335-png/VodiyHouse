@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { MediaPreview } from "@/components/MediaDrop";
+import type { PublishFile } from "@/components/PublishCheck";
 import { mediaPublicUrl } from "@/lib/media";
 import { supabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -38,4 +39,10 @@ export async function getDeveloperPreviews(id: string) {
     logo: previewOf(media.find((item) => item.kind === "logo")),
     cover: previewOf(media.find((item) => item.kind === "cover")),
   };
+}
+
+/** Логотип и фон для панели «Опубликовать застройщика?» (правило 1.2). */
+export async function getDeveloperPublishFiles(id: string): Promise<PublishFile[]> {
+  const media = await readDeveloperMedia(await createSupabaseServerClient(), id);
+  return media.map((item) => ({ id: item.path, src: mediaSrc(item.path), kind: item.kind }));
 }

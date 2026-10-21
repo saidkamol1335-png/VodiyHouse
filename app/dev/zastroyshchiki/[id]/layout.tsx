@@ -43,7 +43,9 @@ export default async function DevDeveloperLayout({ children, params }: DevDevelo
           status={developer.status}
           tabsLabel={t("tabs.label")}
           tabs={tabs}
-          statusControls={<DeveloperStatus developer={developer} action={demoSetStatusAction} />}
+          statusControls={
+            <DeveloperStatus developer={developer} action={demoSetStatusAction} files={[]} />
+          }
         />
         {children}
       </AdminPage>

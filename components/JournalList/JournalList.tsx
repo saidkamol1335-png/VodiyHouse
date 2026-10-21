@@ -92,8 +92,14 @@ function JournalRow({ entry }: { entry: JournalEntry }) {
             {entry.changes.map((change) => (
               <li key={change.field} className="journal-list__change">
                 <span className="journal-list__field">{label("fields", change.field)}</span>{" "}
-                <JournalValueText value={change.before} /> {t("arrow")}{" "}
-                <JournalValueText value={change.after} />
+                {change.opaque ? (
+                  <span className="journal-list__value">{t("changed")}</span>
+                ) : (
+                  <>
+                    <JournalValueText value={change.before} /> {t("arrow")}{" "}
+                    <JournalValueText value={change.after} />
+                  </>
+                )}
               </li>
             ))}
           </ul>

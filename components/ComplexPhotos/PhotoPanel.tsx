@@ -12,13 +12,16 @@ type PhotoPanelProps = {
   photo: PhotoItem;
   index: number;
   count: number;
+  /** Идёт загрузка: порядок не меняем, пока база не знает всех фото. */
+  moveLocked: boolean;
   onMove: (to: number) => void;
   onFocus: (focus: FocusPoint) => void;
   onRemove: () => Promise<void>;
 };
 
 /** Панель выбранного фото (И6): точка фокуса и три кадра, «Сделать обложкой», ← →, «Удалить». */
-export function PhotoPanel({ photo, index, count, onMove, onFocus, onRemove }: PhotoPanelProps) {
+export function PhotoPanel(props: PhotoPanelProps) {
+  const { photo, index, count, moveLocked, onMove, onFocus, onRemove } = props;
   const t = useTranslations("admin.complexes.photos");
   const [confirming, setConfirming] = useState(false);
   const coverAllowed = canBeCover(photo);
@@ -27,7 +30,7 @@ export function PhotoPanel({ photo, index, count, onMove, onFocus, onRemove }: P
       <FocusPreview src={photo.src} size={photo} focus={photo.focus} onFocusChange={onFocus} />
       <div className="photo-panel__actions">
         {index > 0 ? (
-          <Button size="sm" disabled={!coverAllowed} onClick={() => onMove(0)}>
+          <Button size="sm" disabled={!coverAllowed || moveLocked} onClick={() => onMove(0)}>
             {t("makeCover")}
           </Button>
         ) : (
@@ -36,7 +39,7 @@ export function PhotoPanel({ photo, index, count, onMove, onFocus, onRemove }: P
         <Button
           size="sm"
           variant="ghost"
-          disabled={index === 0}
+          disabled={index === 0 || moveLocked}
           aria-label={t("left")}
           onClick={() => onMove(index - 1)}
         >
@@ -45,7 +48,7 @@ export function PhotoPanel({ photo, index, count, onMove, onFocus, onRemove }: P
         <Button
           size="sm"
           variant="ghost"
-          disabled={index === count - 1}
+          disabled={index === count - 1 || moveLocked}
           aria-label={t("right")}
           onClick={() => onMove(index + 1)}
         >

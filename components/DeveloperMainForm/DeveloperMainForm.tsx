@@ -19,6 +19,8 @@ import type {
   SaveMainResult,
 } from "@/lib/admin/developers/types";
 import { useDeveloperMedia } from "@/lib/admin/developers/useDeveloperMedia";
+import type { ProcessedImage } from "@/lib/media";
+import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { ROUTES } from "@/lib/routes";
 
 type DeveloperMainFormProps = {
@@ -66,7 +68,8 @@ export function DeveloperMainForm({
 
   return (
     <AdminPanel title={t("fields.title")} wide>
-      <form className="developer-main" action={formAction} noValidate>
+      {/* Без автосброса React 19: управляемая отметка 1.2 логотипа и фона внутри формы. */}
+      <form className="developer-main" onSubmit={submitKeepingForm(formAction)} noValidate>
         <input type="hidden" name="id" value={developer.id} />
         <div className="developer-main__facts">
           <Field
@@ -122,6 +125,7 @@ export function DeveloperMainForm({
           multiline
           maxLength={DEVELOPER_LIMITS.aboutMax}
           defaultValue={fields.about}
+          error={issue("about")}
         />
         <BilingualField
           id="developer-founders"
@@ -130,6 +134,7 @@ export function DeveloperMainForm({
           uzLabel={t("fields.foundersUz")}
           maxLength={DEVELOPER_LIMITS.foundersMax}
           defaultValue={fields.founders}
+          error={issue("founders")}
         />
         <DeveloperMediaFields
           developerId={developer.id}
@@ -165,11 +170,23 @@ function DeveloperMediaFields({ developerId, published, media, actions }: MediaF
   const logo = useDeveloperMedia({ ...params, kind: "logo", initial: media.logo });
   const cover = useDeveloperMedia({ ...params, kind: "cover", initial: media.cover });
   const error = logo.error ?? cover.error;
+  // Отметка 1.2 — на одну загрузку (И8): после удачной снимается.
+  const uploaded = (upload: typeof logo.upload) => async (image: ProcessedImage) => {
+    await upload(image);
+    setRule12(false);
+  };
   return (
     <>
       {published ? (
-        <Rule12Check id="developer-rule12" checked={rule12} onChange={setRule12} />
-      ) : null}
+        <Rule12Check
+          id="developer-rule12"
+          checked={rule12}
+          onChange={setRule12}
+          context="developer"
+        />
+      ) : (
+        <p className="field__meta">{t("media.rule12Hint")}</p>
+      )}
       <div className="developer-main__media">
         <MediaDrop
           id="developer-logo"
@@ -178,7 +195,7 @@ function DeveloperMediaFields({ developerId, published, media, actions }: MediaF
           label={t("fields.logo")}
           disabled={locked}
           value={logo.preview}
-          onPrepared={logo.upload}
+          onPrepared={uploaded(logo.upload)}
           onRemove={logo.remove}
         />
         <MediaDrop
@@ -188,7 +205,7 @@ function DeveloperMediaFields({ developerId, published, media, actions }: MediaF
           label={t("fields.cover")}
           disabled={locked}
           value={cover.preview}
-          onPrepared={cover.upload}
+          onPrepared={uploaded(cover.upload)}
           onRemove={cover.remove}
           onFocusChange={cover.setFocus}
         />
@@ -213,6 +230,6 @@ function SaveFeedback({ state }: { state: SaveMainResult }) {
     );
   }
   if (state.status !== "error") return null;
-  // Ошибки полей видны под полями (RU | UZ подсвечивает пустой перевод сама) — здесь общий итог.
+  // Ошибки полей видны под полями (у RU | UZ — под парой) — здесь общий итог.
   return <FormStatus tone="error">{t(`errors.${state.error ?? "invalid"}`)}</FormStatus>;
 }

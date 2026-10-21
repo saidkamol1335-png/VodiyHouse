@@ -25,6 +25,12 @@ alter table public.blocks
   drop constraint blocks_name_check,
   add constraint blocks_name_check check (length(btrim(name)) between 1 and 8);
 
+-- Уникальность названия проверяется по итогу вкладки (save_complex_blocks откладывает её до
+-- конца цикла): обмен «1» ↔ «2» и новый «A» над старым «A» → «B» — допустимые правки.
+alter table public.blocks
+  drop constraint blocks_complex_id_name_key,
+  add constraint blocks_complex_id_name_key unique (complex_id, name) deferrable initially immediate;
+
 -- ─── Готовность к публикации (PLAN 3а, И7, И9) ───────────────────────────────────────────
 -- Порядок пунктов — порядок вкладок. have — сколько фото есть (для «нужно ещё N»).
 -- p_row — строка ЖК до записи (триггер проверяет NEW), иначе читается из таблицы.
@@ -471,9 +477,10 @@ to authenticated;
 -- Формат: [{id?, name, build_status, progress_pct, floors_total, floors_built, deadline_year,
 -- deadline_quarter, finishing_id, cadastre, cadastre_expected_on, currency, price_includes}]
 -- в нужном порядке. Блок со списком квартир не удаляется (это шаг 12); удаление блока уносит
--- его планировки — в журнале одна запись о блоке.
+-- его планировки — в журнале одна запись о блоке. Ответ — пути чертежей удалённых блоков,
+-- которые больше ни к чему не привязаны: сервер удалит их из бакета.
 create function public.save_complex_blocks(p_complex uuid, p_blocks jsonb)
-returns void
+returns text[]
 language plpgsql
 set search_path = ''
 as $$
@@ -483,6 +490,8 @@ declare
   item_id uuid;
   kept uuid[];
   before text[];
+  orphans uuid[];
+  removed text[];
 begin
   if not private.has_role('head') then
     raise exception 'Блоки правит руководитель' using errcode = 'insufficient_privilege', hint = 'vh:forbidden';
@@ -504,9 +513,13 @@ begin
     raise exception 'У блока есть список квартир — сначала удалите его на вкладке «Квартиры»'
       using errcode = 'check_violation', hint = 'vh:has_units';
   end if;
-  -- Сначала удалённые: новый блок может взять имя удалённого.
+  orphans := array(
+    select l.drawing_id from public.layouts l join public.blocks b on b.id = l.block_id
+    where b.complex_id = p_complex and b.id <> all (kept) and l.drawing_id is not null
+  );
   delete from public.blocks b where b.complex_id = p_complex and b.id <> all (kept);
 
+  set constraints public.blocks_complex_id_name_key deferred;
   for item in select value from jsonb_array_elements(p_blocks) loop
     item_index := item_index + 1;
     item_id := nullif(item ->> 'id', '')::uuid;
@@ -535,6 +548,15 @@ begin
         item_index * 10
       );
     else
+      -- Этажность — не ниже заведённых квартир: иначе «осталось N» и фасад видят этажи, которых нет.
+      if exists (
+        select 1 from public.units u
+        where u.block_id = item_id and u.floor > (item ->> 'floors_total')::smallint
+      ) then
+        raise exception 'Выше % этажа есть квартиры — сначала уберите их на вкладке «Квартиры»',
+          item ->> 'floors_total'
+          using errcode = 'check_violation', hint = 'vh:floors_below_units';
+      end if;
       update public.blocks
         set name = btrim(item ->> 'name'),
             build_status = coalesce(item ->> 'build_status', 'building')::public.build_status,
@@ -555,13 +577,24 @@ begin
       end if;
     end if;
   end loop;
+  set constraints public.blocks_complex_id_name_key immediate;
 
   perform private.assert_complex_not_worse(p_complex, before);
+
+  -- Чертежи удалённых блоков; скопированный в другой блок остаётся.
+  with gone as (
+    delete from public.media_assets m
+    where m.id = any (orphans)
+      and not exists (select 1 from public.layouts l where l.drawing_id = m.id)
+    returning m.path
+  )
+  select coalesce(array_agg(path), '{}') into removed from gone;
+  return removed;
 end;
 $$;
 
 comment on function public.save_complex_blocks(uuid, jsonb) is
-  'Вкладка «Блоки»: весь список одной транзакцией, порядок — по массиву.';
+  'Вкладка «Блоки»: весь список одной транзакцией, порядок — по массиву. Ответ — пути чертежей удалённых блоков.';
 
 revoke all on function public.save_complex_blocks(uuid, jsonb) from public, anon;
 grant execute on function public.save_complex_blocks(uuid, jsonb) to authenticated;
@@ -672,6 +705,34 @@ comment on function public.save_block_layouts(uuid, jsonb) is
 revoke all on function public.save_block_layouts(uuid, jsonb) from public, anon;
 grant execute on function public.save_block_layouts(uuid, jsonb) to authenticated;
 
+-- ─── Застройщик: отметка 1.2 при публикации (И8, как у ЖК; «реши сам» 21.10.2026) ────────
+-- Логотип и фон черновика загружают без отметки — проверяют все разом при «Опубликовать».
+alter table public.developers add column files_checked_at timestamptz;
+
+create or replace function private.check_developer_publishable()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.about is null then
+    raise exception 'Для публикации нужен текст «О компании» на двух языках'
+      using errcode = 'check_violation', hint = 'vh:not_ready';
+  end if;
+  if not exists (
+    select 1 from public.media_assets m where m.developer_id = new.id and m.kind = 'logo'
+  ) then
+    raise exception 'Для публикации нужен логотип' using errcode = 'check_violation', hint = 'vh:not_ready';
+  end if;
+  if new.files_checked_at is null or new.files_checked_at is not distinct from old.files_checked_at then
+    raise exception 'Перед публикацией отметьте проверку логотипа и фона по правилу 1.2'
+      using errcode = 'check_violation', hint = 'vh:rule12';
+  end if;
+  return new;
+end;
+$$;
+
 -- ─── Логотип и фон застройщика: отметка 1.2 у опубликованного (И8) ───────────────────────
 drop function public.set_developer_media(uuid, public.media_kind, text, integer, integer, text, real, real);
 
@@ -744,18 +805,40 @@ begin
   ) then
     return null;
   end if;
+  -- Файл чертежа виден в журнале через планировку («Чертёж · изменено», удаление планировки или
+  -- блока); отдельные «Фото · добавлено / удалено» на каждый чертёж — шум и путают с галереей.
+  if tg_table_name = 'media_assets' and row_data ->> 'kind' = 'drawing' then
+    return null;
+  end if;
 
   if tg_op = 'UPDATE' then
+    -- Порядок планировок считается из комнат и площади (save_block_layouts) — не правка человека.
     select coalesce(jsonb_object_agg(field.key, jsonb_build_array(old_row -> field.key, field.value)), '{}')
       into changes
       from jsonb_each(new_row) as field
       where field.value is distinct from old_row -> field.key
-        and field.key not in ('updated_at', 'updated_by');
+        and field.key not in ('updated_at', 'updated_by')
+        and not (tg_table_name = 'layouts' and field.key = 'sort');
     if changes = '{}'::jsonb then
       return null;
     end if;
+    -- Подпись правки переживает удаление строки: журнал собирает «Блок A · 2-комн. · 64,5 м²»
+    -- из записи. Скаляры — контекст, а не изменения (журнал показывает только пары [было, стало]).
+    if tg_table_name = 'layouts' then
+      changes := jsonb_build_object(
+        'block_id', new_row -> 'block_id', 'rooms', new_row -> 'rooms', 'area', new_row -> 'area'
+      ) || changes;
+    elsif tg_table_name = 'blocks' then
+      changes := jsonb_build_object('name', new_row -> 'name') || changes;
+    end if;
   else
     changes := row_data - 'created_at' - 'updated_at';
+  end if;
+  -- Название блока — тоже контекстом: подпись планировки переживает и удаление самого блока.
+  if tg_table_name = 'layouts' then
+    changes := changes || jsonb_build_object('block_name', (
+      select b.name from public.blocks b where b.id = nullif(row_data ->> 'block_id', '')::uuid
+    ));
   end if;
 
   insert into public.audit_log (actor_id, action, entity, entity_id, complex_id, developer_id, changes)
@@ -843,11 +926,13 @@ as $$
              (select private.journal_layout_label(b.name, l.rooms, l.area)
                 from public.layouts l join public.blocks b on b.id = l.block_id
                where l.id::text = a.entity_id),
-             (select private.journal_layout_label(
-                       b.name,
-                       private.journal_value(a.changes, 'rooms')::smallint,
-                       private.journal_value(a.changes, 'area')::numeric)
-                from public.blocks b where b.id::text = private.journal_value(a.changes, 'block_id')))
+             nullif(private.journal_layout_label(
+               coalesce(
+                 (select b.name from public.blocks b
+                   where b.id::text = private.journal_value(a.changes, 'block_id')),
+                 private.journal_value(a.changes, 'block_name')),
+               private.journal_value(a.changes, 'rooms')::smallint,
+               private.journal_value(a.changes, 'area')::numeric), ''))
            end,
            -- Сданный объект — своим названием, а не названием застройщика.
            case when a.entity = 'developer_past_projects' then coalesce(
@@ -913,10 +998,10 @@ begin
   if current_slug is null then
     raise exception 'ЖК не найден — обновите страницу' using errcode = 'no_data_found', hint = 'vh:not_found';
   end if;
-  if ever_published or p_slug ~ '^demo(-|$)' or current_slug ~ '^demo(-|$)'
-     or current_slug = p_slug or current_slug ~ ('^' || p_slug || '-[0-9]+$') then
+  if ever_published or p_slug ~ '^demo(-|$)' or current_slug ~ '^demo(-|$)' or current_slug = p_slug then
     return current_slug;
   end if;
+  -- Свой суффикс («x-2» при занятом «x») цикл находит сам: адрес совпадёт с текущим.
   loop
     begin
       update public.complexes set slug = candidate where id = p_complex;

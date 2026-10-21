@@ -96,11 +96,13 @@ export async function saveComplexMainAction(formData: FormData): Promise<SaveCom
   if (error) return fail(contentDbErrorCode(error), brokenOf(error));
   if (!data?.length) return fail("notFound");
   // Пока ЖК не публиковался, адрес на сайте — по UZ-названию (база не тронет опубликованный).
-  await guard.supabase.rpc("set_complex_slug", {
+  // Поля уже сохранены: при отказе повторное «Сохранить» безопасно повторит смену адреса.
+  const slug = await guard.supabase.rpc("set_complex_slug", {
     p_complex: id,
     p_slug: contentSlug(parsed.value.name.uz, SLUG_FALLBACK),
   });
   refresh();
+  if (slug.error) return fail(contentDbErrorCode(slug.error));
   return { status: "saved", at: Date.now() };
 }
 
@@ -187,11 +189,13 @@ export async function saveComplexBlocksAction(formData: FormData): Promise<SaveR
   if (!parsed.ok)
     return parsed.error ? fail(parsed.error) : fail(null, { rowErrors: parsed.rowErrors });
 
-  const { error } = await guard.supabase.rpc("save_complex_blocks", {
+  const { data, error } = await guard.supabase.rpc("save_complex_blocks", {
     p_complex: id,
     p_blocks: parsed.payload,
   });
   if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
+  // Чертежи удалённых блоков: строк уже нет — файлы убираем из бакета.
+  await removeMediaFiles(guard.supabase, data);
   refresh();
   return { status: "saved", at: Date.now() };
 }

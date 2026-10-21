@@ -105,6 +105,23 @@ describe("вкладка «Основное»", () => {
       fieldErrors: { name: "required" },
     });
   });
+
+  it("правило 1.2: телефон, сайт или @ник в публичных полях — contacts", () => {
+    expect(
+      parseDeveloperMain(
+        form({
+          ...GOOD_MAIN,
+          name: "Sifat · sifat.uz",
+          "about.ru": "Звоните +998 90 123 45 67",
+          "founders.ru": "Основатели",
+          "founders.uz": "t.me/fsq_sales",
+        }),
+      ),
+    ).toMatchObject({
+      ok: false,
+      fieldErrors: { name: "contacts", about: "contacts", founders: "contacts" },
+    });
+  });
 });
 
 describe("вкладка «Сданные объекты»", () => {
@@ -138,6 +155,10 @@ describe("вкладка «Сданные объекты»", () => {
       ok: false,
       error: null,
       rowErrors: { "row-2": { name: "missingUz", plannedOn: "dateInvalid" } },
+    });
+    expect(projects([row({ name: { ru: "Дом · www.fsq.uz", uz: "Uy" } })])).toMatchObject({
+      ok: false,
+      rowErrors: { "row-1": { name: "contacts" } },
     });
   });
 

@@ -50,6 +50,14 @@
   object-fit: cover;
 }
 
+/* Плитка обрезает всё снаружи (overflow) — фокус с клавиатуры рисуем внутри. Фокус «+» получает
+   спрятанный input — обводка на подписи. */
+.complex-photos__open:focus-visible,
+.complex-photos__add:has(input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: -2px;
+}
+
 .complex-photos__cover {
   position: absolute;
   top: 6px;
@@ -101,6 +109,18 @@
   justify-content: center;
   padding: 8px;
   border-style: dashed;
+}
+
+/* Ошибка загрузки — на всю строку сетки: причина и «Убрать» видны без прокрутки (390: 100×75). */
+.complex-photos__tile--failed {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+  aspect-ratio: auto;
+}
+
+.complex-photos__tile--failed .complex-photos__failed {
+  overflow: visible;
+  max-height: none;
 }
 
 .complex-photos__busy {

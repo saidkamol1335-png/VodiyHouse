@@ -141,6 +141,8 @@ export async function setDeveloperStatusAction(formData: FormData): Promise<Stat
   const to = readText(formData, "to");
   if (!id || !isStatus(to)) return statusError("invalid");
 
+  // Публикация — только с отметкой правила 1.2 по логотипу и фону (И8, как у ЖК).
+  if (to === "published" && readText(formData, "rule12") !== "on") return statusError("rule12");
   const refused = await statusMoveError(
     guard.supabase,
     id,
@@ -148,7 +150,10 @@ export async function setDeveloperStatusAction(formData: FormData): Promise<Stat
     readText(formData, "confirm") ?? "",
   );
   if (refused) return refused;
-  const { error } = await guard.supabase.from("developers").update({ status: to }).eq("id", id);
+  // Отметку 1.2 база требует поставить в том же действии, что и публикацию.
+  const change =
+    to === "published" ? { status: to, files_checked_at: new Date().toISOString() } : { status: to };
+  const { error } = await guard.supabase.from("developers").update(change).eq("id", id);
   if (error) return statusError(contentDbErrorCode(error));
   refresh();
   return { status: "done", to, at: Date.now() };

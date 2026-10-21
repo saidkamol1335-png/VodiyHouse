@@ -1,6 +1,7 @@
 import { bilingualIssue } from "../bilingual";
 import { bilingualHasContact } from "../contactGuard";
 import { readText } from "../credentials";
+import { parsePriceInput } from "@/lib/format";
 import { quarterOf } from "@/lib/quarters";
 import {
   BLOCK_LIMITS,
@@ -32,6 +33,13 @@ function whole(raw: string, min: number, max: number): Whole {
   return value < min || value > max ? { value: null, issue: "outOfRange" } : { value };
 }
 
+// «Блок A» → «A»: слово «Блок» сайт добавляет сам, иначе вышло бы «Блок Блок A».
+const BLOCK_WORD = /^(?:блок|blok|block)(?=[\s\-–—.]|$)[\s\-–—.]*/iu;
+
+/** Название блока, как его сохранит база: без слова «Блок» и лишних пробелов. */
+export const blockCode = (name: string) =>
+  name.trim().replace(/\s+/g, " ").replace(BLOCK_WORD, "").trim();
+
 function nameIssue(name: string): BlockRowIssue | undefined {
   if (!name) return "nameRequired";
   return name.length > BLOCK_LIMITS.nameMax ? "nameTooLong" : undefined;
@@ -42,6 +50,7 @@ function includesIssue(rows: readonly PriceInclude[]): BlockRowIssue | undefined
     const issue = bilingualIssue(row.item, { max: BLOCK_LIMITS.includeItemMax, required: true });
     if (issue) return issue;
     if (bilingualHasContact(row.item)) return "contacts";
+    if (!row.included && parsePriceInput(row.price).issue) return "includePrice";
   }
   return undefined;
 }
@@ -54,8 +63,9 @@ export function blockPayload(
   const built = whole(row.floorsBuilt, 0, BLOCK_LIMITS.floorsMax);
   const progress = whole(row.progressPct, 0, 100);
   const delivered = row.buildStatus === "delivered";
+  const name = blockCode(row.name);
   const issues: BlockRowErrors[string] = {
-    name: nameIssue(row.name.trim()),
+    name: nameIssue(name),
     floorsTotal: total.issue ?? (total.value === null ? "floorsRequired" : undefined),
     floorsBuilt: delivered
       ? undefined
@@ -72,7 +82,7 @@ export function blockPayload(
   return {
     payload: {
       ...(row.id ? { id: row.id } : {}),
-      name: row.name.trim(),
+      name,
       build_status: row.buildStatus,
       // У сданного блока готовность и «построено» не нужны: сайт пишет «Сдан · 3 кв. 2025».
       progress_pct: delivered ? null : progress.value,
@@ -84,11 +94,10 @@ export function blockPayload(
       cadastre: row.cadastre || null,
       cadastre_expected_on: row.cadastre === "in_progress" ? row.cadastreExpectedOn : null,
       currency: row.currency,
-      price_includes: row.priceIncludes.map((item) => ({
-        item: item.item,
-        included: item.included,
-        ...(item.included || !item.price ? {} : { price: Number(item.price.replace(/\s+/g, "")) }),
-      })),
+      price_includes: row.priceIncludes.map((item) => {
+        const price = item.included ? null : parsePriceInput(item.price).value;
+        return { item: item.item, included: item.included, ...(price ? { price } : {}) };
+      }),
     },
   };
 }
@@ -152,11 +161,29 @@ export function parseBlocks(formData: FormData): BlocksParse {
   if (drafts.some((row) => row === null)) return { ok: false, error: "invalid" };
   const rowErrors: BlockRowErrors = {};
   const payload: BlockPayload[] = [];
+  const repeated = repeatedNames(drafts as BlockDraft[]);
   for (const row of drafts as BlockDraft[]) {
     const result = blockPayload(row);
-    if ("issues" in result) rowErrors[row.key] = result.issues;
-    else payload.push(result.payload);
+    const issues = "issues" in result ? result.issues : {};
+    // Повтор — на второй карточке сразу, вместе с другими ошибками: база тоже откажет, но без
+    // подсказки, какая из карточек.
+    if (repeated.has(row.key)) issues.name ??= "nameTaken";
+    if (Object.keys(issues).length > 0) rowErrors[row.key] = issues;
+    else if ("payload" in result) payload.push(result.payload);
   }
   if (Object.keys(rowErrors).length > 0) return { ok: false, error: null, rowErrors };
   return { ok: true, payload };
+}
+
+/** Ключи карточек, чьё название уже встречалось выше (без учёта регистра и слова «Блок»). */
+function repeatedNames(rows: readonly BlockDraft[]): Set<string> {
+  const seen = new Set<string>();
+  const repeated = new Set<string>();
+  for (const row of rows) {
+    const code = blockCode(row.name).toLocaleLowerCase("ru");
+    if (!code) continue;
+    if (seen.has(code)) repeated.add(row.key);
+    seen.add(code);
+  }
+  return repeated;
 }

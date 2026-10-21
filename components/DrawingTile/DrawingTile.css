@@ -42,6 +42,13 @@
   pointer-events: none;
 }
 
+/* Фокус получает спрятанный input файла — обводку рисуем на плитке и на «Заменить» в окне. */
+.drawing-tile:has(.drawing-tile__input:focus-visible),
+.drawing-tile__actions label:has(input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 .drawing-tile__busy {
   font-size: var(--fs-micro);
   text-align: center;

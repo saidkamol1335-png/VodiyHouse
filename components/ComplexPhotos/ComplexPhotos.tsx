@@ -35,6 +35,7 @@ export function ComplexPhotos({
   actions,
 }: ComplexPhotosProps) {
   const t = useTranslations("admin.complexes.photos");
+  const tAdmin = useTranslations("admin");
   const [rule12, setRule12] = useState(false);
   const gallery = usePhotoGallery({ complexId, initial, actions, rule12 });
   const [selected, setSelected] = useState<string | null>(null);
@@ -46,6 +47,11 @@ export function ComplexPhotos({
     if (dragging) void gallery.move(dragging, targetIndex);
     setDragging(null);
   };
+  // Отметка 1.2 — на одну пачку (И8): снимается, если хоть одно фото загрузилось.
+  const upload = (files: File[]) =>
+    void gallery.upload(files).then((uploaded) => {
+      if (uploaded > 0) setRule12(false);
+    });
 
   return (
     <AdminPanel title={t("title")} wide>
@@ -58,8 +64,10 @@ export function ComplexPhotos({
           })}
         </p>
         {published ? (
-          <Rule12Check id="rule12-photos" checked={rule12} onChange={setRule12} />
-        ) : null}
+          <Rule12Check id="rule12-photos" checked={rule12} onChange={setRule12} context="photo" />
+        ) : (
+          <p className="field__meta">{tAdmin("media.rule12Hint")}</p>
+        )}
         <ul className="complex-photos__grid">
           {gallery.photos.map((photo, index) => (
             <li
@@ -69,7 +77,7 @@ export function ComplexPhotos({
                   ? "complex-photos__tile complex-photos__tile--selected"
                   : "complex-photos__tile"
               }
-              draggable
+              draggable={!gallery.uploading}
               onDragStart={() => setDragging(photo.id)}
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => drop(event, index)}
@@ -86,6 +94,8 @@ export function ComplexPhotos({
                 <img
                   src={photo.src}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   style={{ objectPosition: objectPosition(photo, TILE_RATIO, photo.focus) }}
                 />
               </button>
@@ -96,7 +106,7 @@ export function ComplexPhotos({
             <PendingTile key={item.key} item={item} onDismiss={() => gallery.dismiss(item.key)} />
           ))}
           <li className="complex-photos__tile complex-photos__tile--add">
-            <AddTile locked={locked} onFiles={(files) => void gallery.upload(files)} />
+            <AddTile locked={locked} onFiles={upload} />
           </li>
         </ul>
         <GalleryProblem error={gallery.error} />
@@ -105,6 +115,7 @@ export function ComplexPhotos({
             photo={current}
             index={gallery.photos.indexOf(current)}
             count={gallery.photos.length}
+            moveLocked={gallery.uploading}
             onMove={(to) => void gallery.move(current.id, to)}
             onFocus={(focus) => gallery.setFocus(current.id, focus)}
             onRemove={async () => {
@@ -149,8 +160,12 @@ function PendingTile({ item, onDismiss }: { item: PendingPhoto; onDismiss: () =>
     : item.error
       ? t(`developers.errors.${item.error}`)
       : t("media.uploadFailed");
+  // Ошибка — на всю строку сетки: в плитке 100×75 (390) причина и «Убрать» не помещаются.
+  const className = item.failed
+    ? "complex-photos__tile complex-photos__tile--pending complex-photos__tile--failed"
+    : "complex-photos__tile complex-photos__tile--pending";
   return (
-    <li className="complex-photos__tile complex-photos__tile--pending" data-testid="photo-pending">
+    <li className={className} data-testid="photo-pending">
       {item.failed ? (
         <span className="complex-photos__failed" role="alert">
           <b>{item.name}</b> {message}
@@ -168,6 +183,10 @@ function PendingTile({ item, onDismiss }: { item: PendingPhoto; onDismiss: () =>
 function GalleryProblem({ error }: { error: GalleryError }) {
   const t = useTranslations("admin");
   if (!error) return null;
+  if (error.error === "notCover") {
+    const min = MEDIA_LIMITS.complexCoverMinLongSide;
+    return <FormStatus tone="error">{t("complexes.photos.notCover", { min })}</FormStatus>;
+  }
   if (error.broken.length > 0) {
     const broken = error.broken.map((item) => t(`complexes.status.missing.${item}`)).join(" · ");
     return <FormStatus tone="error">{`${t("complexes.brokenLead")} ${broken}`}</FormStatus>;

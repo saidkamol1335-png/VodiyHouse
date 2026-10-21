@@ -53,7 +53,15 @@ export function ChoiceField({
           {label}
         </span>
         {clearLabel && value ? (
-          <button type="button" className="choice-field__clear" onClick={() => pick("")}>
+          <button
+            type="button"
+            className="choice-field__clear"
+            onClick={(event) => {
+              pick("");
+              // Клик по кнопке не даёт input: без него форма не знает о правке («Уйти без сохранения?»).
+              event.currentTarget.form?.dispatchEvent(new Event("input", { bubbles: true }));
+            }}
+          >
             <X size={12} aria-hidden="true" />
             {clearLabel}
           </button>

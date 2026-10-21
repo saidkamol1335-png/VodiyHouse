@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { Button } from "@/components/Button";
 import { ComplexReadiness } from "@/components/ComplexReadiness";
 import { FormStatus } from "@/components/FormStatus";
-import { StatusCapsule, type PublishPanelProps } from "@/components/StatusCapsule";
+import { PublishCheck } from "@/components/PublishCheck";
+import { StatusCapsule } from "@/components/StatusCapsule";
 import type { ReadinessItem } from "@/lib/admin/complexes/readiness";
 import type { ComplexFilePreview, ComplexStatusResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
@@ -40,7 +39,14 @@ export function ComplexStatus({
       name={complex.name}
       action={action}
       messages="admin.complexes.status"
-      publishPanel={(panel) => <PublishPanel {...panel} complexId={complex.id} files={files} />}
+      publishPanel={(panel) => (
+        <PublishCheck
+          {...panel}
+          entityId={complex.id}
+          files={files}
+          messages="admin.complexes.publish"
+        />
+      )}
     >
       {showReadiness ? <ComplexReadiness items={readiness} base={base} /> : null}
       {developer.published || complex.status === "archived" ? null : (
@@ -50,60 +56,5 @@ export function ComplexStatus({
         </FormStatus>
       )}
     </StatusCapsule>
-  );
-}
-
-type PublishPanelOwnProps = PublishPanelProps & {
-  complexId: string;
-  files: readonly ComplexFilePreview[];
-};
-
-/** Как «Проверить» у видеографа в мокапе: все фото и чертежи, галочка — и только тогда «Опубликовать». */
-function PublishPanel({ complexId, files, formAction, pending, onCancel }: PublishPanelOwnProps) {
-  const t = useTranslations("admin.complexes.publish");
-  const [checked, setChecked] = useState(false);
-  return (
-    <form className="complex-publish" action={formAction}>
-      <input type="hidden" name="id" value={complexId} />
-      <input type="hidden" name="to" value="published" />
-      <p className="complex-publish__title">{t("title")}</p>
-      <p className="complex-publish__lead">{t("lead")}</p>
-      {files.length > 0 ? (
-        <ul
-          className="complex-publish__files"
-          aria-label={t("filesLabel", { count: files.length })}
-        >
-          {files.map((file) => (
-            <li
-              key={file.id}
-              className={`complex-publish__file complex-publish__file--${file.kind}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- превью из бакета в кабинете; next/image — на сайте (фаза 3) */}
-              <img src={file.src} alt="" loading="lazy" />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="complex-publish__lead">{t("noFiles")}</p>
-      )}
-      <label className="complex-publish__check">
-        <input
-          type="checkbox"
-          name="rule12"
-          value="on"
-          checked={checked}
-          onChange={(event) => setChecked(event.target.checked)}
-        />
-        <span>{t("check")}</span>
-      </label>
-      <div className="complex-publish__actions">
-        <Button type="submit" size="sm" disabled={!checked} pending={pending}>
-          {pending ? t("pending") : t("submit")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel}>
-          {t("cancel")}
-        </Button>
-      </div>
-    </form>
   );
 }

@@ -62,3 +62,20 @@ export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
   if (currency === "USD") return `$${GROUPED.format(Math.round(amount))}`;
   return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
 }
+
+/** Предел цены — numeric(14,2) в базе. */
+export const PRICE_MAX = 999_999_999_999;
+
+export type PriceInput = { value: number | null; issue?: "notNumber" | "outOfRange" };
+
+/**
+ * Цена, набранная руками: целое, группы — пробелами («31 000»). Запятую и точку не угадываем:
+ * «31,000» с клавиатуры ПК — это 31 000, а Number() дал бы 31, поэтому такой ввод — ошибка.
+ */
+export function parsePriceInput(raw: string): PriceInput {
+  const digits = raw.replace(/\s+/g, "");
+  if (!digits) return { value: null };
+  if (!/^\d+$/.test(digits)) return { value: null, issue: "notNumber" };
+  const value = Number(digits);
+  return value <= 0 || value > PRICE_MAX ? { value: null, issue: "outOfRange" } : { value };
+}

@@ -12,7 +12,7 @@ import { setDeveloperStatusAction } from "@/lib/admin/actions/developers";
 import { developerTabs } from "@/lib/admin/developers/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
-import { getDeveloper } from "@/lib/admin/server/developerPage";
+import { getDeveloper, getDeveloperPublishFiles } from "@/lib/admin/server/developerPage";
 import { requireSection } from "@/lib/admin/session";
 import { ROUTES } from "@/lib/routes";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -49,6 +49,7 @@ export default async function DeveloperLayout({ children, params }: DeveloperLay
   const { id } = await params;
   const developer = await getDeveloper(id);
   if (!developer) notFound();
+  const files = await getDeveloperPublishFiles(developer.id);
   const tabs = developerTabs(`${ADMIN_ROUTES.developers}/${developer.id}`, (key) =>
     t(`developers.tabs.${key}`),
   );
@@ -68,7 +69,9 @@ export default async function DeveloperLayout({ children, params }: DeveloperLay
         status={developer.status}
         tabsLabel={t("developers.tabs.label")}
         tabs={tabs}
-        statusControls={<DeveloperStatus developer={developer} action={setDeveloperStatusAction} />}
+        statusControls={
+          <DeveloperStatus developer={developer} action={setDeveloperStatusAction} files={files} />
+        }
       />
       {children}
     </AdminPage>

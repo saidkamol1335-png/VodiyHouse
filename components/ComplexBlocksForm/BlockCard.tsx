@@ -2,13 +2,15 @@
 
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import type { SelectOption } from "@/components/SelectField";
 import type { BlockDraft, BlockRowErrors } from "@/lib/admin/complexes/blocks";
 import { quarterOf } from "@/lib/quarters";
 import { BlockFields } from "./BlockFields";
+
+export type MoveDirection = "up" | "down";
 
 type BlockCardProps = {
   block: BlockDraft;
@@ -17,11 +19,28 @@ type BlockCardProps = {
   open: boolean;
   issues: BlockRowErrors[string] | undefined;
   finishings: readonly SelectOption[];
+  /** Карточку только что переставили стрелкой: вернуть фокус на стрелку (React переносит узел). */
+  focusMove?: MoveDirection;
+  /** Фокус возвращён — перенос забыт: иначе он сработал бы снова при возврате на вкладку. */
+  onMoveFocused: () => void;
   onToggle: () => void;
   onChange: (patch: Partial<BlockDraft>) => void;
-  onMove: (to: number) => void;
+  onMove: (direction: MoveDirection) => void;
   onRemove: () => void;
 };
+
+/** Стрелки порядка: после переноса узла фокус уходит на body — возвращаем, на краю — на соседнюю. */
+function useMoveFocus(focusMove: MoveDirection | undefined, onFocused: () => void) {
+  const up = useRef<HTMLButtonElement>(null);
+  const down = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!focusMove) return;
+    const [target, fallback] = focusMove === "up" ? [up, down] : [down, up];
+    (target.current && !target.current.disabled ? target : fallback).current?.focus();
+    onFocused();
+  }, [focusMove, onFocused]);
+  return [up, down] as const;
+}
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.blocks">>;
 
@@ -65,29 +84,42 @@ function StatusBadge({ block, t }: { block: BlockDraft; t: Translate }) {
 export function BlockCard(props: BlockCardProps) {
   const { block, index, count, open, onToggle, onMove } = props;
   const t = useTranslations("admin.complexes.blocks");
+  const [upArrow, downArrow] = useMoveFocus(props.focusMove, props.onMoveFocused);
   const title = block.name ? t("blockName", { name: block.name }) : t("unnamed");
   const progress = Number(block.progressPct);
+  // Раскрыта одна карточка (И4): у свёрнутых с ошибками последнего сохранения — плашка в шапке.
+  const hiddenIssues = !open && Boolean(props.issues);
+  const className = [
+    "block-card",
+    open ? "block-card--open" : null,
+    hiddenIssues ? "block-card--error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <li className={open ? "block-card block-card--open" : "block-card"} data-testid="block-card">
+    <li className={className} data-testid="block-card">
       <div className="block-card__head">
         <b className="block-card__title">{title}</b>
         <StatusBadge block={block} t={t} />
+        {hiddenIssues ? <Badge tone="bad">{t("hasIssues")}</Badge> : null}
         <span className="block-card__tools">
           <button
+            ref={upArrow}
             type="button"
             className="block-card__move"
             aria-label={t("moveUp", { name: title })}
             disabled={index === 0}
-            onClick={() => onMove(index - 1)}
+            onClick={() => onMove("up")}
           >
             <ArrowUp size={16} aria-hidden="true" />
           </button>
           <button
+            ref={downArrow}
             type="button"
             className="block-card__move"
             aria-label={t("moveDown", { name: title })}
             disabled={index === count - 1}
-            onClick={() => onMove(index + 1)}
+            onClick={() => onMove("down")}
           >
             <ArrowDown size={16} aria-hidden="true" />
           </button>

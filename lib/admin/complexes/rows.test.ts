@@ -116,6 +116,53 @@ describe("«Блоки» (И4)", () => {
     });
   });
 
+  it("«Блок A» → «A»; повтор названия — ошибка второй карточки; цена пункта — целое", () => {
+    const priced = (price: string) => ({
+      key: "p1",
+      item: { ru: "Паркинг", uz: "Avtoturargoh" },
+      included: false,
+      price,
+    });
+    expect(
+      parseBlocks(formWith("blocks", [block({ name: "Блок  A" }), block({ name: "blok-1" })])),
+    ).toMatchObject({ ok: true, payload: [{ name: "A" }, { name: "1" }] });
+    expect(
+      parseBlocks(
+        formWith("blocks", [
+          block({ key: "a1", name: "A" }),
+          block({ key: "a2", name: "Блок a" }),
+          block({ key: "w1", name: "Блок" }),
+          block({ key: "c1", name: "C", priceIncludes: [priced("5,000")] }),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: false,
+      rowErrors: {
+        a2: { name: "nameTaken" },
+        w1: { name: "nameRequired" },
+        c1: { priceIncludes: "includePrice" },
+      },
+    });
+    expect(
+      parseBlocks(formWith("blocks", [block({ priceIncludes: [priced("8 000")] })])),
+    ).toMatchObject({ ok: true, payload: [{ price_includes: [{ included: false, price: 8000 }] }] });
+    // Повтор виден с первого «Сохранить», даже если у первой «A» есть другие ошибки.
+    expect(
+      parseBlocks(
+        formWith("blocks", [
+          block({ key: "b1", name: "A", floorsTotal: "" }),
+          block({ key: "b2", name: "a", floorsTotal: "" }),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: false,
+      rowErrors: {
+        b1: { floorsTotal: "floorsRequired" },
+        b2: { name: "nameTaken", floorsTotal: "floorsRequired" },
+      },
+    });
+  });
+
   it("из базы: срок — последний день квартала, квартиры и цены планировок — только чтение", () => {
     const [draft] = blockDraftsFrom([
       {
@@ -165,6 +212,18 @@ describe("«Планировки» (И5)", () => {
     expect(parseLayouts(formWith("layouts", [layout({ drawingId: "../evil" })]))).toEqual({
       ok: false,
       error: "invalid",
+    });
+    // «31,000» с клавиатуры ПК — не 31: запятую и точку в цене не угадываем.
+    expect(
+      parseLayouts(
+        formWith("layouts", [
+          layout({ key: "c1", priceFrom: "31,000" }),
+          layout({ key: "c2", priceFrom: "1000000000000" }),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: false,
+      rowErrors: { c1: { priceFrom: "notNumber" }, c2: { priceFrom: "outOfRange" } },
     });
   });
 

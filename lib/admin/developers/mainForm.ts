@@ -5,6 +5,7 @@ import {
   type BilingualIssue,
   type BilingualValue,
 } from "../bilingual";
+import { bilingualHasContact, containsContact } from "../contactGuard";
 import { readText } from "../credentials";
 
 // Вкладка «Основное» застройщика (решение Д2): разбор формы и проверка до базы. Пределы —
@@ -40,7 +41,7 @@ export type DeveloperMainInput = {
 };
 
 export type DeveloperFieldIssue =
-  BilingualIssue | "tooShort" | "outOfRange" | "notWholeNumber" | "dateInvalid";
+  BilingualIssue | "tooShort" | "outOfRange" | "notWholeNumber" | "dateInvalid" | "contacts";
 export type DeveloperMainErrors = Partial<Record<keyof DeveloperMainFields, DeveloperFieldIssue>>;
 /** fields — введённое как есть: React сбрасывает форму после действия, его возвращают в форму. */
 export type DeveloperMainParse =
@@ -57,7 +58,13 @@ export function normalizeName(raw: string): string {
 export function nameIssue(name: string): DeveloperFieldIssue | null {
   if (!name) return "required";
   if (name.length < DEVELOPER_LIMITS.nameMin) return "tooShort";
-  return name.length > DEVELOPER_LIMITS.nameMax ? "tooLong" : null;
+  if (name.length > DEVELOPER_LIMITS.nameMax) return "tooLong";
+  return containsContact(name) ? "contacts" : null;
+}
+
+/** Публичный текст: длина и перевод, затем правило 1.2 — контактов застройщика на сайте нет. */
+function publicTextIssue(value: BilingualValue, max: number): DeveloperFieldIssue | undefined {
+  return bilingualIssue(value, { max }) ?? (bilingualHasContact(value) ? "contacts" : undefined);
 }
 
 type WholeNumber = { value: number | null; issue: DeveloperFieldIssue | null };
@@ -108,8 +115,8 @@ export function parseDeveloperMain(formData: FormData): DeveloperMainParse {
     deliveredCheckedAt: fields.deliveredCheckedAt
       ? (isoDateIssue(fields.deliveredCheckedAt, checkedYearMin, yearMax) ?? undefined)
       : undefined,
-    about: bilingualIssue(fields.about, { max: aboutMax }) ?? undefined,
-    founders: bilingualIssue(fields.founders, { max: foundersMax }) ?? undefined,
+    about: publicTextIssue(fields.about, aboutMax),
+    founders: publicTextIssue(fields.founders, foundersMax),
   };
   const fieldErrors = Object.fromEntries(
     Object.entries(issues).filter(([, issue]) => issue),

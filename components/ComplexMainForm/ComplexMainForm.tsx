@@ -10,6 +10,7 @@ import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import type { DeveloperOption, SaveComplexMainResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { formatCoordinates } from "@/lib/geo";
+import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 import { AboutPanel, ChecksPanel, LocationPanel } from "./ComplexMainSections";
 
@@ -76,7 +77,12 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
   const sections = { ...props, fields, issue };
 
   return (
-    <form className="complex-main" action={formAction} onInput={guard.onInput} noValidate>
+    <form
+      className="complex-main"
+      onSubmit={submitKeepingForm(formAction)}
+      onInput={guard.onInput}
+      noValidate
+    >
       <input type="hidden" name="id" value={props.complex.id} />
       <AboutPanel {...sections} />
       <LocationPanel {...sections} />

@@ -43,7 +43,7 @@ export type BlockDraft = {
   priceIncludes: PriceInclude[];
   /** Только чтение: у блока есть список квартир — не удаляется (шаг 12). */
   units: number;
-  /** Только чтение: планировок с ценой — смена валюты спросит подтверждение. */
+  /** Только чтение: планировок с ценой; с ними, квартирами или ценой пункта смена валюты спросит. */
   pricedLayouts: number;
 };
 
@@ -52,6 +52,8 @@ export type BlockRowIssue =
   | "contacts"
   | "nameRequired"
   | "nameTooLong"
+  | "nameTaken"
+  | "includePrice"
   | "floorsRequired"
   | "outOfRange"
   | "notWholeNumber"

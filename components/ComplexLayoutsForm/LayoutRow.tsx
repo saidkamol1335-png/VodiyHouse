@@ -29,12 +29,12 @@ type LayoutRowProps = {
   onRemove: () => void;
 };
 
-function roomOptions(current: number | null) {
+function roomOptions(current: number | null, studioLabel: string) {
   const choices: number[] = [...ROOM_CHOICES];
   if (current !== null && !choices.includes(current)) choices.push(current);
   return choices.map((rooms) => ({
     value: String(rooms),
-    label: rooms === 0 ? "Ст" : String(rooms),
+    label: rooms === 0 ? studioLabel : String(rooms),
   }));
 }
 
@@ -42,6 +42,7 @@ function roomOptions(current: number | null) {
 export function LayoutRow(props: LayoutRowProps) {
   const { row, currency, hasUnits, issues, onChange } = props;
   const t = useTranslations("admin.complexes.layouts");
+  const rooms = useTranslations("admin.complexes.rooms");
   const [busy, setBusy] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const issue = (field: "rooms" | "area" | "priceFrom") =>
@@ -70,7 +71,7 @@ export function LayoutRow(props: LayoutRowProps) {
         id={id("rooms")}
         name={id("rooms")}
         label={t("fields.rooms")}
-        options={roomOptions(row.rooms)}
+        options={roomOptions(row.rooms, rooms("studio"))}
         value={row.rooms === null ? "" : String(row.rooms)}
         error={issue("rooms")}
         onChange={(value) => onChange({ rooms: value === "" ? null : Number(value) })}

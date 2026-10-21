@@ -160,7 +160,7 @@ test.describe("кабинет · ЖК · страница", () => {
   test("публикация (И8): панель с галочкой 1.2; без данных — чего не хватает", async ({ page }) => {
     await open(page, GULZOR);
     await page.getByRole("button", { name: "Опубликовать" }).click();
-    const panel = page.locator(".complex-publish");
+    const panel = page.locator(".publish-check");
     await expect(panel).toContainText("Опубликовать ЖК?");
     const submit = panel.getByRole("button", { name: "Опубликовать на сайте" });
     await expect(submit).toBeDisabled();
@@ -169,6 +169,9 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(formStatus(page, /Чтобы опубликовать, не хватает:/)).toContainText(
       "точка на карте",
     );
+    // После отказа панель открыта, а отметка 1.2 видна такой, какой её отправили.
+    await expect(panel.getByRole("checkbox")).toBeChecked();
+    await expect(submit).toBeEnabled();
   });
 
   test("архив — только с верным названием (RU или UZ)", async ({ page }) => {
@@ -222,6 +225,65 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(classes.getByRole("radio", { name: "Комфорт" })).toBeChecked();
     await classes.getByRole("button", { name: "Сбросить" }).click();
     await expect(classes.getByRole("radio", { checked: true })).toHaveCount(0);
+  });
+
+  test("«Сбросить» — тоже правка: уход по вкладке спрашивает", async ({ page }) => {
+    await open(page, SHODLIK);
+    const classes = page.getByRole("radiogroup", { name: "Класс" });
+    await classes.getByRole("button", { name: "Сбросить" }).click();
+    let asked = "";
+    page.once("dialog", (dialog) => {
+      asked = dialog.message();
+      void dialog.dismiss();
+    });
+    await page
+      .getByRole("navigation", { name: "Разделы ЖК" })
+      .getByRole("link", { name: "Журнал" })
+      .click();
+    expect(asked).toContain("Уйти без сохранения?");
+  });
+
+  test("после ошибки сохранения выбор класса и района не откатывается (сброс формы React 19)", async ({
+    page,
+  }) => {
+    await open(page, SHODLIK);
+    const classes = page.getByRole("radiogroup", { name: "Класс" });
+    await classes.getByText("Бизнес", { exact: true }).click();
+    const location = page.getByLabel("Город или район");
+    const before = await location.inputValue();
+    const other = await location
+      .locator("option")
+      .evaluateAll(
+        (options, current) =>
+          (options as HTMLOptionElement[]).find((option) => option.value && option.value !== current)
+            ?.value,
+        before,
+      );
+    await location.selectOption(other!);
+    await page.getByLabel("Ориентир · RU").fill("звоните +998 90 123 45 67");
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    await expect(page.getByText(/В тексте контакты/)).toBeVisible();
+    await expect(classes.getByRole("radio", { name: "Бизнес" })).toBeChecked();
+    await expect(location).toHaveValue(other!);
+  });
+
+  test("«Назад» браузера с несохранёнными правками спрашивает «Уйти без сохранения?»", async ({
+    page,
+  }) => {
+    await open(page, LIST);
+    await rowOf(page, "Shodlik").click();
+    await expect(page).toHaveURL(SHODLIK);
+    await page.waitForLoadState("networkidle");
+    await page.getByLabel("До центра, мин").fill("9");
+    let asked = "";
+    page.once("dialog", (dialog) => {
+      asked = dialog.message();
+      void dialog.dismiss();
+    });
+    await page.evaluate(() => history.back());
+    await expect.poll(() => asked).toContain("Уйти без сохранения?");
+    await expect(page).toHaveURL(SHODLIK);
+    await expect(page.getByLabel("До центра, мин")).toHaveValue("9");
   });
 
   test("несохранённые правки: переход по вкладке спрашивает «Уйти без сохранения?»", async ({

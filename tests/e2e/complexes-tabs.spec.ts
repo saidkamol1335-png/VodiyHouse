@@ -82,16 +82,24 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
     await expect(formStatus(page, "Сохранено")).toBeVisible();
   });
 
-  test("смена валюты при ценах планировок — с подтверждением", async ({ page }) => {
+  test("смена валюты при ценах планировок или квартир — с подтверждением", async ({ page }) => {
     await open(page, `${NAMUNA}/bloki`);
     const card = cardOf(page, "Блок 1");
     await card.getByRole("button", { name: "Изменить" }).click();
     // Выбор применяется только после «Да»: радио управляемое, поэтому клик, а не check.
     await card.getByText("сум", { exact: true }).click();
-    await expect(card).toContainText("У 2 планировок цены в старой валюте");
+    await expect(card).toContainText("У блока уже есть цены");
     await expect(card.locator(".block-card__summary")).toContainText("USD");
     await card.getByRole("button", { name: "Да, сменить" }).click();
     await expect(card.locator(".block-card__summary")).toContainText("сум");
+
+    // У Shodlik A цены только у квартир («цена от» планировок пустая) — тоже спрашивает.
+    await open(page, `${SHODLIK}/bloki`);
+    const shodlik = cardOf(page, "Блок A");
+    await shodlik.getByRole("button", { name: "Изменить" }).click();
+    await shodlik.getByText("сум", { exact: true }).click();
+    await expect(shodlik).toContainText("У блока уже есть цены");
+    await expect(shodlik.locator(".block-card__summary")).toContainText("USD");
   });
 
   test("«Планировки» (И5): переключатель блоков; у блока с квартирами цена — из квартир", async ({
@@ -224,6 +232,10 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
     await expect(rows.first()).toContainText("свободно 12");
     await open(page, `${NAMUNA}/kvartiry`);
     await expect(page.locator(".complex-units__row")).toContainText("списка квартир нет");
+    await expect(page.getByRole("link", { name: "Отметить доступность →" })).toHaveAttribute(
+      "href",
+      `${NAMUNA}/planirovki`,
+    );
 
     await open(page, `${SHODLIK}/zhurnal`);
     await expect(page.getByText("Блок B").first()).toBeVisible();
