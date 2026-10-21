@@ -1,0 +1,78 @@
+/* Чертёж в строке планировки: плитка 64×44 (мокап: превью в «Моих отчётах» видеографа), чертёж —
+   на белом листе в обеих темах; крупно — системное окно <dialog>. */
+.drawing-tile {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 64px;
+  height: 44px;
+  padding: 0;
+  border: 1px dashed var(--line-3);
+  border-radius: var(--r-s);
+  background: none;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.drawing-tile[aria-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.drawing-tile--filled {
+  border-style: solid;
+  border-color: var(--line-2);
+  background: var(--drawing-bg);
+}
+
+.drawing-tile__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.drawing-tile__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drawing-tile__busy {
+  font-size: var(--fs-micro);
+  text-align: center;
+}
+
+.drawing-tile__dialog {
+  max-width: min(960px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  color: var(--fg);
+}
+
+.drawing-tile__dialog::backdrop {
+  background: var(--scrim);
+}
+
+.drawing-tile__large {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  margin: 0 auto;
+  background: var(--drawing-bg);
+}
+
+.drawing-tile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}

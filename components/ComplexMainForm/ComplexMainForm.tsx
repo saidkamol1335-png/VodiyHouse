@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect } from "react";
 import { Button } from "@/components/Button";
-import { FormStatus } from "@/components/FormStatus";
+import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import type { SelectOption } from "@/components/SelectField";
 import type { ComplexMainFields } from "@/lib/admin/complexes/mainForm";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
@@ -82,29 +82,11 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
       <LocationPanel {...sections} />
       <ChecksPanel {...sections} />
       <div className="complex-main__save">
-        <SaveFeedback state={state} />
+        <ComplexSaveFeedback state={state} />
         <Button type="submit" pending={pending}>
           {pending ? t("pending") : t("save")}
         </Button>
       </div>
     </form>
   );
-}
-
-/** «Сохранено», отказ сервера или чего лишился бы опубликованный ЖК. */
-function SaveFeedback({ state }: { state: SaveComplexMainResult }) {
-  const t = useTranslations("admin");
-  if (state.status === "saved") {
-    return (
-      <FormStatus key={state.at} tone="success">
-        {t("complexes.saved")}
-      </FormStatus>
-    );
-  }
-  if (state.status !== "error") return null;
-  if (state.broken.length > 0) {
-    const broken = state.broken.map((item) => t(`complexes.status.missing.${item}`)).join(" · ");
-    return <FormStatus tone="error">{`${t("complexes.brokenLead")} ${broken}`}</FormStatus>;
-  }
-  return <FormStatus tone="error">{t(`developers.errors.${state.error ?? "invalid"}`)}</FormStatus>;
 }

@@ -1,0 +1,21 @@
+/* Отметка правила 1.2 у загрузки: янтарная рамка — как подтверждения кабинета. */
+.rule12-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-m);
+  background: var(--amber-soft);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  cursor: pointer;
+}
+
+.rule12-check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--amber);
+}

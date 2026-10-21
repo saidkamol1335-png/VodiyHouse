@@ -50,3 +50,15 @@ export function initialsOf(name: string): string {
     .map((word) => word.charAt(0).toUpperCase())
     .join("");
 }
+
+const GROUPED = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+const SUM_STEP = 1000;
+
+/**
+ * Цена для кабинета и сайта (ТЗ 1.5, предложение): USD — до доллара, «$31 000»; сум — до тысячи,
+ * «354 000 000 сум». Хранится цена без округления — округляет только вывод (PLAN §0.10).
+ */
+export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
+  if (currency === "USD") return `$${GROUPED.format(Math.round(amount))}`;
+  return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
+}

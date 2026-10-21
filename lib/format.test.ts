@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { greetingOf } from "./admin/greeting";
-import { formatDate, formatDateTime, formatFileSize, formatWeekdayDate, hourIn, initialsOf } from "./format";
+import {
+  formatDate,
+  formatDateTime,
+  formatFileSize,
+  formatPrice,
+  formatWeekdayDate,
+  hourIn,
+  initialsOf,
+} from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
 const MOCKUP_NOON = new Date("2026-10-19T07:00:00Z");
@@ -54,5 +62,14 @@ describe("вес файла", () => {
     expect(formatFileSize(512 * 1024)).toBe("512 КБ");
     expect(formatFileSize(2.44 * 1024 * 1024)).toBe("2,4 МБ");
     expect(formatFileSize(25 * 1024 * 1024)).toBe("25 МБ");
+  });
+});
+
+describe("formatPrice", () => {
+  it("USD — до доллара, сум — до тысячи, неразрывные пробелы между разрядами", () => {
+    const plain = (text: string) => text.replace(/\s/g, " ");
+    expect(plain(formatPrice(31000, "USD"))).toBe("$31 000");
+    expect(plain(formatPrice(40270.4, "USD"))).toBe("$40 270");
+    expect(plain(formatPrice(354_123_456, "UZS"))).toBe("354 123 000 сум");
   });
 });

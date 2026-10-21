@@ -1,0 +1,242 @@
+/* Вкладка «Блоки» (И4): карточки-сводки как блоки на сайте («Блоки и условия покупки» мокапа) и
+   карточки «Программ оплаты»; открытая карточка — поля на месте. */
+.complex-blocks {
+  display: grid;
+  gap: 14px;
+}
+
+.complex-blocks__lead,
+.complex-blocks__empty {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-blocks__cards {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-blocks__restore {
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.complex-blocks__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.complex-blocks__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.block-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+}
+
+.block-card--open {
+  border-color: var(--line-3);
+}
+
+.block-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.block-card__title {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.block-card__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.block-card__move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.block-card__move:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.block-card__move:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.block-card__chevron {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.block-card--open .block-card__chevron {
+  transform: rotate(180deg);
+}
+
+/* Полоса готовности — как «7 из 12 этажей» у блока на сайте мокапа. */
+.block-card__bar {
+  display: block;
+  overflow: hidden;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--line);
+}
+
+.block-card__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  transform-origin: left;
+}
+
+.block-card__summary {
+  margin: 0;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}
+
+/* Раскрытие: высота меняется сразу, поля проявляются (только opacity и transform, ≤ 200 мс). */
+.block-card__body {
+  display: grid;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  animation: block-card-reveal var(--dur-fast) var(--ease) both;
+}
+
+@keyframes block-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.block-card__remove {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.block-card__confirm {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.block-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.block-fields__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
+.block-fields__currency {
+  display: grid;
+  gap: 6px;
+}
+
+.block-fields__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.block-fields__includes {
+  display: grid;
+  gap: 10px;
+}
+
+.block-fields__includes summary {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.block-fields__include {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 32px;
+  align-items: end;
+  gap: 10px;
+}
+
+.block-fields__include-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 48px;
+  border: 0;
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block-card__body {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .block-card {
+    padding: 14px;
+  }
+
+  .block-fields__include {
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .block-fields__include > :first-child {
+    grid-column: 1 / -1;
+  }
+}

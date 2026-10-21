@@ -39,10 +39,10 @@ export async function processImage(file: File, kind: MediaKind): Promise<Process
     const resolutionIssue = checkResolution(decoded.size, kind);
     if (resolutionIssue) return fail(resolutionIssue);
 
-    const { maxLongSide, output } = MEDIA_KIND_RULES[kind];
+    const { maxLongSide, output, opaque } = MEDIA_KIND_RULES[kind];
     const target = fitWithin(decoded.size, maxLongSide);
     const steps = downscaleSteps(decoded.size, target);
-    const canvas = drawDownscaled(decoded.source, steps, output === "image/jpeg");
+    const canvas = drawDownscaled(decoded.source, steps, opaque);
     if (!canvas) return fail({ code: "processingFailed" });
 
     const blob = await encodeCanvas(canvas, output, JPEG_QUALITY);

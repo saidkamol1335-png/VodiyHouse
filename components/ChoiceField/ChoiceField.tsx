@@ -15,6 +15,10 @@ type ChoiceFieldProps = {
   clearLabel?: string;
   error?: string;
   onChange?: (value: string) => void;
+  /** Управляемое значение: выбор применяет родитель (например, после «Да» в подтверждении). */
+  value?: string;
+  /** sm — в строке таблицы (планировки), lg — в форме (44 px, как меню телефона). */
+  size?: "sm" | "lg";
 };
 
 /** Выбор из 2–4 значений одним тапом — сегментом, как RU | UZ в шапке («реши сам» шага 11). */
@@ -27,17 +31,36 @@ export function ChoiceField({
   clearLabel,
   error,
   onChange,
+  value: controlled,
+  size = "lg",
 }: ChoiceFieldProps) {
-  const [value, setValue] = useState(defaultValue ?? "");
+  const [inner, setInner] = useState(defaultValue ?? "");
+  const value = controlled ?? inner;
   const pick = (next: string) => {
-    setValue(next);
+    if (controlled === undefined) setInner(next);
     onChange?.(next);
   };
   return (
-    <fieldset className="field choice-field" aria-describedby={error ? `${id}-error` : undefined}>
-      <legend className="field__label">{label}</legend>
+    <div
+      className="field choice-field"
+      role="radiogroup"
+      aria-labelledby={`${id}-label`}
+      aria-describedby={error ? `${id}-error` : undefined}
+    >
+      {/* «Сбросить» — на строке подписи: сегменту нужна вся ширина (на телефоне — до 4 вариантов). */}
+      <div className="choice-field__head">
+        <span id={`${id}-label`} className="field__label">
+          {label}
+        </span>
+        {clearLabel && value ? (
+          <button type="button" className="choice-field__clear" onClick={() => pick("")}>
+            <X size={12} aria-hidden="true" />
+            {clearLabel}
+          </button>
+        ) : null}
+      </div>
       <div className="choice-field__row">
-        <div className="segmented segmented--lg choice-field__options">
+        <div className={`segmented segmented--${size} choice-field__options`}>
           {options.map((option) => (
             <label
               key={option.value}
@@ -59,16 +82,6 @@ export function ChoiceField({
             </label>
           ))}
         </div>
-        {clearLabel && value ? (
-          <button
-            type="button"
-            className="choice-field__clear"
-            aria-label={clearLabel}
-            onClick={() => pick("")}
-          >
-            <X size={14} aria-hidden="true" />
-          </button>
-        ) : null}
       </div>
       {/* Ничего не выбрано — радио не уходит в форму: пустое значение отправляем сами. */}
       {value ? null : <input type="hidden" name={name} value="" />}
@@ -77,6 +90,6 @@ export function ChoiceField({
           {error}
         </p>
       ) : null}
-    </fieldset>
+    </div>
   );
 }

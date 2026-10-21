@@ -26,17 +26,19 @@ type KindRule = {
   minLongSide: number;
   /** Больше — уменьшается в браузере. */
   maxLongSide: number;
-  /** Логотипу нужна прозрачность — PNG; у фото и чертежей её нет — JPEG легче. */
+  /** Логотипу нужна прозрачность — PNG; фото — JPEG легче; чертёж — PNG: JPEG размывает линии. */
   output: "image/jpeg" | "image/png";
+  /** Подложить белый: у JPEG нет прозрачности, чертёж — белый лист (шаг 11, «реши сам»). */
+  opaque: boolean;
 };
 
 // Логотип на сайте не шире пары сотен пикселей: 400 px хватает для экранов ×2, 1600 — с запасом.
 export const MEDIA_KIND_RULES: Record<MediaKind, KindRule> = {
-  photo: { minLongSide: 1600, maxLongSide: 3200, output: "image/jpeg" },
-  cover: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg" },
-  facade: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg" },
-  drawing: { minLongSide: 1200, maxLongSide: 3200, output: "image/jpeg" },
-  logo: { minLongSide: 400, maxLongSide: 1600, output: "image/png" },
+  photo: { minLongSide: 1600, maxLongSide: 3200, output: "image/jpeg", opaque: true },
+  cover: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg", opaque: true },
+  facade: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg", opaque: true },
+  drawing: { minLongSide: 1200, maxLongSide: 3200, output: "image/png", opaque: true },
+  logo: { minLongSide: 400, maxLongSide: 1600, output: "image/png", opaque: false },
 };
 
 export const JPEG_QUALITY = 0.9;

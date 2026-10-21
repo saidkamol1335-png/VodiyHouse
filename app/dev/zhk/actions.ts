@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
+import { parseLayouts } from "@/lib/admin/complexes/layouts";
 import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
 import { demoComplex, demoReadiness } from "@/lib/admin/complexes/demoPage";
 import { parseComplexMain } from "@/lib/admin/complexes/mainForm";
@@ -10,6 +12,7 @@ import type {
   ComplexStatusResult,
   CreateComplexResult,
   SaveComplexMainResult,
+  SaveRowsResult,
 } from "@/lib/admin/complexes/types";
 import { bilingualHasContact } from "@/lib/admin/contactGuard";
 import { readText, readUuid } from "@/lib/admin/credentials";
@@ -81,4 +84,22 @@ export async function demoSetComplexStatusAction(formData: FormData): Promise<Co
     if (missing.length > 0) return { status: "error", error: "notReady", missing };
   }
   return { status: "done", to, at: Date.now() };
+}
+
+export async function demoSaveComplexBlocksAction(formData: FormData): Promise<SaveRowsResult> {
+  devOnly();
+  const parsed = parseBlocks(formData);
+  if (parsed.ok) return { status: "saved", at: Date.now() };
+  return parsed.error
+    ? { status: "error", error: parsed.error, rowErrors: {}, broken: [] }
+    : { status: "error", error: null, rowErrors: parsed.rowErrors, broken: [] };
+}
+
+export async function demoSaveBlockLayoutsAction(formData: FormData): Promise<SaveRowsResult> {
+  devOnly();
+  const parsed = parseLayouts(formData);
+  if (parsed.ok) return { status: "saved", at: Date.now() };
+  return parsed.error
+    ? { status: "error", error: parsed.error, rowErrors: {}, broken: [] }
+    : { status: "error", error: null, rowErrors: parsed.rowErrors, broken: [] };
 }

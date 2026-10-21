@@ -1,9 +1,13 @@
 /* Выбор из 2–4 значений: большой сегмент мокапа (меню телефона) во всю ширину поля. */
 .choice-field {
   min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
+}
+
+.choice-field__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .choice-field__row {
@@ -37,17 +41,18 @@
   outline-offset: 1px;
 }
 
+/* «Сбросить» — справа на строке подписи. */
 .choice-field__clear {
   display: inline-flex;
-  flex: none;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
+  gap: 4px;
+  padding: 2px 4px;
+  border: 0;
   background: none;
   color: var(--fg-3);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease);
 }
@@ -56,10 +61,18 @@
   color: var(--fg);
 }
 
-/* Телефон: четыре класса ЖК в одну строку — плотнее (Эконом · Комфорт · Бизнес · Премиум). */
+/* Телефон: варианты плотнее (Эконом · Комфорт · Бизнес · Премиум), длинная подпись
+   («После сдачи») переносится на вторую строку, а не обрезается. */
 @media (max-width: 760px) {
-  .choice-field__row .choice-field__option {
-    padding: 0 6px;
+  /* Ширина — по подписи, и не уже самого длинного слова: «Оформляется» не режется. */
+  /* Три класса: segmented--lg из Segmented.css грузится позже и иначе перебил бы отступы. */
+  .choice-field__row .choice-field__options .choice-field__option {
+    flex: 1 1 auto;
+    min-width: min-content;
+    padding: 4px;
     font-size: var(--fs-small);
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
   }
 }

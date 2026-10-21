@@ -59,11 +59,13 @@ describe("правила фото · разрешение (PLAN 3а)", () => {
     expect(canBeComplexCover({ width: 1600, height: 2400 })).toBe(true);
   });
 
-  it("предел уменьшения не меньше порога, логотип — PNG, остальное — JPEG", () => {
+  it("предел уменьшения не меньше порога; логотип и чертёж — PNG, фото — JPEG; прозрачен только логотип", () => {
     for (const kind of MEDIA_KINDS) {
       const rule = MEDIA_KIND_RULES[kind];
       expect(rule.maxLongSide).toBeGreaterThanOrEqual(rule.minLongSide);
-      expect(rule.output).toBe(kind === "logo" ? "image/png" : "image/jpeg");
+      expect(rule.output).toBe(kind === "logo" || kind === "drawing" ? "image/png" : "image/jpeg");
+      // Чертёж — белый лист: подписи площадей не теряются на тёмном фоне сайта.
+      expect(rule.opaque).toBe(kind !== "logo");
     }
   });
 

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { collectPageErrors } from "./helpers";
+import { collectPageErrors, imageFile } from "./helpers";
 
 // Шаг 11 фазы 1: «ЖК» на служебном стенде (/dev/zhk, DEMO мокапа) — список (в. 5), создание,
 // статус и готовность (И8, И9), вкладки «Основное», «Блоки», «Планировки», «Фото» (И1–И6).
@@ -212,7 +212,7 @@ test.describe("кабинет · ЖК · страница", () => {
     await page.goto(SHODLIK);
     await page.getByLabel("Координаты или ссылка на карту").fill("71.7843, 40.3842");
     await expect(page.getByText(/широта и долгота перепутаны/)).toBeVisible();
-    const classes = page.getByRole("group", { name: "Класс" });
+    const classes = page.getByRole("radiogroup", { name: "Класс" });
     await expect(classes.getByRole("radio", { name: "Комфорт" })).toBeChecked();
     await classes.getByRole("button", { name: "Сбросить" }).click();
     await expect(classes.getByRole("radio", { checked: true })).toHaveCount(0);
@@ -238,6 +238,138 @@ test.describe("кабинет · ЖК · страница", () => {
 
   test("страница не шире экрана", async ({ page }) => {
     for (const url of [SHODLIK, GULZOR]) {
+      await page.goto(url);
+      await page.waitForLoadState("networkidle");
+      expect(await noHorizontalScroll(page), url).toBe(0);
+    }
+  });
+});
+
+const NAMUNA = complexUrl(2);
+const cardOf = (page: Page, name: string) =>
+  page.getByTestId("block-card").filter({ has: page.getByText(name, { exact: true }) });
+
+test.describe("кабинет · ЖК · блоки и планировки", () => {
+  let errors: string[];
+
+  test.beforeEach(({ page }) => {
+    errors = collectPageErrors(page);
+  });
+
+  test.afterEach(() => {
+    expect(errors).toEqual([]);
+  });
+
+  test("«Блоки» (И4): карточки-сводки как на сайте, порядок стрелками", async ({ page }) => {
+    await page.goto(`${SHODLIK}/bloki`);
+    const cards = page.getByTestId("block-card");
+    await expect(cards).toHaveCount(2);
+    await expect(cardOf(page, "Блок A").locator(".block-card__summary")).toHaveText(
+      "Сдан · 3 кв. 2025 · Черновая · 12 эт. · USD",
+    );
+    const b = cardOf(page, "Блок B");
+    await expect(b).toContainText("Строится · 58 %");
+    await expect(b.locator(".block-card__summary")).toHaveText(
+      "4 кв. 2027 · White box · 7 из 12 эт. · USD",
+    );
+    await page.getByRole("button", { name: "Ниже: Блок A" }).click();
+    await expect(cards.first()).toContainText("Блок B");
+  });
+
+  test("блок со списком квартир не удаляется; сданному не нужны «построено» и %", async ({
+    page,
+  }) => {
+    await page.goto(`${SHODLIK}/bloki`);
+    const a = cardOf(page, "Блок A");
+    await a.getByRole("button", { name: "Изменить" }).click();
+    await expect(a).toContainText("У блока список из 88 квартир");
+    await expect(a.getByRole("button", { name: "Удалить блок" })).toHaveCount(0);
+    await expect(a.getByLabel("Построено этажей")).toHaveCount(0);
+    await a.getByRole("radio", { name: "Строится" }).check({ force: true });
+    await expect(a.getByLabel("Построено этажей")).toBeVisible();
+  });
+
+  test("новый блок: без названия и этажности — ошибки в карточке, потом «Сохранено»", async ({
+    page,
+  }) => {
+    await page.goto(`${SHODLIK}/bloki`);
+    await page.getByRole("button", { name: "Добавить блок" }).click();
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    // Заголовок карточки меняется вместе с названием — берём последнюю карточку.
+    const card = page.getByTestId("block-card").last();
+    await expect(card).toContainText("Новый блок");
+    await expect(card).toContainText("Нужно название — A, B или 1");
+    await expect(card).toContainText("Нужна этажность");
+    await card.getByLabel("Название").fill("C");
+    await card.getByLabel("Этажей всего").fill("9");
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    await expect(formStatus(page, "Сохранено")).toBeVisible();
+  });
+
+  test("смена валюты при ценах планировок — с подтверждением", async ({ page }) => {
+    await page.goto(`${NAMUNA}/bloki`);
+    const card = cardOf(page, "Блок 1");
+    await card.getByRole("button", { name: "Изменить" }).click();
+    // Выбор применяется только после «Да»: радио управляемое, поэтому клик, а не check.
+    await card.getByText("сум", { exact: true }).click();
+    await expect(card).toContainText("У 2 планировок цены в старой валюте");
+    await expect(card.locator(".block-card__summary")).toContainText("USD");
+    await card.getByRole("button", { name: "Да, сменить" }).click();
+    await expect(card.locator(".block-card__summary")).toContainText("сум");
+  });
+
+  test("«Планировки» (И5): переключатель блоков; у блока с квартирами цена — из квартир", async ({
+    page,
+  }) => {
+    await page.goto(`${SHODLIK}/planirovki`);
+    const rows = page.getByTestId("layout-row");
+    await expect(rows).toHaveCount(4);
+    await expect(rows.first()).toContainText("от $31 000 · свободно 2");
+    await expect(rows.first()).toContainText("нет чертежа — на сайте не покажется");
+    await expect(rows.first().getByRole("button", { name: "Удалить планировку" })).toBeDisabled();
+    await page
+      .getByRole("group", { name: "Блок" })
+      .getByRole("button", { name: /Блок B/ })
+      .click();
+    await expect(rows.first()).toContainText("от $31 060 · свободно 8");
+  });
+
+  test("чертёж в опубликованный ЖК — только с отметкой 1.2; маленький — понятная ошибка", async ({
+    page,
+  }) => {
+    await page.goto(`${SHODLIK}/planirovki`);
+    const row = page.getByTestId("layout-row").first();
+    const input = row.locator('input[type="file"]');
+    await expect(input).toBeDisabled();
+    await page.getByRole("checkbox", { name: /Правило 1.2/ }).check();
+    await input.setInputFiles(
+      await imageFile(page, { width: 800, height: 600, type: "image/png" }),
+    );
+    await expect(row).toContainText("Слишком маленькое");
+    await input.setInputFiles(
+      await imageFile(page, { width: 1600, height: 1200, type: "image/png" }),
+    );
+    await expect(row.getByRole("button", { name: "Открыть чертёж крупно" })).toBeVisible();
+    await expect(row).not.toContainText("нет чертежа");
+    await row.getByRole("button", { name: "Открыть чертёж крупно" }).click();
+    await expect(page.getByRole("dialog", { name: "Чертёж планировки" })).toBeVisible();
+  });
+
+  test("блок без квартир: своя цена; пустая строка — ошибки; «Дублировать»", async ({ page }) => {
+    await page.goto(`${NAMUNA}/planirovki`);
+    const rows = page.getByTestId("layout-row");
+    await expect(rows).toHaveCount(7);
+    await expect(rows.first().getByLabel("Цена от, $")).toHaveValue("33000");
+    await rows.first().getByRole("button", { name: "Дублировать планировку" }).click();
+    await expect(rows).toHaveCount(8);
+    await page.getByRole("button", { name: "Добавить планировку" }).click();
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    await expect(rows.last()).toContainText("Выберите комнаты");
+    await expect(rows.last()).toContainText("Нужна площадь");
+  });
+
+  test("вкладки не шире экрана", async ({ page }) => {
+    for (const url of [`${SHODLIK}/bloki`, `${SHODLIK}/planirovki`, `${NAMUNA}/planirovki`]) {
       await page.goto(url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);

@@ -1,0 +1,185 @@
+/* Вкладка «Планировки» (И5): переключатель блоков, как на сайте (MobJkPlans мокапа), и строки Д5
+   с плиткой чертежа 64×44 — как «Мои отчёты» видеографа; на телефоне — карточка на строку. */
+.complex-layouts {
+  display: grid;
+  gap: 14px;
+}
+
+/* Ширина — по блокам: segmented--lg (Segmented.css грузится позже) иначе растянул бы на всю. */
+.complex-layouts .complex-layouts__switch {
+  justify-self: start;
+  width: auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.complex-layouts__count {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+
+.complex-layouts__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-layouts__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-layouts__empty p {
+  margin: 0;
+}
+
+.complex-layouts__empty a {
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+.complex-layouts__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-layouts__rows > li + li {
+  border-top: 1px dashed var(--line);
+}
+
+.complex-layouts__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.complex-layouts__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Строка: чертёж · комнаты · площадь · цена и «доступна» · плашки и действия. */
+.layout-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1fr) 220px;
+  align-items: start;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+/* Плитка — на уровне полей, под строкой подписей. */
+.layout-row__drawing {
+  padding-top: 26px;
+}
+
+.layout-row__price {
+  display: grid;
+  gap: 6px;
+}
+
+.layout-row__available {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.layout-row__available input {
+  accent-color: var(--amber);
+}
+
+.layout-row__offer {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.layout-row__end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 48px;
+  margin-top: 23px;
+}
+
+.layout-row__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-right: auto;
+}
+
+.layout-row__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.layout-row__icon:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.layout-row__icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.layout-row__issue {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1100px) {
+  .layout-row {
+    grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .layout-row__end {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .layout-row {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  /* Телефон: плитка чертежа и комнаты — первой строкой, остальное — на всю ширину. */
+  .layout-row > .field:not(.choice-field),
+  .layout-row__price,
+  .layout-row__offer,
+  .layout-row__end {
+    grid-column: 1 / -1;
+  }
+
+  .layout-row__end {
+    margin-top: 0;
+  }
+}

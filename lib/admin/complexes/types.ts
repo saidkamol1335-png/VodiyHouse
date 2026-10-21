@@ -34,3 +34,20 @@ export type ComplexStatusResult = StatusResult<ComplexRequirement>;
 
 /** Превью файла в панели публикации (правило 1.2): фото галереи и чертежи. */
 export type ComplexFilePreview = { id: string; src: string; kind: "photo" | "drawing" };
+
+/** Вкладки со строками («Блоки», «Планировки»): ошибки по строке (key) и что нарушила бы правка. */
+export type SaveRowsResult =
+  | { status: "idle" }
+  | { status: "saved"; at: number }
+  | {
+      status: "error";
+      error: ContentErrorCode | null;
+      /** Ошибки по строке (key): поле → код из messages вкладки. */
+      rowErrors: Record<string, Partial<Record<string, string>>>;
+      broken: ComplexRequirement[];
+    };
+
+/** Файлы ЖК (фото, чертежи): id — новой строки media_assets или того, что поменяли. */
+export type ComplexMediaResult =
+  | { status: "done"; id: string }
+  | { status: "error"; error: ContentErrorCode; broken: ComplexRequirement[] };

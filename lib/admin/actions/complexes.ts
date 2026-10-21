@@ -3,7 +3,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
+import { parseLayouts } from "@/lib/admin/complexes/layouts";
 import { complexMainRow, parseComplexMain } from "@/lib/admin/complexes/mainForm";
 import {
   missingOf,
@@ -16,6 +18,7 @@ import type {
   ComplexStatusResult,
   CreateComplexResult,
   SaveComplexMainResult,
+  SaveRowsResult,
 } from "@/lib/admin/complexes/types";
 import { bilingualHasContact } from "@/lib/admin/contactGuard";
 import { readText, readUuid } from "@/lib/admin/credentials";
@@ -24,6 +27,7 @@ import { archiveConfirmed, canMove } from "@/lib/admin/developers/publication";
 import { isPublicationStatus } from "@/lib/admin/publicationFilter";
 import type { PublicationStatus } from "@/lib/admin/publication";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import { removeMediaFiles } from "@/lib/admin/server/mediaFiles";
 import { requireActionViewer } from "@/lib/admin/session";
 import { contentSlug } from "@/lib/slug";
 
@@ -155,4 +159,59 @@ export async function setComplexStatusAction(formData: FormData): Promise<Comple
   if (error) return statusError(contentDbErrorCode(error), brokenOf(error));
   refresh();
   return { status: "done", to, at: Date.now() };
+}
+
+/** «Сохранить вкладку» на «Блоках» (И4): все карточки одним вызовом базы. */
+export async function saveComplexBlocksAction(formData: FormData): Promise<SaveRowsResult> {
+  const guard = await headGuard();
+  const fail = (
+    error: ContentErrorCode | null,
+    extra: Partial<SaveRowsResult> = {},
+  ): SaveRowsResult =>
+    ({
+      status: "error",
+      error,
+      rowErrors: {},
+      broken: [],
+      ...extra,
+    }) as SaveRowsResult;
+  if (!guard.ok) return fail(guard.code);
+  const id = readUuid(formData);
+  if (!id) return fail("notFound");
+  const parsed = parseBlocks(formData);
+  if (!parsed.ok)
+    return parsed.error ? fail(parsed.error) : fail(null, { rowErrors: parsed.rowErrors });
+
+  const { error } = await guard.supabase.rpc("save_complex_blocks", {
+    p_complex: id,
+    p_blocks: parsed.payload,
+  });
+  if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
+  refresh();
+  return { status: "saved", at: Date.now() };
+}
+
+/** «Сохранить вкладку» на «Планировках» (И5): планировки одного блока одним вызовом базы. */
+export async function saveBlockLayoutsAction(formData: FormData): Promise<SaveRowsResult> {
+  const guard = await headGuard();
+  const fail = (
+    error: ContentErrorCode | null,
+    extra: Partial<SaveRowsResult> = {},
+  ): SaveRowsResult =>
+    ({ status: "error", error, rowErrors: {}, broken: [], ...extra }) as SaveRowsResult;
+  if (!guard.ok) return fail(guard.code);
+  const block = readUuid(formData, "block");
+  if (!block) return fail("notFound");
+  const parsed = parseLayouts(formData);
+  if (!parsed.ok)
+    return parsed.error ? fail(parsed.error) : fail(null, { rowErrors: parsed.rowErrors });
+
+  const { data, error } = await guard.supabase.rpc("save_block_layouts", {
+    p_block: block,
+    p_layouts: parsed.payload,
+  });
+  if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
+  await removeMediaFiles(guard.supabase, data);
+  refresh();
+  return { status: "saved", at: Date.now() };
 }
