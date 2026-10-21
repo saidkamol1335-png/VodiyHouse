@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/Button";
@@ -15,6 +14,8 @@ import type {
   UnitsAction,
   UnitsLayout,
 } from "@/lib/admin/units/types";
+import { unitsFailure } from "@/lib/admin/units/errors";
+import { settle } from "@/lib/ui/settle";
 import { uncoveredSlots, validateRisers, type Riser } from "@/lib/units";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 
@@ -23,13 +24,15 @@ type UnitsRisersProps = {
   ready: ReadyBlockView;
   layouts: readonly UnitsLayout[];
   action: UnitsAction<SaveRisersInput, SaveRisersResult>;
+  /** После сохранения: список перечитывается — стояки собираются из него (12.4). */
+  onSaved: () => Promise<boolean>;
 };
 
 /** Стояки готового блока (Н5, Н6): свёрнуты над списком; правка меняет планировку квартир. */
-export function UnitsRisers({ blockId, ready, layouts, action }: UnitsRisersProps) {
+export function UnitsRisers({ blockId, ready, layouts, action, onSaved }: UnitsRisersProps) {
   const t = useTranslations("admin.complexes.units.risers");
   const [open, setOpen] = useState(false);
-  const draft = useRisersDraft(blockId, ready, action);
+  const draft = useRisersDraft(blockId, ready, action, onSaved);
   const bodyId = `${blockId}-risers`;
   return (
     <section className={open ? "units-risers units-risers--open" : "units-risers"}>
@@ -76,6 +79,8 @@ export function UnitsRisers({ blockId, ready, layouts, action }: UnitsRisersProp
 }
 
 type Draft = { base: readonly Riser[]; risers: Riser[] };
+/** Сохранённые стояки — пока список не перечитан (against — стояки списка на момент сохранения). */
+type Saved = { risers: readonly Riser[]; against: ReadyBlockView };
 
 /**
  * Правка по снимку («Решения 12.2»): base — стояки, от которых начали, сервер меняет только
@@ -85,16 +90,17 @@ function useRisersDraft(
   blockId: string,
   ready: ReadyBlockView,
   action: UnitsAction<SaveRisersInput, SaveRisersResult>,
+  onSaved: () => Promise<boolean>,
 ) {
   const t = useTranslations("admin.complexes.units.risers");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [result, setResult] = useState<SaveRisersResult | null>(null);
   const [pending, startTransition] = useTransition();
   const guard = useUnsavedGuard(t("unsaved"));
-  const router = useRouter();
-  const shown = draft?.risers ?? ready.risers;
+  const { current, markSaved } = useSavedRisers(ready);
+  const shown = draft?.risers ?? current;
   const edit = (risers: Riser[]) => {
-    setDraft({ base: draft?.base ?? ready.risers, risers });
+    setDraft({ base: draft?.base ?? current, risers });
     setResult(null);
     guard.onInput();
   };
@@ -106,18 +112,31 @@ function useRisersDraft(
   const save = () => {
     if (!draft) return;
     startTransition(async () => {
-      const next = await action({ blockId, base: draft.base, risers: draft.risers });
+      const input = { blockId, base: draft.base, risers: draft.risers };
+      const next = await settle(() => action(input), unitsFailure("network"));
       setResult(next);
       if (next.status !== "done") return;
+      markSaved(draft.risers);
       setDraft(null);
       guard.reset();
-      // Всё пропущено — действие не сбросило кэш, а снимок устарел: стояки читаются заново.
-      if (next.skipped.length > 0) router.refresh();
+      // Не ждём внутри перехода: иначе навигация кабинета стояла бы, пока читаются 5000 строк.
+      void onSaved();
     });
   };
   const valid = validateRisers(ready.plan, shown).length === 0;
   const uncovered = uncoveredSlots(ready.plan, shown);
   return { shown, dirty: draft !== null, valid, uncovered, result, pending, edit, reset, save };
+}
+
+/**
+ * Пока список не перечитан (или чтение не удалось), правда — сохранённое, а не прежний список:
+ * иначе мелькнули бы прежние стояки, а новая правка ушла бы со старым снимком.
+ */
+function useSavedRisers(ready: ReadyBlockView) {
+  const [saved, setSaved] = useState<Saved | null>(null);
+  const current = saved && saved.against === ready ? saved.risers : ready.risers;
+  const markSaved = (risers: readonly Riser[]) => setSaved({ risers, against: ready });
+  return { current, markSaved };
 }
 
 function RisersFeedback({ result }: { result: SaveRisersResult | null }) {

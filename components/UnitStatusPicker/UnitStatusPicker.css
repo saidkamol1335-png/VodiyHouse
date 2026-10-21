@@ -1,0 +1,81 @@
+/* Выбор статуса квартиры: три чипа с точкой цвета статуса (как плашки Badge: ok · amber · bad);
+   выбранный — заливка своего цвета. На телефоне — по 44 px, чтобы попасть пальцем. */
+.unit-status-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.unit-status-picker__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.unit-status-picker__option:hover {
+  border-color: var(--line-3);
+  color: var(--fg);
+}
+
+.unit-status-picker__option:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.unit-status-picker__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+}
+
+.unit-status-picker__option--free .unit-status-picker__dot {
+  color: var(--badge-ok-fg);
+}
+
+.unit-status-picker__option--reserved .unit-status-picker__dot {
+  color: var(--badge-amber-fg);
+}
+
+.unit-status-picker__option--sold .unit-status-picker__dot {
+  color: var(--badge-bad-fg);
+}
+
+.unit-status-picker__option--free[aria-pressed="true"] {
+  border-color: var(--badge-ok-border);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+}
+
+.unit-status-picker__option--reserved[aria-pressed="true"] {
+  border-color: var(--badge-amber-border);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.unit-status-picker__option--sold[aria-pressed="true"] {
+  border-color: var(--badge-bad-border);
+  background: var(--bad-soft);
+  color: var(--badge-bad-fg);
+}
+
+@media (max-width: 760px) {
+  .unit-status-picker__option {
+    height: 44px;
+    padding: 0 16px;
+    font-size: var(--fs-control);
+  }
+}

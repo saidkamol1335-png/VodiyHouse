@@ -49,6 +49,10 @@ describe("квартира из базы", () => {
     });
   });
 
+  it("время правки, которое не разобрать, — исключение (иначе «обновлено …» уронило бы список)", () => {
+    expect(() => parseUnitRecord({ ...ROW, updated_at: "вчера" })).toThrow();
+  });
+
   it("чужая форма — исключение, а не пустой список", () => {
     expect(() => parseUnitRecords({})).toThrow();
     expect(() => parseUnitRecord({ ...ROW, status: "booked" })).toThrow();

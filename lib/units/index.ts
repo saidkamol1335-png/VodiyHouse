@@ -12,6 +12,8 @@ export {
   summarizeBlockPlan,
   validateBlockPlan,
 } from "./blockPlan";
+export type { UnitStamp } from "./edit";
+export { reuseUnchanged, withStatuses } from "./edit";
 export type {
   RoomsByLayout,
   UnitFilter,
@@ -21,8 +23,10 @@ export type {
 } from "./list";
 export {
   EMPTY_UNIT_FILTER,
+  activeFilterCount,
   countUnitStatuses,
   filterUnits,
+  shownFilterOptions,
   sortUnitsByNumber,
   unitFilterOptions,
 } from "./list";

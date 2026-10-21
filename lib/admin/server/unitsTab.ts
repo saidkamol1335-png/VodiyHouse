@@ -1,12 +1,11 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { parseUnitRecords, type UnitRecord } from "@/lib/units";
 import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "../units/types";
 import { readDictionary } from "./developers";
 
-// Вкладка «Квартиры» (шаг 12) сессией сотрудника: блоки ЖК, планировки и квартиры выбранного
-// блока, отделки. Квартиры — block_unit_rows одним значением: обычный select PostgREST молча
-// обрезается на 1000 строках, а в блоке до 5000 квартир. Ошибка — исключение (error.tsx).
+// Вкладка «Квартиры» (шаг 12) сессией сотрудника: блоки ЖК, планировки выбранного блока,
+// отделки. Квартир здесь нет: их читает экран (readBlockUnitsAction) — страница перерисовывается
+// на каждый тап статуса, а в блоке до 5000 строк («Решения 12.4»). Ошибка — исключение (error.tsx).
 
 function unavailable(what: string, cause: unknown): never {
   throw new Error(`${what}-unavailable`, { cause });
@@ -17,7 +16,6 @@ export type UnitsTab = {
   /** null — у ЖК нет блоков. */
   block: UnitsBlock | null;
   layouts: UnitsLayout[];
-  units: UnitRecord[];
   finishings: UnitsFinishing[];
 };
 
@@ -46,16 +44,6 @@ const blockOf = (row: BlockRow): UnitsBlock => ({
   currency: row.currency === "UZS" ? "UZS" : "USD",
   unitCount: row.units[0]?.count ?? 0,
 });
-
-/** Квартиры блока по порядку номеров; чужой или несуществующий блок — пусто. */
-export async function readBlockUnits(
-  supabase: SupabaseClient,
-  blockId: string,
-): Promise<UnitRecord[]> {
-  const { data, error } = await supabase.rpc("block_unit_rows", { p_block: blockId });
-  if (error) unavailable("block-units", error);
-  return parseUnitRecords(data ?? []);
-}
 
 async function readLayouts(supabase: SupabaseClient, blockId: string): Promise<UnitsLayout[]> {
   const { data, error } = await supabase
@@ -91,14 +79,11 @@ export async function readUnitsTab(
   if (blocks.error) unavailable("units-blocks", blocks.error);
   const all = ((blocks.data ?? []) as unknown as BlockRow[]).map(blockOf);
   const block = all.find((item) => item.id === blockId) ?? all[0] ?? null;
-  const [layouts, units] = block
-    ? await Promise.all([readLayouts(supabase, block.id), readBlockUnits(supabase, block.id)])
-    : [[], []];
+  const layouts = block ? await readLayouts(supabase, block.id) : [];
   return {
     blocks: all,
     block,
     layouts,
-    units,
     finishings: finishings.map((item) => ({
       id: item.id,
       name: item.name.ru,

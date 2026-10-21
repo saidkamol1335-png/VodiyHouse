@@ -2,9 +2,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AdminPanel } from "@/components/AdminPanel";
 import { UnitsBlockSwitch } from "@/components/UnitsBlockSwitch";
+import { UnitsBlockView } from "@/components/UnitsBlockView";
 import { UnitsGenerator } from "@/components/UnitsGenerator";
-import { UnitsCreatedNotice, UnitsNoticeProvider } from "@/components/UnitsNotice";
-import { UnitsRisers } from "@/components/UnitsRisers";
+import { UnitsNoticeProvider } from "@/components/UnitsNotice";
+import { UnitsBarProvider } from "@/components/UnitsUndoBar";
 import type {
   CreateBlockUnitsInput,
   CreateBlockUnitsResult,
@@ -12,6 +13,7 @@ import type {
   SaveRisersResult,
   UnitsAction,
   UnitsBlock,
+  UnitsListActions,
   UnitsTabView,
 } from "@/lib/admin/units/types";
 
@@ -24,30 +26,43 @@ export type ComplexUnitsTabProps = {
   published: boolean;
   createAction: UnitsAction<CreateBlockUnitsInput, CreateBlockUnitsResult>;
   saveRisersAction: UnitsAction<SaveRisersInput, SaveRisersResult>;
+  /** Чтение списка и статус; без status — список только для просмотра. */
+  listActions: UnitsListActions;
+  /** Имя сотрудника — «только что · имя» у сменённой строки. */
+  viewerName: string | null;
+  /** Запрос адреса, который переключатель блоков сохраняет (стенд: ?demo=…). */
+  switchQuery?: string | null;
 };
 
-/** Вкладка «Квартиры» (Н6): блок без списка — генератор на месте списка, со списком — стояки. */
+/** Вкладка «Квартиры» (Н6): блок без списка — генератор на месте списка, со списком — стояки и список. */
 export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
   const t = useTranslations("admin.complexes.units");
   const { view, tabHref, blocksHref } = props;
   return (
     <AdminPanel title={t("title")} wide>
       <UnitsNoticeProvider>
-        <div className="complex-units">
-          <p className="complex-units__lead">{t("lead")}</p>
-          {view.block === null ? (
-            <p className="complex-units__note">
-              {t("empty")} <Link href={blocksHref}>{t("toBlocks")}</Link>
-            </p>
-          ) : (
-            <>
-              {view.blocks.length > 1 ? (
-                <UnitsBlockSwitch blocks={view.blocks} current={view.block.id} href={tabHref} />
-              ) : null}
-              <BlockUnits {...props} block={view.block} />
-            </>
-          )}
-        </div>
+        <UnitsBarProvider>
+          <div className="complex-units">
+            <p className="complex-units__lead">{t("lead")}</p>
+            {view.block === null ? (
+              <p className="complex-units__note">
+                {t("empty")} <Link href={blocksHref}>{t("toBlocks")}</Link>
+              </p>
+            ) : (
+              <>
+                {view.blocks.length > 1 ? (
+                  <UnitsBlockSwitch
+                    blocks={view.blocks}
+                    current={view.block.id}
+                    href={tabHref}
+                    query={props.switchQuery}
+                  />
+                ) : null}
+                <BlockUnits {...props} block={view.block} />
+              </>
+            )}
+          </div>
+        </UnitsBarProvider>
       </UnitsNoticeProvider>
     </AdminPanel>
   );
@@ -56,22 +71,18 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
 function BlockUnits({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlock }) {
   const t = useTranslations("admin.complexes.units");
   const { view } = props;
-  if (view.ready) {
+  // Список страница не несёт: есть ли он — по числу квартир блока (12.4).
+  if (block.unitCount > 0) {
     return (
-      <>
-        <p className="complex-units__listed">
-          <b>{t("blockName", { name: block.name })}</b> · {t("listed", { count: view.ready.count })}
-        </p>
-        <UnitsCreatedNotice blockId={block.id} />
-        <UnitsRisers
-          key={block.id}
-          blockId={block.id}
-          ready={view.ready}
-          layouts={view.layouts}
-          action={props.saveRisersAction}
-        />
-        <p className="complex-units__note">{t("listSoon")}</p>
-      </>
+      <UnitsBlockView
+        key={block.id}
+        block={block}
+        layouts={view.layouts}
+        finishings={view.finishings}
+        actions={props.listActions}
+        saveRisersAction={props.saveRisersAction}
+        viewerName={props.viewerName}
+      />
     );
   }
   if (block.floorsTotal === null) {

@@ -2,7 +2,7 @@
 // комнаты чипами, этаж «от — до», поиск по номеру («Решаю сам» шага 12). Чистые функции: экран
 // фильтрует весь блок (до 5000 квартир) в браузере, «Выбрать все N» берёт отфильтрованное.
 
-import { compareUnitNumbers, unitNumberMatches } from "./number";
+import { compareUnitNumbers, foldUnitNumber } from "./number";
 import type { UnitRecord } from "./record";
 import { ROOM_GROUPS, roomGroupOf, type RoomGroup } from "./rooms";
 import type { UnitStatus } from "./status";
@@ -38,25 +38,44 @@ function roomFilterOf(unit: UnitRecord, roomsByLayout: RoomsByLayout): UnitRoomF
   return rooms === undefined ? "none" : roomGroupOf(rooms);
 }
 
-function matchesExceptStatus(unit: UnitRecord, filter: UnitFilter, roomsByLayout: RoomsByLayout) {
-  return (
+/** Все фильтры, кроме статуса; запрос сворачивается один раз на список, а не на квартиру. */
+function exceptStatus(filter: UnitFilter, roomsByLayout: RoomsByLayout) {
+  const wanted = foldUnitNumber(filter.query);
+  return (unit: UnitRecord) =>
     (filter.entrances.length === 0 || filter.entrances.includes(unit.entrance)) &&
     (filter.rooms.length === 0 || filter.rooms.includes(roomFilterOf(unit, roomsByLayout))) &&
     (filter.floorFrom === null || unit.floor >= filter.floorFrom) &&
     (filter.floorTo === null || unit.floor <= filter.floorTo) &&
-    unitNumberMatches(unit.number, filter.query)
-  );
+    (wanted === "" || foldUnitNumber(unit.number).includes(wanted));
 }
 
+const NO_IDS: ReadonlySet<string> = new Set();
+
+/**
+ * keep — квартиры, которым только что сменили статус: остаются в списке до смены фильтра, хотя
+ * статус уже не тот («Свободны» → тап «бронь» — строка не пропадает из-под пальца).
+ */
 export function filterUnits(
   units: readonly UnitRecord[],
   filter: UnitFilter,
   roomsByLayout: RoomsByLayout,
+  keep: ReadonlySet<string> = NO_IDS,
 ): UnitRecord[] {
+  const matches = exceptStatus(filter, roomsByLayout);
   return units.filter(
     (unit) =>
-      (filter.status === null || unit.status === filter.status) &&
-      matchesExceptStatus(unit, filter, roomsByLayout),
+      (filter.status === null || unit.status === filter.status || keep.has(unit.id)) &&
+      matches(unit),
+  );
+}
+
+/** Сколько фильтров, кроме статуса, включено — число на кнопке «Фильтры · N» (390). */
+export function activeFilterCount(filter: UnitFilter): number {
+  return (
+    filter.entrances.length +
+    filter.rooms.length +
+    (filter.floorFrom !== null || filter.floorTo !== null ? 1 : 0) +
+    (filter.query.trim() === "" ? 0 : 1)
   );
 }
 
@@ -69,8 +88,9 @@ export function countUnitStatuses(
   roomsByLayout: RoomsByLayout,
 ): UnitStatusCounts {
   const counts: UnitStatusCounts = { all: 0, free: 0, reserved: 0, sold: 0 };
+  const matches = exceptStatus(filter, roomsByLayout);
   for (const unit of units) {
-    if (!matchesExceptStatus(unit, filter, roomsByLayout)) continue;
+    if (!matches(unit)) continue;
     counts.all += 1;
     counts[unit.status] += 1;
   }
@@ -108,4 +128,21 @@ export function unitFilterOptions(
 
 export function sortUnitsByNumber(units: readonly UnitRecord[]): UnitRecord[] {
   return [...units].sort((a, b) => compareUnitNumbers(a.number, b.number));
+}
+
+/**
+ * Чипы на экране: что есть в блоке и что уже включено. Включённое значение могло пропасть из
+ * блока (квартирам назначили планировку — «без пл.» исчезло): его чип остаётся, чтобы его можно
+ * было снять, а не искать «Сбросить».
+ */
+export function shownFilterOptions(
+  options: UnitFilterOptions,
+  filter: UnitFilter,
+): Pick<UnitFilterOptions, "entrances" | "rooms"> {
+  const entrances = [...new Set([...options.entrances, ...filter.entrances])].sort((a, b) => a - b);
+  const rooms = new Set<UnitRoomFilter>([...options.rooms, ...filter.rooms]);
+  return {
+    entrances,
+    rooms: [...ROOM_GROUPS, "none" as const].filter((group) => rooms.has(group)),
+  };
 }

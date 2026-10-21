@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useUnitsNotice } from "@/components/UnitsNotice";
+import { unitsFailure } from "@/lib/admin/units/errors";
 import {
   generatorDefaults,
   generatorIssues,
@@ -15,6 +16,7 @@ import type {
   CreateBlockUnitsResult,
   UnitsAction,
 } from "@/lib/admin/units/types";
+import { settle } from "@/lib/ui/settle";
 import {
   defaultRisers,
   fitRisersToPlan,
@@ -73,7 +75,8 @@ export function useGenerator({ blockId, floors, action }: GeneratorOptions) {
   };
   const create = () =>
     startTransition(async () => {
-      const next = await action({ blockId, plan, risers: draft.risers });
+      const input = { blockId, plan, risers: draft.risers };
+      const next = await settle(() => action(input), unitsFailure("network"));
       setResult(next);
       if (next.status !== "done") return;
       guard.reset();

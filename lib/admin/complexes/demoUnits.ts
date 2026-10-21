@@ -1,18 +1,16 @@
-import {
-  applyRisers,
-  defaultRisers,
-  generateUnits,
-  type BlockPlan,
-  type UnitRecord,
-} from "@/lib/units";
-import type { UnitsBlock, UnitsLayout } from "../units/types";
+import type { BlockPlan, UnitRecord } from "@/lib/units";
+import { SEED_DICTIONARIES } from "../dictionaries/seed";
+import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "../units/types";
 import { DEMO_COMPLEX_ROWS } from "./demo";
 import { demoBlocks } from "./demoBlocks";
 import { demoLayouts } from "./demoLayouts";
+import { demoPlanUnits } from "./demoUnitsPlan";
+import { applyDemoUnitsScenario, type DemoUnitsScenario } from "./demoUnitsScenarios";
 
 // Квартиры DEMO для стенда /dev/zhk/<id>/kvartiry — как supabase/demo/seed.sql: Shodlik A и B —
-// 2 подъезда × эт. 2–12 × 4, позиция i — i-я планировка блока; цена — формула мокапа (площадь ×
-// $700 × поправка за этаж, до $10). Свободных — как «41 в продаже · Бл. A: 12 · Бл. B: 29».
+// 2 подъезда × эт. 2–12 × 4, позиция i — i-я планировка блока. Свободных — как «41 в продаже ·
+// Бл. A: 12 · Бл. B: 29».
+// Сценарии стенда (?demo=…: разнообразие, 5000 квартир) — demoUnitsScenarios.ts.
 
 const PLAN: BlockPlan = {
   entrances: 2,
@@ -21,60 +19,11 @@ const PLAN: BlockPlan = {
   unitsPerFloor: [4, 4],
   startNumber: 1,
 };
-const PRICE_PER_M2 = 700;
 const FREE: Record<string, number> = { A: 12, B: 29 };
 const RESERVED = 2;
 
-const unitId = (blockId: string, n: number) =>
-  `${n.toString(16).padStart(8, "0")}-0000-4000-8000-${blockId.slice(-12)}`;
-
-/** Порядок «свободна → бронь → продана» по хешу номера: свободные разбросаны по этажам. */
-const scatter = (number: string) => (Number(number) * 2654435761) % 1000;
-
-function priceOf(area: number, floor: number): number {
-  const factor = 1 + 0.006 * (floor - 2) - (floor === 2 ? 0.02 : 0);
-  return Math.round((area * PRICE_PER_M2 * factor) / 10) * 10;
-}
-
-function blockUnits(
-  blockId: string,
-  blockName: string,
-  layouts: readonly UnitsLayout[],
-): UnitRecord[] {
-  const risers = defaultRisers(PLAN).map((riser, index) => ({
-    ...riser,
-    layoutId: layouts[index]?.id ?? null,
-  }));
-  const units = applyRisers(generateUnits(PLAN), risers);
-  const order = [...units]
-    .sort((a, b) => scatter(a.number) - scatter(b.number))
-    .map((unit) => unit.number);
-  const free = FREE[blockName] ?? 0;
-  return units.map((unit, index) => {
-    const place = order.indexOf(unit.number);
-    const area = layouts.find((layout) => layout.id === unit.layoutId)?.area ?? null;
-    const status = place < free ? "free" : place < free + RESERVED ? "reserved" : "sold";
-    return {
-      id: unitId(blockId, index + 1),
-      entrance: unit.entrance,
-      floor: unit.floor,
-      position: unit.position,
-      number: unit.number,
-      layoutId: unit.layoutId,
-      price: area === null ? null : priceOf(area, unit.floor),
-      pricePerM2: null,
-      finishingId: null,
-      status,
-      updatedAt: "2026-10-21T09:41:00Z",
-      updatedByName: status === "free" ? null : "Дилноза Юсупова",
-    };
-  });
-}
-
-/** Вкладка «Квартиры» DEMO — та же форма, что readUnitsTab у настоящей базы. */
-export function demoUnitsTab(complexId: string, wantedBlock: unknown) {
-  const drafts = demoBlocks(complexId);
-  const layoutsOf = new Map(
+function layoutsByBlock(complexId: string) {
+  return new Map(
     demoLayouts(complexId).map((block) => [
       block.blockId,
       block.layouts.map((layout) => ({
@@ -86,7 +35,30 @@ export function demoUnitsTab(complexId: string, wantedBlock: unknown) {
       })),
     ]),
   );
-  const blocks: UnitsBlock[] = drafts.map((draft) => ({
+}
+
+export const DEMO_FINISHINGS: UnitsFinishing[] = SEED_DICTIONARIES.finishings.map((item) => ({
+  id: item.id,
+  name: item.name.ru,
+  isActive: item.isActive,
+}));
+
+export type DemoUnitsTab = {
+  blocks: UnitsBlock[];
+  block: UnitsBlock | null;
+  layouts: UnitsLayout[];
+  finishings: UnitsFinishing[];
+  units: UnitRecord[];
+};
+
+/** Вкладка «Квартиры» DEMO — та же форма, что readUnitsTab у настоящей базы, и список блока. */
+export function demoUnitsTab(
+  complexId: string,
+  wantedBlock: unknown,
+  scenario: DemoUnitsScenario = null,
+): DemoUnitsTab {
+  const layoutsOf = layoutsByBlock(complexId);
+  const blocks: UnitsBlock[] = demoBlocks(complexId).map((draft) => ({
     id: draft.id!,
     name: draft.name,
     floorsTotal: draft.floorsTotal ? Number(draft.floorsTotal) : null,
@@ -96,16 +68,19 @@ export function demoUnitsTab(complexId: string, wantedBlock: unknown) {
   }));
   const block = blocks.find((item) => item.id === wantedBlock) ?? blocks[0] ?? null;
   const layouts = block ? (layoutsOf.get(block.id) ?? []) : [];
-  const units = block && block.unitCount > 0 ? blockUnits(block.id, block.name, layouts) : [];
-  return { blocks, block, layouts, units };
+  const counts = { free: (block && FREE[block.name]) ?? 0, reserved: RESERVED };
+  const units = block && block.unitCount > 0 ? demoPlanUnits(block.id, PLAN, layouts, counts) : [];
+  const tab = { blocks, block, layouts, finishings: DEMO_FINISHINGS, units };
+  return applyDemoUnitsScenario(scenario, tab);
 }
 
-/** Квартиры DEMO-блока по его id — стенду «Сохранить стояки», где ЖК не передаётся. */
+/** Квартиры DEMO-блока по его id — действиям стенда, куда ЖК не передаётся. */
 export function demoBlockUnits(
   blockId: string,
+  scenario: DemoUnitsScenario = null,
 ): { floors: number | null; units: UnitRecord[] } | null {
   for (const row of DEMO_COMPLEX_ROWS) {
-    const tab = demoUnitsTab(row.id, blockId);
+    const tab = demoUnitsTab(row.id, blockId, scenario);
     if (tab.block?.id === blockId) return { floors: tab.block.floorsTotal, units: tab.units };
   }
   return null;

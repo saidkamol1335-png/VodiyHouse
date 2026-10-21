@@ -11,19 +11,21 @@ type PlacedUnit = UnitSlot & { layoutId: string | null };
  * этажность блока (её может не быть — тогда по квартирам), нижний — первый этаж с квартирами.
  */
 export function planFromUnits(units: readonly UnitSlot[], floorsTotal: number | null): BlockPlan {
-  const entrances = Math.max(1, ...units.map((unit) => unit.entrance));
-  const unitsPerFloor = Array.from({ length: entrances }, (_, index) =>
-    Math.max(
-      1,
-      ...units.filter((unit) => unit.entrance === index + 1).map((unit) => unit.position),
-    ),
-  );
-  const floors = units.map((unit) => unit.floor);
+  // Один проход и без Math.max(...список): разворот 5000 аргументов — на грани стека движка.
+  const positions = new Map<number, number>();
+  let low = Infinity;
+  let high = 1;
+  for (const unit of units) {
+    positions.set(unit.entrance, Math.max(positions.get(unit.entrance) ?? 1, unit.position));
+    low = Math.min(low, unit.floor);
+    high = Math.max(high, unit.floor);
+  }
+  const entrances = Math.max(1, ...positions.keys());
   return {
     entrances,
-    floors: floorsTotal ?? Math.max(1, ...floors),
-    firstResidentialFloor: floors.length > 0 ? Math.min(...floors) : 1,
-    unitsPerFloor,
+    floors: floorsTotal ?? high,
+    firstResidentialFloor: Number.isFinite(low) ? low : 1,
+    unitsPerFloor: Array.from({ length: entrances }, (_, index) => positions.get(index + 1) ?? 1),
     startNumber: 1,
   };
 }
@@ -40,14 +42,19 @@ function runsOf(values: ReadonlyMap<number, string | null>) {
   return runs;
 }
 
-/** Этаж → планировка квартир позиции в подъезде. */
-function floorsOf(units: readonly PlacedUnit[], entrance: number, position: number) {
-  const byFloor = new Map<number, string | null>();
+/**
+ * «подъезд:позиция» → этаж → планировка — за один проход: стояки собираются в браузере на каждое
+ * прочитанное состояние списка (до 5000 квартир), обход списка на каждую пару был бы квадратом.
+ */
+function floorIndex(units: readonly PlacedUnit[]) {
+  const index = new Map<string, Map<number, string | null>>();
   for (const unit of units) {
-    if (unit.entrance === entrance && unit.position === position)
-      byFloor.set(unit.floor, unit.layoutId);
+    const key = `${unit.entrance}:${unit.position}`;
+    let byFloor = index.get(key);
+    if (!byFloor) index.set(key, (byFloor = new Map()));
+    byFloor.set(unit.floor, unit.layoutId);
   }
-  return byFloor;
+  return index;
 }
 
 /**
@@ -57,10 +64,14 @@ function floorsOf(units: readonly PlacedUnit[], entrance: number, position: numb
 export function risersFromUnits(units: readonly PlacedUnit[]): Riser[] {
   const entrances = [...new Set(units.map((unit) => unit.entrance))].sort((a, b) => a - b);
   const positions = [...new Set(units.map((unit) => unit.position))].sort((a, b) => a - b);
+  const index = floorIndex(units);
   const risers: Riser[] = [];
   for (const position of positions) {
     const perEntrance = new Map(
-      entrances.map((entrance) => [entrance, floorsOf(units, entrance, position)]),
+      entrances.map((entrance) => [
+        entrance,
+        index.get(`${entrance}:${position}`) ?? new Map<number, string | null>(),
+      ]),
     );
     const common = commonFloors(perEntrance);
     for (const run of runsOf(common)) risers.push({ entrance: null, position, ...run });

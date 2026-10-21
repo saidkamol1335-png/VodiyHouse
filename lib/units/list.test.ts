@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_UNIT_FILTER,
+  shownFilterOptions,
+  activeFilterCount,
   countUnitStatuses,
   filterUnits,
   sortUnitsByNumber,
@@ -84,5 +86,38 @@ describe("список квартир · фильтры", () => {
 
   it("порядок номеров: 1, 2, 3, 10, 12А", () => {
     expect(numbers(sortUnitsByNumber(UNITS))).toEqual(["1", "2", "3", "10", "12А"]);
+  });
+
+  it("keep: строка со сменённым статусом остаётся под фильтром статуса, но не под другими", () => {
+    const free = { ...EMPTY_UNIT_FILTER, status: "free" as const };
+    const keep = new Set(["id-2", "id-3"]);
+    expect(numbers(filterUnits(UNITS, free, ROOMS, keep))).toEqual(["1", "2", "3", "12А", "10"]);
+    expect(numbers(filterUnits(UNITS, { ...free, entrances: [1] }, ROOMS, keep))).toEqual([
+      "1",
+      "2",
+    ]);
+  });
+
+  it("«Фильтры · N»: подъезды и комнаты поштучно, этаж и номер — по одному, статус не считается", () => {
+    expect(activeFilterCount(EMPTY_UNIT_FILTER)).toBe(0);
+    expect(activeFilterCount({ ...EMPTY_UNIT_FILTER, status: "free", query: "  " })).toBe(0);
+    expect(
+      activeFilterCount({
+        ...EMPTY_UNIT_FILTER,
+        entrances: [1, 2],
+        rooms: ["1"],
+        floorTo: 5,
+        query: "4",
+      }),
+    ).toBe(5);
+  });
+
+  it("включённый чип, которого больше нет в блоке, остаётся — его можно снять", () => {
+    const options = unitFilterOptions(UNITS, ROOMS);
+    const filter = { ...EMPTY_UNIT_FILTER, entrances: [3], rooms: ["3" as const] };
+    expect(shownFilterOptions(options, filter)).toEqual({
+      entrances: [1, 2, 3],
+      rooms: ["studio", "1", "2", "3", "4plus", "none"],
+    });
   });
 });

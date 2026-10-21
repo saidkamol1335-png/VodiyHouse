@@ -1,14 +1,10 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { Badge, type BadgeTone } from "@/components/Badge";
+import { UnitStatusBadge } from "@/components/UnitStatusBadge";
 import type { UnitsSummary } from "@/lib/admin/journal/unitsSummary";
-import type { UnitStatus } from "@/lib/units";
 
 // Сводная запись о квартирах (шаг 12): одно действие — одна запись. Что сделано и сколько,
 // номера, группы статусов; пометки — то, что требует внимания (без планировки, не тронуты).
-
-/** Цвета статусов — как в мокапе: свободна — зелёный, бронь — янтарь, продана — розовый. */
-const STATUS_TONES: Record<UnitStatus, BadgeTone> = { free: "ok", reserved: "amber", sold: "bad" };
 
 type Of<K extends UnitsSummary["kind"]> = Extract<UnitsSummary, { kind: K }>;
 
@@ -60,7 +56,8 @@ function StatusSummary({ summary }: { summary: Of<"status"> }) {
       <ul className="journal-list__groups">
         {summary.groups.map((group) => (
           <li key={`${group.from}-${group.to}`} className="journal-list__group">
-            <StatusBadge status={group.from} /> {t("arrow")} <StatusBadge status={group.to} />
+            <UnitStatusBadge status={group.from} /> {t("arrow")}{" "}
+            <UnitStatusBadge status={group.to} />
             <GroupCount summary={summary} group={group} />
           </li>
         ))}
@@ -130,15 +127,6 @@ function DeleteSummary({ summary }: { summary: Of<"delete" | "delete_list"> }) {
       ) : null}
       {summary.soldNumbers ? <Line>{t("soldWere", { numbers: summary.soldNumbers })}</Line> : null}
     </Summary>
-  );
-}
-
-function StatusBadge({ status }: { status: UnitStatus }) {
-  const t = useTranslations("admin.journal.unitStatus");
-  return (
-    <Badge tone={STATUS_TONES[status]} size="sm">
-      {t(status)}
-    </Badge>
   );
 }
 

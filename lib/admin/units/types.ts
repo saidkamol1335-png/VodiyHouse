@@ -76,6 +76,9 @@ export type SaveRisersInput = { blockId: string; base: readonly Riser[]; risers:
 /** skipped — номера квартир, которые поправили после снимка: их не тронули. */
 export type SaveRisersResult = UnitsResult<{ changed: number; skipped: string[] }>;
 export type SetLayoutAvailableInput = { layoutId: string; available: boolean };
+/** Список блока читается на клиенте: страница его не несёт («Решения 12.2»). */
+export type BlockUnitsInput = { blockId: string };
+export type BlockUnitsResult = UnitsResult<{ units: UnitRecord[] }>;
 export type ChangedResult = UnitsResult<{ changed: number }>;
 
 // ─── Вкладка «Квартиры»: что видит экран ────────────────────────────────────────────────────
@@ -104,14 +107,31 @@ export type UnitsFinishing = { id: number; name: string; isActive: boolean };
 /** Готовый блок: стояки собраны из квартир, границы — для их проверки (Н5). */
 export type ReadyBlockView = { count: number; plan: BlockPlan; risers: Riser[] };
 
-/** Вкладка «Квартиры» в браузере: без списка квартир — его экран читает сам (12.4). */
+/**
+ * Вкладка «Квартиры» в браузере — без квартир: список (до 5000) экран читает сам, а стояки
+ * собирает из прочитанного (12.4). Есть ли список — по unitCount блока.
+ */
 export type UnitsTabView = {
   blocks: UnitsBlock[];
   /** null — у ЖК нет блоков. */
   block: UnitsBlock | null;
   layouts: UnitsLayout[];
-  ready: ReadyBlockView | null;
+  finishings: UnitsFinishing[];
 };
 
 /** Действие вкладки пропсом: настоящее — Server Action, на стенде — ответ без базы. */
 export type UnitsAction<I, R> = (input: I) => Promise<R>;
+
+export type UnitsStatusActions = {
+  set: UnitsAction<SetUnitsStatusInput, SetUnitsStatusResult>;
+  revert: UnitsAction<RevertUnitsStatusInput, RevertUnitsStatusResult>;
+};
+
+/**
+ * Действия списка. Права задаёт наличие действия: без status плашка — просто плашка. В 12.5
+ * сюда добавятся правка строки, цена, отделка и удаление — менеджеру их не передают (12.6).
+ */
+export type UnitsListActions = {
+  read: UnitsAction<BlockUnitsInput, BlockUnitsResult>;
+  status: UnitsStatusActions | null;
+};

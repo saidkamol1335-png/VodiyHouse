@@ -5,7 +5,6 @@ import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
 import { parseLayouts } from "@/lib/admin/complexes/layouts";
 import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
-import { demoBlockUnits } from "@/lib/admin/complexes/demoUnits";
 import { demoComplex, demoReadiness } from "@/lib/admin/complexes/demoPage";
 import { parseComplexMain } from "@/lib/admin/complexes/mainForm";
 import { missingOf } from "@/lib/admin/complexes/readiness";
@@ -19,15 +18,6 @@ import { bilingualHasContact } from "@/lib/admin/contactGuard";
 import { readText, readUuid } from "@/lib/admin/credentials";
 import { archiveConfirmed, canMove } from "@/lib/admin/developers/publication";
 import { isPublicationStatus } from "@/lib/admin/publicationFilter";
-import { unitsFailure } from "@/lib/admin/units/errors";
-import { readPlan, readRisers } from "@/lib/admin/units/parse";
-import type {
-  CreateBlockUnitsInput,
-  CreateBlockUnitsResult,
-  SaveRisersInput,
-  SaveRisersResult,
-} from "@/lib/admin/units/types";
-import { applyRisers, generateUnits, planFromUnits, riserEdits } from "@/lib/units";
 
 // Подделка Supabase для стенда /dev/zhk: настоящие проверки форм и правила статуса, без базы.
 // DEMO не меняется — стенд показывает ответы действий (как /dev/zastroyshchiki).
@@ -112,30 +102,4 @@ export async function demoSaveBlockLayoutsAction(formData: FormData): Promise<Sa
   return parsed.error
     ? { status: "error", error: parsed.error, rowErrors: {}, broken: [] }
     : { status: "error", error: null, rowErrors: parsed.rowErrors, broken: [] };
-}
-
-/** Генератор на стенде: тот же разбор и те же строки lib/units, без базы — ответ «создано N». */
-export async function demoCreateBlockUnitsAction(
-  input: CreateBlockUnitsInput,
-): Promise<CreateBlockUnitsResult> {
-  devOnly();
-  const plan = readPlan(input?.plan);
-  const risers = plan ? readRisers(input.risers, plan) : null;
-  if (!plan || !risers) return unitsFailure("invalid");
-  const units = applyRisers(generateUnits(plan), risers);
-  const unassigned = units.filter((unit) => unit.layoutId === null).length;
-  return { status: "done", created: units.length, unassigned };
-}
-
-/** Стояки на стенде: снимок и правки — как у настоящего действия, квартиры DEMO не меняются. */
-export async function demoSaveRisersAction(input: SaveRisersInput): Promise<SaveRisersResult> {
-  devOnly();
-  const block = typeof input?.blockId === "string" ? demoBlockUnits(input.blockId) : null;
-  if (!block) return unitsFailure("notFound");
-  const plan = planFromUnits(block.units, block.floors);
-  const base = readRisers(input.base, plan);
-  const risers = readRisers(input.risers, plan);
-  if (!base || !risers) return unitsFailure("invalid");
-  const { changes, skipped } = riserEdits(block.units, base, risers);
-  return { status: "done", changed: changes.length, skipped: skipped.map((unit) => unit.number) };
 }

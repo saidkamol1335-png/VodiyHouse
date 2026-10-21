@@ -107,7 +107,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
     page,
   }) => {
     await open(page, SHODLIK);
-    await expect(page.locator(".complex-units__listed")).toContainText(
+    await expect(page.locator(".units-block__listed")).toContainText(
       "Блок A · список из 88 квартир",
     );
     const toggle = page.getByRole("button", { name: "Стояки · 4 строки" });
@@ -150,7 +150,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
     );
     await switcher.getByRole("link", { name: /Блок B/ }).click();
     await expect(page).toHaveURL(/\?blok=/);
-    await expect(page.locator(".complex-units__listed")).toContainText("Блок B");
+    await expect(page.locator(".units-block__listed")).toContainText("Блок B");
     await expect(switcher.getByRole("link", { name: /Блок B/ })).toHaveAttribute(
       "aria-current",
       "page",

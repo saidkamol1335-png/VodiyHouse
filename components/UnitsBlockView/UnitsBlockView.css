@@ -1,0 +1,66 @@
+/* Блок со списком квартир: шапка «Блок A · список из N», стояки и список, отказ чтения с
+   «Повторить» и место под полосой «Отменить», чтобы она не закрывала последнюю карточку. */
+.units-block {
+  display: grid;
+  gap: 14px;
+}
+
+.units-block__listed {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+}
+
+.units-block__listed b {
+  color: var(--fg);
+}
+
+.units-block__loading {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-block__failed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.units-block__retry {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.units-block__retry:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-block__retry[aria-disabled="true"] {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+
+.units-block__spacer {
+  height: 72px;
+}
+
+@media (max-width: 760px) {
+  .units-block__retry {
+    height: 44px;
+  }
+
+  .units-block__spacer {
+    height: 96px;
+  }
+}

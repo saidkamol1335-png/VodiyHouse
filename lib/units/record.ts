@@ -46,6 +46,13 @@ function text(row: Row, key: string): string {
   return value;
 }
 
+/** Время правки: строка, которую понимает Date, — иначе «обновлено …» уронило бы весь список. */
+function timestamp(row: Row, key: string): string {
+  const value = text(row, key);
+  if (!Number.isFinite(Date.parse(value))) throw new Error(`units: ${key} — не время`);
+  return value;
+}
+
 const optionalText = (row: Row, key: string): string | null =>
   typeof row[key] === "string" ? (row[key] as string) : null;
 
@@ -64,7 +71,7 @@ export function parseUnitRecord(value: unknown): UnitRecord {
     pricePerM2: optionalNumber(value, "price_per_m2"),
     finishingId: optionalNumber(value, "finishing_id"),
     status,
-    updatedAt: text(value, "updated_at"),
+    updatedAt: timestamp(value, "updated_at"),
     updatedByName: optionalText(value, "updated_by_name"),
   };
 }

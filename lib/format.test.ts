@@ -9,6 +9,7 @@ import {
   hourIn,
   initialsOf,
   parsePriceInput,
+  relativeStamp,
 } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
@@ -83,5 +84,57 @@ describe("formatPrice", () => {
     expect(parsePriceInput("0")).toEqual({ value: null, issue: "outOfRange" });
     expect(parsePriceInput("1000000000000")).toEqual({ value: null, issue: "outOfRange" });
     expect(parsePriceInput("999 999 999 999")).toEqual({ value: 999_999_999_999 });
+  });
+});
+
+describe("relativeStamp — «обновлено …» в списке квартир", () => {
+  // 21.10.2026, 14:46 по Ташкенту.
+  const now = new Date("2026-10-21T09:46:00Z");
+  const ago = (ms: number) => new Date(now.getTime() - ms);
+
+  it("до 45 с и время из будущего — «только что»", () => {
+    expect(relativeStamp(ago(44_000), now)).toEqual({ kind: "now" });
+    expect(relativeStamp(new Date(now.getTime() + 60_000), now)).toEqual({ kind: "now" });
+  });
+
+  it("минуты до часа", () => {
+    expect(relativeStamp(ago(45_000), now)).toEqual({ kind: "minutes", minutes: 1 });
+    expect(relativeStamp(ago(5 * 60_000), now)).toEqual({ kind: "minutes", minutes: 5 });
+    expect(relativeStamp(ago(59 * 60_000), now)).toEqual({ kind: "minutes", minutes: 59 });
+  });
+
+  it("сегодня и вчера — по календарю Ташкента, а не UTC", () => {
+    expect(relativeStamp(ago(3 * 3_600_000), now)).toEqual({ kind: "today", time: "11:46" });
+    // 00:10 по Ташкенту — ещё 20.10 по UTC, но уже «сегодня».
+    expect(relativeStamp(new Date("2026-10-20T19:10:00Z"), now)).toEqual({
+      kind: "today",
+      time: "00:10",
+    });
+    expect(relativeStamp(new Date("2026-10-20T18:50:00Z"), now)).toEqual({
+      kind: "yesterday",
+      time: "23:50",
+    });
+  });
+
+  it("ровно час и 59,5 мин — уже «сегодня в», а не «60 мин назад»", () => {
+    expect(relativeStamp(ago(60 * 60_000), now)).toEqual({ kind: "today", time: "13:46" });
+    expect(relativeStamp(ago(59 * 60_000 + 30_000), now)).toMatchObject({ kind: "today" });
+  });
+
+  it("неверная дата — null, а не исключение", () => {
+    expect(relativeStamp(new Date("не время"), now)).toBeNull();
+  });
+
+  it("раньше — дата; другой год — с годом", () => {
+    expect(relativeStamp(new Date("2026-10-18T04:05:00Z"), now)).toEqual({
+      kind: "date",
+      date: "18.10",
+      time: "09:05",
+    });
+    expect(relativeStamp(new Date("2025-12-31T04:05:00Z"), now)).toEqual({
+      kind: "date",
+      date: "31.12.2025",
+      time: "09:05",
+    });
   });
 });

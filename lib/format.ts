@@ -36,6 +36,73 @@ export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): st
   return `${formatDate(date, timeZone)} ${time}`;
 }
 
+/** Когда поменяли — по-человечески, как в мокапе (fRel): тексты в messages, здесь только вид. */
+export type RelativeStamp =
+  | { kind: "now" }
+  | { kind: "minutes"; minutes: number }
+  | { kind: "today" | "yesterday"; time: string }
+  | { kind: "date"; date: string; time: string };
+
+const DAY_MS = 86_400_000;
+
+// «Обновлено …» считается у сотен строк на каждый тик часов: форматтеры Intl создаются один раз
+// на часовой пояс, а не на строку (создание — самое дорогое).
+const stampFormats = new Map<
+  string,
+  Record<"day" | "time" | "dayMonth" | "full", Intl.DateTimeFormat>
+>();
+
+function formatsIn(timeZone: string) {
+  let formats = stampFormats.get(timeZone);
+  if (!formats) {
+    formats = {
+      day: new Intl.DateTimeFormat("en-CA", { timeZone }),
+      time: new Intl.DateTimeFormat("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone,
+      }),
+      dayMonth: new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", timeZone }),
+      full: new Intl.DateTimeFormat("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone,
+      }),
+    };
+    stampFormats.set(timeZone, formats);
+  }
+  return formats;
+}
+
+/**
+ * «только что» (до 45 с — и время из будущего: часы сервера и телефона расходятся), «N мин назад»,
+ * «сегодня в 09:41», «вчера в 18:05», иначе «21.10 в 09:41» (другой год — «21.10.2025»).
+ * Неверная дата — null: строку списка без времени показать можно, а исключение уронило бы весь.
+ */
+export function relativeStamp(
+  at: Date,
+  now: Date,
+  timeZone: string = APP_TIME_ZONE,
+): RelativeStamp | null {
+  if (!Number.isFinite(at.getTime()) || !Number.isFinite(now.getTime())) return null;
+  const seconds = Math.round((now.getTime() - at.getTime()) / 1000);
+  if (seconds < 45) return { kind: "now" };
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return { kind: "minutes", minutes };
+  const formats = formatsIn(timeZone);
+  const time = formats.time.format(at);
+  const day = formats.day.format(at);
+  const today = formats.day.format(now);
+  if (day === today) return { kind: "today", time };
+  if (day === formats.day.format(new Date(now.getTime() - DAY_MS)))
+    return { kind: "yesterday", time };
+  const sameYear = day.slice(0, 4) === today.slice(0, 4);
+  const date = (sameYear ? formats.dayMonth : formats.full).format(at);
+  return { kind: "date", date, time };
+}
+
 /** Час суток 0–23 в часовом поясе. */
 export function hourIn(date: Date, timeZone: string = APP_TIME_ZONE): number {
   const hour = new Intl.DateTimeFormat("en-GB", {

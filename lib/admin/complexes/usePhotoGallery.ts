@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_FOCUS, processImage, type FocusPoint, type MediaIssue } from "@/lib/media";
+import { settle } from "@/lib/ui/settle";
 import type { ContentErrorCode } from "../developers/errors";
 import {
   movePhoto,
@@ -31,8 +32,10 @@ export type PendingPhoto = {
 };
 
 /** notCover — перестановка поставила бы обложкой фото меньше 2400 px. */
-export type GalleryError =
-  { error: ContentErrorCode | "notCover"; broken: ComplexRequirement[] } | null;
+export type GalleryError = {
+  error: ContentErrorCode | "notCover";
+  broken: ComplexRequirement[];
+} | null;
 
 const NETWORK: ComplexMediaResult = { status: "error", error: "network", broken: [] };
 
@@ -40,15 +43,6 @@ function form(fields: Record<string, string | number>): FormData {
   const data = new FormData();
   for (const [name, value] of Object.entries(fields)) data.append(name, String(value));
   return data;
-}
-
-/** Действие сервера: обрыв связи и сбой 5xx — тот же ответ «нет связи», а не исключение. */
-async function settle(run: () => Promise<ComplexMediaResult>): Promise<ComplexMediaResult> {
-  try {
-    return await run();
-  } catch {
-    return NETWORK;
-  }
 }
 
 type Params = {
@@ -77,8 +71,13 @@ function useFocusSaver(params: Params, onResult: (result: ComplexMediaResult) =>
     const { params: current, onResult: report } = latest.current;
     if (!item || !current.actions) return;
     const { actions, complexId } = current;
-    const data = form({ id: complexId, photo: item.id, focusX: item.focus.x, focusY: item.focus.y });
-    void settle(() => actions.setFocus(data)).then(report);
+    const data = form({
+      id: complexId,
+      photo: item.id,
+      focusX: item.focus.x,
+      focusY: item.focus.y,
+    });
+    void settle(() => actions.setFocus(data), NETWORK).then(report);
   }, []);
   useEffect(() => flush, [flush]);
   return (id: string, focus: FocusPoint) => {
@@ -158,14 +157,17 @@ export function usePhotoGallery(params: Params) {
     setPhotos(next);
     if (!actions) return setError(null);
     const order = JSON.stringify(next.map((photo) => photo.id));
-    const result = await settle(() => actions.reorder(form({ id: complexId, order })));
+    const result = await settle(() => actions.reorder(form({ id: complexId, order })), NETWORK);
     refused(result);
     if (result.status === "error") setPhotos((current) => restoreOrder(current, beforeIds));
   };
 
   const remove = async (id: string) => {
     if (actions) {
-      const result = await settle(() => actions.remove(form({ id: complexId, photo: id })));
+      const result = await settle(
+        () => actions.remove(form({ id: complexId, photo: id })),
+        NETWORK,
+      );
       refused(result);
       if (result.status === "error") return false;
     }

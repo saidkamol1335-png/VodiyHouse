@@ -1,0 +1,191 @@
+/* Список квартир блока (Н1) — таблица как «Заявки» мокапа: шапка моно прописными, зебра, без
+   линий между строками. Вид выбирает ширина контейнера, а не экрана (меню кабинета съедает
+   250 px): от 1000 — 8 колонок, 720–999 — без «Обновлено», уже — карточки. Те же границы — в
+   UnitsRow.css (контейнер units-list). Строки и карточки — блок units-row. */
+.units-list {
+  container: units-list / inline-size;
+  display: grid;
+  gap: 12px;
+}
+
+.units-list__summary {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+/* Пока отложенный фильтр догоняет ввод — подпись приглушена. */
+.units-list__summary[aria-busy="true"] {
+  opacity: var(--opacity-busy);
+}
+
+.units-list__frame {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+}
+
+.units-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.units-list__th {
+  padding: 11px 12px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Ширины — чтобы строка шла в одну линию, как у «Заявок»: «Планировке» остаётся всё прочее,
+   при 1000 — не меньше 150 px («4-комн. · 112,5 м²»). */
+.units-list__th--number {
+  width: 56px;
+}
+
+.units-list__th--entrance {
+  width: 84px;
+}
+
+.units-list__th--floor {
+  width: 60px;
+}
+
+.units-list__th--price {
+  width: 170px;
+  text-align: right;
+}
+
+.units-list__th--finishing {
+  width: 160px;
+}
+
+.units-list__th--updated {
+  width: 190px;
+}
+
+.units-list__th--status {
+  width: 128px;
+}
+
+.units-list__empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.units-list__reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.units-list__reset:hover {
+  text-decoration: underline;
+}
+
+.units-list__reset:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-list__more {
+  display: flex;
+  justify-content: center;
+}
+
+.units-list__more:empty {
+  display: none;
+}
+
+/* Шире 1080 (окно 1440) — отделке и «Обновлено» место в одну строку, как у «Заявок». */
+@container units-list (min-width: 1080px) {
+  .units-list__th--finishing {
+    width: 190px;
+  }
+
+  .units-list__th--updated {
+    width: 236px;
+  }
+}
+
+/* 720–999: без «Обновлено» — оно есть в раскрытой строке. Колонка остаётся нулевой ширины, а не
+   display: none: иначе раскрытие (colspan на все колонки) добавило бы таблице лишнюю колонку. */
+@container units-list (max-width: 999px) {
+  .units-list__th {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .units-list__th.units-list__th--updated {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  .units-list__th--number {
+    width: 52px;
+  }
+
+  .units-list__th--entrance {
+    width: 80px;
+  }
+
+  .units-list__th--floor {
+    width: 52px;
+  }
+
+  .units-list__th--price {
+    width: 140px;
+  }
+
+  .units-list__th--finishing {
+    width: 128px;
+  }
+
+  .units-list__th--status {
+    width: 124px;
+  }
+}
+
+/* Уже 720 — карточки: шапки таблицы нет, рамка — у списка карточек. */
+@container units-list (max-width: 719px) {
+  .units-list__table,
+  .units-list__table > tbody {
+    display: block;
+  }
+
+  .units-list__head {
+    display: none;
+  }
+
+  .units-list__reset {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .units-list__more .button {
+    width: 100%;
+    min-height: 44px;
+  }
+}

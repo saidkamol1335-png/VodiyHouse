@@ -1,0 +1,246 @@
+/* Строка квартиры (Н1) в таблице UnitsList и её раскрытие с выбором статуса. Вид — по ширине
+   контейнера units-list (границы те же, что в UnitsList.css): от 1000 — строка в 8 колонок,
+   720–999 — без «Обновлено», уже — карточка в две строки (образец — список наличия сайта,
+   .avl__r мокапа): «41 · 2-комн. · 64,5 м² · плашка», ниже серым «под. 1 · эт. 12 · цена». */
+.units-row > td {
+  padding: 7px 12px;
+  font-size: var(--fs-small-l);
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.units-row--alt,
+.units-row__detail--alt {
+  background: var(--row-alt);
+}
+
+.units-row__number {
+  font-family: var(--mono);
+  font-size: var(--fs-label-l);
+  font-weight: 500;
+  letter-spacing: var(--ls-mono);
+}
+
+/* «под.» и «эт.» — только у карточки: в таблице это скажет шапка. */
+.units-row__prefix {
+  display: none;
+}
+
+.units-row__layout--none,
+.units-row__price--none,
+.units-row__finishing--none,
+.units-row__finishing--inherited,
+.units-row__price--muted,
+.units-row__per-m2,
+.units-row__updated {
+  color: var(--fg-3);
+}
+
+.units-row__per-m2,
+.units-row__updated {
+  font-size: var(--fs-caption);
+}
+
+.units-row__price {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.units-row__status-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 4px 0 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  font: inherit;
+  cursor: pointer;
+}
+
+.units-row__status-button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-row__status-button:hover .badge {
+  box-shadow: var(--chip-on-ring);
+}
+
+.units-row__chevron {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.units-row--open .units-row__chevron {
+  transform: rotate(180deg);
+}
+
+/* Нижняя полоса «Отменить» не закрывает раскрытую строку при прокрутке к ней. */
+.units-row__detail {
+  scroll-margin-bottom: 96px;
+}
+
+.units-row__detail-cell {
+  padding: 10px 12px 14px;
+  border-top: 1px dashed var(--line);
+}
+
+/* Раскрытие — содержимое появляется opacity + transform (≤ 200 мс, CLAUDE.md §3). */
+.units-row__detail-cell > * {
+  animation: units-row-reveal var(--dur-fast) var(--ease) both;
+}
+
+.units-row__detail-updated {
+  display: block;
+  margin-top: 10px;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+@keyframes units-row-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@container units-list (max-width: 999px) {
+  .units-row > td {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .units-row > .units-row__updated {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    visibility: hidden;
+  }
+
+  .units-row__per-m2 {
+    display: block;
+  }
+
+  .units-row__sep {
+    display: none;
+  }
+}
+
+@container units-list (max-width: 719px) {
+  .units-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+    padding: 8px 8px 10px 14px;
+  }
+
+  .units-row + .units-row,
+  .units-row__detail + .units-row {
+    border-top: 1px solid var(--line);
+  }
+
+  .units-row--alt,
+  .units-row__detail--alt {
+    background: none;
+  }
+
+  .units-row > td {
+    display: block;
+    padding: 0;
+  }
+
+  .units-row > .units-row__updated {
+    display: none;
+  }
+
+  .units-row__number {
+    order: 1;
+    margin-right: 4px;
+    font-size: var(--fs-control);
+    font-weight: 600;
+  }
+
+  .units-row > .units-row__layout {
+    flex: 1 1 0;
+    order: 2;
+    min-width: 0;
+    font-size: var(--fs-body);
+    font-weight: 650;
+  }
+
+  .units-row__status {
+    order: 3;
+  }
+
+  /* Перенос на вторую строку. */
+  .units-row::after {
+    flex-basis: 100%;
+    order: 4;
+    content: "";
+  }
+
+  .units-row > .units-row__entrance,
+  .units-row > .units-row__floor,
+  .units-row > .units-row__price,
+  .units-row > .units-row__finishing {
+    color: var(--fg-2);
+    font-size: var(--fs-caption);
+    text-align: left;
+  }
+
+  /* Цена брони и проданной — серее цены свободной и здесь: сайт её не видит. */
+  .units-row > .units-row__entrance,
+  .units-row > .units-row__floor,
+  .units-row > .units-row__price--muted,
+  .units-row > .units-row__price--none {
+    color: var(--fg-3);
+  }
+
+  /* Вторая строка — в порядке разметки: подъезд, этаж, цена, отделка. */
+  .units-row__entrance,
+  .units-row__floor,
+  .units-row__price,
+  .units-row__finishing {
+    order: 5;
+  }
+
+  /* Отделка блока одна на все карточки — на телефоне это шум; своя отделка квартиры видна. */
+  .units-row > .units-row__finishing--inherited,
+  .units-row > .units-row__finishing--none {
+    display: none;
+  }
+
+  .units-row__prefix,
+  .units-row__per-m2,
+  .units-row__sep {
+    display: inline;
+  }
+
+  .units-row > .units-row__floor::before,
+  .units-row > .units-row__price::before,
+  .units-row > .units-row__finishing::before {
+    margin-right: 6px;
+    content: "·";
+  }
+
+  /* Плашка — кнопка 44 × 44 и больше: попасть пальцем. */
+  .units-row__status-button {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: flex-end;
+    padding: 0 6px;
+  }
+
+  .units-row__detail,
+  .units-row__detail-cell {
+    display: block;
+  }
+
+  .units-row__detail-cell {
+    padding: 10px 14px 14px;
+  }
+}

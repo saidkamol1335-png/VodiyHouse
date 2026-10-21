@@ -76,3 +76,22 @@
     font-size: var(--fs-control);
   }
 }
+
+/* Чипы выбора нескольких (FilterChips): ряд переносится, а не прокручивается. */
+.filter-pills--wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.filter-pills--wrap .filter-pills__pill {
+  height: 32px;
+  padding: 0 12px;
+}
+
+@media (max-width: 760px) {
+  .filter-pills--wrap .filter-pills__pill {
+    min-width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+}

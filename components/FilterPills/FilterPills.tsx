@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormatter } from "next-intl";
 import { useRef } from "react";
 import { useStripScroll } from "@/lib/ui/useStripScroll";
 
@@ -19,6 +20,7 @@ export function FilterPills<Key extends string>({
   value,
   onChange,
 }: FilterPillsProps<Key>) {
+  const format = useFormatter();
   const track = useRef<HTMLDivElement>(null);
   // Затухание у края, за которым ещё есть пилюли, — как у вкладок (лента на телефоне).
   const edges = useStripScroll(track, true, value);
@@ -45,7 +47,7 @@ export function FilterPills<Key extends string>({
           >
             {pill.label}
             {pill.count === undefined ? null : (
-              <span className="filter-pills__count">{pill.count}</span>
+              <span className="filter-pills__count">{format.number(pill.count)}</span>
             )}
           </button>
         );

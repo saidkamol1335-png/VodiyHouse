@@ -1,0 +1,164 @@
+/* Полоса «Отменить» (мокап: .toast): карточка справа снизу, на телефоне — во всю ширину над
+   нижним краем; действие — пилюля 44 px на телефоне (.ts__a). Появление — opacity + transform. */
+.units-undo {
+  position: fixed;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 45;
+  width: min(420px, calc(100% - 24px));
+  pointer-events: none;
+}
+
+.units-undo__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 10px 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  box-shadow: var(--toast-shadow);
+  pointer-events: auto;
+  animation: units-undo-in var(--dur-fast) var(--ease) both;
+}
+
+.units-undo__icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--ok);
+}
+
+.units-undo__card--notice .units-undo__icon {
+  color: var(--amber-2);
+}
+
+.units-undo__card--error .units-undo__icon {
+  color: var(--badge-bad-fg);
+}
+
+.units-undo__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.units-undo__title,
+.units-undo__detail {
+  margin: 0;
+}
+
+.units-undo__title {
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.units-undo__detail {
+  margin-top: 3px;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+}
+
+.units-undo__action {
+  display: inline-flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.units-undo__action:hover {
+  text-decoration: underline;
+}
+
+.units-undo__action[aria-disabled="true"] {
+  color: var(--fg-3);
+  text-decoration: none;
+  cursor: default;
+}
+
+.units-undo__shortcut {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-tiny);
+  font-weight: 500;
+  letter-spacing: var(--ls-mono);
+}
+
+.units-undo__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+.units-undo__action:focus-visible,
+.units-undo__close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@keyframes units-undo-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (max-width: 760px) {
+  .units-undo {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+  }
+
+  .units-undo__card {
+    align-items: center;
+  }
+
+  .units-undo__action {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: var(--r-pill);
+    background: var(--badge-amber-bg);
+  }
+
+  .units-undo__close {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Подсказка про клавиши — только там, где есть мышь и клавиатура. */
+@media (hover: none) {
+  .units-undo__shortcut {
+    display: none;
+  }
+}
+
+/* Отказ прежнего тапа, чью полосу уже сменили: виден до «×». */
+.units-undo__lost {
+  margin: 6px 0 0;
+  color: var(--badge-bad-fg);
+  font-size: var(--fs-caption);
+  font-weight: 650;
+}
+
+.units-undo__title:focus {
+  outline: none;
+}

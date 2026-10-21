@@ -128,3 +128,25 @@ describe("готовый блок: сохранение стояков по сн
     expect(changes).toHaveLength(2);
   });
 });
+
+describe("готовый блок: 5000 квартир", () => {
+  it("предел блока собирается в стояки и границы плана без переполнения стека", () => {
+    const big: BlockPlan = {
+      entrances: 10,
+      floors: 12,
+      firstResidentialFloor: 3,
+      unitsPerFloor: Array.from({ length: 10 }, () => 50),
+      startNumber: 1,
+    };
+    const placed = generateUnits(big).map((slot) => ({
+      ...slot,
+      layoutId: `l${slot.position % 4}`,
+    }));
+    expect(placed).toHaveLength(5000);
+    expect(planFromUnits(placed, 12)).toEqual(big);
+    const risers = risersFromUnits(placed);
+    expect(risers).toHaveLength(50);
+    expect(risers.every((riser) => riser.entrance === null && riser.floorFrom === 3)).toBe(true);
+    expect(validateRisers(big, risers)).toEqual([]);
+  });
+});
