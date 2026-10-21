@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PUBLICATION_STATUSES } from "@/lib/admin/publication";
-import { seedContent, type ContentIds } from "./content-fixtures";
+import { makeComplexReady, seedContent, type ContentIds } from "./content-fixtures";
 import {
   anon,
   createStaff,
@@ -110,12 +110,16 @@ describe("застройщики, ЖК и медиа", () => {
     );
     const id = rows[0]!.id;
     expect(await statusOf(id)).toEqual({ status: "draft", archived: false });
+    await makeComplexReady(db.admin, id);
 
     const setStatus = (status: string) =>
       db.as(user(head), (tx) =>
         tx.query("update complexes set status = $1 where id = $2", [status, id]),
       );
-    await setStatus("published");
+    // Публикация — с отметкой правила 1.2 в том же действии (шаг 11, И8).
+    await db.as(user(head), (tx) =>
+      tx.query("update complexes set status = 'published', files_checked_at = now() where id = $1", [id]),
+    );
     expect(await idsVisible(anon, "complexes")).toContain(id);
     await setStatus("archived");
     expect(await statusOf(id)).toEqual({ status: "archived", archived: true });

@@ -54,7 +54,7 @@ describe("генератор блока → база", () => {
     const started = performance.now();
     const { blockId, inserted } = await db.as(user(head), async (tx) => {
       const block = await tx.query<{ id: string }>(
-        "insert into blocks (complex_id, name, floors_total) values ($1, 'Генератор', 16) returning id",
+        "insert into blocks (complex_id, name, floors_total) values ($1, 'Г', 16) returning id",
         [ids.publicComplex],
       );
       const blockId = block.rows[0]!.id;
@@ -105,7 +105,7 @@ describe("генератор блока → база", () => {
 
   it("второй прогон генератора в тот же блок отклоняется базой — номера заняты", async () => {
     const block = await db.admin.query<{ id: string }>(
-      "select id from blocks where name = 'Генератор'",
+      "select id from blocks where name = 'Г'",
     );
     const blockId = block.rows[0]!.id;
     const rows = toUnitInsertRows(blockId, applyRisers(generateUnits(PLAN), []));

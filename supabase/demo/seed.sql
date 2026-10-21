@@ -40,33 +40,34 @@ from (values
 join public.developers d on d.slug = p.developer;
 
 -- ─── ЖК (мокап: JKS) ─────────────────────────────────────────────────────────────────────
+-- Точки — условные, в центре Ферганы (ЖК вымышленные); этажность ЖК считается по блокам.
 
 insert into public.complexes (
   developer_id, slug, name, class, location_id, address, landmark, minutes_to_center,
-  house_type, ceiling_height, floors_min, floors_max, parking,
+  lat, lng, house_type, ceiling_height, parking,
   permit_checked_at, land_checked_at, staff_visited_at, status, sort
 )
 select
   d.id, c.slug, jsonb_build_object('ru', c.name, 'uz', c.name), c.class::public.complex_class, l.id,
   jsonb_build_object('ru', c.address_ru, 'uz', c.address_uz),
   jsonb_build_object('ru', c.landmark_ru, 'uz', c.landmark_uz),
-  c.minutes, 'monolith', c.ceiling, c.floors, c.floors, c.parking::public.parking_type,
+  c.minutes, c.lat, c.lng, 'monolith', c.ceiling, c.parking::public.parking_type,
   c.checked_on::date, c.checked_on::date, c.visited_on::date, 'published', c.sort
 from (values
   ('demo-sifat', 'demo-shodlik', 'Shodlik', 'comfort',
    'ул. Мустакиллик, 12', 'Mustaqillik ko‘chasi, 12', 'напротив центрального парка', 'markaziy bog‘ ro‘parasida',
-   7, 3.0, 12, 'underground', '2026-09-12', '2026-09-20', 1),
+   7, 40.384200, 71.784300, 3.0, 'underground', '2026-09-12', '2026-09-20', 1),
   ('demo-margilan-invest', 'demo-namuna', 'Namuna', 'business',
    'ул. Навои, 45', 'Navoiy ko‘chasi, 45', 'рядом с площадью Мустакиллик', 'Mustaqillik maydoni yonida',
-   4, 3.1, 16, 'underground', '2026-09-11', '2026-09-18', 2),
+   4, 40.388900, 71.783100, 3.1, 'underground', '2026-09-11', '2026-09-18', 2),
   ('demo-margilan-invest', 'demo-yulduz', 'Yulduz', 'premium',
    'ул. Сайилгох, 9', 'Sayilgoh ko‘chasi, 9', 'в центре, у пешеходной улицы', 'markazda, piyodalar ko‘chasi yonida',
-   2, 3.3, 18, 'underground', '2026-09-11', '2026-09-21', 3),
+   2, 40.387100, 71.790500, 3.3, 'underground', '2026-09-11', '2026-09-21', 3),
   ('demo-kamalak', 'demo-orzu', 'Orzu', 'comfort',
    'ул. Маргилонская, 77', 'Marg‘ilon ko‘chasi, 77', 'рядом с университетом', 'universitet yonida',
-   12, 3.0, 10, 'mixed', '2026-09-09', '2026-09-19', 4)
+   12, 40.376800, 71.775200, 3.0, 'mixed', '2026-09-09', '2026-09-19', 4)
 ) as c (developer, slug, name, class, address_ru, address_uz, landmark_ru, landmark_uz,
-        minutes, ceiling, floors, parking, checked_on, visited_on, sort)
+        minutes, lat, lng, ceiling, parking, checked_on, visited_on, sort)
 join public.developers d on d.slug = c.developer
 join public.locations l on l.slug = 'fergana';
 

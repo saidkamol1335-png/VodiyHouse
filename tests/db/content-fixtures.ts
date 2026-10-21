@@ -26,6 +26,40 @@ async function insertId(admin: Db, sql: string, params: unknown[]): Promise<stri
   return rows[0]!.id;
 }
 
+/**
+ * Всё, что нужно ЖК для публикации (PLAN 3а, шаг 11): адрес, город, точка, блок со сроком,
+ * планировка с чертежом и ценой, 5 фото, первое — от 2400 px. В обход RLS.
+ */
+export async function makeComplexReady(admin: Db, complexId: string): Promise<void> {
+  await admin.query(
+    `update complexes set address = '{"ru": "ул. Навои, 1", "uz": "Navoiy ko‘chasi, 1"}',
+       location_id = (select id from locations order by sort limit 1), lat = 40.3864, lng = 71.7864
+     where id = $1`,
+    [complexId],
+  );
+  const blockId = await insertId(
+    admin,
+    `insert into blocks (complex_id, name, floors_total, deadline_year, deadline_quarter)
+     values ($1, 'R', 12, 2027, 4)`,
+    [complexId],
+  );
+  const drawingId = await insertId(
+    admin,
+    "insert into media_assets (complex_id, kind, path, width, height) values ($1, 'drawing', $2, 1600, 1200)",
+    [complexId, `complexes/${complexId}/${crypto.randomUUID()}.png`],
+  );
+  await admin.query(
+    "insert into layouts (block_id, rooms, area, drawing_id, price_from) values ($1, 1, 40, $2, 30000)",
+    [blockId, drawingId],
+  );
+  for (const [index, width] of [2400, 1600, 1600, 1600, 1600].entries()) {
+    await admin.query(
+      "insert into media_assets (complex_id, kind, path, width, height, sort) values ($1, 'photo', $2, $3, 1000, $4)",
+      [complexId, `complexes/${complexId}/${crypto.randomUUID()}.jpg`, width, (index + 1) * 10],
+    );
+  }
+}
+
 export async function seedContent(admin: Db): Promise<ContentIds> {
   const developer = (slug: string, status: PublicationStatus) =>
     insertId(admin, "insert into developers (slug, name, status) values ($1, $1, $2)", [
