@@ -12,7 +12,11 @@ import { cabinetPerson } from "@/lib/admin/person";
 import { DEMO_STAFF, DEMO_VIEWER_ID } from "@/lib/admin/staff/demoStaff";
 import { staffState } from "@/lib/admin/staff/directory";
 import type { StaffRowActionSet } from "@/lib/admin/staff/types";
-import { demoCreateStaffAction, demoResetStaffPasswordAction, demoSetStaffActiveAction } from "./actions";
+import {
+  demoCreateStaffAction,
+  demoResetStaffPasswordAction,
+  demoSetStaffActiveAction,
+} from "./actions";
 
 const DEMO_ROW_ACTIONS: StaffRowActionSet = {
   setActive: demoSetStaffActiveAction,
@@ -28,7 +32,15 @@ export default async function DevStaffPage() {
   const tabs = [{ segment: null, href: "/dev/staff", label: t("tabs.staff") }];
   return (
     <AdminShell viewer={DEV_VIEWER}>
-      <AdminPage topbar={<AdminTopbar title={t("title")} subtitle="Сотрудники · DEMO · служебная страница" person={person} />}>
+      <AdminPage
+        topbar={
+          <AdminTopbar
+            title={t("title")}
+            subtitle="Сотрудники · DEMO · служебная страница"
+            person={person}
+          />
+        }
+      >
         <AdminTabs label={t("tabsLabel")} tabs={tabs} />
         <StaffCreateForm action={demoCreateStaffAction} />
         <StaffList

@@ -52,12 +52,22 @@
   font-size: var(--fs-small);
 }
 
+/* Значок — своей колонкой: длинный пункт переносится, а кружок остаётся у первой строки. */
 .complex-readiness__item {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: start;
+  gap: 2px 8px;
   color: var(--amber-2);
+}
+
+/* Значок — по высоте первой строки текста. */
+.complex-readiness__item > svg {
+  margin-top: 0.2em;
+}
+
+.complex-readiness__note {
+  grid-column: 2;
 }
 
 .complex-readiness__item a {
@@ -75,7 +85,7 @@
   text-decoration: none;
 }
 
-.complex-readiness__note {
+.complex-readiness__item .complex-readiness__note {
   color: var(--fg-3);
   font-size: var(--fs-caption);
 }

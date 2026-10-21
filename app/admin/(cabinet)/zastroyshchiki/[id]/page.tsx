@@ -7,6 +7,7 @@ import {
 } from "@/lib/admin/actions/developerMedia";
 import type { DeveloperMediaActions } from "@/lib/admin/developers/types";
 import { getDeveloperPreviews } from "@/lib/admin/server/developerPage";
+import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { developerForTab } from "@/lib/admin/server/developerTab";
 
 export const instant = false;
@@ -29,6 +30,7 @@ export default async function DeveloperMainPage({ params }: { params: Promise<{ 
       action={saveDeveloperMainAction}
       media={media}
       mediaActions={MEDIA_ACTIONS}
+      complexesHref={`${ADMIN_ROUTES.complexes}?zastroyshchik=${developer.id}`}
     />
   );
 }

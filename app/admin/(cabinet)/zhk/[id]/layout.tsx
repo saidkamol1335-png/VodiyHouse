@@ -94,6 +94,11 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
               src: mediaSrc(file.path),
             }))}
             base={base}
+            developer={{
+              name: complex.developerName,
+              published: complex.developerStatus === "published",
+              href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
+            }}
           />
         }
       />

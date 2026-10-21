@@ -70,3 +70,14 @@
   letter-spacing: var(--ls-mono);
   overflow-wrap: anywhere;
 }
+
+/* «ЖК застройщика →» — ссылка на список ЖК с фильтром, рядом с адресом на сайте. */
+.developer-main__complexes {
+  margin-left: 12px;
+  color: var(--amber-2);
+  font-family: var(--font);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}

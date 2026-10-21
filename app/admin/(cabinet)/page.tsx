@@ -21,8 +21,16 @@ async function HomeTopbar({ person }: { person: CabinetPerson }) {
   const now = new Date();
   const t = await getTranslations("admin.home");
   const greeting = t(`greeting.${greetingOf(now)}`);
-  const title = person.firstName ? t("greetingWithName", { greeting, name: person.firstName }) : greeting;
-  return <AdminTopbar title={title} subtitle={t("subtitle", { date: formatWeekdayDate(now) })} person={person} />;
+  const title = person.firstName
+    ? t("greetingWithName", { greeting, name: person.firstName })
+    : greeting;
+  return (
+    <AdminTopbar
+      title={title}
+      subtitle={t("subtitle", { date: formatWeekdayDate(now) })}
+      person={person}
+    />
+  );
 }
 
 export default async function AdminHomePage() {

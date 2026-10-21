@@ -62,6 +62,11 @@ export default async function DevComplexLayout({ children, params }: DevComplexL
               readiness={readiness}
               files={[]}
               base={base}
+              developer={{
+                name: complex.developerName,
+                published: complex.developerStatus === "published",
+                href: `/dev/zastroyshchiki/${complex.developerId}`,
+              }}
             />
           }
         />

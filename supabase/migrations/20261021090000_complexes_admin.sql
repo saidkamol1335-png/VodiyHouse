@@ -889,3 +889,51 @@ grant execute on function
   private.journal_value(jsonb, text),
   public.journal_entries(uuid, bigint, integer, uuid)
 to authenticated;
+
+-- ─── Адрес на сайте у ещё не опубликованного ЖК («реши сам» шага 11) ─────────────────────
+-- Пока ЖК ни разу не публиковался (отметки 1.2 ещё не было), адрес следует за UZ-названием —
+-- опечатка черновика не остаётся в адресе навсегда. После первой публикации адрес не меняется:
+-- ссылки на сайте не ломаются. Ответ — адрес ЖК после вызова.
+create function public.set_complex_slug(p_complex uuid, p_slug text)
+returns text
+language plpgsql
+set search_path = ''
+as $$
+declare
+  current_slug text;
+  ever_published boolean;
+  candidate text := p_slug;
+  suffix integer := 1;
+begin
+  if not private.has_role('head') then
+    raise exception 'Адрес ЖК меняет руководитель' using errcode = 'insufficient_privilege', hint = 'vh:forbidden';
+  end if;
+  select c.slug, c.files_checked_at is not null into current_slug, ever_published
+    from public.complexes c where c.id = p_complex for update;
+  if current_slug is null then
+    raise exception 'ЖК не найден — обновите страницу' using errcode = 'no_data_found', hint = 'vh:not_found';
+  end if;
+  if ever_published or p_slug ~ '^demo(-|$)' or current_slug ~ '^demo(-|$)'
+     or current_slug = p_slug or current_slug ~ ('^' || p_slug || '-[0-9]+$') then
+    return current_slug;
+  end if;
+  loop
+    begin
+      update public.complexes set slug = candidate where id = p_complex;
+      return candidate;
+    exception when unique_violation then
+      suffix := suffix + 1;
+      if suffix > 99 then
+        raise;
+      end if;
+      candidate := p_slug || '-' || suffix;
+    end;
+  end loop;
+end;
+$$;
+
+comment on function public.set_complex_slug(uuid, text) is
+  'Адрес на сайте по UZ-названию — только у ЖК, который ещё ни разу не публиковался.';
+
+revoke all on function public.set_complex_slug(uuid, text) from public, anon;
+grant execute on function public.set_complex_slug(uuid, text) to authenticated;

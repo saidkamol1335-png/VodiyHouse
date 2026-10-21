@@ -82,6 +82,30 @@ describe("кабинет ЖК", () => {
     });
   });
 
+  describe("адрес на сайте", () => {
+    const setSlug = (id: string, slug: string) =>
+      scalar<string>(head, "select set_complex_slug($1, $2) as value", [id, slug]);
+
+    it("пока ЖК не публиковался — следует за названием; занят — -2; после публикации — нет", async () => {
+      const id = await createComplex("Shodlk", "shodlk");
+      await createComplex("Shodlik", "shodlik");
+      expect(await setSlug(id, "shodlik")).toBe("shodlik-2");
+      expect(await setSlug(id, "shodlik")).toBe("shodlik-2");
+      await makeComplexReady(db.admin, id);
+      await publish(id);
+      expect(await setSlug(id, "shodlik-city")).toBe("shodlik-2");
+    });
+
+    it("адрес demo-… не выдаётся и не меняется; менеджер — отказ", async () => {
+      const id = await createComplex("Orzu Park", "orzu-park");
+      expect(await setSlug(id, "demo-orzu")).toBe("orzu-park");
+      await expectHint(
+        db.as(user(manager), (tx) => tx.query("select set_complex_slug($1, 'x')", [id])),
+        "vh:forbidden",
+      );
+    });
+  });
+
   describe("список", () => {
     it("строки в порядке каталога с застройщиком; видеографу — пусто", async () => {
       const id = await createComplex("Gulzor", "gulzor");

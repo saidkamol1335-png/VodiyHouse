@@ -9,6 +9,12 @@ const LIST = "/dev/zhk";
 const complexUrl = (n: number) => `${LIST}/00000000-0000-4000-8000-0000000000c${n}`;
 const MARGILON_INVEST = "00000000-0000-4000-8000-0000000000d2";
 
+/** Переход и гидратация: поля управляемые — ввод до React теряется (как в 10.1 со снимками). */
+async function open(page: Page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+}
+
 const noHorizontalScroll = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
@@ -29,7 +35,7 @@ test.describe("кабинет · ЖК · список", () => {
   test("строки как «Остатки по ЖК»: комнаты, «свободно N», плашки; «Все» без архива", async ({
     page,
   }) => {
-    await page.goto(LIST);
+    await open(page, LIST);
     await expect(page.locator(".complex-list__row")).toHaveCount(6);
     const shodlik = rowOf(page, "Shodlik");
     await expect(shodlik).toContainText("Фергана · Farg‘ona Sifat Qurilish");
@@ -49,7 +55,7 @@ test.describe("кабинет · ЖК · список", () => {
   });
 
   test("поиск без апострофа и по городу; архив — своей пилюлей", async ({ page }) => {
-    await page.goto(LIST);
+    await open(page, LIST);
     const rows = page.locator(".complex-list__row");
     await page.getByLabel("Поиск ЖК").fill("коканд");
     await expect(rows).toHaveCount(1);
@@ -65,7 +71,7 @@ test.describe("кабинет · ЖК · список", () => {
   });
 
   test("ЖК застройщика: ?zastroyshchik= — только его, крестик — весь список", async ({ page }) => {
-    await page.goto(`${LIST}?zastroyshchik=${MARGILON_INVEST}`);
+    await open(page, `${LIST}?zastroyshchik=${MARGILON_INVEST}`);
     await expect(page.locator(".complex-list__row")).toHaveCount(2);
     await page.getByRole("link", { name: /Застройщик: Marg‘ilon Invest/ }).click();
     await expect(page).toHaveURL(LIST);
@@ -73,7 +79,7 @@ test.describe("кабинет · ЖК · список", () => {
   });
 
   test("«+ Добавить ЖК»: застройщик и название; UZ подставляется латиницей", async ({ page }) => {
-    await page.goto(LIST);
+    await open(page, LIST);
     await page.getByRole("button", { name: "Добавить ЖК" }).click();
     await page.getByRole("button", { name: "Создать черновик" }).click();
     await expect(page.locator(".field__error", { hasText: "Выберите застройщика" })).toBeVisible();
@@ -91,7 +97,7 @@ test.describe("кабинет · ЖК · список", () => {
   });
 
   test("страница не шире экрана", async ({ page }) => {
-    await page.goto(LIST);
+    await open(page, LIST);
     await page.waitForLoadState("networkidle");
     expect(await noHorizontalScroll(page)).toBe(0);
   });
@@ -116,7 +122,7 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("вкладки — адреса; у черновика точки там, где не хватает данных", async ({ page }) => {
-    await page.goto(GULZOR);
+    await open(page, GULZOR);
     const tabs = page.getByRole("navigation", { name: "Разделы ЖК" });
     await expect(tabs.getByRole("link")).toHaveText([
       /Основное/,
@@ -131,14 +137,14 @@ test.describe("кабинет · ЖК · страница", () => {
       "href",
       `${GULZOR}/foto`,
     );
-    await page.goto(SHODLIK);
+    await open(page, SHODLIK);
     // У опубликованного строки готовности и точек нет.
     await expect(page.locator(".admin-tabs__dot")).toHaveCount(0);
     await expect(page.locator(".complex-readiness")).toHaveCount(0);
   });
 
   test("готовность (И9): «1 из 8», список — ссылки на вкладки, «нужно ещё 5»", async ({ page }) => {
-    await page.goto(GULZOR);
+    await open(page, GULZOR);
     const toggle = page.getByRole("button", { name: /Для публикации: 1 из 8/ });
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
@@ -152,7 +158,7 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("публикация (И8): панель с галочкой 1.2; без данных — чего не хватает", async ({ page }) => {
-    await page.goto(GULZOR);
+    await open(page, GULZOR);
     await page.getByRole("button", { name: "Опубликовать" }).click();
     const panel = page.locator(".complex-publish");
     await expect(panel).toContainText("Опубликовать ЖК?");
@@ -166,7 +172,7 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("архив — только с верным названием (RU или UZ)", async ({ page }) => {
-    await page.goto(GULZOR);
+    await open(page, GULZOR);
     await page.getByRole("button", { name: "В архив" }).click();
     const confirm = page.getByLabel("Чтобы подтвердить, введите название");
     await confirm.fill("Gulzar");
@@ -180,7 +186,7 @@ test.describe("кабинет · ЖК · страница", () => {
   test("«Основное»: три панели; контакты в тексте и кривая точка — ошибки, потом «Сохранено»", async ({
     page,
   }) => {
-    await page.goto(SHODLIK);
+    await open(page, SHODLIK);
     await expect(page.getByRole("heading", { level: 2 })).toHaveText([
       "О ЖК",
       "Расположение",
@@ -209,7 +215,7 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("точка вне области — подсказка; класс сбрасывается крестиком", async ({ page }) => {
-    await page.goto(SHODLIK);
+    await open(page, SHODLIK);
     await page.getByLabel("Координаты или ссылка на карту").fill("71.7843, 40.3842");
     await expect(page.getByText(/широта и долгота перепутаны/)).toBeVisible();
     const classes = page.getByRole("radiogroup", { name: "Класс" });
@@ -221,7 +227,7 @@ test.describe("кабинет · ЖК · страница", () => {
   test("несохранённые правки: переход по вкладке спрашивает «Уйти без сохранения?»", async ({
     page,
   }) => {
-    await page.goto(SHODLIK);
+    await open(page, SHODLIK);
     await page.getByLabel("До центра, мин").fill("9");
     let asked = "";
     page.once("dialog", (dialog) => {
@@ -236,9 +242,24 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(page).toHaveURL(SHODLIK);
   });
 
+  test("застройщик не опубликован — подсказка в шапке; со страницы застройщика — его ЖК", async ({
+    page,
+  }) => {
+    await open(page, GULZOR);
+    await expect(page.locator(".form-status")).toContainText(
+      "ЖК не появится на сайте, пока не опубликован застройщик «Navro‘z Qurilish».",
+    );
+    await open(page, SHODLIK);
+    await expect(page.getByText(/ЖК не появится на сайте/)).toHaveCount(0);
+    await open(page, "/dev/zastroyshchiki/00000000-0000-4000-8000-0000000000d1");
+    await page.getByRole("link", { name: "ЖК застройщика →" }).click();
+    await expect(page.locator(".complex-list__row")).toHaveCount(1);
+    await expect(page.locator(".complex-list__row")).toContainText("ЖК Shodlik");
+  });
+
   test("страница не шире экрана", async ({ page }) => {
     for (const url of [SHODLIK, GULZOR]) {
-      await page.goto(url);
+      await open(page, url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);
     }

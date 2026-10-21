@@ -95,6 +95,11 @@ export async function saveComplexMainAction(formData: FormData): Promise<SaveCom
     .select("id");
   if (error) return fail(contentDbErrorCode(error), brokenOf(error));
   if (!data?.length) return fail("notFound");
+  // Пока ЖК не публиковался, адрес на сайте — по UZ-названию (база не тронет опубликованный).
+  await guard.supabase.rpc("set_complex_slug", {
+    p_complex: id,
+    p_slug: contentSlug(parsed.value.name.uz, SLUG_FALLBACK),
+  });
   refresh();
   return { status: "saved", at: Date.now() };
 }

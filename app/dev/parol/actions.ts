@@ -8,17 +8,26 @@ import { DEMO_EMAIL, DEMO_TEMPORARY_PASSWORD } from "./demo";
 
 // Подделка Supabase для стенда: настоящее ядро смены пароля, но без Auth и базы.
 const demoDeps: ChangePasswordDeps = {
-  verifyCurrentPassword: async (_email, password) => (password === DEMO_TEMPORARY_PASSWORD ? "ok" : "wrong"),
+  verifyCurrentPassword: async (_email, password) =>
+    password === DEMO_TEMPORARY_PASSWORD ? "ok" : "wrong",
   updatePassword: async () => null,
   clearMustChange: async () => true,
   signOutOthers: async () => undefined,
 };
 
 /** /dev/parol: успех ведёт в кабинет (без ключей Supabase он открыт), ошибки — как у настоящей формы. */
-export async function demoChangePasswordAction(_previous: PasswordState, formData: FormData): Promise<PasswordState> {
+export async function demoChangePasswordAction(
+  _previous: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
   if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
   const fields = parsePasswordChange(formData);
-  const outcome = await changeFirstPassword(demoDeps, { ...fields, userId: "demo", email: DEMO_EMAIL, role: "manager" });
+  const outcome = await changeFirstPassword(demoDeps, {
+    ...fields,
+    userId: "demo",
+    email: DEMO_EMAIL,
+    role: "manager",
+  });
   if (outcome.kind === "error") return { error: outcome.code, fieldErrors: outcome.fieldErrors };
   redirect(outcome.to);
 }

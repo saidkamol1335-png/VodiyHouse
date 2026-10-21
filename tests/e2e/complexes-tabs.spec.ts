@@ -8,6 +8,12 @@ const complexUrl = (n: number) => `/dev/zhk/00000000-0000-4000-8000-0000000000c$
 const SHODLIK = complexUrl(1);
 const GULZOR = complexUrl(5);
 
+/** Переход и гидратация: поля управляемые — ввод до React теряется (как в 10.1 со снимками). */
+async function open(page: Page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+}
+
 const noHorizontalScroll = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
@@ -31,7 +37,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   });
 
   test("«Блоки» (И4): карточки-сводки как на сайте, порядок стрелками", async ({ page }) => {
-    await page.goto(`${SHODLIK}/bloki`);
+    await open(page, `${SHODLIK}/bloki`);
     const cards = page.getByTestId("block-card");
     await expect(cards).toHaveCount(2);
     await expect(cardOf(page, "Блок A").locator(".block-card__summary")).toHaveText(
@@ -49,7 +55,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   test("блок со списком квартир не удаляется; сданному не нужны «построено» и %", async ({
     page,
   }) => {
-    await page.goto(`${SHODLIK}/bloki`);
+    await open(page, `${SHODLIK}/bloki`);
     const a = cardOf(page, "Блок A");
     await a.getByRole("button", { name: "Изменить" }).click();
     await expect(a).toContainText("У блока список из 88 квартир");
@@ -62,7 +68,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   test("новый блок: без названия и этажности — ошибки в карточке, потом «Сохранено»", async ({
     page,
   }) => {
-    await page.goto(`${SHODLIK}/bloki`);
+    await open(page, `${SHODLIK}/bloki`);
     await page.getByRole("button", { name: "Добавить блок" }).click();
     await page.getByRole("button", { name: "Сохранить вкладку" }).click();
     // Заголовок карточки меняется вместе с названием — берём последнюю карточку.
@@ -77,7 +83,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   });
 
   test("смена валюты при ценах планировок — с подтверждением", async ({ page }) => {
-    await page.goto(`${NAMUNA}/bloki`);
+    await open(page, `${NAMUNA}/bloki`);
     const card = cardOf(page, "Блок 1");
     await card.getByRole("button", { name: "Изменить" }).click();
     // Выбор применяется только после «Да»: радио управляемое, поэтому клик, а не check.
@@ -91,7 +97,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   test("«Планировки» (И5): переключатель блоков; у блока с квартирами цена — из квартир", async ({
     page,
   }) => {
-    await page.goto(`${SHODLIK}/planirovki`);
+    await open(page, `${SHODLIK}/planirovki`);
     const rows = page.getByTestId("layout-row");
     await expect(rows).toHaveCount(4);
     await expect(rows.first()).toContainText("от $31 000 · свободно 2");
@@ -107,7 +113,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   test("чертёж в опубликованный ЖК — только с отметкой 1.2; маленький — понятная ошибка", async ({
     page,
   }) => {
-    await page.goto(`${SHODLIK}/planirovki`);
+    await open(page, `${SHODLIK}/planirovki`);
     const row = page.getByTestId("layout-row").first();
     const input = row.locator('input[type="file"]');
     await expect(input).toBeDisabled();
@@ -126,7 +132,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
   });
 
   test("блок без квартир: своя цена; пустая строка — ошибки; «Дублировать»", async ({ page }) => {
-    await page.goto(`${NAMUNA}/planirovki`);
+    await open(page, `${NAMUNA}/planirovki`);
     const rows = page.getByTestId("layout-row");
     await expect(rows).toHaveCount(7);
     await expect(rows.first().getByLabel("Цена от, $")).toHaveValue("33000");
@@ -140,7 +146,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
 
   test("вкладки не шире экрана", async ({ page }) => {
     for (const url of [`${SHODLIK}/bloki`, `${SHODLIK}/planirovki`, `${NAMUNA}/planirovki`]) {
-      await page.goto(url);
+      await open(page, url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);
     }
@@ -161,7 +167,7 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
   test("«Фото» (И6): у опубликованного — сначала отметка 1.2; пачка; маленькое — ошибка; обложка", async ({
     page,
   }) => {
-    await page.goto(`${SHODLIK}/foto`);
+    await open(page, `${SHODLIK}/foto`);
     const add = page.getByLabel("Добавить фото");
     await expect(add).toBeDisabled();
     await page.getByRole("checkbox", { name: /Правило 1\.2/ }).check();
@@ -185,7 +191,7 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
   test("порядок стрелкой, точка фокуса и удаление — сразу, без кнопки сохранения", async ({
     page,
   }) => {
-    await page.goto(`${GULZOR}/foto`);
+    await open(page, `${GULZOR}/foto`);
     await expect(page.getByRole("checkbox", { name: /Правило 1\.2/ })).toHaveCount(0);
     await page
       .getByLabel("Добавить фото")
@@ -211,15 +217,15 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
   });
 
   test("«Квартиры» до шага 12 и «Журнал» ЖК", async ({ page }) => {
-    await page.goto(`${SHODLIK}/kvartiry`);
+    await open(page, `${SHODLIK}/kvartiry`);
     const rows = page.locator(".complex-units__row");
     await expect(rows.first()).toContainText("Блок A");
     await expect(rows.first()).toContainText("список из 88 квартир");
     await expect(rows.first()).toContainText("свободно 12");
-    await page.goto(`${NAMUNA}/kvartiry`);
+    await open(page, `${NAMUNA}/kvartiry`);
     await expect(page.locator(".complex-units__row")).toContainText("списка квартир нет");
 
-    await page.goto(`${SHODLIK}/zhurnal`);
+    await open(page, `${SHODLIK}/zhurnal`);
     await expect(page.getByText("Блок B").first()).toBeVisible();
     await expect(page.getByText("Готовность, %")).toBeVisible();
     await expect(page.getByText("Блок A · 1-комн. · 42,5 м²")).toBeVisible();
@@ -227,7 +233,7 @@ test.describe("кабинет · ЖК · фото, квартиры, журна�
 
   test("вкладки не шире экрана", async ({ page }) => {
     for (const url of [`${SHODLIK}/foto`, `${SHODLIK}/kvartiry`, `${SHODLIK}/zhurnal`]) {
-      await page.goto(url);
+      await open(page, url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);
     }

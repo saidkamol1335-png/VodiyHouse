@@ -22,6 +22,7 @@ export default async function DevDeveloperMainPage({
       action={demoSaveMainAction}
       media={{ logo: null, cover: null }}
       mediaActions={null}
+      complexesHref={`/dev/zhk?zastroyshchik=${developer.id}`}
     />
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
@@ -26,6 +27,8 @@ type DeveloperMainFormProps = {
   media: { logo: MediaPreview | null; cover: MediaPreview | null };
   /** null — без облака (служебный стенд): фото остаются в браузере. */
   mediaActions: DeveloperMediaActions | null;
+  /** Список ЖК с фильтром по застройщику (?zastroyshchik=…). */
+  complexesHref: string;
 };
 
 const IDLE: SaveMainResult = { status: "idle" };
@@ -47,6 +50,7 @@ export function DeveloperMainForm({
   action,
   media,
   mediaActions,
+  complexesHref,
 }: DeveloperMainFormProps) {
   const t = useTranslations("admin.developers");
   const [state, formAction, pending] = useActionState(
@@ -106,6 +110,9 @@ export function DeveloperMainForm({
         </div>
         <p className="developer-main__slug">
           {t("slug")}: {ROUTES.developers}/{developer.slug}
+          <Link className="developer-main__complexes" href={complexesHref}>
+            {t("complexesLink")}
+          </Link>
         </p>
         <BilingualField
           id="developer-about"
