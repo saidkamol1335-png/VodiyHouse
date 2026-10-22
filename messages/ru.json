@@ -581,7 +581,7 @@
         "inherit": "как в блоке",
         "delete": "Удалено: {count, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
         "deleteList": "Удалён весь список: {count, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
-        "statuses": "свободных {free}, в брони {reserved}, продано {sold}",
+        "statuses": "свободных {free, number}, в брони {reserved, number}, продано {sold, number}",
         "reservedWere": "были в брони: № <numbers></numbers>",
         "soldWere": "были проданы: № <numbers></numbers>",
         "showAll": "показать все"
@@ -1039,8 +1039,7 @@
           "noLayout": "— без планировки",
           "refine": "+ Уточнить для подъезда",
           "split": "+ Разделить по этажам",
-          "remove": "Убрать строку",
-        "removeRow": "Убрать строку: позиция {position}, {entrance, select, all {все подъезды} other {подъезд {entrance}}}, эт. {from}–{to}",
+          "removeRow": "Убрать строку: позиция {position}, {entrance, select, all {все подъезды} other {подъезд {entrance}}}, эт. {from}–{to}",
           "toggle": "Стояки · {count, plural, one {# строка} few {# строки} many {# строк} other {# строки}}",
           "save": "Сохранить стояки",
           "saving": "Сохраняем…",

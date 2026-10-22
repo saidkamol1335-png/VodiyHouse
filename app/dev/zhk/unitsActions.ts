@@ -10,6 +10,7 @@ import {
   isUuid,
   readPlan,
   readRisers,
+  readRisersForPlan,
   readRisersSnapshot,
   readStatus,
   readUnitIds,
@@ -73,7 +74,7 @@ export async function demoSaveRisersAction(
   if (!block) return unitsFailure("notFound");
   const plan = planFromUnits(block.units, block.floors);
   const base = readRisersSnapshot(input.base);
-  const risers = readRisers(input.risers, plan);
+  const risers = readRisersForPlan(input.risers, plan);
   if (!base || !risers) return unitsFailure("invalid");
   const { changes, skipped } = riserEdits(block.units, base, risers);
   return { status: "done", changed: changes.length, skipped: skipped.map((unit) => unit.number) };

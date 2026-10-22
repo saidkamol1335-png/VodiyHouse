@@ -25,8 +25,8 @@ type BlockReadStateProps = {
   retry: () => Promise<boolean>;
   /** Прежний список на экране — не обновился. */
   stale?: boolean;
-  /** Куда перевести фокус после удачного «Повторить»: кнопка уходит вместе с отказом. */
-  focusAfter?: string;
+  /** Удачное «Повторить» с фокусом на кнопке: она уходит вместе с отказом — фокус переставит блок. */
+  onRecovered?: () => void;
 };
 
 /** Первое чтение, его отказ с «Повторить» или «список не обновился — показан прежний». */
@@ -35,16 +35,13 @@ export function BlockReadState({
   reading,
   retry,
   stale = false,
-  focusAfter,
+  onRecovered,
 }: BlockReadStateProps) {
   const t = useTranslations("admin.complexes.units");
   const tErrors = useTranslations("admin.developers.errors");
   const retryKeepingFocus = async (button: HTMLButtonElement) => {
     const focused = document.activeElement === button;
-    if (!(await retry()) || !focused || !focusAfter) return;
-    requestAnimationFrame(() =>
-      document.getElementById(focusAfter)?.focus({ preventScroll: true }),
-    );
+    if ((await retry()) && focused) onRecovered?.();
   };
   if (!error)
     return (
@@ -55,7 +52,9 @@ export function BlockReadState({
   return (
     <div className="units-block__failed">
       <FormStatus tone={stale ? "notice" : "error"}>
-        {stale ? t("list.refreshFailed") : t("list.loadFailed")} {tErrors(error)}
+        {stale ? t("list.refreshFailed") : t("list.loadFailed")}{" "}
+        {/* Читают все сотрудники: «только руководитель» ввело бы в заблуждение — доступ отключили. */}
+        {error === "forbidden" ? t("list.bar.forbidden") : tErrors(error)}
       </FormStatus>
       <button
         type="button"

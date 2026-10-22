@@ -103,3 +103,11 @@
     height: 44px;
   }
 }
+
+/* Планшет пальцем: «+ Квартира» и «Повторить» — 44 px. */
+@media (pointer: coarse) {
+  .units-block__add,
+  .units-block__retry {
+    height: 44px;
+  }
+}

@@ -25,6 +25,14 @@
   font-size: var(--fs-small);
 }
 
+/* Ссылка в тексте пояснения — не только цветом (WCAG 1.4.1): preflight снимает подчёркивание. */
+.complex-layouts__link {
+  color: var(--amber-2);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .complex-layouts__empty {
   display: flex;
   flex-wrap: wrap;

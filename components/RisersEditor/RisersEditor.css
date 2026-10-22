@@ -166,3 +166,16 @@
     height: 44px;
   }
 }
+
+/* Планшет пальцем: «×» строки — 44 px и шире телефонной ширины (на телефоне — своя сетка выше). */
+@media (pointer: coarse) and (min-width: 761px) {
+  .risers-editor__row {
+    grid-template-columns: 170px 96px 96px minmax(0, 1fr) 44px;
+  }
+
+  .risers-editor__remove,
+  .risers-editor__remove-gap {
+    width: 44px;
+    height: 44px;
+  }
+}

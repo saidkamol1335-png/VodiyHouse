@@ -247,3 +247,10 @@
     min-height: 44px;
   }
 }
+
+/* Планшет пальцем: «Выбрать все», «Снять выделение» — 44 px, как на телефоне. */
+@media (pointer: coarse) {
+  .units-list__select-button {
+    min-height: 44px;
+  }
+}

@@ -18,7 +18,7 @@ export function UnitsBarDock({ blockId }: { blockId: string }) {
     <>
       {bar ? <div className="units-bar-dock__spacer" aria-hidden="true" /> : null}
       <UnitsDock>
-        <UnitsUndoBar control={control} blockId={blockId} />
+        <UnitsUndoBar control={control} blockId={blockId} undoable={false} />
       </UnitsDock>
     </>
   );

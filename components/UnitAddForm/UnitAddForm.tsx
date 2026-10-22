@@ -11,7 +11,7 @@ import { fieldOf } from "@/lib/admin/units/editOutcome";
 import type { UnitErrorField, UnitsLayout } from "@/lib/admin/units/types";
 import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import type { UnitsEditControl } from "@/lib/admin/units/useUnitsEdit";
-import { focusFirstInvalid } from "@/lib/ui/focusFirstInvalid";
+import { useFocusFirstInvalid } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import type { Riser, UnitRecord } from "@/lib/units";
 import { useUnitAddForm, type UnitAddFormState } from "./useUnitAddForm";
@@ -32,6 +32,7 @@ export function UnitAddForm({ onClose, ...params }: UnitAddFormProps) {
   const { reply, added, pending } = form;
   // «Добавить» недоступна, пока идёт запрос: фокус вернётся на неё — форма ждёт следующую.
   const submit = useRefocusAfter(pending);
+  const focusInvalid = useFocusFirstInvalid();
   return (
     <form
       className="unit-add"
@@ -39,7 +40,7 @@ export function UnitAddForm({ onClose, ...params }: UnitAddFormProps) {
       onSubmit={(event) => {
         event.preventDefault();
         const element = event.currentTarget;
-        void form.submit().then(() => focusFirstInvalid(element));
+        void form.submit().then(() => focusInvalid(element));
       }}
     >
       <p className="unit-add__title">{t("title")}</p>

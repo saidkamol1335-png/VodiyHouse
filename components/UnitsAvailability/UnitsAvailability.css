@@ -101,3 +101,10 @@
     min-height: 44px;
   }
 }
+
+/* Планшет пальцем: «Доступна | Нет в наличии» — 44 px. */
+@media (pointer: coarse) {
+  .units-availability__row .units-availability__option {
+    min-height: 44px;
+  }
+}

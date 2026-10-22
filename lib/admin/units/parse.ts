@@ -4,6 +4,7 @@
 import { PRICE_MAX, PRICE_PER_M2_MAX } from "@/lib/format";
 import {
   BLOCK_PLAN_LIMITS,
+  clipRisersToPlan,
   foldUnitNumber,
   isUnitNumber,
   isUnitStatus,
@@ -127,6 +128,17 @@ export function readRisersSnapshot(value: unknown): Riser[] | null {
   if (!Array.isArray(value) || value.length > BLOCK_PLAN_LIMITS.totalUnits) return null;
   const risers = value.map(readRiser);
   return risers.some((riser) => riser === null) ? null : (risers as Riser[]);
+}
+
+/**
+ * Черновик стояков готового блока: форма, затем — под текущий план (он мог сжаться после снимка:
+ * нетронутые строки черновика несут прежние границы) и строго.
+ */
+export function readRisersForPlan(value: unknown, plan: BlockPlan): Riser[] | null {
+  const risers = readRisersSnapshot(value);
+  if (!risers) return null;
+  const clipped = clipRisersToPlan(risers, plan);
+  return validateRisers(plan, clipped).length === 0 ? clipped : null;
 }
 
 /** Стояки в границах блока; пересечения одного уровня — отказ (validateRisers). */

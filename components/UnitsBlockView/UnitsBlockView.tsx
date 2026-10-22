@@ -11,6 +11,7 @@ import { UnitsRisers } from "@/components/UnitsRisers";
 import { UnitsUndoBar } from "@/components/UnitsUndoBar";
 import { UnitsEditContext } from "@/lib/admin/units/editContext";
 import type { SaveRisersInput, SaveRisersResult, UnitsAction } from "@/lib/admin/units/types";
+import { useFocusAfterRender } from "@/lib/ui/useFocusAfterRender";
 import { BLOCK_PLAN_LIMITS } from "@/lib/units";
 import { BlockReadState, ListGone } from "./BlockReadState";
 import { UnitsBlockHead } from "./UnitsBlockHead";
@@ -148,7 +149,13 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
     () => (edit && base ? { edit, block, layouts, finishings, units: base, dirty } : null),
     [edit, base, block, layouts, finishings, dirty],
   );
-  const read = { error: readError, reading, retry: store.reload, focusAfter: ids.summary };
+  const focusAfterRead = useFocusAfterRender();
+  const read = {
+    error: readError,
+    reading,
+    retry: store.reload,
+    onRecovered: () => focusAfterRead(ids.summary),
+  };
   if (base === null) return <BlockReadState {...read} />;
   if (base.length === 0) return <ListGone />;
   return (

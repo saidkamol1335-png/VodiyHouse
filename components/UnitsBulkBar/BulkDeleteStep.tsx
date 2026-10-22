@@ -105,7 +105,7 @@ function DeleteWarnings({ id, units, visible, published }: DeleteWarningsProps) 
   const sold = units.filter((unit) => unit.status === "sold");
   const hidden = hiddenCount(units, visible);
   return (
-    <div id={id}>
+    <div id={id} className="units-bulk__warnings">
       {reserved.length > 0 ? (
         <p className="units-bulk__warning">
           {t("reserved", { numbers: numbersLine(reserved, more) })}

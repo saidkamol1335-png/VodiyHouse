@@ -12,7 +12,7 @@ import { fieldOf } from "@/lib/admin/units/editOutcome";
 import type { UnitErrorField } from "@/lib/admin/units/types";
 import { withField } from "@/lib/admin/units/unitForm";
 import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
-import { focusFirstInvalid } from "@/lib/ui/focusFirstInvalid";
+import { useFocusFirstInvalid } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import type { UnitRecord } from "@/lib/units";
 import { useUnitEditForm, type UnitEditFormState } from "./useUnitEditForm";
@@ -29,6 +29,7 @@ export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
   const form = useUnitEditForm(unit, onDone);
   const { initial, current, reply, pending } = form;
   const submit = useRefocusAfter(pending);
+  const focusInvalid = useFocusFirstInvalid();
   const changedMeanwhile = current !== null && current.updatedAt !== initial.updatedAt;
   return (
     <form
@@ -36,7 +37,7 @@ export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
       onSubmit={(event) => {
         event.preventDefault();
         const element = event.currentTarget;
-        void form.save().then(() => focusFirstInvalid(element));
+        void form.save().then(() => focusInvalid(element));
       }}
     >
       <p className="unit-edit__title">

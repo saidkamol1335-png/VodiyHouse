@@ -100,6 +100,7 @@
 @media (pointer: coarse) {
   .filter-pills__pill,
   .filter-pills--wrap .filter-pills__pill {
+    justify-content: center;
     min-width: 44px;
     height: 44px;
   }

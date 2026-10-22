@@ -36,12 +36,20 @@ export function RisersEditor({ idPrefix, plan, risers, layouts, onChange }: Rise
   const positions = [...new Set(risers.map((riser) => riser.position))].sort((a, b) => a - b);
   const rowsOf = (position: number) =>
     risers.flatMap((riser, index) => (riser.position === position ? [{ riser, index }] : []));
+  const titleOf = (position: number | undefined) =>
+    position === undefined ? null : `${idPrefix}-p${position}-title`;
+  // Последняя строка позиции уходит вместе с её заголовком — тогда фокус на соседнюю позицию.
+  const fallbackOf = (at: number) =>
+    [titleOf(positions[at + 1]), titleOf(positions[at - 1]), `${idPrefix}-list`].filter(
+      (id): id is string => id !== null,
+    );
   return (
-    <ul className="risers-editor">
-      {positions.map((position) => (
+    <ul id={`${idPrefix}-list`} className="risers-editor" tabIndex={-1}>
+      {positions.map((position, at) => (
         <RiserPosition
           key={position}
           idPrefix={`${idPrefix}-p${position}`}
+          fallback={fallbackOf(at)}
           position={position}
           rows={rowsOf(position)}
           plan={plan}
@@ -83,7 +91,9 @@ type PositionProps = {
   /** Новая строка на место at; patch — правка строки выше (у «разделить» укорачивается прежняя). */
   onInsert: (at: number, riser: Riser, patch?: RowPatch) => void;
   /** Фокус после перерисовки: нажатая кнопка уходит вместе со строкой или пропадает сама. */
-  focus: (id: string) => void;
+  focus: (...ids: string[]) => void;
+  /** Куда фокус, если вместе со строкой ушла вся позиция. */
+  fallback: readonly string[];
 };
 
 const rowId = (idPrefix: string, index: number) => `${idPrefix}-r${index}`;
@@ -112,7 +122,7 @@ function RiserPosition(props: PositionProps) {
             onChange={(patch) => props.onUpdate(index, patch)}
             onRemove={() => {
               props.onRemove(index);
-              props.focus(titleId);
+              props.focus(titleId, ...props.fallback);
             }}
           />
         ))}

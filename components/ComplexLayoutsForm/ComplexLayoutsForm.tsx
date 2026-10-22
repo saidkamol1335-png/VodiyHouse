@@ -193,7 +193,7 @@ function BlockLayoutsForm({
         {!block.hasUnits && rows.some((row) => !row.available) ? (
           <p className="complex-layouts__lead">
             {t("complexes.layouts.unavailableNote")}{" "}
-            <Link href={`${unitsHref}?blok=${block.blockId}`}>
+            <Link className="complex-layouts__link" href={`${unitsHref}?blok=${block.blockId}`}>
               {t("complexes.layouts.toUnits")}
             </Link>
           </p>

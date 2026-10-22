@@ -13,7 +13,15 @@
 }
 
 /* Точка «переход идёт» у ссылки блока: место занято всегда, меняется только прозрачность. */
+/* Точка — поверх угла пилюли: в потоке она сдвигала бы подпись. */
+.units-block-switch__item {
+  position: relative;
+}
+
 .units-block-switch__pending {
+  position: absolute;
+  top: 6px;
+  right: 8px;
   width: 6px;
   height: 6px;
   border-radius: var(--r-pill);

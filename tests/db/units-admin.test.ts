@@ -264,10 +264,19 @@ describe("квартиры в кабинете: права, генератор, 
       await timed(() =>
         callAs(db, head, "set_units_price($1, $2, 'total', 50000)", [tooBig, unitIds]),
       );
+      await timed(() => callAs(db, head, "set_units_finishing($1, $2, null)", [tooBig, unitIds]));
+      const noLayout = JSON.stringify(unitIds.map((id) => ({ id, layout_id: null })));
+      await timed(() => callAs(db, head, "set_units_layouts($1, $2::jsonb)", [tooBig, noLayout]));
       expect(
         await timed(() => callAs(db, head, "delete_block_units($1, 'Т')", [tooBig])),
       ).toMatchObject({ deleted: 5000 });
       expect(await unitsOf(db.admin, tooBig)).toHaveLength(0);
+      // Список заново — и «Удалить» выбранных: весь список так не удалить, поэтому 4999.
+      await generate(db, head, tooBig, big);
+      const fresh = (await unitsOf(db.admin, tooBig)).map((unit) => unit.id);
+      expect(
+        await timed(() => callAs(db, head, "delete_units($1, $2)", [tooBig, fresh.slice(1)])),
+      ).toMatchObject({ deleted: 4999 });
     });
 
     it("неверные строки отклоняются целиком понятным кодом, без частичной вставки", async () => {

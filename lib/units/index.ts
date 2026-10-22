@@ -45,6 +45,7 @@ export { parseUnitRecord, parseUnitRecords } from "./record";
 export type { LayoutChange, Riser, RiserIssue } from "./risers";
 export {
   applyRisers,
+  clipRisersToPlan,
   defaultRisers,
   fitRisersToPlan,
   layoutForSlot,

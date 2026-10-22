@@ -6,6 +6,7 @@ import {
   readPlan,
   readPrice,
   readRisers,
+  readRisersForPlan,
   readRisersSnapshot,
   readUnitIds,
   readUnitPatch,
@@ -78,6 +79,21 @@ describe("вход действий «Квартир»", () => {
     expect(readRisersSnapshot([{ ...risers[0], floorFrom: 1, floorTo: 13 }])).toHaveLength(1);
     expect(readRisersSnapshot([{ ...risers[0], layoutId: "x" }])).toBeNull();
     expect(readRisersSnapshot("x")).toBeNull();
+  });
+
+  it("черновик стояков готового блока — под сжавшийся план, а не отказ (второй круг 12.7)", () => {
+    const risers = defaultRisers(PLAN).map((riser) => ({ ...riser, layoutId: ID }));
+    // Удалили эт. 2 и позицию 4: нетронутые строки черновика — со старыми границами.
+    const shrunk: BlockPlan = { ...PLAN, firstResidentialFloor: 3, unitsPerFloor: [3, 3] };
+    expect(readRisers(risers, shrunk)).toBeNull();
+    const clipped = readRisersForPlan(risers, shrunk)!;
+    expect(clipped.map((riser) => [riser.position, riser.floorFrom, riser.floorTo])).toEqual([
+      [1, 3, 12],
+      [2, 3, 12],
+      [3, 3, 12],
+    ]);
+    // Пустой этаж не прячется обрезкой — это ошибка черновика.
+    expect(readRisersForPlan([{ ...risers[0], floorFrom: Number.NaN }], shrunk)).toBeNull();
   });
 
   it("«Удалить список блока»: название — без регистра и с двойниками A ↔ А", () => {

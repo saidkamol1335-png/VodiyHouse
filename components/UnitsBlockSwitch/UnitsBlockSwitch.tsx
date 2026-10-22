@@ -24,7 +24,7 @@ export function UnitsBlockSwitch({ blocks, current, href, query = null }: UnitsB
           key={block.id}
           href={`${href}?blok=${block.id}${query ? `&${query}` : ""}`}
           scroll={false}
-          className={segmentedItemClass(block.id === current)}
+          className={`${segmentedItemClass(block.id === current)} units-block-switch__item`}
           aria-current={block.id === current ? "page" : undefined}
         >
           {t("blockName", { name: block.name })}

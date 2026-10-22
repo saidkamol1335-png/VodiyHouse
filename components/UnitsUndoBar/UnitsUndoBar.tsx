@@ -14,6 +14,8 @@ type UnitsUndoBarProps = {
   control: UnitsBarView;
   /** Блок на экране: ответ из другого блока подписывается «Блок A · …». */
   blockId: string;
+  /** false — у блока без списка «Отменить» нет (список тапа удалили, пока шли 5 с). */
+  undoable?: boolean;
 };
 
 /** Куда вернуть фокус: после «Отменить» — на заголовок новой полосы, после «×» — откуда пришли. */
@@ -47,7 +49,7 @@ class FocusMemory {
  * «Кв. 41: свободна → бронь · Отменить». Живая область — отдельная скрытая строка, смонтирована
  * всегда: диктор слышит и первое сообщение, но не перечитывает кнопки.
  */
-export function UnitsUndoBar({ control, blockId }: UnitsUndoBarProps) {
+export function UnitsUndoBar({ control, blockId, undoable = true }: UnitsUndoBarProps) {
   const texts = useBarTexts();
   const [focus] = useState(() => new FocusMemory());
   const { bar } = control;
@@ -64,7 +66,7 @@ export function UnitsUndoBar({ control, blockId }: UnitsUndoBarProps) {
           control={control}
           lines={lines}
           focus={focus}
-          own={bar.blockId === blockId}
+          own={undoable && bar.blockId === blockId}
         />
       ) : null}
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import { useUnitsNotice } from "@/components/UnitsNotice";
 import { lostBar, nextBarOp } from "@/lib/admin/units/bar";
@@ -30,9 +30,21 @@ type UnitsAvailabilityProps = {
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.units">>;
 
 /** Отказ после смены блока — строкой «Блок C · Не сохранили …» в полосе вкладки (CL5 приёмки 12.7). */
+/** Разметка панели, снятая в эффекте: спрятанная Next'ом (Activity) — ещё в DOM, ушедшая — нет. */
+class PanelElement {
+  private element: HTMLElement | null = null;
+
+  watch(element: HTMLElement | null) {
+    if (element) this.element = element;
+  }
+
+  gone = () => !this.element?.isConnected;
+}
+
 function useLostAvailability(
   block: Pick<UnitsBlock, "id" | "name">,
   describe: (layout: UnitsLayout) => LayoutText,
+  panel: PanelElement,
 ): LostAvailability {
   const { setBar } = useUnitsBar();
   const latest = useRef(describe);
@@ -41,6 +53,8 @@ function useLostAvailability(
   });
   return useCallback(
     (layout, available, error) => {
+      // Вкладку лишь спрятали — отказ покажет строка, когда её откроют; в полосу — только с ушедшей.
+      if (!panel.gone()) return;
       const { name, price } = latest.current(layout);
       const message = {
         kind: "availabilityFailed" as const,
@@ -51,7 +65,7 @@ function useLostAvailability(
       const where = { blockId: block.id, blockName: block.name };
       setBar((current) => lostBar(current, { message, ...where }, nextBarOp()));
     },
-    [block.id, block.name, setBar],
+    [block.id, block.name, panel, setBar],
   );
 }
 type Control = ReturnType<typeof useLayoutAvailability>;
@@ -71,10 +85,13 @@ export function UnitsAvailability({ block, layouts, action }: UnitsAvailabilityP
   const label = useLayoutLabel(layouts);
   const describe = (layout: UnitsLayout) =>
     describeLayout(layout, label(layout), block.currency, t);
-  const onLost = useLostAvailability(block, describe);
+  const section = useRef<HTMLElement>(null);
+  const [panel] = useState(() => new PanelElement());
+  useEffect(() => panel.watch(section.current));
+  const onLost = useLostAvailability(block, describe, panel);
   const control = useLayoutAvailability(layouts, action, onStale, onLost);
   return (
-    <section className="units-availability" aria-labelledby={titleId}>
+    <section ref={section} className="units-availability" aria-labelledby={titleId}>
       <h3 id={titleId} className="units-availability__title">
         {t("availability.title")}
       </h3>

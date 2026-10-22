@@ -94,6 +94,11 @@
   justify-items: start;
 }
 
+/* Обёртка предупреждений — только для aria-describedby: в сетке шага её как бы нет. */
+.units-bulk__warnings {
+  display: contents;
+}
+
 .units-bulk__form > .field,
 .units-bulk__form > .unit-price-fields {
   justify-self: stretch;

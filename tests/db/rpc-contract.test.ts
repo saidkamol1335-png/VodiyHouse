@@ -51,13 +51,17 @@ describe("вызовы rpc совпадают с функциями базы", (
       await supabase.rpc(fn, { p_one: 1, p_two: f({ x: 1, y: [2, 3] }) });
       await supabase.rpc("plain");
       await supabase.rpc("short", { p_block }, );
+      await supabase.rpc<Row>('set_v2', { p_x: "}", p_y: 2 });
     `;
     expect(rpcCallsOf({ file: "x.ts", source })).toEqual([
       { file: "x.ts", name: "add_a", keys: ["p_one", "p_two"] },
       { file: "x.ts", name: "add_b", keys: ["p_one", "p_two"] },
       { file: "x.ts", name: "plain", keys: [] },
       { file: "x.ts", name: "short", keys: ["p_block"] },
+      { file: "x.ts", name: "set_v2", keys: ["p_x", "p_y"] },
     ]);
+    const template = "supabase.rpc(`set_${kind}_media`, { p_a: 1 })";
+    expect(() => rpcCallsOf({ file: "y.ts", source: template })).toThrow(/без имени-строки: 1/);
   });
 });
 
@@ -72,11 +76,20 @@ async function sourceFiles(dir: string): Promise<{ file: string; source: string 
   );
 }
 
+// Имя — строкой в любых кавычках или переменной; .rpc<T>( — тоже вызов.
+const CALL =
+  /\.rpc\s*(?:<[^>]*>)?\s*\(\s*(?:(["'`])([a-z_][a-z0-9_]*)\1|([A-Za-z_]\w*))\s*(,\s*\{)?/g;
+const ANY_CALL = /\.rpc\s*(?:<[^>]*>)?\s*\(/g;
+
 function rpcCallsOf({ file, source }: { file: string; source: string }): RpcCall[] {
   const calls: RpcCall[] = [];
-  for (const match of source.matchAll(/\.rpc\(\s*(?:"([a-z_]+)"|([A-Za-z_]\w*))\s*(,\s*\{)?/g)) {
-    const names = match[1] ? [match[1]] : namesOfVariable(source, match[2]!);
-    const keys = match[3] ? topLevelKeys(source, match.index + match[0].length) : [];
+  const matches = [...source.matchAll(CALL)];
+  // Не разобранный вызов (шаблонная строка, выражение) не должен проскочить молча.
+  const unparsed = [...source.matchAll(ANY_CALL)].length - matches.length;
+  if (unparsed > 0) throw new Error(`${file}: вызовов rpc без имени-строки: ${unparsed}`);
+  for (const match of matches) {
+    const names = match[2] ? [match[2]] : namesOfVariable(source, match[3]!);
+    const keys = match[4] ? topLevelKeys(source, match.index + match[0].length) : [];
     for (const name of names) calls.push({ file, name, keys });
   }
   return calls;
@@ -95,7 +108,17 @@ function topLevelKeys(source: string, start: number): string[] {
   const keys: string[] = [];
   let depth = 0;
   let segment = "";
+  let quote: string | null = null;
   for (const char of source.slice(start)) {
+    // Скобки и запятые внутри строкового значения — не разметка объекта.
+    if (quote !== null) {
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") {
+      quote = char;
+      continue;
+    }
     if (depth === 0 && (char === "," || char === "}")) {
       keys.push(/^\s*([A-Za-z_]\w*)\s*(?::|$)/.exec(segment)?.[1] ?? "");
       if (char === "}") break;

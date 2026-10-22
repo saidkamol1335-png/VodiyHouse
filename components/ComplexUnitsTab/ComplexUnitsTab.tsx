@@ -37,7 +37,7 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
     <AdminPanel title={t("title")} wide>
       <UnitsNoticeProvider blockId={view.block?.id ?? null}>
         <UnitsBarProvider>
-          <div className="complex-units">
+          <div className="complex-units" data-units-tab>
             <p className="complex-units__lead">{t(builds ? "lead" : "leadStock")}</p>
             {view.block === null ? (
               <p className="complex-units__note">

@@ -204,7 +204,7 @@ const Line = ({ children }: { children: ReactNode }) => (
 );
 // Строка с «показать все» (details) — div: details в p HTML не допускает, гидратация бы упала.
 const LongLine = ({ children }: { children: ReactNode }) => (
-  <div className="journal-list__summary-line">{children}</div>
+  <div className="journal-list__summary-line journal-list__summary-line--long">{children}</div>
 );
 const Note = ({ children }: { children: ReactNode }) => (
   <p className="journal-list__note">{children}</p>

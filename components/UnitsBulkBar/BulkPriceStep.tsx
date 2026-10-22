@@ -15,6 +15,7 @@ import {
   type PriceIssue,
 } from "@/lib/admin/units/priceForm";
 import { useEditRequest } from "@/lib/admin/units/useEditRequest";
+import { useFocusFirstInvalid } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import { submitWith, type BulkStepProps } from "./BulkSteps";
 
@@ -34,6 +35,7 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
   const [issue, setIssue] = useState<PriceIssue | null>(null);
   const { reply, pending, send, here } = useEditRequest();
   const submit = useRefocusAfter(pending);
+  const focusInvalid = useFocusFirstInvalid();
   const sample = units.find((unit) => unit.layoutId !== null) ?? null;
   const area = layouts.find((layout) => layout.id === sample?.layoutId)?.area ?? null;
   const withoutLayout = draft.mode === "per_m2" ? withoutLayoutCount(units) : 0;
@@ -47,7 +49,7 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
     if (!result && here()) onDone();
   };
   return (
-    <form className="units-bulk__form" onSubmit={submitWith(apply)}>
+    <form className="units-bulk__form" onSubmit={submitWith(apply, focusInvalid)}>
       <UnitPriceFields
         draft={draft}
         onChange={(next) => {

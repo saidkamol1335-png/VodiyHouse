@@ -18,7 +18,7 @@ import { unitsFailure } from "@/lib/admin/units/errors";
 import { settle } from "@/lib/ui/settle";
 import { useFocusAfterRender } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
-import { uncoveredSlots, validateRisers, type Riser } from "@/lib/units";
+import { clipRisersToPlan, uncoveredSlots, validateRisers, type Riser } from "@/lib/units";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 
 type UnitsRisersProps = {
@@ -145,7 +145,9 @@ function useRisersDraft({
   const [pending, startTransition] = useTransition();
   const guard = useUnsavedGuard(t("unsaved"));
   const { current, markSaved } = useSavedRisers(ready, reads);
-  const shown = draft?.risers ?? current;
+  // План мог сжаться после начала правки (удалили этаж, подъезд, позицию): строки черновика —
+  // под текущий план, иначе нетронутые подсветились бы ошибкой и сохранить было бы нельзя.
+  const shown = draft ? clipRisersToPlan(draft.risers, ready.plan) : current;
   const edit = (risers: Riser[]) => {
     setDraft({ base: draft?.base ?? current, risers });
     setResult(null);
