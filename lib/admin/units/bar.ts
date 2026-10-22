@@ -4,7 +4,16 @@
 
 import { createContext, type Dispatch, type SetStateAction } from "react";
 import type { UnitStatus, UnitsUndo } from "@/lib/units";
+import { editTone, type EditMessage } from "./editOutcome";
 import type { StatusMessage, StatusOutcome, StatusSubject } from "./statusOutcome";
+
+/** Что в полосе: статус (тап, «Отменить») или правка руководителя (12.5). */
+export type BarMessage = StatusMessage | EditMessage;
+
+// Номера действий — общие на модуль: полоса одна на вкладку, а хуки у каждого блока свои, и ответ
+// действия одного блока не должен принять полосу другого за свою.
+let lastOp = 0;
+export const nextBarOp = () => ++lastOp;
 
 export type UnitsBarUndo = {
   blockId: string;
@@ -12,16 +21,18 @@ export type UnitsBarUndo = {
   groups: UnitsUndo;
   subject: StatusSubject;
   numbers: ReadonlyMap<string, string>;
+  /** Видимые при массовой смене: после «Отменить» на месте остаются только они. */
+  keep?: ReadonlySet<string>;
 };
 
 /** Отказ прежнего тапа, чью полосу уже сменили: показывается строкой до «×». */
-export type UnitsBarLost = { message: StatusMessage; blockId: string; blockName: string };
+export type UnitsBarLost = { message: BarMessage; blockId: string; blockName: string };
 
 export type UnitsBar = {
   op: number;
   blockId: string;
   blockName: string;
-  message: StatusMessage;
+  message: BarMessage;
   /** Сохраняется или отменяется — «Отменить» пока недоступна. */
   busy: boolean;
   undo: UnitsBarUndo | null;
@@ -30,8 +41,16 @@ export type UnitsBar = {
 
 export type UnitsBarTone = "success" | "notice" | "error";
 
-export function barTone(message: StatusMessage): UnitsBarTone {
+export function barTone(message: BarMessage): UnitsBarTone {
   switch (message.kind) {
+    case "rowSaved":
+    case "added":
+    case "priced":
+    case "finished":
+    case "deleted":
+    case "rowGone":
+    case "editFailed":
+      return editTone(message);
     case "failed":
     case "revertFailed":
       return "error";
@@ -61,6 +80,20 @@ export function startBar(
   return { ...start, busy: true, undo: null, lost: kept };
 }
 
+/** Итог правки руководителя — своя полоса без «Отменить» (отказы прежних остаются строками). */
+export function noteBar(
+  current: UnitsBar | null,
+  note: Pick<UnitsBar, "op" | "blockId" | "blockName" | "message">,
+): UnitsBar {
+  return { ...startBar(current, note), busy: false };
+}
+
+/** Отказ правки, чья форма уже закрыта: строкой в текущей полосе, а без полосы — своей. */
+export function lostBar(current: UnitsBar | null, lost: UnitsBarLost, op: number): UnitsBar {
+  if (!current) return { op, ...lost, busy: false, undo: null, lost: [] };
+  return { ...current, lost: [...current.lost, lost] };
+}
+
 /**
  * Ответ действия op. Полоса ещё его — показать исход. Полосу уже сменили, закрыли или вкладку
  * прятали — успех молча (смена сохранена), а отказ — строкой: иначе строка тихо откатилась бы.
@@ -75,6 +108,19 @@ export function settleBar(
   const lost = { message: settled.message, blockId: settled.blockId, blockName: settled.blockName };
   if (!current) return { ...settled, busy: false, undo: null, lost: [] };
   return { ...current, lost: [...current.lost, lost] };
+}
+
+/**
+ * Список блока удалили: его полосы и строк больше нет; строки других блоков остаются — первая
+ * становится полосой (до «×»).
+ */
+export function withoutBlock(current: UnitsBar | null, blockId: string): UnitsBar | null {
+  if (!current) return null;
+  const lost = current.lost.filter((line) => line.blockId !== blockId);
+  if (current.blockId !== blockId)
+    return lost.length === current.lost.length ? current : { ...current, lost };
+  const [first, ...rest] = lost;
+  return first ? { op: nextBarOp(), ...first, busy: false, undo: null, lost: rest } : null;
 }
 
 /**

@@ -78,10 +78,11 @@ export function demoUnitsTab(
 export function demoBlockUnits(
   blockId: string,
   scenario: DemoUnitsScenario = null,
-): { floors: number | null; units: UnitRecord[] } | null {
+): { name: string; floors: number | null; units: UnitRecord[] } | null {
   for (const row of DEMO_COMPLEX_ROWS) {
     const tab = demoUnitsTab(row.id, blockId, scenario);
-    if (tab.block?.id === blockId) return { floors: tab.block.floorsTotal, units: tab.units };
+    if (tab.block?.id === blockId)
+      return { name: tab.block.name, floors: tab.block.floorsTotal, units: tab.units };
   }
   return null;
 }

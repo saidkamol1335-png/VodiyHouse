@@ -6,6 +6,7 @@ import { INITIAL_UNITS_LIST, unitsListReducer, type UnitsListEvent } from "./lis
 import { UNITS_RELOAD_AFTER_MS } from "./statusOutcome";
 import type { SetUnitsStatusResult, UnitsStatusActions } from "./types";
 import { useUnitStatus } from "./useUnitStatus";
+import { useUnitsBar } from "./useUnitsBar";
 import { watchReturn, type UnitsListStore } from "./useUnitsList";
 
 const unit = (number: string): UnitRecord => ({
@@ -61,10 +62,10 @@ function setup() {
   const store = fakeStore();
   const { actions, answers } = controlledActions();
   const params = { blockId: "b", blockName: "A", actions, viewerName: "Азиз" };
-  const hook = renderHook(() => useUnitStatus(store, params));
+  const hook = renderHook(() => useUnitStatus(store, params, useUnitsBar()));
   const answer = async (index: number, result: SetUnitsStatusResult) =>
     act(async () => answers[index]!(result));
-  return { hook, answer };
+  return { hook, answer, store, actions };
 }
 
 describe("статус тапом: полоса", () => {
@@ -102,6 +103,44 @@ describe("статус тапом: полоса", () => {
     act(() => hook.result.current.dismiss());
     await answer(0, unitsFailure("notFound"));
     expect(hook.result.current.bar).toMatchObject({ message: { kind: "failed" }, undo: null });
+  });
+});
+
+describe("массовая смена и «Отменить»", () => {
+  it("скрытые фильтром выделенные не всплывают ни после смены, ни после «Отменить»", async () => {
+    const { hook, answer, store } = setup();
+    act(() => hook.result.current.change([U41, U42], "sold", new Set(["u41"])));
+    expect([...store.state.sticky]).toEqual(["u41"]);
+    await answer(0, {
+      status: "done",
+      changed: 2,
+      undo: [{ status: "free", ids: ["u41", "u42"] }],
+    });
+    await act(async () => hook.result.current.undo());
+    expect([...store.state.sticky]).toEqual(["u41"]);
+  });
+
+  it("Ctrl+Z работает и с фокусом на галочке строки; в поле ввода — нет", async () => {
+    const { hook, answer, actions } = setup();
+    const revert = vi.spyOn(actions, "revert");
+    act(() => hook.result.current.change([U41], "reserved"));
+    await answer(0, done("u41", "free"));
+    const press = (target: HTMLElement) =>
+      act(() => {
+        target.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
+        );
+      });
+    const field = document.createElement("input");
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    document.body.append(field, check);
+    press(field);
+    expect(revert).not.toHaveBeenCalled();
+    press(check);
+    expect(revert).toHaveBeenCalledOnce();
+    field.remove();
+    check.remove();
   });
 });
 

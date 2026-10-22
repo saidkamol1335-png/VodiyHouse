@@ -1,0 +1,85 @@
+/* Раскрытие под строкой квартиры: выбор статуса, «Изменить квартиру», «Обновлено …» — или форма
+   правки (Н4). Строка таблицы с одной ячейкой на все колонки; в карточках (уже 720) — блок. */
+/* Зебра и выбор — как у строки над раскрытием (UnitsRow.css). */
+.unit-detail--alt {
+  background: var(--row-alt);
+}
+
+.unit-detail--selected {
+  background: var(--badge-amber-bg);
+}
+
+.unit-detail__cell {
+  padding: 10px 12px 14px;
+  border-top: 1px dashed var(--line);
+}
+
+/* Содержимое появляется opacity + transform (≤ 200 мс, CLAUDE.md §3). */
+.unit-detail__cell > * {
+  animation: unit-detail-reveal var(--dur-fast) var(--ease) both;
+}
+
+.unit-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.unit-detail__edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.unit-detail__edit:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.unit-detail__updated {
+  display: block;
+  margin-top: 10px;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+@keyframes unit-detail-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@container units-list (max-width: 719px) {
+  .unit-detail,
+  .unit-detail__cell {
+    display: block;
+  }
+
+  /* В карточках зебры нет; выбранная остаётся янтарной. */
+  .unit-detail--alt {
+    background: none;
+  }
+
+  .unit-detail--selected {
+    background: var(--badge-amber-bg);
+  }
+
+  .unit-detail__cell {
+    padding: 10px 14px 14px;
+  }
+
+  .unit-detail__edit {
+    min-height: 44px;
+  }
+}

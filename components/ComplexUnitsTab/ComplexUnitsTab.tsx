@@ -4,7 +4,7 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { UnitsBlockSwitch } from "@/components/UnitsBlockSwitch";
 import { UnitsBlockView } from "@/components/UnitsBlockView";
 import { UnitsGenerator } from "@/components/UnitsGenerator";
-import { UnitsNoticeProvider } from "@/components/UnitsNotice";
+import { UnitsListNotice, UnitsNoticeProvider } from "@/components/UnitsNotice";
 import { UnitsBarProvider } from "@/components/UnitsUndoBar";
 import type {
   CreateBlockUnitsInput,
@@ -40,7 +40,7 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
   const { view, tabHref, blocksHref } = props;
   return (
     <AdminPanel title={t("title")} wide>
-      <UnitsNoticeProvider>
+      <UnitsNoticeProvider blockId={view.block?.id ?? null}>
         <UnitsBarProvider>
           <div className="complex-units">
             <p className="complex-units__lead">{t("lead")}</p>
@@ -68,7 +68,17 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
   );
 }
 
-function BlockUnits({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlock }) {
+/** «Создано» или «Список удалён» — над генератором и списком: при смене одного другим не теряется. */
+function BlockUnits(props: ComplexUnitsTabProps & { block: UnitsBlock }) {
+  return (
+    <>
+      <UnitsListNotice blockId={props.block.id} createdToo={props.block.unitCount > 0} />
+      <BlockBody {...props} />
+    </>
+  );
+}
+
+function BlockBody({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlock }) {
   const t = useTranslations("admin.complexes.units");
   const { view } = props;
   // Список страница не несёт: есть ли он — по числу квартир блока (12.4).
@@ -82,6 +92,7 @@ function BlockUnits({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBl
         actions={props.listActions}
         saveRisersAction={props.saveRisersAction}
         viewerName={props.viewerName}
+        published={props.published}
       />
     );
   }

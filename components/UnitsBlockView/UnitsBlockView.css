@@ -5,6 +5,43 @@
   gap: 14px;
 }
 
+.units-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.units-block__note {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.units-block__add {
+  height: 36px;
+  padding: 0 15px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small-l);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.units-block__add[aria-expanded="true"] {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+}
+
+.units-block__add:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 .units-block__listed {
   margin: 0;
   color: var(--fg-2);
@@ -51,16 +88,18 @@
   cursor: default;
 }
 
+/* Место под доком, пока он виден: высоту пишет UnitsDock (ResizeObserver), до первого замера —
+   запасная из токенов. */
 .units-block__spacer {
-  height: 72px;
+  height: calc(var(--units-dock-h) + var(--units-dock-gap));
 }
 
 @media (max-width: 760px) {
-  .units-block__retry {
+  .units-block__add {
     height: 44px;
   }
 
-  .units-block__spacer {
-    height: 96px;
+  .units-block__retry {
+    height: 44px;
   }
 }

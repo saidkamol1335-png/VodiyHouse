@@ -31,7 +31,11 @@
   --fs-kpi: 30px;
   --fs-stat: 34px;
   --fs-h2: clamp(30px, 3.05vw, 46px);
-  --fs-login-title: clamp(30px, 3.05vw, 46px); /* «Кабинет сотрудника»: на телефоне 30 px, не 27 (К1.3) */
+  --fs-login-title: clamp(
+    30px,
+    3.05vw,
+    46px
+  ); /* «Кабинет сотрудника»: на телефоне 30 px, не 27 (К1.3) */
   --fs-admin-title: 22px; /* заголовок раздела кабинета */
   --fs-h1: clamp(42px, 4.7vw, 68px);
 
@@ -66,6 +70,15 @@
   --admin-side-w: 250px;
   --admin-panel-pad: 20px; /* поля панели кабинета; липкие полосы внутри неё выходят на них */
   --field-multiline-max: 340px; /* многострочное поле растёт по тексту до ~14 строк */
+  /* Док «Квартир» (полоса «Отменить» и массовая панель): ширина, отступ от края экрана (на
+     телефоне — свой), высота до первого замера (UnitsDock пишет настоящую на блок) и зазор над
+     ним; --units-dock-cover — сколько низа экрана он закрывает (0, пока пуст). */
+  --units-dock-w: 620px;
+  --units-dock-inset: 20px;
+  --units-dock-inset-sm: 12px;
+  --units-dock-h: 96px;
+  --units-dock-gap: 16px;
+  --units-dock-cover: 0px;
   --cols: 6; /* линии колонок фона */
 
   /* ---------- анимации ---------- */
@@ -148,7 +161,8 @@
   --s-sold-t: #9e3a2e;
 
   --shadow-1: 0 1px 2px rgba(40, 28, 12, 0.04), 0 10px 28px rgba(40, 28, 12, 0.05);
-  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(40, 28, 12, 0.04),
+  --shadow-2:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(40, 28, 12, 0.04),
     0 12px 32px rgba(40, 28, 12, 0.07);
   --shadow-hover: 0 2px 4px rgba(40, 28, 12, 0.05), 0 22px 44px rgba(40, 28, 12, 0.11);
   --shadow-3: 0 30px 80px rgba(40, 28, 12, 0.18), 0 4px 14px rgba(40, 28, 12, 0.06);
@@ -157,7 +171,8 @@
   --spot-fill: rgba(248, 155, 13, 0.12); /* подсветка карточки за курсором */
   --spot-edge: rgba(255, 181, 71, 0.65);
 
-  --page-glow: radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.09), transparent 62%),
+  --page-glow:
+    radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.09), transparent 62%),
     radial-gradient(700px 600px at 100% 110%, rgba(248, 155, 13, 0.05), transparent 60%);
 
   /* кнопки-обводки, круглые кнопки, сегменты (шапка мокапа) */
@@ -215,7 +230,8 @@
   --login-card-w: 440px;
   --login-card-bg: linear-gradient(180deg, rgba(253, 251, 247, 0.88), rgba(253, 251, 247, 0.92));
   /* Фото стройки — тёмный островок в обеих темах (PLAN §3.7): затемнение 40–55 % под карточкой. */
-  --login-shade: radial-gradient(120% 90% at 50% 50%, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0.6)),
+  --login-shade:
+    radial-gradient(120% 90% at 50% 50%, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0.6)),
     linear-gradient(180deg, rgba(10, 8, 6, 0.45), rgba(10, 8, 6, 0.4));
   --field-bg: rgba(255, 255, 255, 0.54);
   --field-ring: 0 0 0 4px rgba(248, 155, 13, 0.16);
@@ -290,7 +306,8 @@
   --shadow-sheet: 0 -20px 60px rgba(0, 0, 0, 0.6);
   --glow-amber: 0 0 0 1px rgba(255, 208, 138, 0.5) inset, 0 8px 28px rgba(248, 155, 13, 0.22);
 
-  --page-glow: radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.1), transparent 62%),
+  --page-glow:
+    radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.1), transparent 62%),
     radial-gradient(700px 600px at 100% 110%, rgba(220, 80, 0, 0.08), transparent 60%);
 
   --control-bg: rgba(255, 240, 220, 0.045);

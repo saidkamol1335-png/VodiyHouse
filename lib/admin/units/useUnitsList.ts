@@ -1,7 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useReducer, useRef, useState, type Dispatch } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type Dispatch,
+} from "react";
 import { settle } from "@/lib/ui/settle";
 import type { UnitRecord } from "@/lib/units";
 import { unitsFailure } from "./errors";
@@ -53,16 +61,12 @@ export function useUnitsList(params: Params): UnitsListStore {
   });
   useListReading(queue, latest, dispatch);
   const units = useMemo(() => visibleUnits(state), [state]);
+  // Стабильные: «Стояки» под memo получают reload пропсом и не перерисовываются на каждую букву.
+  const reload = useCallback(() => queue.reload(), [queue]);
+  const track = useCallback(<T>(work: () => Promise<T>) => queue.track(work), [queue]);
   return useMemo(
-    () => ({
-      state,
-      units,
-      dispatch,
-      latest: () => latest.current.state,
-      reload: () => queue.reload(),
-      track: <T>(work: () => Promise<T>) => queue.track(work),
-    }),
-    [state, units, queue],
+    () => ({ state, units, dispatch, latest: () => latest.current.state, reload, track }),
+    [state, units, reload, track],
   );
 }
 

@@ -47,6 +47,16 @@ const ROOMS = new Map([
 ]);
 const numbers = (units: readonly UnitRecord[]) => units.map((u) => u.number);
 
+describe("список квартир · закреплённые строки", () => {
+  it("правленая или добавленная строка видна при любом фильтре, пока его не сменят", () => {
+    const filter = { ...EMPTY_UNIT_FILTER, status: "sold" as const, query: "нет такого" };
+    expect(filterUnits(UNITS, filter, ROOMS)).toEqual([]);
+    expect(numbers(filterUnits(UNITS, filter, ROOMS, { pinned: new Set(["id-2"]) }))).toEqual([
+      "2",
+    ]);
+  });
+});
+
 describe("список квартир · фильтры", () => {
   it("без фильтров — все", () => {
     expect(filterUnits(UNITS, EMPTY_UNIT_FILTER, ROOMS)).toHaveLength(5);
@@ -91,11 +101,16 @@ describe("список квартир · фильтры", () => {
   it("keep: строка со сменённым статусом остаётся под фильтром статуса, но не под другими", () => {
     const free = { ...EMPTY_UNIT_FILTER, status: "free" as const };
     const keep = new Set(["id-2", "id-3"]);
-    expect(numbers(filterUnits(UNITS, free, ROOMS, keep))).toEqual(["1", "2", "3", "12А", "10"]);
-    expect(numbers(filterUnits(UNITS, { ...free, entrances: [1] }, ROOMS, keep))).toEqual([
+    expect(numbers(filterUnits(UNITS, free, ROOMS, { sticky: keep }))).toEqual([
       "1",
       "2",
+      "3",
+      "12А",
+      "10",
     ]);
+    expect(
+      numbers(filterUnits(UNITS, { ...free, entrances: [1] }, ROOMS, { sticky: keep })),
+    ).toEqual(["1", "2"]);
   });
 
   it("«Фильтры · N»: подъезды и комнаты поштучно, этаж и номер — по одному, статус не считается", () => {
@@ -119,5 +134,13 @@ describe("список квартир · фильтры", () => {
       entrances: [1, 2, 3],
       rooms: ["studio", "1", "2", "3", "4plus", "none"],
     });
+  });
+
+  it("pinned: правленая квартира проходит все фильтры, а sticky — только фильтр статуса", () => {
+    const filter = { ...EMPTY_UNIT_FILTER, status: "free" as const, query: "999" };
+    expect(numbers(filterUnits(UNITS, filter, ROOMS, { pinned: new Set(["id-3"]) }))).toEqual([
+      "3",
+    ]);
+    expect(numbers(filterUnits(UNITS, filter, ROOMS, { sticky: new Set(["id-3"]) }))).toEqual([]);
   });
 });

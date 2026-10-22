@@ -1,0 +1,12 @@
+/* Цена квартиры (Н3): сегмент режима, поле суммы и строка примера расчёта. */
+.unit-price-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.unit-price-fields__example {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}

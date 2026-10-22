@@ -1,0 +1,33 @@
+/* Док внизу экрана вкладки «Квартиры»: полоса «Отменить» над массовой панелью, справа снизу
+   колонки контента; на телефоне — во всю ширину. Пустое место дока нажатий не ловит — карточки и
+   «Показать ещё» под ним доступны. Вне контейнера списка: container query сделал бы его опорой
+   для position: fixed. */
+.units-dock {
+  position: fixed;
+  right: var(--units-dock-inset);
+  bottom: calc(var(--units-dock-inset) + env(safe-area-inset-bottom));
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(
+    var(--units-dock-w),
+    calc(100% - var(--admin-side-w, 0px) - 2 * var(--units-dock-inset))
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 980px) {
+  .units-dock {
+    width: min(var(--units-dock-w), calc(100% - 2 * var(--units-dock-inset)));
+  }
+}
+
+@media (max-width: 760px) {
+  .units-dock {
+    --units-dock-inset: var(--units-dock-inset-sm);
+
+    left: var(--units-dock-inset);
+    width: auto;
+  }
+}

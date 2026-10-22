@@ -1,0 +1,71 @@
+/* «+ Квартира» (Н4): панель над стояками — место (подъезд · этаж · позиция) в ряд, ниже номер и
+   планировка; на узком экране — в столбик. */
+.unit-add {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+  animation: unit-add-reveal var(--dur-fast) var(--ease) both;
+}
+
+.unit-add__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.unit-add__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.unit-add__slot {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Место занято или его нет — под всеми тремя полями, как ошибка поля. */
+.unit-add__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.unit-add__row {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.unit-add__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@keyframes unit-add-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 760px) {
+  .unit-add {
+    padding: 14px;
+  }
+
+  .unit-add__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .unit-add__actions .button {
+    flex: 1 1 0;
+  }
+}

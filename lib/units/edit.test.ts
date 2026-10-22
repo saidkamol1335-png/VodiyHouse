@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { UNIT_FIELDS, reuseUnchanged, withStatuses } from "./edit";
+import {
+  UNIT_FIELDS,
+  reuseUnchanged,
+  withFields,
+  withStatuses,
+  withUnit,
+  withoutUnits,
+} from "./edit";
 import type { UnitRecord } from "./record";
 
 const unit = (id: string, status: UnitRecord["status"]): UnitRecord => ({
@@ -71,5 +78,23 @@ describe("правки прочитанного списка", () => {
     const previous = [unit("1", "free")];
     const fresh = [{ ...unit("1", "free"), [field]: CHANGED[field] }];
     expect(reuseUnchanged(previous, fresh)[0]).toBe(fresh[0]);
+  });
+});
+
+describe("правки руководителя в прочитанном списке", () => {
+  it("массовые поля: новый объект и отметка — только где значение поменялось", () => {
+    const units = [unit("1", "free"), { ...unit("2", "free"), finishingId: 4 }, unit("3", "free")];
+    const next = withFields(units, new Set(["1", "2"]), { finishingId: 4 }, STAMP);
+    expect(next[0]).toMatchObject({ finishingId: 4, updatedAt: STAMP.at, updatedByName: "Азиз" });
+    expect(next[1]).toBe(units[1]);
+    expect(next[2]).toBe(units[2]);
+  });
+
+  it("квартира из ответа: замена по id или вставка — по порядку номеров", () => {
+    const units = [unit("2", "free"), unit("10", "free")];
+    expect(withUnit(units, unit("3", "sold")).map((item) => item.id)).toEqual(["2", "3", "10"]);
+    const renamed = { ...unit("10", "free"), number: "1" };
+    expect(withUnit(units, renamed).map((item) => item.number)).toEqual(["1", "2"]);
+    expect(withoutUnits(units, new Set(["2"])).map((item) => item.id)).toEqual(["10"]);
   });
 });

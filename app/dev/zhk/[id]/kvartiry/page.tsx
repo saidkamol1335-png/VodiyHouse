@@ -14,6 +14,14 @@ import {
   demoSaveRisersAction,
   demoSetUnitsStatusAction,
 } from "../../unitsActions";
+import {
+  demoAddUnitAction,
+  demoDeleteBlockUnitsAction,
+  demoDeleteUnitsAction,
+  demoSetUnitsFinishingAction,
+  demoSetUnitsPriceAction,
+  demoUpdateUnitAction,
+} from "../../unitsEditActions";
 
 // Адрес с [id] известен только на запросе: страница ждёт его на сервере, как разделы кабинета
 // (docs: instant-navigation) — иначе меню и вкладки (usePathname) вне <Suspense> падают.
@@ -51,6 +59,14 @@ export default async function DevComplexUnitsPage({
         status: {
           set: demoSetUnitsStatusAction.bind(null, scenario),
           revert: demoRevertUnitsStatusAction.bind(null, scenario),
+        },
+        edit: {
+          add: demoAddUnitAction.bind(null, scenario),
+          update: demoUpdateUnitAction.bind(null, scenario),
+          remove: demoDeleteUnitsAction.bind(null, scenario),
+          removeList: demoDeleteBlockUnitsAction.bind(null, scenario),
+          price: demoSetUnitsPriceAction.bind(null, scenario),
+          finishing: demoSetUnitsFinishingAction.bind(null, scenario),
         },
       }}
       viewerName={(await cabinetPerson(DEV_VIEWER)).name}

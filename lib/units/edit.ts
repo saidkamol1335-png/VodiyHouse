@@ -2,6 +2,7 @@
 // которых правка не коснулась, остаются теми же объектами — список из 5000 строк не
 // перерисовывается целиком из-за одной квартиры (строки сравниваются по ссылке).
 
+import { sortUnitsByNumber } from "./list";
 import type { UnitRecord } from "./record";
 import type { UnitStatus } from "./status";
 
@@ -18,6 +19,36 @@ export function withStatuses(
     if (status === undefined || status === unit.status) return unit;
     return { ...unit, status, updatedAt: stamp.at, updatedByName: stamp.by };
   });
+}
+
+/** Поля, которые правят массово: цена (целиком или за м²) и отделка. */
+export type UnitFieldsPatch = Partial<Pick<UnitRecord, "price" | "pricePerM2" | "finishingId">>;
+
+/**
+ * Массовая цена или отделка: новый объект и «только что · имя» — только у квартир, где значение
+ * и правда поменялось (база меняет так же: строку с тем же значением не трогает).
+ */
+export function withFields(
+  units: readonly UnitRecord[],
+  ids: ReadonlySet<string>,
+  fields: UnitFieldsPatch,
+  stamp: UnitStamp,
+): UnitRecord[] {
+  const keys = Object.keys(fields) as (keyof UnitFieldsPatch)[];
+  return units.map((unit) => {
+    if (!ids.has(unit.id) || keys.every((key) => unit[key] === fields[key])) return unit;
+    return { ...unit, ...fields, updatedAt: stamp.at, updatedByName: stamp.by };
+  });
+}
+
+/** Сохранённая или добавленная квартира из ответа базы: заменить по id или вставить, по номерам. */
+export function withUnit(units: readonly UnitRecord[], unit: UnitRecord): UnitRecord[] {
+  const rest = units.filter((item) => item.id !== unit.id);
+  return sortUnitsByNumber([...rest, unit]);
+}
+
+export function withoutUnits(units: readonly UnitRecord[], ids: ReadonlySet<string>): UnitRecord[] {
+  return units.filter((unit) => !ids.has(unit.id));
 }
 
 /** Все поля квартиры, кроме id: новое поле UnitRecord без строки здесь — ошибка typecheck. */

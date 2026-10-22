@@ -485,7 +485,11 @@ begin
   insert into public.units (block_id, layout_id, entrance, floor, "position", number)
   values (p_block, p_layout, p_entrance, p_floor, p_position, btrim(p_number))
   returning * into unit_row;
-  return jsonb_build_object('complex_id', complex, 'unit', to_jsonb(unit_row));
+  -- Имя того, кто правил строку последним: правка без изменений автора не меняет (экран не
+  -- подставляет своё имя).
+  return jsonb_build_object('complex_id', complex, 'unit', to_jsonb(unit_row) || jsonb_build_object(
+    'updated_by_name', (select p.full_name from public.profiles p where p.id = unit_row.updated_by)
+  ));
 end;
 $$;
 
@@ -567,7 +571,11 @@ begin
   -- Стёртая цена или другая планировка могут снять с опубликованного ЖК «цену от».
   perform private.assert_complex_not_worse(complex, before);
   select * into unit_row from public.units u where u.id = p_unit;
-  return jsonb_build_object('complex_id', complex, 'unit', to_jsonb(unit_row));
+  -- Имя того, кто правил строку последним: правка без изменений автора не меняет (экран не
+  -- подставляет своё имя).
+  return jsonb_build_object('complex_id', complex, 'unit', to_jsonb(unit_row) || jsonb_build_object(
+    'updated_by_name', (select p.full_name from public.profiles p where p.id = unit_row.updated_by)
+  ));
 end;
 $$;
 

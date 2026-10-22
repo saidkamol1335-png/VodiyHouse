@@ -6,27 +6,20 @@ import { unitsDbFailure, unitsFailure } from "@/lib/admin/units/errors";
 import {
   blockNameConfirmed,
   isUuid,
-  readFinishing,
   readLayout,
   readPlan,
-  readPrice,
   readRisers,
-  readUnitIds,
   readUnitPatch,
 } from "@/lib/admin/units/parse";
+import { replyCount, unitReply } from "@/lib/admin/units/reply";
 import type {
   AddUnitInput,
-  ChangedResult,
   CreateBlockUnitsInput,
   CreateBlockUnitsResult,
   DeleteBlockUnitsInput,
   DeleteUnitsResult,
   SaveRisersInput,
   SaveRisersResult,
-  SetUnitsFinishingInput,
-  SetUnitsPriceInput,
-  SetUnitsPriceResult,
-  UnitIdsInput,
   UnitRowResult,
   UpdateUnitInput,
 } from "@/lib/admin/units/types";
@@ -36,7 +29,6 @@ import {
   generateUnits,
   isUnitNumber,
   normalizeUnitNumber,
-  parseUnitRecord,
   parseUnitRecords,
   planFromUnits,
   riserEdits,
@@ -44,18 +36,12 @@ import {
   toUnitLayoutItems,
 } from "@/lib/units";
 
-// «Квартиры» руководителя (шаг 12, Н3–Н6): генератор, правка строки, «+ Квартира», удаление,
-// массовые цена и отделка, стояки. Каждое действие — открытый POST: первой строкой проверяет
+// «Квартиры» руководителя (шаг 12, Н4–Н6): генератор, правка строки, «+ Квартира», «Удалить
+// список блока», стояки; массовые действия панели — unitsMass.ts. Каждое действие — открытый POST: первой строкой проверяет
 // руководителя, вход разбирается заново (lib/admin/units/parse), права и инварианты ещё раз
 // держат функции базы. Ответ функции называет ЖК — по нему сбрасывается кэш сайта.
 
 const headGuard = () => requireActionViewer(["head"]);
-
-/** Число из ответа функции базы {complex_id, created, …}. */
-function count(data: unknown, key: string): number {
-  const value = (data as Record<string, unknown> | null)?.[key];
-  return typeof value === "number" ? value : 0;
-}
 
 /** Блок для действия; null — нет (или ошибка базы: её отдаёт error). */
 async function readBlock(supabase: SupabaseClient, blockId: string) {
@@ -83,7 +69,11 @@ export async function createBlockUnitsAction(
   });
   if (error) return unitsDbFailure(error);
   expireComplex(complexIdFrom(data));
-  return { status: "done", created: count(data, "created"), unassigned: count(data, "unassigned") };
+  return {
+    status: "done",
+    created: replyCount(data, "created"),
+    unassigned: replyCount(data, "unassigned"),
+  };
 }
 
 /** «+ Квартира» (Н4): свободная, без цены; номер — без пробелов и заглавными («12a» → «12A»). */
@@ -108,7 +98,7 @@ export async function addUnitAction(input: AddUnitInput): Promise<UnitRowResult>
   });
   if (error) return unitsDbFailure(error);
   expireComplex(complexIdFrom(data));
-  return { status: "done", unit: parseUnitRecord((data as { unit: unknown }).unit) };
+  return unitReply(data);
 }
 
 /** Правка строки (Н4): только переданные поля — номер, планировка, цена, отделка. */
@@ -126,23 +116,7 @@ export async function updateUnitAction(input: UpdateUnitInput): Promise<UnitRowR
   });
   if (error) return unitsDbFailure(error);
   expireComplex(complexIdFrom(data));
-  return { status: "done", unit: parseUnitRecord((data as { unit: unknown }).unit) };
-}
-
-/** «Удалить» выделенные; весь список — только «Удалить список блока». */
-export async function deleteUnitsAction(input: UnitIdsInput): Promise<DeleteUnitsResult> {
-  const guard = await headGuard();
-  if (!guard.ok) return unitsFailure(guard.code);
-  const ids = readUnitIds(input?.unitIds);
-  if (!isUuid(input?.blockId) || !ids) return unitsFailure("invalid");
-
-  const { data, error } = await guard.supabase.rpc("delete_units", {
-    p_block: input.blockId,
-    p_unit_ids: ids,
-  });
-  if (error) return unitsDbFailure(error);
-  expireComplex(complexIdFrom(data));
-  return { status: "done", deleted: count(data, "deleted") };
+  return unitReply(data);
 }
 
 /** «Удалить список блока» (Н4): название вводят как угодно («a», «А») — сверяем мягко. */
@@ -164,52 +138,7 @@ export async function deleteBlockUnitsAction(
   });
   if (error) return unitsDbFailure(error);
   expireComplex(complexIdFrom(data));
-  return { status: "done", deleted: count(data, "deleted") };
-}
-
-/** Массовая цена (Н3): за м², целиком или «без цены»; брони и проданным — тоже (сайт не видит). */
-export async function setUnitsPriceAction(input: SetUnitsPriceInput): Promise<SetUnitsPriceResult> {
-  const guard = await headGuard();
-  if (!guard.ok) return unitsFailure(guard.code);
-  const ids = readUnitIds(input?.unitIds);
-  const price = readPrice(input?.mode, input?.value);
-  if (!isUuid(input?.blockId) || !ids) return unitsFailure("invalid");
-  if (!price) return unitsFailure("invalid", "price");
-
-  const { data, error } = await guard.supabase.rpc("set_units_price", {
-    p_block: input.blockId,
-    p_unit_ids: ids,
-    p_mode: price.mode,
-    p_value: price.value,
-  });
-  if (error) return unitsDbFailure(error);
-  expireComplex(complexIdFrom(data));
-  return {
-    status: "done",
-    changed: count(data, "changed"),
-    withoutLayout: count(data, "without_layout"),
-  };
-}
-
-/** Массовая отделка; null — «как в блоке». */
-export async function setUnitsFinishingAction(
-  input: SetUnitsFinishingInput,
-): Promise<ChangedResult> {
-  const guard = await headGuard();
-  if (!guard.ok) return unitsFailure(guard.code);
-  const ids = readUnitIds(input?.unitIds);
-  const finishing = readFinishing(input?.finishingId);
-  if (!isUuid(input?.blockId) || !ids) return unitsFailure("invalid");
-  if (finishing === undefined) return unitsFailure("invalid", "finishing_id");
-
-  const { data, error } = await guard.supabase.rpc("set_units_finishing", {
-    p_block: input.blockId,
-    p_unit_ids: ids,
-    p_finishing: finishing,
-  });
-  if (error) return unitsDbFailure(error);
-  expireComplex(complexIdFrom(data));
-  return { status: "done", changed: count(data, "changed") };
+  return { status: "done", deleted: replyCount(data, "deleted") };
 }
 
 /**
@@ -242,5 +171,5 @@ export async function saveRisersAction(input: SaveRisersInput): Promise<SaveRise
   });
   if (error) return unitsDbFailure(error);
   expireComplex(complexIdFrom(data));
-  return { status: "done", changed: count(data, "changed"), skipped: skippedNumbers };
+  return { status: "done", changed: replyCount(data, "changed"), skipped: skippedNumbers };
 }

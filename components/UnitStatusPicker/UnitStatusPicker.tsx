@@ -5,8 +5,10 @@ import { useEffect, useRef, type KeyboardEvent } from "react";
 import { UNIT_STATUSES, type UnitStatus } from "@/lib/units";
 
 type UnitStatusPickerProps = {
-  number: string;
-  status: UnitStatus;
+  /** Подпись группы для диктора: «Статус кв. 41», «Статус выбранных». */
+  label: string;
+  /** null — у выбранных статусы разные: ни одна кнопка не нажата. */
+  status: UnitStatus | null;
   onPick: (status: UnitStatus) => void;
   /** Esc — закрыть без смены (фокус вернёт тот, кто открыл). */
   onClose: () => void;
@@ -15,11 +17,10 @@ type UnitStatusPickerProps = {
 /**
  * Три статуса кнопками (решение №7): раскрываются под строкой по тапу на плашку — как чипы
  * статуса заявки в мокапе. Фокус сразу на первом другом статусе: Enter меняет, Esc закрывает.
- * В 12.5 тот же выбор встанет в массовую панель.
+ * Тот же выбор — в массовой панели (12.5).
  */
-export function UnitStatusPicker({ number, status, onPick, onClose }: UnitStatusPickerProps) {
+export function UnitStatusPicker({ label, status, onPick, onClose }: UnitStatusPickerProps) {
   const t = useTranslations("admin.journal.unitStatus");
-  const tList = useTranslations("admin.complexes.units.list");
   const first = useRef<HTMLButtonElement>(null);
   useEffect(() => first.current?.focus(), []);
   const keydown = (event: KeyboardEvent) => {
@@ -29,12 +30,7 @@ export function UnitStatusPicker({ number, status, onPick, onClose }: UnitStatus
   };
   const firstOther = UNIT_STATUSES.find((item) => item !== status);
   return (
-    <div
-      className="unit-status-picker"
-      role="group"
-      aria-label={tList("statusPicker", { number })}
-      onKeyDown={keydown}
-    >
+    <div className="unit-status-picker" role="group" aria-label={label} onKeyDown={keydown}>
       {UNIT_STATUSES.map((item) => (
         <button
           key={item}

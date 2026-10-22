@@ -5,10 +5,18 @@ import { demoPlanUnits } from "./demoUnitsPlan";
 // Сценарии стенда «Квартир» (?demo=…), чтобы e2e проверял то, чего в DEMO-сиде нет: variety —
 // номера с буквами, цена за м², квартиры без планировки, своя отделка, блок B в сумах; big — блок
 // на пределе в 5000 квартир; fail — база отказывает в статусе; conflict — статус успел поменять
-// другой сотрудник; empty — список удалили, пока страница была открыта (чтение пустое). Каждый
-// сценарий привязан к действиям через .bind: без общего состояния между воркерами Playwright.
+// другой сотрудник; empty — список удалили, пока страница была открыта (чтение пустое); notready —
+// ЖК на сайте, и снятая цена убрала бы «цену от» (vh:not_ready). Каждый сценарий привязан к
+// действиям через .bind: без общего состояния между воркерами Playwright.
 
-export const DEMO_UNITS_SCENARIOS = ["variety", "big", "fail", "conflict", "empty"] as const;
+export const DEMO_UNITS_SCENARIOS = [
+  "variety",
+  "big",
+  "fail",
+  "conflict",
+  "empty",
+  "notready",
+] as const;
 export type DemoUnitsScenario = (typeof DEMO_UNITS_SCENARIOS)[number] | null;
 
 export function demoUnitsScenario(value: unknown): DemoUnitsScenario {

@@ -4,7 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { UnitsGenerator } from "@/components/UnitsGenerator";
 import type { CreateBlockUnitsResult } from "@/lib/admin/units/types";
 import ru from "@/messages/ru.json";
-import { UnitsCreatedNotice, UnitsNoticeProvider } from "./UnitsNotice";
+import {
+  UnitsListNotice,
+  UnitsNoticeProvider,
+  useListRemoved,
+  useUnitsNotice,
+} from "./UnitsNotice";
 
 // Настоящий кабинет: после «Создать» страница перерисовывается уже со списком — генератор
 // исчезает, ответ должен показаться над стояками. Здесь перерисовку заменяет rerender.
@@ -20,9 +25,9 @@ function Tab({
 }) {
   return (
     <NextIntlClientProvider locale="ru" messages={ru}>
-      <UnitsNoticeProvider>
+      <UnitsNoticeProvider blockId="b1">
         {listed ? (
-          <UnitsCreatedNotice blockId="b1" />
+          <UnitsListNotice blockId="b1" createdToo />
         ) : (
           <UnitsGenerator
             blockId="b1"
@@ -37,6 +42,49 @@ function Tab({
     </NextIntlClientProvider>
   );
 }
+
+/** Блок со списком: уведомление сверху, ниже — список или «удалён». */
+function BlockWithList({ blockId }: { blockId: string }) {
+  const setNotice = useUnitsNotice();
+  const removed = useListRemoved(blockId);
+  return (
+    <>
+      <UnitsListNotice blockId={blockId} createdToo />
+      {removed ? null : <p>Список блока {blockId}</p>}
+      <button
+        type="button"
+        onClick={() => setNotice({ kind: "deleted", blockId, name: "A", deleted: 3 })}
+      >
+        Удалить
+      </button>
+    </>
+  );
+}
+
+function Switch({ blockId }: { blockId: string }) {
+  return (
+    <NextIntlClientProvider locale="ru" messages={ru}>
+      <UnitsNoticeProvider blockId={blockId}>
+        <BlockWithList blockId={blockId} />
+      </UnitsNoticeProvider>
+    </NextIntlClientProvider>
+  );
+}
+
+describe("«Список блока удалён» и переключение блоков", () => {
+  afterEach(cleanup);
+
+  it("другой блок и обратно — уведомления нет, список (созданный снова) виден", () => {
+    const { rerender } = render(<Switch blockId="b1" />);
+    fireEvent.click(screen.getByRole("button", { name: "Удалить" }));
+    expect(screen.queryByText("Список блока b1")).toBeNull();
+    expect(screen.getByText(/Список блока A удалён/)).toBeTruthy();
+    rerender(<Switch blockId="b2" />);
+    rerender(<Switch blockId="b1" />);
+    expect(screen.getByText("Список блока b1")).toBeTruthy();
+    expect(screen.queryByText(/удалён/)).toBeNull();
+  });
+});
 
 describe("ответ генератора после перерисовки страницы", () => {
   afterEach(cleanup);

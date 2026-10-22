@@ -2,74 +2,143 @@
 
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useRef, type RefObject } from "react";
+import { memo, useLayoutEffect, useRef, type RefObject } from "react";
 import { UnitStatusBadge } from "@/components/UnitStatusBadge";
+import { UnitDetail } from "@/components/UnitDetail";
+import { UnitsCheck } from "@/components/UnitsCheck";
 import { unitRowView, type UnitRowContext } from "@/lib/admin/units/rowView";
 import type { UnitRecord, UnitStatus } from "@/lib/units";
+import { UpdatedAgo } from "@/components/UpdatedAgo";
 import { FinishingCell, LayoutCell, PriceCell } from "./UnitsRowCells";
-import { UnitDetail } from "./UnitDetail";
-import { UpdatedAgo } from "./UpdatedAgo";
+
+export type UnitsRowOpen = "status" | "edit" | null;
 
 type UnitsRowProps = {
   unit: UnitRecord;
   rowContext: UnitRowContext;
-  open: boolean;
+  open: UnitsRowOpen;
   /** Зебра — по номеру строки: раскрытие вставляет свою строку, и :nth-child сбивался бы. */
   alt: boolean;
-  onToggle: (id: string | null) => void;
+  /** null — колонки выбора нет (с выбранными делать нечего). */
+  selected: boolean | null;
+  onSelect: (id: string, on: boolean) => void;
+  /** false — раскрытое не сменилось (правку не бросили). */
+  onOpen: (id: string | null, mode?: "status" | "edit") => boolean;
   /** null — статус менять нельзя: плашка без кнопки. */
   onPick: ((unit: UnitRecord, to: UnitStatus) => void) | null;
+  /** Правка квартиры руководителем (Н4) — в том же раскрытии. */
+  canEdit: boolean;
+  colSpan: number;
 };
 
 /**
- * Строка квартиры (Н1): № · подъезд · этаж · планировка · цена · отделка · обновлено · статус;
- * в узком контейнере — карточка в две строки (CSS). Тап по плашке раскрывает под строкой выбор
- * статуса. memo — по ссылке квартиры и подписи контекста: перечитанный список и новые пропсы
- * страницы не перерисовывают все строки.
+ * Строка квартиры (Н1): [выбор] · № · подъезд · этаж · планировка · цена · отделка · обновлено ·
+ * статус; в узком контейнере — карточка в две строки (CSS). Тап по плашке раскрывает под строкой
+ * выбор статуса и «Изменить квартиру». memo — по ссылке квартиры и подписи контекста:
+ * перечитанный список и новые пропсы страницы не перерисовывают все строки.
  */
-export const UnitsRow = memo(
-  function UnitsRow({ unit, rowContext, open, alt, onToggle, onPick }: UnitsRowProps) {
-    const button = useRef<HTMLButtonElement>(null);
-    const detailId = `unit-${unit.id}-status`;
-    const close = () => {
-      onToggle(null);
-      button.current?.focus();
+export const UnitsRow = memo(function UnitsRow(props: UnitsRowProps) {
+  const { unit, open, alt, onOpen, onPick } = props;
+  const button = useRef<HTMLButtonElement>(null);
+  const detailId = `unit-${unit.id}-detail`;
+  const row = useFocusOutOnUnmount(detailId);
+  const close = () => {
+    // Правку не бросили — фокус остаётся в форме.
+    if (onOpen(null)) button.current?.focus();
+  };
+  return (
+    <>
+      <tr
+        ref={row}
+        className={rowClass(open !== null, alt, props.selected === true)}
+        role="row"
+        data-unit-id={unit.id}
+      >
+        {props.selected === null ? null : <SelectCell {...props} />}
+        <UnitCells unit={unit} rowContext={props.rowContext} />
+        <StatusCell {...props} detailId={detailId} button={button} />
+      </tr>
+      {open ? (
+        <UnitDetail
+          id={detailId}
+          alt={alt}
+          selected={props.selected === true}
+          unit={unit}
+          mode={open}
+          colSpan={props.colSpan}
+          onPick={
+            onPick
+              ? (to) => {
+                  onPick(unit, to);
+                  close();
+                }
+              : null
+          }
+          onEdit={props.canEdit ? () => onOpen(unit.id, "edit") : null}
+          onClose={close}
+        />
+      ) : null}
+    </>
+  );
+}, sameRow);
+
+/**
+ * Строка уходит из списка, а фокус в ней или в её раскрытии (её перечитали, удалили, закрыли
+ * раскрытие строки, которая держалась только им) — на сводку списка без прокрутки, а не на body.
+ * Очистка layout-эффекта идёт, пока строка ещё в DOM.
+ */
+function useFocusOutOnUnmount(detailId: string) {
+  const row = useRef<HTMLTableRowElement>(null);
+  useLayoutEffect(() => {
+    const element = row.current;
+    return () => {
+      const focused = document.activeElement;
+      const detail = document.getElementById(detailId);
+      if (!focused || !(element?.contains(focused) || detail?.contains(focused))) return;
+      const summary = element
+        ?.closest(".units-list")
+        ?.querySelector<HTMLElement>(".units-list__summary");
+      summary?.focus({ preventScroll: true });
     };
-    return (
-      <>
-        <tr className={rowClass(open, alt)} role="row">
-          <UnitCells unit={unit} rowContext={rowContext} />
-          <StatusCell
-            unit={unit}
-            open={open}
-            detailId={detailId}
-            button={button}
-            {...{ onToggle, onPick }}
-          />
-        </tr>
-        {open && onPick ? (
-          <UnitDetail
-            id={detailId}
-            alt={alt}
-            unit={unit}
-            onPick={(to) => {
-              onPick(unit, to);
-              close();
-            }}
-            onClose={close}
-          />
-        ) : null}
-      </>
-    );
-  },
-  (prev, next) =>
+  }, [detailId]);
+  return row;
+}
+
+function sameRow(prev: UnitsRowProps, next: UnitsRowProps) {
+  return (
     prev.unit === next.unit &&
     prev.open === next.open &&
     prev.alt === next.alt &&
+    prev.selected === next.selected &&
+    prev.canEdit === next.canEdit &&
+    prev.colSpan === next.colSpan &&
     prev.rowContext.signature === next.rowContext.signature &&
-    prev.onToggle === next.onToggle &&
-    prev.onPick === next.onPick,
-);
+    prev.onOpen === next.onOpen &&
+    prev.onSelect === next.onSelect &&
+    prev.onPick === next.onPick
+  );
+}
+
+function rowClass(open: boolean, alt: boolean, selected: boolean) {
+  const classes = ["units-row"];
+  if (alt) classes.push("units-row--alt");
+  if (open) classes.push("units-row--open");
+  if (selected) classes.push("units-row--selected");
+  return classes.join(" ");
+}
+
+function SelectCell({ unit, selected, onSelect }: UnitsRowProps) {
+  const t = useTranslations("admin.complexes.units.list.select");
+  return (
+    <td className="units-row__select" role="cell">
+      <UnitsCheck
+        label={t("row", { number: unit.number })}
+        checked={selected === true}
+        onChange={(on) => onSelect(unit.id, on)}
+      />
+    </td>
+  );
+}
 
 /** Ячейки до статуса: № · подъезд · этаж · планировка · цена · отделка · обновлено. */
 function UnitCells({ unit, rowContext }: Pick<UnitsRowProps, "unit" | "rowContext">) {
@@ -98,38 +167,32 @@ function UnitCells({ unit, rowContext }: Pick<UnitsRowProps, "unit" | "rowContex
   );
 }
 
-function rowClass(open: boolean, alt: boolean) {
-  const classes = ["units-row"];
-  if (alt) classes.push("units-row--alt");
-  if (open) classes.push("units-row--open");
-  return classes.join(" ");
-}
-
-type StatusCellProps = Pick<UnitsRowProps, "unit" | "open" | "onToggle" | "onPick"> & {
+type StatusCellProps = UnitsRowProps & {
   detailId: string;
   button: RefObject<HTMLButtonElement | null>;
 };
 
-/** Плашка статуса: с правом менять — кнопка, раскрывающая выбор под строкой. */
-function StatusCell({ unit, open, detailId, button, onToggle, onPick }: StatusCellProps) {
+/** Плашка статуса: можно менять статус или править — кнопка, раскрывающая строку. */
+function StatusCell({ unit, open, detailId, button, onOpen, onPick, canEdit }: StatusCellProps) {
   const t = useTranslations("admin.complexes.units.list");
   const tStatus = useTranslations("admin.journal.unitStatus");
-  if (!onPick)
+  if (!onPick && !canEdit)
     return (
       <td className="units-row__status" role="cell">
         <UnitStatusBadge status={unit.status} />
       </td>
     );
+  const label = { number: unit.number, status: tStatus(unit.status) };
   return (
     <td className="units-row__status" role="cell">
       <button
         ref={button}
         type="button"
         className="units-row__status-button"
-        aria-label={t("statusButton", { number: unit.number, status: tStatus(unit.status) })}
-        aria-expanded={open}
+        aria-label={canEdit ? t("statusButtonEdit", label) : t("statusButton", label)}
+        aria-expanded={open !== null}
         aria-controls={open ? detailId : undefined}
-        onClick={() => onToggle(open ? null : unit.id)}
+        onClick={() => onOpen(open ? null : unit.id)}
       >
         <UnitStatusBadge status={unit.status} />
         <ChevronDown className="units-row__chevron" size={14} aria-hidden="true" />

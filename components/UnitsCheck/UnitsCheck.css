@@ -1,0 +1,38 @@
+/* Галочка выбора квартиры: квадрат 18 px янтарного цвета; зона касания — 32 px в таблице (WCAG
+   2.5.8: не меньше 24), 44 px на пальцах и в карточках. */
+.units-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+}
+
+.units-check__input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--amber);
+  cursor: pointer;
+}
+
+.units-check__input:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  .units-check {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@container units-list (max-width: 719px) {
+  .units-check {
+    width: 44px;
+    height: 44px;
+  }
+}

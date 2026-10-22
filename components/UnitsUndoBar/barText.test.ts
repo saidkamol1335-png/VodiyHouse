@@ -1,5 +1,7 @@
 import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
+import { editFailed, type EditMessage } from "@/lib/admin/units/editOutcome";
+import { unitsFailure } from "@/lib/admin/units/errors";
 import type { StatusMessage } from "@/lib/admin/units/statusOutcome";
 import ru from "@/messages/ru.json";
 import { barText, type BarTexts } from "./barText";
@@ -12,6 +14,7 @@ const texts = {
   }),
   status: createTranslator({ locale: "ru", messages: ru, namespace: "admin.journal.unitStatus" }),
   errors: createTranslator({ locale: "ru", messages: ru, namespace: "admin.developers.errors" }),
+  complexes: createTranslator({ locale: "ru", messages: ru, namespace: "admin.complexes" }),
 } as unknown as BarTexts;
 
 const ONE = { number: "41", count: 1 };
@@ -64,5 +67,65 @@ describe("текст полосы статуса", () => {
     ],
   ])("%j", (message, expected) => {
     expect(show(message)).toEqual(expected);
+  });
+});
+
+describe("текст полосы правок руководителя", () => {
+  const edit = (message: EditMessage) => {
+    const { title, detail } = barText(texts, message);
+    return [plain(title), plain(detail)];
+  };
+
+  it.each<[EditMessage, (string | null)[]]>([
+    [{ kind: "rowSaved", number: "41" }, ["Кв. 41: сохранено", null]],
+    [{ kind: "added", number: "89" }, ["Добавлена кв. 89", null]],
+    [
+      { kind: "priced", subject: MANY, changed: 2, withoutLayout: 1, none: false },
+      [
+        "Цена поменялась у 2 квартир",
+        "Без планировки: 1 — на сайте у них «цена по запросу», пока стояк не назначит планировку.",
+      ],
+    ],
+    [
+      { kind: "priced", subject: MANY, changed: 0, withoutLayout: 0, none: false },
+      ["Ничего не поменялось: у выбранных уже такая цена.", null],
+    ],
+    [
+      { kind: "priced", subject: MANY, changed: 3, withoutLayout: 0, none: true },
+      ["Цена снята у 3 квартир", null],
+    ],
+    [
+      { kind: "finished", subject: MANY, changed: 0 },
+      ["Ничего не поменялось: у выбранных уже такая отделка.", null],
+    ],
+    [{ kind: "deleted", count: 5 }, ["Удалено: 5 квартир", null]],
+    [
+      { kind: "rowGone", number: "41" },
+      ["Кв. 41 удалили, пока была открыта её правка, — правка не сохранена.", null],
+    ],
+    [
+      { kind: "priced", subject: MANY, changed: 1200, withoutLayout: 1200, none: false },
+      [
+        "Цена поменялась у 1 200 квартир",
+        "Без планировки: 1 200 — на сайте у них «цена по запросу», пока стояк не назначит планировку.",
+      ],
+    ],
+    [
+      editFailed("row", ONE, unitsFailure("unitNumberTaken")),
+      ["Не сохранили кв. 41.", "Квартира с таким номером уже есть в блоке"],
+    ],
+    [
+      editFailed("price", MANY, unitsFailure("network")),
+      [
+        "Не поставили цену: 3 квартиры.",
+        "Ответ не дошёл — список перечитан: проверьте, сохранилось ли.",
+      ],
+    ],
+    [
+      { kind: "editFailed", what: "remove", subject: ONE, error: "notReady", broken: ["layouts"] },
+      ["Не удалили: кв. 41.", "Нельзя: опубликованный ЖК потерял бы планировка с чертежом и ценой"],
+    ],
+  ])("%j", (message, expected) => {
+    expect(edit(message)).toEqual(expected);
   });
 });

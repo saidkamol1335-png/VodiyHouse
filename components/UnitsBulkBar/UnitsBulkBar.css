@@ -1,0 +1,164 @@
+/* Массовая панель («Решаю сам» шага 12) в доке блока: строка «Выбрано N · M вне фильтра», шаги
+   Статус · Цена · Отделка · Удалить и «×»; открытый шаг растёт над строкой (без подложки — список
+   под ней доступен) и стоит раньше неё и в DOM — порядок Tab как на экране. На 390 — во всю
+   ширину, шаг прокручивается сам. */
+.units-bulk {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  box-shadow: var(--toast-shadow);
+  pointer-events: auto;
+  animation: units-bulk-in var(--dur-fast) var(--ease) both;
+}
+
+.units-bulk__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.units-bulk__count {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: var(--fs-small-l);
+}
+
+.units-bulk__hidden {
+  color: var(--fg-3);
+}
+
+.units-bulk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.units-bulk__action {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.units-bulk__action--open {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+  color: var(--fg);
+}
+
+.units-bulk__action--danger {
+  color: var(--badge-bad-fg);
+}
+
+.units-bulk__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+.units-bulk__action:focus-visible,
+.units-bulk__close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-bulk__step {
+  max-height: min(60vh, 520px);
+  overflow-y: auto;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+  animation: units-bulk-in var(--dur-fast) var(--ease) both;
+}
+
+.units-bulk__form {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.units-bulk__form > .field,
+.units-bulk__form > .unit-price-fields {
+  justify-self: stretch;
+}
+
+.units-bulk__question {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.units-bulk__warning,
+.units-bulk__note {
+  margin: 0;
+  font-size: var(--fs-caption);
+}
+
+.units-bulk__warning {
+  color: var(--badge-amber-fg);
+}
+
+.units-bulk__note {
+  color: var(--fg-2);
+}
+
+.units-bulk__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@keyframes units-bulk-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 760px) {
+  .units-bulk {
+    padding: 10px 8px 10px 14px;
+  }
+
+  .units-bulk__action,
+  .units-bulk__close {
+    height: 44px;
+  }
+
+  .units-bulk__close {
+    width: 44px;
+  }
+
+  .units-bulk__step {
+    max-height: 60dvh;
+  }
+
+  .units-bulk__form .button {
+    width: 100%;
+  }
+
+  .units-bulk__buttons {
+    width: 100%;
+  }
+
+  .units-bulk__buttons .button {
+    flex: 1 1 0;
+  }
+}

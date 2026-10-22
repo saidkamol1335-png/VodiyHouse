@@ -128,10 +128,24 @@ export type UnitsStatusActions = {
 };
 
 /**
- * Действия списка. Права задаёт наличие действия: без status плашка — просто плашка. В 12.5
- * сюда добавятся правка строки, цена, отделка и удаление — менеджеру их не передают (12.6).
+ * Правки руководителя (12.5, Н3, Н4). Каждое действие — по отдельности: кнопка есть, только если
+ * передано её действие (TODO-заказчик «цены — менеджер?» закрывается одной строкой страницы).
+ */
+export type UnitsEditActions = Partial<{
+  add: UnitsAction<AddUnitInput, UnitRowResult>;
+  update: UnitsAction<UpdateUnitInput, UnitRowResult>;
+  remove: UnitsAction<UnitIdsInput, DeleteUnitsResult>;
+  removeList: UnitsAction<DeleteBlockUnitsInput, DeleteUnitsResult>;
+  price: UnitsAction<SetUnitsPriceInput, SetUnitsPriceResult>;
+  finishing: UnitsAction<SetUnitsFinishingInput, ChangedResult>;
+}>;
+
+/**
+ * Действия списка. Права задаёт наличие действия: без status плашка — просто плашка; без edit —
+ * ни правки, ни цены, ни удаления (менеджер, 12.6).
  */
 export type UnitsListActions = {
   read: UnitsAction<BlockUnitsInput, BlockUnitsResult>;
   status: UnitsStatusActions | null;
+  edit: UnitsEditActions | null;
 };

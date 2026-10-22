@@ -4,35 +4,36 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { UnitsFilters } from "@/components/UnitsFilters";
-import { UnitsRow } from "@/components/UnitsRow";
-import { UNITS_LIST_COLUMNS } from "@/lib/admin/units/columns";
 import type { UnitRowContext } from "@/lib/admin/units/rowView";
 import { UNITS_PAGE_SIZE } from "@/lib/admin/units/statusOutcome";
+import type { UnitsListView } from "@/lib/admin/units/useUnitsListView";
+import type { UnitsSelection } from "@/lib/admin/units/useUnitsSelection";
 import { EMPTY_UNIT_FILTER, type UnitRecord, type UnitStatus } from "@/lib/units";
-import { useUnitsListView } from "./useUnitsListView";
+import { UnitsTable } from "./UnitsTable";
 
 type UnitsListProps = {
   /** Название блока («A») — для подписи таблицы диктору. */
   blockName: string;
-  /** Прочитанное с правками, которые ещё сохраняются. */
-  units: readonly UnitRecord[];
-  /** Квартиры, которым сменили статус, — не пропадают из-под фильтра статуса до его смены. */
-  sticky: ReadonlySet<string>;
+  /** id сводки «Показано N из M»: на неё уходит фокус, когда исчезает то, на чём он был. */
+  summaryId: string;
   rowContext: UnitRowContext;
-  onFilterChange: () => void;
+  /** Фильтр, порция и раскрытая строка — у блока: их видит и массовая панель. */
+  view: UnitsListView;
+  selection: UnitsSelection | null;
+  canEdit: boolean;
   /** null — менять статус нельзя. */
   onStatus: ((unit: UnitRecord, to: UnitStatus) => void) | null;
 };
 
 /** Список квартир блока (Н1): фильтры, таблица (в узком контейнере — карточки) порциями по 200. */
-export function UnitsList({ blockName, units, sticky, rowContext, ...props }: UnitsListProps) {
-  const t = useTranslations("admin.complexes.units.list");
-  const view = useUnitsListView({
-    units,
-    sticky,
-    rooms: rowContext.rooms,
-    onFilterChange: props.onFilterChange,
-  });
+export function UnitsList({
+  blockName,
+  summaryId,
+  rowContext,
+  view,
+  selection,
+  ...props
+}: UnitsListProps) {
   return (
     <div className="units-list">
       <UnitsFilters
@@ -41,9 +42,7 @@ export function UnitsList({ blockName, units, sticky, rowContext, ...props }: Un
         options={view.options}
         onChange={view.changeFilter}
       />
-      <p className="units-list__summary" aria-live="polite" aria-busy={view.busy}>
-        {t("shown", { shown: view.shown.length, total: view.visible.length })}
-      </p>
+      <SummaryRow view={view} selection={selection} summaryId={summaryId} />
       {view.visible.length === 0 ? (
         <NothingFound onReset={() => view.changeFilter(EMPTY_UNIT_FILTER)} />
       ) : (
@@ -51,12 +50,103 @@ export function UnitsList({ blockName, units, sticky, rowContext, ...props }: Un
           blockName={blockName}
           units={view.shown}
           rowContext={rowContext}
-          openId={view.openId}
-          onToggle={view.toggle}
+          view={view}
+          selection={selection}
+          canEdit={props.canEdit}
           onStatus={props.onStatus}
         />
       )}
-      <ShowMore left={view.visible.length - view.limit} onClick={view.showMore} />
+      {/* Закреплённые за порцией уже на экране — «ещё» считает только скрытые. */}
+      <ShowMore
+        left={view.visible.length - view.shown.length}
+        limit={view.limit}
+        onClick={view.showMore}
+      />
+    </div>
+  );
+}
+
+/** «Показано N из M» (на неё уходит фокус, когда исчезает кнопка) и кнопки выделения. */
+function SummaryRow({
+  view,
+  selection,
+  summaryId,
+}: {
+  view: UnitsListView;
+  selection: UnitsSelection | null;
+  summaryId: string;
+}) {
+  const t = useTranslations("admin.complexes.units.list");
+  return (
+    <div className="units-list__summary-row">
+      <p
+        id={summaryId}
+        className="units-list__summary"
+        tabIndex={-1}
+        aria-live="polite"
+        aria-busy={view.busy}
+      >
+        {t("shown", { shown: view.shown.length, total: view.visible.length })}
+      </p>
+      {selection ? (
+        <SelectionButtons view={view} selection={selection} summaryId={summaryId} />
+      ) : null}
+    </div>
+  );
+}
+
+type SelectionButtonsProps = {
+  view: UnitsListView;
+  selection: UnitsSelection;
+  summaryId: string;
+};
+
+/**
+ * «Выбрать все N по фильтру» добавляет к выделенным (найденные поиском раньше не пропадают) — по
+ * текущему фильтру, пока отложенный догоняет ввод, кнопка недоступна. «Снять выделение» — всё.
+ * Нажатая кнопка исчезает — фокус переходит на соседнюю (или на сводку), а не на body.
+ */
+function SelectionButtons({ view, selection, summaryId }: SelectionButtonsProps) {
+  const t = useTranslations("admin.complexes.units.list.select");
+  const next = useRef<"all" | "clear" | null>(null);
+  const focusIf = (which: "all" | "clear") => (element: HTMLButtonElement | null) => {
+    if (!element || next.current !== which) return;
+    next.current = null;
+    element.focus();
+  };
+  const allPicked = view.visible.every((unit) => selection.ids.has(unit.id));
+  const pickAll = () => {
+    next.current = "clear";
+    selection.setMany(view.matchingNow(), true);
+  };
+  const clear = () => {
+    next.current = view.visible.length > 0 ? "all" : null;
+    if (next.current === null) document.getElementById(summaryId)?.focus();
+    selection.clear();
+  };
+  return (
+    <div className="units-list__selection">
+      {view.visible.length > 0 && !allPicked ? (
+        <button
+          ref={focusIf("all")}
+          type="button"
+          className="units-list__select-all"
+          aria-disabled={view.busy}
+          onClick={view.busy ? undefined : pickAll}
+        >
+          {t("all", { count: view.visible.length })}
+        </button>
+      ) : null}
+      {selection.selected.length > 0 ? (
+        <button
+          ref={focusIf("clear")}
+          type="button"
+          className="units-list__select-all"
+          onClick={clear}
+        >
+          {t("clear")}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -75,15 +165,16 @@ function NothingFound({ onReset }: { onReset: () => void }) {
 }
 
 /** «Показать ещё 200»: фокус — на первую новую строку, а не на body, когда кнопка исчезнет. */
-function ShowMore({ left, onClick }: { left: number; onClick: () => void }) {
+function ShowMore({ left, limit, onClick }: { left: number; limit: number; onClick: () => void }) {
   const t = useTranslations("admin.complexes.units.list");
   const anchor = useRef<HTMLDivElement>(null);
   const firstNew = useRef<number | null>(null);
+  const rowsOf = () =>
+    anchor.current?.closest(".units-list")?.querySelectorAll<HTMLElement>(".units-row") ?? null;
   useEffect(() => {
     if (firstNew.current === null) return;
-    const list = anchor.current?.closest(".units-list");
-    const buttons = list?.querySelectorAll<HTMLElement>(".units-row__status-button");
-    buttons?.[firstNew.current]?.focus();
+    const row = rowsOf()?.[firstNew.current];
+    row?.querySelector<HTMLElement>("button, input")?.focus();
     firstNew.current = null;
   });
   return (
@@ -93,63 +184,14 @@ function ShowMore({ left, onClick }: { left: number; onClick: () => void }) {
           variant="ghost"
           size="sm"
           onClick={() => {
-            firstNew.current =
-              anchor.current?.closest(".units-list")?.querySelectorAll(".units-row__status-button")
-                .length ?? null;
+            // Первая новая — сразу за порцией (закреплённые встанут на свои места по номеру).
+            firstNew.current = limit;
             onClick();
           }}
         >
           {t("more", { count: Math.min(UNITS_PAGE_SIZE, left) })}
         </Button>
       ) : null}
-    </div>
-  );
-}
-
-type UnitsTableProps = {
-  blockName: string;
-  units: readonly UnitRecord[];
-  rowContext: UnitRowContext;
-  openId: string | null;
-  onToggle: (id: string | null) => void;
-  onStatus: UnitsListProps["onStatus"];
-};
-
-/** Явные роли: в карточках у ячеек меняется display, и Safari иначе теряет смысл таблицы. */
-function UnitsTable({ blockName, units, rowContext, openId, onToggle, onStatus }: UnitsTableProps) {
-  const t = useTranslations("admin.complexes.units.list");
-  return (
-    <div className="units-list__frame">
-      <table className="units-list__table" role="table">
-        <caption className="sr-only">{t("caption", { name: blockName })}</caption>
-        <thead className="units-list__head" role="rowgroup">
-          <tr role="row">
-            {UNITS_LIST_COLUMNS.map((column) => (
-              <th
-                key={column}
-                className={`units-list__th units-list__th--${column}`}
-                role="columnheader"
-                scope="col"
-              >
-                {t(`columns.${column}`)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody role="rowgroup">
-          {units.map((unit, index) => (
-            <UnitsRow
-              key={unit.id}
-              unit={unit}
-              rowContext={rowContext}
-              open={openId === unit.id}
-              alt={index % 2 === 1}
-              onToggle={onToggle}
-              onPick={onStatus}
-            />
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }

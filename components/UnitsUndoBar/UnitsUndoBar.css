@@ -1,11 +1,6 @@
-/* Полоса «Отменить» (мокап: .toast): карточка справа снизу, на телефоне — во всю ширину над
-   нижним краем; действие — пилюля 44 px на телефоне (.ts__a). Появление — opacity + transform. */
+/* Полоса «Отменить» (мокап: .toast) в доке блока (UnitsDock): над массовой панелью; действие —
+   пилюля 44 px на телефоне (.ts__a). Появление — opacity + transform. */
 .units-undo {
-  position: fixed;
-  right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  z-index: 45;
-  width: min(420px, calc(100% - 24px));
   pointer-events: none;
 }
 
@@ -119,13 +114,6 @@
 }
 
 @media (max-width: 760px) {
-  .units-undo {
-    right: 12px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
-    left: 12px;
-    width: auto;
-  }
-
   .units-undo__card {
     align-items: center;
   }

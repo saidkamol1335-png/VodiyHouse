@@ -8,6 +8,42 @@
   gap: 12px;
 }
 
+.units-list__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+}
+
+.units-list__selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.units-list__select-all {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.units-list__select-all[aria-disabled="true"] {
+  opacity: var(--opacity-busy);
+  cursor: default;
+}
+
+.units-list__select-all:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 .units-list__summary {
   margin: 0;
   color: var(--fg-3);
@@ -15,6 +51,12 @@
   font-size: var(--fs-label);
   letter-spacing: var(--ls-mono);
   transition: opacity var(--dur-fast) var(--ease);
+}
+
+/* Сводка получает фокус, когда исчезает кнопка, на которой он был («×» панели, удаление). */
+.units-list__summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
 }
 
 /* Пока отложенный фильтр догоняет ввод — подпись приглушена. */
@@ -50,6 +92,11 @@
 
 /* Ширины — чтобы строка шла в одну линию, как у «Заявок»: «Планировке» остаётся всё прочее,
    при 1000 — не меньше 150 px («4-комн. · 112,5 м²»). */
+.units-list__th--select {
+  width: 40px;
+  padding: 0 0 0 6px;
+}
+
 .units-list__th--number {
   width: 56px;
 }
@@ -63,16 +110,16 @@
 }
 
 .units-list__th--price {
-  width: 170px;
+  width: 160px;
   text-align: right;
 }
 
 .units-list__th--finishing {
-  width: 160px;
+  width: 150px;
 }
 
 .units-list__th--updated {
-  width: 190px;
+  width: 170px;
 }
 
 .units-list__th--status {
@@ -119,11 +166,11 @@
 /* Шире 1080 (окно 1440) — отделке и «Обновлено» место в одну строку, как у «Заявок». */
 @container units-list (min-width: 1080px) {
   .units-list__th--finishing {
-    width: 190px;
+    width: 180px;
   }
 
   .units-list__th--updated {
-    width: 236px;
+    width: 220px;
   }
 }
 
@@ -178,7 +225,8 @@
     display: none;
   }
 
-  .units-list__reset {
+  .units-list__reset,
+  .units-list__select-all {
     display: inline-flex;
     align-items: center;
     min-height: 44px;

@@ -9,9 +9,17 @@
   overflow-wrap: anywhere;
 }
 
-.units-row--alt,
-.units-row__detail--alt {
+.units-row--alt {
   background: var(--row-alt);
+}
+
+/* Выбранная галочкой — янтарный фон (поверх зебры); раскрытие — так же (UnitDetail.css). */
+.units-row--selected {
+  background: var(--badge-amber-bg);
+}
+
+.units-row > .units-row__select {
+  padding: 0 0 0 6px;
 }
 
 .units-row__number {
@@ -77,35 +85,6 @@
   transform: rotate(180deg);
 }
 
-/* Нижняя полоса «Отменить» не закрывает раскрытую строку при прокрутке к ней. */
-.units-row__detail {
-  scroll-margin-bottom: 96px;
-}
-
-.units-row__detail-cell {
-  padding: 10px 12px 14px;
-  border-top: 1px dashed var(--line);
-}
-
-/* Раскрытие — содержимое появляется opacity + transform (≤ 200 мс, CLAUDE.md §3). */
-.units-row__detail-cell > * {
-  animation: units-row-reveal var(--dur-fast) var(--ease) both;
-}
-
-.units-row__detail-updated {
-  display: block;
-  margin-top: 10px;
-  color: var(--fg-3);
-  font-size: var(--fs-caption);
-}
-
-@keyframes units-row-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-
 @container units-list (max-width: 999px) {
   .units-row > td {
     padding-right: 8px;
@@ -139,13 +118,21 @@
   }
 
   .units-row + .units-row,
-  .units-row__detail + .units-row {
+  .unit-detail + .units-row {
     border-top: 1px solid var(--line);
   }
 
-  .units-row--alt,
-  .units-row__detail--alt {
+  .units-row--alt {
     background: none;
+  }
+
+  .units-row--selected {
+    background: var(--badge-amber-bg);
+  }
+
+  .units-row > .units-row__select {
+    order: 0;
+    margin-left: -10px;
   }
 
   .units-row > td {
@@ -233,14 +220,5 @@
     min-height: 44px;
     justify-content: flex-end;
     padding: 0 6px;
-  }
-
-  .units-row__detail,
-  .units-row__detail-cell {
-    display: block;
-  }
-
-  .units-row__detail-cell {
-    padding: 10px 14px 14px;
   }
 }

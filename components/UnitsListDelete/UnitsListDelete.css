@@ -1,0 +1,61 @@
+/* «Удалить список блока» (Н4): опасная зона внизу блока — свёрнута в кнопку; раскрыта — рамка
+   цвета ошибки, ввод названия блока и «Удалить список». */
+.units-list-delete {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.units-list-delete--open {
+  display: block;
+  border-top: 0;
+}
+
+.units-list-delete__form {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  padding: 16px 18px;
+  border: 1px solid var(--badge-bad-border);
+  border-radius: var(--r-m);
+  background: var(--bad-soft);
+  animation: units-list-delete-reveal var(--dur-fast) var(--ease) both;
+}
+
+.units-list-delete__title {
+  margin: 0;
+  color: var(--badge-bad-fg);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.units-list-delete__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-list-delete__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@keyframes units-list-delete-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 760px) {
+  .units-list-delete > .button {
+    height: 44px;
+  }
+
+  .units-list-delete__actions .button {
+    flex: 1 1 0;
+  }
+}

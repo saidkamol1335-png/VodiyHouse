@@ -1,5 +1,16 @@
 import { ComplexUnitsTab } from "@/components/ComplexUnitsTab";
-import { createBlockUnitsAction, saveRisersAction } from "@/lib/admin/actions/units";
+import {
+  addUnitAction,
+  createBlockUnitsAction,
+  deleteBlockUnitsAction,
+  saveRisersAction,
+  updateUnitAction,
+} from "@/lib/admin/actions/units";
+import {
+  deleteUnitsAction,
+  setUnitsFinishingAction,
+  setUnitsPriceAction,
+} from "@/lib/admin/actions/unitsMass";
 import { readBlockUnitsAction } from "@/lib/admin/actions/unitsList";
 import { revertUnitsStatusAction, setUnitsStatusAction } from "@/lib/admin/actions/unitsStatus";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
@@ -17,9 +28,18 @@ type ComplexUnitsPageProps = {
   searchParams: Promise<{ blok?: string | string[] }>;
 };
 
+// Права — наличием действия: менеджеру (12.6) edit не передаётся.
 const LIST_ACTIONS = {
   read: readBlockUnitsAction,
   status: { set: setUnitsStatusAction, revert: revertUnitsStatusAction },
+  edit: {
+    add: addUnitAction,
+    update: updateUnitAction,
+    remove: deleteUnitsAction,
+    removeList: deleteBlockUnitsAction,
+    price: setUnitsPriceAction,
+    finishing: setUnitsFinishingAction,
+  },
 };
 
 /** Вкладка «Квартиры» (шаг 12): блок из ?blok=, генератор или стояки и список (читает экран). */

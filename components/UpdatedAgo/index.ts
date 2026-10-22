@@ -1,0 +1,1 @@
+export { UpdatedAgo } from "./UpdatedAgo";

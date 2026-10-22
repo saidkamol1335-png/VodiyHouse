@@ -94,3 +94,87 @@ describe("список квартир в браузере", () => {
     expect(run(state, { type: "filterChanged" }).sticky.size).toBe(0);
   });
 });
+
+describe("правки руководителя в списке", () => {
+  const withLayout = (number: string, layoutId: string) => ({
+    ...unit(number, "free"),
+    layoutId,
+  });
+
+  it("массовый статус: на месте остаются только видимые — скрытые выделенные не всплывают", () => {
+    const state = run(loaded([unit("1", "free"), unit("2", "free")]), {
+      type: "statusSent",
+      op: 1,
+      changes: new Map<string, UnitStatus>([
+        ["id-1", "sold"],
+        ["id-2", "sold"],
+      ]),
+      keep: new Set(["id-1"]),
+    });
+    expect([...state.sticky]).toEqual(["id-1"]);
+    expect(statusOf(state, "2")).toBe("sold");
+  });
+
+  it("сохранённая и добавленная квартира — из ответа базы, по номерам, видна до смены фильтра", () => {
+    const state = run(
+      loaded([unit("1", "free"), unit("10", "free")]),
+      { type: "unitSaved", unit: unit("2", "free") },
+      { type: "unitSaved", unit: { ...unit("10", "free"), number: "3" } },
+    );
+    expect(visibleUnits(state).map((item) => item.number)).toEqual(["1", "2", "3"]);
+    expect(state.pinned).toEqual(new Set(["id-2", "id-10"]));
+    expect(run(state, { type: "filterChanged" }).pinned.size).toBe(0);
+  });
+
+  it("массовая цена: отметка только у поменявшихся, остальные строки — те же объекты", () => {
+    const first = loaded([withLayout("1", "L"), { ...unit("2", "free"), pricePerM2: 620 }]);
+    const state = run(first, {
+      type: "unitsPatched",
+      ids: new Set(["id-1", "id-2"]),
+      fields: { price: null, pricePerM2: 620 },
+      stamp: STAMP,
+    });
+    expect(state.base![0]).toMatchObject({ pricePerM2: 620, updatedByName: "Азиз" });
+    expect(state.base![1]).toBe(first.base![1]);
+  });
+
+  it("удалённые уходят вместе со слоем правок и «липкостью»", () => {
+    const state = run(loaded([unit("1", "free"), unit("2", "free")]), tap(1, "id-2", "sold"), {
+      type: "unitsRemoved",
+      ids: new Set(["id-2"]),
+    });
+    expect(visibleUnits(state).map((item) => item.number)).toEqual(["1"]);
+    expect(state.pending.size).toBe(0);
+    expect(state.sticky.size).toBe(0);
+  });
+
+  it("ответ правки, отправленной до смены фильтра, строку не закрепляет", () => {
+    const first = loaded([unit("1", "free")]);
+    const since = first.filterGen;
+    const state = run(
+      first,
+      { type: "filterChanged" },
+      {
+        type: "unitSaved",
+        unit: { ...unit("1", "free"), number: "1А" },
+        since,
+      },
+    );
+    expect(state.filterGen).toBe(since + 1);
+    expect(state.base![0]!.number).toBe("1А");
+    expect(state.pinned.size).toBe(0);
+  });
+
+  it("каждое чтение считается: сохранённые стояки держатся только до следующего", () => {
+    const first = loaded([unit("1", "free")]);
+    expect(run(first, { type: "readDone", units: [unit("1", "free")] }).reads).toBe(
+      first.reads + 1,
+    );
+    expect(run(first, { type: "readFailed", error: "timeout" }).reads).toBe(first.reads);
+  });
+
+  it("до первого чтения править нечего", () => {
+    const event: UnitsListEvent = { type: "unitSaved", unit: unit("1", "free") };
+    expect(run(INITIAL_UNITS_LIST, event)).toBe(INITIAL_UNITS_LIST);
+  });
+});

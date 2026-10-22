@@ -12,10 +12,11 @@ export {
   summarizeBlockPlan,
   validateBlockPlan,
 } from "./blockPlan";
-export type { UnitStamp } from "./edit";
-export { reuseUnchanged, withStatuses } from "./edit";
+export type { UnitFieldsPatch, UnitStamp } from "./edit";
+export { reuseUnchanged, withFields, withStatuses, withUnit, withoutUnits } from "./edit";
 export type {
   RoomsByLayout,
+  UnitKeep,
   UnitFilter,
   UnitFilterOptions,
   UnitRoomFilter,

@@ -72,9 +72,11 @@
 }
 
 @media (max-width: 760px) {
+  /* Над доком «Квартир», если он виден (выбраны квартиры, полоса «Отменить»): иначе «Сохранить
+     стояки» оказалась бы под массовой панелью. */
   .units-risers__actions {
     position: sticky;
-    bottom: 0;
+    bottom: min(var(--units-dock-cover), 50vh);
     z-index: 5;
     margin: 0 calc(-1 * var(--units-risers-pad)) calc(-1 * var(--units-risers-pad));
     padding: 12px var(--units-risers-pad) calc(12px + env(safe-area-inset-bottom));

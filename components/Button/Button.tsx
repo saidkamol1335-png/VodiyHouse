@@ -1,10 +1,13 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 
 type ButtonProps = {
   children: ReactNode;
-  /** primary — янтарная пилюля с бликом, ghost — прозрачная (мокап: .btn--primary, .btn--ghost). */
-  variant?: "primary" | "ghost";
+  /**
+   * primary — янтарная пилюля с бликом, ghost — прозрачная, danger — прозрачная с красной рамкой
+   * для того, что не отменить (мокап: .btn--primary, .btn--ghost, .btn--danger).
+   */
+  variant?: "primary" | "ghost" | "danger";
   size?: "md" | "sm";
   block?: boolean;
   /** Ссылка без префикса языка: кабинет и переходы на сайт из кабинета. */
@@ -22,6 +25,8 @@ type ButtonProps = {
   "aria-label"?: string;
   /** Кнопка раскрывает часть страницы («Изменить» у карточки блока). */
   "aria-expanded"?: boolean;
+  /** Вернуть на кнопку фокус, когда закрылось то, что она открыла. */
+  ref?: Ref<HTMLButtonElement>;
 };
 
 type ButtonLook = Pick<ButtonProps, "variant" | "size" | "block" | "pending" | "className">;
@@ -51,6 +56,7 @@ export function Button({
   disabled = false,
   "aria-label": ariaLabel,
   "aria-expanded": ariaExpanded,
+  ref,
   ...look
 }: ButtonProps) {
   const classes = buttonClasses(look);
@@ -63,6 +69,7 @@ export function Button({
   }
   return (
     <button
+      ref={ref}
       type={type}
       name={name}
       value={value}

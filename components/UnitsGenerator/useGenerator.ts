@@ -80,7 +80,7 @@ export function useGenerator({ blockId, floors, action }: GeneratorOptions) {
       setResult(next);
       if (next.status !== "done") return;
       guard.reset();
-      notify({ blockId, created: next.created, unassigned: next.unassigned });
+      notify({ kind: "created", blockId, created: next.created, unassigned: next.unassigned });
     });
   const ready = summary !== null && validateRisers(plan, draft.risers).length === 0;
   const issues = generatorIssues(validateBlockPlan(plan));

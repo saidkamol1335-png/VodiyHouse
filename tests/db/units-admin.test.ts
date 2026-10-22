@@ -189,7 +189,9 @@ describe("квартиры в кабинете: права, генератор, 
           [ids.draftComplex, layout],
         ),
       );
-      expect(Number(rows[0]?.price_from)).toBe(unitTotalPrice({ price: null, pricePerM2: 621 }, 58.7));
+      expect(Number(rows[0]?.price_from)).toBe(
+        unitTotalPrice({ price: null, pricePerM2: 621 }, 58.7),
+      );
     });
 
     it("5000 квартир — одной транзакцией и одной записью; 5001 — отказ без вставки", async () => {
@@ -289,13 +291,18 @@ describe("квартиры в кабинете: права, генератор, 
     });
 
     it("«+ Квартира»: свободная без цены, построчная запись с номером и блоком", async () => {
-      const added = await callAs<{ unit: { status: string; price: null } }>(
+      const added = await callAs<{ unit: Record<string, unknown> }>(
         db,
         head,
         "add_unit($1, 2, 5, 3, '17', $2)",
         [block, twoRoom],
       );
-      expect(added.unit).toMatchObject({ status: "free", price: null, number: "17" });
+      expect(added.unit).toMatchObject({
+        status: "free",
+        price: null,
+        number: "17",
+        updated_by_name: "Тест · head",
+      });
       const entry = (await unitEntries(db.admin, block)).at(-1);
       expect(entry).toMatchObject({
         action: "insert",
@@ -326,11 +333,21 @@ describe("квартиры в кабинете: права, генератор, 
     it("правка строки меняет только переданные поля и пишет номер, блок и подпись планировки", async () => {
       const unit = await unitByNumber(db.admin, block, "3");
       await callAs(db, head, "set_units_price($1, $2, 'total', 41000)", [block, [unit.id]]);
-      await callAs(db, head, "update_unit($1, $2, $3::jsonb)", [
-        block,
-        unit.id,
-        JSON.stringify({ number: "3А", layout_id: twoRoom }),
-      ]);
+      const edit = (who: string, patch: object) =>
+        callAs<{ unit: Record<string, unknown> }>(db, who, "update_unit($1, $2, $3::jsonb)", [
+          block,
+          unit.id,
+          JSON.stringify(patch),
+        ]);
+      const saved = await edit(head, { number: "3А", layout_id: twoRoom });
+      expect(saved.unit).toMatchObject({ number: "3А", updated_by_name: "Тест · head" });
+      // Правка без изменений автора не меняет: экран не подставит имя второго руководителя.
+      const other = await createStaff(db.admin, "head", { fullName: "Азиз Каримов" });
+      const same = await edit(other, { number: "3А" });
+      expect(same.unit).toMatchObject({
+        updated_by_name: "Тест · head",
+        updated_at: saved.unit.updated_at,
+      });
       expect(await unitByNumber(db.admin, block, "3А")).toMatchObject({
         price: "41000.00",
         layout_id: twoRoom,

@@ -1,6 +1,6 @@
-// Колонки списка квартир (Н1) — одно место для шапки таблицы и colspan раскрытой строки: в 12.5
-// добавится колонка галочки, и раскрытие не должно стать на колонку уже.
-export const UNITS_LIST_COLUMNS = [
+// Колонки списка квартир (Н1) — одно место для шапки таблицы и colspan раскрытой строки: колонка
+// галочки (12.5) есть, только когда с выбранными можно что-то сделать.
+export const UNITS_DATA_COLUMNS = [
   "number",
   "entrance",
   "floor",
@@ -11,4 +11,8 @@ export const UNITS_LIST_COLUMNS = [
   "status",
 ] as const;
 
-export type UnitsListColumn = (typeof UNITS_LIST_COLUMNS)[number];
+export type UnitsListColumn = "select" | (typeof UNITS_DATA_COLUMNS)[number];
+
+export function unitsListColumns(select: boolean): readonly UnitsListColumn[] {
+  return select ? ["select", ...UNITS_DATA_COLUMNS] : UNITS_DATA_COLUMNS;
+}

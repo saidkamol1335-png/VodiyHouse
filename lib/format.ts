@@ -147,11 +147,17 @@ export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
   return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
 }
 
-const AREA = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+/** Число как есть: разряды, до двух знаков после запятой — площадь и набранная сумма. */
+const DECIMAL = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+
+/** Сумма, как её набрали, — с разрядами и без округления до тысячи сумов: «8 320 500». */
+export function formatAmount(amount: number): string {
+  return DECIMAL.format(amount);
+}
 
 /** «42,5 м²» — площадь планировки (как подпись базы в журнале). */
 export function formatArea(area: number): string {
-  return `${AREA.format(area)} м²`;
+  return `${DECIMAL.format(area)} м²`;
 }
 
 /** «$620/м²», «4 100 000 сум/м²» — цена за м² квартиры (Н3). */

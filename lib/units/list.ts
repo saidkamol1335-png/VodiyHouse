@@ -52,20 +52,25 @@ function exceptStatus(filter: UnitFilter, roomsByLayout: RoomsByLayout) {
 const NO_IDS: ReadonlySet<string> = new Set();
 
 /**
- * keep — квартиры, которым только что сменили статус: остаются в списке до смены фильтра, хотя
- * статус уже не тот («Свободны» → тап «бронь» — строка не пропадает из-под пальца).
+ * Строки, которые остаются на месте до смены фильтра. sticky — сменили статус: проходит только
+ * фильтр статуса («Свободны» → тап «бронь» — строка не пропадает из-под пальца), а скрытые
+ * выделенные после массового статуса так и остаются скрытыми. pinned — правленая или добавленная
+ * квартира: проходит все фильтры (новый номер не пропадает под поиском).
  */
+export type UnitKeep = { sticky?: ReadonlySet<string>; pinned?: ReadonlySet<string> };
+
 export function filterUnits(
   units: readonly UnitRecord[],
   filter: UnitFilter,
   roomsByLayout: RoomsByLayout,
-  keep: ReadonlySet<string> = NO_IDS,
+  { sticky = NO_IDS, pinned = NO_IDS }: UnitKeep = {},
 ): UnitRecord[] {
   const matches = exceptStatus(filter, roomsByLayout);
   return units.filter(
     (unit) =>
-      (filter.status === null || unit.status === filter.status || keep.has(unit.id)) &&
-      matches(unit),
+      pinned.has(unit.id) ||
+      ((filter.status === null || unit.status === filter.status || sticky.has(unit.id)) &&
+        matches(unit)),
   );
 }
 

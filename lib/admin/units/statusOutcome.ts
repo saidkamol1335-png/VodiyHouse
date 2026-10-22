@@ -15,6 +15,11 @@ export const UNITS_PAGE_SIZE = 200;
 /** Номер — у одной квартиры («Кв. 41»), у нескольких — только сколько (массовая смена, 12.5). */
 export type StatusSubject = { number: string | null; count: number };
 
+export const statusSubject = (units: readonly { number: string }[]): StatusSubject => ({
+  number: units.length === 1 ? units[0]!.number : null,
+  count: units.length,
+});
+
 export type StatusMessage =
   | { kind: "saving"; subject: StatusSubject; from: UnitStatus | null; to: UnitStatus }
   | { kind: "changed"; subject: StatusSubject; from: UnitStatus | null; to: UnitStatus }

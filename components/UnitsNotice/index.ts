@@ -1,6 +1,7 @@
+export type { UnitsNotice } from "./UnitsNotice";
 export {
-  UnitsCreatedNotice,
+  UnitsListNotice,
   UnitsNoticeProvider,
+  useListRemoved,
   useUnitsNotice,
-  type CreatedNotice,
 } from "./UnitsNotice";

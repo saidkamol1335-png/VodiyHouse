@@ -14,7 +14,7 @@ const bar = (page: Page) => page.locator(".units-undo");
 const pill = (page: Page, name: string) =>
   page.getByRole("group", { name: "Статус" }).getByRole("button", { name: new RegExp(`^${name}`) });
 const statusButtons = (page: Page, status: string) =>
-  page.getByRole("button", { name: new RegExp(`^Кв\\. .+, ${status}\\. Сменить статус$`) });
+  page.getByRole("button", { name: new RegExp(`^Кв\\. .+, ${status}\\. Статус и правка$`) });
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 0) < 760;
 
 async function open(page: Page, url: string = SHODLIK) {
@@ -84,8 +84,11 @@ test.describe("кабинет · ЖК · список квартир", () => {
 
     await openFilters(page);
     await page.getByRole("group", { name: "Подъезд" }).getByRole("button", { name: "1" }).click();
-    const free1 = Number((await pill(page, "Свободны").textContent())!.replace(/\D/g, ""));
-    await expect(rows(page)).toHaveCount(free1);
+    // Фильтр применяется отложенно: счётчик сверяется со строками, когда они уже под него.
+    const freeCount = async () =>
+      Number((await pill(page, "Свободны").textContent())!.replace(/\D/g, ""));
+    await expect.poll(freeCount).toBeLessThan(12);
+    await expect.poll(async () => (await rows(page).count()) === (await freeCount())).toBe(true);
     // Счётчики — по остальным фильтрам: выбранная пилюля не обнуляет соседние.
     await expect(pill(page, "Все")).not.toContainText(/\b0\b/);
     if (isMobile(page))
@@ -124,7 +127,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await expect(pill(page, "Свободны")).toContainText("11");
     await expect(pill(page, "Бронь")).toContainText("3");
     await expect(bar(page)).toContainText(`Кв. ${number}: свободна → бронь`);
-    const changed = page.getByRole("button", { name: `Кв. ${number}, бронь. Сменить статус` });
+    const changed = page.getByRole("button", { name: `Кв. ${number}, бронь. Статус и правка` });
     await expect(changed).toBeFocused();
     await expect(bar(page).getByRole("button", { name: /Отменить/ })).not.toHaveAttribute(
       "aria-disabled",
@@ -143,7 +146,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     expect(posts).toHaveLength(2);
 
     // Тот же статус — без запроса.
-    await page.getByRole("button", { name: `Кв. ${number}, свободна. Сменить статус` }).click();
+    await page.getByRole("button", { name: `Кв. ${number}, свободна. Статус и правка` }).click();
     await page
       .getByRole("group", { name: `Статус кв. ${number}` })
       .getByRole("button", { name: "свободна" })
@@ -230,7 +233,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     };
     const [first, second] = [await numberOf(0), await numberOf(1)];
     for (const number of [first, second]) {
-      await page.getByRole("button", { name: `Кв. ${number}, свободна. Сменить статус` }).click();
+      await page.getByRole("button", { name: `Кв. ${number}, свободна. Статус и правка` }).click();
       await page.locator(".unit-status-picker").getByRole("button", { name: "продана" }).click();
     }
     await expect(bar(page)).toContainText(`Не сохранили кв. ${second}.`);
@@ -268,7 +271,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await page.keyboard.press("Tab");
     await expect(picker.getByRole("button", { name: "бронь" })).toBeFocused();
     await page.keyboard.press("Enter");
-    const reserved = page.getByRole("button", { name: `Кв. ${number}, бронь. Сменить статус` });
+    const reserved = page.getByRole("button", { name: `Кв. ${number}, бронь. Статус и правка` });
     await expect(reserved).toBeFocused();
     await expect(bar(page)).toContainText(`Кв. ${number}: продана → бронь`);
     await expect(bar(page)).not.toContainText("Сохраняем");
@@ -322,7 +325,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await button.click();
     await page.locator(".unit-status-picker").getByRole("button", { name: "продана" }).click();
     await expect(
-      page.getByRole("button", { name: `Кв. ${number}, продана. Сменить статус` }),
+      page.getByRole("button", { name: `Кв. ${number}, продана. Статус и правка` }),
     ).toBeVisible();
     const visibility = (state: "hidden" | "visible") =>
       page.evaluate((value) => {
@@ -338,7 +341,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await visibility("visible");
     // DEMO не меняется: новое чтение вернуло исходный статус.
     await expect(
-      page.getByRole("button", { name: `Кв. ${number}, свободна. Сменить статус` }),
+      page.getByRole("button", { name: `Кв. ${number}, свободна. Статус и правка` }),
     ).toBeVisible();
   });
 
@@ -437,7 +440,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
 
     const last = rows(page).last();
     await last.scrollIntoViewIfNeeded();
-    await last.getByRole("button", { name: /Сменить статус/ }).click();
+    await last.getByRole("button", { name: /Статус и правка/ }).click();
     await page.locator(".unit-status-picker").getByRole("button", { name: "бронь" }).click();
     await expect(bar(page)).toContainText("→ бронь");
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));

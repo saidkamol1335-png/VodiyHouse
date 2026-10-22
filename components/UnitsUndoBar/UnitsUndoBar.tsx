@@ -66,6 +66,7 @@ function useBarTexts(): BarTexts {
     bar: useTranslations("admin.complexes.units.list.bar"),
     status: useTranslations("admin.journal.unitStatus"),
     errors: useTranslations("admin.developers.errors"),
+    complexes: useTranslations("admin.complexes"),
   };
 }
 
