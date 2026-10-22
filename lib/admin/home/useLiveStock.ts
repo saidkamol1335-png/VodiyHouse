@@ -1,16 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { settle } from "@/lib/ui/settle";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BROWSER_CLOCK, LivePoller } from "./livePoller";
-import {
-  NETWORK_FAILURE,
-  initialLive,
-  isSiteStockResult,
-  nextLive,
-  outcomeOf,
-  type LiveStock,
-} from "./liveStock";
+import { initialLive, nextLive, outcomeOf, withoutFlashes, type LiveStock } from "./liveStock";
+import { readOnce } from "./readOnce";
 import type { SiteStock, SiteStockResult } from "./siteStock";
 
 export type SiteStockRead = () => Promise<SiteStockResult>;
@@ -29,10 +22,23 @@ export function useLiveStock(initial: SiteStock | null, read: SiteStockRead): Li
     readRef.current = read;
   });
 
+  // Activity прячет главную display:none, а при показе CSS перезапускает анимации — вспышки
+  // прошлых перемен сыграли бы снова, будто числа только что сменились.
+  useLayoutEffect(() => () => setState(withoutFlashes), []);
+
+  // Вернулись на главную ссылкой — сервер прочитал свежие цифры: берём их (сменившиеся вспыхнут)
+  // и не читаем то же самое действием сразу. До подключения расписания — порядок эффектов важен.
+  const seen = useRef(initial);
+  useEffect(() => {
+    if (initial === null || initial === seen.current) return;
+    seen.current = initial;
+    poller.markFresh();
+    setState((prev) => nextLive(prev, { status: "done", stock: initial }, Date.now(), null));
+  }, [initial, poller]);
+
   useEffect(() => {
     const run = async () => {
-      const answer = await settle(() => readRef.current(), NETWORK_FAILURE);
-      const result = isSiteStockResult(answer) ? answer : NETWORK_FAILURE;
+      const result = await readOnce(() => readRef.current());
       setState((prev) => nextLive(prev, result, Date.now(), poller.shownAt));
       return outcomeOf(result);
     };

@@ -75,16 +75,38 @@ describe("расписание «live»", () => {
     expect(run).toHaveBeenCalledTimes(2);
   });
 
-  it("стоп после «войдите заново»; после отключения — тишина", async () => {
+  it("«войдите заново»: по таймеру не читаем, возврат на вкладку пробует снова (вошли в другой)", async () => {
+    const paused = poller(false, "pause");
+    await vi.advanceTimersByTimeAsync(LIVE_POLL_MS * 3);
+    expect(paused.run).toHaveBeenCalledTimes(1);
+    paused.instance.wake();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(paused.run).toHaveBeenCalledTimes(2);
+  });
+
+  it("кабинет обновили — стоп и при возврате; после отключения — тишина", async () => {
     const stopped = poller(false, "stop");
     await vi.advanceTimersByTimeAsync(LIVE_POLL_MS * 3);
     stopped.instance.wake();
+    await vi.advanceTimersByTimeAsync(0);
     expect(stopped.run).toHaveBeenCalledTimes(1);
 
     const { instance, run } = poller();
     instance.disconnect();
     await vi.advanceTimersByTimeAsync(LIVE_POLL_MS * 3);
     expect(run).not.toHaveBeenCalled();
+  });
+
+  it("свежие цифры страницы (вернулись ссылкой) — следующее чтение через минуту, а не сразу", async () => {
+    const { instance, run } = poller();
+    instance.disconnect();
+    await vi.advanceTimersByTimeAsync(LIVE_POLL_MS * 2);
+    instance.markFresh();
+    instance.connect(run);
+    await vi.advanceTimersByTimeAsync(LIVE_POLL_MS - 1);
+    expect(run).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
   it("показ после Activity через ≥ 10 с — читаем сразу, «показано» — время первых цифр", async () => {

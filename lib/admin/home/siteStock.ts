@@ -31,15 +31,21 @@ export type BlockAvailabilityRecord = {
   name: string;
   /** null — у блока нет списка квартир. */
   free_count: number | null;
+  /** Свободные без планировки — тем же запросом, что free_count. */
+  free_unassigned: number;
   available: boolean;
 };
 
 export type Price = { amount: number; currency: Currency };
 
-/** Тип в раскрытии: free null — «по планировкам»; цена «от» — в каждой валюте блоков. */
+/**
+ * Тип в раскрытии: free null — числа нет (есть блок по планировкам), known — известная часть;
+ * цена «от» — в каждой валюте блоков.
+ */
 export type RoomOffer = {
   group: RoomGroup;
   free: number | null;
+  known: number;
   areaFrom: number | null;
   prices: Price[];
 };
@@ -62,7 +68,8 @@ export type SiteStock = { complexes: SiteStockComplex[] };
 
 export type SiteComplex = Pick<ComplexListRow, "id" | "name" | "locationName" | "developerName">;
 
-export type SiteStockError = ActionGuardCode | "unavailable";
+/** outdated — кабинет обновили (новая сборка): старая страница своё действие уже не найдёт. */
+export type SiteStockError = ActionGuardCode | "unavailable" | "outdated";
 
 export type SiteStockResult =
   { status: "done"; stock: SiteStock } | { status: "error"; error: SiteStockError };
@@ -97,19 +104,12 @@ function areaFrom(records: readonly RoomOfferRecord[]): number | null {
 
 /** Типы — ровно группы строки (одно правило «свободно»), «от» — по доступным записям группы. */
 function offersOf(stock: ComplexStock, records: readonly RoomOfferRecord[]): RoomOffer[] {
-  return stock.groups.map(({ group, free }) => {
+  return stock.groups.map(({ group, free, known }) => {
     const offered = records.filter(
       (record) => record.available && roomGroupOf(record.rooms) === group,
     );
-    return { group, free, areaFrom: areaFrom(offered), prices: pricesOf(offered) };
+    return { group, free, known, areaFrom: areaFrom(offered), prices: pricesOf(offered) };
   });
-}
-
-function unassignedOf(stock: ComplexStock, blocks: readonly BlockStock[]): number {
-  // С «по планировкам» сумма типов неполная — разницу не посчитать.
-  if (stock.partial) return 0;
-  const listed = blocks.reduce((sum, block) => sum + (block.free ?? 0), 0);
-  return Math.max(0, listed - stock.free);
 }
 
 function groupBy<T extends { complex_id: string }>(records: readonly T[]): Map<string, T[]> {
@@ -138,7 +138,7 @@ export function siteStockFrom(
   return {
     complexes: complexes.map((complex) => {
       const stock = stocks.get(complex.id) ?? EMPTY_STOCK;
-      const blockStock = (blocksOf.get(complex.id) ?? []).map(blockStockOf);
+      const blockRecords = blocksOf.get(complex.id) ?? [];
       return {
         id: complex.id,
         name: complex.name.ru,
@@ -146,8 +146,8 @@ export function siteStockFrom(
         developerName: complex.developerName,
         stock,
         offers: offersOf(stock, roomsOf.get(complex.id) ?? []),
-        blocks: blockStock,
-        unassigned: unassignedOf(stock, blockStock),
+        blocks: blockRecords.map(blockStockOf),
+        unassigned: blockRecords.reduce((sum, block) => sum + block.free_unassigned, 0),
       };
     }),
   };

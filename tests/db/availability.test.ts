@@ -24,6 +24,7 @@ type RoomRow = {
   rooms: number;
   currency: string;
   free_count: number | null;
+  listed_free: number;
   available: boolean;
   area_from: string | null;
   price_from: string | null;
@@ -33,6 +34,7 @@ type BlockRow = {
   block_id: string;
   name: string;
   free_count: number | null;
+  free_unassigned: number;
   available: boolean;
 };
 
@@ -162,21 +164,65 @@ describe("наличие квартир для сайта", () => {
     ]);
   });
 
-  it("итог по блокам считает и квартиры без планировки", async () => {
-    const expected = await db.admin.query<{ free: number }>(
-      "select count(*)::int as free from units where block_id = $1 and status = 'free'",
+  it("итог по блокам считает и квартиры без планировки — и называет их отдельно", async () => {
+    const expected = await db.admin.query<{ free: number; unassigned: number }>(
+      `select count(*)::int as free,
+              (count(*) filter (where layout_id is null))::int as unassigned
+       from units where block_id = $1 and status = 'free'`,
       [generatedBlock],
     );
+    expect(expected.rows[0]?.unassigned).toBe(1);
     const blocks = await blockRows(anon, [ids.publicComplex]);
     const byBlock = new Map(blocks.map((row) => [row.block_id, row]));
     expect(byBlock.get(generatedBlock)).toMatchObject({
       complex_id: ids.publicComplex,
       free_count: expected.rows[0]?.free,
+      free_unassigned: 1,
       available: true,
     });
-    expect(byBlock.get(ids.publicBlock)).toMatchObject({ free_count: 2, available: true });
+    expect(byBlock.get(ids.publicBlock)).toMatchObject({
+      free_count: 2,
+      free_unassigned: 0,
+      available: true,
+    });
     // Без списка: числа нет, «есть что предложить» — по флагу «доступна» планировок.
-    expect(byBlock.get(manualBlock)).toMatchObject({ free_count: null, available: true });
+    expect(byBlock.get(manualBlock)).toMatchObject({
+      free_count: null,
+      free_unassigned: 0,
+      available: true,
+    });
+  });
+
+  it("тип и в блоке со списком, и в блоке без списка (одна валюта): числа нет, известная часть — отдельно", async () => {
+    const listed = await db.admin.query<{ free: number }>(
+      `select count(*)::int as free
+       from units u join layouts l on l.id = u.layout_id join blocks b on b.id = u.block_id
+       where b.complex_id = $1 and b.currency = 'USD' and l.rooms = 2 and u.status = 'free'`,
+      [ids.publicComplex],
+    );
+    expect(listed.rows[0]?.free).toBeGreaterThan(0);
+    const before = (await rooms(anon, [ids.publicComplex])).find(
+      (row) => row.currency === "USD" && row.rooms === 2,
+    );
+    expect(before).toMatchObject({
+      free_count: listed.rows[0]?.free,
+      listed_free: before?.free_count,
+    });
+
+    const { rows } = await db.admin.query<{ id: string }>(
+      "insert into blocks (complex_id, name, sort) values ($1, 'D', 3) returning id",
+      [ids.publicComplex],
+    );
+    const unlisted = rows[0]!.id;
+    await db.admin.query(
+      "insert into layouts (block_id, rooms, area, price_from, available) values ($1, 2, 55, 39000, true)",
+      [unlisted],
+    );
+    const mixed = (await rooms(anon, [ids.publicComplex])).find(
+      (row) => row.currency === "USD" && row.rooms === 2,
+    );
+    expect(mixed).toMatchObject({ free_count: null, listed_free: listed.rows[0]?.free });
+    await db.admin.query("delete from blocks where id = $1", [unlisted]);
   });
 
   it("по блокам — сразу для нескольких ЖК (главная кабинета, Г4): сайту только опубликованные", async () => {

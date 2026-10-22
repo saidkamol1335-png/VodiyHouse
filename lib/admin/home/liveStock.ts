@@ -3,40 +3,55 @@ import type { SiteStock, SiteStockComplex, SiteStockError, SiteStockResult } fro
 
 // Что панель «Остатки по ЖК» показывает после каждого чтения (Г4 A). Сбой не стирает цифры: они
 // остаются, метка «live» гаснет, рядом — «обновлено N мин назад». Пилюля ЖК, чьё число сменилось,
-// вспыхивает, как в мокапе.
+// вспыхивает, как в мокапе. Сессия кончилась, прав нет или кабинет обновили — экран говорит, что
+// сделать, а не обещает «попробуем снова».
 
 export type LiveStock = {
   stock: SiteStock | null;
   live: boolean;
-  /** Когда цифры на экране прочитаны (часы браузера, мс); null — неизвестно (чтения не было). */
+  /** Когда прочитаны цифры на экране (часы браузера, мс); null — неизвестно (чтения не было). */
   readAt: number | null;
   /** Номер вспышки пилюли по ЖК: растёт при смене числа — ключ перезапуска анимации. */
   flashes: Readonly<Record<string, number>>;
+  /** Почему перечитывание остановлено; null — идёт (или повторится само). */
+  halted: HaltReason | null;
 };
 
-/** Обрыв связи: Server Action бросил исключение или вернул не ответ. */
+/** Обрыв связи: Server Action бросил исключение, не ответил вовремя или вернул не ответ. */
 export const NETWORK_FAILURE: SiteStockResult = { status: "error", error: "network" };
 
-/** Перечитывать бесполезно: войти заново, нет прав, облака нет. */
-const STOP_ERRORS: ReadonlySet<SiteStockError> = new Set(["session", "forbidden", "notConfigured"]);
+/** Кабинет обновили: старая страница своё действие уже не найдёт — поможет только перезагрузка. */
+export const OUTDATED: SiteStockResult = { status: "error", error: "outdated" };
 
-export type LiveOutcome = "ok" | "retry" | "stop";
+/** Без нового входа (или прав) читать бесполезно; возврат на вкладку попробует ещё раз. */
+const PAUSE_ERRORS = new Set<SiteStockError>(["session", "forbidden", "notConfigured"]);
+
+export type HaltReason = "session" | "forbidden" | "notConfigured" | "outdated";
+
+/** ok и retry — по расписанию; pause — только при возврате на вкладку; stop — больше никогда. */
+export type LiveOutcome = "ok" | "retry" | "pause" | "stop";
 
 export function initialLive(stock: SiteStock | null): LiveStock {
-  return { stock, live: stock !== null, readAt: null, flashes: {} };
+  return { stock, live: stock !== null, readAt: null, flashes: {}, halted: null };
 }
 
 export function isSiteStockResult(value: unknown): value is SiteStockResult {
   return typeof value === "object" && value !== null && "status" in value;
 }
 
+function haltOf(error: SiteStockError): HaltReason | null {
+  if (error === "outdated") return "outdated";
+  return PAUSE_ERRORS.has(error) ? (error as HaltReason) : null;
+}
+
 export function outcomeOf(result: SiteStockResult): LiveOutcome {
   if (result.status === "done") return "ok";
-  return STOP_ERRORS.has(result.error) ? "stop" : "retry";
+  if (result.error === "outdated") return "stop";
+  return PAUSE_ERRORS.has(result.error) ? "pause" : "retry";
 }
 
 const badgeKey = (complex: SiteStockComplex) => {
-  const view = stockBadgeView(complex.stock);
+  const view = stockBadgeView(complex.stock, complex.unassigned);
   return `${view.text}:${view.count}`;
 };
 
@@ -62,11 +77,19 @@ export function nextLive(
   now: number,
   shownAt: number | null,
 ): LiveStock {
-  if (result.status === "error") return { ...prev, live: false, readAt: prev.readAt ?? shownAt };
+  if (result.status === "error") {
+    return { ...prev, live: false, readAt: prev.readAt ?? shownAt, halted: haltOf(result.error) };
+  }
   return {
     stock: result.stock,
     live: true,
     readAt: now,
     flashes: flashesAfter(prev, result.stock),
+    halted: null,
   };
+}
+
+/** Activity спрятала главную: при показе CSS перезапустит анимации — прошлые вспышки гасим. */
+export function withoutFlashes(state: LiveStock): LiveStock {
+  return Object.keys(state.flashes).length === 0 ? state : { ...state, flashes: {} };
 }

@@ -15,6 +15,7 @@ function stock(groups: Partial<Record<RoomGroup, number | null>>): ComplexStock 
   const items = ROOM_GROUPS.filter((group) => group in groups).map((group) => ({
     group,
     free: groups[group] ?? null,
+    known: groups[group] ?? 0,
   }));
   return {
     groups: items,

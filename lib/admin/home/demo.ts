@@ -5,6 +5,7 @@ import {
   type BlockAvailabilityRecord,
   type RoomOfferRecord,
   type SiteStock,
+  type SiteStockResult,
 } from "./siteStock";
 
 // DEMO для стенда /dev/glavnaya — записи той же формы, что отдают room_availability и
@@ -14,11 +15,20 @@ import {
 // В базу не попадают.
 //
 // Сценарии (?demo=…), которых в сиде нет: change — следующее чтение видит, что квартиры сменили
-// статус (вспышка пилюли); fail — перечитывание не удаётся; empty — на сайте нет ЖК; variety —
-// блок без списка в сумах («по планировкам», «N+»), «цена по запросу», мало свободных (янтарь),
-// распроданный ЖК, свободные без планировки.
+// статус (вспышка пилюли); fail — перечитывание не удаётся (база); session — сессия кончилась
+// (перечитывание на паузе, «Войти»); empty — на сайте нет ЖК; variety —
+// блок без списка в сумах («2к 18+», «свободно 65+»), «цена по запросу», мало свободных (янтарь),
+// свободные без планировки (у Shodlik — в дополнение к типам, у Yulduz — только они); layouts —
+// у всех ЖК блоки без списка квартир (итог — словами, а не «0+»).
 
-export const SITE_STOCK_SCENARIOS = ["change", "fail", "empty", "variety"] as const;
+export const SITE_STOCK_SCENARIOS = [
+  "change",
+  "fail",
+  "session",
+  "empty",
+  "variety",
+  "layouts",
+] as const;
 export type SiteStockScenario = (typeof SITE_STOCK_SCENARIOS)[number] | null;
 
 export function siteStockScenario(value: unknown): SiteStockScenario {
@@ -29,7 +39,8 @@ export function siteStockScenario(value: unknown): SiteStockScenario {
 
 /** rooms, свободно (null — по планировкам), площадь от, цена от (null — по запросу), валюта. */
 type Room = [rooms: number, free: number | null, area: number, price: number | null, uzs?: true];
-type Block = [name: string, free: number | null];
+/** Блок: название, свободно (null — нет списка квартир), из них без планировки. */
+type Block = [name: string, free: number | null, unassigned?: number];
 type Demo = Record<string, { rooms: Room[]; blocks: Block[] }>;
 
 const SEED: Demo = {
@@ -109,7 +120,7 @@ const VARIETY: Demo = {
   "demo-shodlik": {
     ...SEED["demo-shodlik"]!,
     blocks: [
-      ["A", 14],
+      ["A", 14, 2],
       ["B", 29],
     ],
   },
@@ -120,7 +131,7 @@ const VARIETY: Demo = {
       ["2", null],
     ],
   },
-  "demo-yulduz": { rooms: [], blocks: [["1", 0]] },
+  "demo-yulduz": { rooms: [], blocks: [["1", 12, 12]] },
   "demo-orzu": {
     rooms: [
       [0, 2, 30.5, 23460],
@@ -135,6 +146,17 @@ const VARIETY: Demo = {
   },
 };
 
+/** Как сид, только списков квартир нет: наличие — по флагу «доступна» планировок. */
+const LAYOUTS: Demo = Object.fromEntries(
+  Object.entries(SEED).map(([slug, { rooms, blocks }]) => [
+    slug,
+    {
+      rooms: rooms.map(([count, , area, price]): Room => [count, null, area, price]),
+      blocks: blocks.map(([name]): Block => [name, null]),
+    },
+  ]),
+);
+
 const ON_SITE = DEMO_COMPLEX_ROWS.filter(isOnSite);
 
 function roomRecord(complexId: string, [rooms, free, area, price, uzs]: Room): RoomOfferRecord {
@@ -143,19 +165,21 @@ function roomRecord(complexId: string, [rooms, free, area, price, uzs]: Room): R
     rooms,
     currency: uzs ? "UZS" : "USD",
     free_count: free,
+    listed_free: free ?? 0,
     available: free === null || free > 0,
     area_from: area,
     price_from: price,
   };
 }
 
-function blockRecord(complexId: string, [name, free]: Block): BlockAvailabilityRecord {
+function blockRecord(complexId: string, [name, free, unassigned]: Block): BlockAvailabilityRecord {
   return {
     complex_id: complexId,
     // Блок на главной — только ключ строки; по нему никуда не переходят.
     block_id: `${complexId}:${name}`,
     name,
     free_count: free,
+    free_unassigned: unassigned ?? 0,
     available: free === null || free > 0,
   };
 }
@@ -172,11 +196,14 @@ function stockOf(demo: Demo): SiteStock {
 /** Что страница стенда показывает сразу. */
 export function demoSiteStock(scenario: SiteStockScenario): SiteStock {
   if (scenario === "empty") return { complexes: [] };
-  return stockOf(scenario === "variety" ? VARIETY : SEED);
+  if (scenario === "variety") return stockOf(VARIETY);
+  return stockOf(scenario === "layouts" ? LAYOUTS : SEED);
 }
 
-/** Что отдаёт перечитывание; null — отказ (fail). */
-export function demoSiteStockRead(scenario: SiteStockScenario): SiteStock | null {
-  if (scenario === "fail") return null;
-  return scenario === "change" ? stockOf(CHANGED) : demoSiteStock(scenario);
+/** Что отдаёт перечитывание — ответ действия, как у настоящего. */
+export function demoSiteStockRead(scenario: SiteStockScenario): SiteStockResult {
+  if (scenario === "fail") return { status: "error", error: "unavailable" };
+  if (scenario === "session") return { status: "error", error: "session" };
+  const stock = scenario === "change" ? stockOf(CHANGED) : demoSiteStock(scenario);
+  return { status: "done", stock };
 }

@@ -62,6 +62,13 @@
   line-height: 1.1;
 }
 
+/* «по планировкам» вместо «0+»: слово, а не число — размером заголовка, не KPI. */
+.site-stock__total-value--words {
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: var(--ls-h3);
+}
+
 .site-stock__total-caption {
   color: var(--fg-2);
   font-size: var(--fs-caption);
@@ -91,12 +98,20 @@
   font-size: var(--fs-caption);
 }
 
+/* Телефон: «live» — своей строкой под итогом (как подпись карточки мокапа «обновляется вживую»):
+   рядом с заголовком длинное «обновлено 3 мин назад» сжимало бы подпись и сдвигало строки. */
 @container site-stock (max-width: 560px) {
   .site-stock__head {
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "intro live"
-      "total total";
+      "intro"
+      "total"
+      "live";
     margin-bottom: 6px;
+  }
+
+  .site-stock__live {
+    justify-self: start;
   }
 
   .site-stock__total {

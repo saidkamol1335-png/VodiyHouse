@@ -12,6 +12,7 @@ import {
   isOnSite,
 } from "./list";
 import {
+  roomFreeText,
   roomGroupOf,
   stockBadgeView,
   stockByComplex,
@@ -28,12 +29,20 @@ const MIGRATION = readFileSync(
   "utf8",
 );
 
+/** listed — известная часть (свободные в блоках со списком); по умолчанию — само число. */
 const room = (
   complexId: string,
   rooms: number,
   free: number | null,
   available = true,
-): RoomAvailabilityRecord => ({ complex_id: complexId, rooms, free_count: free, available });
+  listed = free ?? 0,
+): RoomAvailabilityRecord => ({
+  complex_id: complexId,
+  rooms,
+  free_count: free,
+  listed_free: listed,
+  available,
+});
 
 describe("остатки по комнатам", () => {
   it("группы мокапа: студия, 1–3, «4+» складывает 4 и 5 комнат и валюты", () => {
@@ -53,8 +62,8 @@ describe("остатки по комнатам", () => {
       room("a", 2, 0),
     ]).get("a")!;
     expect(stock.groups).toEqual([
-      { group: "1", free: 10 },
-      { group: "4plus", free: 6 },
+      { group: "1", free: 10, known: 10 },
+      { group: "4plus", free: 6, known: 6 },
     ]);
     expect(stock).toMatchObject({ free: 16, partial: false });
   });
@@ -66,16 +75,35 @@ describe("остатки по комнатам", () => {
       room("b", 3, null, false),
     ]).get("b")!;
     expect(stock.groups).toEqual([
-      { group: "1", free: null },
-      { group: "2", free: 5 },
+      { group: "1", free: null, known: 0 },
+      { group: "2", free: 5, known: 5 },
     ]);
     expect(stock).toMatchObject({ free: 5, partial: true });
     expect(stockTone(stock)).toBe("ok");
   });
 
+  it("тип и в блоке со списком, и по планировкам: числа нет, известные — в «свободно N+» и «18+»", () => {
+    // Одна валюта: room_availability сама даёт null и listed_free; две валюты — две записи.
+    const stock = stockByComplex([
+      room("m", 2, null, true, 18),
+      room("m", 1, 6),
+      room("m", 3, 4),
+      room("m", 3, null, true, 0),
+    ]).get("m")!;
+    expect(stock.groups.map((item) => [item.group, roomFreeText(item)])).toEqual([
+      ["1", "6"],
+      ["2", "18+"],
+      ["3", "4+"],
+    ]);
+    expect(stock).toMatchObject({ free: 28, partial: true });
+    expect(stockBadgeView(stock)).toEqual({ text: "freePartial", count: 28, tone: "ok" });
+    const unknown = stockByComplex([room("u", 1, null)]).get("u")!;
+    expect(roomFreeText(unknown.groups[0]!)).toBe("✓");
+  });
+
   it("цвет пилюли как в мокапе: 0 — нет, до 10 — янтарь, больше — зелёный", () => {
     const tone = (free: number) =>
-      stockTone({ groups: [{ group: "1", free }], free, partial: false });
+      stockTone({ groups: [{ group: "1", free, known: free }], free, partial: false });
     expect([tone(0), tone(6), tone(10), tone(11)]).toEqual(["none", "low", "low", "ok"]);
   });
 
@@ -90,6 +118,12 @@ describe("остатки по комнатам", () => {
       tone: "ok",
     });
     expect(view([room("c", 2, 4)])).toEqual({ text: "free", count: 4, tone: "low" });
+    // Главная: свободные только без планировки — не «нет свободных».
+    expect(stockBadgeView({ groups: [], free: 0, partial: false }, 12)).toEqual({
+      text: "unassigned",
+      count: 12,
+      tone: "low",
+    });
   });
 });
 

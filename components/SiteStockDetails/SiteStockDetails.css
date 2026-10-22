@@ -1,0 +1,170 @@
+/* Раскрытие строки «Остатков» (Г3 B): слева типы таблицей, справа блоки и «Квартиры →». Высота —
+   сразу, содержимое — opacity + transform ≤ 200 мс (как карточки «Блоков»). Таблица типов с двумя
+   ценами шире 450 px, поэтому две колонки — только у широкой панели; уже — одна колонка, а цена
+   при нехватке места переносится. На телефоне тип — колонкой, остальное — строкой с переносом. */
+.site-stock-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  align-items: start;
+  gap: 12px 28px;
+  padding: 2px 4px 16px;
+  font-size: var(--fs-small);
+  animation: site-stock-details-reveal var(--dur-fast) var(--ease) both;
+}
+
+.site-stock-details[hidden] {
+  display: none;
+}
+
+@keyframes site-stock-details-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Город и застройщик — только когда строка их не показывает (узкая панель). */
+.site-stock-details__where {
+  display: none;
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.site-stock-details__section {
+  min-width: 0;
+}
+
+.site-stock-details__section--types {
+  grid-row: span 2;
+}
+
+.site-stock-details__label {
+  margin: 0 0 6px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* Типы — таблица по колонкам: тип · свободно · цена от · площадь от (subgrid строк). */
+.site-stock-details__offers {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(min-content, max-content) max-content;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-stock-details__offer {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+}
+
+.site-stock-details__facts {
+  display: contents;
+}
+
+.site-stock-details__type {
+  font-weight: 700;
+}
+
+.site-stock-details__free {
+  color: var(--badge-ok-fg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.site-stock-details__price {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-stock-details__area {
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.site-stock-details__blocks {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-stock-details__note {
+  margin: 6px 0 0;
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.site-stock-details__none {
+  margin: 0;
+  color: var(--fg-3);
+}
+
+.site-stock-details__link {
+  display: inline-flex;
+  align-self: end;
+  justify-self: start;
+  align-items: center;
+  gap: 6px;
+  color: var(--amber-2);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.site-stock-details__link:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .site-stock-details__link {
+    min-height: 44px;
+  }
+}
+
+@container site-stock (max-width: 900px) {
+  .site-stock-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-stock-details__section--types {
+    grid-row: auto;
+  }
+}
+
+@container site-stock (max-width: 640px) {
+  .site-stock-details {
+    padding: 0 2px 14px;
+  }
+
+  .site-stock-details__where {
+    display: block;
+  }
+}
+
+@container site-stock (max-width: 560px) {
+  .site-stock-details__offers {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 6px 12px;
+  }
+
+  .site-stock-details__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+
+  .site-stock-details__free {
+    text-align: left;
+  }
+}

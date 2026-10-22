@@ -1,19 +1,20 @@
 /* Пилюля остатков (.badge + .stock-badge): вспышка, когда «live» на главной принёс другое число
-   (мокап leftFlash). Мокап красил фон и тень — здесь только transform и opacity (CLAUDE.md §3):
-   янтарный слой под текстом гаснет, в full пилюля ещё и вздрагивает. В none — ничего. */
+   (мокап leftFlash: янтарная пилюля с тёмным текстом). Мокап анимировал фон, цвет и тень — здесь
+   только opacity и transform (CLAUDE.md §3): поверх лежит янтарный слой со своим тёмным текстом
+   и гаснет; в full пилюля ещё и вздрагивает. В lite — 200 мс, в none вспышки нет. */
 .stock-badge {
   position: relative;
-  isolation: isolate;
 }
 
-.stock-badge--flash::after {
-  content: "";
+.stock-badge__flash {
+  display: grid;
   position: absolute;
-  z-index: -1;
   inset: -1px;
+  place-items: center;
   border-radius: inherit;
   background: var(--amber);
   box-shadow: var(--flash-glow);
+  color: var(--on-amber);
   opacity: 0;
   animation: stock-badge-fade var(--dur-flash) var(--ease-2);
   pointer-events: none;

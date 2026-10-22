@@ -7,7 +7,15 @@ import {
   type BlockAvailabilityRecord,
   type RoomOfferRecord,
   type SiteComplex,
+  type SiteStock,
+  type SiteStockResult,
 } from "./siteStock";
+
+/** Ответ DEMO-чтения — цифры (сценарий без отказа). */
+function demoStock(result: SiteStockResult): SiteStock {
+  if (result.status !== "done") throw new Error(result.error);
+  return result.stock;
+}
 
 // «Остатки по ЖК» на главной (шаг 13): одно правило «свободно» со списком «ЖК», «от» по типам
 // (в каждой валюте), свободные по блокам и без планировки.
@@ -31,16 +39,23 @@ const room = (
   rooms,
   currency,
   free_count: free,
+  listed_free: free ?? 0,
   available,
   area_from: area,
   price_from: price,
 });
 
-const block = (name: string, free: number | null, available = true): BlockAvailabilityRecord => ({
+const block = (
+  name: string,
+  free: number | null,
+  available = true,
+  unassigned = 0,
+): BlockAvailabilityRecord => ({
   complex_id: "c",
   block_id: `b-${name}`,
   name,
   free_count: free,
+  free_unassigned: unassigned,
   available,
 });
 
@@ -53,8 +68,20 @@ describe("остатки на главной", () => {
     ).complexes;
     expect(shodlik!.stock).toMatchObject({ free: 9, partial: false });
     expect(shodlik!.offers).toEqual([
-      { group: "1", free: 6, areaFrom: 42.5, prices: [{ currency: "USD", amount: 30290 }] },
-      { group: "4plus", free: 3, areaFrom: 120, prices: [{ currency: "USD", amount: 140000 }] },
+      {
+        group: "1",
+        free: 6,
+        known: 6,
+        areaFrom: 42.5,
+        prices: [{ currency: "USD", amount: 30290 }],
+      },
+      {
+        group: "4plus",
+        free: 3,
+        known: 3,
+        areaFrom: 120,
+        prices: [{ currency: "USD", amount: 140000 }],
+      },
     ]);
     expect(shodlik!.blocks).toEqual([{ id: "b-A", name: "A", free: 9, available: true }]);
     expect(shodlik!.unassigned).toBe(0);
@@ -75,26 +102,26 @@ describe("остатки на главной", () => {
       {
         group: "2",
         free: null,
+        known: 4,
         areaFrom: 60,
         prices: [
           { currency: "USD", amount: 37200 },
           { currency: "UZS", amount: 450_000_000 },
         ],
       },
-      { group: "3", free: 2, areaFrom: 88, prices: [] },
+      { group: "3", free: 2, known: 2, areaFrom: 88, prices: [] },
     ]);
-    expect(mixed!.stock).toMatchObject({ free: 2, partial: true });
-    // С «по планировкам» сумма типов неполная — «без планировки» не считаем.
-    expect(mixed!.unassigned).toBe(0);
+    // Известные 4 двухкомнатные из блока A не пропадают из «свободно N+».
+    expect(mixed!.stock).toMatchObject({ free: 6, partial: true });
   });
 
-  it("свободные без планировки: в блоках есть, в типах нет — разница отдельно", () => {
+  it("свободные без планировки — из блоков (тем же запросом), а не вычитанием из типов", () => {
     const [shodlik] = siteStockFrom(
       [complex],
-      [room(1, 3, 42.5, 30000)],
-      [block("A", 5), block("B", null, false)],
+      [room(1, 3, 42.5, 30000), room(2, null, 60, 40000)],
+      [block("A", 5, true, 2), block("B", null, false)],
     ).complexes;
-    expect(shodlik!.stock.free).toBe(3);
+    expect(shodlik!.stock).toMatchObject({ free: 3, partial: true });
     expect(shodlik!.unassigned).toBe(2);
   });
 
@@ -130,19 +157,24 @@ describe("DEMO главной — как сид и как список «ЖК»"
     }
   });
 
-  it("сценарии: change меняет два ЖК, fail отказывает, empty пуст, variety — редкие случаи", () => {
+  it("сценарии: change меняет два ЖК, fail отказывает, empty пуст, variety и layouts — редкие случаи", () => {
     expect(siteStockScenario("change")).toBe("change");
     expect(siteStockScenario("drop table")).toBeNull();
-    const changed = demoSiteStockRead("change")!.complexes.map((item) => item.stock.free);
+    const changed = demoStock(demoSiteStockRead("change")).complexes.map((item) => item.stock.free);
     expect(changed).toEqual([40, 65, 43, 28]);
-    expect(demoSiteStockRead("fail")).toBeNull();
+    expect(demoSiteStockRead("fail")).toEqual({ status: "error", error: "unavailable" });
+    expect(demoSiteStockRead("session")).toEqual({ status: "error", error: "session" });
     expect(demoSiteStock("empty").complexes).toEqual([]);
-    const variety = demoSiteStock("variety").complexes;
-    expect(variety.map((item) => [item.stock.free, item.stock.partial, item.unassigned])).toEqual([
+    const variety = demoSiteStock("variety");
+    expect(
+      variety.complexes.map((item) => [item.stock.free, item.stock.partial, item.unassigned]),
+    ).toEqual([
       [41, false, 2],
-      [47, true, 0],
-      [0, false, 0],
+      [65, true, 0],
+      [0, false, 12],
       [8, false, 0],
     ]);
+    expect(siteStockTotal(variety)).toEqual({ free: 114, partial: true });
+    expect(siteStockTotal(demoSiteStock("layouts"))).toEqual({ free: 0, partial: true });
   });
 });

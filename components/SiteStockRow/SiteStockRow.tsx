@@ -1,9 +1,9 @@
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { SiteStockDetails } from "@/components/SiteStockDetails";
 import { StockBadge } from "@/components/StockBadge";
 import { StockRooms } from "@/components/StockRooms";
 import type { SiteStockComplex } from "@/lib/admin/home/siteStock";
-import { SiteStockDetails } from "./SiteStockDetails";
 
 type SiteStockRowProps = {
   complex: SiteStockComplex;
@@ -37,7 +37,12 @@ export function SiteStockRow({ complex, open, onToggle, flash, unitsHref }: Site
         </span>
         <StockRooms stock={complex.stock} className="site-stock-row__rooms" />
         <span className="site-stock-row__stock">
-          <StockBadge key={flash} stock={complex.stock} flash={flash > 0} />
+          <StockBadge
+            key={flash}
+            stock={complex.stock}
+            unassigned={complex.unassigned}
+            flash={flash > 0}
+          />
         </span>
         <ChevronDown className="site-stock-row__chevron" size={16} aria-hidden="true" />
       </button>

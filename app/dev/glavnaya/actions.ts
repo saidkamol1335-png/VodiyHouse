@@ -12,6 +12,5 @@ function devOnly() {
 
 export async function demoReadSiteStockAction(scenario: unknown): Promise<SiteStockResult> {
   devOnly();
-  const stock = demoSiteStockRead(siteStockScenario(scenario));
-  return stock ? { status: "done", stock } : { status: "error", error: "unavailable" };
+  return demoSiteStockRead(siteStockScenario(scenario));
 }

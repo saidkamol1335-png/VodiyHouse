@@ -3,6 +3,8 @@ import type { LiveOutcome } from "./liveStock";
 // Расписание «live» главной (Г4 A): чтение раз в минуту, пока вкладка браузера видна; вернулись
 // на вкладку (или на главную из другого раздела — Activity) через ≥ 10 с после прошлого чтения —
 // читаем сразу. Цепочка таймеров, а не setInterval: медленный ответ не наслаивает чтения.
+// «Войдите заново» и «нет прав» — пауза: по таймеру не читаем, но возврат на вкладку пробует ещё
+// раз (могли войти в другой вкладке). Кабинет обновили — стоп до перезагрузки.
 // Экземпляр живёт в useState — переживает StrictMode и Activity.
 
 export const LIVE_POLL_MS = 60_000;
@@ -19,6 +21,7 @@ export class LivePoller {
   private run: (() => Promise<LiveOutcome>) | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private reading = false;
+  private paused = false;
   private stopped = false;
   private lastAttempt: number | null = null;
   /** Когда показаны цифры страницы сервера; null — их не было (сервер не прочитал). */
@@ -44,6 +47,13 @@ export class LivePoller {
     this.clear();
   }
 
+  /** Страница принесла свежие цифры (переход обратно на главную): следующее чтение — через минуту. */
+  markFresh() {
+    this.lastAttempt = this.clock.now();
+    this.paused = false;
+    if (this.run) this.schedule();
+  }
+
   /** Подключили или вернулись на вкладку: давно не читали — читаем, иначе ждём своей минуты. */
   wake() {
     if (!this.run || this.stopped || this.reading) return;
@@ -54,7 +64,7 @@ export class LivePoller {
 
   private schedule() {
     this.clear();
-    if (!this.run || this.stopped || !this.clock.visible()) return;
+    if (!this.run || this.stopped || this.paused || !this.clock.visible()) return;
     const wait = Math.max(0, this.lastAttempt! + LIVE_POLL_MS - this.clock.now());
     this.timer = setTimeout(() => void this.read(), wait);
   }
@@ -66,7 +76,9 @@ export class LivePoller {
     this.reading = true;
     this.lastAttempt = this.clock.now();
     try {
-      if ((await run()) === "stop") this.stopped = true;
+      const outcome = await run();
+      this.stopped = outcome === "stop";
+      this.paused = outcome === "pause";
     } finally {
       this.reading = false;
     }

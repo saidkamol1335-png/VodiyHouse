@@ -66,3 +66,28 @@
 .live-status--stale .live-status__dot::after {
   content: none;
 }
+
+/* «Войти» и «Обновить страницу» у остановленного перечитывания: ссылкой, как в тексте. */
+.live-status__action {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.live-status__action:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .live-status__action {
+    min-height: 44px;
+  }
+}
