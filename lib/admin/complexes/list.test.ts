@@ -9,8 +9,15 @@ import {
   complexListScope,
   filterComplexes,
   isHiddenByDeveloper,
+  isOnSite,
 } from "./list";
-import { roomGroupOf, stockByComplex, stockTone, type RoomAvailabilityRecord } from "./stock";
+import {
+  roomGroupOf,
+  stockBadgeView,
+  stockByComplex,
+  stockTone,
+  type RoomAvailabilityRecord,
+} from "./stock";
 import { toUzbekLatin } from "@/lib/translit";
 
 const MIGRATION = readFileSync(
@@ -71,6 +78,19 @@ describe("остатки по комнатам", () => {
       stockTone({ groups: [{ group: "1", free }], free, partial: false });
     expect([tone(0), tone(6), tone(10), tone(11)]).toEqual(["none", "low", "low", "ok"]);
   });
+
+  it("пилюля: нет свободных, по планировкам, «N+» и «N» с цветом", () => {
+    const view = (records: RoomAvailabilityRecord[]) =>
+      stockBadgeView(stockByComplex(records).get("c") ?? { groups: [], free: 0, partial: false });
+    expect(view([room("c", 1, 0)])).toEqual({ text: "none", count: 0, tone: "none" });
+    expect(view([room("c", 1, null)])).toEqual({ text: "byLayouts", count: 0, tone: "ok" });
+    expect(view([room("c", 1, null), room("c", 2, 4)])).toEqual({
+      text: "freePartial",
+      count: 4,
+      tone: "ok",
+    });
+    expect(view([room("c", 2, 4)])).toEqual({ text: "free", count: 4, tone: "low" });
+  });
 });
 
 describe("список ЖК", () => {
@@ -117,6 +137,12 @@ describe("список ЖК", () => {
     const bahor = DEMO_COMPLEX_ROWS.find((row) => row.name.ru === "Bahor")!;
     expect(isHiddenByDeveloper(bahor)).toBe(true);
     expect(isHiddenByDeveloper(DEMO_COMPLEX_ROWS[0]!)).toBe(false);
+  });
+
+  it("на сайте — опубликованы и ЖК, и застройщик (как private.is_public_complex)", () => {
+    expect(MIGRATION).toMatch(/c\.status = 'published' and d\.status = 'published'/);
+    const onSite = DEMO_COMPLEX_ROWS.filter(isOnSite).map((row) => row.name.ru);
+    expect(onSite).toEqual(["Shodlik", "Namuna", "Yulduz", "Orzu"]);
   });
 });
 

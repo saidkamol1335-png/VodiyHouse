@@ -87,7 +87,7 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     const blocks = await db.as(anon, (tx) =>
       tx.query<{ name: string; free_count: number }>(
         "select name, free_count from block_availability($1)",
-        [shodlik],
+        [[shodlik]],
       ),
     );
     expect(blocks.rows).toEqual([

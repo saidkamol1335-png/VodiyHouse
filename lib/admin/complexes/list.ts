@@ -63,6 +63,11 @@ export function isHiddenByDeveloper(row: Pick<ComplexListRow, "status" | "develo
   return row.status === "published" && row.developerStatus !== "published";
 }
 
+/** ЖК на сайте — как private.is_public_complex: опубликованы и ЖК, и его застройщик. */
+export function isOnSite(row: Pick<ComplexListRow, "status" | "developerStatus">) {
+  return row.status === "published" && row.developerStatus === "published";
+}
+
 export type ComplexListQuery = {
   query: string;
   filter: PublicationFilter;

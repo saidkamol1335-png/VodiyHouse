@@ -28,6 +28,13 @@ type RoomRow = {
   area_from: string | null;
   price_from: string | null;
 };
+type BlockRow = {
+  complex_id: string;
+  block_id: string;
+  name: string;
+  free_count: number | null;
+  available: boolean;
+};
 
 // Функции наличия для сайта — PLAN §5, приёмка фазы 1: «осталось N» совпадает с SQL-подсчётом.
 describe("наличие квартир для сайта", () => {
@@ -53,6 +60,8 @@ describe("наличие квартир для сайта", () => {
     call<LayoutRow>(actor, "select * from layout_availability($1)", [complex]);
   const rooms = (actor: Actor, complexes: string[]) =>
     call<RoomRow>(actor, "select * from room_availability($1)", [complexes]);
+  const blockRows = (actor: Actor, complexes: string[]) =>
+    call<BlockRow>(actor, "select * from block_availability($1)", [complexes]);
 
   it("«осталось N» по каждой планировке совпадает с прямым подсчётом", async () => {
     const expected = await db.admin.query<{ layout_id: string; free: number }>(
@@ -158,15 +167,35 @@ describe("наличие квартир для сайта", () => {
       "select count(*)::int as free from units where block_id = $1 and status = 'free'",
       [generatedBlock],
     );
-    const blocks = await call<{ block_id: string; free_count: number | null }>(
-      anon,
-      "select * from block_availability($1)",
-      [ids.publicComplex],
+    const blocks = await blockRows(anon, [ids.publicComplex]);
+    const byBlock = new Map(blocks.map((row) => [row.block_id, row]));
+    expect(byBlock.get(generatedBlock)).toMatchObject({
+      complex_id: ids.publicComplex,
+      free_count: expected.rows[0]?.free,
+      available: true,
+    });
+    expect(byBlock.get(ids.publicBlock)).toMatchObject({ free_count: 2, available: true });
+    // Без списка: числа нет, «есть что предложить» — по флагу «доступна» планировок.
+    expect(byBlock.get(manualBlock)).toMatchObject({ free_count: null, available: true });
+  });
+
+  it("по блокам — сразу для нескольких ЖК (главная кабинета, Г4): сайту только опубликованные", async () => {
+    const all = [ids.publicComplex, ids.draftComplex, ids.hiddenComplex, ids.orphanComplex];
+    const forSite = await blockRows(anon, all);
+    expect(new Set(forSite.map((row) => row.complex_id))).toEqual(new Set([ids.publicComplex]));
+    const forStaff = await blockRows(user(videographer), all);
+    expect(forStaff.map((row) => row.block_id)).toContain(ids.draftBlock);
+  });
+
+  it("блок без списка, где все планировки «нет в наличии», — не «по планировкам»", async () => {
+    await db.admin.query("update layouts set available = false where block_id = $1", [manualBlock]);
+    const manual = (await blockRows(anon, [ids.publicComplex])).find(
+      (row) => row.block_id === manualBlock,
     );
-    const byBlock = new Map(blocks.map((row) => [row.block_id, row.free_count]));
-    expect(byBlock.get(generatedBlock)).toBe(expected.rows[0]?.free);
-    expect(byBlock.get(ids.publicBlock)).toBe(2);
-    expect(byBlock.get(manualBlock)).toBeNull();
+    expect(manual).toMatchObject({ free_count: null, available: false });
+    await db.admin.query("update layouts set available = true where block_id = $1 and rooms = 1", [
+      manualBlock,
+    ]);
   });
 
   it("квартиры блока: три статуса, цена только у свободных, без полей сотрудников", async () => {

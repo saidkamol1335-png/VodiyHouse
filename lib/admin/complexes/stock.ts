@@ -24,13 +24,19 @@ export const EMPTY_STOCK: ComplexStock = { groups: [], free: 0, partial: false }
 /** Мокап: 0 — «нет», до 10 — янтарная пилюля, больше — зелёная. */
 export const LOW_STOCK = 10;
 
+/** Свободно по записи: число; null — без списка квартир, но «доступна»; без списка и нет — 0. */
+export function recordFree(record: Pick<RoomAvailabilityRecord, "free_count" | "available">) {
+  if (record.free_count !== null) return record.free_count;
+  return record.available ? null : 0;
+}
+
 function stockOf(records: readonly RoomAvailabilityRecord[]): ComplexStock {
   const byGroup = new Map<RoomGroup, number | null>();
   for (const record of records) {
     const group = roomGroupOf(record.rooms);
     const known = byGroup.has(group) ? byGroup.get(group)! : 0;
     // Валюты блоков складываются: в строке списка важно число квартир, не цена.
-    const free = record.free_count === null ? (record.available ? null : 0) : record.free_count;
+    const free = recordFree(record);
     byGroup.set(group, known === null || free === null ? null : known + free);
   }
   const groups = ROOM_GROUPS.filter((group) => byGroup.has(group) && byGroup.get(group) !== 0).map(
@@ -58,4 +64,21 @@ export type StockTone = "none" | "low" | "ok";
 export function stockTone(stock: ComplexStock): StockTone {
   if (stock.free === 0 && !stock.partial) return "none";
   return stock.free <= LOW_STOCK && !stock.partial ? "low" : "ok";
+}
+
+/** Пилюля остатков: «нет свободных», «по планировкам», «свободно N» или «свободно N+». */
+export type StockBadgeView = {
+  text: "none" | "byLayouts" | "free" | "freePartial";
+  count: number;
+  tone: StockTone;
+};
+
+export function stockBadgeView(stock: ComplexStock): StockBadgeView {
+  if (stock.groups.length === 0) return { text: "none", count: 0, tone: "none" };
+  if (stock.free === 0 && stock.partial) return { text: "byLayouts", count: 0, tone: "ok" };
+  return {
+    text: stock.partial ? "freePartial" : "free",
+    count: stock.free,
+    tone: stockTone(stock),
+  };
 }
