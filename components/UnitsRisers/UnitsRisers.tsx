@@ -15,10 +15,17 @@ import type {
   UnitsLayout,
 } from "@/lib/admin/units/types";
 import { unitsFailure } from "@/lib/admin/units/errors";
+import { samePlanShape } from "@/lib/admin/units/generator";
 import { settle } from "@/lib/ui/settle";
 import { useFocusAfterRender } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
-import { clipRisersToPlan, uncoveredSlots, validateRisers, type Riser } from "@/lib/units";
+import {
+  clipRisersToPlan,
+  uncoveredSlots,
+  validateRisers,
+  type BlockPlan,
+  type Riser,
+} from "@/lib/units";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 
 type UnitsRisersProps = {
@@ -124,7 +131,8 @@ function RisersActions({
   );
 }
 
-type Draft = { base: readonly Riser[]; risers: Riser[] };
+/** plan — под который собраны строки черновика: план блока мог смениться после правки. */
+type Draft = { base: readonly Riser[]; risers: Riser[]; plan: BlockPlan };
 /** Сохранённые стояки — пока список не перечитан (against — стояки списка на момент сохранения). */
 type Saved = { risers: readonly Riser[]; against: ReadyBlockView; reads: number };
 
@@ -145,11 +153,9 @@ function useRisersDraft({
   const [pending, startTransition] = useTransition();
   const guard = useUnsavedGuard(t("unsaved"));
   const { current, markSaved } = useSavedRisers(ready, reads);
-  // План мог сжаться после начала правки (удалили этаж, подъезд, позицию): строки черновика —
-  // под текущий план, иначе нетронутые подсветились бы ошибкой и сохранить было бы нельзя.
-  const shown = draft ? clipRisersToPlan(draft.risers, ready.plan) : current;
+  const shown = draft ? draftFor(draft, ready.plan) : current;
   const edit = (risers: Riser[]) => {
-    setDraft({ base: draft?.base ?? current, risers });
+    setDraft({ base: draft?.base ?? current, risers, plan: ready.plan });
     setResult(null);
     guard.onInput();
   };
@@ -161,11 +167,11 @@ function useRisersDraft({
   const save = (onDone: () => void) => {
     if (!draft) return;
     startTransition(async () => {
-      const input = { blockId, base: draft.base, risers: draft.risers };
+      const input = { blockId, base: draft.base, risers: shown };
       const next = await settle(() => action(input), unitsFailure("network"));
       setResult(next);
       if (next.status !== "done") return;
-      markSaved(draft.risers);
+      markSaved(shown);
       setDraft(null);
       guard.reset();
       onDone();
@@ -176,6 +182,15 @@ function useRisersDraft({
   const valid = validateRisers(ready.plan, shown).length === 0;
   const uncovered = uncoveredSlots(ready.plan, shown);
   return { shown, dirty: draft !== null, valid, uncovered, result, pending, edit, reset, save };
+}
+
+/**
+ * План сжался после начала правки (удалили этаж, подъезд, позицию) — черновик под текущий план,
+ * иначе нетронутые строки подсветились бы ошибкой и сохранить было бы нельзя. Только при смене
+ * формы плана: на каждой букве обрезка съела бы набираемый этаж («1» из «12» — ниже первого жилого).
+ */
+function draftFor(draft: Draft, plan: BlockPlan): Riser[] {
+  return samePlanShape(draft.plan, plan) ? draft.risers : clipRisersToPlan(draft.risers, plan);
 }
 
 /**

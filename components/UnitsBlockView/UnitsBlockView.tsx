@@ -142,20 +142,26 @@ function BlockHeadAndAdd({ block, layouts, actions, state }: WithState) {
   );
 }
 
+/** Первое чтение и «Повторить»: удачный повтор с фокусом на кнопке — фокус на сводку списка. */
+function useBlockRead(store: UnitsBlockState["store"], summaryId: string) {
+  const focusAfterRead = useFocusAfterRender();
+  const { readError, reading } = store.state;
+  return {
+    error: readError,
+    reading,
+    retry: store.reload,
+    onRecovered: () => focusAfterRead(summaryId),
+  };
+}
+
 function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }: WithState) {
   const { store, edit, selection, dirty, ready, onStatus } = state;
-  const { base, readError, reading } = store.state;
+  const { base, readError } = store.state;
   const editContext = useMemo(
     () => (edit && base ? { edit, block, layouts, finishings, units: base, dirty } : null),
     [edit, base, block, layouts, finishings, dirty],
   );
-  const focusAfterRead = useFocusAfterRender();
-  const read = {
-    error: readError,
-    reading,
-    retry: store.reload,
-    onRecovered: () => focusAfterRead(ids.summary),
-  };
+  const read = useBlockRead(store, ids.summary);
   if (base === null) return <BlockReadState {...read} />;
   if (base.length === 0) return <ListGone />;
   return (

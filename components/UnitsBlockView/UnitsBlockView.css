@@ -94,18 +94,8 @@
   height: calc(var(--units-dock-h) + var(--units-dock-gap));
 }
 
-@media (max-width: 760px) {
-  .units-block__add {
-    height: 44px;
-  }
-
-  .units-block__retry {
-    height: 44px;
-  }
-}
-
-/* Планшет пальцем: «+ Квартира» и «Повторить» — 44 px. */
-@media (pointer: coarse) {
+/* «+ Квартира» и «Повторить» — 44 px: на телефоне и на планшете пальцем. */
+@media (max-width: 760px), (pointer: coarse) {
   .units-block__add,
   .units-block__retry {
     height: 44px;

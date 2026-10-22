@@ -50,11 +50,14 @@
   }
 }
 
-@media (max-width: 760px) {
+/* Цель касания — 44 px: на телефоне и на планшете пальцем. */
+@media (max-width: 760px), (pointer: coarse) {
   .units-list-delete > .button {
     height: 44px;
   }
+}
 
+@media (max-width: 760px) {
   .units-list-delete__actions .button {
     flex: 1 1 0;
   }

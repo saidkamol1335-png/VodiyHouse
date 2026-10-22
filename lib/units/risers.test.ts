@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generateUnits, type BlockPlan } from "./blockPlan";
 import {
   applyRisers,
+  clipRisersToPlan,
   defaultRisers,
   fitRisersToPlan,
   layoutForSlot,
@@ -188,6 +189,33 @@ describe("стояки генератора: смена первого жило�
     expect(fitRisersToPlan([general(1, "a", 5, 16)], floors(plan, 2))).toEqual([
       general(1, "a", 5, 16),
     ]);
+  });
+});
+
+describe("стояки готового блока под сжавшийся план", () => {
+  const shrunk: BlockPlan = {
+    ...PLAN,
+    entrances: 2,
+    floors: 12,
+    firstResidentialFloor: 3,
+    unitsPerFloor: [4, 3],
+  };
+
+  it("этажи обрезаются по плану, стояки вне плана отпадают, недостающие не добавляются", () => {
+    const risers = [
+      general(1, "a"),
+      { ...general(4, "b"), entrance: 2 },
+      { ...general(2, "c"), entrance: 3 },
+      general(3, "d", 14, 16),
+    ];
+    expect(clipRisersToPlan(risers, shrunk)).toEqual([general(1, "a", 3, 12)]);
+  });
+
+  it("незаполненный и перевёрнутый этаж не трогает — их покажет проверка", () => {
+    const empty = general(1, "a", Number.NaN, 16);
+    const reversed = general(2, "b", 9, 1);
+    expect(clipRisersToPlan([empty, reversed], shrunk)).toEqual([empty, reversed]);
+    expect(validateRisers(shrunk, [empty, reversed])).toHaveLength(2);
   });
 });
 

@@ -152,3 +152,12 @@
     height: 44px;
   }
 }
+
+/* Планшет пальцем (контейнер шире 620): поиск, этажи и «Сбросить» — 44 px, как на телефоне. */
+@media (pointer: coarse) {
+  .units-filters__search .field__input,
+  .units-filters__floor.field__input,
+  .units-filters__reset {
+    height: 44px;
+  }
+}

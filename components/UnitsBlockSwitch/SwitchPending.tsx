@@ -2,12 +2,14 @@
 
 import { useLinkStatus } from "next/link";
 import { useEffect, useRef } from "react";
+import { SWITCHING_ATTRIBUTE } from "@/lib/admin/units/switching";
 
 /**
- * Переход на другой блок идёт (тап статуса ещё сохраняется — Next ждёт его и refresh): точка у
- * ссылки, а уходящий блок приглушён и недоступен целиком — с массовой панелью и полосой внизу,
- * мышью и клавиатурой (inert; Ctrl+Z молчит по data-switching вкладки): правку, начатую в нём,
- * унёс бы переход. Точка всегда в DOM — меняется только прозрачность, вёрстка не прыгает.
+ * Переход на другой блок идёт (RSC нового блока, а если сохранение сбросило тег ЖК — и refresh):
+ * точка у ссылки, а уходящий блок приглушён и недоступен целиком — с массовой панелью и полосой
+ * внизу, мышью и клавиатурой (inert; Ctrl+Z молчит по data-switching вкладки): правку, начатую
+ * в нём, унёс бы переход. Точка у ссылки в DOM всегда (у текущего блока её нет) — меняется только
+ * прозрачность.
  */
 export function SwitchPending() {
   const { pending } = useLinkStatus();
@@ -16,10 +18,10 @@ export function SwitchPending() {
     if (!pending) return;
     const tab = dot.current?.closest<HTMLElement>("[data-units-tab]") ?? null;
     const hosts = [...(tab?.querySelectorAll<HTMLElement>("[data-units-dock-host]") ?? [])];
-    tab?.setAttribute("data-switching", "");
+    tab?.setAttribute(SWITCHING_ATTRIBUTE, "");
     for (const host of hosts) host.inert = true;
     return () => {
-      tab?.removeAttribute("data-switching");
+      tab?.removeAttribute(SWITCHING_ATTRIBUTE);
       for (const host of hosts) host.inert = false;
     };
   }, [pending]);

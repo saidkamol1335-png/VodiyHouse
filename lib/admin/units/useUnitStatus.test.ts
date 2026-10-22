@@ -170,6 +170,29 @@ describe("массовая смена и «Отменить»", () => {
     await act(async () => hook.result.current.undo());
     expect(revert).toHaveBeenCalledOnce();
   });
+
+  it("идёт переход на другой блок (data-switching вкладки) — Ctrl+Z молчит", async () => {
+    const { hook, answer, actions } = setup();
+    const revert = vi.spyOn(actions, "revert");
+    act(() => hook.result.current.change([U41], "reserved"));
+    await answer(0, done("u41", "free"));
+    const tab = document.createElement("div");
+    tab.setAttribute("data-units-tab", "");
+    tab.setAttribute("data-switching", "");
+    document.body.append(tab);
+    const press = () =>
+      act(() => {
+        document.body.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
+        );
+      });
+    press();
+    expect(revert).not.toHaveBeenCalled();
+    tab.removeAttribute("data-switching");
+    press();
+    expect(revert).toHaveBeenCalledOnce();
+    tab.remove();
+  });
 });
 
 describe("статус тапом: 5 с от ответа, а не от тапа", () => {

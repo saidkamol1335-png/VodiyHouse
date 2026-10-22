@@ -17,6 +17,7 @@ import {
   type LostAvailability,
   type StaleAvailability,
 } from "@/lib/admin/units/useLayoutAvailability";
+import { blockSwitching } from "@/lib/admin/units/switching";
 import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import { useUnitsBar } from "@/lib/admin/units/useUnitsBar";
 import { formatPrice } from "@/lib/format";
@@ -29,7 +30,6 @@ type UnitsAvailabilityProps = {
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.units">>;
 
-/** Отказ после смены блока — строкой «Блок C · Не сохранили …» в полосе вкладки (CL5 приёмки 12.7). */
 /** Разметка панели, снятая в эффекте: спрятанная Next'ом (Activity) — ещё в DOM, ушедшая — нет. */
 class PanelElement {
   private element: HTMLElement | null = null;
@@ -41,6 +41,7 @@ class PanelElement {
   gone = () => !this.element?.isConnected;
 }
 
+/** Отказ после смены блока — строкой «Блок C · Не сохранили …» в полосе вкладки (CL5 приёмки 12.7). */
 function useLostAvailability(
   block: Pick<UnitsBlock, "id" | "name">,
   describe: (layout: UnitsLayout) => LayoutText,
@@ -53,8 +54,9 @@ function useLostAvailability(
   });
   return useCallback(
     (layout, available, error) => {
-      // Вкладку лишь спрятали — отказ покажет строка, когда её откроют; в полосу — только с ушедшей.
-      if (!panel.gone()) return;
+      // Вкладку лишь спрятали — отказ покажет строка, когда её откроют; в полосу — только с ушедшей
+      // или уходящей (переход на другой блок: панель ещё в DOM, но inert и вот-вот исчезнет).
+      if (!panel.gone() && !blockSwitching()) return;
       const { name, price } = latest.current(layout);
       const message = {
         kind: "availabilityFailed" as const,
@@ -68,6 +70,7 @@ function useLostAvailability(
     [block.id, block.name, panel, setBar],
   );
 }
+
 type Control = ReturnType<typeof useLayoutAvailability>;
 
 /**

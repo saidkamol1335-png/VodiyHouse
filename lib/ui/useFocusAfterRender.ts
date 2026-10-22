@@ -5,9 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 // Кнопка, которую нажали, исчезла вместе со строкой («Убрать строку», «Разделить по этажам»), или
 // ответ показал ошибку у поля — фокус упал бы на body (WCAG 2.4.3) или остался на кнопке, и диктор
 // не услышал бы причину. Обработчик просит фокус — его ставят после коммита компонента (эффект),
-// а не в кадре: до коммита на странице ещё прежняя разметка (удаляемая строка, старое поле с
-// ошибкой). Цель, которой так и не случилось (успех без ошибок), не ловит фокус потом: запрос
-// живёт FOCUS_WINDOW_MS. Объект в useState: читается из обработчиков и эффекта, не из рендера.
+// а не в кадре: до коммита на странице ещё прежняя разметка (удаляемая строка, старое поле).
+// Запрос сам перерисовывает владельца: при отказе до запроса ошибку уже отрисовал коммит события
+// (SyncLane), раньше чем дошло .then с запросом, — без своего рендера эффект бы не повторился.
+// Цель ищется один раз, в коммите самого запроса: не нашлась (успех без ошибок) — фокус не
+// перехватит потом, посреди ввода. Срок FOCUS_WINDOW_MS — страховка для вкладки, спрятанной
+// в Activity: там эффекты стоят до показа, и фокус прыгнул бы при возврате «Назад».
+// Объект в useState: читается из обработчиков и эффекта.
 
 const FOCUS_WINDOW_MS = 1000;
 
@@ -15,45 +19,45 @@ type Target = () => HTMLElement | null;
 
 class FocusRequest {
   private target: Target | null = null;
-  private until = 0;
+  private asked = 0;
+  private askedAt = 0;
 
-  ask = (target: Target) => {
+  /** Номер запроса — его отрисовка ставит фокус. */
+  ask = (target: Target): number => {
     this.target = target;
-    this.until = Date.now() + FOCUS_WINDOW_MS;
+    this.askedAt = Date.now();
+    this.asked += 1;
+    return this.asked;
   };
 
-  flush() {
-    if (this.target === null) return;
-    if (Date.now() > this.until) {
-      this.target = null;
-      return;
-    }
-    const element = this.target();
-    if (!element) return;
-    element.focus();
+  /** rendered — номер последнего запроса, попавшего в этот коммит. */
+  flush(rendered: number) {
+    if (this.target === null || rendered < this.asked) return;
+    if (Date.now() - this.askedAt <= FOCUS_WINDOW_MS) this.target()?.focus();
     this.target = null;
   }
 }
 
-function useFocusRequest(): FocusRequest {
+function useFocusRequest(): (target: Target) => void {
   const [request] = useState(() => new FocusRequest());
-  useEffect(() => request.flush());
-  return request;
+  const [rendered, setRendered] = useState(0);
+  useEffect(() => request.flush(rendered));
+  return useCallback((target: Target) => setRendered(request.ask(target)), [request]);
 }
 
 /** «Поставь фокус на первый существующий из id после перерисовки». */
 export function useFocusAfterRender(): (...ids: string[]) => void {
-  const request = useFocusRequest();
+  const ask = useFocusRequest();
   return useCallback(
     (...ids: string[]) =>
-      request.ask(() => {
+      ask(() => {
         for (const id of ids) {
           const element = document.getElementById(id);
           if (element) return element;
         }
         return null;
       }),
-    [request],
+    [ask],
   );
 }
 
@@ -63,10 +67,9 @@ export function useFocusAfterRender(): (...ids: string[]) => void {
  * (useRefocusAfter) — очистка эффекта того же коммита, она отрабатывает раньше.
  */
 export function useFocusFirstInvalid(): (form: HTMLElement) => void {
-  const request = useFocusRequest();
+  const ask = useFocusRequest();
   return useCallback(
-    (form: HTMLElement) =>
-      request.ask(() => form.querySelector<HTMLElement>('[aria-invalid="true"]')),
-    [request],
+    (form: HTMLElement) => ask(() => form.querySelector<HTMLElement>('[aria-invalid="true"]')),
+    [ask],
   );
 }

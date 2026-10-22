@@ -7,6 +7,7 @@ import type { UnitRecord, UnitStatus } from "@/lib/units";
 import { nextBarOp, settleBar, startBar, type UnitsBar, type UnitsBarUndo } from "./bar";
 import { unitsFailure } from "./errors";
 import { confirmedStatuses } from "./listState";
+import { blockSwitching } from "./switching";
 import {
   commonStatus,
   statusSubject,
@@ -175,8 +176,8 @@ function useUndoShortcut(enabled: boolean, undo: () => void) {
       if (event.key.toLowerCase() !== "z" && event.code !== "KeyZ") return;
       const target = event.target as HTMLElement | null;
       if (target?.closest(TEXT_ENTRY)) return;
-      // Идёт переход на другой блок (SwitchPending): уходящий блок недоступен — и «Отменить» тоже.
-      if (document.querySelector("[data-units-tab][data-switching]")) return;
+      // Идёт переход на другой блок: уходящий блок недоступен — и «Отменить» тоже.
+      if (blockSwitching()) return;
       event.preventDefault();
       undo();
     };

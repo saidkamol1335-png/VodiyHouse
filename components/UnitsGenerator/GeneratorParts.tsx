@@ -73,7 +73,10 @@ export function GeneratorNotes({ layouts, layoutsHref, published, unassigned }: 
   const warning =
     layouts.length === 0 ? (
       <>
-        {t("noLayouts")} <Link href={layoutsHref}>{t("toLayouts")}</Link>
+        {t("noLayouts")}{" "}
+        <Link className="units-generator__link" href={layoutsHref}>
+          {t("toLayouts")}
+        </Link>
       </>
     ) : unassigned > 0 ? (
       t("unassigned", { count: unassigned })

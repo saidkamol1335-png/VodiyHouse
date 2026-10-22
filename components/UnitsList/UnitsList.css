@@ -22,16 +22,23 @@
   gap: 4px 14px;
 }
 
-.units-list__select-button {
-  min-height: 32px;
+/* Кнопки-ссылки: «Выбрать все», «Снять выделение», «К действиям», «Сбросить фильтры». */
+.units-list__select-button,
+.units-list__reset {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: 0;
   background: none;
   color: var(--amber-2);
   font: inherit;
-  font-size: var(--fs-small);
   font-weight: 700;
   cursor: pointer;
+}
+
+.units-list__select-button {
+  min-height: 32px;
+  font-size: var(--fs-small);
 }
 
 .units-list__select-button[aria-disabled="true"] {
@@ -49,11 +56,6 @@
   white-space: nowrap;
 }
 
-.units-list__select-button:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 2px;
-}
-
 .units-list__summary {
   margin: 0;
   color: var(--fg-3);
@@ -63,8 +65,11 @@
   transition: opacity var(--dur-fast) var(--ease);
 }
 
-/* Сводка получает фокус, когда исчезает кнопка, на которой он был («×» панели, удаление). */
-.units-list__summary:focus-visible {
+/* Обводка фокуса — у кнопок-ссылок и у сводки: она получает фокус, когда исчезает кнопка,
+   на которой он был («×» панели, удаление). */
+.units-list__summary:focus-visible,
+.units-list__select-button:focus-visible,
+.units-list__reset:focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 2px;
 }
@@ -145,23 +150,8 @@
   font-size: var(--fs-small);
 }
 
-.units-list__reset {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--amber-2);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .units-list__reset:hover {
   text-decoration: underline;
-}
-
-.units-list__reset:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 2px;
 }
 
 .units-list__more {
@@ -237,8 +227,6 @@
 
   .units-list__reset,
   .units-list__select-button {
-    display: inline-flex;
-    align-items: center;
     min-height: 44px;
   }
 
@@ -248,9 +236,11 @@
   }
 }
 
-/* Планшет пальцем: «Выбрать все», «Снять выделение» — 44 px, как на телефоне. */
+/* Планшет пальцем: «Выбрать все», «Сбросить фильтры», «Показать ещё» — 44 px, как у карточек. */
 @media (pointer: coarse) {
-  .units-list__select-button {
+  .units-list__reset,
+  .units-list__select-button,
+  .units-list__more .button {
     min-height: 44px;
   }
 }

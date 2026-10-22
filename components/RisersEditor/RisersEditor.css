@@ -1,6 +1,9 @@
 /* Стояки (Н5): позиция — заголовок моно-шрифтом и строки «подъезды · этажи от–до · планировка»;
    стояк подъезда — с янтарной чертой слева (уточняет общий). На телефоне — карточка на строку. */
 .risers-editor {
+  /* Колонка «×»: на телефоне и пальцем — 44 px. */
+  --risers-editor-remove-w: 36px;
+
   display: grid;
   gap: 4px;
   margin: 0;
@@ -38,7 +41,7 @@
 
 .risers-editor__row {
   display: grid;
-  grid-template-columns: 170px 96px 96px minmax(0, 1fr) 36px;
+  grid-template-columns: 170px 96px 96px minmax(0, 1fr) var(--risers-editor-remove-w);
   align-items: end;
   gap: 8px 12px;
 }
@@ -84,7 +87,7 @@
 
 .risers-editor__remove,
 .risers-editor__remove-gap {
-  width: 36px;
+  width: var(--risers-editor-remove-w);
   height: 40px;
 }
 
@@ -134,19 +137,29 @@
   }
 }
 
+/* Цели касания — от 44 px, как в остальном шаге: на телефоне и на планшете пальцем. */
+@media (max-width: 760px), (pointer: coarse) {
+  .risers-editor {
+    --risers-editor-remove-w: 44px;
+  }
+
+  .risers-editor__input,
+  .risers-editor__select,
+  .risers-editor__actions .button,
+  .risers-editor__remove,
+  .risers-editor__remove-gap {
+    height: 44px;
+  }
+
+  /* «Все подъезды» — по низу поля 44 px. */
+  .risers-editor__scope--all {
+    padding-bottom: 13px;
+  }
+}
+
 @media (max-width: 760px) {
   .risers-editor__row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
-  }
-
-  /* Цели касания на телефоне — от 44 px, как в остальном шаге. */
-  .risers-editor__input,
-  .risers-editor__select {
-    height: 44px;
-  }
-
-  .risers-editor__actions .button {
-    height: 44px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--risers-editor-remove-w);
   }
 
   .risers-editor__scope,
@@ -162,20 +175,5 @@
   .risers-editor__remove-gap {
     grid-column: 3;
     grid-row: 1;
-    width: 44px;
-    height: 44px;
-  }
-}
-
-/* Планшет пальцем: «×» строки — 44 px и шире телефонной ширины (на телефоне — своя сетка выше). */
-@media (pointer: coarse) and (min-width: 761px) {
-  .risers-editor__row {
-    grid-template-columns: 170px 96px 96px minmax(0, 1fr) 44px;
-  }
-
-  .risers-editor__remove,
-  .risers-editor__remove-gap {
-    width: 44px;
-    height: 44px;
   }
 }

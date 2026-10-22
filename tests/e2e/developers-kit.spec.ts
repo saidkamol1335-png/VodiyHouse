@@ -152,6 +152,8 @@ test.describe("кабинет · застройщики", () => {
     page,
   }) => {
     await page.goto(SIFAT);
+    // Ввод до гидратации React не увидит (холодный кэш Turbopack: 22.10.2026, дважды) — ждём загрузку.
+    await page.waitForLoadState("networkidle");
     await page.getByLabel("Основатели · RU").fill("Инженеры-строители");
     await expect(page.getByText("Нужен текст на узбекском")).toBeVisible();
     await page.getByLabel("Год основания").fill("1890");

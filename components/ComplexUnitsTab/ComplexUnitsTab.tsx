@@ -36,19 +36,11 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
   return (
     <AdminPanel title={t("title")} wide>
       <UnitsNoticeProvider blockId={view.block?.id ?? null}>
-        <UnitsBarProvider>
+        <UnitsBarProvider blockId={view.block?.id ?? null}>
           <div className="complex-units" data-units-tab>
             <p className="complex-units__lead">{t(builds ? "lead" : "leadStock")}</p>
             {view.block === null ? (
-              <p className="complex-units__note">
-                {builds ? (
-                  <>
-                    {t("empty")} <Link href={blocksHref}>{t("toBlocks")}</Link>
-                  </>
-                ) : (
-                  t("emptyStock")
-                )}
-              </p>
+              <NoBlocks blocksHref={builds ? blocksHref : null} />
             ) : (
               <>
                 {view.blocks.length > 1 ? (
@@ -66,6 +58,20 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
         </UnitsBarProvider>
       </UnitsNoticeProvider>
     </AdminPanel>
+  );
+}
+
+/** У ЖК нет блоков: руководителю — ссылка на «Блоки», менеджеру — только пояснение. */
+function NoBlocks({ blocksHref }: { blocksHref: string | null }) {
+  const t = useTranslations("admin.complexes.units");
+  if (!blocksHref) return <p className="complex-units__note">{t("emptyStock")}</p>;
+  return (
+    <p className="complex-units__note">
+      {t("empty")}{" "}
+      <Link className="complex-units__link" href={blocksHref}>
+        {t("toBlocks")}
+      </Link>
+    </p>
   );
 }
 
@@ -123,7 +129,10 @@ function Generator({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlo
   if (block.floorsTotal === null) {
     return (
       <p className="complex-units__note">
-        {t("noFloors")} <Link href={props.blocksHref}>{t("toFloors")}</Link>
+        {t("noFloors")}{" "}
+        <Link className="complex-units__link" href={props.blocksHref}>
+          {t("toFloors")}
+        </Link>
       </p>
     );
   }

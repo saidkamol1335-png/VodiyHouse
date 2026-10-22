@@ -131,6 +131,13 @@
   font-weight: 600;
 }
 
+/* Ссылка в предупреждении того же цвета — отличается подчёркиванием и весом (WCAG 1.4.1). */
+.units-generator__link {
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .units-generator__actions {
   display: flex;
   flex-wrap: wrap;
@@ -139,12 +146,14 @@
   gap: 12px;
 }
 
-@media (max-width: 760px) {
-  /* Флажок «В подъездах по-разному» — цель всей строкой не ниже 44 px. */
+/* Флажок «В подъездах по-разному» — цель всей строкой не ниже 44 px: телефон и планшет пальцем. */
+@media (max-width: 760px), (pointer: coarse) {
   .units-generator__check {
     min-height: 44px;
   }
+}
 
+@media (max-width: 760px) {
   .units-generator__fields,
   .units-generator__entrances {
     grid-template-columns: repeat(2, minmax(0, 1fr));

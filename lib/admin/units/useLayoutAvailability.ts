@@ -6,6 +6,7 @@ import { settle } from "@/lib/ui/settle";
 import { usePresence } from "@/lib/ui/usePresence";
 import type { ContentErrorCode } from "../developers/errors";
 import { unitsFailure } from "./errors";
+import { blockSwitching } from "./switching";
 import type { ChangedResult, SetLayoutAvailableInput, UnitsAction, UnitsLayout } from "./types";
 
 // «Доступна / нет в наличии» у планировки блока без списка (Н7): тап сохраняет сразу, без
@@ -93,7 +94,7 @@ export function useLayoutAvailability(
       if (isStale(result.error)) {
         onStale(result.error);
         router.refresh();
-      } else if (!here()) onLost(layout, available, result.error);
+      } else if (!here() || blockSwitching()) onLost(layout, available, result.error);
     },
     [action, here, inFlight, onLost, onStale, router],
   );

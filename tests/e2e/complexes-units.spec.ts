@@ -155,6 +155,11 @@ test.describe("кабинет · ЖК · квартиры", () => {
       "aria-current",
       "page",
     );
+    // Переход на свой же блок — не уход: у текущей пилюли точки перехода нет (и inert не ставится).
+    await expect(
+      switcher.locator('[aria-current="page"] .units-block-switch__pending'),
+    ).toHaveCount(0);
+    await expect(switcher.locator(".units-block-switch__pending")).toHaveCount(1);
 
     await page.getByRole("button", { name: /Стояки ·/ }).click();
     await position(page, 3).getByRole("button", { name: "+ Уточнить для подъезда" }).click();
@@ -216,6 +221,25 @@ test.describe("кабинет · ЖК · квартиры", () => {
       .click();
     // Позиция 2, эт. 2–11 в двух подъездах.
     await expect(page.locator(".units-risers__warning")).toContainText("Вне стояков: 20 мест");
+  });
+
+  test("стояки готового блока: этаж набирается с клавиатуры — строка на месте", async ({
+    page,
+  }) => {
+    await open(page, SHODLIK);
+    await page.getByRole("button", { name: /Стояки ·/ }).click();
+    const from = position(page, 1).getByLabel("Этаж от").first();
+    const to = position(page, 1).getByLabel("Этаж до").first();
+    // «1» из «10» — ниже первого жилого и ниже «от»: черновик не подгоняется под план на ходу.
+    await to.fill("");
+    await to.pressSequentially("10");
+    await expect(to).toHaveValue("10");
+    await expect(to).toBeFocused();
+    await from.fill("");
+    await from.pressSequentially("10");
+    await expect(from).toHaveValue("10");
+    await expect(page.getByRole("button", { name: "Стояки · 4 строки" })).toBeVisible();
+    await expect(position(page, 1).locator(".risers-editor__issue")).toHaveCount(0);
   });
 
   test("скриншоты: генератор и стояки", async ({ page }, testInfo) => {

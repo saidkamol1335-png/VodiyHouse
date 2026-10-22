@@ -39,7 +39,8 @@ export function UnitsBlockSwitch({ blocks, current, href, query = null }: UnitsB
           ) : (
             <span className="units-block-switch__count">{t("noList")}</span>
           )}
-          <SwitchPending />
+          {/* Переход на свой же блок — не уход: блок остаётся, его правки и отказы — на месте. */}
+          {block.id === current ? null : <SwitchPending />}
         </Link>
       ))}
     </nav>

@@ -264,9 +264,20 @@ describe("квартиры в кабинете: права, генератор, 
       await timed(() =>
         callAs(db, head, "set_units_price($1, $2, 'total', 50000)", [tooBig, unitIds]),
       );
-      await timed(() => callAs(db, head, "set_units_finishing($1, $2, null)", [tooBig, unitIds]));
-      const noLayout = JSON.stringify(unitIds.map((id) => ({ id, layout_id: null })));
-      await timed(() => callAs(db, head, "set_units_layouts($1, $2::jsonb)", [tooBig, noLayout]));
+      // Отделка и стояки — со сменой у всех 5000: пустая смена мерила бы только проверку входа.
+      const { rows: finishings } = await db.admin.query<{ id: number }>(
+        "select id from finishings where is_active order by id limit 1",
+      );
+      expect(
+        await timed(() =>
+          callAs(db, head, "set_units_finishing($1, $2, $3)", [tooBig, unitIds, finishings[0]!.id]),
+        ),
+      ).toMatchObject({ changed: 5000 });
+      const oneRoom = await newLayout(db.admin, tooBig, 1, 42.5);
+      const assigned = JSON.stringify(unitIds.map((id) => ({ id, layout_id: oneRoom })));
+      expect(
+        await timed(() => callAs(db, head, "set_units_layouts($1, $2::jsonb)", [tooBig, assigned])),
+      ).toMatchObject({ changed: 5000 });
       expect(
         await timed(() => callAs(db, head, "delete_block_units($1, 'Т')", [tooBig])),
       ).toMatchObject({ deleted: 5000 });

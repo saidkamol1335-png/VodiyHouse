@@ -59,6 +59,17 @@ describe("«+ Квартира»", () => {
     expect(screen.queryByText(/Проверьте поля/)).toBeNull();
   });
 
+  it("место занято (без запроса) — фокус на первое поле места, диктор слышит причину", async () => {
+    const addUnit = vi.fn(async () => null);
+    renderForm(addUnit);
+    fireEvent.change(screen.getByLabelText("Этаж"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Позиция"), { target: { value: "1" } });
+    await add();
+    expect(addUnit).not.toHaveBeenCalled();
+    expect(screen.getAllByText(/Место занято/).length).toBeGreaterThan(0);
+    expect(document.activeElement).toBe(screen.getByLabelText("Подъезд"));
+  });
+
   it("планировку убрали из блока — ошибка у «Планировки»", async () => {
     renderForm(vi.fn(async () => unitsFailure("invalid", "layout_id")));
     fireEvent.change(screen.getByLabelText("Этаж"), { target: { value: "5" } });

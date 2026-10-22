@@ -83,3 +83,10 @@
     min-height: 44px;
   }
 }
+
+/* Планшет пальцем (контейнер шире 720): «Изменить квартиру» — 44 px, как в карточке. */
+@media (pointer: coarse) {
+  .unit-detail__edit {
+    min-height: 44px;
+  }
+}

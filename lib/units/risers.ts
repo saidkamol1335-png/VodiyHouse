@@ -77,27 +77,19 @@ export function fitRisersToPlan(
  * Стояки готового блока под план, который сжался после снимка (удалили нижний этаж, подъезд,
  * крайнюю позицию): вне плана квартир нет — такие стояки отпадают, этажи обрезаются по плану.
  * В отличие от fitRisersToPlan, недостающих не добавляет: у готового блока стояк без планировки
- * снял бы её с квартир. Незаполненный этаж (NaN) не трогает — его покажет проверка.
+ * снял бы её с квартир. Незаполненный или перевёрнутый этаж не трогает — его покажет проверка.
  */
 export function clipRisersToPlan(risers: readonly Riser[], plan: BlockPlan): Riser[] {
-  const filled = (riser: Riser) =>
-    Number.isFinite(riser.floorFrom) && Number.isFinite(riser.floorTo);
-  return risers
-    .filter(
-      (riser) =>
-        riser.position <= maxPositionFor(plan, riser.entrance) &&
-        (riser.entrance === null || riser.entrance <= plan.entrances),
-    )
-    .map((riser) =>
-      filled(riser)
-        ? {
-            ...riser,
-            floorFrom: Math.max(riser.floorFrom, plan.firstResidentialFloor),
-            floorTo: Math.min(riser.floorTo, plan.floors),
-          }
-        : riser,
-    )
-    .filter((riser) => !filled(riser) || riser.floorFrom <= riser.floorTo);
+  const inPlan = (riser: Riser) =>
+    riser.position <= maxPositionFor(plan, riser.entrance) &&
+    (riser.entrance === null || riser.entrance <= plan.entrances);
+  return risers.filter(inPlan).flatMap((riser) => {
+    const filled = Number.isFinite(riser.floorFrom) && Number.isFinite(riser.floorTo);
+    if (!filled || riser.floorFrom > riser.floorTo) return [riser];
+    const floorFrom = Math.max(riser.floorFrom, plan.firstResidentialFloor);
+    const floorTo = Math.min(riser.floorTo, plan.floors);
+    return floorFrom <= floorTo ? [{ ...riser, floorFrom, floorTo }] : [];
+  });
 }
 
 /** Сколько мест плана не покрывает ни один стояк — их планировку сохранение не тронет. */

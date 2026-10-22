@@ -164,15 +164,6 @@
     grid-area: close;
   }
 
-  .units-bulk__action,
-  .units-bulk__close {
-    height: 44px;
-  }
-
-  .units-bulk__close {
-    width: 44px;
-  }
-
   .units-bulk__step {
     max-height: 60dvh;
   }
@@ -190,8 +181,8 @@
   }
 }
 
-/* Планшет пальцем: шаги и «×» — 44 px, как на телефоне. */
-@media (pointer: coarse) {
+/* Шаги и «×» — 44 px: на телефоне и на планшете пальцем. */
+@media (max-width: 760px), (pointer: coarse) {
   .units-bulk__action,
   .units-bulk__close {
     height: 44px;

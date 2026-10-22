@@ -2,8 +2,8 @@
 
 import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { barTone, type UnitsBar } from "@/lib/admin/units/bar";
+import { useContext, useEffect, useRef, useState, type RefObject } from "react";
+import { UnitsBarContext, barTone, type UnitsBar } from "@/lib/admin/units/bar";
 import type { UnitStatusControl } from "@/lib/admin/units/useUnitStatus";
 import { barText, type BarTexts } from "./barText";
 
@@ -45,20 +45,35 @@ class FocusMemory {
 }
 
 /**
+ * Живая область полосы — отдельная скрытая строка, смонтирована всегда: диктор слышит и первое
+ * сообщение, но не перечитывает кнопки. На вкладке она одна — у UnitsBarProvider, вне блоков:
+ * уходящий блок на время перехода inert, и ответ тапа, пришедший в него, иначе прозвучал бы
+ * в пустоту (третий круг 12.7). Без провайдера (тесты, отдельный экран) — своя у полосы.
+ */
+export function UnitsBarStatus({ bar, blockId }: { bar: UnitsBar | null; blockId: string | null }) {
+  const texts = useBarTexts();
+  const said = useSaidOn(bar, blockId);
+  const lines = bar ? barLines(texts, bar, said) : [];
+  return (
+    <p className="sr-only" role="status">
+      {lines.map((line) => line.join(" ")).join(". ")}
+    </p>
+  );
+}
+
+/**
  * Полоса внизу экрана (мокап: .toast — справа снизу на 1440, во всю ширину на телефоне):
- * «Кв. 41: свободна → бронь · Отменить». Живая область — отдельная скрытая строка, смонтирована
- * всегда: диктор слышит и первое сообщение, но не перечитывает кнопки.
+ * «Кв. 41: свободна → бронь · Отменить».
  */
 export function UnitsUndoBar({ control, blockId, undoable = true }: UnitsUndoBarProps) {
   const texts = useBarTexts();
+  const shared = useContext(UnitsBarContext) !== null;
   const [focus] = useState(() => new FocusMemory());
   const { bar } = control;
   const lines = bar ? barLines(texts, bar, blockId) : [];
   return (
     <div className="units-undo">
-      <p className="sr-only" role="status">
-        {lines.map((line) => line.join(" ")).join(". ")}
-      </p>
+      {shared ? null : <UnitsBarStatus bar={bar} blockId={blockId} />}
       {bar ? (
         <UndoCard
           key={bar.op}
@@ -73,6 +88,21 @@ export function UnitsUndoBar({ control, blockId, undoable = true }: UnitsUndoBar
   );
 }
 
+/**
+ * Блок, на котором сообщение прозвучало: подпись «Блок A ·» — относительно него, а не блока на
+ * экране. Провайдер переживает смену блока, и иначе смена подписи перечитала бы то же сообщение
+ * (а отказ прозвучал бы как новый). Новое сообщение — новый объект message (тап, его исход,
+ * правка) или новый отказ в lost; конец 5 с (expireBar) и смена блока его не пересоздают.
+ */
+function useSaidOn(bar: UnitsBar | null, blockId: string | null): string | null {
+  const message = bar?.message ?? null;
+  const lost = bar?.lost.length ?? 0;
+  const [said, setSaid] = useState({ message, lost, blockId });
+  if (said.message === message && said.lost === lost) return said.blockId;
+  setSaid({ message, lost, blockId });
+  return blockId;
+}
+
 function useBarTexts(): BarTexts {
   return {
     bar: useTranslations("admin.complexes.units.list.bar"),
@@ -83,7 +113,7 @@ function useBarTexts(): BarTexts {
 }
 
 /** Строки полосы: исход и отказы прежних тапов; ответ другого блока — с его названием. */
-function barLines(texts: BarTexts, bar: UnitsBar, blockId: string): string[][] {
+function barLines(texts: BarTexts, bar: UnitsBar, blockId: string | null): string[][] {
   const label = (text: string, of: { blockId: string; blockName: string }) =>
     of.blockId === blockId ? text : texts.bar("otherBlock", { name: of.blockName, text });
   const line = (message: UnitsBar["message"], of: { blockId: string; blockName: string }) => {

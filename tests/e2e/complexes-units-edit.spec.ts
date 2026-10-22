@@ -38,6 +38,35 @@ function trackActions(page: Page) {
 const dismissNextDialog = (page: Page) =>
   page.waitForEvent("dialog").then((dialog) => dialog.dismiss());
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Ответ действия приходит внутри перехода на другой блок — по событиям, а не по часам: действие
+ * отпускается после начала перехода (RSC-запрос страницы) и кадра на data-switching, а переход —
+ * только после ответа действия (и кадра на его отрисовку).
+ */
+async function slowBlockSwitch(page: Page) {
+  let started!: () => void;
+  let answered!: () => void;
+  const navigation = new Promise<void>((resolve) => (started = resolve));
+  const action = new Promise<void>((resolve) => (answered = resolve));
+  await page.route(`**${SHODLIK}*`, async (route) => {
+    const request = route.request();
+    const headers = request.headers();
+    if (request.method() === "GET" && headers["rsc"] === "1" && !headers["next-router-prefetch"]) {
+      started();
+      await Promise.race([action, sleep(5000)]);
+      await sleep(200);
+    } else if (request.method() === "POST") {
+      await Promise.race([navigation, sleep(5000)]);
+      await sleep(100);
+      await route.fulfill({ response: await route.fetch() });
+      return answered();
+    }
+    await route.continue();
+  });
+}
+
 async function step(page: Page, name: string) {
   await bulk(page).getByRole("button", { name, exact: true }).click();
 }
@@ -108,6 +137,10 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await value.fill("31,000");
     await bulk(page).getByRole("button", { name: "Поставить цену" }).click();
     await expect(bulk(page)).toContainText("Нужно целое число");
+    // Отказ до запроса — фокус на поле суммы (оно связано с текстом ошибки), и повторно тоже.
+    await expect(value).toBeFocused();
+    await bulk(page).getByRole("button", { name: "Поставить цену" }).click();
+    await expect(value).toBeFocused();
     expect(posts).toHaveLength(0);
     await value.fill("650");
     await expect(bulk(page)).toContainText("Кв. 1: 42,5 м² × 650 = $27 625");
@@ -116,6 +149,33 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await expect(rowOf(page, "1").locator(".units-row__per-m2")).toHaveText("$650/м²");
     expect(posts).toHaveLength(1);
     expect(posts[0]!.postData()).toContain("per_m2");
+  });
+
+  test("отказ правки, пришедший во время перехода на другой блок, — строкой в полосе", async ({
+    page,
+  }) => {
+    test.slow();
+    await open(page, `${SHODLIK}?demo=fail`);
+    // Переход медленный (RSC блока B — 2 с), отказ правки приходит внутри него: форма уходящего
+    // блока ещё смонтирована, но inert и исчезнет вместе с блоком — отказ должен уйти в полосу.
+    await slowBlockSwitch(page);
+    await check(page, "1").check();
+    await step(page, "Цена");
+    await bulk(page).getByText("за квартиру", { exact: true }).click();
+    await bulk(page).getByLabel("Цена квартиры, $").fill("50000");
+    await bulk(page).getByRole("button", { name: "Поставить цену" }).click();
+    await page
+      .getByRole("navigation", { name: "Блок" })
+      .getByRole("link", { name: /Блок B/ })
+      .click();
+    await expect(page.locator(".units-block__listed")).toContainText("Блок B", { timeout: 15_000 });
+    await expect(bar(page)).toContainText("Блок A · Не поставили цену");
+    // Диктору — по блоку, где прозвучало (A, переход ещё шёл): после смены блока текст тот же.
+    const live = page.locator(".complex-units + [role=status]");
+    await expect(live).toContainText("Не поставили цену");
+    await expect(live).not.toContainText("Блок A ·");
+    // Обработчики маршрута с задержками не должны пережить тест (ошибка «страница закрыта»).
+    await page.unrouteAll({ behavior: "ignoreErrors" });
   });
 
   test("отделка: вариант выбирают явно; «Под ключ», затем «как в блоке»", async ({ page }) => {
@@ -178,6 +238,10 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await number.fill("2");
     await page.getByRole("button", { name: "Сохранить" }).click();
     await expect(page.locator(".unit-edit")).toContainText("Квартира с таким номером уже есть");
+    // Отказ до запроса — фокус на неверное поле (оно связано с текстом ошибки), и повторно тоже.
+    await expect(number).toBeFocused();
+    await page.getByRole("button", { name: "Сохранить" }).click();
+    await expect(number).toBeFocused();
     expect(posts).toHaveLength(0);
 
     const asked = dismissNextDialog(page);
@@ -206,6 +270,7 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await form.getByLabel("Позиция").fill("1");
     await form.getByRole("button", { name: "Добавить" }).click();
     await expect(form).toContainText("Место занято: кв. 1");
+    await expect(form.getByLabel("Подъезд")).toBeFocused();
     await form.getByLabel("Позиция").fill("5");
     await expect(form.getByLabel("Номер")).toHaveValue("89");
     await form.getByRole("button", { name: "Добавить" }).click();

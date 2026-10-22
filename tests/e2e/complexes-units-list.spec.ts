@@ -21,6 +21,7 @@ const isMobile = (page: Page) => (page.viewportSize()?.width ?? 0) < 760;
 // подряд; весь e2e на dev-сервере растягивает их дольше 5 с (trace 22.10.2026, так же на 01010ae),
 // а такие тесты целиком — дольше 30 с, поэтому они ещё и test.slow().
 const SWITCH = { timeout: 15_000 };
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function open(page: Page, url: string = SHODLIK) {
   await page.goto(url);
@@ -264,8 +265,17 @@ test.describe("кабинет · ЖК · список квартир", () => {
       .getByRole("navigation", { name: "Блок" })
       .getByRole("link", { name: /Блок B/ })
       .click();
+    // Переход идёт (RSC блока B): уходящий блок недоступен целиком, с доком.
+    await expect(page.locator(".complex-units")).toHaveAttribute("data-switching", "");
+    await expect(page.locator(".units-block")).toHaveJSProperty("inert", true);
     await expect(pill(page, "Свободны")).toContainText("29", SWITCH);
+    await expect(page.locator(".units-block")).toHaveJSProperty("inert", false);
     await expect(bar(page)).toContainText(`Блок A · Не сохранили кв. ${first}.`);
+    // Живая область — у вкладки, вне блоков: inert уходящего блока её не глушил. Подпись — по
+    // блоку, где прозвучало (во время перехода — без «Блок A ·», после — с ним: оба случая ниже).
+    const live = page.locator(".complex-units + [role=status]");
+    await expect(live).toContainText(`Не сохранили кв. ${first}.`);
+    await expect(page.locator("[data-units-dock-host] .units-undo [role=status]")).toHaveCount(0);
   });
 
   test("клавиатура: Enter открывает выбор, Esc закрывает, фокус — на плашке; Ctrl+Z", async ({
@@ -361,6 +371,39 @@ test.describe("кабинет · ЖК · список квартир", () => {
     ).toBeVisible();
   });
 
+  test("исход тапа, пришедший уже на другом блоке, — диктору с названием блока тапа", async ({
+    page,
+  }) => {
+    test.slow();
+    await open(page, `${SHODLIK}?demo=fail`);
+    // Ответ тапа держим, пока на экране не появится блок B: переход не ждёт действие.
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => (release = resolve));
+    let held = false;
+    await page.route(`**${SHODLIK}*`, async (route) => {
+      if (route.request().method() === "POST" && !held) {
+        held = true;
+        await Promise.race([released, sleep(20_000)]);
+      }
+      await route.continue();
+    });
+    const button = statusButtons(page, "свободна").first();
+    const number = /^Кв\. (\S+),/.exec((await button.getAttribute("aria-label"))!)![1]!;
+    await button.click();
+    await page.locator(".unit-status-picker").getByRole("button", { name: "бронь" }).click();
+    const switcher = page.getByRole("navigation", { name: "Блок" });
+    await switcher.getByRole("link", { name: /Блок B/ }).click();
+    await expect(pill(page, "Свободны")).toContainText("29", SWITCH);
+    release();
+    const live = page.locator(".complex-units + [role=status]");
+    await expect(live).toContainText(`Блок A · Не сохранили кв. ${number}.`, SWITCH);
+    // Вернулись в A — то же сообщение, подпись прежняя: диктор его не перечитывает.
+    await switcher.getByRole("link", { name: /Блок A/ }).click();
+    await expect(pill(page, "Свободны")).toContainText("12", SWITCH);
+    await expect(live).toContainText(`Блок A · Не сохранили кв. ${number}.`);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  });
+
   test("блок A → B → A: свой список у каждого; полоса одна на вкладку — с названием блока", async ({
     page,
   }) => {
@@ -380,6 +423,8 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await switcher.getByRole("link", { name: /Блок B/ }).click();
     await expect(pill(page, "Свободны")).toContainText("29", SWITCH);
     await expect(bar(page)).toContainText(`Блок A · Кв. ${number}: свободна → бронь`);
+    // Блок B со списком: «Отменить» тапа из A — только в A (у блока без списка — тест ниже).
+    await expect(bar(page).getByRole("button", { name: /Отменить/ })).toHaveCount(0);
     await switcher.getByRole("link", { name: /Блок A/ }).click();
     // Список A прочитан заново: DEMO не меняется — квартира снова свободна.
     await expect(pill(page, "Свободны")).toContainText("12", SWITCH);
@@ -408,11 +453,57 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await expect(bar(page).getByRole("button", { name: /Отменить/ })).toBeVisible(SWITCH);
   });
 
+  test("отказ Н7, пришедший во время перехода на другой блок, — строкой в полосе", async ({
+    page,
+  }) => {
+    test.slow();
+    await open(page, `${SHODLIK}?demo=mixed`);
+    const switcher = page.getByRole("navigation", { name: "Блок" });
+    await switcher.getByRole("link", { name: /Блок B/ }).click();
+    await expect(page.getByRole("heading", { name: "Наличие по планировкам" })).toBeVisible(SWITCH);
+    await page.waitForLoadState("networkidle");
+    // Тап Н7 обрывается после начала перехода, а переход ждёт обрыв — по событиям, не по часам:
+    // панель уходящего блока ещё в DOM, но inert и исчезнет — отказ должен уйти в полосу.
+    allowed = /Failed to load resource: net::ERR_FAILED/;
+    let first = true;
+    let started!: () => void;
+    let aborted!: () => void;
+    const navigation = new Promise<void>((resolve) => (started = resolve));
+    const tap = new Promise<void>((resolve) => (aborted = resolve));
+    await page.route(`**${SHODLIK}*`, async (route) => {
+      const request = route.request();
+      const headers = request.headers();
+      if (
+        request.method() === "GET" &&
+        headers["rsc"] === "1" &&
+        !headers["next-router-prefetch"]
+      ) {
+        started();
+        await Promise.race([tap, sleep(5000)]);
+        await sleep(200);
+      } else if (request.method() === "POST" && first) {
+        first = false;
+        await Promise.race([navigation, sleep(5000)]);
+        await sleep(100);
+        await route.abort();
+        return aborted();
+      }
+      await route.continue();
+    });
+    await page.getByRole("button", { name: "Нет в наличии" }).first().click();
+    await switcher.getByRole("link", { name: /Блок A/ }).click();
+    await expect(rows(page).first()).toBeVisible(SWITCH);
+    await expect(bar(page)).toContainText("Блок B · Не сохранили «нет в наличии»", SWITCH);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  });
+
   test("«К действиям · N» — с клавиатуры сразу к массовой панели", async ({ page }) => {
     await open(page);
     await page.getByRole("checkbox", { name: "Выбрать кв. 1", exact: true }).check();
-    // Ссылка-пропуск видна только в фокусе с клавиатуры — так её и нажимают.
-    await page.getByRole("button", { name: "К действиям · 1" }).focus();
+    // Ссылка-пропуск видна только в фокусе с клавиатуры — так её и нажимают; после мыши — нет.
+    const skip = page.getByRole("button", { name: "К действиям · 1" });
+    expect((await skip.boundingBox())!.width).toBeLessThanOrEqual(1);
+    await skip.focus();
     await page.keyboard.press("Enter");
     await expect(page.locator("[data-units-bulk] button").first()).toBeFocused();
   });
