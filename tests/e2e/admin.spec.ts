@@ -123,12 +123,14 @@ test.describe("оболочка кабинета /admin", () => {
     expect(errors).toEqual([]);
   });
 
-  test("К4: заголовок — приветствие по времени Ташкента, подпись — дата", async ({ page }) => {
+  test("К4: заголовок — приветствие по времени Ташкента, подпись — дата (мокап главной)", async ({
+    page,
+  }) => {
     await page.goto("/admin");
     const title = page.getByRole("heading", { level: 1 });
     await expect(title).toHaveText(/^(Доброе утро|Добрый день|Добрый вечер)(, .+)?$/);
     await expect(page.locator(".admin-topbar__subtitle")).toContainText(
-      /\d{2}\.\d{2}\.\d{4} · кабинет Vodiy House/,
+      /\d{2}\.\d{2}\.\d{4} · данные общие с сайтом и обновляются вживую/,
     );
   });
 
@@ -204,7 +206,7 @@ test.describe("оболочка кабинета /admin", () => {
     expect(errors).toEqual([]);
   });
 
-  test("без ключей «Застройщики», «Справочники» и «Журнал» говорят, что база не подключена", async ({
+  test("без ключей «Остатки», «Застройщики», «Справочники» и «Журнал» говорят, что база не подключена", async ({
     page,
   }) => {
     test.skip(
@@ -213,6 +215,7 @@ test.describe("оболочка кабинета /admin", () => {
     );
     const errors = collectPageErrors(page);
     for (const path of [
+      "/admin",
       "/admin/zastroyshchiki",
       "/admin/nastroyki/spravochniki",
       "/admin/nastroyki/zhurnal",

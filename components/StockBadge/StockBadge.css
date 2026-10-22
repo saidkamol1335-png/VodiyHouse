@@ -1,0 +1,36 @@
+/* Пилюля остатков (.badge + .stock-badge): вспышка, когда «live» на главной принёс другое число
+   (мокап leftFlash). Мокап красил фон и тень — здесь только transform и opacity (CLAUDE.md §3):
+   янтарный слой под текстом гаснет, в full пилюля ещё и вздрагивает. В none — ничего. */
+.stock-badge {
+  position: relative;
+  isolation: isolate;
+}
+
+.stock-badge--flash::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--amber);
+  box-shadow: var(--flash-glow);
+  opacity: 0;
+  animation: stock-badge-fade var(--dur-flash) var(--ease-2);
+  pointer-events: none;
+}
+
+[data-motion="full"] .stock-badge--flash {
+  animation: stock-badge-pop var(--dur-flash) var(--ease-2);
+}
+
+@keyframes stock-badge-fade {
+  from {
+    opacity: 1;
+  }
+}
+
+@keyframes stock-badge-pop {
+  from {
+    transform: scale(var(--flash-scale));
+  }
+}

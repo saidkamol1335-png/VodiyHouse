@@ -246,6 +246,12 @@
   --dur-beam: 5s; /* луч по рамке карточки — один круг */
   --dur-shine: 3.6s; /* блик по янтарной кнопке */
   --dur-rise: 0.6s; /* появление карточки в full */
+  --dur-ping: 1.8s; /* пульс точки «live» на главной кабинета — только full */
+  --dur-flash: 1.8s; /* вспышка пилюли остатков, когда «live» принёс другое число */
+  --flash-scale: 1.3;
+  --flash-glow: 0 0 20px rgba(248, 155, 13, 0.8);
+  --live-dot: #1fa45a;
+  --live-dot-glow: 0 0 8px rgba(31, 164, 90, 0.6);
   --rise-offset: 16px;
 }
 
@@ -352,6 +358,8 @@
   --chip-on-border: var(--amber);
   --chip-on-ring: 0 0 0 1px rgba(248, 155, 13, 0.25) inset, 0 0 22px rgba(248, 155, 13, 0.3);
   --panel-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.04), rgba(255, 240, 220, 0.012));
+  --live-dot: var(--ok);
+  --live-dot-glow: 0 0 10px var(--ok);
 
   --login-card-bg: linear-gradient(180deg, rgba(28, 26, 23, 0.88), rgba(16, 15, 13, 0.92));
   --field-bg: rgba(255, 240, 220, 0.03);
@@ -365,6 +373,7 @@
   --dur-slow: 200ms;
   --dur-slower: 200ms;
   --dur-reveal: 200ms;
+  --dur-flash: 200ms;
   --glass-filter: none;
   --glass: var(--glass-solid);
   --over-photo-button: rgba(15, 12, 8, 0.45); /* без blur кружок темнее, чтобы иконка читалась */
@@ -378,6 +387,7 @@
   --dur-slow: 0ms;
   --dur-slower: 0ms;
   --dur-reveal: 0ms;
+  --dur-flash: 0ms;
   --glass-filter: none;
   --glass: var(--glass-solid);
   --over-photo-button: rgba(15, 12, 8, 0.45);

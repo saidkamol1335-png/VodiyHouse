@@ -1,0 +1,7 @@
+/* Остатки по комнатам моноширинным (мокап .ostl__rooms) — список «ЖК» и главная. */
+.stock-rooms {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+}

@@ -4,17 +4,17 @@ import { ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { Badge, type BadgeTone } from "@/components/Badge";
 import { FilterPills } from "@/components/FilterPills";
 import { PublicationBadge } from "@/components/PublicationBadge";
 import { SearchField } from "@/components/SearchField";
+import { StockBadge } from "@/components/StockBadge";
+import { StockRooms } from "@/components/StockRooms";
 import {
   complexFilterCounts,
   filterComplexes,
   isHiddenByDeveloper,
   type ComplexListRow,
 } from "@/lib/admin/complexes/list";
-import { stockTone, type ComplexStock, type StockTone } from "@/lib/admin/complexes/stock";
 import { complexTabHref, type ComplexAccess } from "@/lib/admin/complexes/tabs";
 import { deletionDate } from "@/lib/admin/developers/publication";
 import { PUBLICATION_FILTERS, type PublicationFilter } from "@/lib/admin/publicationFilter";
@@ -31,8 +31,6 @@ type ComplexListProps = {
   /** Без manage (менеджер, Н2) — без пилюль и плашек публикации, архива нет, строка — сразу tabs[0]. */
   access: ComplexAccess;
 };
-
-const STOCK_TONES: Record<StockTone, BadgeTone> = { none: "neutral", low: "amber", ok: "ok" };
 
 /** «ЖК» (в. 5): поиск и пилюли статусов сверху, строки как «Остатки по ЖК» мокапа. */
 export function ComplexList({
@@ -182,7 +180,7 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
             <span className="complex-list__warning">{t("hiddenByDeveloper")}</span>
           ) : null}
         </span>
-        <span className="complex-list__rooms">{roomsLine(row.stock, t)}</span>
+        <StockRooms stock={row.stock} className="complex-list__rooms" />
         <span className="complex-list__stock">
           <StockBadge stock={row.stock} />
         </span>
@@ -197,18 +195,6 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
   );
 }
 
-function StockBadge({ stock }: { stock: ComplexStock }) {
-  const t = useTranslations("admin.complexes.stock");
-  if (stock.groups.length === 0) return <Badge tone="neutral">{t("none")}</Badge>;
-  if (stock.free === 0 && stock.partial) {
-    return <Badge tone="ok">{t("byLayouts")}</Badge>;
-  }
-  const text = stock.partial
-    ? t("freePartial", { count: stock.free })
-    : t("free", { count: stock.free });
-  return <Badge tone={STOCK_TONES[stockTone(stock)]}>{text}</Badge>;
-}
-
 /** «Фергана · Farg‘ona Sifat Qurilish»; у архива — дата окончательного удаления. */
 function metaLine(row: ComplexListRow, t: Translate): string {
   const parts = [row.locationName ?? t("noLocation"), row.developerName];
@@ -216,9 +202,4 @@ function metaLine(row: ComplexListRow, t: Translate): string {
     parts.push(t("archivedUntil", { date: formatDate(deletionDate(row.archivedAt)) }));
   }
   return parts.join(" · ");
-}
-
-/** «Ст 7 · 1к 10 · 4+ 3»; тип без списка квартир — без числа, с галочкой «есть». */
-function roomsLine(stock: ComplexStock, t: Translate): string {
-  return stock.groups.map((item) => `${t(`rooms.${item.group}`)} ${item.free ?? "✓"}`).join(" · ");
 }

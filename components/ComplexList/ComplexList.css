@@ -142,11 +142,8 @@
   font-weight: 600;
 }
 
+/* Шрифт и цвет — у .stock-rooms (общий с главной); здесь — место в строке. */
 .complex-list__rooms {
-  color: var(--fg-2);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-mono);
   white-space: nowrap;
 }
 

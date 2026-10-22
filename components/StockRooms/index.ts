@@ -1,0 +1,1 @@
+export { StockRooms } from "./StockRooms";

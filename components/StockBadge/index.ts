@@ -1,0 +1,1 @@
+export { StockBadge } from "./StockBadge";

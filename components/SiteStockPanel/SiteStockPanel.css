@@ -1,0 +1,109 @@
+/* «Остатки по ЖК» (мокап .panel + .ostl, Г1 B): панель на всю ширину, слева заголовок и подпись,
+   справа «live» и итог крупно (как карточка «Свободно на сайте»). Раскладка — по ширине панели
+   (container query): на телефоне итог уходит под заголовок, строки — компактные (Г5 C). */
+.site-stock {
+  container: site-stock / inline-size;
+  padding: var(--admin-panel-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.site-stock__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "intro live"
+    "intro total";
+  align-items: start;
+  gap: 6px 24px;
+  margin-bottom: 10px;
+}
+
+.site-stock__intro {
+  grid-area: intro;
+  min-width: 0;
+}
+
+.site-stock__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.site-stock__lead {
+  max-width: 70ch;
+  margin: 4px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+
+.site-stock__live {
+  grid-area: live;
+  justify-self: end;
+}
+
+.site-stock__total {
+  display: grid;
+  grid-area: total;
+  justify-items: end;
+  gap: 2px;
+  margin: 0;
+  text-align: right;
+}
+
+.site-stock__total-value {
+  font-size: var(--fs-kpi);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.site-stock__total-caption {
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.site-stock__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-stock__rows > li + li {
+  border-top: 1px dashed var(--line);
+}
+
+.site-stock__empty {
+  margin: 8px 0 4px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+/* Что значат «N+» и «по планировкам» — видимым текстом (как в списке «ЖК»). */
+.site-stock__footnote {
+  margin: 12px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+@container site-stock (max-width: 560px) {
+  .site-stock__head {
+    grid-template-areas:
+      "intro live"
+      "total total";
+    margin-bottom: 6px;
+  }
+
+  .site-stock__total {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+    text-align: left;
+  }
+}
