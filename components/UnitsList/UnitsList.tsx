@@ -130,7 +130,7 @@ function SelectionButtons({ view, selection, summaryId }: SelectionButtonsProps)
         <button
           ref={focusIf("all")}
           type="button"
-          className="units-list__select-all"
+          className="units-list__select-button"
           aria-disabled={view.busy}
           onClick={view.busy ? undefined : pickAll}
         >
@@ -141,13 +141,29 @@ function SelectionButtons({ view, selection, summaryId }: SelectionButtonsProps)
         <button
           ref={focusIf("clear")}
           type="button"
-          className="units-list__select-all"
+          className="units-list__select-button"
           onClick={clear}
         >
           {t("clear")}
         </button>
       ) : null}
+      <ToBulkActions count={selection.selected.length} />
     </div>
+  );
+}
+
+/**
+ * «К действиям · N»: панель внизу экрана — последняя в порядке Tab, с клавиатуры до неё — сразу
+ * отсюда (фокус на её первую кнопку; UnitsBulkBar помечена data-units-bulk).
+ */
+function ToBulkActions({ count }: { count: number }) {
+  const t = useTranslations("admin.complexes.units.list.select");
+  if (count === 0) return null;
+  const jump = () => document.querySelector<HTMLElement>("[data-units-bulk] button")?.focus();
+  return (
+    <button type="button" className="units-list__select-button" onClick={jump}>
+      {t("toActions", { count })}
+    </button>
   );
 }
 

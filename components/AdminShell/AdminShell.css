@@ -1,4 +1,17 @@
 /* Мокап: .adm, .adm__side, .adm__main. */
+
+/* Строка, до которой дошли Tab или прокрутка к элементу, не прячется под липкой шапкой (WCAG
+   2.4.11): сверху — отступ на её высоту; снизу — док «Квартир» (UnitsDock). */
+html:has(.admin-shell) {
+  scroll-padding-top: var(--admin-topbar-h);
+}
+
+@media (max-width: 980px) {
+  html:has(.admin-shell) {
+    scroll-padding-top: var(--admin-strip-h);
+  }
+}
+
 .admin-shell {
   position: relative;
   display: grid;

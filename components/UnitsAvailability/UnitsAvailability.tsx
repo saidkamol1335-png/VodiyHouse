@@ -17,8 +17,9 @@ import {
   type LostAvailability,
   type StaleAvailability,
 } from "@/lib/admin/units/useLayoutAvailability";
+import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import { useUnitsBar } from "@/lib/admin/units/useUnitsBar";
-import { formatArea, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 
 type UnitsAvailabilityProps = {
   block: Pick<UnitsBlock, "id" | "name" | "currency">;
@@ -67,7 +68,9 @@ export function UnitsAvailability({ block, layouts, action }: UnitsAvailabilityP
     (reason: StaleAvailability) => setNotice({ kind: "stale", blockId: block.id, reason }),
     [block.id, setNotice],
   );
-  const describe = (layout: UnitsLayout) => describeLayout(layout, block.currency, t);
+  const label = useLayoutLabel(layouts);
+  const describe = (layout: UnitsLayout) =>
+    describeLayout(layout, label(layout), block.currency, t);
   const onLost = useLostAvailability(block, describe);
   const control = useLayoutAvailability(layouts, action, onStale, onLost);
   return (
@@ -97,14 +100,15 @@ export function UnitsAvailability({ block, layouts, action }: UnitsAvailabilityP
 
 type LayoutText = { name: string; price: string };
 
-/** Цена — и в имени группы, и в «Сохранено»: у двух планировок бывают одинаковые комнаты и площадь. */
+/** Цена — и в имени группы, и в «Сохранено»; у двойника имя ещё и с вариантом (useLayoutLabel). */
 function describeLayout(
   layout: UnitsLayout,
+  name: string,
   currency: UnitsBlock["currency"],
   t: Translate,
 ): LayoutText {
   return {
-    name: t("layoutLabel", { rooms: layout.rooms, area: formatArea(layout.area) }),
+    name,
     price:
       layout.priceFrom === null
         ? t("availability.priceNone")

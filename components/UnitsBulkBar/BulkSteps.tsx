@@ -8,6 +8,7 @@ import { SelectField } from "@/components/SelectField";
 import { UnitStatusPicker } from "@/components/UnitStatusPicker";
 import { commonStatus } from "@/lib/admin/units/statusOutcome";
 import { useEditRequest } from "@/lib/admin/units/useEditRequest";
+import { focusFirstInvalid } from "@/lib/ui/focusFirstInvalid";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import { BulkDeleteStep } from "./BulkDeleteStep";
 import { BulkPriceStep } from "./BulkPriceStep";
@@ -114,8 +115,10 @@ function BulkFinishingStep({ selection, edit, block, finishings, onDone }: BulkS
   );
 }
 
-/** Enter в поле шага — то же, что кнопка шага. */
-export const submitWith = (apply: () => Promise<unknown>) => (event: FormEvent) => {
-  event.preventDefault();
-  void apply();
-};
+/** Enter в поле шага — то же, что кнопка шага; отказ по полю — фокус на него. */
+export const submitWith =
+  (apply: () => Promise<unknown>) => (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    void apply().then(() => focusFirstInvalid(form));
+  };

@@ -123,9 +123,17 @@ function DeleteSummary({ summary }: { summary: Of<"delete" | "delete_list"> }) {
       </Line>
       <Line>{t("statuses", summary.statuses)}</Line>
       {summary.reservedNumbers ? (
-        <Line>{t("reservedWere", { numbers: summary.reservedNumbers })}</Line>
+        <Line>
+          {t.rich("reservedWere", {
+            numbers: () => <LongNumbers numbers={summary.reservedNumbers!} />,
+          })}
+        </Line>
       ) : null}
-      {summary.soldNumbers ? <Line>{t("soldWere", { numbers: summary.soldNumbers })}</Line> : null}
+      {summary.soldNumbers ? (
+        <Line>
+          {t.rich("soldWere", { numbers: () => <LongNumbers numbers={summary.soldNumbers!} /> })}
+        </Line>
+      ) : null}
     </Summary>
   );
 }
@@ -158,6 +166,28 @@ function GroupCount({
 function Count({ count }: { count: number }) {
   const t = useTranslations("admin.journal.summary");
   return <span>{t("count", { count })}</span>;
+}
+
+const SHOWN_NUMBERS = 20;
+
+/**
+ * Номера брони и продаж при удалении списка хранятся полностью (до CSV фазы 3 — единственный след
+ * статусов), но тысячи номеров растянули бы запись на телефоне: первые 20, остальное — по
+ * «показать все» на месте (details — без JS, с клавиатуры и диктором).
+ */
+function LongNumbers({ numbers }: { numbers: string }) {
+  const t = useTranslations("admin.journal.summary");
+  const parts = numbers.split(", ");
+  if (parts.length <= SHOWN_NUMBERS) return numbers;
+  return (
+    <>
+      {parts.slice(0, SHOWN_NUMBERS).join(", ")},{" "}
+      <details className="journal-list__more">
+        <summary>{t("showAll")}</summary>
+        {parts.slice(SHOWN_NUMBERS).join(", ")}
+      </details>
+    </>
+  );
 }
 
 function Numbers({ numbers }: { numbers: string }) {

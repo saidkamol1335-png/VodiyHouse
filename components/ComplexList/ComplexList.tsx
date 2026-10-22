@@ -80,9 +80,17 @@ export function ComplexList({
           baseHref={baseHref}
           access={access}
         />
+        <PartialFootnote visible={visible} />
       </div>
     </section>
   );
+}
+
+/** Что значат «N+» и «по планировкам» — видимым текстом: title на телефоне не открыть. */
+function PartialFootnote({ visible }: { visible: readonly ComplexListRow[] }) {
+  const t = useTranslations("admin.complexes.stock");
+  if (!visible.some((row) => row.stock.partial)) return null;
+  return <p className="complex-list__footnote">{t("partialHint")}</p>;
 }
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes">>;
@@ -193,20 +201,12 @@ function StockBadge({ stock }: { stock: ComplexStock }) {
   const t = useTranslations("admin.complexes.stock");
   if (stock.groups.length === 0) return <Badge tone="neutral">{t("none")}</Badge>;
   if (stock.free === 0 && stock.partial) {
-    return (
-      <span title={t("partialHint")}>
-        <Badge tone="ok">{t("byLayouts")}</Badge>
-      </span>
-    );
+    return <Badge tone="ok">{t("byLayouts")}</Badge>;
   }
   const text = stock.partial
     ? t("freePartial", { count: stock.free })
     : t("free", { count: stock.free });
-  return (
-    <span title={stock.partial ? t("partialHint") : undefined}>
-      <Badge tone={STOCK_TONES[stockTone(stock)]}>{text}</Badge>
-    </span>
-  );
+  return <Badge tone={STOCK_TONES[stockTone(stock)]}>{text}</Badge>;
 }
 
 /** «Фергана · Farg‘ona Sifat Qurilish»; у архива — дата окончательного удаления. */

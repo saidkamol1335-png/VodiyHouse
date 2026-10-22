@@ -4,10 +4,13 @@
 import { unitPricePerM2, unitTotalPrice } from "@/lib/calc/unitPrice";
 import { formatPrice, formatPricePerM2 } from "@/lib/format";
 import type { RoomsByLayout, UnitRecord } from "@/lib/units";
+import { layoutVariants } from "./layoutVariants";
 import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "./types";
 
 export type UnitRowContext = {
   layouts: ReadonlyMap<string, UnitsLayout>;
+  /** Двойники по комнатам и площади — «вариант N» (layoutVariants). */
+  variants: ReadonlyMap<string, number>;
   rooms: RoomsByLayout;
   finishings: ReadonlyMap<number, string>;
   blockFinishingId: number | null;
@@ -26,6 +29,7 @@ export function unitRowContext(
 ): UnitRowContext {
   return {
     layouts: new Map(layouts.map((layout) => [layout.id, layout])),
+    variants: layoutVariants(layouts),
     rooms: new Map(layouts.map((layout) => [layout.id, layout.rooms])),
     finishings: new Map(finishings.map((item) => [item.id, item.name])),
     blockFinishingId: block.finishingId,
@@ -41,7 +45,7 @@ export function unitRowContext(
 }
 
 export type UnitRowView = {
-  layout: { rooms: number; area: number } | null;
+  layout: { rooms: number; area: number; variant: number | null } | null;
   /** «$37 200»; null — не посчитать (нет цены или площади). */
   total: string | null;
   /** «$620/м²»; null — не посчитать. */
@@ -66,7 +70,9 @@ export function unitRowView(unit: UnitRecord, ctx: UnitRowContext): UnitRowView 
   const total = unitTotalPrice(unit, area);
   const perM2 = unitPricePerM2(unit, area);
   return {
-    layout: layout ? { rooms: layout.rooms, area: layout.area } : null,
+    layout: layout
+      ? { rooms: layout.rooms, area: layout.area, variant: ctx.variants.get(layout.id) ?? null }
+      : null,
     total: total === null ? null : formatPrice(total, ctx.currency),
     perM2: perM2 === null ? null : formatPricePerM2(perM2, ctx.currency),
     finishing: finishingOf(unit, ctx),

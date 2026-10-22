@@ -2,7 +2,8 @@
    контейнера units-list (границы те же, что в UnitsList.css): от 1000 — строка в 8 колонок,
    720–999 — без «Обновлено», уже — карточка в две строки (образец — список наличия сайта,
    .avl__r мокапа): «41 · 2-комн. · 64,5 м² · плашка», ниже серым «под. 1 · эт. 12 · цена». */
-.units-row > td {
+.units-row > td,
+.units-row > th {
   padding: 7px 12px;
   font-size: var(--fs-small-l);
   vertical-align: middle;
@@ -22,7 +23,9 @@
   padding: 0 0 0 6px;
 }
 
-.units-row__number {
+/* Классы стоят на самих ячейках: специфичность — как у .units-row > td, иначе её размер перебьёт. */
+.units-row > .units-row__number {
+  text-align: start;
   font-family: var(--mono);
   font-size: var(--fs-label-l);
   font-weight: 500;
@@ -45,7 +48,7 @@
 }
 
 .units-row__per-m2,
-.units-row__updated {
+.units-row > .units-row__updated {
   font-size: var(--fs-caption);
 }
 
@@ -86,7 +89,8 @@
 }
 
 @container units-list (max-width: 999px) {
-  .units-row > td {
+  .units-row > td,
+  .units-row > th {
     padding-right: 8px;
     padding-left: 8px;
   }
@@ -135,7 +139,8 @@
     margin-left: -10px;
   }
 
-  .units-row > td {
+  .units-row > td,
+  .units-row > th {
     display: block;
     padding: 0;
   }
@@ -144,7 +149,7 @@
     display: none;
   }
 
-  .units-row__number {
+  .units-row > .units-row__number {
     order: 1;
     margin-right: 4px;
     font-size: var(--fs-control);
@@ -220,5 +225,12 @@
     min-height: 44px;
     justify-content: flex-end;
     padding: 0 6px;
+  }
+}
+
+/* Планшет пальцем: таблица, а не карточки, — плашка статуса всё равно не меньше 44 px. */
+@media (pointer: coarse) {
+  .units-row__status-button {
+    min-height: 44px;
   }
 }

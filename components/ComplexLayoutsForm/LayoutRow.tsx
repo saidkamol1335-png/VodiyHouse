@@ -23,6 +23,8 @@ type LayoutRowProps = {
   issues: LayoutRowErrors[string] | undefined;
   /** Нет отметки 1.2 у опубликованного ЖК: чертёж не загрузить. */
   uploadLocked: boolean;
+  /** Номер варианта у двойника по комнатам и площади (layoutVariants); иначе null. */
+  variant: number | null;
   onChange: (patch: Partial<LayoutDraft>) => void;
   onDrawing: (file: File | undefined) => Promise<string | null>;
   onDuplicate: () => void;
@@ -119,7 +121,7 @@ function OfferText({ row, currency }: { row: LayoutDraft; currency: Currency }) 
   );
 }
 
-function RowEnd({ row, hasUnits, onDuplicate, onRemove }: LayoutRowProps) {
+function RowEnd({ row, hasUnits, variant, onDuplicate, onRemove }: LayoutRowProps) {
   const t = useTranslations("admin.complexes.layouts");
   const priced = hasUnits ? row.offer?.priceFrom != null : Boolean(row.priceFrom.trim());
   return (
@@ -131,6 +133,8 @@ function RowEnd({ row, hasUnits, onDuplicate, onRemove }: LayoutRowProps) {
           </Badge>
         )}
         {priced ? null : <Badge size="sm">{t("noPrice")}</Badge>}
+        {/* Двойник (те же комнаты и площадь) — тот же «вариант N», что в списках «Квартир». */}
+        {variant ? <Badge size="sm">{t("variant", { n: variant })}</Badge> : null}
         {/* «Нет в наличии» ставят на «Квартирах» (Н7) — здесь только видно, почему сайт так пишет. */}
         {!hasUnits && !row.available ? (
           <span title={t("unavailableHint")}>

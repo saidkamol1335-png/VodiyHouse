@@ -16,7 +16,7 @@ export function GeneratorTotal({ summary, issues }: TotalProps) {
   return (
     <>
       {/* Живая область стоит всегда: вставленную вместе с текстом диктор не читает. */}
-      <p className="units-generator__announce" aria-live="polite">
+      <p className="sr-only" aria-live="polite">
         {summary ? `${t("total", { count: summary.total })}, ${rangeText(t, summary)}` : ""}
       </p>
       {tooMany ? (

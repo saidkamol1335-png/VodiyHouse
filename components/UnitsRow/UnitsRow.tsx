@@ -146,9 +146,10 @@ function UnitCells({ unit, rowContext }: Pick<UnitsRowProps, "unit" | "rowContex
   const view = unitRowView(unit, rowContext);
   return (
     <>
-      <td className="units-row__number" role="cell">
+      {/* Номер — заголовок строки: диктор в навигации по столбцу называет квартиру. */}
+      <th className="units-row__number" scope="row" role="rowheader">
         {unit.number}
-      </td>
+      </th>
       <td className="units-row__entrance" role="cell">
         <span className="units-row__prefix">{t("card.entrance")} </span>
         {unit.entrance}

@@ -12,10 +12,11 @@ export function LayoutCell({ view }: { view: UnitRowView }) {
         {t("list.noLayout")}
       </td>
     );
-  const { rooms, area } = view.layout;
+  const { rooms, area, variant } = view.layout;
+  const label = t("layoutLabel", { rooms, area: formatArea(area) });
   return (
     <td className="units-row__layout" role="cell">
-      {t("layoutLabel", { rooms, area: formatArea(area) })}
+      {variant ? `${label} · ${t("layoutVariant", { n: variant })}` : label}
     </td>
   );
 }

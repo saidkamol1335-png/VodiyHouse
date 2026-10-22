@@ -259,9 +259,9 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await expect(summary).toBeFocused();
     await page.getByRole("button", { name: "Выбрать все 88 по фильтру" }).click();
     await expect(
-      page.locator(".units-list__select-all", { hasText: "Снять выделение" }),
+      page.locator(".units-list__select-button", { hasText: "Снять выделение" }),
     ).toBeFocused();
-    await page.locator(".units-list__select-all", { hasText: "Снять выделение" }).click();
+    await page.locator(".units-list__select-button", { hasText: "Снять выделение" }).click();
     await expect(page.getByRole("button", { name: "Выбрать все 88 по фильтру" })).toBeFocused();
   });
 

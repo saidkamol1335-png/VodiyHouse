@@ -95,3 +95,12 @@
     justify-content: center;
   }
 }
+
+/* Планшет пальцем: пилюли и чипы — 44 px, как на телефоне. */
+@media (pointer: coarse) {
+  .filter-pills__pill,
+  .filter-pills--wrap .filter-pills__pill {
+    min-width: 44px;
+    height: 44px;
+  }
+}

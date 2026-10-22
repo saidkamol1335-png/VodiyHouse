@@ -18,6 +18,7 @@ import {
 import type { ComplexMediaResult, SaveRowsResult } from "@/lib/admin/complexes/types";
 import { UploadRefused, uploadComplexFile } from "@/lib/admin/complexes/upload";
 import type { FormAction } from "@/lib/admin/developers/types";
+import { layoutVariants } from "@/lib/admin/units/layoutVariants";
 import { processImage } from "@/lib/media";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { useDraftRows } from "@/lib/ui/useDraftRows";
@@ -33,6 +34,8 @@ type ComplexLayoutsFormProps = {
   /** null — без облака (служебный стенд): чертежи остаются в браузере. */
   attach: FormAction<ComplexMediaResult> | null;
   blocksHref: string;
+  /** Вкладка «Квартиры»: «нет в наличии» у блока без списка меняют там (Н7). */
+  unitsHref: string;
 };
 
 const IDLE: SaveRowsResult = { status: "idle" };
@@ -84,7 +87,12 @@ function useDrawingUpload({ complexId, attach, rule12, onUploaded }: DrawingUplo
     const result = await processImage(file, "drawing");
     if (!result.ok) return t(`media.issues.${result.issue.code}`, result.issue);
     try {
-      const { id, src } = await uploadComplexFile({ complexId, image: result.image, attach, rule12 });
+      const { id, src } = await uploadComplexFile({
+        complexId,
+        image: result.image,
+        attach,
+        rule12,
+      });
       onUploaded(key, { drawingId: id, drawingSrc: src });
       return null;
     } catch (error) {
@@ -112,6 +120,7 @@ function BlockLayoutsForm({
   published,
   action,
   attach,
+  unitsHref,
   onSwitch,
 }: BlockFormProps) {
   const t = useTranslations("admin");
@@ -151,6 +160,10 @@ function BlockLayoutsForm({
   };
   const others = blocks.filter((item) => item.blockId !== block.blockId && item.layouts.length > 0);
 
+  // Сохранённые двойники — «вариант N», как в списках «Квартир» (новые строки id ещё не имеют).
+  const variants = layoutVariants(
+    rows.flatMap((row) => (row.id ? [{ id: row.id, rooms: row.rooms, area: row.area }] : [])),
+  );
   return (
     <AdminPanel title={t("complexes.layouts.title")} wide>
       {/* Отметка 1.2 — не правка вкладки: вне формы, иначе «Уйти без сохранения?» без правок. */}
@@ -176,6 +189,15 @@ function BlockLayoutsForm({
           <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={switchTo} />
         ) : null}
         <p className="complex-layouts__lead">{t("complexes.layouts.lead")}</p>
+        {/* Плашку «нет в наличии» объясняет видимый текст: title на телефоне не открыть. */}
+        {!block.hasUnits && rows.some((row) => !row.available) ? (
+          <p className="complex-layouts__lead">
+            {t("complexes.layouts.unavailableNote")}{" "}
+            <Link href={`${unitsHref}?blok=${block.blockId}`}>
+              {t("complexes.layouts.toUnits")}
+            </Link>
+          </p>
+        ) : null}
         {rows.length === 0 ? (
           <EmptyBlock
             others={others}
@@ -189,6 +211,7 @@ function BlockLayoutsForm({
               row={row}
               currency={block.currency}
               hasUnits={block.hasUnits}
+              variant={(row.id && variants.get(row.id)) || null}
               issues={rowErrors[row.key]}
               uploadLocked={published && !rule12}
               onChange={(patch) => update(row.key, patch)}

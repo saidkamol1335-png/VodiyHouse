@@ -25,6 +25,8 @@ type ButtonProps = {
   "aria-label"?: string;
   /** Кнопка раскрывает часть страницы («Изменить» у карточки блока). */
   "aria-expanded"?: boolean;
+  /** Пояснение: одинаковые кнопки у каждой позиции стояков — к какой относится эта. */
+  "aria-describedby"?: string;
   /** Вернуть на кнопку фокус, когда закрылось то, что она открыла. */
   ref?: Ref<HTMLButtonElement>;
 };
@@ -56,6 +58,7 @@ export function Button({
   disabled = false,
   "aria-label": ariaLabel,
   "aria-expanded": ariaExpanded,
+  "aria-describedby": ariaDescribedBy,
   ref,
   ...look
 }: ButtonProps) {
@@ -79,6 +82,7 @@ export function Button({
       aria-busy={look.pending || undefined}
       aria-label={ariaLabel}
       aria-expanded={ariaExpanded}
+      aria-describedby={ariaDescribedBy}
     >
       {children}
     </button>

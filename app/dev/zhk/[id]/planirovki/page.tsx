@@ -40,6 +40,7 @@ export default async function DevComplexLayoutsPage({
       action={demoSaveBlockLayoutsAction}
       attach={null}
       blocksHref={complexTabHref(`/dev/zhk/${complex.id}`, "blocks")}
+      unitsHref={complexTabHref(`/dev/zhk/${complex.id}`, "units")}
     />
   );
 }

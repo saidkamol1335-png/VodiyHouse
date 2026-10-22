@@ -73,36 +73,13 @@
   text-transform: uppercase;
 }
 
+/* Вид — общий с полями форм (field__input: рамка, наведение, фокус, ошибка); здесь — размер:
+   строк стояков много, поле ниже обычного. */
 .risers-editor__input,
 .risers-editor__select {
-  width: 100%;
   height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-s);
-  outline: none;
-  background: var(--field-bg);
-  color: var(--fg);
-  font: inherit;
   font-size: var(--fs-small);
-  font-weight: 600;
-  transition:
-    border-color var(--dur-fast) var(--ease),
-    box-shadow var(--dur-base) var(--ease);
-}
-
-.risers-editor__input:focus,
-.risers-editor__select:focus {
-  border-color: var(--amber);
-  box-shadow: var(--field-ring);
-}
-
-.risers-editor__input--error,
-.risers-editor__select--error,
-.risers-editor__input--error:focus,
-.risers-editor__select--error:focus {
-  border-color: var(--bad);
-  box-shadow: var(--field-ring-error);
 }
 
 .risers-editor__remove,
@@ -159,7 +136,17 @@
 
 @media (max-width: 760px) {
   .risers-editor__row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+  }
+
+  /* Цели касания на телефоне — от 44 px, как в остальном шаге. */
+  .risers-editor__input,
+  .risers-editor__select {
+    height: 44px;
+  }
+
+  .risers-editor__actions .button {
+    height: 44px;
   }
 
   .risers-editor__scope,
@@ -175,5 +162,7 @@
   .risers-editor__remove-gap {
     grid-column: 3;
     grid-row: 1;
+    width: 44px;
+    height: 44px;
   }
 }

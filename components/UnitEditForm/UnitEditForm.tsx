@@ -11,8 +11,9 @@ import { UnitPriceFields } from "@/components/UnitPriceFields";
 import { fieldOf } from "@/lib/admin/units/editOutcome";
 import type { UnitErrorField } from "@/lib/admin/units/types";
 import { withField } from "@/lib/admin/units/unitForm";
+import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
+import { focusFirstInvalid } from "@/lib/ui/focusFirstInvalid";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
-import { formatArea } from "@/lib/format";
 import type { UnitRecord } from "@/lib/units";
 import { useUnitEditForm, type UnitEditFormState } from "./useUnitEditForm";
 
@@ -34,7 +35,8 @@ export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
       className="unit-edit"
       onSubmit={(event) => {
         event.preventDefault();
-        void form.save();
+        const element = event.currentTarget;
+        void form.save().then(() => focusFirstInvalid(element));
       }}
     >
       <p className="unit-edit__title">
@@ -82,6 +84,7 @@ function numberError(form: UnitEditFormState, t: EditT) {
 
 function EditFields({ form }: { form: UnitEditFormState }) {
   const t = useTranslations("admin.complexes.units");
+  const label = useLayoutLabel(form.context.layouts);
   const tEdit = useTranslations("admin.complexes.units.edit");
   const id = useId();
   const { draft, change, context } = form;
@@ -104,10 +107,7 @@ function EditFields({ form }: { form: UnitEditFormState }) {
         id={`${id}-layout`}
         label={t("edit.layout")}
         placeholder={t("edit.noLayout")}
-        options={context.layouts.map((layout) => ({
-          value: layout.id,
-          label: t("layoutLabel", { rooms: layout.rooms, area: formatArea(layout.area) }),
-        }))}
+        options={context.layouts.map((layout) => ({ value: layout.id, label: label(layout) }))}
         value={draft.layoutId}
         error={
           form.reply && fieldOf(form.reply) === "layout_id" ? tEdit("issues.layoutGone") : undefined

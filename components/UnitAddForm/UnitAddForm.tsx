@@ -9,8 +9,9 @@ import { FormStatus } from "@/components/FormStatus";
 import { SelectField } from "@/components/SelectField";
 import { fieldOf } from "@/lib/admin/units/editOutcome";
 import type { UnitErrorField, UnitsLayout } from "@/lib/admin/units/types";
+import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import type { UnitsEditControl } from "@/lib/admin/units/useUnitsEdit";
-import { formatArea } from "@/lib/format";
+import { focusFirstInvalid } from "@/lib/ui/focusFirstInvalid";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import type { Riser, UnitRecord } from "@/lib/units";
 import { useUnitAddForm, type UnitAddFormState } from "./useUnitAddForm";
@@ -37,7 +38,8 @@ export function UnitAddForm({ onClose, ...params }: UnitAddFormProps) {
       aria-label={t("title")}
       onSubmit={(event) => {
         event.preventDefault();
-        void form.submit();
+        const element = event.currentTarget;
+        void form.submit().then(() => focusFirstInvalid(element));
       }}
     >
       <p className="unit-add__title">{t("title")}</p>
@@ -79,6 +81,10 @@ function SlotFields({ form }: { form: UnitAddFormState }) {
   const id = useId();
   const { draft, change, limits, issues } = form;
   const error = slotError(form, t, tErrors);
+  const errorId = `${id}-slot-error`;
+  // «Место занято» — про все три поля: они неверны вместе и связаны с этим текстом.
+  const slotTaken = (key: string) =>
+    error ? { "aria-invalid": true, "aria-describedby": `${id}-${key}-hint ${errorId}` } : {};
   const field = (key: "entrance" | "floor" | "position", max: number) => (
     <Field
       id={`${id}-${key}`}
@@ -89,6 +95,7 @@ function SlotFields({ form }: { form: UnitAddFormState }) {
       hint={t(`${key}Range`, { max })}
       error={issues[key] ? t(`${key}Range`, { max }) : undefined}
       onChange={(event) => change({ ...draft, [key]: event.target.value })}
+      {...(issues[key] ? {} : slotTaken(key))}
     />
   );
   return (
@@ -96,7 +103,11 @@ function SlotFields({ form }: { form: UnitAddFormState }) {
       {field("entrance", limits.maxEntrance)}
       {field("floor", limits.floors)}
       {field("position", limits.maxPosition(Number(draft.entrance) || 1))}
-      {error ? <p className="unit-add__error">{error}</p> : null}
+      {error ? (
+        <p id={errorId} className="unit-add__error">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -120,6 +131,7 @@ function NumberAndLayout({
   layouts: readonly UnitsLayout[];
 }) {
   const t = useTranslations("admin.complexes.units");
+  const label = useLayoutLabel(layouts);
   const id = useId();
   const { draft, change, reply } = form;
   return (
@@ -139,10 +151,7 @@ function NumberAndLayout({
         id={`${id}-layout`}
         label={t("add.layout")}
         placeholder={t("edit.noLayout")}
-        options={layouts.map((layout) => ({
-          value: layout.id,
-          label: t("layoutLabel", { rooms: layout.rooms, area: formatArea(layout.area) }),
-        }))}
+        options={layouts.map((layout) => ({ value: layout.id, label: label(layout) }))}
         value={form.layoutId}
         hint={form.layoutByRiser ? t("add.byRiser") : undefined}
         error={reply && fieldOf(reply) === "layout_id" ? t("edit.issues.layoutGone") : undefined}

@@ -98,7 +98,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
     await page.getByLabel("Подъезды", { exact: true }).fill("50");
     await page.getByLabel("Квартир на этаже", { exact: true }).fill("10");
     await expect(page.locator(".units-generator__total--error")).toContainText(
-      /7.500 квартир — в блоке не больше 5000/,
+      /7.500 квартир — в блоке не больше 5.000/,
     );
     await expect(page.getByRole("button", { name: "Создать квартиры" })).toBeDisabled();
   });
@@ -208,7 +208,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
     await open(page, SHODLIK);
     await page.getByRole("button", { name: /Стояки ·/ }).click();
     await position(page, 2).getByRole("button", { name: "+ Разделить по этажам" }).click();
-    await position(page, 2).getByRole("button", { name: "Убрать строку" }).first().click();
+    await position(page, 2).getByRole("button", { name: /^Убрать строку/ }).first().click();
     // Позиция 2, эт. 2–11 в двух подъездах.
     await expect(page.locator(".units-risers__warning")).toContainText("Вне стояков: 20 мест");
   });

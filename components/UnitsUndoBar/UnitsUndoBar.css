@@ -150,3 +150,17 @@
 .units-undo__title:focus {
   outline: none;
 }
+
+/* Планшет пальцем (шире 760): «Отменить» живёт 5 с, промах по соседнему «×» закрыл бы полосу —
+   цели те же 44 px, что на телефоне. */
+@media (pointer: coarse) {
+  .units-undo__action {
+    min-height: 44px;
+    padding: 0 14px;
+  }
+
+  .units-undo__close {
+    width: 44px;
+    height: 44px;
+  }
+}

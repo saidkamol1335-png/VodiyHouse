@@ -20,7 +20,8 @@ import { submitWith, type BulkStepProps } from "./BulkSteps";
 
 /**
  * Цена выбранных (Н3): «за м² | за квартиру | без цены». Заранее — пример расчёта по первой
- * выбранной с планировкой, сколько без планировки и что брони и проданным цена тоже ставится.
+ * выбранной с планировкой, сколько без планировки и — если они выбраны — что брони и проданным
+ * цена тоже ставится.
  * Ошибка суммы — у поля, без запроса.
  */
 export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkStepProps) {
@@ -36,6 +37,7 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
   const sample = units.find((unit) => unit.layoutId !== null) ?? null;
   const area = layouts.find((layout) => layout.id === sample?.layoutId)?.area ?? null;
   const withoutLayout = draft.mode === "per_m2" ? withoutLayoutCount(units) : 0;
+  const notFree = units.filter((unit) => unit.status !== "free").length;
   const apply = async () => {
     const change = readPriceDraft(draft);
     if (isPriceIssue(change)) return setIssue(change.issue);
@@ -59,7 +61,9 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
       {withoutLayout > 0 ? (
         <FormStatus tone="notice">{t("withoutLayout", { count: withoutLayout })}</FormStatus>
       ) : null}
-      {draft.mode === "none" ? null : <p className="units-bulk__note">{t("allStatuses")}</p>}
+      {draft.mode === "none" || notFree === 0 ? null : (
+        <p className="units-bulk__note">{t("allStatuses", { count: notFree })}</p>
+      )}
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
       <Button ref={submit} type="submit" pending={pending}>
         {draft.mode === "none" ? t("applyNone") : t("apply")}

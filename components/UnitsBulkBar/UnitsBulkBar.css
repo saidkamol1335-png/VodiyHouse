@@ -137,6 +137,28 @@
     padding: 10px 8px 10px 14px;
   }
 
+  /* «×» — в строке счётчика справа, шаги — второй строкой: иначе «×» уходил отдельной строкой
+     слева, отрывался от «Выбрано N», и док становился выше. */
+  .units-bulk__bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "count close"
+      "actions actions";
+  }
+
+  .units-bulk__count {
+    grid-area: count;
+  }
+
+  .units-bulk__actions {
+    grid-area: actions;
+  }
+
+  .units-bulk__close {
+    grid-area: close;
+  }
+
   .units-bulk__action,
   .units-bulk__close {
     height: 44px;
@@ -160,5 +182,17 @@
 
   .units-bulk__buttons .button {
     flex: 1 1 0;
+  }
+}
+
+/* Планшет пальцем: шаги и «×» — 44 px, как на телефоне. */
+@media (pointer: coarse) {
+  .units-bulk__action,
+  .units-bulk__close {
+    height: 44px;
+  }
+
+  .units-bulk__close {
+    width: 44px;
   }
 }

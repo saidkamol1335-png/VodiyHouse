@@ -148,15 +148,8 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
     () => (edit && base ? { edit, block, layouts, finishings, units: base, dirty } : null),
     [edit, base, block, layouts, finishings, dirty],
   );
-  if (base === null)
-    return (
-      <BlockReadState
-        error={readError}
-        reading={reading}
-        retry={store.reload}
-        focusAfter={ids.summary}
-      />
-    );
+  const read = { error: readError, reading, retry: store.reload, focusAfter: ids.summary };
+  if (base === null) return <BlockReadState {...read} />;
   if (base.length === 0) return <ListGone />;
   return (
     <>
@@ -171,15 +164,7 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
           onSaved={store.reload}
         />
       ) : null}
-      {readError ? (
-        <BlockReadState
-          error={readError}
-          reading={reading}
-          retry={store.reload}
-          focusAfter={ids.summary}
-          stale
-        />
-      ) : null}
+      {readError ? <BlockReadState {...read} stale /> : null}
       <UnitsEditContext.Provider value={editContext}>
         <UnitsList
           blockName={block.name}

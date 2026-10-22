@@ -15,6 +15,27 @@ type GeneratorFieldsProps = {
   onChange: (inputs: GeneratorInputs) => void;
 };
 
+type NumberFieldProps = {
+  id: string;
+  label: string;
+  hint?: string;
+  value: string;
+  error: string | undefined;
+  onValue: (value: string) => void;
+};
+
+/** Поле генератора — только цифры: текстом, без стрелок type=number (как и этажи стояков). */
+function NumberField({ onValue, ...field }: NumberFieldProps) {
+  return (
+    <Field
+      {...field}
+      inputMode="numeric"
+      autoComplete="off"
+      onChange={(event) => onValue(event.target.value)}
+    />
+  );
+}
+
 /** Поля генератора: подъезды, первый жилой, квартир на этаже (одно число или по подъездам), № 1. */
 export function GeneratorFields(props: GeneratorFieldsProps) {
   const { idPrefix, inputs, floors, entrances, issues, onChange } = props;
@@ -25,48 +46,42 @@ export function GeneratorFields(props: GeneratorFieldsProps) {
     return found ? t(`issues.${found.code}`, found) : undefined;
   };
   const issue = (code: BlockPlanIssue["code"]) => issueText((item) => item.code === code);
-  const number = { inputMode: "numeric" as const, autoComplete: "off" };
+  // Одно число на все подъезды — без «(подъезд 1)» из текста кода.
+  const perFloorError = issue("unitsPerFloorOutOfRange")
+    ? t("perFloorOutOfRange")
+    : issue("unitsPerFloorCountMismatch");
   return (
     <div className="units-generator__fields">
-      <Field
+      <NumberField
         id={`${idPrefix}-entrances`}
         label={t("entrances")}
-        {...number}
         value={inputs.entrances}
         error={issue("entrancesOutOfRange")}
-        onChange={(event) => set({ entrances: event.target.value })}
+        onValue={(entrances) => set({ entrances })}
       />
-      <Field
+      <NumberField
         id={`${idPrefix}-first`}
         label={t("firstFloor")}
         hint={t("firstFloorHint", { floors })}
-        {...number}
         value={inputs.firstFloor}
         error={issue("firstResidentialFloorOutOfRange") ?? issue("floorsOutOfRange")}
-        onChange={(event) => set({ firstFloor: event.target.value })}
+        onValue={(firstFloor) => set({ firstFloor })}
       />
       {inputs.perEntrance && entrances > 1 ? null : (
-        <Field
+        <NumberField
           id={`${idPrefix}-per-floor`}
           label={t("perFloor")}
-          {...number}
           value={inputs.perFloor}
-          error={
-            // Одно число на все подъезды — без «(подъезд 1)» из текста кода.
-            issue("unitsPerFloorOutOfRange")
-              ? t("perFloorOutOfRange")
-              : issue("unitsPerFloorCountMismatch")
-          }
-          onChange={(event) => set({ perFloor: event.target.value })}
+          error={perFloorError}
+          onValue={(perFloor) => set({ perFloor })}
         />
       )}
-      <Field
+      <NumberField
         id={`${idPrefix}-start`}
         label={t("startNumber")}
-        {...number}
         value={inputs.startNumber}
         error={issue("startNumberOutOfRange")}
-        onChange={(event) => set({ startNumber: event.target.value })}
+        onValue={(startNumber) => set({ startNumber })}
       />
       {entrances > 1 ? <PerEntrance {...props} set={set} issueText={issueText} /> : null}
     </div>
@@ -87,6 +102,8 @@ function PerEntrance({ idPrefix, inputs, entrances, set, issueText }: PerEntranc
   );
   const setValue = (index: number, value: string) =>
     set({ perEntranceValues: values.map((item, at) => (at === index ? value : item)) });
+  const entranceError = (entrance: number) =>
+    issueText((issue) => issue.code === "unitsPerFloorOutOfRange" && issue.entrance === entrance);
   return (
     <div className="units-generator__per-entrance">
       <label className="units-generator__check">
@@ -102,17 +119,13 @@ function PerEntrance({ idPrefix, inputs, entrances, set, issueText }: PerEntranc
       {inputs.perEntrance ? (
         <div className="units-generator__entrances">
           {values.map((value, index) => (
-            <Field
+            <NumberField
               key={index}
               id={`${idPrefix}-per-floor-${index + 1}`}
               label={`${t("perFloor")} · ${t("entranceN", { n: index + 1 })}`}
-              inputMode="numeric"
-              autoComplete="off"
               value={value}
-              error={issueText(
-                (issue) => issue.code === "unitsPerFloorOutOfRange" && issue.entrance === index + 1,
-              )}
-              onChange={(event) => setValue(index, event.target.value)}
+              error={entranceError(index + 1)}
+              onValue={(next) => setValue(index, next)}
             />
           ))}
         </div>

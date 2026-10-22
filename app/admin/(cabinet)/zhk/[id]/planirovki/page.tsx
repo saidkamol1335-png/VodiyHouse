@@ -24,6 +24,7 @@ export default async function ComplexLayoutsPage({ params }: { params: Promise<{
       action={saveBlockLayoutsAction}
       attach={attachComplexDrawingAction}
       blocksHref={complexTabHref(`${ADMIN_ROUTES.complexes}/${complex.id}`, "blocks")}
+      unitsHref={complexTabHref(`${ADMIN_ROUTES.complexes}/${complex.id}`, "units")}
     />
   );
 }

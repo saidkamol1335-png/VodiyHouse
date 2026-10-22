@@ -225,6 +225,8 @@
   --chip-on-border: #f0a030;
   --chip-on-ring: 0 0 0 1px rgba(248, 155, 13, 0.25) inset;
   --admin-topbar-h: 74px;
+  /* Лента меню на телефоне и планшете (≤ 980): пилюли 40 px + отступы 10 px + граница. */
+  --admin-strip-h: 62px;
   --admin-content-pad: 30px;
   --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.216));
 

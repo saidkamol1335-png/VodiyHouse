@@ -16,6 +16,13 @@
   gap: 12px 16px;
 }
 
+/* Сноска под списком: что значат «N+» и «по планировкам». */
+.complex-list__footnote {
+  margin: 12px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
 .complex-list__panel {
   padding: 20px;
   border: 1px solid var(--line);

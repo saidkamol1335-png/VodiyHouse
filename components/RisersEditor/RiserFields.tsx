@@ -3,14 +3,17 @@
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { UnitsLayout } from "@/lib/admin/units/types";
-import { formatArea } from "@/lib/format";
+import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import type { BlockPlan, Riser, RiserIssue } from "@/lib/units";
 
 // Строка стояка: подъезды · этажи от–до · планировка · «убрать». Ошибка — текстом под строкой
-// и через aria-describedby у полей (не role=alert: она мигала бы на каждое нажатие).
+// и через aria-describedby у полей (не role=alert: она мигала бы на каждое нажатие). Позиция —
+// тоже описанием каждого поля: при переходе по Tab заголовок списка диктор не называет.
 
 type RowProps = {
   id: string;
+  /** Заголовок «Позиция N» — описание полей строки. */
+  titleId: string;
   riser: Riser;
   plan: BlockPlan;
   layouts: readonly UnitsLayout[];
@@ -20,21 +23,17 @@ type RowProps = {
   onRemove: () => void;
 };
 
-/** Общие свойства полей строки: ошибка строки связана с каждым её полем. */
-type ControlState = { describedBy: string | undefined };
+/** Общие свойства полей строки: позиция и ошибка строки связаны с каждым её полем. */
+type ControlState = { describedBy: string; invalid: boolean };
 
-export function RiserRow({
-  id,
-  riser,
-  plan,
-  layouts,
-  issue,
-  removable,
-  onChange,
-  onRemove,
-}: RowProps) {
+export function RiserRow(props: RowProps) {
+  const { id, riser, plan, issue, onChange } = props;
   const t = useTranslations("admin.complexes.units.risers");
-  const state: ControlState = { describedBy: issue ? `${id}-issue` : undefined };
+  const issueId = `${id}-issue`;
+  const state: ControlState = {
+    describedBy: issue ? `${props.titleId} ${issueId}` : props.titleId,
+    invalid: issue !== undefined,
+  };
   const refine = riser.entrance !== null;
   return (
     <li className={refine ? "risers-editor__row risers-editor__row--refine" : "risers-editor__row"}>
@@ -45,6 +44,52 @@ export function RiserRow({
         state={state}
         onChange={onChange}
       />
+      <Floors id={id} riser={riser} state={state} onChange={onChange} />
+      <LayoutSelect
+        id={`${id}-layout`}
+        value={riser.layoutId}
+        layouts={props.layouts}
+        describedBy={state.describedBy}
+        onChange={(layoutId) => onChange({ layoutId })}
+      />
+      <RowRemove {...props} />
+      {issue ? (
+        <p id={issueId} className="risers-editor__issue">
+          {t(`issues.${issue.code}`)}
+        </p>
+      ) : null}
+    </li>
+  );
+}
+
+/** «×» с именем строки: у каждой позиции и подъезда их несколько — «Убрать строку» одно на всех. */
+function RowRemove({ riser, removable, onRemove }: RowProps) {
+  const t = useTranslations("admin.complexes.units.risers");
+  if (!removable) return <span className="risers-editor__remove-gap" />;
+  const label = t("removeRow", {
+    position: riser.position,
+    entrance: riser.entrance === null ? "all" : String(riser.entrance),
+    from: riser.floorFrom,
+    to: riser.floorTo,
+  });
+  return (
+    <button type="button" className="risers-editor__remove" aria-label={label} onClick={onRemove}>
+      <X aria-hidden="true" size={16} />
+    </button>
+  );
+}
+
+/** Вид — общий с Field (field__input и его --error), размер — свой элемент блока. */
+const inputClass = (state: ControlState, own: string) =>
+  `field__input ${own}${state.invalid ? " field__input--error" : ""}`;
+
+type FloorsProps = Pick<RowProps, "id" | "riser" | "onChange"> & { state: ControlState };
+
+/** «Этаж от» и «Этаж до» строки. */
+function Floors({ id, riser, state, onChange }: FloorsProps) {
+  const t = useTranslations("admin.complexes.units.risers");
+  return (
+    <>
       <FloorInput
         id={`${id}-from`}
         label={t("floorFrom")}
@@ -59,35 +104,9 @@ export function RiserRow({
         state={state}
         onChange={(floorTo) => onChange({ floorTo })}
       />
-      <LayoutSelect
-        id={`${id}-layout`}
-        value={riser.layoutId}
-        layouts={layouts}
-        onChange={(layoutId) => onChange({ layoutId })}
-      />
-      {removable ? (
-        <button
-          type="button"
-          className="risers-editor__remove"
-          aria-label={t("remove")}
-          onClick={onRemove}
-        >
-          <X aria-hidden="true" size={16} />
-        </button>
-      ) : (
-        <span className="risers-editor__remove-gap" />
-      )}
-      {issue ? (
-        <p id={`${id}-issue`} className="risers-editor__issue">
-          {t(`issues.${issue.code}`)}
-        </p>
-      ) : null}
-    </li>
+    </>
   );
 }
-
-const inputClass = (state: ControlState, base: string) =>
-  state.describedBy ? `${base} ${base}--error` : base;
 
 type FloorInputProps = {
   id: string;
@@ -110,7 +129,7 @@ function FloorInput({ id, label, value, state, onChange }: FloorInputProps) {
         className={inputClass(state, "risers-editor__input")}
         inputMode="numeric"
         autoComplete="off"
-        aria-invalid={state.describedBy ? true : undefined}
+        aria-invalid={state.invalid || undefined}
         aria-describedby={state.describedBy}
         value={Number.isNaN(value) ? "" : value}
         onChange={(event) => {
@@ -126,24 +145,27 @@ type LayoutSelectProps = {
   id: string;
   value: string | null;
   layouts: readonly UnitsLayout[];
+  describedBy: string;
   onChange: (layoutId: string | null) => void;
 };
 
-function LayoutSelect({ id, value, layouts, onChange }: LayoutSelectProps) {
+function LayoutSelect({ id, value, layouts, describedBy, onChange }: LayoutSelectProps) {
   const t = useTranslations("admin.complexes.units");
+  const label = useLayoutLabel(layouts);
   return (
     <label className="risers-editor__layout" htmlFor={id}>
       <span className="risers-editor__label">{t("risers.layout")}</span>
       <select
         id={id}
-        className="risers-editor__select"
+        className="field__input risers-editor__select"
+        aria-describedby={describedBy}
         value={value ?? ""}
         onChange={(event) => onChange(event.target.value || null)}
       >
         <option value="">{t("risers.noLayout")}</option>
         {layouts.map((layout) => (
           <option key={layout.id} value={layout.id}>
-            {t("layoutLabel", { rooms: layout.rooms, area: formatArea(layout.area) })}
+            {label(layout)}
           </option>
         ))}
       </select>
@@ -173,7 +195,7 @@ function RiserScope({ id, riser, entrances, state, onChange }: ScopeProps) {
       <select
         id={`${id}-entrance`}
         className={inputClass(state, "risers-editor__select")}
-        aria-invalid={state.describedBy ? true : undefined}
+        aria-invalid={state.invalid || undefined}
         aria-describedby={state.describedBy}
         value={riser.entrance}
         onChange={(event) => onChange({ entrance: Number(event.target.value) })}

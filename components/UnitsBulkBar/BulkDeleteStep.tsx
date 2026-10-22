@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import { hiddenCount } from "@/lib/admin/units/selection";
@@ -54,6 +55,7 @@ function DeleteQuestion({
   const t = useTranslations("admin.complexes.units.bulk.remove");
   const { reply, pending, send, here } = useEditRequest();
   const yes = useRefocusAfter(pending);
+  const id = useId();
   const remove = async () => {
     if (!edit) return;
     if (await send((shown) => edit.removeUnits(units, shown))) return;
@@ -63,13 +65,17 @@ function DeleteQuestion({
     selection.setMany(units, false);
   };
   return (
+    // Вопрос — имя группы, предупреждения — её описание: фокус на «Нет» / «Да» читает и их.
     <div
       className="units-bulk__form"
       role="group"
-      aria-label={t("question", { count: units.length })}
+      aria-labelledby={`${id}-question`}
+      aria-describedby={`${id}-warnings`}
     >
-      <p className="units-bulk__question">{t("question", { count: units.length })}</p>
-      <DeleteWarnings units={units} visible={visible} published={published} />
+      <p id={`${id}-question`} className="units-bulk__question">
+        {t("question", { count: units.length })}
+      </p>
+      <DeleteWarnings id={`${id}-warnings`} units={units} visible={visible} published={published} />
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
       <div className="units-bulk__buttons">
         <Button variant="ghost" onClick={onCancel}>
@@ -84,20 +90,22 @@ function DeleteQuestion({
 }
 
 type DeleteWarningsProps = {
+  /** Описание группы вопроса (aria-describedby). */
+  id: string;
   units: readonly UnitRecord[];
   visible: readonly UnitRecord[];
   published: boolean;
 };
 
 /** Брони и продажи по номерам, скрытые фильтром и «сайт их больше не покажет». */
-function DeleteWarnings({ units, visible, published }: DeleteWarningsProps) {
+function DeleteWarnings({ id, units, visible, published }: DeleteWarningsProps) {
   const t = useTranslations("admin.complexes.units.bulk.remove");
   const more = (count: number) => t("more", { count });
   const reserved = units.filter((unit) => unit.status === "reserved");
   const sold = units.filter((unit) => unit.status === "sold");
   const hidden = hiddenCount(units, visible);
   return (
-    <>
+    <div id={id}>
       {reserved.length > 0 ? (
         <p className="units-bulk__warning">
           {t("reserved", { numbers: numbersLine(reserved, more) })}
@@ -110,6 +118,6 @@ function DeleteWarnings({ units, visible, published }: DeleteWarningsProps) {
       <p className="units-bulk__note">
         {published ? `${t("published")} ${t("noUndo")}` : t("noUndo")}
       </p>
-    </>
+    </div>
   );
 }

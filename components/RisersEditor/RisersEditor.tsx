@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/Button";
 import type { UnitsLayout } from "@/lib/admin/units/types";
+import { useFocusAfterRender } from "@/lib/ui/useFocusAfterRender";
 import { validateRisers, type BlockPlan, type Riser, type RiserIssue } from "@/lib/units";
 import { RiserRow } from "./RiserFields";
 
@@ -30,6 +31,7 @@ function issuesByRow(issues: readonly RiserIssue[]): Map<number, RiserIssue> {
 }
 
 export function RisersEditor({ idPrefix, plan, risers, layouts, onChange }: RisersEditorProps) {
+  const focus = useFocusAfterRender();
   const issues = issuesByRow(validateRisers(plan, risers));
   const positions = [...new Set(risers.map((riser) => riser.position))].sort((a, b) => a - b);
   const rowsOf = (position: number) =>
@@ -50,6 +52,7 @@ export function RisersEditor({ idPrefix, plan, risers, layouts, onChange }: Rise
           }
           onRemove={(index) => onChange(risers.filter((_, at) => at !== index))}
           onInsert={(at, riser, patch) => onChange(insertRiser(risers, at, riser, patch))}
+          focus={focus}
         />
       ))}
     </ul>
@@ -79,64 +82,91 @@ type PositionProps = {
   onRemove: (index: number) => void;
   /** Новая строка на место at; patch — правка строки выше (у «разделить» укорачивается прежняя). */
   onInsert: (at: number, riser: Riser, patch?: RowPatch) => void;
+  /** Фокус после перерисовки: нажатая кнопка уходит вместе со строкой или пропадает сама. */
+  focus: (id: string) => void;
 };
 
+const rowId = (idPrefix: string, index: number) => `${idPrefix}-r${index}`;
+
 function RiserPosition(props: PositionProps) {
-  const { idPrefix, position, rows, plan, issues, onInsert } = props;
+  const { idPrefix, position, rows } = props;
   const t = useTranslations("admin.complexes.units.risers");
-  const common = rows.filter((row) => row.riser.entrance === null);
-  const top = common.reduce<Row | undefined>(
-    (best, row) => (!best || row.riser.floorTo > best.riser.floorTo ? row : best),
-    undefined,
-  );
-  const refinement = refinementOf(position, plan, rows, top?.riser);
-  const after = (rows.at(-1)?.index ?? -1) + 1;
+  const titleId = `${idPrefix}-title`;
+  const commonCount = rows.filter((row) => row.riser.entrance === null).length;
   return (
     <li className="risers-editor__position">
-      <p id={`${idPrefix}-title`} className="risers-editor__title">
+      <p id={titleId} className="risers-editor__title" tabIndex={-1}>
         {t("position", { n: position })}
       </p>
-      <ul className="risers-editor__rows" aria-labelledby={`${idPrefix}-title`}>
+      <ul className="risers-editor__rows" aria-labelledby={titleId}>
         {rows.map(({ riser, index }) => (
           <RiserRow
             key={index}
-            id={`${idPrefix}-r${index}`}
+            id={rowId(idPrefix, index)}
+            titleId={titleId}
             riser={riser}
-            plan={plan}
+            plan={props.plan}
             layouts={props.layouts}
-            issue={issues.get(index + 1)}
-            removable={riser.entrance !== null || common.length > 1}
+            issue={props.issues.get(index + 1)}
+            removable={riser.entrance !== null || commonCount > 1}
             onChange={(patch) => props.onUpdate(index, patch)}
-            onRemove={() => props.onRemove(index)}
+            onRemove={() => {
+              props.onRemove(index);
+              props.focus(titleId);
+            }}
           />
         ))}
       </ul>
-      <div className="risers-editor__actions">
-        {refinement ? (
-          <Button variant="ghost" size="sm" onClick={() => onInsert(after, refinement)}>
-            {t("refine")}
-          </Button>
-        ) : null}
-        {top && top.riser.floorTo > top.riser.floorFrom ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              onInsert(
-                top.index + 1,
-                { ...top.riser, floorFrom: top.riser.floorTo },
-                {
-                  index: top.index,
-                  change: { floorTo: top.riser.floorTo - 1 },
-                },
-              )
-            }
-          >
-            {t("split")}
-          </Button>
-        ) : null}
-      </div>
+      <PositionActions {...props} titleId={titleId} />
     </li>
+  );
+}
+
+/** Верхний общий стояк позиции — его делит «Разделить по этажам». */
+function topCommon(rows: readonly Row[]): Row | undefined {
+  return rows
+    .filter((row) => row.riser.entrance === null)
+    .reduce<Row | undefined>(
+      (best, row) => (!best || row.riser.floorTo > best.riser.floorTo ? row : best),
+      undefined,
+    );
+}
+
+/** «+ Уточнить для подъезда» и «+ Разделить по этажам»: фокус — на первое поле новой строки. */
+function PositionActions(props: PositionProps & { titleId: string }) {
+  const { idPrefix, position, rows, plan, onInsert, focus, titleId } = props;
+  const t = useTranslations("admin.complexes.units.risers");
+  const top = topCommon(rows);
+  const refinement = refinementOf(position, plan, rows, top?.riser);
+  const after = (rows.at(-1)?.index ?? -1) + 1;
+  const refine = (riser: Riser) => {
+    onInsert(after, riser);
+    focus(`${rowId(idPrefix, after)}-entrance`);
+  };
+  const split = ({ riser, index }: Row) => {
+    const change = { floorTo: riser.floorTo - 1 };
+    onInsert(index + 1, { ...riser, floorFrom: riser.floorTo }, { index, change });
+    focus(`${rowId(idPrefix, index + 1)}-from`);
+  };
+  // Имя кнопки — её текст, позиция — описанием: такие же кнопки есть у каждой позиции.
+  return (
+    <div className="risers-editor__actions">
+      {refinement ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-describedby={titleId}
+          onClick={() => refine(refinement)}
+        >
+          {t("refine")}
+        </Button>
+      ) : null}
+      {top && top.riser.floorTo > top.riser.floorFrom ? (
+        <Button variant="ghost" size="sm" aria-describedby={titleId} onClick={() => split(top)}>
+          {t("split")}
+        </Button>
+      ) : null}
+    </div>
   );
 }
 

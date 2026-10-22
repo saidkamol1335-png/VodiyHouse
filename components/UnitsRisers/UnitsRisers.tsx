@@ -16,6 +16,8 @@ import type {
 } from "@/lib/admin/units/types";
 import { unitsFailure } from "@/lib/admin/units/errors";
 import { settle } from "@/lib/ui/settle";
+import { useFocusAfterRender } from "@/lib/ui/useFocusAfterRender";
+import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import { uncoveredSlots, validateRisers, type Riser } from "@/lib/units";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 
@@ -47,6 +49,7 @@ export const UnitsRisers = memo(function UnitsRisers({
   return (
     <section className={open ? "units-risers units-risers--open" : "units-risers"}>
       <button
+        id={`${bodyId}-toggle`}
         type="button"
         className="units-risers__toggle"
         aria-expanded={open}
@@ -68,23 +71,53 @@ export const UnitsRisers = memo(function UnitsRisers({
         {draft.dirty && draft.uncovered > 0 ? (
           <p className="units-risers__warning">{t("uncovered", { count: draft.uncovered })}</p>
         ) : null}
-        <RisersActions draft={draft} />
+        <RisersActions
+          draft={draft}
+          ids={{ toggle: `${bodyId}-toggle`, feedback: `${bodyId}-result` }}
+        />
       </div>
     </section>
   );
 });
 
-function RisersActions({ draft }: { draft: ReturnType<typeof useRisersDraft> }) {
+type ActionIds = { toggle: string; feedback: string };
+
+/**
+ * Кнопки уходят из-под фокуса: «Отменить правки» пропадает вместе с правкой — фокус на «Стояки ·
+ * N строк»; после «Сохранить» кнопка недоступна — фокус на итог; отказ — обратно на кнопку.
+ */
+function RisersActions({
+  draft,
+  ids,
+}: {
+  draft: ReturnType<typeof useRisersDraft>;
+  ids: ActionIds;
+}) {
   const t = useTranslations("admin.complexes.units.risers");
+  const focus = useFocusAfterRender();
+  const saveButton = useRefocusAfter(draft.pending);
   return (
     <div className="units-risers__actions">
-      <RisersFeedback result={draft.result} />
+      <div id={ids.feedback} tabIndex={-1}>
+        <RisersFeedback result={draft.result} />
+      </div>
       {draft.dirty ? (
-        <Button variant="ghost" onClick={draft.reset}>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            draft.reset();
+            focus(ids.toggle);
+          }}
+        >
           {t("reset")}
         </Button>
       ) : null}
-      <Button pending={draft.pending} disabled={!draft.dirty || !draft.valid} onClick={draft.save}>
+      <Button
+        ref={saveButton}
+        pending={draft.pending}
+        disabled={!draft.dirty || !draft.valid}
+        onClick={() => draft.save(() => focus(ids.feedback))}
+      >
         {draft.pending ? t("saving") : t("save")}
       </Button>
     </div>
@@ -123,7 +156,7 @@ function useRisersDraft({
     setResult(null);
     guard.reset();
   };
-  const save = () => {
+  const save = (onDone: () => void) => {
     if (!draft) return;
     startTransition(async () => {
       const input = { blockId, base: draft.base, risers: draft.risers };
@@ -133,6 +166,7 @@ function useRisersDraft({
       markSaved(draft.risers);
       setDraft(null);
       guard.reset();
+      onDone();
       // Не ждём внутри перехода: иначе навигация кабинета стояла бы, пока читаются 5000 строк.
       void onSaved();
     });

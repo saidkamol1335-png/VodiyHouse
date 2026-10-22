@@ -83,7 +83,13 @@ function BulkPanel(props: UnitsBulkBarProps) {
   };
   // Шаг — раньше строки и в DOM: порядок Tab совпадает с видом (шаг над строкой).
   return (
-    <section ref={box} className="units-bulk" aria-label={t("label")} onKeyDown={keydown}>
+    <section
+      ref={box}
+      className="units-bulk"
+      aria-label={t("label")}
+      onKeyDown={keydown}
+      data-units-bulk
+    >
       {step ? <BulkSteps id={stepId} step={step} {...props} onDone={closeStep} /> : null}
       <div className="units-bulk__bar">
         <BulkCount {...props} />

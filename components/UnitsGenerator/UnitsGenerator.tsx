@@ -10,6 +10,7 @@ import type {
   UnitsAction,
   UnitsLayout,
 } from "@/lib/admin/units/types";
+import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import { GeneratorFields } from "./GeneratorFields";
 import { GeneratorFeedback, GeneratorNotes, GeneratorTotal } from "./GeneratorParts";
 import { useGenerator } from "./useGenerator";
@@ -58,16 +59,31 @@ export function UnitsGenerator(props: UnitsGeneratorProps) {
         </div>
       ) : null}
       <GeneratorNotes {...props} unassigned={ready ? unassignedCount(plan, risers) : 0} />
-      <div className="units-generator__actions">
-        <GeneratorFeedback result={generator.result} />
-        <Button pending={generator.pending} disabled={!ready} onClick={generator.create}>
-          {generator.pending
-            ? t("generator.creating")
-            : summary
-              ? t("generator.create", { count: summary.total })
-              : t("generator.createAny")}
-        </Button>
-      </div>
+      <GeneratorActions generator={generator} />
     </section>
+  );
+}
+
+/** Итог ответа и «Создать N квартир»: отказ базы — генератор на месте, фокус — обратно на кнопку. */
+function GeneratorActions({ generator }: { generator: ReturnType<typeof useGenerator> }) {
+  const t = useTranslations("admin.complexes.units.generator");
+  const createButton = useRefocusAfter(generator.pending);
+  const { summary } = generator;
+  return (
+    <div className="units-generator__actions">
+      <GeneratorFeedback result={generator.result} />
+      <Button
+        ref={createButton}
+        pending={generator.pending}
+        disabled={!generator.ready}
+        onClick={generator.create}
+      >
+        {generator.pending
+          ? t("creating")
+          : summary
+            ? t("create", { count: summary.total })
+            : t("createAny")}
+      </Button>
+    </div>
   );
 }
