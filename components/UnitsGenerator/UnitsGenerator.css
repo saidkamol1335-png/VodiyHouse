@@ -155,10 +155,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  /* «Создать N квартир» прилипает к низу: стояков у блока бывает много. */
+  /* «Создать N квартир» прилипает к низу (стояков у блока бывает много) — над полосой, если она есть. */
   .units-generator__actions {
     position: sticky;
-    bottom: 0;
+    bottom: min(var(--units-dock-cover), var(--units-dock-cover-max));
     z-index: 5;
     margin: 0 calc(-1 * var(--admin-panel-pad));
     padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));

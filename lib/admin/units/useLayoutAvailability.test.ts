@@ -48,6 +48,31 @@ describe("«Доступна / нет в наличии» (Н7)", () => {
     expect(result.current.state.last).toEqual({ layoutId: "l1", available: false });
   });
 
+  it("отказ после ухода с панели (сменили блок) — в полосу; «экран устарел» — нет", async () => {
+    const { action, answers } = controlled();
+    const onLost = vi.fn();
+    const { result, unmount } = renderHook(() =>
+      useLayoutAvailability([L1, L2], action, onStale, onLost),
+    );
+    act(() => void result.current.change(L1, false));
+    act(() => void result.current.change(L2, true));
+    unmount();
+    await act(async () => answers[0]!(unitsFailure("network")));
+    await act(async () => answers[1]!(unitsFailure("notFound")));
+    expect(onLost.mock.calls).toEqual([[L1, false, "network"]]);
+    expect(onStale).toHaveBeenCalledWith("notFound");
+  });
+
+  it("отказ, пока панель на месте, — у строки, а не в полосе", async () => {
+    const { action, answers } = controlled();
+    const onLost = vi.fn();
+    const { result } = renderHook(() => useLayoutAvailability([L1], action, onStale, onLost));
+    act(() => void result.current.change(L1, false));
+    await act(async () => answers[0]!(unitsFailure("network")));
+    expect(result.current.state.errors).toEqual({ l1: "network" });
+    expect(onLost).not.toHaveBeenCalled();
+  });
+
   it("второй тап той же планировки, пока ответа нет, не отправляется", async () => {
     const { action, answers, calls } = controlled();
     const { result } = renderHook(() => useLayoutAvailability([L1], action, onStale));

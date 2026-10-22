@@ -23,6 +23,8 @@ export type EditMessage =
   | { kind: "deleted"; count: number }
   /** Квартиру удалили, пока была открыта её правка: правка пропала вместе со строкой. */
   | { kind: "rowGone"; number: string }
+  /** Н7 не сохранилось, а строки уже нет на экране (сменили блок): отказ — строкой в полосе. */
+  | { kind: "availabilityFailed"; layout: string; available: boolean; error: ContentErrorCode }
   | {
       kind: "editFailed";
       what: EditWhat;
@@ -54,7 +56,12 @@ export const editFailed = (
 
 /** Тон полосы: отказ — ошибка; ничего не поменялось или есть квартиры без планировки — заметка. */
 export function editTone(message: EditMessage): "success" | "notice" | "error" {
-  if (message.kind === "editFailed" || message.kind === "rowGone") return "error";
+  if (
+    message.kind === "editFailed" ||
+    message.kind === "rowGone" ||
+    message.kind === "availabilityFailed"
+  )
+    return "error";
   if (message.kind === "priced")
     return message.changed === 0 || message.withoutLayout > 0 ? "notice" : "success";
   if (message.kind === "finished") return message.changed === 0 ? "notice" : "success";

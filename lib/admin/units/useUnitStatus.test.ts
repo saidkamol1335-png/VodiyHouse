@@ -142,6 +142,34 @@ describe("массовая смена и «Отменить»", () => {
     field.remove();
     check.remove();
   });
+
+  it("«Отменить» тапа другого блока — ни кнопкой, ни Ctrl+Z; в своём блоке — да", async () => {
+    const store = fakeStore();
+    const { actions, answers } = controlledActions();
+    const revert = vi.spyOn(actions, "revert");
+    const hook = renderHook(
+      ({ blockId }) =>
+        useUnitStatus(
+          store,
+          { blockId, blockName: blockId, actions, viewerName: null },
+          useUnitsBar(),
+        ),
+      { initialProps: { blockId: "a" } },
+    );
+    act(() => hook.result.current.change([U41], "reserved"));
+    await act(async () => answers[0]!(done("u41", "free")));
+    hook.rerender({ blockId: "b" });
+    await act(async () => hook.result.current.undo());
+    act(() => {
+      document.body.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
+      );
+    });
+    expect(revert).not.toHaveBeenCalled();
+    hook.rerender({ blockId: "a" });
+    await act(async () => hook.result.current.undo());
+    expect(revert).toHaveBeenCalledOnce();
+  });
 });
 
 describe("статус тапом: 5 с от ответа, а не от тапа", () => {

@@ -1,9 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useId } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import { useUnitsNotice } from "@/components/UnitsNotice";
+import { lostBar, nextBarOp } from "@/lib/admin/units/bar";
 import type {
   ChangedResult,
   SetLayoutAvailableInput,
@@ -13,17 +14,45 @@ import type {
 } from "@/lib/admin/units/types";
 import {
   useLayoutAvailability,
+  type LostAvailability,
   type StaleAvailability,
 } from "@/lib/admin/units/useLayoutAvailability";
+import { useUnitsBar } from "@/lib/admin/units/useUnitsBar";
 import { formatArea, formatPrice } from "@/lib/format";
 
 type UnitsAvailabilityProps = {
-  block: Pick<UnitsBlock, "id" | "currency">;
+  block: Pick<UnitsBlock, "id" | "name" | "currency">;
   layouts: readonly UnitsLayout[];
   action: UnitsAction<SetLayoutAvailableInput, ChangedResult>;
 };
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.units">>;
+
+/** Отказ после смены блока — строкой «Блок C · Не сохранили …» в полосе вкладки (CL5 приёмки 12.7). */
+function useLostAvailability(
+  block: Pick<UnitsBlock, "id" | "name">,
+  describe: (layout: UnitsLayout) => LayoutText,
+): LostAvailability {
+  const { setBar } = useUnitsBar();
+  const latest = useRef(describe);
+  useEffect(() => {
+    latest.current = describe;
+  });
+  return useCallback(
+    (layout, available, error) => {
+      const { name, price } = latest.current(layout);
+      const message = {
+        kind: "availabilityFailed" as const,
+        layout: `${name}, ${price}`,
+        available,
+        error,
+      };
+      const where = { blockId: block.id, blockName: block.name };
+      setBar((current) => lostBar(current, { message, ...where }, nextBarOp()));
+    },
+    [block.id, block.name, setBar],
+  );
+}
 type Control = ReturnType<typeof useLayoutAvailability>;
 
 /**
@@ -38,8 +67,9 @@ export function UnitsAvailability({ block, layouts, action }: UnitsAvailabilityP
     (reason: StaleAvailability) => setNotice({ kind: "stale", blockId: block.id, reason }),
     [block.id, setNotice],
   );
-  const control = useLayoutAvailability(layouts, action, onStale);
   const describe = (layout: UnitsLayout) => describeLayout(layout, block.currency, t);
+  const onLost = useLostAvailability(block, describe);
+  const control = useLayoutAvailability(layouts, action, onStale, onLost);
   return (
     <section className="units-availability" aria-labelledby={titleId}>
       <h3 id={titleId} className="units-availability__title">

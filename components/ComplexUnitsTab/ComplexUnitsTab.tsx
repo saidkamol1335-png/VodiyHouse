@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AdminPanel } from "@/components/AdminPanel";
 import { UnitsAvailability } from "@/components/UnitsAvailability";
+import { UnitsBarDock } from "@/components/UnitsBarDock";
 import { UnitsBlockSwitch } from "@/components/UnitsBlockSwitch";
 import { UnitsBlockView } from "@/components/UnitsBlockView";
 import { UnitsGenerator } from "@/components/UnitsGenerator";
@@ -105,11 +106,13 @@ function BlockBody({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlo
         action={actions.layoutAvailable}
       />
     ) : null;
+  // Своя полоса и у блока без списка: ответ тапа из другого блока и отказ Н7 видны и здесь.
   return (
-    <>
+    <div className="complex-units__stock" data-units-dock-host>
       {availability}
       <Generator {...props} block={block} />
-    </>
+      <UnitsBarDock blockId={block.id} />
+    </div>
   );
 }
 

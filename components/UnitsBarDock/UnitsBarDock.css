@@ -1,0 +1,4 @@
+/* Место под полосой у блока без списка: она не закрывает «Создать N квартир» и последние строки. */
+.units-bar-dock__spacer {
+  height: calc(var(--units-dock-h) + var(--units-dock-gap));
+}

@@ -91,7 +91,7 @@ function useListReading(queue: ReadQueue, latest: Latest, dispatch: Dispatch<Uni
       }
       return true;
     });
-    void queue.reload();
+    queue.ensureRead();
     const stopWatching = watchReturn(() => void queue.reload());
     return () => {
       stopWatching();

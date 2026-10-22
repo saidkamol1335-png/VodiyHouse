@@ -3,6 +3,7 @@
 // смены блока, «×» или следующего тапа, не теряется — отказ остаётся строкой до «×».
 
 import { createContext, type Dispatch, type SetStateAction } from "react";
+import type { PausableTimer } from "@/lib/ui/usePausableTimeout";
 import type { UnitStatus, UnitsUndo } from "@/lib/units";
 import { editTone, type EditMessage } from "./editOutcome";
 import type { StatusMessage, StatusOutcome, StatusSubject } from "./statusOutcome";
@@ -50,6 +51,7 @@ export function barTone(message: BarMessage): UnitsBarTone {
     case "deleted":
     case "rowGone":
     case "editFailed":
+    case "availabilityFailed":
       return editTone(message);
     case "failed":
     case "revertFailed":
@@ -142,6 +144,8 @@ export function barTimed(bar: UnitsBar | null): boolean {
 export type UnitsBarState = {
   bar: UnitsBar | null;
   setBar: Dispatch<SetStateAction<UnitsBar | null>>;
+  /** Часы полосы — у провайдера: смена блока не начинает 5 с заново, у блока без списка они идут. */
+  timer: PausableTimer;
 };
 
 export const UnitsBarContext = createContext<UnitsBarState | null>(null);

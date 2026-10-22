@@ -42,13 +42,16 @@ const settle = (op: number, applied: Map<string, UnitStatus> | null): UnitsListE
 });
 
 describe("список квартир в браузере", () => {
-  it("чтение: порядок номеров, ошибка не стирает прежний список", () => {
+  it("чтение: порядок номеров, ошибка не стирает прежний список и держится до ответа", () => {
     const state = loaded([unit("10", "free"), unit("2", "sold"), unit("12А", "free")]);
     expect(visibleUnits(state).map((item) => item.number)).toEqual(["2", "10", "12А"]);
     const failed = run(state, { type: "readStarted" }, { type: "readFailed", error: "timeout" });
     expect(failed.base).toBe(state.base);
     expect(failed.readError).toBe("timeout");
-    expect(run(failed, { type: "readStarted" }).readError).toBeNull();
+    // Пока идёт повтор, отказ (и «Повторить») на месте; ответ его снимает.
+    const retrying = run(failed, { type: "readStarted" });
+    expect(retrying).toMatchObject({ reading: true, readError: "timeout" });
+    expect(run(retrying, { type: "readDone", units: [] }).readError).toBeNull();
   });
 
   it("тап: строка меняется сразу, подтверждение пишет статус и отметку", () => {

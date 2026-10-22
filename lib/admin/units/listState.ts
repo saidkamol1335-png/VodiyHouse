@@ -92,8 +92,9 @@ function sent(
 
 export function unitsListReducer(state: UnitsListState, event: UnitsListEvent): UnitsListState {
   switch (event.type) {
+    // Отказ остаётся до ответа: «Повторить» не исчезает из-под пальца (и фокуса), пока идёт чтение.
     case "readStarted":
-      return { ...state, reading: true, readError: null };
+      return { ...state, reading: true };
     case "readDone":
       return {
         ...state,

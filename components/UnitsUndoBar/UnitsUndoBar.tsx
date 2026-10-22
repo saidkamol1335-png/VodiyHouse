@@ -7,8 +7,11 @@ import { barTone, type UnitsBar } from "@/lib/admin/units/bar";
 import type { UnitStatusControl } from "@/lib/admin/units/useUnitStatus";
 import { barText, type BarTexts } from "./barText";
 
+/** Что полосе нужно от статуса: на блоке без списка «Отменить» нет — только полоса и «×». */
+export type UnitsBarView = Pick<UnitStatusControl, "bar" | "timer" | "undo" | "dismiss">;
+
 type UnitsUndoBarProps = {
-  control: UnitStatusControl;
+  control: UnitsBarView;
   /** Блок на экране: ответ из другого блока подписывается «Блок A · …». */
   blockId: string;
 };
@@ -55,7 +58,14 @@ export function UnitsUndoBar({ control, blockId }: UnitsUndoBarProps) {
         {lines.map((line) => line.join(" ")).join(". ")}
       </p>
       {bar ? (
-        <UndoCard key={bar.op} bar={bar} control={control} lines={lines} focus={focus} />
+        <UndoCard
+          key={bar.op}
+          bar={bar}
+          control={control}
+          lines={lines}
+          focus={focus}
+          own={bar.blockId === blockId}
+        />
       ) : null}
     </div>
   );
@@ -83,12 +93,14 @@ function barLines(texts: BarTexts, bar: UnitsBar, blockId: string): string[][] {
 
 type UndoCardProps = {
   bar: UnitsBar;
-  control: UnitStatusControl;
+  control: UnitsBarView;
   lines: string[][];
   focus: FocusMemory;
+  /** Тап сделан в этом блоке: «Отменить» тапа другого блока — только в нём (CL1 приёмки 12.7). */
+  own: boolean;
 };
 
-function UndoCard({ bar, control, lines, focus }: UndoCardProps) {
+function UndoCard({ bar, control, lines, focus, own }: UndoCardProps) {
   const title = useRef<HTMLParagraphElement>(null);
   const { timer } = control;
   useEffect(() => {
@@ -117,7 +129,7 @@ function UndoCard({ bar, control, lines, focus }: UndoCardProps) {
         <CircleAlert className="units-undo__icon" size={18} aria-hidden="true" />
       )}
       <CardText lines={lines} title={title} />
-      <UndoActions bar={bar} control={control} focus={focus} />
+      <UndoActions bar={bar} control={control} focus={focus} own={own} />
     </div>
   );
 }
@@ -146,11 +158,11 @@ function CardText({
   );
 }
 
-function UndoActions({ bar, control, focus }: Omit<UndoCardProps, "lines">) {
+function UndoActions({ bar, control, focus, own }: Omit<UndoCardProps, "lines">) {
   const t = useTranslations("admin.complexes.units.list.bar");
-  const canUndo = bar.undo !== null && !bar.busy;
+  const canUndo = own && bar.undo !== null && !bar.busy;
   // Пока смена сохраняется, «Отменить» уже на месте, но недоступна — полоса не прыгает.
-  const waitingUndo = bar.message.kind === "saving";
+  const waitingUndo = own && bar.message.kind === "saving";
   const undo = () => {
     focus.askTitle();
     control.undo();

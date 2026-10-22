@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { settle } from "@/lib/ui/settle";
+import { usePresence } from "@/lib/ui/usePresence";
 import type { ContentErrorCode } from "../developers/errors";
 import { unitsFailure } from "./errors";
 import type { ChangedResult, SetLayoutAvailableInput, UnitsAction, UnitsLayout } from "./types";
@@ -54,12 +55,21 @@ class InFlight {
 const valuesOf = (layouts: readonly UnitsLayout[]) =>
   Object.fromEntries(layouts.map((layout) => [layout.id, layout.available]));
 
+/** Отказ, пришедший, когда панели уже нет (сменили блок): его покажет полоса вкладки. */
+export type LostAvailability = (
+  layout: UnitsLayout,
+  available: boolean,
+  error: ContentErrorCode,
+) => void;
+
 export function useLayoutAvailability(
   layouts: readonly UnitsLayout[],
   action: UnitsAction<SetLayoutAvailableInput, ChangedResult>,
   onStale: (reason: StaleAvailability) => void,
+  onLost: LostAvailability = () => {},
 ) {
   const router = useRouter();
+  const here = usePresence();
   const [state, setState] = useState(EMPTY);
   useFreshValues(layouts, setState);
   const [inFlight] = useState(() => new InFlight());
@@ -79,12 +89,13 @@ export function useLayoutAvailability(
       const result = await settle(() => action({ layoutId: layout.id, available }), NETWORK);
       inFlight.end(layout.id);
       setState((current) => settled(current, layout.id, available, result));
-      if (result.status === "error" && isStale(result.error)) {
+      if (result.status !== "error") return;
+      if (isStale(result.error)) {
         onStale(result.error);
         router.refresh();
-      }
+      } else if (!here()) onLost(layout, available, result.error);
     },
-    [action, inFlight, onStale, router],
+    [action, here, inFlight, onLost, onStale, router],
   );
 
   return { valueOf, change, state };

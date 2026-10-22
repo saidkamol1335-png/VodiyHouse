@@ -52,5 +52,13 @@ export function editBarText(texts: BarTexts, message: EditMessage): BarText {
       return { title: bar("rowGone", { number: message.number }), detail: null };
     case "editFailed":
       return failedText(texts, message);
+    case "availabilityFailed":
+      return {
+        title: bar("availabilityFailed", {
+          layout: message.layout,
+          value: message.available ? "on" : "off",
+        }),
+        detail: message.error === "forbidden" ? bar("forbidden") : texts.errors(message.error),
+      };
   }
 }

@@ -47,7 +47,7 @@ function BlockContent(props: UnitsBlockViewProps) {
   const { base } = state.store.state;
   const docked = state.status.bar !== null || state.selection.selected.length > 0;
   return (
-    <div className="units-block">
+    <div className="units-block" data-units-dock-host>
       <BlockHeadAndAdd {...props} state={state} ids={ids} />
       <BlockBody {...props} state={state} ids={ids} />
       {state.edit && props.actions.edit?.removeList && base && base.length > 0 ? (
@@ -149,7 +149,14 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
     [edit, base, block, layouts, finishings, dirty],
   );
   if (base === null)
-    return <BlockReadState error={readError} reading={reading} retry={store.reload} />;
+    return (
+      <BlockReadState
+        error={readError}
+        reading={reading}
+        retry={store.reload}
+        focusAfter={ids.summary}
+      />
+    );
   if (base.length === 0) return <ListGone />;
   return (
     <>
@@ -165,7 +172,13 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
         />
       ) : null}
       {readError ? (
-        <BlockReadState error={readError} reading={reading} retry={store.reload} stale />
+        <BlockReadState
+          error={readError}
+          reading={reading}
+          retry={store.reload}
+          focusAfter={ids.summary}
+          stale
+        />
       ) : null}
       <UnitsEditContext.Provider value={editContext}>
         <UnitsList

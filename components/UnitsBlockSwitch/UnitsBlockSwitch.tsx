@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { segmentedItemClass } from "@/components/Segmented";
 import type { UnitsBlock } from "@/lib/admin/units/types";
+import { SwitchPending } from "./SwitchPending";
 
 type UnitsBlockSwitchProps = {
   blocks: readonly UnitsBlock[];
@@ -15,6 +16,7 @@ type UnitsBlockSwitchProps = {
 /** «Блок A 88 · Блок B нет списка» — как переключатель «Планировок», но ссылками. */
 export function UnitsBlockSwitch({ blocks, current, href, query = null }: UnitsBlockSwitchProps) {
   const t = useTranslations("admin.complexes.units");
+  const format = useFormatter();
   return (
     <nav className="segmented segmented--lg units-block-switch" aria-label={t("switch")}>
       {blocks.map((block) => (
@@ -26,9 +28,18 @@ export function UnitsBlockSwitch({ blocks, current, href, query = null }: UnitsB
           aria-current={block.id === current ? "page" : undefined}
         >
           {t("blockName", { name: block.name })}
-          <span className="units-block-switch__count">
-            {block.unitCount > 0 ? block.unitCount : t("noList")}
-          </span>
+          {/* Диктору — «Блок A, 88 квартир»: голое число непонятно. */}
+          {block.unitCount > 0 ? (
+            <>
+              <span className="units-block-switch__count" aria-hidden="true">
+                {format.number(block.unitCount)}
+              </span>
+              <span className="sr-only">{t("switchUnits", { count: block.unitCount })}</span>
+            </>
+          ) : (
+            <span className="units-block-switch__count">{t("noList")}</span>
+          )}
+          <SwitchPending />
         </Link>
       ))}
     </nav>

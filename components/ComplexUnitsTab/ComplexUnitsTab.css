@@ -4,6 +4,20 @@
   gap: 14px;
 }
 
+/* Переход на другой блок идёт: уходящий блок приглушён и не принимает клики — правку в нём уже
+   не начать, а ответ на неё пропал бы вместе с блоком. */
+.complex-units:has(.units-block-switch__pending--on) :is(.units-block, .complex-units__stock) {
+  opacity: var(--opacity-busy);
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+/* Блок без списка: «Наличие по планировкам», генератор и полоса вкладки. */
+.complex-units__stock {
+  display: grid;
+  gap: 14px;
+}
+
 .complex-units__lead,
 .complex-units__note {
   margin: 0;

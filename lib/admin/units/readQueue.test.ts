@@ -30,6 +30,28 @@ describe("очередь чтения списка квартир", () => {
     expect(reads).toBe(1);
   });
 
+  it("показ во время идущего чтения (StrictMode: эффект дважды) — одно чтение", async () => {
+    const queue = new ReadQueue();
+    const reading = deferred();
+    let reads = 0;
+    const run = () => {
+      reads += 1;
+      return reading.promise;
+    };
+    queue.connect(run);
+    queue.ensureRead();
+    queue.disconnect();
+    queue.connect(run);
+    queue.ensureRead();
+    reading.resolve(true);
+    await tick();
+    expect(reads).toBe(1);
+    // Без идущего чтения показ читает.
+    queue.ensureRead();
+    await tick();
+    expect(reads).toBe(2);
+  });
+
   it("просьба во время чтения — ещё одно чтение после него, обещание ждёт именно его", async () => {
     const queue = new ReadQueue();
     const reads: Array<ReturnType<typeof deferred>> = [];

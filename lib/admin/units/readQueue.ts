@@ -29,6 +29,14 @@ export class ReadQueue {
     });
   }
 
+  /**
+   * Показ вкладки: нужно хотя бы одно чтение, и уже идущее годится — StrictMode в разработке
+   * монтирует эффект дважды, и второе чтение тех же 5000 строк было бы лишним.
+   */
+  ensureRead() {
+    if (!this.reading) void this.reload();
+  }
+
   /** Сохранение статуса: пока оно идёт, чтений нет. */
   async track<T>(work: () => Promise<T>): Promise<T> {
     this.saving += 1;

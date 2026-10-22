@@ -25,12 +25,27 @@ type BlockReadStateProps = {
   retry: () => Promise<boolean>;
   /** Прежний список на экране — не обновился. */
   stale?: boolean;
+  /** Куда перевести фокус после удачного «Повторить»: кнопка уходит вместе с отказом. */
+  focusAfter?: string;
 };
 
 /** Первое чтение, его отказ с «Повторить» или «список не обновился — показан прежний». */
-export function BlockReadState({ error, reading, retry, stale = false }: BlockReadStateProps) {
+export function BlockReadState({
+  error,
+  reading,
+  retry,
+  stale = false,
+  focusAfter,
+}: BlockReadStateProps) {
   const t = useTranslations("admin.complexes.units");
   const tErrors = useTranslations("admin.developers.errors");
+  const retryKeepingFocus = async (button: HTMLButtonElement) => {
+    const focused = document.activeElement === button;
+    if (!(await retry()) || !focused || !focusAfter) return;
+    requestAnimationFrame(() =>
+      document.getElementById(focusAfter)?.focus({ preventScroll: true }),
+    );
+  };
   if (!error)
     return (
       <p className="units-block__loading" role="status" aria-busy={reading}>
@@ -46,7 +61,7 @@ export function BlockReadState({ error, reading, retry, stale = false }: BlockRe
         type="button"
         className="units-block__retry"
         aria-disabled={reading}
-        onClick={reading ? undefined : () => void retry()}
+        onClick={reading ? undefined : (event) => void retryKeepingFocus(event.currentTarget)}
       >
         {t("list.retry")}
       </button>

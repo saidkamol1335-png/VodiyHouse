@@ -69,11 +69,16 @@ export function useUnitStatus(
     },
     [run],
   );
+  // «Отменить» и Ctrl+Z — только в блоке тапа: здесь список, подписи и перечитывание — его.
   const undo = useCallback(() => {
     const current = latest.current.bar;
-    if (current?.undo && !current.busy) run(undoWork(current.undo));
+    const own = current?.undo?.blockId === latest.current.params.blockId;
+    if (current?.undo && !current.busy && own) run(undoWork(current.undo));
   }, [run]);
-  useUndoShortcut(bar !== null && bar.undo !== null && !bar.busy, undo);
+  useUndoShortcut(
+    bar !== null && bar.undo !== null && !bar.busy && bar.undo.blockId === params.blockId,
+    undo,
+  );
   return { bar, timer, change, undo, dismiss };
 }
 
