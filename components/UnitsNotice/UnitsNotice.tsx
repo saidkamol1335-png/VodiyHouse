@@ -12,15 +12,18 @@ import {
   type ReactNode,
 } from "react";
 import { FormStatus } from "@/components/FormStatus";
+import type { StaleAvailability } from "@/lib/admin/units/useLayoutAvailability";
 
-// «Создано: N квартир» после генератора и «Список блока удалён» (12.5). Настоящее действие
-// сбрасывает тег ЖК, страница тут же перерисовывается — генератор сменяется списком или список
-// генератором, и ответ ушёл бы вместе с ними. Поэтому он хранится выше (провайдер стоит над
-// переключением «генератор ↔ список») и показывается над обоими.
+// «Создано: N квартир» после генератора, «Список блока удалён» (12.5) и «экран устарел» у Н7
+// (12.6). Настоящее действие сбрасывает тег ЖК, страница тут же перерисовывается — генератор
+// сменяется списком или список генератором, и ответ ушёл бы вместе с ними. Поэтому он хранится
+// выше (провайдер стоит над переключением «генератор ↔ список») и показывается над обоими.
 
 export type UnitsNotice =
   | { kind: "created"; blockId: string; created: number; unassigned: number }
-  | { kind: "deleted"; blockId: string; name: string; deleted: number };
+  | { kind: "deleted"; blockId: string; name: string; deleted: number }
+  /** Н7 ответил «экран устарел» — после перечитывания строки или всей панели уже нет. */
+  | { kind: "stale"; blockId: string; reason: StaleAvailability };
 
 type NoticeContext = {
   notice: UnitsNotice | null;
@@ -68,31 +71,50 @@ type UnitsListNoticeProps = {
 
 /** Над генератором или списком блока; фокус — на него: кнопка, которую нажали, исчезла. */
 export function UnitsListNotice({ blockId, createdToo }: UnitsListNoticeProps) {
-  const t = useTranslations("admin.complexes.units");
   const { notice } = useContext(Context);
   const ref = useRef<HTMLDivElement>(null);
   const mine = notice?.blockId === blockId ? notice : null;
-  const shown = mine && (createdToo || mine.kind === "deleted") ? mine : null;
+  const shown = mine && (createdToo || mine.kind !== "created") ? mine : null;
   useEffect(() => {
     if (shown) ref.current?.focus();
   }, [shown]);
   if (!shown) return null;
   return (
     <div ref={ref} className="units-notice" tabIndex={-1}>
-      {shown.kind === "deleted" ? (
+      <NoticeText notice={shown} />
+    </div>
+  );
+}
+
+function NoticeText({ notice }: { notice: UnitsNotice }) {
+  const t = useTranslations("admin.complexes.units");
+  switch (notice.kind) {
+    case "deleted":
+      return (
         <FormStatus tone="success">
-          {t("removeList.done", { name: shown.name, count: shown.deleted })}
+          {t("removeList.done", { name: notice.name, count: notice.deleted })}
         </FormStatus>
-      ) : (
+      );
+    case "stale":
+      return (
+        <FormStatus tone="notice">
+          {t(
+            notice.reason === "listExists" ? "availability.staleList" : "availability.staleLayout",
+          )}
+        </FormStatus>
+      );
+    case "created":
+      return (
         <>
-          <FormStatus tone="success">{t("generator.created", { count: shown.created })}</FormStatus>
-          {shown.unassigned > 0 ? (
+          <FormStatus tone="success">
+            {t("generator.created", { count: notice.created })}
+          </FormStatus>
+          {notice.unassigned > 0 ? (
             <FormStatus tone="notice">
-              {t("generator.createdUnassigned", { count: shown.unassigned })}
+              {t("generator.createdUnassigned", { count: notice.unassigned })}
             </FormStatus>
           ) : null}
         </>
-      )}
-    </div>
-  );
+      );
+  }
 }

@@ -1,6 +1,8 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
+import { demoLayouts } from "@/lib/admin/complexes/demoLayouts";
 import { demoBlockUnits } from "@/lib/admin/complexes/demoUnits";
 import { demoUnitsScenario } from "@/lib/admin/complexes/demoUnitsScenarios";
 import { unitsFailure } from "@/lib/admin/units/errors";
@@ -8,12 +10,14 @@ import { isUuid, readPlan, readRisers, readStatus, readUnitIds } from "@/lib/adm
 import type {
   BlockUnitsInput,
   BlockUnitsResult,
+  ChangedResult,
   CreateBlockUnitsInput,
   CreateBlockUnitsResult,
   RevertUnitsStatusInput,
   RevertUnitsStatusResult,
   SaveRisersInput,
   SaveRisersResult,
+  SetLayoutAvailableInput,
   SetUnitsStatusInput,
   SetUnitsStatusResult,
 } from "@/lib/admin/units/types";
@@ -103,6 +107,28 @@ export async function demoSetUnitsStatusAction(
 
 const otherStatus = (shown: UnitStatus, to: UnitStatus): UnitStatus =>
   (["free", "reserved", "sold"] as const).find((item) => item !== shown && item !== to)!;
+
+/**
+ * «Доступна / нет в наличии» (Н7): планировка DEMO и блок без списка — как проверяет функция базы.
+ * Без refresh: DEMO не меняется, и перерисовка вернула бы на экран значение сида.
+ */
+export async function demoSetLayoutAvailableAction(
+  scenario: unknown,
+  input: SetLayoutAvailableInput,
+): Promise<ChangedResult> {
+  devOnly();
+  if (!isUuid(input?.layoutId) || typeof input.available !== "boolean")
+    return unitsFailure("invalid");
+  const kind = demoUnitsScenario(scenario);
+  if (kind === "fail") return unitsFailure("timeout");
+  const block = DEMO_COMPLEX_ROWS.flatMap((row) => demoLayouts(row.id)).find((item) =>
+    item.layouts.some((layout) => layout.id === input.layoutId),
+  );
+  if (!block) return unitsFailure("notFound");
+  if ((demoBlockUnits(block.blockId, kind)?.units.length ?? 0) > 0)
+    return unitsFailure("listExists");
+  return { status: "done", changed: 1 };
+}
 
 /** «Отменить»: conflict — квартиры уже поменял другой (skipped). */
 export async function demoRevertUnitsStatusAction(

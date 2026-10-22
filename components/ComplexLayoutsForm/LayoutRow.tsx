@@ -96,14 +96,6 @@ export function LayoutRow(props: LayoutRowProps) {
             error={issue("priceFrom")}
             onChange={(event) => onChange({ priceFrom: event.target.value })}
           />
-          <label className="layout-row__available">
-            <input
-              type="checkbox"
-              checked={row.available}
-              onChange={(event) => onChange({ available: event.target.checked })}
-            />
-            {t("fields.available")}
-          </label>
         </div>
       )}
       <RowEnd {...props} />
@@ -139,6 +131,14 @@ function RowEnd({ row, hasUnits, onDuplicate, onRemove }: LayoutRowProps) {
           </Badge>
         )}
         {priced ? null : <Badge size="sm">{t("noPrice")}</Badge>}
+        {/* «Нет в наличии» ставят на «Квартирах» (Н7) — здесь только видно, почему сайт так пишет. */}
+        {!hasUnits && !row.available ? (
+          <span title={t("unavailableHint")}>
+            <Badge tone="bad" size="sm">
+              {t("unavailable")}
+            </Badge>
+          </span>
+        ) : null}
       </span>
       <button
         type="button"

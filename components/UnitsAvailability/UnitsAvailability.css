@@ -1,0 +1,103 @@
+/* «Наличие по планировкам» (Н7): строки «1-комн. · 42,5 м² · от $31 000» и сегмент
+   «Доступна | Нет в наличии»; на телефоне сегмент — второй строкой во всю ширину. */
+.units-availability {
+  display: grid;
+  gap: 10px;
+}
+
+.units-availability__title {
+  margin: 0;
+  color: var(--fg);
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.units-availability__lead,
+.units-availability__empty {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.units-availability__rows {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  list-style: none;
+}
+
+.units-availability__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 10px 14px;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.units-availability__row + .units-availability__row {
+  border-top: 1px dashed var(--line);
+}
+
+.units-availability__row--busy {
+  opacity: var(--opacity-busy);
+}
+
+.units-availability__name {
+  font-size: var(--fs-body);
+  font-weight: 650;
+}
+
+.units-availability__price {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  white-space: nowrap;
+}
+
+/* Вариант — примесь к .segmented__item (вид сегмента); родитель в селекторе нужен, чтобы перебить
+   размеры .segmented--sm .segmented__item, а выбранный вариант определяет aria-pressed. */
+.units-availability__row .units-availability__option {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: var(--fs-small);
+}
+
+.units-availability__option--on[aria-pressed="true"] {
+  color: var(--badge-ok-fg);
+}
+
+.units-availability__option--off[aria-pressed="true"] {
+  color: var(--badge-bad-fg);
+}
+
+.units-availability__option[aria-disabled="true"] {
+  cursor: progress;
+}
+
+.units-availability__option:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.units-availability__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--badge-bad-fg);
+  font-size: var(--fs-caption);
+}
+
+@media (max-width: 760px) {
+  .units-availability__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .units-availability__switch {
+    grid-column: 1 / -1;
+    display: flex;
+  }
+
+  .units-availability__row .units-availability__option {
+    min-height: 44px;
+  }
+}

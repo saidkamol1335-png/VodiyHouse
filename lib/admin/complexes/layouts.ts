@@ -27,13 +27,13 @@ export type LayoutDraft = {
   drawingId: string | null;
   drawingSrc: string | null;
   priceFrom: string;
+  /** Только чтение: «доступна / нет в наличии» меняют на «Квартирах» (Н7, 12.6), вкладка его не шлёт. */
   available: boolean;
   /**
-   * «Цена от» и «доступна», как их прочитали из базы. Вкладка шлёт поле, только если его правили:
-   * устаревший черновик не затрёт «нет в наличии» менеджера (Н7) и «цену от» после «Удалить
-   * список блока». Нет — строка новая, шлётся всё.
+   * «Цена от», как её прочитали из базы. Вкладка шлёт её, только если правили: устаревший
+   * черновик не затрёт «цену от» после «Удалить список блока». Нет — строка новая, шлётся всё.
    */
-  saved?: { available: boolean; priceFrom: string };
+  saved?: { priceFrom: string };
   /** Только чтение: квартир с этой планировкой — удалить нельзя. */
   units: number;
   offer: LayoutOffer | null;
@@ -58,9 +58,8 @@ export type LayoutPayload = {
   rooms: number;
   area: number;
   drawing_id: string | null;
-  /** Нет ключа — база оставляет прежнее значение. */
+  /** Нет ключа — база оставляет прежнее значение (и «доступна» — её вкладка не шлёт вовсе). */
   price_from?: number | null;
-  available?: boolean;
 };
 
 export type LayoutsParse =
@@ -105,10 +104,8 @@ function decimal(raw: string, max: number): Parsed {
 
 function savedOf(value: unknown): LayoutDraft["saved"] {
   if (typeof value !== "object" || value === null) return undefined;
-  const { available, priceFrom } = value as Record<string, unknown>;
-  return typeof available === "boolean" && typeof priceFrom === "string"
-    ? { available, priceFrom: priceFrom.trim() }
-    : undefined;
+  const { priceFrom } = value as Record<string, unknown>;
+  return typeof priceFrom === "string" ? { priceFrom: priceFrom.trim() } : undefined;
 }
 
 function payloadOf(
@@ -133,7 +130,6 @@ function payloadOf(
   const found = Object.fromEntries(Object.entries(issues).filter(([, issue]) => issue));
   if (Object.keys(found).length > 0) return { issues: found };
   const saved = savedOf(row.saved);
-  const available = row.available !== false;
   return {
     payload: {
       ...(id ? { id } : {}),
@@ -141,7 +137,6 @@ function payloadOf(
       area: area.value!,
       drawing_id: drawingId || null,
       ...(!saved || text(row.priceFrom) !== saved.priceFrom ? { price_from: price.value } : {}),
-      ...(!saved || available !== saved.available ? { available } : {}),
     },
   };
 }

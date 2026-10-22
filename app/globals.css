@@ -126,6 +126,7 @@
 @import "../components/UnitDetail/UnitDetail.css";
 @import "../components/UnitEditForm/UnitEditForm.css";
 @import "../components/UnitPriceFields/UnitPriceFields.css";
+@import "../components/UnitsAvailability/UnitsAvailability.css";
 @import "../components/UnitsBlockSwitch/UnitsBlockSwitch.css";
 @import "../components/UnitsBlockView/UnitsBlockView.css";
 @import "../components/UnitsBulkBar/UnitsBulkBar.css";

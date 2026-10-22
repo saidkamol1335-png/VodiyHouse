@@ -149,3 +149,14 @@ export type UnitsListActions = {
   status: UnitsStatusActions | null;
   edit: UnitsEditActions | null;
 };
+
+/**
+ * Все действия вкладки; роли страница отдаёт только её (unitsActionsFor). Без create — ни
+ * генератора, без saveRisers — ни «Стояков», без layoutAvailable — ни «Наличия по планировкам» (Н7).
+ */
+export type UnitsTabActions = {
+  list: UnitsListActions;
+  create: UnitsAction<CreateBlockUnitsInput, CreateBlockUnitsResult> | null;
+  saveRisers: UnitsAction<SaveRisersInput, SaveRisersResult> | null;
+  layoutAvailable: UnitsAction<SetLayoutAvailableInput, ChangedResult> | null;
+};

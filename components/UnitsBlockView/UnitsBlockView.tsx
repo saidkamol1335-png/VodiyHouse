@@ -17,7 +17,8 @@ import { UnitsBlockHead } from "./UnitsBlockHead";
 import { useUnitsBlock, type UnitsBlockParams, type UnitsBlockState } from "./useUnitsBlock";
 
 type UnitsBlockViewProps = UnitsBlockParams & {
-  saveRisersAction: UnitsAction<SaveRisersInput, SaveRisersResult>;
+  /** null — «Стояков» нет (менеджер, Н2): планировки квартир правит руководитель. */
+  saveRisersAction: UnitsAction<SaveRisersInput, SaveRisersResult> | null;
   /** ЖК на сайте: удаление предупреждает, что сайт перестанет показывать квартиры. */
   published: boolean;
 };
@@ -152,7 +153,7 @@ function BlockBody({ block, layouts, finishings, saveRisersAction, state, ids }:
   if (base.length === 0) return <ListGone />;
   return (
     <>
-      {ready ? (
+      {ready && saveRisersAction ? (
         <UnitsRisers
           key={block.id}
           blockId={block.id}

@@ -80,6 +80,31 @@ test.describe("менеджер и видеограф", () => {
     await context.close();
   });
 
+  // 12.6 (Н2): права роли в облаке — меню, список, вкладки и действия квартир (DEMO после demo:seed).
+  // Н7 здесь не проверить: в сиде у всех блоков есть список — его проверяют тесты базы и стенд.
+  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({ browser }) => {
+    const context = await browser.newContext({ storageState: cabinetState("manager") });
+    const page = await context.newPage();
+    await page.goto("/admin");
+    await page.getByRole("navigation", { name: "Разделы кабинета" }).getByRole("link", { name: "ЖК", exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/zhk$/);
+    await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
+    await expect(page.locator(".complex-list__status")).toHaveCount(0);
+    // DEMO-сид: у Shodlik оба блока со списком — проверяем, что видно после чтения списка.
+    const shodlik = page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" });
+    await expect(shodlik).toHaveAttribute("href", /\/admin\/zhk\/[0-9a-f-]{36}\/kvartiry$/);
+    const units = (await shodlik.getAttribute("href"))!;
+    await page.goto(units.replace(/\/kvartiry$/, "/bloki"));
+    await expect(page).toHaveURL(new RegExp(`${units}$`));
+    await expect(page.getByRole("button", { name: /Сменить статус$/ }).first()).toBeVisible();
+    await expect(page.locator(".admin-entity-head")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Статус и правка$/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Стояки/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "+ Квартира" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Удалить список блока" })).toHaveCount(0);
+    await context.close();
+  });
+
   test("видеограф: на Главной — заглушка роли", async ({ browser }) => {
     const context = await browser.newContext({ storageState: cabinetState("videographer") });
     const page = await context.newPage();

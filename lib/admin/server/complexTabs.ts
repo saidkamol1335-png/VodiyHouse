@@ -101,7 +101,7 @@ export async function readBlockLayouts(
         drawingSrc: layout.drawing ? src(layout.drawing.path) : null,
         priceFrom: decimalText(layout.price_from),
         available: layout.available,
-        saved: { available: layout.available, priceFrom: decimalText(layout.price_from) },
+        saved: { priceFrom: decimalText(layout.price_from) },
         units: layout.units[0]?.count ?? 0,
         offer:
           hasUnits && offer

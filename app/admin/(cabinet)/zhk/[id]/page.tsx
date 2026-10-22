@@ -13,7 +13,7 @@ export const instant = false;
 
 /** Вкладка «Основное» (И1–И3): «О ЖК», «Расположение», «Проверено Vodiy House». */
 export default async function ComplexMainPage({ params }: { params: Promise<{ id: string }> }) {
-  const complex = await complexForTab(params);
+  const complex = await complexForTab(params, "main");
   if (!complex) return null;
   const t = await getTranslations("admin.complexes");
   const supabase = await createSupabaseServerClient();

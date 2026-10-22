@@ -50,7 +50,7 @@ function draftOf(blockId: string, plan: Plan, index: number, hasUnits: boolean):
     drawingSrc: null,
     priceFrom: price ? String(price) : "",
     available: true,
-    saved: { available: true, priceFrom: price ? String(price) : "" },
+    saved: { priceFrom: price ? String(price) : "" },
     units: hasUnits ? 11 : 0,
     offer: hasUnits && offer ? { priceFrom: offer[0], freeCount: offer[1] } : null,
   };

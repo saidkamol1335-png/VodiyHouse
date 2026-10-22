@@ -26,7 +26,7 @@ export type AdminNavItem = {
   roles: readonly StaffRole[];
   /** Раздел уже есть в коде. Пустые разделы в меню не показываются (PLAN §7, фаза 0). */
   ready: boolean;
-  /** Готов пока не для всех ролей: «ЖК» менеджеру нужен вкладкой «Квартиры» (шаг 12). */
+  /** Готов пока не для всех своих ролей: раздел делается по шагам плана. */
   readyFor?: readonly StaffRole[];
 };
 
@@ -35,13 +35,7 @@ export type AdminNavItem = {
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "home", href: ADMIN_ROUTES.home, roles: ["head", "manager"], ready: true },
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
-  {
-    key: "complexes",
-    href: ADMIN_ROUTES.complexes,
-    roles: ["head", "manager"],
-    ready: true,
-    readyFor: ["head"],
-  },
+  { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: true },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
   { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: false },
   {

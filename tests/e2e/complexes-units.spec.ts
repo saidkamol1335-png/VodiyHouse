@@ -217,7 +217,9 @@ test.describe("кабинет · ЖК · квартиры", () => {
     const dir = `test-results/screens/${testInfo.project.name}`;
     await open(page, NAMUNA);
     if (testInfo.project.name.startsWith("mobile")) {
-      // «Создать N квартир» прилипает к низу экрана.
+      // «Создать N квартир» прилипает к низу экрана, пока генератор на экране (над ним с 12.6 —
+      // «Наличие по планировкам»).
+      await page.getByRole("heading", { name: "Генератор списка" }).scrollIntoViewIfNeeded();
       await expect(page.getByRole("button", { name: "Создать 120 квартир" })).toBeInViewport();
     }
     await position(page, 1).getByLabel("Планировка").selectOption({ label: "Студия · 34,2 м²" });

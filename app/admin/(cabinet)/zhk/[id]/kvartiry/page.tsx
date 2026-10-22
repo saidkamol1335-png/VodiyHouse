@@ -12,12 +12,18 @@ import {
   setUnitsPriceAction,
 } from "@/lib/admin/actions/unitsMass";
 import { readBlockUnitsAction } from "@/lib/admin/actions/unitsList";
-import { revertUnitsStatusAction, setUnitsStatusAction } from "@/lib/admin/actions/unitsStatus";
+import {
+  revertUnitsStatusAction,
+  setLayoutAvailableAction,
+  setUnitsStatusAction,
+} from "@/lib/admin/actions/unitsStatus";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { complexForTab } from "@/lib/admin/server/complexPage";
 import { readUnitsTab } from "@/lib/admin/server/unitsTab";
 import { requireViewer } from "@/lib/admin/session";
+import { unitsActionsFor } from "@/lib/admin/units/access";
+import type { UnitsTabActions } from "@/lib/admin/units/types";
 import { unitsTabView } from "@/lib/admin/units/view";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -28,23 +34,28 @@ type ComplexUnitsPageProps = {
   searchParams: Promise<{ blok?: string | string[] }>;
 };
 
-// Права — наличием действия: менеджеру (12.6) edit не передаётся.
-const LIST_ACTIONS = {
-  read: readBlockUnitsAction,
-  status: { set: setUnitsStatusAction, revert: revertUnitsStatusAction },
-  edit: {
-    add: addUnitAction,
-    update: updateUnitAction,
-    remove: deleteUnitsAction,
-    removeList: deleteBlockUnitsAction,
-    price: setUnitsPriceAction,
-    finishing: setUnitsFinishingAction,
+// Права — наличием действий: роли отдаётся только её часть (unitsActionsFor, Н2).
+const ACTIONS: UnitsTabActions = {
+  list: {
+    read: readBlockUnitsAction,
+    status: { set: setUnitsStatusAction, revert: revertUnitsStatusAction },
+    edit: {
+      add: addUnitAction,
+      update: updateUnitAction,
+      remove: deleteUnitsAction,
+      removeList: deleteBlockUnitsAction,
+      price: setUnitsPriceAction,
+      finishing: setUnitsFinishingAction,
+    },
   },
+  create: createBlockUnitsAction,
+  saveRisers: saveRisersAction,
+  layoutAvailable: setLayoutAvailableAction,
 };
 
 /** Вкладка «Квартиры» (шаг 12): блок из ?blok=, генератор или стояки и список (читает экран). */
 export default async function ComplexUnitsPage({ params, searchParams }: ComplexUnitsPageProps) {
-  const complex = await complexForTab(params);
+  const complex = await complexForTab(params, "units");
   if (!complex) return null;
   const [{ blok }, viewer] = await Promise.all([searchParams, requireViewer()]);
   const supabase = await createSupabaseServerClient();
@@ -57,9 +68,7 @@ export default async function ComplexUnitsPage({ params, searchParams }: Complex
       blocksHref={complexTabHref(base, "blocks")}
       layoutsHref={complexTabHref(base, "layouts")}
       published={complex.status === "published"}
-      createAction={createBlockUnitsAction}
-      saveRisersAction={saveRisersAction}
-      listActions={LIST_ACTIONS}
+      actions={unitsActionsFor(viewer.role, ACTIONS)}
       viewerName={viewer.name}
     />
   );

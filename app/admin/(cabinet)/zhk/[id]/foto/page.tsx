@@ -22,7 +22,7 @@ const PHOTO_ACTIONS: PhotoActions = {
 
 /** Вкладка «Фото» (И6): галерея, первое — обложка; сохраняется сразу. */
 export default async function ComplexPhotosPage({ params }: { params: Promise<{ id: string }> }) {
-  const complex = await complexForTab(params);
+  const complex = await complexForTab(params, "photos");
   if (!complex) return null;
   const photos = await readComplexPhotos(await createSupabaseServerClient(), complex.id, mediaSrc);
   return (

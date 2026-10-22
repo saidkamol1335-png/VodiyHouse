@@ -10,7 +10,8 @@ import { ComplexStatus } from "@/components/ComplexStatus";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { setComplexStatusAction } from "@/lib/admin/actions/complexes";
 import { tabsNeedingAttention } from "@/lib/admin/complexes/readiness";
-import { complexTabs } from "@/lib/admin/complexes/tabs";
+import type { ComplexRecord } from "@/lib/admin/complexes/record";
+import { canOpenComplex, complexAccess, complexTabs } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
 import { getComplex, getComplexReadiness } from "@/lib/admin/server/complexPage";
@@ -25,34 +26,58 @@ export const instant = false;
 
 type ComplexLayoutProps = { children: ReactNode; params: Promise<{ id: string }> };
 
-/** Страница ЖК (в. 6): шапка со статусом и готовностью (И8, И9), вкладки-адреса — дочерние страницы. */
+/**
+ * Страница ЖК (в. 6): шапка со статусом и готовностью (И8, И9), вкладки-адреса — дочерние
+ * страницы; у менеджера — только «Квартиры» без шапки (Н2).
+ */
 export default async function ComplexLayout({ children, params }: ComplexLayoutProps) {
   const { viewer, allowed } = await requireSection("complexes");
   const person = await cabinetPerson(viewer);
   const t = await getTranslations("admin");
+  const access = complexAccess(viewer.role);
   if (!allowed || isCabinetOpenWithoutLogin || !hasSupabaseEnv()) {
-    const topbar = (
-      <AdminTopbar
-        title={t("complexes.title")}
-        subtitle={t("complexes.subtitle")}
-        person={person}
-      />
+    // Подпись наличия — только тому, кому раздел открыт (менеджеру); видеографу — общая.
+    const subtitle = t(
+      allowed && !access.manage ? "complexes.subtitleStock" : "complexes.subtitle",
     );
     return (
-      <AdminPage topbar={topbar}>
+      <AdminPage
+        topbar={<AdminTopbar title={t("complexes.title")} subtitle={subtitle} person={person} />}
+      >
         {allowed ? (
           <AdminPanel title={t("complexes.title")}>
             {t("developers.errors.notConfigured")}
           </AdminPanel>
         ) : (
-          <AdminDenied section={t("nav.complexes")} />
+          <AdminDenied section={t("nav.complexes")} sectionKey="complexes" />
         )}
       </AdminPage>
     );
   }
-  const { id } = await params;
-  const complex = await getComplex(id);
-  if (!complex) notFound();
+  const complex = await getComplex((await params).id);
+  if (!complex || !canOpenComplex(access, complex.status)) notFound();
+  const topbar = (
+    <AdminTopbar
+      title={t("complexes.namePrefixed", { name: complex.name.ru })}
+      subtitle={t("complexes.entitySubtitle", {
+        developer: complex.developerName,
+        address: `${ROUTES.catalog}/${complex.slug}`,
+      })}
+      person={person}
+    />
+  );
+  return (
+    <AdminPage topbar={topbar}>
+      {/* Менеджер (Н2): без статуса публикации и готовности, вкладка одна — ленты нет. */}
+      {access.manage ? <ComplexHead complex={complex} /> : null}
+      {children}
+    </AdminPage>
+  );
+}
+
+/** Статус публикации с готовностью (И8, И9) и вкладки — руководителю. */
+async function ComplexHead({ complex }: { complex: ComplexRecord }) {
+  const t = await getTranslations("admin.complexes");
   const [readiness, files] = await Promise.all([
     getComplexReadiness(complex.id),
     readComplexFiles(await createSupabaseServerClient(), complex.id),
@@ -61,48 +86,29 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
   const unpublished = complex.status === "draft" || complex.status === "hidden";
   const tabs = complexTabs(
     base,
-    (key) => t(`complexes.tabs.${key}`),
+    (key) => t(`tabs.${key}`),
     unpublished ? tabsNeedingAttention(readiness) : undefined,
   );
-  const name = t("complexes.namePrefixed", { name: complex.name.ru });
   return (
-    <AdminPage
-      topbar={
-        <AdminTopbar
-          title={name}
-          subtitle={t("complexes.entitySubtitle", {
-            developer: complex.developerName,
-            address: `${ROUTES.catalog}/${complex.slug}`,
-          })}
-          person={person}
+    <AdminEntityHead
+      status={complex.status}
+      tabsLabel={t("tabs.label")}
+      tabs={tabs}
+      attentionLabel={t("attention")}
+      statusControls={
+        <ComplexStatus
+          complex={{ ...complex, name: complex.name.ru }}
+          action={setComplexStatusAction}
+          readiness={readiness}
+          files={files.map((file) => ({ id: file.id, kind: file.kind, src: mediaSrc(file.path) }))}
+          base={base}
+          developer={{
+            name: complex.developerName,
+            published: complex.developerStatus === "published",
+            href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
+          }}
         />
       }
-    >
-      <AdminEntityHead
-        status={complex.status}
-        tabsLabel={t("complexes.tabs.label")}
-        tabs={tabs}
-        attentionLabel={t("complexes.attention")}
-        statusControls={
-          <ComplexStatus
-            complex={{ ...complex, name: complex.name.ru }}
-            action={setComplexStatusAction}
-            readiness={readiness}
-            files={files.map((file) => ({
-              id: file.id,
-              kind: file.kind,
-              src: mediaSrc(file.path),
-            }))}
-            base={base}
-            developer={{
-              name: complex.developerName,
-              published: complex.developerStatus === "published",
-              href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
-            }}
-          />
-        }
-      />
-      {children}
-    </AdminPage>
+    />
   );
 }

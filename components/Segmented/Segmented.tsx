@@ -5,12 +5,15 @@ type SegmentedProps = {
   children: ReactNode;
   /** sm — шапка (27 px), lg — меню телефона на всю ширину (44 px). */
   size?: "sm" | "lg";
+  /** Элемент блока-владельца (БЭМ-примесь): раскладку сегмента в своей строке задаёт он. */
+  className?: string;
 };
 
 /** Сегмент из двух-трёх вариантов: RU | UZ, Светлая | Тёмная. */
-export function Segmented({ label, children, size = "sm" }: SegmentedProps) {
+export function Segmented({ label, children, size = "sm", className }: SegmentedProps) {
+  const classes = `segmented segmented--${size}${className ? ` ${className}` : ""}`;
   return (
-    <div className={`segmented segmented--${size}`} role="group" aria-label={label}>
+    <div className={classes} role="group" aria-label={label}>
       {children}
     </div>
   );

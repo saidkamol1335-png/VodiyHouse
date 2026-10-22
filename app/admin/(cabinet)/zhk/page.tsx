@@ -8,6 +8,7 @@ import { ComplexList } from "@/components/ComplexList";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { createComplexAction } from "@/lib/admin/actions/complexes";
 import { complexListScope } from "@/lib/admin/complexes/list";
+import { complexAccess, type ComplexAccess } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
 import { readComplexRows, readDeveloperOptions } from "@/lib/admin/server/complexes";
@@ -19,18 +20,23 @@ export const instant = false;
 
 type ComplexesPageProps = { searchParams: Promise<{ zastroyshchik?: string | string[] }> };
 
-/** «ЖК» (в. 5): до шага 12 — только руководителю, потом и менеджеру (вкладка «Квартиры»). */
+/** «ЖК» (в. 5): руководителю — с созданием и статусами, менеджеру — список наличия (Н2). */
 export default async function ComplexesPage({ searchParams }: ComplexesPageProps) {
   const { viewer, allowed } = await requireSection("complexes");
   const person = await cabinetPerson(viewer);
   const t = await getTranslations("admin");
+  const access = complexAccess(viewer.role);
   const topbar = (
-    <AdminTopbar title={t("complexes.title")} subtitle={t("complexes.subtitle")} person={person} />
+    <AdminTopbar
+      title={t("complexes.title")}
+      subtitle={t(allowed && !access.manage ? "complexes.subtitleStock" : "complexes.subtitle")}
+      person={person}
+    />
   );
   if (!allowed) {
     return (
       <AdminPage topbar={topbar}>
-        <AdminDenied section={t("nav.complexes")} />
+        <AdminDenied section={t("nav.complexes")} sectionKey="complexes" />
       </AdminPage>
     );
   }
@@ -41,14 +47,33 @@ export default async function ComplexesPage({ searchParams }: ComplexesPageProps
       </AdminPage>
     );
   }
+  return (
+    <AdminPage topbar={topbar}>
+      {access.manage ? (
+        <HeadComplexes scopeId={(await searchParams).zastroyshchik} access={access} />
+      ) : (
+        <StockComplexes access={access} />
+      )}
+    </AdminPage>
+  );
+}
+
+/** Менеджер: только наличие — без создания и «ЖК застройщика». */
+async function StockComplexes({ access }: { access: ComplexAccess }) {
+  const rows = await readComplexRows(await createSupabaseServerClient());
+  return <ComplexList rows={rows} baseHref={ADMIN_ROUTES.complexes} access={access} />;
+}
+
+/** Руководитель: «+ Добавить ЖК» и список с пилюлями статусов, ?zastroyshchik= — ЖК застройщика. */
+async function HeadComplexes({ scopeId, access }: { scopeId: unknown; access: ComplexAccess }) {
   const supabase = await createSupabaseServerClient();
   const [rows, developers] = await Promise.all([
     readComplexRows(supabase),
     readDeveloperOptions(supabase),
   ]);
-  const scope = complexListScope((await searchParams).zastroyshchik, developers, rows);
+  const scope = complexListScope(scopeId, developers, rows);
   return (
-    <AdminPage topbar={topbar}>
+    <>
       <ComplexCreateForm
         action={createComplexAction}
         developers={developers}
@@ -63,7 +88,8 @@ export default async function ComplexesPage({ searchParams }: ComplexesPageProps
         baseHref={ADMIN_ROUTES.complexes}
         developer={scope.developer}
         initialFilter={scope.archived ? "archived" : "all"}
+        access={access}
       />
-    </AdminPage>
+    </>
   );
 }

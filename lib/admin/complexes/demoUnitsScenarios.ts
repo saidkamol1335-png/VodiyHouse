@@ -3,7 +3,8 @@ import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "../units/types";
 import { demoPlanUnits } from "./demoUnitsPlan";
 
 // Сценарии стенда «Квартир» (?demo=…), чтобы e2e проверял то, чего в DEMO-сиде нет: variety —
-// номера с буквами, цена за м², квартиры без планировки, своя отделка, блок B в сумах; big — блок
+// номера с буквами, цена за м², квартиры без планировки, своя отделка, блок B в сумах, планировка
+// «нет в наличии» у блока без списка; big — блок
 // на пределе в 5000 квартир; fail — база отказывает в статусе; conflict — статус успел поменять
 // другой сотрудник; empty — список удалили, пока страница была открыта (чтение пустое); notready —
 // ЖК на сайте, и снятая цена убрала бы «цену от» (vh:not_ready). Каждый сценарий привязан к
@@ -33,11 +34,24 @@ type Tab = {
   units: UnitRecord[];
 };
 
+/** variety у блока без списка: вторая планировка «нет в наличии» — и на «Квартирах», и на «Планировках». */
+export function withUnavailableSample<T extends { available: boolean }>(
+  layouts: readonly T[],
+): T[] {
+  return layouts.map((layout, index) => (index === 1 ? { ...layout, available: false } : layout));
+}
+
 const finishingId = (finishings: readonly UnitsFinishing[], name: string) =>
   finishings.find((item) => item.name === name)?.id ?? null;
 
-/** Блок A: «12» → «12А», «40» → «40Б»; эт. 5 — цена за м²; поз. 4 эт. 12 — без планировки. */
+/**
+ * Блок A: «12» → «12А», «40» → «40Б»; эт. 5 — цена за м²; поз. 4 эт. 12 — без планировки. Блок
+ * без списка: вторая планировка — «нет в наличии» (Н7), чтобы были видны оба значения.
+ */
 function variety(tab: Tab): Tab {
+  if (tab.block && tab.block.unitCount === 0) {
+    return { ...tab, layouts: withUnavailableSample(tab.layouts) };
+  }
   const turnkey = finishingId(tab.finishings, "Под ключ");
   const units = tab.units.map((unit) => {
     const number = unit.number === "12" ? "12А" : unit.number === "40" ? "40Б" : unit.number;

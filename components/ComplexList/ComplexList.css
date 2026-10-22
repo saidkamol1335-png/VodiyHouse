@@ -1,6 +1,10 @@
 /* «ЖК» (в. 5): поиск и пилюли статусов сверху, панель со строками как «Остатки по ЖК» мокапа
    (название, город · застройщик, остатки по комнатам моно, «свободно N») + плашка публикации. */
 .complex-list {
+  /* Колонки строки: у списка наличия (--stock) те же, только без статуса. */
+  --complex-list-stock-col: 132px;
+  --complex-list-status-col: 128px;
+  --complex-list-chevron-col: 18px;
   display: grid;
   gap: 16px;
 }
@@ -78,7 +82,9 @@
    Колонки плашек — постоянной ширины: строки — отдельные сетки, иначе плашки гуляют. */
 .complex-list__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 132px 128px 18px;
+  grid-template-columns:
+    minmax(0, 1fr) auto var(--complex-list-stock-col) var(--complex-list-status-col)
+    var(--complex-list-chevron-col);
   align-items: center;
   gap: 14px;
   padding: 12px 4px;
@@ -86,6 +92,13 @@
   color: inherit;
   text-decoration: none;
   transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* Наличие менеджера (Н2): без плашки публикации — колонки статуса нет. */
+.complex-list--stock .complex-list__row {
+  grid-template-columns:
+    minmax(0, 1fr) auto var(--complex-list-stock-col)
+    var(--complex-list-chevron-col);
 }
 
 .complex-list__row:hover {
@@ -154,7 +167,7 @@
 
   /* Телефон: название, комнаты строкой ниже, плашки — третьей строкой; стрелка справа. */
   .complex-list__row {
-    grid-template-columns: auto auto minmax(0, 1fr) 18px;
+    grid-template-columns: auto auto minmax(0, 1fr) var(--complex-list-chevron-col);
     grid-template-areas:
       "main main main chevron"
       "rooms rooms rooms chevron"
@@ -186,5 +199,13 @@
 
   .complex-list__name {
     white-space: normal;
+  }
+
+  .complex-list--stock .complex-list__row {
+    grid-template-columns: auto minmax(0, 1fr) var(--complex-list-chevron-col);
+    grid-template-areas:
+      "main main chevron"
+      "rooms rooms chevron"
+      "stock . chevron";
   }
 }

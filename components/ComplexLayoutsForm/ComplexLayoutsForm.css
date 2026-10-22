@@ -71,10 +71,12 @@
   margin-left: auto;
 }
 
-/* Строка: чертёж · комнаты · площадь · цена и «доступна» · плашки и действия. */
+/* Строка: чертёж · комнаты · площадь · цена · плашки и действия («доступна» — на «Квартирах», Н7). */
 .layout-row {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1fr) 220px;
+  /* Последняя колонка — по самой широкой плашке («нет чертежа…»): при 220 px плашки уходили
+     влево поверх поля «Цена от», а иконки сжимались до 16 px. */
+  grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1fr) fit-content(280px);
   align-items: start;
   gap: 12px;
   padding: 12px 0;
@@ -88,20 +90,6 @@
 .layout-row__price {
   display: grid;
   gap: 6px;
-}
-
-.layout-row__available {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--fg-2);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.layout-row__available input {
-  accent-color: var(--amber);
 }
 
 .layout-row__offer {
@@ -131,6 +119,7 @@
 
 .layout-row__icon {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   width: 32px;
@@ -165,7 +154,7 @@
     grid-column: 1 / -1;
   }
 
-  /* Окно ~1024 (меню ещё сбоку): цена и «доступна» — под комнатами и площадью, не в колонке
+  /* Окно ~1024 (меню ещё сбоку): цена — под комнатами и площадью, не в колонке
      чертежа 64 px. */
   .layout-row__price,
   .layout-row__offer {

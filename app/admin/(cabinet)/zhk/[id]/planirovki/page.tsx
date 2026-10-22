@@ -12,7 +12,7 @@ export const instant = false;
 
 /** Вкладка «Планировки» (И5): строки выбранного блока, чертежи — PNG на белом. */
 export default async function ComplexLayoutsPage({ params }: { params: Promise<{ id: string }> }) {
-  const complex = await complexForTab(params);
+  const complex = await complexForTab(params, "layouts");
   if (!complex) return null;
   const blocks = await readBlockLayouts(await createSupabaseServerClient(), complex.id, mediaSrc);
   return (

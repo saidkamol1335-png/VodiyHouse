@@ -16,21 +16,27 @@ const keysFor = (role: Parameters<typeof visibleNav>[0]) =>
   visibleNav(role, allReady).map((item) => item.key);
 
 describe("меню кабинета", () => {
-  it("сейчас: руководитель — Главная, ЖК, Застройщики и Настройки; менеджер — Главная (ЖК — шаг 12)", () => {
+  it("сейчас: руководитель — Главная, ЖК, Застройщики и Настройки; менеджер — Главная и ЖК (12.6)", () => {
     expect(visibleNav("head").map((item) => item.key)).toEqual([
       "home",
       "complexes",
       "developers",
       "settings",
     ]);
-    expect(visibleNav("manager").map((item) => item.key)).toEqual(["home"]);
+    expect(visibleNav("manager").map((item) => item.key)).toEqual(["home", "complexes"]);
     expect(visibleNav("videographer")).toEqual([]);
+    expect(isSectionOpen("manager", "complexes")).toBe(true);
+    expect(isSectionOpen("manager", "developers")).toBe(false);
   });
 
   it("раздел, готовый не для всех ролей: руководителю открыт, менеджеру — пока нет", () => {
-    expect(isSectionOpen("head", "complexes")).toBe(true);
-    expect(isSectionOpen("manager", "complexes")).toBe(false);
-    expect(isSectionOpen("manager", "home")).toBe(true);
+    const partly = ADMIN_NAV.map((item) =>
+      item.key === "complexes" ? { ...item, readyFor: ["head"] as const } : item,
+    );
+    expect(isSectionOpen("head", "complexes", partly)).toBe(true);
+    expect(isSectionOpen("manager", "complexes", partly)).toBe(false);
+    expect(isSectionOpen("manager", "home", partly)).toBe(true);
+    expect(visibleNav("manager", partly).map((item) => item.key)).toEqual(["home"]);
   });
 
   it("руководитель видит все 8 разделов в порядке PLAN §7", () => {

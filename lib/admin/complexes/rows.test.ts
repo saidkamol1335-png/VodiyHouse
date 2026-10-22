@@ -210,11 +210,11 @@ describe("«Планировки» (И5)", () => {
     );
     expect(parsed).toEqual({
       ok: true,
-      payload: [{ rooms: 1, area: 42.5, drawing_id: drawing, price_from: 31000, available: true }],
+      payload: [{ rooms: 1, area: 42.5, drawing_id: drawing, price_from: 31000 }],
     });
-    // Прочитанная из базы строка шлёт «цену от» и «доступна», только если их правили (Н7):
-    // устаревший черновик не затрёт «нет в наличии» менеджера.
-    const saved = { available: true, priceFrom: "31 000" };
+    // Прочитанная из базы строка шлёт «цену от», только если её правили; «доступна» вкладка не
+    // шлёт никогда — её меняют на «Квартирах» (Н7), устаревший черновик её не затрёт.
+    const saved = { priceFrom: "31 000" };
     expect(
       parseLayouts(formWith("layouts", [layout({ id: drawing, priceFrom: "31 000", saved })])),
     ).toEqual({ ok: true, payload: [{ id: drawing, rooms: 1, area: 42.5, drawing_id: null }] });
@@ -226,16 +226,7 @@ describe("«Планировки» (И5)", () => {
       ),
     ).toEqual({
       ok: true,
-      payload: [
-        {
-          id: drawing,
-          rooms: 1,
-          area: 42.5,
-          drawing_id: null,
-          price_from: 32000,
-          available: false,
-        },
-      ],
+      payload: [{ id: drawing, rooms: 1, area: 42.5, drawing_id: null, price_from: 32000 }],
     });
     expect(parseLayouts(formWith("layouts", [layout({ drawingId: "../evil" })]))).toEqual({
       ok: false,

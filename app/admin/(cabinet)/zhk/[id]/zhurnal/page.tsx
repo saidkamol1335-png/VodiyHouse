@@ -11,7 +11,7 @@ export const instant = false;
 
 /** Вкладка «Журнал»: кто и когда менял ЖК, блоки, планировки и фото. */
 export default async function ComplexJournalPage({ params }: { params: Promise<{ id: string }> }) {
-  const complex = await complexForTab(params);
+  const complex = await complexForTab(params, "log");
   if (!complex) return null;
   const t = await getTranslations("admin.complexes");
   const scope = { developerId: null, complexId: complex.id };
