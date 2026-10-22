@@ -127,6 +127,18 @@ describe("готовый блок: сохранение стояков по сн
     );
     expect(changes).toHaveLength(2);
   });
+
+  it("план сжался после снимка (удалили эт. 2) — снимок шире плана правку не портит", () => {
+    const rest = units.filter((unit) => unit.floor > 2);
+    const next = NAMUNA.map((riser) =>
+      riser.position === 1 ? { ...riser, floorFrom: 3, layoutId: "st-new" } : riser,
+    );
+    const { changes, skipped } = riserEdits(rest, NAMUNA, next);
+    expect(skipped).toEqual([]);
+    // Позиция 1, эт. 3–16, два подъезда.
+    expect(changes).toHaveLength(28);
+    expect(new Set(changes.map((change) => change.layoutId))).toEqual(new Set(["st-new"]));
+  });
 });
 
 describe("готовый блок: 5000 квартир", () => {

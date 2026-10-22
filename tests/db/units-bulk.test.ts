@@ -270,6 +270,21 @@ describe("квартиры: цена, отделка, стояки, удален
         deleted: 16,
       });
       expect((await unitEntries(db.admin, target)).filter((e) => e.id > since)).toHaveLength(1);
+      // Квартиры — одной сводкой; а планировка, у которой поменялось то, что видит сайт
+      // («цена от» студии, наличие проданной), — своей записью (решение 12.7).
+      const layoutEntries = await db.admin.query<{
+        entity_id: string;
+        actor_id: string;
+        currency: string;
+      }>(
+        "select entity_id, actor_id, changes ->> 'currency' as currency from audit_log where entity = 'layouts' and id > $1 order by id",
+        [since],
+      );
+      expect(layoutEntries.rows).toEqual([
+        // «Цена от» — деньги: в записи валюта блока (12.7).
+        { entity_id: studio, actor_id: head, currency: "USD" },
+        { entity_id: soldOut, actor_id: head, currency: "USD" },
+      ]);
       const layouts = await db.admin.query<{
         id: string;
         available: boolean;
@@ -351,6 +366,24 @@ describe("квартиры: цена, отделка, стояки, удален
       await expectHint(
         callAs(db, manager, "set_layout_available($1, null)", [layout]),
         "vh:invalid",
+      );
+      const entries = async () =>
+        (
+          await db.admin.query<{ actor_id: string }>(
+            "select actor_id from audit_log where entity = 'layouts' and entity_id = $1 order by id",
+            [layout],
+          )
+        ).rows;
+      expect((await entries()).at(-1)?.actor_id).toBe(manager);
+      // Тот же тап ещё раз — без записи; удалённая планировка — «не найдена» (экран перечитывает).
+      const before = (await entries()).length;
+      expect(await callAs(db, manager, "set_layout_available($1, false)", [layout])).toMatchObject({
+        changed: 0,
+      });
+      expect(await entries()).toHaveLength(before);
+      await expectHint(
+        callAs(db, manager, "set_layout_available(gen_random_uuid(), false)"),
+        "vh:not_found",
       );
 
       // «Планировки» без ключа available флаг не трогают (устаревший черновик не затрёт «нет в наличии»).

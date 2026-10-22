@@ -1,4 +1,5 @@
 import type { useTranslations } from "next-intl";
+import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 import type { BarMessage } from "@/lib/admin/units/bar";
 import type { StatusMessage, StatusSubject } from "@/lib/admin/units/statusOutcome";
 import { editBarText } from "./editBarText";
@@ -68,8 +69,15 @@ const STATUS_KINDS: ReadonlySet<string> = new Set([
 const isStatusMessage = (message: BarMessage): message is StatusMessage =>
   STATUS_KINDS.has(message.kind);
 
+/**
+ * Статус и «Отменить» доступны и менеджеру: «Это может только руководитель» ввело бы его в
+ * заблуждение — отказ здесь значит, что доступ отключили или сменили роль, пока страница открыта.
+ */
+const statusError = ({ bar, errors }: BarTexts, error: ContentErrorCode) =>
+  error === "forbidden" ? bar("forbidden") : errors(error);
+
 function statusText(texts: BarTexts, message: StatusMessage): BarText {
-  const { bar, status, errors } = texts;
+  const { bar, status } = texts;
   const only = (title: string): BarText => ({ title, detail: null });
   switch (message.kind) {
     case "saving":
@@ -85,7 +93,7 @@ function statusText(texts: BarTexts, message: StatusMessage): BarText {
     case "failed":
       return {
         title: bar("failed", { subject: subjectText(texts, message.subject, true) }),
-        detail: errors(message.error),
+        detail: statusError(texts, message.error),
       };
     case "reverting":
       return { title: subjectText(texts, message.subject), detail: bar("reverting") };
@@ -98,7 +106,7 @@ function statusText(texts: BarTexts, message: StatusMessage): BarText {
     case "revertFailed":
       return {
         title: bar("revertFailed", { subject: subjectText(texts, message.subject, true) }),
-        detail: errors(message.error),
+        detail: statusError(texts, message.error),
       };
   }
 }

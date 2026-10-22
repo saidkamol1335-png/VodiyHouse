@@ -1,6 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { seedContent, type ContentIds } from "./content-fixtures";
-import { createStaff, createTestDb, expectHint, user, type Db, type TestDb } from "./harness";
+import {
+  createStaff,
+  createTestDb,
+  expectHint,
+  isRemoteTarget,
+  user,
+  type Db,
+  type TestDb,
+} from "./harness";
 import {
   SMALL_PLAN,
   callAs,
@@ -204,6 +212,13 @@ describe("квартиры: статус, «Отменить» и журнал",
         "vh:invalid",
       );
       await expectHint(
+        callAs(db, manager, "revert_units_status($1, 'sold', $2::jsonb)", [
+          block,
+          JSON.stringify([{ status: "free", ids: many }]),
+        ]),
+        "vh:invalid",
+      );
+      await expectHint(
         callAs(db, manager, "set_units_status($1, $2, null)", [block, [own.id]]),
         "vh:invalid",
       );
@@ -391,24 +406,28 @@ describe("квартиры: статус, «Отменить» и журнал",
     });
   });
 
-  it("на свежем соединении правка квартиры пишется в журнал (флаг ещё не задан)", async () => {
-    const clean = await createTestDb();
-    try {
-      const fixtures = await seedContent(clean.admin);
-      const boss = await createStaff(clean.admin, "head");
-      await clean.as(user(boss), (tx) =>
-        tx.query('select update_unit($1, $2, \'{"number": "1А"}\'::jsonb)', [
-          fixtures.publicBlock,
-          fixtures.units[0],
-        ]),
-      );
-      const { rows } = await clean.admin.query<{ action: string }>(
-        "select action from audit_log where entity = 'units' and entity_id = $1",
-        [fixtures.units[0]],
-      );
-      expect(rows.map((row) => row.action)).toEqual(["insert", "update"]);
-    } finally {
-      await clean.close();
-    }
-  });
+  // В облаке второе соединение ждало бы строк, которые держит незакрытая транзакция файла.
+  it.skipIf(isRemoteTarget)(
+    "на свежем соединении правка квартиры пишется в журнал (флаг ещё не задан)",
+    async () => {
+      const clean = await createTestDb();
+      try {
+        const fixtures = await seedContent(clean.admin);
+        const boss = await createStaff(clean.admin, "head");
+        await clean.as(user(boss), (tx) =>
+          tx.query('select update_unit($1, $2, \'{"number": "1А"}\'::jsonb)', [
+            fixtures.publicBlock,
+            fixtures.units[0],
+          ]),
+        );
+        const { rows } = await clean.admin.query<{ action: string }>(
+          "select action from audit_log where entity = 'units' and entity_id = $1",
+          [fixtures.units[0]],
+        );
+        expect(rows.map((row) => row.action)).toEqual(["insert", "update"]);
+      } finally {
+        await clean.close();
+      }
+    },
+  );
 });

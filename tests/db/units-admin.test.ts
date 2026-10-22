@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { unitTotalPrice } from "@/lib/calc/unitPrice";
 import { BLOCK_PLAN_LIMITS, compareUnitNumbers, isUnitNumber, type BlockPlan } from "@/lib/units";
@@ -233,6 +231,43 @@ describe("квартиры в кабинете: права, генератор, 
         callAs(db, head, "add_unit($1, 1, 1, 2, '5001')", [tooBig]),
         "vh:units_limit",
       );
+
+      // Остальные пакетные пути — на том же блоке: в облаке их ограничивает statement_timeout роли.
+      const timed = async <T>(run: () => Promise<T>): Promise<T> => {
+        const at = performance.now();
+        const result = await run();
+        expect(performance.now() - at).toBeLessThan(15_000);
+        return result;
+      };
+      const listed = await timed(() =>
+        callAs<unknown[]>(db, manager, "block_unit_rows($1)", [tooBig]),
+      );
+      expect(listed).toHaveLength(5000);
+      const unitIds = (await unitsOf(db.admin, tooBig)).map((unit) => unit.id);
+      const status = await timed(() =>
+        callAs<{ changed: number; undo: unknown[] }>(
+          db,
+          manager,
+          "set_units_status($1, $2, 'reserved')",
+          [tooBig, unitIds],
+        ),
+      );
+      expect(status.changed).toBe(5000);
+      expect(
+        await timed(() =>
+          callAs(db, manager, "revert_units_status($1, 'reserved', $2::jsonb)", [
+            tooBig,
+            JSON.stringify(status.undo),
+          ]),
+        ),
+      ).toMatchObject({ reverted: 5000, missing: 0 });
+      await timed(() =>
+        callAs(db, head, "set_units_price($1, $2, 'total', 50000)", [tooBig, unitIds]),
+      );
+      expect(
+        await timed(() => callAs(db, head, "delete_block_units($1, 'Т')", [tooBig])),
+      ).toMatchObject({ deleted: 5000 });
+      expect(await unitsOf(db.admin, tooBig)).toHaveLength(0);
     });
 
     it("неверные строки отклоняются целиком понятным кодом, без частичной вставки", async () => {
@@ -538,15 +573,14 @@ describe("квартиры в кабинете: права, генератор, 
   });
 
   it("каждая функция, что пишет квартиры, берёт замок ЖК до чтения и глушит журнал парно", async () => {
-    const sql = await readFile(
-      path.resolve(import.meta.dirname, "../../supabase/migrations/20261021120000_units_admin.sql"),
-      "utf8",
+    // Действующие тела из базы, а не текст одной миграции: поздняя create or replace без замка
+    // тоже попадёт под проверку. Без комментариев: закомментированный вызов не засчитывается.
+    const { rows: functions } = await db.admin.query<{ name: string; source: string }>(
+      "select proname as name, prosrc as source from pg_proc where pronamespace = 'public'::regnamespace",
     );
-    // Без комментариев: закомментированный вызов замка не должен засчитываться.
-    const bodies = sql
-      .replace(/--.*$/gm, "")
-      .split(/\ncreate (?:or replace )?function /)
-      .slice(1);
+    const bodies = functions.map(
+      ({ name, source }) => `public.${name}(${source.replace(/--.*$/gm, "")}`,
+    );
     const nameOf = (body: string) => body.slice(0, body.indexOf("("));
     const writers = bodies.filter(
       (body) =>

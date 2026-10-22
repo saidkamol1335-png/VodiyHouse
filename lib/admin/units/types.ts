@@ -129,7 +129,7 @@ export type UnitsStatusActions = {
 
 /**
  * Правки руководителя (12.5, Н3, Н4). Каждое действие — по отдельности: кнопка есть, только если
- * передано её действие (TODO-заказчик «цены — менеджер?» закрывается одной строкой страницы).
+ * передано её действие (объём TODO-заказчик «цены — менеджер?» — в lib/admin/units/access.ts).
  */
 export type UnitsEditActions = Partial<{
   add: UnitsAction<AddUnitInput, UnitRowResult>;

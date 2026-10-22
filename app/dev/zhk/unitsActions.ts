@@ -6,7 +6,14 @@ import { demoLayouts } from "@/lib/admin/complexes/demoLayouts";
 import { demoBlockUnits } from "@/lib/admin/complexes/demoUnits";
 import { demoUnitsScenario } from "@/lib/admin/complexes/demoUnitsScenarios";
 import { unitsFailure } from "@/lib/admin/units/errors";
-import { isUuid, readPlan, readRisers, readStatus, readUnitIds } from "@/lib/admin/units/parse";
+import {
+  isUuid,
+  readPlan,
+  readRisers,
+  readRisersSnapshot,
+  readStatus,
+  readUnitIds,
+} from "@/lib/admin/units/parse";
 import type {
   BlockUnitsInput,
   BlockUnitsResult,
@@ -65,7 +72,7 @@ export async function demoSaveRisersAction(
     : null;
   if (!block) return unitsFailure("notFound");
   const plan = planFromUnits(block.units, block.floors);
-  const base = readRisers(input.base, plan);
+  const base = readRisersSnapshot(input.base);
   const risers = readRisers(input.risers, plan);
   if (!base || !risers) return unitsFailure("invalid");
   const { changes, skipped } = riserEdits(block.units, base, risers);

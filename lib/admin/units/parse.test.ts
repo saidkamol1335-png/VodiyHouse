@@ -6,6 +6,7 @@ import {
   readPlan,
   readPrice,
   readRisers,
+  readRisersSnapshot,
   readUnitIds,
   readUnitPatch,
 } from "./parse";
@@ -73,6 +74,10 @@ describe("вход действий «Квартир»", () => {
     expect(readRisers([{ ...risers[0], floorTo: 13 }], PLAN)).toBeNull();
     expect(readRisers([{ ...risers[0], layoutId: "x" }], PLAN)).toBeNull();
     expect(readRisers([risers[0], risers[0]], PLAN)).toBeNull();
+    // Снимок base — только форма: план мог сжаться после него (CR1 приёмки 12.7).
+    expect(readRisersSnapshot([{ ...risers[0], floorFrom: 1, floorTo: 13 }])).toHaveLength(1);
+    expect(readRisersSnapshot([{ ...risers[0], layoutId: "x" }])).toBeNull();
+    expect(readRisersSnapshot("x")).toBeNull();
   });
 
   it("«Удалить список блока»: название — без регистра и с двойниками A ↔ А", () => {

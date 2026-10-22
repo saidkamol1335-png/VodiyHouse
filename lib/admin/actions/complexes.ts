@@ -1,7 +1,6 @@
 "use server";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
@@ -66,11 +65,21 @@ export async function createComplexAction(formData: FormData): Promise<CreateCom
 
 type DbError = { code?: string; hint?: string; message?: string; details?: string | null };
 
-/** ЖК блока — из базы, а не из формы; не нашли — хотя бы перерисовать страницу кабинета. */
-async function expireComplexOfBlock(supabase: SupabaseClient, block: string): Promise<void> {
-  const { data } = await supabase.from("blocks").select("complex_id").eq("id", block).maybeSingle();
-  if (data?.complex_id) expireComplex(data.complex_id);
-  else refresh();
+/**
+ * ЖК блока — из базы, а не из формы, и до записи: сбой этого чтения после неё оставил бы кэш сайта
+ * старым при ответе «Сохранено».
+ */
+async function complexOfBlock(
+  supabase: SupabaseClient,
+  block: string,
+): Promise<{ id: string } | { error: ContentErrorCode }> {
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("complex_id")
+    .eq("id", block)
+    .maybeSingle();
+  if (error) return { error: contentDbErrorCode(error) };
+  return data?.complex_id ? { id: data.complex_id } : { error: "notFound" };
 }
 
 /** vh:not_ready несёт в detail, какие условия публикации не выполнены: «address,point». */
@@ -223,14 +232,18 @@ export async function saveBlockLayoutsAction(formData: FormData): Promise<SaveRo
   if (!parsed.ok)
     return parsed.error ? fail(parsed.error) : fail(null, { rowErrors: parsed.rowErrors });
 
+  const owner = await complexOfBlock(guard.supabase, block);
+  if ("error" in owner) return fail(owner.error);
+
   const { data, error } = await guard.supabase.rpc("save_block_layouts", {
     p_block: block,
     p_layouts: parsed.payload,
   });
   // vh:has_units здесь — про планировку со стояками, а не про блок со списком квартир.
   const code = error ? contentDbErrorCode(error) : null;
-  if (error) return fail(code === "hasUnits" ? "layoutHasUnits" : code, { broken: brokenOf(error) });
+  if (error)
+    return fail(code === "hasUnits" ? "layoutHasUnits" : code, { broken: brokenOf(error) });
   await removeMediaFiles(guard.supabase, data);
-  await expireComplexOfBlock(guard.supabase, block);
+  expireComplex(owner.id);
   return { status: "saved", at: Date.now() };
 }

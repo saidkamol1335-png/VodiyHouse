@@ -155,6 +155,10 @@ export async function expectAvailabilityMatches(db: TestDb, staffId: string, com
       [complexId],
     ),
   );
+  // Пустой набор ничего бы не проверил, а Map схлопнул бы задвоенные строки функции.
+  expect(expected.rows.length).toBeGreaterThan(0);
+  const expectedIds = new Set(expected.rows.map((row) => row.layout_id));
+  expect(rows.filter((row) => expectedIds.has(row.layout_id))).toHaveLength(expected.rows.length);
   const actual = new Map(rows.map((row) => [row.layout_id, row.free_count]));
   for (const row of expected.rows) expect(actual.get(row.layout_id)).toBe(row.free);
 }

@@ -73,8 +73,11 @@ const CONTENT_FILES = [
   "developerMedia.ts",
   "dictionaries.ts",
   "units.ts",
+  "unitsMass.ts",
   "unitsStatus.ts",
 ];
+// Без контента сайта: вход, сотрудники, чтение журнала и списка квартир.
+const NO_CONTENT_FILES = ["auth.ts", "journal.ts", "staff.ts", "unitsList.ts"];
 const WITHOUT_TAG = new Set([
   "createComplexAction",
   "createDeveloperAction",
@@ -82,13 +85,19 @@ const WITHOUT_TAG = new Set([
   "saveDeveloperPrivateAction",
 ]);
 const EXPIRES =
-  /\b(expireComplex|expireDeveloper|expireDictionaries|markComplexStale|markDeveloperStale|expireComplexOfBlock)\(/;
+  /\b(expireComplex|expireDeveloper|expireDictionaries|markComplexStale|markDeveloperStale)\(/;
 
 describe("действия контента сбрасывают кэш сайта", () => {
-  const files = readdirSync(ACTIONS_DIR).filter((file) => CONTENT_FILES.includes(file));
+  const all = readdirSync(ACTIONS_DIR).filter(
+    (file) => file.endsWith(".ts") && !file.endsWith(".test.ts"),
+  );
+  const files = all.filter((file) => CONTENT_FILES.includes(file));
 
-  it("все файлы контента на месте", () => {
-    expect(files.sort()).toEqual([...CONTENT_FILES].sort());
+  // Новый файл действий без разбора валит тест: иначе его действия проверку бы не проходили.
+  it("каждый файл действий разобран: контент сайта или явно без него", () => {
+    expect(all.filter((file) => !NO_CONTENT_FILES.includes(file)).sort()).toEqual(
+      [...CONTENT_FILES].sort(),
+    );
   });
 
   it.each(files)("%s", (file) => {

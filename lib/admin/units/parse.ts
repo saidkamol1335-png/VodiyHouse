@@ -118,12 +118,21 @@ function readRiser(value: unknown): Riser | null {
   };
 }
 
-/** Стояки в границах блока; пересечения одного уровня — отказ (validateRisers). */
-export function readRisers(value: unknown, plan: BlockPlan): Riser[] | null {
+/**
+ * Снимок стояков, с которым открыли правку (base), — только форма. План блока мог с тех пор
+ * сжаться (удалили нижний этаж, подъезд, крайнюю позицию): стояк снимка вне плана не покрывает
+ * квартир и ни на что не влияет, а строгая проверка навсегда отказывала бы верному черновику.
+ */
+export function readRisersSnapshot(value: unknown): Riser[] | null {
   if (!Array.isArray(value) || value.length > BLOCK_PLAN_LIMITS.totalUnits) return null;
   const risers = value.map(readRiser);
-  if (risers.some((riser) => riser === null)) return null;
-  return validateRisers(plan, risers as Riser[]).length === 0 ? (risers as Riser[]) : null;
+  return risers.some((riser) => riser === null) ? null : (risers as Riser[]);
+}
+
+/** Стояки в границах блока; пересечения одного уровня — отказ (validateRisers). */
+export function readRisers(value: unknown, plan: BlockPlan): Riser[] | null {
+  const risers = readRisersSnapshot(value);
+  return risers && validateRisers(plan, risers).length === 0 ? risers : null;
 }
 
 /**

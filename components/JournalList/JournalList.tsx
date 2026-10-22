@@ -15,7 +15,13 @@ import type {
   JournalScope,
   JournalValue,
 } from "@/lib/admin/journal/format";
-import { formatDate, formatDateTime, formatPrice, formatPricePerM2 } from "@/lib/format";
+import {
+  formatAmount,
+  formatDate,
+  formatDateTime,
+  formatPrice,
+  formatPricePerM2,
+} from "@/lib/format";
 import { JournalSummary } from "./JournalSummary";
 
 export type JournalLoader = (scope: JournalScope, before: number) => Promise<JournalLoadResult>;
@@ -203,9 +209,9 @@ function UnitValueText({ value, finishings }: ValueProps) {
   return <span className="journal-list__value">{finishings[value.id] ?? `#${value.id}`}</span>;
 }
 
-/** Цена с валютой блока; старые записи без валюты — просто числом. */
+/** Цена с валютой блока; старые записи без валюты — числом с разрядами. */
 function moneyText(value: Extract<JournalValue, { kind: "money" }>): string {
-  if (!value.currency) return String(value.amount);
+  if (!value.currency) return formatAmount(value.amount);
   return value.perM2
     ? formatPricePerM2(value.amount, value.currency)
     : formatPrice(value.amount, value.currency);

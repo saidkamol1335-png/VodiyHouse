@@ -26,10 +26,21 @@ export async function createRemoteTestDb(): Promise<TestDb> {
   await client.query("begin");
   await client.query(SANDBOX_CLEANUP);
 
+  // Тесты ждут и ошибок владельца (check, unique): без точки сохранения такая ошибка прервала бы
+  // транзакцию всего файла, как и у as() ниже.
+  let adminSavepoints = 0;
   const admin: Db = {
     query: async <T>(sql: string, params?: unknown[]) => {
-      const result = await client.query(sql, params);
-      return { rows: result.rows as T[], affectedRows: result.rowCount ?? 0 };
+      const savepoint = `admin_${(adminSavepoints += 1)}`;
+      await client.query(`savepoint ${savepoint}`);
+      try {
+        const result = await client.query(sql, params);
+        await client.query(`release savepoint ${savepoint}`);
+        return { rows: result.rows as T[], affectedRows: result.rowCount ?? 0 };
+      } catch (error) {
+        await client.query(`rollback to savepoint ${savepoint}`);
+        throw error;
+      }
     },
     exec: (sql: string) => {
       // Фиксация транзакции оставила бы тестовые строки в облаке — такие запросы запрещены.
@@ -42,7 +53,9 @@ export async function createRemoteTestDb(): Promise<TestDb> {
   // наверняка, иначе транзакция файла остаётся прерванной и следующие тесты падают не по своей вине.
   // SET ROLE не применяет statement_timeout роли (у authenticated в Supabase — 8 с), а PostgREST
   // применяет на каждом запросе: без этого тест 5000 квартир прошёл бы там, где кабинет упадёт.
-  const ownTimeout = (await client.query<{ value: string }>("select current_setting('statement_timeout') as value")).rows[0]!.value;
+  const ownTimeout = (
+    await client.query<{ value: string }>("select current_setting('statement_timeout') as value")
+  ).rows[0]!.value;
   const timeouts = await roleTimeouts(client);
   let savepoints = 0;
   const as = async <T>(actor: Actor, run: (db: Db) => Promise<T>): Promise<T> => {
@@ -52,7 +65,8 @@ export async function createRemoteTestDb(): Promise<TestDb> {
       await client.query("select set_config('request.jwt.claims', $1, true)", [claimsOf(actor)]);
       await client.query(`set local role ${PG_ROLE[actor.kind]}`);
       const timeout = timeouts.get(PG_ROLE[actor.kind]);
-      if (timeout) await client.query("select set_config('statement_timeout', $1, true)", [timeout]);
+      if (timeout)
+        await client.query("select set_config('statement_timeout', $1, true)", [timeout]);
       const result = await run(admin);
       await client.query("reset role");
       await client.query("select set_config('statement_timeout', $1, true)", [ownTimeout]);

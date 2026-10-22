@@ -36,7 +36,7 @@ describe("права на вкладке «Квартиры» — наличие
     expect(manager.saveRisers).toBeNull();
   });
 
-  it("видеограф — только чтение (раздел ему закрыт, это запасной случай)", () => {
+  it("видеограф — только чтение, как и действие чтения (PLAN §5; раздел ему пока закрыт)", () => {
     expect(unitsActionsFor("videographer", ALL)).toEqual({
       list: { read: ALL.list.read, status: null, edit: null },
       create: null,

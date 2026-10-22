@@ -9,6 +9,7 @@ import {
   readLayout,
   readPlan,
   readRisers,
+  readRisersSnapshot,
   readUnitPatch,
 } from "@/lib/admin/units/parse";
 import { replyCount, unitReply } from "@/lib/admin/units/reply";
@@ -158,7 +159,7 @@ export async function saveRisersAction(input: SaveRisersInput): Promise<SaveRise
   if (!block.data) return unitsFailure("notFound");
   const units = parseUnitRecords(rows.data ?? []);
   const plan = planFromUnits(units, block.data.floors_total);
-  const base = readRisers(input.base, plan);
+  const base = readRisersSnapshot(input.base);
   const risers = readRisers(input.risers, plan);
   if (!base || !risers) return unitsFailure("invalid");
   const { changes, skipped } = riserEdits(units, base, risers);

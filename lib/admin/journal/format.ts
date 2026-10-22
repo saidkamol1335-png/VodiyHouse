@@ -79,7 +79,11 @@ const HIDDEN_FIELDS = new Set([
 // правка (деньги и файл на сайте) должна быть в журнале — «изменено» без «было → стало».
 const OPAQUE_FIELDS = new Set(["drawing_id", "price_includes"]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
-const MONEY_FIELDS = new Set(["price", "price_per_m2"]);
+// Деньги — с валютой блока из контекста записи: цена квартиры и «цена от» планировки.
+const MONEY_FIELDS: Record<string, ReadonlySet<string>> = {
+  units: new Set(["price", "price_per_m2"]),
+  layouts: new Set(["price_from"]),
+};
 const FINISHING_ENTITIES = new Set(["units", "blocks"]);
 const TEXT_LIMIT = 140;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -117,7 +121,7 @@ export function journalValue(
     return { kind: "status", status: raw };
   if (entity === "units" && field === "status" && isUnitStatus(raw))
     return { kind: "unitStatus", status: raw };
-  if (entity === "units" && MONEY_FIELDS.has(field) && typeof raw === "number")
+  if (MONEY_FIELDS[entity]?.has(field) && typeof raw === "number")
     return {
       kind: "money",
       amount: raw,

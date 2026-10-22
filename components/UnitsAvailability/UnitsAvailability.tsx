@@ -117,6 +117,7 @@ function optionClass(active: boolean, available: boolean): string {
 type AvailabilityRowProps = { layout: UnitsLayout; text: LayoutText; control: Control };
 
 function AvailabilityRow({ layout, text, control }: AvailabilityRowProps) {
+  const t = useTranslations("admin.complexes.units.availability");
   const tErrors = useTranslations("admin.developers.errors");
   const errorId = useId();
   const busy = layout.id in control.state.pending;
@@ -133,7 +134,8 @@ function AvailabilityRow({ layout, text, control }: AvailabilityRowProps) {
       />
       {error ? (
         <p id={errorId} className="units-availability__error" role="alert">
-          {tErrors(error)}
+          {/* Н7 — право и менеджера: «только руководитель» ввело бы его в заблуждение. */}
+          {error === "forbidden" ? t("forbidden") : tErrors(error)}
         </p>
       ) : null}
     </li>

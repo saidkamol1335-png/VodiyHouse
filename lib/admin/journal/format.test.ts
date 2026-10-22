@@ -37,6 +37,18 @@ describe("значения в журнале", () => {
     });
   });
 
+  it("деньги: цена квартиры и «цена от» планировки — с валютой блока; у ЖК число — текстом", () => {
+    const usd = { currency: "USD" as const };
+    expect(journalValue("layouts", "price_from", 26402.28, usd)).toEqual({
+      kind: "money",
+      amount: 26402.28,
+      currency: "USD",
+      perM2: false,
+    });
+    expect(journalValue("units", "price_per_m2", 620, usd)).toMatchObject({ perM2: true });
+    expect(journalValue("complexes", "price_from", 5)).toEqual({ kind: "text", text: "5" });
+  });
+
   it("длинный текст обрезается", () => {
     const value = journalValue("developer_private", "notes", "я".repeat(500));
     expect(value.kind === "text" && value.text.length).toBe(140);
