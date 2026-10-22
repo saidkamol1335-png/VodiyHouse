@@ -4,14 +4,31 @@
     {
       "name": "vodiyhouse-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
     },
     {
       "name": "mockup",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "mockup:serve"],
+      "runtimeArgs": [
+        "run",
+        "mockup:serve"
+      ],
       "port": 4599
+    },
+    {
+      "name": "vodiyhouse-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "--port",
+        "3010"
+      ],
+      "port": 3010
     }
   ]
 }
