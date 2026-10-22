@@ -153,9 +153,7 @@ export async function setDeveloperStatusAction(formData: FormData): Promise<Stat
   if (refused) return refused;
   // Отметку 1.2 база требует поставить в том же действии, что и публикацию.
   const change =
-    to === "published"
-      ? { status: to, files_checked_at: new Date().toISOString() }
-      : { status: to };
+    to === "published" ? { status: to, files_checked_at: new Date().toISOString() } : { status: to };
   const { error } = await guard.supabase.from("developers").update(change).eq("id", id);
   if (error) return statusError(contentDbErrorCode(error));
   expireDeveloper(id);

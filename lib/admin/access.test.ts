@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  cabinetOpenWithoutLogin,
-  DEV_VIEWER,
-  isStaffRole,
-  resolveViewer,
-  type OwnProfileRow,
-} from "./access";
+import { cabinetOpenWithoutLogin, DEV_VIEWER, isStaffRole, resolveViewer, type OwnProfileRow } from "./access";
 
 const ID = "6f1c2c1e-6b1f-4bb0-9d7e-0d2b9f1d1a01";
 const profile = (patch: Partial<OwnProfileRow> = {}): OwnProfileRow => ({

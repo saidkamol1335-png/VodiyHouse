@@ -1,10 +1,6 @@
 import { AuthApiError, AuthRetryableFetchError } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import {
-  changeFirstPassword,
-  type ChangePasswordDeps,
-  type ChangePasswordInput,
-} from "./changePassword";
+import { changeFirstPassword, type ChangePasswordDeps, type ChangePasswordInput } from "./changePassword";
 
 const INPUT: ChangePasswordInput = {
   userId: "user-1",
@@ -18,18 +14,10 @@ const INPUT: ChangePasswordInput = {
 function deps(patch: Partial<ChangePasswordDeps> = {}) {
   const calls: string[] = [];
   const fake = {
-    verifyCurrentPassword: vi.fn<ChangePasswordDeps["verifyCurrentPassword"]>(
-      async () => (calls.push("verify"), "ok"),
-    ),
-    updatePassword: vi.fn<ChangePasswordDeps["updatePassword"]>(
-      async () => (calls.push("update"), null),
-    ),
-    clearMustChange: vi.fn<ChangePasswordDeps["clearMustChange"]>(
-      async () => (calls.push("clear"), true),
-    ),
-    signOutOthers: vi.fn<ChangePasswordDeps["signOutOthers"]>(
-      async () => void calls.push("others"),
-    ),
+    verifyCurrentPassword: vi.fn<ChangePasswordDeps["verifyCurrentPassword"]>(async () => (calls.push("verify"), "ok")),
+    updatePassword: vi.fn<ChangePasswordDeps["updatePassword"]>(async () => (calls.push("update"), null)),
+    clearMustChange: vi.fn<ChangePasswordDeps["clearMustChange"]>(async () => (calls.push("clear"), true)),
+    signOutOthers: vi.fn<ChangePasswordDeps["signOutOthers"]>(async () => void calls.push("others")),
     ...patch,
   };
   return { fake, calls };
@@ -47,9 +35,7 @@ describe("первая смена пароля", () => {
 
   it("короткий и несовпадение — ошибки полей, Supabase не вызывается", async () => {
     const { fake } = deps();
-    expect(
-      await changeFirstPassword(fake, { ...INPUT, password: "коротко", confirm: "коротко" }),
-    ).toEqual({
+    expect(await changeFirstPassword(fake, { ...INPUT, password: "коротко", confirm: "коротко" })).toEqual({
       kind: "error",
       code: null,
       fieldErrors: { password: "tooShort" },
@@ -74,13 +60,8 @@ describe("первая смена пароля", () => {
   });
 
   it("сеть при проверке временного → network, новый не ставится", async () => {
-    const { fake } = deps({
-      verifyCurrentPassword: async () => ({ error: new AuthRetryableFetchError("сбой", 503) }),
-    });
-    expect(await changeFirstPassword(fake, INPUT)).toMatchObject({
-      kind: "error",
-      code: "network",
-    });
+    const { fake } = deps({ verifyCurrentPassword: async () => ({ error: new AuthRetryableFetchError("сбой", 503) }) });
+    expect(await changeFirstPassword(fake, INPUT)).toMatchObject({ kind: "error", code: "network" });
     expect(fake.updatePassword).not.toHaveBeenCalled();
   });
 
@@ -90,30 +71,19 @@ describe("первая смена пароля", () => {
       ["weak_password", "weakPassword"],
     ] as const) {
       const { fake } = deps({ updatePassword: async () => new AuthApiError("x", 422, code) });
-      expect(await changeFirstPassword(fake, INPUT)).toEqual({
-        kind: "error",
-        code: null,
-        fieldErrors: { password: field },
-      });
+      expect(await changeFirstPassword(fake, INPUT)).toEqual({ kind: "error", code: null, fieldErrors: { password: field } });
       expect(fake.clearMustChange).not.toHaveBeenCalled();
     }
   });
 
   it("флаг не снялся → finishFailed, остальные сессии не трогаем", async () => {
     const { fake } = deps({ clearMustChange: async () => false });
-    expect(await changeFirstPassword(fake, INPUT)).toEqual({
-      kind: "error",
-      code: "finishFailed",
-      fieldErrors: {},
-    });
+    expect(await changeFirstPassword(fake, INPUT)).toEqual({ kind: "error", code: "finishFailed", fieldErrors: {} });
     expect(fake.signOutOthers).not.toHaveBeenCalled();
   });
 
   it("видеограф после смены — на Главную с заглушкой роли (пока нет раздела «Видео»)", async () => {
     const { fake } = deps();
-    expect(await changeFirstPassword(fake, { ...INPUT, role: "videographer" })).toEqual({
-      kind: "redirect",
-      to: "/admin",
-    });
+    expect(await changeFirstPassword(fake, { ...INPUT, role: "videographer" })).toEqual({ kind: "redirect", to: "/admin" });
   });
 });

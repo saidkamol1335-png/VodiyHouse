@@ -25,15 +25,8 @@ export type CabinetSession = { result: ViewerResult; email: string | null };
 const PROFILE_COLUMNS = "id, full_name, role, is_active, must_change_password";
 
 /** Свой профиль под сессией сотрудника (RLS: каждый видит себя). Ошибка сети — исключение. */
-export async function readOwnProfile(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<OwnProfileRow | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(PROFILE_COLUMNS)
-    .eq("id", userId)
-    .maybeSingle();
+export async function readOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfileRow | null> {
+  const { data, error } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", userId).maybeSingle();
   if (error) throw new Error("cabinet-profile-unavailable", { cause: error });
   return data as OwnProfileRow | null;
 }
@@ -48,8 +41,7 @@ export const getCabinetSession = cache(async (): Promise<CabinetSession> => {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.getClaims();
   // Auth не ответил — app/admin/error.tsx покажет «Кабинет временно недоступен», а не вход.
-  if (error?.name === "AuthRetryableFetchError")
-    throw new Error("cabinet-auth-unavailable", { cause: error });
+  if (error?.name === "AuthRetryableFetchError") throw new Error("cabinet-auth-unavailable", { cause: error });
   const userId = data?.claims.sub ?? null;
   const profile = userId ? await readOwnProfile(supabase, userId) : null;
   const email = typeof data?.claims.email === "string" ? data.claims.email : null;
@@ -57,9 +49,7 @@ export const getCabinetSession = cache(async (): Promise<CabinetSession> => {
 });
 
 /** Сотрудник страницы кабинета; иначе редирект: на вход, на «доступ отключён» или на смену пароля. */
-export async function requireViewer(
-  options: { allowPasswordChange?: boolean } = {},
-): Promise<CabinetViewer> {
+export async function requireViewer(options: { allowPasswordChange?: boolean } = {}): Promise<CabinetViewer> {
   const { result } = await getCabinetSession();
   switch (result.kind) {
     case "login":
@@ -75,9 +65,7 @@ export async function requireViewer(
 }
 
 /** Сотрудник и открыт ли ему раздел (недоступное показывает «Раздел доступен руководителю»). */
-export async function requireSection(
-  key: AdminNavKey,
-): Promise<{ viewer: CabinetViewer; allowed: boolean }> {
+export async function requireSection(key: AdminNavKey): Promise<{ viewer: CabinetViewer; allowed: boolean }> {
   const viewer = await requireViewer();
   return { viewer, allowed: isSectionOpen(viewer.role, key) };
 }
@@ -100,10 +88,7 @@ async function currentUser(supabase: SupabaseClient, fresh: boolean): Promise<Cu
   const { data, error } = await supabase.auth.getClaims();
   if (error?.name === "AuthRetryableFetchError") return { code: "network" };
   const claims = data?.claims;
-  return {
-    id: claims?.sub ?? null,
-    email: typeof claims?.email === "string" ? claims.email : null,
-  };
+  return { id: claims?.sub ?? null, email: typeof claims?.email === "string" ? claims.email : null };
 }
 
 /**
@@ -125,11 +110,7 @@ export async function requireActionViewer(
   } catch {
     return { ok: false, code: "network" };
   }
-  const decision = decideActionGuard(
-    resolveViewer(user.id, profile),
-    roles,
-    options.allowPasswordChange ?? false,
-  );
+  const decision = decideActionGuard(resolveViewer(user.id, profile), roles, options.allowPasswordChange ?? false);
   if ("code" in decision) return { ok: false, code: decision.code };
   return { ok: true, viewer: decision.viewer, email: user.email, supabase };
 }

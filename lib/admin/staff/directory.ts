@@ -52,9 +52,7 @@ export function parseDirectoryRows(rows: readonly DirectoryRow[]): StaffMember[]
  */
 export type StaffState = "active" | "pending" | "inactive" | "inactiveNotBanned" | "activeBanned";
 
-export function staffState(
-  member: Pick<StaffMember, "isActive" | "banned" | "mustChangePassword">,
-): StaffState {
+export function staffState(member: Pick<StaffMember, "isActive" | "banned" | "mustChangePassword">): StaffState {
   if (!member.isActive) return member.banned ? "inactive" : "inactiveNotBanned";
   if (member.banned) return "activeBanned";
   return member.mustChangePassword ? "pending" : "active";

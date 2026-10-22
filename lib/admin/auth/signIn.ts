@@ -14,8 +14,7 @@ export type SignInDeps = {
   signOutLocal(): Promise<void>;
 };
 
-export type SignInOutcome =
-  { kind: "redirect"; to: string } | { kind: "error"; code: SignInErrorCode };
+export type SignInOutcome = { kind: "redirect"; to: string } | { kind: "error"; code: SignInErrorCode };
 
 /** Пароль → профиль → куда вести. Без профиля или отключённому сессия сразу закрывается. */
 export async function signIn(deps: SignInDeps, input: SignInInput): Promise<SignInOutcome> {

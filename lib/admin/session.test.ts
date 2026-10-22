@@ -20,10 +20,7 @@ describe("кого пускать в Server Action", () => {
   });
 
   it("ждёт смены пароля: в обычные действия — нет, в смену пароля — да", () => {
-    const pending = {
-      kind: "changePassword" as const,
-      viewer: viewer({ mustChangePassword: true }),
-    };
+    const pending = { kind: "changePassword" as const, viewer: viewer({ mustChangePassword: true }) };
     expect(decideActionGuard(pending, ["manager"], false)).toEqual({ code: "forbidden" });
     expect(decideActionGuard(pending, ["manager"], true)).toEqual({ viewer: pending.viewer });
   });

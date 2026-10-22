@@ -40,11 +40,7 @@ describe("вход", () => {
   });
 
   it("неверный пароль → invalidCredentials, профиль не читается", async () => {
-    const fake = deps({
-      signInWithPassword: async () => ({
-        error: new AuthApiError("x", 400, "invalid_credentials"),
-      }),
-    });
+    const fake = deps({ signInWithPassword: async () => ({ error: new AuthApiError("x", 400, "invalid_credentials") }) });
     expect(await signIn(fake, INPUT)).toEqual({ kind: "error", code: "invalidCredentials" });
     expect(fake.readOwnProfile).not.toHaveBeenCalled();
   });
@@ -68,9 +64,7 @@ describe("вход", () => {
   });
 
   it("сеть Auth → network", async () => {
-    const fake = deps({
-      signInWithPassword: async () => ({ error: new AuthRetryableFetchError("сбой", 503) }),
-    });
+    const fake = deps({ signInWithPassword: async () => ({ error: new AuthRetryableFetchError("сбой", 503) }) });
     expect(await signIn(fake, INPUT)).toEqual({ kind: "error", code: "network" });
   });
 
@@ -79,12 +73,7 @@ describe("вход", () => {
       vi.spyOn(console, method).mockImplementation(() => undefined),
     );
     await signIn(deps({ readOwnProfile: async () => null }), INPUT);
-    await signIn(
-      deps({
-        signInWithPassword: async () => ({ error: new AuthApiError("x", 400, "user_banned") }),
-      }),
-      INPUT,
-    );
+    await signIn(deps({ signInWithPassword: async () => ({ error: new AuthApiError("x", 400, "user_banned") }) }), INPUT);
     for (const spy of spies) {
       for (const call of spy.mock.calls) expect(JSON.stringify(call)).not.toContain(INPUT.password);
     }
