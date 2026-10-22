@@ -89,7 +89,19 @@ export function nextLive(
   };
 }
 
-/** Activity спрятала главную: при показе CSS перезапустит анимации — прошлые вспышки гасим. */
-export function withoutFlashes(state: LiveStock): LiveStock {
-  return Object.keys(state.flashes).length === 0 ? state : { ...state, flashes: {} };
+/**
+ * Activity спрятала главную: при показе CSS перезапустит анимации — гасим вспышки, которые уже
+ * были на экране (shown). Новую, пришедшую в том же коммите (вернулись ссылкой — свежие цифры),
+ * не трогаем: в разработке StrictMode при показе ещё раз зовёт очистку, и она стёрла бы её.
+ */
+export function withoutFlashes(
+  state: LiveStock,
+  shown: Readonly<Record<string, number>>,
+): LiveStock {
+  const flashes = Object.fromEntries(
+    Object.entries(state.flashes).filter(([id, count]) => shown[id] !== count),
+  );
+  return Object.keys(flashes).length === Object.keys(state.flashes).length
+    ? state
+    : { ...state, flashes };
 }

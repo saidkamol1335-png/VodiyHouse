@@ -182,7 +182,7 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
         </span>
         <StockRooms stock={row.stock} className="complex-list__rooms" />
         <span className="complex-list__stock">
-          <StockBadge stock={row.stock} />
+          <StockBadge stock={row.stock} unassigned={row.unassigned} />
         </span>
         {publication ? (
           <span className="complex-list__status">

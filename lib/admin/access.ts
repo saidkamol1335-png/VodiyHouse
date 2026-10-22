@@ -21,13 +21,21 @@ export type CabinetViewer = {
 };
 
 // Без входа видно всё, что увидит руководитель: так проверяется меню целиком.
-export const DEV_VIEWER: CabinetViewer = { id: "dev", role: "head", name: null, mustChangePassword: false };
+export const DEV_VIEWER: CabinetViewer = {
+  id: "dev",
+  role: "head",
+  name: null,
+  mustChangePassword: false,
+};
 
 /**
  * Кабинет без входа — только при разработке и только без ключей Supabase: с ключами
  * проверяется настоящий вход, а продакшен-сборка без ключей ведёт на экран входа.
  */
-export function cabinetOpenWithoutLogin(input: { nodeEnv: string | undefined; hasEnv: boolean }): boolean {
+export function cabinetOpenWithoutLogin(input: {
+  nodeEnv: string | undefined;
+  hasEnv: boolean;
+}): boolean {
   return input.nodeEnv !== "production" && !input.hasEnv;
 }
 

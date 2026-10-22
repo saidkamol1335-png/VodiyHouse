@@ -153,10 +153,13 @@ export function siteStockFrom(
   };
 }
 
-/** Итог в шапке панели (Г1 B): «176» или «176+», если у части типов нет числа. */
-export function siteStockTotal(stock: SiteStock): { free: number; partial: boolean } {
+export type SiteStockTotal = { free: number; partial: boolean; unassigned: number };
+
+/** Итог в шапке панели (Г1 B): «176» или «176+», если у части типов нет числа; без планировки — отдельно. */
+export function siteStockTotal(stock: SiteStock): SiteStockTotal {
   return {
     free: stock.complexes.reduce((sum, complex) => sum + complex.stock.free, 0),
     partial: stock.complexes.some((complex) => complex.stock.partial),
+    unassigned: stock.complexes.reduce((sum, complex) => sum + complex.unassigned, 0),
   };
 }

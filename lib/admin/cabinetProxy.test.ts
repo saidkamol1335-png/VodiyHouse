@@ -31,7 +31,10 @@ function request(path: string, init: { cookie?: string; action?: boolean } = {})
   const headers = new Headers();
   if (init.cookie) headers.set("cookie", init.cookie);
   if (init.action) headers.set("next-action", "abc123");
-  return new NextRequest(`http://localhost:3000${path}`, { headers, method: init.action ? "POST" : "GET" });
+  return new NextRequest(`http://localhost:3000${path}`, {
+    headers,
+    method: init.action ? "POST" : "GET",
+  });
 }
 
 const isRedirectTo = (response: Response, path: string) =>

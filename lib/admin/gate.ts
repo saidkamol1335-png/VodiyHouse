@@ -23,7 +23,12 @@ export type GateDecision = { kind: "next" } | { kind: "redirect"; location: stri
  * Экран входа открыт всегда; Server Action не перенаправляется (307 на POST сломал бы действие —
  * оно само проверяет сотрудника); без сессии — на вход.
  */
-export function adminGate(input: { pathname: string; hasSession: boolean; isServerAction: boolean }): GateDecision {
-  if (input.isServerAction || input.pathname === LOGIN_PATH || input.hasSession) return { kind: "next" };
+export function adminGate(input: {
+  pathname: string;
+  hasSession: boolean;
+  isServerAction: boolean;
+}): GateDecision {
+  if (input.isServerAction || input.pathname === LOGIN_PATH || input.hasSession)
+    return { kind: "next" };
   return { kind: "redirect", location: LOGIN_PATH };
 }

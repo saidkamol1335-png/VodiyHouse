@@ -21,16 +21,27 @@ describe("добавить сотрудника", () => {
     const outcome = await createStaffMember(fake, INPUT);
     expect(outcome).toEqual({
       kind: "created",
-      member: { id: "user-9", fullName: "Азиз Рахимов", email: "aziz@vodiyhouse.uz", role: "manager" },
+      member: {
+        id: "user-9",
+        fullName: "Азиз Рахимов",
+        email: "aziz@vodiyhouse.uz",
+        role: "manager",
+      },
       password: PASSWORD,
     });
     expect(fake.createAuthUser).toHaveBeenCalledWith({ email: INPUT.email, password: PASSWORD });
-    expect(fake.insertProfile).toHaveBeenCalledWith({ id: "user-9", fullName: INPUT.fullName, role: "manager" });
+    expect(fake.insertProfile).toHaveBeenCalledWith({
+      id: "user-9",
+      fullName: INPUT.fullName,
+      role: "manager",
+    });
     expect(fake.deleteAuthUser).not.toHaveBeenCalled();
   });
 
   it("email занят → emailTaken, профиль не вставляется", async () => {
-    const fake = deps({ createAuthUser: async () => ({ error: new AuthApiError("x", 422, "email_exists") }) });
+    const fake = deps({
+      createAuthUser: async () => ({ error: new AuthApiError("x", 422, "email_exists") }),
+    });
     expect(await createStaffMember(fake, INPUT)).toEqual({ kind: "error", code: "emailTaken" });
     expect(fake.insertProfile).not.toHaveBeenCalled();
   });
@@ -40,7 +51,10 @@ describe("добавить сотрудника", () => {
     expect(await createStaffMember(forbidden, INPUT)).toEqual({ kind: "error", code: "forbidden" });
     expect(forbidden.deleteAuthUser).toHaveBeenCalledWith("user-9");
 
-    const broken = deps({ insertProfile: async () => ({ code: "XX000" }), deleteAuthUser: async () => false });
+    const broken = deps({
+      insertProfile: async () => ({ code: "XX000" }),
+      deleteAuthUser: async () => false,
+    });
     expect(await createStaffMember(broken, INPUT)).toEqual({ kind: "error", code: "createFailed" });
   });
 

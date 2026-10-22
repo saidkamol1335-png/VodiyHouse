@@ -11,17 +11,27 @@ describe("ранняя проверка кабинета (proxy)", () => {
   });
 
   it("без сессии раздел кабинета → экран входа", () => {
-    expect(adminGate({ pathname: "/admin/nastroyki", hasSession: false, isServerAction: false })).toEqual({
+    expect(
+      adminGate({ pathname: "/admin/nastroyki", hasSession: false, isServerAction: false }),
+    ).toEqual({
       kind: "redirect",
       location: "/admin/vhod",
     });
-    expect(adminGate({ pathname: "/admin/parol", hasSession: false, isServerAction: false }).kind).toBe("redirect");
+    expect(
+      adminGate({ pathname: "/admin/parol", hasSession: false, isServerAction: false }).kind,
+    ).toBe("redirect");
   });
 
   it("экран входа открыт всегда; Server Action не перенаправляется; с сессией — пропуск", () => {
-    expect(adminGate({ pathname: "/admin/vhod", hasSession: false, isServerAction: false })).toEqual({ kind: "next" });
-    expect(adminGate({ pathname: "/admin", hasSession: false, isServerAction: true })).toEqual({ kind: "next" });
-    expect(adminGate({ pathname: "/admin", hasSession: true, isServerAction: false })).toEqual({ kind: "next" });
+    expect(
+      adminGate({ pathname: "/admin/vhod", hasSession: false, isServerAction: false }),
+    ).toEqual({ kind: "next" });
+    expect(adminGate({ pathname: "/admin", hasSession: false, isServerAction: true })).toEqual({
+      kind: "next",
+    });
+    expect(adminGate({ pathname: "/admin", hasSession: true, isServerAction: false })).toEqual({
+      kind: "next",
+    });
   });
 
   it("cookie сессии Supabase: целая и по частям — да; code-verifier и язык — нет", () => {

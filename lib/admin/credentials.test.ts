@@ -19,7 +19,15 @@ const form = (entries: [string, string | Blob][]) => {
 describe("readText", () => {
   it("файл, повтор ключа и нет поля → null", () => {
     expect(readText(form([["email", new Blob(["x"])]]), "email")).toBeNull();
-    expect(readText(form([["email", "a"], ["email", "b"]]), "email")).toBeNull();
+    expect(
+      readText(
+        form([
+          ["email", "a"],
+          ["email", "b"],
+        ]),
+        "email",
+      ),
+    ).toBeNull();
     expect(readText(form([]), "email")).toBeNull();
     expect(readText(form([["email", "a@b.uz"]]), "email")).toBe("a@b.uz");
   });
@@ -27,17 +35,39 @@ describe("readText", () => {
 
 describe("вход", () => {
   it("email обрезается и в нижний регистр, пароль — как введён", () => {
-    const parsed = parseSignIn(form([["email", "  Dilnoza@VodiyHouse.UZ "], ["password", " секрет "]]));
-    expect(parsed).toEqual({ ok: true, value: { email: "dilnoza@vodiyhouse.uz", password: " секрет " } });
+    const parsed = parseSignIn(
+      form([
+        ["email", "  Dilnoza@VodiyHouse.UZ "],
+        ["password", " секрет "],
+      ]),
+    );
+    expect(parsed).toEqual({
+      ok: true,
+      value: { email: "dilnoza@vodiyhouse.uz", password: " секрет " },
+    });
   });
 
   it("пусто и без @ → коды; email возвращается для поля", () => {
-    expect(parseSignIn(form([["email", ""], ["password", ""]]))).toEqual({
+    expect(
+      parseSignIn(
+        form([
+          ["email", ""],
+          ["password", ""],
+        ]),
+      ),
+    ).toEqual({
       ok: false,
       email: "",
       fieldErrors: { email: "emailRequired", password: "passwordRequired" },
     });
-    expect(parseSignIn(form([["email", "dilnoza"], ["password", "x"]]))).toEqual({
+    expect(
+      parseSignIn(
+        form([
+          ["email", "dilnoza"],
+          ["password", "x"],
+        ]),
+      ),
+    ).toEqual({
       ok: false,
       email: "dilnoza",
       fieldErrors: { email: "emailInvalid" },
@@ -45,7 +75,13 @@ describe("вход", () => {
   });
 
   it("служебные поля Next.js ($ACTION_…) не мешают", () => {
-    const parsed = parseSignIn(form([["$ACTION_ID_abc", ""], ["email", "a@b.uz"], ["password", "p"]]));
+    const parsed = parseSignIn(
+      form([
+        ["$ACTION_ID_abc", ""],
+        ["email", "a@b.uz"],
+        ["password", "p"],
+      ]),
+    );
     expect(parsed.ok).toBe(true);
   });
 
@@ -59,7 +95,13 @@ describe("вход", () => {
 
 describe("новый сотрудник", () => {
   const staff = (fullName: string, email = "aziz@vodiyhouse.uz", role = "manager") =>
-    parseStaffInput(form([["fullName", fullName], ["email", email], ["role", role]]));
+    parseStaffInput(
+      form([
+        ["fullName", fullName],
+        ["email", email],
+        ["role", role],
+      ]),
+    );
 
   it("имя: обрезка и сжатие пробелов; роль — одна из трёх", () => {
     expect(staff("  Азиз   Рахимов ")).toEqual({
@@ -73,7 +115,10 @@ describe("новый сотрудник", () => {
       ok: false,
       fieldErrors: { fullName: "fullNameRequired", email: "emailInvalid", role: "roleInvalid" },
     });
-    expect(staff("я".repeat(81))).toMatchObject({ ok: false, fieldErrors: { fullName: "fullNameTooLong" } });
+    expect(staff("я".repeat(81))).toMatchObject({
+      ok: false,
+      fieldErrors: { fullName: "fullNameTooLong" },
+    });
     expect(staff("я".repeat(80)).ok).toBe(true);
   });
 
@@ -85,8 +130,13 @@ describe("новый сотрудник", () => {
   });
 
   it("предел имени совпадает с check у profiles.full_name в миграции", () => {
-    const sql = readFileSync("supabase/migrations/20261019160000_staff_dictionaries_audit.sql", "utf8");
-    const max = sql.match(/full_name text not null check \(length\(btrim\(full_name\)\) between 1 and (\d+)\)/)?.[1];
+    const sql = readFileSync(
+      "supabase/migrations/20261019160000_staff_dictionaries_audit.sql",
+      "utf8",
+    );
+    const max = sql.match(
+      /full_name text not null check \(length\(btrim\(full_name\)\) between 1 and (\d+)\)/,
+    )?.[1];
     expect(Number(max)).toBe(STAFF_LIMITS.fullNameMax);
   });
 });
@@ -100,7 +150,15 @@ describe("служебные поля", () => {
   });
 
   it("смена пароля: поля как введены, без обрезки", () => {
-    expect(parsePasswordChange(form([["current", " a"], ["password", "b "], ["confirm", "c"]]))).toEqual({
+    expect(
+      parsePasswordChange(
+        form([
+          ["current", " a"],
+          ["password", "b "],
+          ["confirm", "c"],
+        ]),
+      ),
+    ).toEqual({
       current: " a",
       password: "b ",
       confirm: "c",

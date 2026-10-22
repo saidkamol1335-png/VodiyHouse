@@ -6,13 +6,13 @@ const TONES: Record<StockTone, BadgeTone> = { none: "neutral", low: "amber", ok:
 
 type StockBadgeProps = {
   stock: ComplexStock;
-  /** Свободные без планировки (главная): без типов ЖК иначе выглядел бы распроданным. */
+  /** Свободные без планировки: без типов ЖК иначе выглядел бы распроданным. */
   unassigned?: number;
   /** «live» принёс другое число (главная) — пилюля вспыхивает, как в мокапе. */
   flash?: boolean;
 };
 
-/** Пилюля остатков ЖК — одна у списка «ЖК» и «Остатков по ЖК» на главной. */
+/** Пилюля остатков ЖК — одна у списка «ЖК» и «Остатков по ЖК» на главной (одно правило). */
 export function StockBadge({ stock, unassigned = 0, flash = false }: StockBadgeProps) {
   const t = useTranslations("admin.complexes.stock");
   const view = stockBadgeView(stock, unassigned);

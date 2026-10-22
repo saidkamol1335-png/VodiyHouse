@@ -19,7 +19,9 @@ import {
 // (перечитывание на паузе, «Войти»); empty — на сайте нет ЖК; variety —
 // блок без списка в сумах («2к 18+», «свободно 65+»), «цена по запросу», мало свободных (янтарь),
 // свободные без планировки (у Shodlik — в дополнение к типам, у Yulduz — только они); layouts —
-// у всех ЖК блоки без списка квартир (итог — словами, а не «0+»).
+// у всех ЖК блоки без списка квартир (итог — словами, а не «0+»); unassigned — свободные есть, но
+// ни одной не назначена планировка (итог — их число с пояснением, а не «0»); unpublished — при
+// следующем чтении Orzu сняли с сайта (строка уходит, фокус в ней — на заголовок панели).
 
 export const SITE_STOCK_SCENARIOS = [
   "change",
@@ -28,6 +30,8 @@ export const SITE_STOCK_SCENARIOS = [
   "empty",
   "variety",
   "layouts",
+  "unassigned",
+  "unpublished",
 ] as const;
 export type SiteStockScenario = (typeof SITE_STOCK_SCENARIOS)[number] | null;
 
@@ -157,6 +161,14 @@ const LAYOUTS: Demo = Object.fromEntries(
   ]),
 );
 
+/** Как сид, только стояки не назначены: все свободные — без планировки. */
+const UNASSIGNED: Demo = Object.fromEntries(
+  Object.entries(SEED).map(([slug, { blocks }]) => [
+    slug,
+    { rooms: [], blocks: blocks.map(([name, free]): Block => [name, free, free ?? 0]) },
+  ]),
+);
+
 const ON_SITE = DEMO_COMPLEX_ROWS.filter(isOnSite);
 
 function roomRecord(complexId: string, [rooms, free, area, price, uzs]: Room): RoomOfferRecord {
@@ -197,6 +209,7 @@ function stockOf(demo: Demo): SiteStock {
 export function demoSiteStock(scenario: SiteStockScenario): SiteStock {
   if (scenario === "empty") return { complexes: [] };
   if (scenario === "variety") return stockOf(VARIETY);
+  if (scenario === "unassigned") return stockOf(UNASSIGNED);
   return stockOf(scenario === "layouts" ? LAYOUTS : SEED);
 }
 
@@ -205,5 +218,11 @@ export function demoSiteStockRead(scenario: SiteStockScenario): SiteStockResult 
   if (scenario === "fail") return { status: "error", error: "unavailable" };
   if (scenario === "session") return { status: "error", error: "session" };
   const stock = scenario === "change" ? stockOf(CHANGED) : demoSiteStock(scenario);
+  if (scenario === "unpublished") {
+    return {
+      status: "done",
+      stock: { complexes: stock.complexes.filter((item) => item.name !== "Orzu") },
+    };
+  }
   return { status: "done", stock };
 }

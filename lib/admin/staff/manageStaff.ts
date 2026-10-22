@@ -19,7 +19,8 @@ export type ManageStaffDeps = {
 type StaffTarget = { actorId: string; staffId: string };
 
 export type SetActiveOutcome = { kind: "done" } | { kind: "error"; code: StaffErrorCode };
-export type ResetPasswordOutcome = { kind: "reset"; password: string } | { kind: "error"; code: StaffErrorCode };
+export type ResetPasswordOutcome =
+  { kind: "reset"; password: string } | { kind: "error"; code: StaffErrorCode };
 
 /**
  * Сначала база (она проверяет права и «последнего руководителя»), потом Auth. Если второй шаг
@@ -33,12 +34,16 @@ export async function setStaffActive(
   const updated = await deps.updateActive(staffId, active);
   if ("error" in updated) return { kind: "error", code: staffDbErrorCode(updated.error) };
   if (updated.rows === 0) return { kind: "error", code: "notFound" };
-  if (!(await deps.setBan(staffId, !active))) return { kind: "error", code: active ? "unbanFailed" : "banFailed" };
+  if (!(await deps.setBan(staffId, !active)))
+    return { kind: "error", code: active ? "unbanFailed" : "banFailed" };
   return { kind: "done" };
 }
 
 /** Новый временный пароль: база отмечает «сменить при входе», затем Auth меняет пароль. */
-export async function resetStaffPassword(deps: ManageStaffDeps, { actorId, staffId }: StaffTarget): Promise<ResetPasswordOutcome> {
+export async function resetStaffPassword(
+  deps: ManageStaffDeps,
+  { actorId, staffId }: StaffTarget,
+): Promise<ResetPasswordOutcome> {
   if (actorId === staffId) return { kind: "error", code: "self" };
   const refused = await deps.requirePasswordChange(staffId);
   if (refused) return { kind: "error", code: staffDbErrorCode(refused) };

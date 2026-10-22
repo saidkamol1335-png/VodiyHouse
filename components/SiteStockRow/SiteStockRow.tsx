@@ -23,7 +23,10 @@ export function SiteStockRow({ complex, open, onToggle, flash, unitsHref }: Site
   const detailsId = `site-stock-${complex.id}`;
   const where = [complex.locationName ?? t("noLocation"), complex.developerName].join(" · ");
   return (
-    <li className={open ? "site-stock-row site-stock-row--open" : "site-stock-row"}>
+    <li
+      className={open ? "site-stock-row site-stock-row--open" : "site-stock-row"}
+      data-complex-id={complex.id}
+    >
       <button
         type="button"
         className="site-stock-row__toggle"

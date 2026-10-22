@@ -1,4 +1,9 @@
-import { AuthApiError, AuthRetryableFetchError, AuthSessionMissingError, AuthWeakPasswordError } from "@supabase/supabase-js";
+import {
+  AuthApiError,
+  AuthRetryableFetchError,
+  AuthSessionMissingError,
+  AuthWeakPasswordError,
+} from "@supabase/supabase-js";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -35,7 +40,9 @@ describe("ошибки входа", () => {
 describe("ошибки смены пароля", () => {
   it("тот же пароль, слабый, нет сессии, лимит, сеть, прочее", () => {
     expect(passwordErrorCode(api("same_password", 422))).toBe("sameAsCurrent");
-    expect(passwordErrorCode(new AuthWeakPasswordError("коротко", 422, ["length"]))).toBe("weakPassword");
+    expect(passwordErrorCode(new AuthWeakPasswordError("коротко", 422, ["length"]))).toBe(
+      "weakPassword",
+    );
     expect(passwordErrorCode(new AuthSessionMissingError())).toBe("session");
     expect(passwordErrorCode(api("session_not_found", 403))).toBe("session");
     expect(passwordErrorCode(api("over_request_rate_limit", 429))).toBe("rateLimited");
@@ -85,7 +92,9 @@ describe("каждый hint vh:… из миграций знает кабине
   const hints = new Set(
     readdirSync(dir)
       .filter((file) => file.endsWith(".sql"))
-      .flatMap((file) => [...readFileSync(path.join(dir, file), "utf8").matchAll(/hint = '(vh:[a-z_0-9]+)'/g)])
+      .flatMap((file) => [
+        ...readFileSync(path.join(dir, file), "utf8").matchAll(/hint = '(vh:[a-z_0-9]+)'/g),
+      ])
       .map((match) => match[1]!),
   );
 

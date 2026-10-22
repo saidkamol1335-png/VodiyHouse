@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BROWSER_CLOCK, LivePoller } from "./livePoller";
 import { initialLive, nextLive, outcomeOf, withoutFlashes, type LiveStock } from "./liveStock";
-import { readOnce } from "./readOnce";
+import { createLiveRead } from "./readOnce";
 import type { SiteStock, SiteStockResult } from "./siteStock";
 
 export type SiteStockRead = () => Promise<SiteStockResult>;
@@ -23,8 +23,19 @@ export function useLiveStock(initial: SiteStock | null, read: SiteStockRead): Li
   });
 
   // Activity прячет главную display:none, а при показе CSS перезапускает анимации — вспышки
-  // прошлых перемен сыграли бы снова, будто числа только что сменились.
-  useLayoutEffect(() => () => setState(withoutFlashes), []);
+  // прошлых перемен сыграли бы снова, будто числа только что сменились. Гасим показанные.
+  const shownFlashes = useRef(state.flashes);
+  useLayoutEffect(() => {
+    shownFlashes.current = state.flashes;
+  });
+  useLayoutEffect(
+    () => () => {
+      const shown = shownFlashes.current;
+      setState((prev) => withoutFlashes(prev, shown));
+    },
+    [],
+  );
+  const [liveRead] = useState(createLiveRead);
 
   // Вернулись на главную ссылкой — сервер прочитал свежие цифры: берём их (сменившиеся вспыхнут)
   // и не читаем то же самое действием сразу. До подключения расписания — порядок эффектов важен.
@@ -38,7 +49,7 @@ export function useLiveStock(initial: SiteStock | null, read: SiteStockRead): Li
 
   useEffect(() => {
     const run = async () => {
-      const result = await readOnce(() => readRef.current());
+      const result = await liveRead(() => readRef.current());
       setState((prev) => nextLive(prev, result, Date.now(), poller.shownAt));
       return outcomeOf(result);
     };
@@ -49,7 +60,7 @@ export function useLiveStock(initial: SiteStock | null, read: SiteStockRead): Li
       document.removeEventListener("visibilitychange", onVisibility);
       poller.disconnect();
     };
-  }, [poller]);
+  }, [poller, liveRead]);
 
   return state;
 }

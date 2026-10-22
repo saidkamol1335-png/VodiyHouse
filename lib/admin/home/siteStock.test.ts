@@ -132,7 +132,7 @@ describe("остатки на главной", () => {
       ["Orzu", 0],
       ["Shodlik", 3],
     ]);
-    expect(siteStockTotal(stock)).toEqual({ free: 3, partial: false });
+    expect(siteStockTotal(stock)).toEqual({ free: 3, partial: false, unassigned: 0 });
   });
 });
 
@@ -145,7 +145,7 @@ describe("DEMO главной — как сид и как список «ЖК»"
       ["Yulduz", 43],
       ["Orzu", 27],
     ]);
-    expect(siteStockTotal(stock)).toEqual({ free: 176, partial: false });
+    expect(siteStockTotal(stock)).toEqual({ free: 176, partial: false, unassigned: 0 });
     expect(stock.complexes[0]!.blocks.map((item) => [item.name, item.free])).toEqual([
       ["A", 12],
       ["B", 29],
@@ -174,7 +174,16 @@ describe("DEMO главной — как сид и как список «ЖК»"
       [0, false, 12],
       [8, false, 0],
     ]);
-    expect(siteStockTotal(variety)).toEqual({ free: 114, partial: true });
-    expect(siteStockTotal(demoSiteStock("layouts"))).toEqual({ free: 0, partial: true });
+    expect(siteStockTotal(variety)).toEqual({ free: 114, partial: true, unassigned: 14 });
+    expect(siteStockTotal(demoSiteStock("layouts"))).toEqual({
+      free: 0,
+      partial: true,
+      unassigned: 0,
+    });
+    expect(siteStockTotal(demoSiteStock("unassigned"))).toEqual({
+      free: 0,
+      partial: false,
+      unassigned: 176,
+    });
   });
 });

@@ -10,7 +10,12 @@ export type StaffFormErrors = Partial<Record<"fullName" | "email" | "role", Staf
 export type CreateStaffResult =
   | { status: "idle" }
   | { status: "created"; member: CreatedStaff; password: string }
-  | { status: "error"; error: StaffErrorCode | null; fieldErrors: StaffFormErrors; fields: StaffFields };
+  | {
+      status: "error";
+      error: StaffErrorCode | null;
+      fieldErrors: StaffFormErrors;
+      fields: StaffFields;
+    };
 
 export const CREATE_STAFF_IDLE: CreateStaffResult = { status: "idle" };
 
@@ -18,7 +23,8 @@ export const CREATE_STAFF_IDLE: CreateStaffResult = { status: "idle" };
 export type CreateStaffAction = (formData: FormData) => Promise<CreateStaffResult>;
 
 export type StaffActionResult = { status: "done" } | { status: "error"; error: StaffErrorCode };
-export type ResetPasswordResult = { status: "reset"; password: string } | { status: "error"; error: StaffErrorCode };
+export type ResetPasswordResult =
+  { status: "reset"; password: string } | { status: "error"; error: StaffErrorCode };
 
 export type StaffRowActionSet = {
   /** Поля формы: id, active = "true" | "false". */

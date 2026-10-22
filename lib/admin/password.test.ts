@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { checkNewPassword, generatePassword, PASSWORD_ALPHABET, PASSWORD_RULES, type RandomFill } from "./password";
+import {
+  checkNewPassword,
+  generatePassword,
+  PASSWORD_ALPHABET,
+  PASSWORD_RULES,
+  type RandomFill,
+} from "./password";
 
 /** Подставной источник: отдаёт заданные байты по кругу. */
 const cycling = (values: number[]): RandomFill => {
@@ -57,7 +63,11 @@ describe("временный пароль", () => {
 });
 
 describe("свой пароль", () => {
-  const valid = { current: "Temp7Pass9Xy", password: "мой-пароль-2026", confirm: "мой-пароль-2026" };
+  const valid = {
+    current: "Temp7Pass9Xy",
+    password: "мой-пароль-2026",
+    confirm: "мой-пароль-2026",
+  };
 
   it("сгенерированный проходит проверку как новый", () => {
     const password = generatePassword();
@@ -65,29 +75,43 @@ describe("свой пароль", () => {
   });
 
   it("9 символов — коротко, 10 — подходит", () => {
-    expect(checkNewPassword({ ...valid, password: "123456789", confirm: "123456789" })).toEqual({ password: "tooShort" });
-    expect(checkNewPassword({ ...valid, password: "1234567890", confirm: "1234567890" })).toEqual({});
+    expect(checkNewPassword({ ...valid, password: "123456789", confirm: "123456789" })).toEqual({
+      password: "tooShort",
+    });
+    expect(checkNewPassword({ ...valid, password: "1234567890", confirm: "1234567890" })).toEqual(
+      {},
+    );
   });
 
   it("больше 72 байт — слишком длинный (37 кириллических букв = 74 байта)", () => {
     const long = "я".repeat(37);
-    expect(checkNewPassword({ ...valid, password: long, confirm: long })).toEqual({ password: "tooLong" });
+    expect(checkNewPassword({ ...valid, password: long, confirm: long })).toEqual({
+      password: "tooLong",
+    });
   });
 
   it("повтор не совпадает; совпадает с временным; временный не введён", () => {
-    expect(checkNewPassword({ ...valid, confirm: "другой-пароль" })).toEqual({ confirm: "mismatch" });
-    expect(checkNewPassword({ ...valid, password: valid.current, confirm: valid.current })).toEqual({
-      password: "sameAsCurrent",
+    expect(checkNewPassword({ ...valid, confirm: "другой-пароль" })).toEqual({
+      confirm: "mismatch",
     });
+    expect(checkNewPassword({ ...valid, password: valid.current, confirm: valid.current })).toEqual(
+      {
+        password: "sameAsCurrent",
+      },
+    );
     expect(checkNewPassword({ ...valid, current: "" })).toEqual({ current: "currentRequired" });
   });
 
   it("пробелы не обрезаются — это часть пароля", () => {
-    expect(checkNewPassword({ ...valid, password: " 123456789", confirm: "123456789 " })).toEqual({ confirm: "mismatch" });
+    expect(checkNewPassword({ ...valid, password: " 123456789", confirm: "123456789 " })).toEqual({
+      confirm: "mismatch",
+    });
   });
 
   it("минимальная длина совпадает с minimum_password_length в supabase/config.toml", () => {
     const config = readFileSync("supabase/config.toml", "utf8");
-    expect(Number(config.match(/^minimum_password_length = (\d+)/m)?.[1])).toBe(PASSWORD_RULES.minLength);
+    expect(Number(config.match(/^minimum_password_length = (\d+)/m)?.[1])).toBe(
+      PASSWORD_RULES.minLength,
+    );
   });
 });

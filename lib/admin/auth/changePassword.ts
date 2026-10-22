@@ -7,7 +7,10 @@ import { checkNewPassword, type PasswordField } from "../password";
 
 export type ChangePasswordDeps = {
   /** Временный пароль проверяется отдельным входом без сохранения сессии. */
-  verifyCurrentPassword(email: string, password: string): Promise<"ok" | "wrong" | { error: AuthErrorLike }>;
+  verifyCurrentPassword(
+    email: string,
+    password: string,
+  ): Promise<"ok" | "wrong" | { error: AuthErrorLike }>;
   /** Новый пароль — сессией самого сотрудника. null — успех. */
   updatePassword(password: string): Promise<AuthErrorLike | null>;
   /** Снять флаг смены пароля (сервер, ключ service_role); false — строка не изменилась. */
@@ -37,13 +40,20 @@ const fieldError = (field: PasswordField, code: PasswordErrorCode): ChangePasswo
   fieldErrors: { [field]: code },
 });
 
-const formError = (code: PasswordErrorCode): ChangePasswordOutcome => ({ kind: "error", code, fieldErrors: {} });
+const formError = (code: PasswordErrorCode): ChangePasswordOutcome => ({
+  kind: "error",
+  code,
+  fieldErrors: {},
+});
 
 /**
  * Порядок: проверка полей → временный пароль → новый пароль → флаг → остальные сессии.
  * Временный пароль спрашиваем, чтобы старая сессия после «Новый пароль» не сменила пароль за сотрудника.
  */
-export async function changeFirstPassword(deps: ChangePasswordDeps, input: ChangePasswordInput): Promise<ChangePasswordOutcome> {
+export async function changeFirstPassword(
+  deps: ChangePasswordDeps,
+  input: ChangePasswordInput,
+): Promise<ChangePasswordOutcome> {
   const issues = checkNewPassword(input);
   if (Object.keys(issues).length > 0) return { kind: "error", code: null, fieldErrors: issues };
 
@@ -54,7 +64,9 @@ export async function changeFirstPassword(deps: ChangePasswordDeps, input: Chang
   const updateError = await deps.updatePassword(input.password);
   if (updateError) {
     const code = passwordErrorCode(updateError);
-    return code === "sameAsCurrent" || code === "weakPassword" ? fieldError("password", code) : formError(code);
+    return code === "sameAsCurrent" || code === "weakPassword"
+      ? fieldError("password", code)
+      : formError(code);
   }
   if (!(await deps.clearMustChange(input.userId))) return formError("finishFailed");
   await deps.signOutOthers();

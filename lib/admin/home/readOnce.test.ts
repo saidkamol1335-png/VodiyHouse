@@ -1,7 +1,8 @@
 import { UnrecognizedActionError } from "next/dist/client/components/unrecognized-action-error";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { demoSiteStock } from "./demo";
-import { LIVE_READ_DEADLINE_MS, readOnce } from "./readOnce";
+import { LIVE_READ_DEADLINE_MS, createLiveRead, readOnce } from "./readOnce";
+import type { SiteStockResult } from "./siteStock";
 
 // Одно чтение «live» всегда даёт ответ: зависшее — «нет связи» через 20 с, а не вечный «live»;
 // кабинет обновили (действия старой страницы больше нет) — «обновите страницу».
@@ -31,6 +32,22 @@ describe("одно чтение «live»", () => {
     expect(settled).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
     await expect(pending).resolves.toEqual({ status: "error", error: "network" });
+  });
+
+  it("пока зависшее не вернулось, новое не шлём (очередь действий Next); вернулось — снова шлём", async () => {
+    let finish: (value: SiteStockResult) => void = () => {};
+    const read = vi.fn(() => new Promise<SiteStockResult>((resolve) => (finish = resolve)));
+    const live = createLiveRead();
+    const first = live(read);
+    await vi.advanceTimersByTimeAsync(LIVE_READ_DEADLINE_MS);
+    await expect(first).resolves.toEqual({ status: "error", error: "network" });
+    await vi.advanceTimersByTimeAsync(60_000);
+    await expect(live(read)).resolves.toEqual({ status: "error", error: "network" });
+    expect(read).toHaveBeenCalledTimes(1);
+    finish({ status: "done", stock: demoSiteStock(null) });
+    await vi.advanceTimersByTimeAsync(0);
+    const again = live(async () => ({ status: "done", stock: demoSiteStock(null) }));
+    await expect(again).resolves.toMatchObject({ status: "done" });
   });
 
   it("обрыв — «нет связи»; действие не найдено (новая сборка) — «кабинет обновился»", async () => {

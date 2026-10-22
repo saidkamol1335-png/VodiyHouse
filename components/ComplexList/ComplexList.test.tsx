@@ -55,6 +55,13 @@ describe("список «ЖК»: руководитель и менеджер", 
     expect(screen.getByText("Ничего не нашлось. Сбросьте поиск.")).toBeTruthy();
   });
 
+  it("свободные только без планировки — «без планировки N», а не «нет свободных» (как на главной)", () => {
+    const sample = { ...DEMO_COMPLEX_ROWS[0]!, stock: { groups: [], free: 0, partial: false } };
+    renderList("head", [{ ...sample, unassigned: 12 }]);
+    expect(screen.getByText("без планировки 12")).toBeTruthy();
+    expect(screen.queryByText("нет свободных")).toBeNull();
+  });
+
   it("руководитель: пустые состояния прежние", () => {
     renderList("head", []);
     expect(screen.getByText("ЖК пока нет — добавьте первый.")).toBeTruthy();

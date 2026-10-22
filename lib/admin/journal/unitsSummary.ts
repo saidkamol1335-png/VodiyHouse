@@ -51,20 +51,18 @@ const str = (raw: Raw, key: string) => (typeof raw[key] === "string" ? (raw[key]
 
 function statusGroups(value: unknown): UnitStatusGroup[] {
   if (!Array.isArray(value)) return [];
-  return value
-    .filter(isRaw)
-    .flatMap((group) =>
-      isUnitStatus(group.from) && isUnitStatus(group.to)
-        ? [
-            {
-              from: group.from,
-              to: group.to,
-              count: num(group, "count"),
-              numbers: str(group, "numbers") ?? "",
-            },
-          ]
-        : [],
-    );
+  return value.filter(isRaw).flatMap((group) =>
+    isUnitStatus(group.from) && isUnitStatus(group.to)
+      ? [
+          {
+            from: group.from,
+            to: group.to,
+            count: num(group, "count"),
+            numbers: str(group, "numbers") ?? "",
+          },
+        ]
+      : [],
+  );
 }
 
 function layoutGroups(value: unknown): UnitsLayoutGroup[] {

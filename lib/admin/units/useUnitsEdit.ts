@@ -132,7 +132,9 @@ function lostDraft(
       if (removedHere.has(unit.id)) return;
       const { blockId, blockName } = context.params;
       const message = { kind: "rowGone" as const, number: unit.number };
-      context.bar.setBar((current) => lostBar(current, { message, blockId, blockName }, nextBarOp()));
+      context.bar.setBar((current) =>
+        lostBar(current, { message, blockId, blockName }, nextBarOp()),
+      );
     });
   };
 }

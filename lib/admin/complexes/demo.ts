@@ -24,7 +24,7 @@ function stock(groups: Partial<Record<RoomGroup, number | null>>): ComplexStock 
   };
 }
 
-type DemoRow = Omit<ComplexListRow, "developerName" | "developerStatus" | "name"> & {
+type DemoRow = Omit<ComplexListRow, "developerName" | "developerStatus" | "name" | "unassigned"> & {
   name: string;
   developer: number;
 };
@@ -117,6 +117,7 @@ export const DEMO_COMPLEX_ROWS: readonly ComplexListRow[] = ROWS.map(
   ({ developer, name, ...row }) => ({
     ...row,
     name: { ru: name, uz: name },
+    unassigned: 0,
     developerName: developerOf(developer).name,
     developerStatus: developerOf(developer).status,
   }),

@@ -8,7 +8,9 @@ import type { SiteStockResult } from "./siteStock";
 
 export const LIVE_READ_DEADLINE_MS = 20_000;
 
-export async function readOnce(read: () => Promise<SiteStockResult>): Promise<SiteStockResult> {
+type Read = () => Promise<SiteStockResult>;
+
+export async function readOnce(read: Read): Promise<SiteStockResult> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<SiteStockResult>((resolve) => {
     timer = setTimeout(() => resolve(NETWORK_FAILURE), LIVE_READ_DEADLINE_MS);
@@ -21,4 +23,28 @@ export async function readOnce(read: () => Promise<SiteStockResult>): Promise<Si
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Чтения без наслоения. Server Action не отменить, а в Next они идут одной очередью: пока
+ * зависшее чтение не вернулось, новое встало бы за ним — и с ним сохранения в других разделах.
+ * Поэтому, пока прошлое не вернулось, новое не шлём и сразу отвечаем «нет связи».
+ */
+export function createLiveRead() {
+  let pending: Promise<SiteStockResult> | null = null;
+  return (read: Read): Promise<SiteStockResult> => {
+    if (pending) return Promise.resolve(NETWORK_FAILURE);
+    let call: Promise<SiteStockResult>;
+    try {
+      call = read();
+    } catch (error) {
+      call = Promise.reject(error);
+    }
+    pending = call;
+    const release = () => {
+      if (pending === call) pending = null;
+    };
+    call.then(release, release);
+    return readOnce(() => call);
+  };
 }

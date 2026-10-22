@@ -35,9 +35,15 @@ describe("список сотрудников", () => {
   it("состояние: активен, ждёт первого входа, отключён и расхождения базы с Auth", () => {
     expect(staffState({ isActive: true, banned: false, mustChangePassword: false })).toBe("active");
     expect(staffState({ isActive: true, banned: false, mustChangePassword: true })).toBe("pending");
-    expect(staffState({ isActive: false, banned: true, mustChangePassword: false })).toBe("inactive");
-    expect(staffState({ isActive: false, banned: false, mustChangePassword: false })).toBe("inactiveNotBanned");
-    expect(staffState({ isActive: true, banned: true, mustChangePassword: true })).toBe("activeBanned");
+    expect(staffState({ isActive: false, banned: true, mustChangePassword: false })).toBe(
+      "inactive",
+    );
+    expect(staffState({ isActive: false, banned: false, mustChangePassword: false })).toBe(
+      "inactiveNotBanned",
+    );
+    expect(staffState({ isActive: true, banned: true, mustChangePassword: true })).toBe(
+      "activeBanned",
+    );
   });
 
   it("адрес входа для сообщения: тот же сайт + /admin/vhod", () => {

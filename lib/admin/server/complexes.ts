@@ -8,7 +8,11 @@ import {
   type ComplexDbRow,
   type ComplexRecord,
 } from "../complexes/record";
-import { stockByComplex, type RoomAvailabilityRecord } from "../complexes/stock";
+import {
+  stockByComplex,
+  unassignedByComplex,
+  type RoomAvailabilityRecord,
+} from "../complexes/stock";
 import type { DeveloperOption } from "../complexes/types";
 
 // Чтение данных кабинета ЖК сессией сотрудника (RLS). Ошибка сети или базы — исключение:
@@ -18,17 +22,27 @@ function unavailable(what: string, cause: unknown): never {
   throw new Error(`${what}-unavailable`, { cause });
 }
 
-/** Строки списка «ЖК» с остатками по комнатам (два запроса на весь список). */
+/**
+ * Строки списка «ЖК» с остатками по комнатам и свободными без планировки (три запроса на весь
+ * список): правило пилюли — то же, что на главной.
+ */
 export async function readComplexRows(supabase: SupabaseClient): Promise<ComplexListRow[]> {
   const rows = await supabase.rpc("complex_rows");
   if (rows.error) unavailable("complex-rows", rows.error);
   const records = (rows.data ?? []) as ComplexRowRecord[];
   if (records.length === 0) return [];
-  const stock = await supabase.rpc("room_availability", {
-    complex_ids: records.map((record) => record.id),
-  });
+  const complexIds = records.map((record) => record.id);
+  const [stock, blocks] = await Promise.all([
+    supabase.rpc("room_availability", { complex_ids: complexIds }),
+    supabase.rpc("block_availability", { complex_ids: complexIds }),
+  ]);
   if (stock.error) unavailable("room-availability", stock.error);
-  return parseComplexRows(records, stockByComplex((stock.data ?? []) as RoomAvailabilityRecord[]));
+  if (blocks.error) unavailable("block-availability", blocks.error);
+  return parseComplexRows(
+    records,
+    stockByComplex((stock.data ?? []) as RoomAvailabilityRecord[]),
+    unassignedByComplex((blocks.data ?? []) as { complex_id: string; free_unassigned: number }[]),
+  );
 }
 
 /** Застройщики для «+ Добавить ЖК» и вкладки «Основное»: в порядке списка, без архивных. */

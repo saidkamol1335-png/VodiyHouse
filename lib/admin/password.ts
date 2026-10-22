@@ -45,15 +45,21 @@ export function generatePassword(fill: RandomFill = cryptoFill): string {
 }
 
 export type PasswordField = "current" | "password" | "confirm";
-export type PasswordIssueCode = "currentRequired" | "tooShort" | "tooLong" | "mismatch" | "sameAsCurrent";
+export type PasswordIssueCode =
+  "currentRequired" | "tooShort" | "tooLong" | "mismatch" | "sameAsCurrent";
 export type PasswordIssues = Partial<Record<PasswordField, PasswordIssueCode>>;
 
 /** Свой пароль на /admin/parol. Пробелы не обрезаются: это часть пароля. */
-export function checkNewPassword(input: { current: string; password: string; confirm: string }): PasswordIssues {
+export function checkNewPassword(input: {
+  current: string;
+  password: string;
+  confirm: string;
+}): PasswordIssues {
   const issues: PasswordIssues = {};
   if (!input.current) issues.current = "currentRequired";
   if (input.password.length < PASSWORD_RULES.minLength) issues.password = "tooShort";
-  else if (new TextEncoder().encode(input.password).length > PASSWORD_RULES.maxBytes) issues.password = "tooLong";
+  else if (new TextEncoder().encode(input.password).length > PASSWORD_RULES.maxBytes)
+    issues.password = "tooLong";
   else if (input.current && input.password === input.current) issues.password = "sameAsCurrent";
   if (!issues.password && input.confirm !== input.password) issues.confirm = "mismatch";
   return issues;

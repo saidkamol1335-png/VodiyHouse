@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type RefObject } from "react";
 import { LiveStatus } from "@/components/LiveStatus";
 import { SiteStockRow } from "@/components/SiteStockRow";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
@@ -43,32 +43,48 @@ export function SiteStockPanel({ initial, read, complexesHref }: SiteStockPanelP
   );
 }
 
-/** «176 свободных квартир на сайте · в 4 ЖК» — как карточка «Свободно на сайте» мокапа. */
+/**
+ * «176 свободных квартир на сайте · в 4 ЖК» — как карточка «Свободно на сайте» мокапа. «0» и
+ * «0+» читались бы как «почти пусто»: без числа у всех типов — «по планировкам»; свободные только
+ * без планировки — их число с пояснением.
+ */
 function StockTotal({ stock }: { stock: SiteStock }) {
   const t = useTranslations("admin.home.stock");
   const total = siteStockTotal(stock);
   const complexes = stock.complexes.length;
-  // Числа нет ни у одного типа (все блоки без списка квартир): «0+» читалось бы как «почти пусто».
+  const extra = total.unassigned > 0 ? t("totalUnassignedSuffix", { count: total.unassigned }) : "";
   if (total.free === 0 && total.partial) {
-    return (
-      <p className="site-stock__total">
-        <span className="site-stock__total-value site-stock__total-value--words">
-          {t("totalByLayouts")}
-        </span>
-        <span className="site-stock__total-caption">
-          {t("totalByLayoutsCaption", { complexes })}
-        </span>
-      </p>
-    );
+    const caption = t("totalByLayoutsCaption", { complexes }) + extra;
+    return <TotalView value={t("totalByLayouts")} caption={caption} words />;
   }
+  if (total.free === 0 && total.unassigned > 0) {
+    const caption = t("totalUnassignedCaption", { count: total.unassigned, complexes });
+    return <TotalView value={t("total", { count: total.unassigned })} caption={caption} />;
+  }
+  const value = t(total.partial ? "totalPartial" : "total", { count: total.free });
+  return (
+    <TotalView
+      value={value}
+      caption={t("totalCaption", { count: total.free, complexes }) + extra}
+    />
+  );
+}
+
+type TotalViewProps = { value: string; caption: string; words?: boolean };
+
+function TotalView({ value, caption, words = false }: TotalViewProps) {
   return (
     <p className="site-stock__total">
-      <span className="site-stock__total-value">
-        {t(total.partial ? "totalPartial" : "total", { count: total.free })}
+      <span
+        className={
+          words
+            ? "site-stock__total-value site-stock__total-value--words"
+            : "site-stock__total-value"
+        }
+      >
+        {value}
       </span>
-      <span className="site-stock__total-caption">
-        {t("totalCaption", { count: total.free, complexes })}
-      </span>
+      <span className="site-stock__total-caption">{caption}</span>
     </p>
   );
 }
@@ -82,7 +98,8 @@ type StockRowsProps = {
 function StockRows({ live, complexesHref, titleRef }: StockRowsProps) {
   const t = useTranslations("admin");
   const { stock, flashes } = live;
-  const openId = useOpenRow(stock, titleRef);
+  const openId = useOpenRow(stock);
+  const focus = useFocusRescue(stock, titleRef);
   if (stock === null) {
     return (
       <p className="site-stock__empty">
@@ -95,7 +112,12 @@ function StockRows({ live, complexesHref, titleRef }: StockRowsProps) {
   }
   return (
     <>
-      <ul className="site-stock__rows" aria-label={t("home.stock.rowsLabel")}>
+      <ul
+        className="site-stock__rows"
+        aria-label={t("home.stock.rowsLabel")}
+        onFocus={focus.onFocus}
+        onBlur={focus.onBlur}
+      >
         {stock.complexes.map((complex) => (
           <SiteStockRow
             key={complex.id}
@@ -116,22 +138,41 @@ function StockRows({ live, complexesHref, titleRef }: StockRowsProps) {
 
 /**
  * Открыта одна строка. Перечитывание убрало открытый ЖК (сняли с сайта) — строка закрыта и,
- * вернувшись, сама не раскроется; фокус, оставшийся в ней, — на заголовок панели, не в никуда.
+ * вернувшись, сама не раскроется.
  */
-function useOpenRow(stock: SiteStock | null, titleRef: RefObject<HTMLHeadingElement | null>) {
+function useOpenRow(stock: SiteStock | null) {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [lostCount, setLostCount] = useState(0);
   if (openId !== null && stock && !stock.complexes.some((complex) => complex.id === openId)) {
     setOpenId(null);
-    setLostCount((count) => count + 1);
   }
-  // Номер обработанной потери: повторный показ страницы (Activity) не должен отбирать фокус.
-  const handled = useRef(0);
-  useEffect(() => {
-    if (lostCount === handled.current) return;
-    handled.current = lostCount;
-    if (document.activeElement === document.body) titleRef.current?.focus();
-  }, [lostCount, titleRef]);
   const toggle = (id: string) => setOpenId((current) => (current === id ? null : id));
   return { value: openId, toggle };
+}
+
+const rowIdOf = (target: EventTarget) =>
+  target instanceof Element
+    ? (target.closest("[data-complex-id]")?.getAttribute("data-complex-id") ?? null)
+    : null;
+
+/**
+ * Фокус был в строке ЖК (открытой или нет), а перечитывание её убрало — фокус на заголовок панели,
+ * а не в никуда. Удаление элемента в фокусе даёт blur без relatedTarget — такой уход не считаем.
+ */
+function useFocusRescue(stock: SiteStock | null, titleRef: RefObject<HTMLHeadingElement | null>) {
+  const focused = useRef<string | null>(null);
+  useEffect(() => {
+    const id = focused.current;
+    if (id === null || !stock || stock.complexes.some((complex) => complex.id === id)) return;
+    focused.current = null;
+    if (document.activeElement === document.body) titleRef.current?.focus();
+  }, [stock, titleRef]);
+  return {
+    onFocus: (event: FocusEvent) => {
+      focused.current = rowIdOf(event.target);
+    },
+    onBlur: (event: FocusEvent<HTMLElement>) => {
+      const next = event.relatedTarget;
+      if (next && !event.currentTarget.contains(next as Node)) focused.current = null;
+    },
+  };
 }

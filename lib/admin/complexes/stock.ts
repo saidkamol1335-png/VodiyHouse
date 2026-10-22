@@ -66,6 +66,17 @@ export function stockByComplex(
   return new Map([...grouped].map(([id, items]) => [id, stockOf(items)]));
 }
 
+/** Свободные без планировки по ЖК — сумма block_availability.free_unassigned его блоков. */
+export function unassignedByComplex(
+  records: readonly { complex_id: string; free_unassigned: number }[],
+): Map<string, number> {
+  const sums = new Map<string, number>();
+  for (const record of records) {
+    sums.set(record.complex_id, (sums.get(record.complex_id) ?? 0) + record.free_unassigned);
+  }
+  return sums;
+}
+
 export type StockTone = "none" | "low" | "ok";
 
 export function stockTone(stock: ComplexStock): StockTone {
@@ -74,8 +85,8 @@ export function stockTone(stock: ComplexStock): StockTone {
 }
 
 /**
- * Пилюля остатков: «нет свободных», «по планировкам», «свободно N», «свободно N+»; на главной ещё
- * «без планировки N» — свободные есть, но ни одной не назначена планировка (в типах их нет).
+ * Пилюля остатков: «нет свободных», «по планировкам», «свободно N», «свободно N+» и «без
+ * планировки N» — свободные есть, но ни одной не назначена планировка (в типах их нет).
  */
 export type StockBadgeView = {
   text: "none" | "byLayouts" | "free" | "freePartial" | "unassigned";

@@ -61,7 +61,8 @@ export type AuthErrorLike = { code?: string; status?: number; name?: string };
 export type DbErrorLike = { code?: string; hint?: string | null };
 
 const isNetwork = (error: AuthErrorLike) => error.name === "AuthRetryableFetchError";
-const isRateLimited = (error: AuthErrorLike) => error.code === "over_request_rate_limit" || error.status === 429;
+const isRateLimited = (error: AuthErrorLike) =>
+  error.code === "over_request_rate_limit" || error.status === 429;
 
 // Отключённый (бан) и неверный пароль — одна фраза: по ответу нельзя узнать, кто отключён.
 const SIGN_IN_BY_CODE: Record<string, SignInErrorCode> = {
@@ -80,8 +81,10 @@ export function signInErrorCode(error: AuthErrorLike): SignInErrorCode {
 
 export function passwordErrorCode(error: AuthErrorLike): PasswordErrorCode {
   if (error.code === "same_password") return "sameAsCurrent";
-  if (error.code === "weak_password" || error.name === "AuthWeakPasswordError") return "weakPassword";
-  if (error.code === "session_not_found" || error.name === "AuthSessionMissingError") return "session";
+  if (error.code === "weak_password" || error.name === "AuthWeakPasswordError")
+    return "weakPassword";
+  if (error.code === "session_not_found" || error.name === "AuthSessionMissingError")
+    return "session";
   if (isRateLimited(error)) return "rateLimited";
   if (isNetwork(error)) return "network";
   return "unknown";

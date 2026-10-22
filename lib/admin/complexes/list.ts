@@ -23,6 +23,8 @@ export type ComplexListRow = {
   developerStatus: PublicationStatus;
   locationName: string | null;
   stock: ComplexStock;
+  /** Свободные без планировки: в типах их нет, но ЖК не распродан. */
+  unassigned: number;
 };
 
 export type ComplexRowRecord = {
@@ -43,6 +45,7 @@ const statusOf = (value: string): PublicationStatus =>
 export function parseComplexRows(
   records: readonly ComplexRowRecord[],
   stock: ReadonlyMap<string, ComplexStock>,
+  unassigned: ReadonlyMap<string, number> = new Map(),
 ): ComplexListRow[] {
   return records.map((record) => ({
     id: record.id,
@@ -55,6 +58,7 @@ export function parseComplexRows(
     developerStatus: statusOf(record.developer_status),
     locationName: record.location_name,
     stock: stock.get(record.id) ?? EMPTY_STOCK,
+    unassigned: unassigned.get(record.id) ?? 0,
   }));
 }
 

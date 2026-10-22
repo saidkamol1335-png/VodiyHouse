@@ -49,11 +49,13 @@ describe("состояние «live»", () => {
 
   it("страницу спрятали (Activity) — прошлые вспышки гаснут, следующая перемена снова вспыхнет", () => {
     const once = nextLive(initialLive(seed), { status: "done", stock: changed }, 2_000, 1_000);
-    const hidden = withoutFlashes(once);
+    const hidden = withoutFlashes(once, once.flashes);
     expect(hidden.flashes).toEqual({});
-    expect(withoutFlashes(hidden)).toBe(hidden);
+    expect(withoutFlashes(hidden, {})).toBe(hidden);
     const again = nextLive(hidden, { status: "done", stock: seed }, 3_000, 1_000);
     expect(Object.values(again.flashes)).toEqual([1, 1]);
+    // Вспышка, пришедшая в том же коммите, что и показ (StrictMode в разработке), не гаснет.
+    expect(withoutFlashes(again, hidden.flashes)).toBe(again);
   });
 
   it("после чтения без прежних цифр вспышек нет", () => {

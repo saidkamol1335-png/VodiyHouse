@@ -135,6 +135,9 @@ test.describe("кабинет · главная · остатки по ЖК", ()
   }) => {
     await open(page, `${HEAD}?demo=variety`);
     await expect(page.locator(".site-stock__total-value")).toHaveText("114+");
+    await expect(page.locator(".site-stock__total-caption")).toHaveText(
+      "свободных квартир на сайте · в 4 ЖК · ещё 14 без планировки",
+    );
     await expect(page.locator(".site-stock-row .stock-badge")).toHaveText([
       "свободно 41",
       "свободно 65+",
@@ -181,6 +184,17 @@ test.describe("кабинет · главная · остатки по ЖК", ()
     await expect(badge(page, "Shodlik")).toHaveText("по планировкам");
   });
 
+  test("свободные только без планировки: итог — их число с пояснением, а не «0»", async ({
+    page,
+  }) => {
+    await open(page, `${HEAD}?demo=unassigned`);
+    await expect(page.locator(".site-stock__total-value")).toHaveText("176");
+    await expect(page.locator(".site-stock__total-caption")).toHaveText(
+      "свободных квартир без планировки — по типам пока не посчитать · в 4 ЖК",
+    );
+    await expect(badge(page, "Shodlik")).toHaveText("без планировки 41");
+  });
+
   test("live: первое чтение через минуту, дальше — раз в минуту, пока вкладка видна; возврат — сразу; вспышка", async ({
     page,
   }) => {
@@ -222,6 +236,43 @@ test.describe("кабинет · главная · остатки по ЖК", ()
     await expect(page.locator(".stock-badge--flash")).toHaveCount(0);
   });
 
+  test("вернулись ссылкой — свежие цифры страницы: сменившиеся вспыхивают (и в разработке)", async ({
+    page,
+  }) => {
+    await page.clock.install();
+    const posts = trackActions(page);
+    await open(page, `${HEAD}?demo=change`);
+    await page.clock.runFor(65_000);
+    await expect(badge(page, "Shodlik")).toHaveText(/^свободно 40/);
+    await toggle(page, "Shodlik").click();
+    await details(page, "Shodlik").getByRole("link", { name: "Квартиры" }).click();
+    await expect(page.locator(".units-row").first()).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    // «Квартиры» читают список своим действием — считаем только запросы после возврата.
+    const before = posts.length;
+    // Переход ссылкой (не «назад»): сервер заново читает страницу — у стенда это цифры сида.
+    await page.evaluate(() =>
+      (
+        window as unknown as { next: { router: { push: (href: string) => void } } }
+      ).next.router.push("/dev/glavnaya?demo=change"),
+    );
+    await expect(badge(page, "Shodlik")).toHaveText(/^свободно 41/);
+    await expect(badge(page, "Shodlik")).toHaveClass(/stock-badge--flash/);
+    // Свежие цифры пришли со страницей — повторного чтения действием нет.
+    await settle();
+    expect(posts).toHaveLength(before);
+  });
+
+  test("ЖК сняли с сайта: строка уходит, фокус из неё — на заголовок панели", async ({ page }) => {
+    test.skip(isMobile(page), "клавиатура — десктоп");
+    await page.clock.install();
+    await open(page, `${HEAD}?demo=unpublished`);
+    await toggle(page, "Orzu").focus();
+    await page.clock.runFor(65_000);
+    await expect(toggle(page, "Orzu")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Остатки по ЖК" })).toBeFocused();
+  });
+
   test("сбой: метка гаснет, цифры прежние, «обновлено N мин назад»; строки не сдвигаются", async ({
     page,
   }) => {
@@ -247,12 +298,24 @@ test.describe("кабинет · главная · остатки по ЖК", ()
     await page.clock.install();
     const posts = trackActions(page);
     await open(page, `${HEAD}?demo=session`);
+    const top = async () => (await toggle(page, "Shodlik").boundingBox())!.y;
+    const before = await top();
     await page.clock.runFor(65_000);
     await expect(live(page).locator(".live-status__label")).toContainText("сессия закончилась");
-    await expect(live(page).getByRole("link", { name: "Войти" })).toHaveAttribute(
-      "href",
-      "/admin/vhod",
-    );
+    const signIn = live(page).getByRole("link", { name: "Войти" });
+    await expect(signIn).toHaveAttribute("href", "/admin/vhod");
+    expect(await top()).toBe(before);
+    if (isMobile(page)) {
+      // Палец: цель 44 px — невидимый слой вокруг ссылки, строка от него не растёт.
+      const box = (await signIn.boundingBox())!;
+      const hit = (dy: number) =>
+        page.evaluate(
+          ([x, y]) => document.elementFromPoint(x!, y!)?.closest("a")?.textContent ?? null,
+          [box.x + box.width / 2, box.y + box.height / 2 + dy],
+        );
+      expect(await hit(-18)).toBe("Войти");
+      expect(await hit(18)).toBe("Войти");
+    }
     await expect(live(page).getByRole("status")).toHaveText(
       "Сессия закончилась — остатки больше не обновляются. Войдите снова.",
     );
