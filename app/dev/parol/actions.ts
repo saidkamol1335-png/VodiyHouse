@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import { redirect } from "next/navigation";
 import { changeFirstPassword, type ChangePasswordDeps } from "@/lib/admin/auth/changePassword";
 import type { PasswordState } from "@/lib/admin/auth/types";
@@ -20,7 +21,7 @@ export async function demoChangePasswordAction(
   _previous: PasswordState,
   formData: FormData,
 ): Promise<PasswordState> {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
+  devOnly();
   const fields = parsePasswordChange(formData);
   const outcome = await changeFirstPassword(demoDeps, {
     ...fields,

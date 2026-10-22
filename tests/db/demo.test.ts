@@ -1,6 +1,14 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
+import { demoSiteStock } from "@/lib/admin/home/demo";
+import {
+  siteStockFrom,
+  type BlockAvailabilityRecord,
+  type RoomOfferRecord,
+  type SiteStock,
+} from "@/lib/admin/home/siteStock";
 import { generateUnits } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import { anon, createStaff, createTestDb, isRemoteTarget, user, type TestDb } from "./harness";
@@ -80,6 +88,32 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
         expected,
       );
     }
+  });
+
+  it("стенд главной (/dev/glavnaya) показывает то же, что функции сайта по сиду", async () => {
+    const slugs = ["demo-shodlik", "demo-namuna", "demo-yulduz", "demo-orzu"];
+    const complexes = await Promise.all(
+      slugs.map(async (slug) => {
+        const listed = DEMO_COMPLEX_ROWS.find((row) => row.slug === slug)!;
+        return { ...listed, id: await complexId(slug) };
+      }),
+    );
+    const ids = complexes.map((complex) => complex.id);
+    const query = <T>(sql: string) =>
+      db.as(anon, async (tx) => (await tx.query<T>(sql, [ids])).rows);
+    const fromSql = siteStockFrom(
+      complexes,
+      await query<RoomOfferRecord>("select * from room_availability($1)"),
+      await query<BlockAvailabilityRecord>("select * from block_availability($1)"),
+    );
+    // id блоков и ЖК у стенда свои — сравниваем всё остальное.
+    const comparable = (stock: SiteStock) =>
+      stock.complexes.map((complex) => ({
+        ...complex,
+        id: null,
+        blocks: complex.blocks.map((block) => ({ ...block, id: null })),
+      }));
+    expect(comparable(fromSql)).toEqual(comparable(demoSiteStock(null)));
   });
 
   it("Shodlik по блокам — как в мокапе: «Бл. A: 12 · Бл. B: 29»", async () => {
@@ -178,8 +212,12 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
   it("удалённые из кабинета сданные объекты DEMO уходят из журнала вместе с DEMO", async () => {
     await seed();
     const head = await createStaff(db.admin, "head");
-    const sifat = (await db.admin.query<{ id: string }>("select id from developers where slug = 'demo-sifat'")).rows[0]!.id;
-    await db.as(user(head), (tx) => tx.query("select save_developer_past_projects($1, '[]')", [sifat]));
+    const sifat = (
+      await db.admin.query<{ id: string }>("select id from developers where slug = 'demo-sifat'")
+    ).rows[0]!.id;
+    await db.as(user(head), (tx) =>
+      tx.query("select save_developer_past_projects($1, '[]')", [sifat]),
+    );
     const logged = `select count(*)::int as n from audit_log where developer_id = '${sifat}'`;
     expect(await count(logged)).toBeGreaterThan(0);
 

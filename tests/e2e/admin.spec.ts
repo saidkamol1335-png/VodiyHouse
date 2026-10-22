@@ -24,7 +24,11 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(password).toHaveAttribute("type", "password");
     await page.getByRole("button", { name: "Показать пароль" }).click();
     await expect(password).toHaveAttribute("type", "text");
-    await page.getByRole("button", { name: "Скрыть пароль" }).click();
+    await expect(page.getByRole("button", { name: "Показать пароль" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await page.getByRole("button", { name: "Показать пароль" }).click();
     await expect(password).toHaveAttribute("type", "password");
   });
 
@@ -87,6 +91,41 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(html).toHaveAttribute("data-theme", "light");
     await page.getByRole("button", { name: "Включить тёмную тему" }).click();
     await expect(html).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("К1.2: карточка не мигает, когда режим переключается lite → full (первый заход)", async ({
+    page,
+  }, testInfo) => {
+    test.skip(isPhone(testInfo.project.name), "full — только десктоп");
+    // Прозрачность карточки по кадрам с первой отрисовки: проявилась — больше не гаснет. Переключение
+    // делаем сами, как MotionController после пробы FPS: под нагрузкой проба честно выбирает lite.
+    await page.addInitScript(() => {
+      const state = { samples: [] as number[], switched: false };
+      (window as unknown as { card: typeof state }).card = state;
+      const tick = () => {
+        const card = document.querySelector(".login-card");
+        if (card) {
+          const opacity = Number(getComputedStyle(card).opacity);
+          state.samples.push(opacity);
+          if (opacity >= 0.95 && !state.switched) {
+            state.switched = true;
+            document.documentElement.setAttribute("data-motion", "full");
+          }
+        }
+        if (state.samples.length < 150) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await page.goto("/admin/vhod?motion=lite");
+    const card = () =>
+      page.evaluate(
+        () => (window as unknown as { card: { samples: number[]; switched: boolean } }).card,
+      );
+    await expect.poll(async () => (await card()).samples.length).toBeGreaterThanOrEqual(150);
+    const { samples, switched } = await card();
+    expect(switched).toBe(true);
+    const shown = samples.findIndex((opacity) => opacity >= 0.95);
+    expect(Math.min(...samples.slice(shown))).toBeGreaterThan(0.9);
   });
 
   test("К1.7: без ролика — кадр готового дома, видео нет", async ({ page }) => {

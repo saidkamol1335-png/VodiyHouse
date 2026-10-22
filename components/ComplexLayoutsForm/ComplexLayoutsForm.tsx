@@ -7,7 +7,6 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import { Rule12Check } from "@/components/Rule12Check";
-import { segmentedItemClass } from "@/components/Segmented";
 import {
   LAYOUT_LIMITS,
   newLayoutDraft,
@@ -16,14 +15,14 @@ import {
   type LayoutRowErrors,
 } from "@/lib/admin/complexes/layouts";
 import type { ComplexMediaResult, SaveRowsResult } from "@/lib/admin/complexes/types";
-import { UploadRefused, uploadComplexFile } from "@/lib/admin/complexes/upload";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { layoutVariants } from "@/lib/admin/units/layoutVariants";
-import { processImage } from "@/lib/media";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { useDraftRows } from "@/lib/ui/useDraftRows";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
+import { BlockSwitch, EmptyBlock } from "./BlockSwitch";
 import { LayoutRow } from "./LayoutRow";
+import { useDrawingUpload } from "./useDrawingUpload";
 
 type ComplexLayoutsFormProps = {
   complexId: string;
@@ -68,50 +67,6 @@ type BlockFormProps = ComplexLayoutsFormProps & {
   block: BlockLayouts;
   onSwitch: (blockId: string) => void;
 };
-
-type DrawingUpload = Pick<BlockFormProps, "complexId" | "attach"> & {
-  rule12: boolean;
-  /** После загрузки: строка получает чертёж, отметка 1.2 снимается (И8: при каждой загрузке). */
-  onUploaded: (key: string, drawing: Pick<LayoutDraft, "drawingId" | "drawingSrc">) => void;
-};
-
-/**
- * Чертёж строки: подготовка в браузере → бакет → строка media_assets; ответ — текст ошибки.
- * uploading — пока идёт загрузка, вкладку не сохраняют: новая строка получит id с сервера, и
- * ответ загрузки уже не найдёт её по ключу.
- */
-function useDrawingUpload({ complexId, attach, rule12, onUploaded }: DrawingUpload) {
-  const t = useTranslations("admin");
-  const [uploads, setUploads] = useState(0);
-  const prepareAndAttach = async (key: string, file: File): Promise<string | null> => {
-    const result = await processImage(file, "drawing");
-    if (!result.ok) return t(`media.issues.${result.issue.code}`, result.issue);
-    try {
-      const { id, src } = await uploadComplexFile({
-        complexId,
-        image: result.image,
-        attach,
-        rule12,
-      });
-      onUploaded(key, { drawingId: id, drawingSrc: src });
-      return null;
-    } catch (error) {
-      return error instanceof UploadRefused
-        ? t(`developers.errors.${error.code}`)
-        : t("media.uploadFailed");
-    }
-  };
-  const upload = async (key: string, file: File | undefined): Promise<string | null> => {
-    if (!file) return null;
-    setUploads((count) => count + 1);
-    try {
-      return await prepareAndAttach(key, file);
-    } finally {
-      setUploads((count) => count - 1);
-    }
-  };
-  return { upload, uploading: uploads > 0 };
-}
 
 function BlockLayoutsForm({
   block,
@@ -239,56 +194,5 @@ function BlockLayoutsForm({
         </div>
       </form>
     </AdminPanel>
-  );
-}
-
-type BlockSwitchProps = {
-  blocks: readonly BlockLayouts[];
-  current: string;
-  onSwitch: (id: string) => void;
-};
-
-/** «Блок A · Блок B», как на сайте; «Все блоки» нет — новая планировка не попадёт в чужой блок. */
-function BlockSwitch({ blocks, current, onSwitch }: BlockSwitchProps) {
-  const t = useTranslations("admin.complexes.layouts");
-  return (
-    <div
-      className="segmented segmented--lg complex-layouts__switch"
-      role="group"
-      aria-label={t("switch")}
-    >
-      {blocks.map((item) => (
-        <button
-          key={item.blockId}
-          type="button"
-          className={segmentedItemClass(item.blockId === current)}
-          aria-pressed={item.blockId === current}
-          onClick={() => onSwitch(item.blockId)}
-        >
-          {t("blockName", { name: item.blockName })}
-          <span className="complex-layouts__count">{item.layouts.length}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function EmptyBlock({
-  others,
-  onCopy,
-}: {
-  others: readonly BlockLayouts[];
-  onCopy: (from: BlockLayouts) => void;
-}) {
-  const t = useTranslations("admin.complexes.layouts");
-  return (
-    <div className="complex-layouts__empty">
-      <p>{t("empty")}</p>
-      {others.map((other) => (
-        <Button key={other.blockId} size="sm" variant="ghost" onClick={() => onCopy(other)}>
-          {t("copyFrom", { name: other.blockName, count: other.layouts.length })}
-        </Button>
-      ))}
-    </div>
   );
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import {
   parseDictionaryItem,
   readDictionaryKey,
@@ -13,10 +14,6 @@ import type { DictionaryActionResult } from "@/lib/admin/dictionaries/types";
 // remove_dictionary_item: «Фергана» стоит у DEMO-ЖК — она скрывается, остальное удаляется.
 
 const USED_SLUGS = new Set(["fergana"]);
-
-function devOnly() {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
-}
 
 const invalid: DictionaryActionResult = { status: "error", error: "invalid", fieldErrors: {} };
 const done = (outcome?: "deleted" | "hidden"): DictionaryActionResult => ({

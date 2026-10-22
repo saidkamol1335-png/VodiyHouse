@@ -273,6 +273,7 @@ test.describe("кабинет · ЖК · фото и журнал", () => {
       await open(page, `${SHODLIK}/zhurnal`);
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({
+        caret: "initial",
         path: `test-results/screens/${testInfo.project.name}/s12-journal-${theme}.png`,
         fullPage: true,
       });

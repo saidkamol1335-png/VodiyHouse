@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import { parseStaffInput, readStaffId, readText } from "@/lib/admin/credentials";
 import { generatePassword } from "@/lib/admin/password";
 import { createStaffMember, type CreateStaffDeps } from "@/lib/admin/staff/createStaff";
@@ -33,10 +34,6 @@ const demoDeps: CreateStaffDeps & ManageStaffDeps = {
   requirePasswordChange: async () => null,
   setPassword: async () => true,
 };
-
-function devOnly() {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
-}
 
 export async function demoCreateStaffAction(formData: FormData): Promise<CreateStaffResult> {
   devOnly();

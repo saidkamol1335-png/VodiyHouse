@@ -15,7 +15,8 @@ export function AdminTopbar({ title, subtitle, person, pending = false }: AdminT
   return (
     <header className={pending ? "admin-topbar admin-topbar--pending" : "admin-topbar"}>
       <div className="admin-topbar__text">
-        <h1 className="admin-topbar__title">{pending ? " " : title}</h1>
+        {/* Заглушка держит высоту строки; заголовок с текстом (не пустой) — и для диктора. */}
+        <h1 className="admin-topbar__title">{title || " "}</h1>
         {subtitle || pending ? <p className="admin-topbar__subtitle">{pending ? " " : subtitle}</p> : null}
       </div>
       <div className="admin-topbar__tools">

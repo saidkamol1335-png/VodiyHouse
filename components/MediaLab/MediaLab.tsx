@@ -112,6 +112,7 @@ export function MediaLab() {
           type="file"
           accept={MEDIA_LIMITS.acceptedTypes.join(",")}
           onChange={chooseFile}
+          aria-label={t("fileLabel")}
           data-testid="media-input"
         />
       </div>

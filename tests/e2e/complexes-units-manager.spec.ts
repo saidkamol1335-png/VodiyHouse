@@ -224,20 +224,20 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     await expect(page.locator(".complex-list__row").first()).toBeVisible();
     // После гидратации: screenshot прячет курсор стилем, до неё React заметил бы чужой атрибут.
     await page.waitForLoadState("networkidle");
-    await page.screenshot({ path: `${dir}/s12-manager-list.png` });
+    await page.screenshot({ path: `${dir}/s12-manager-list.png`, caret: "initial" });
     await openList(page);
     await rowOf(page, "4")
       .getByRole("button", { name: /Сменить статус/ })
       .click();
     await page.getByRole("checkbox", { name: "Выбрать кв. 1", exact: true }).check();
-    await page.screenshot({ path: `${dir}/s12-manager-units.png` });
+    await page.screenshot({ path: `${dir}/s12-manager-units.png`, caret: "initial" });
     await openAvailability(page);
-    await page.screenshot({ path: `${dir}/s12-manager-availability.png` });
+    await page.screenshot({ path: `${dir}/s12-manager-availability.png`, caret: "initial" });
     await openAvailability(page, "/dev/zhk");
-    await page.screenshot({ path: `${dir}/s12-availability-head.png` });
+    await page.screenshot({ path: `${dir}/s12-availability-head.png`, caret: "initial" });
     await page.goto(`/dev/zhk/${NAMUNA_ID}/planirovki?demo=variety`);
     await expect(page.getByText("нет в наличии", { exact: true })).toBeVisible();
     await page.waitForLoadState("networkidle");
-    await page.screenshot({ path: `${dir}/s12-layouts-unavailable.png` });
+    await page.screenshot({ path: `${dir}/s12-layouts-unavailable.png`, caret: "initial" });
   });
 });

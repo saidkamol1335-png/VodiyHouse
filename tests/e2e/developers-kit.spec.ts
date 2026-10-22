@@ -288,6 +288,7 @@ test.describe("кабинет · застройщики", () => {
         await page.waitForLoadState("networkidle");
         await page.evaluate(() => document.fonts.ready);
         await page.screenshot({
+          caret: "initial",
           path: `${folder}/s10-developers-${name}-${theme}.png`,
           fullPage: true,
         });

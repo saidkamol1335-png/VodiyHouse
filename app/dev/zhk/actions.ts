@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import { redirect } from "next/navigation";
 import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
@@ -21,10 +22,6 @@ import { isPublicationStatus } from "@/lib/admin/publicationFilter";
 
 // Подделка Supabase для стенда /dev/zhk: настоящие проверки форм и правила статуса, без базы.
 // DEMO не меняется — стенд показывает ответы действий (как /dev/zastroyshchiki).
-
-function devOnly() {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
-}
 
 /** Создание ведёт на черновик DEMO — у стенда нет базы, куда положить новый ЖК. */
 export async function demoCreateComplexAction(formData: FormData): Promise<CreateComplexResult> {

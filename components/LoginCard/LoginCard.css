@@ -10,12 +10,19 @@
   backdrop-filter: var(--glass-filter);
 }
 
-[data-motion="full"] .login-card {
-  animation: login-card-rise var(--dur-rise) var(--ease) both;
+/* Появление — одна анимация на все режимы, режим меняет только длительность и сдвиг. При первом
+   заходе сервер рисует lite, а проба FPS через ~0,5 с переключает на full: другое имя анимации
+   запустило бы её заново — карточка гасла и всплывала (приёмка фазы 1). Сменённая длительность
+   у уже сыгранной анимации даёт сдвиг меньше пикселя. В none длительность 0. */
+.login-card {
+  --login-card-rise-dur: var(--dur-fast);
+  --login-card-rise-offset: 0px;
+  animation: login-card-rise var(--login-card-rise-dur) var(--ease) both;
 }
 
-[data-motion="lite"] .login-card {
-  animation: login-card-fade var(--dur-fast) linear both;
+[data-motion="full"] .login-card {
+  --login-card-rise-dur: var(--dur-rise);
+  --login-card-rise-offset: var(--rise-offset);
 }
 
 /* Луч по рамке (мокап: .beam). В мокапе вращается угол градиента — это перерисовка на каждом
@@ -48,7 +55,12 @@
   left: 50%;
   width: 250%;
   aspect-ratio: 1;
-  background: conic-gradient(transparent 0deg 280deg, var(--beam-color) 320deg, var(--beam-tip) 340deg, transparent 360deg);
+  background: conic-gradient(
+    transparent 0deg 280deg,
+    var(--beam-color) 320deg,
+    var(--beam-tip) 340deg,
+    transparent 360deg
+  );
   transform: translate(-50%, -50%);
   animation: login-card-beam var(--dur-beam) linear infinite;
   will-change: transform;
@@ -102,20 +114,11 @@
 @keyframes login-card-rise {
   from {
     opacity: 0.01;
-    transform: translateY(var(--rise-offset));
+    transform: translateY(var(--login-card-rise-offset));
   }
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes login-card-fade {
-  from {
-    opacity: 0.01;
-  }
-  to {
-    opacity: 1;
   }
 }
 

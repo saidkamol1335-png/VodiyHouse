@@ -147,7 +147,7 @@ test.describe("кабинет · главная · остатки по ЖК", ()
     await expect(badge(page, "Orzu")).toHaveClass(/badge--amber/);
     await expect(badge(page, "Yulduz")).toHaveClass(/badge--amber/);
     await expect(rowOf(page, "Namuna").locator(".stock-rooms")).toContainText("2к 18+");
-    await expect(page.locator(".site-stock__footnote")).toContainText("«N+» и «по планировкам»");
+    await expect(page.locator(".site-stock__footnote")).toContainText("«N+», «✓» и «по планировкам»");
 
     await toggle(page, "Namuna").click();
     const namuna = details(page, "Namuna");

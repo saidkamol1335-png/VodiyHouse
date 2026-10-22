@@ -63,6 +63,34 @@ describe("Server Actions кабинета", () => {
     }
   });
 
+  // Приёмка фазы 1 (PLAN §5): менеджер не создаёт, не публикует и не архивирует ЖК и застройщиков,
+  // не правит справочники и сотрудников. Все действия — только руководителю, кроме перечисленных:
+  // новое действие с другими ролями без записи здесь — красный тест.
+  it("все действия: только руководитель, кроме перечисленных исключений", () => {
+    const others: Record<string, RegExp> = {
+      changePasswordAction: /requireActionViewer\(STAFF_ROLES, \{ allowPasswordChange: true \}\)/,
+      readSiteStockAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      readBlockUnitsAction: /requireActionViewer\(\["head", "manager", "videographer"\]\)/,
+      setUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      revertUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      setLayoutAvailableAction: /requireActionViewer\(\["head", "manager"\]\)/,
+    };
+    const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
+    for (const file of files) {
+      const source = readSource(file);
+      const headGuard =
+        /const headGuard = \(\) => (requireActionViewer\([^\n]+\));|async function headGuard\(\) \{\n\s*const guard = await (requireActionViewer\([^;]+\));/.exec(
+          source,
+        );
+      for (const { name, body } of exportedFunctions(source)) {
+        if (WITHOUT_SESSION.has(name)) continue;
+        const call = /const guard = await ([^;]+);/.exec(body)?.[1] ?? "";
+        const resolved = call === "headGuard()" ? (headGuard?.[1] ?? headGuard?.[2] ?? "") : call;
+        expect(resolved, `${file}: ${name}`).toMatch(others[name] ?? headOnly);
+      }
+    }
+  });
+
   it("headGuard сам спрашивает Auth заново (fresh) и пускает только руководителя", () => {
     const source = readSource("staff.ts");
     expect(source).toMatch(/requireActionViewer\(\["head"\], \{ fresh: true \}\)/);

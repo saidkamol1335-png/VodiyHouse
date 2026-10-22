@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import { refresh } from "next/cache";
 import { demoBlockUnits } from "@/lib/admin/complexes/demoUnits";
 import { demoUnitsScenario } from "@/lib/admin/complexes/demoUnitsScenarios";
@@ -39,10 +40,6 @@ import ru from "@/messages/ru.json";
 
 /** Как в базе: ответ называет того, кто правил, — на стенде это сотрудник стенда (как на странице). */
 const DEMO_AUTHOR = ru.admin.user.devName;
-
-function devOnly() {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
-}
 
 /** Квартиры блока по сценарию; null — нет такого блока. */
 const blockOf = (scenario: unknown, blockId: unknown) =>

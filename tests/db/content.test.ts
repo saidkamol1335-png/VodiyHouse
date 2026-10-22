@@ -140,6 +140,19 @@ describe("застройщики, ЖК и медиа", () => {
          ($1, 'arch-2', '{"ru": "А2", "uz": "A2"}', 'draft')`,
       [developerId],
     );
+    // Приёмка фазы 1: менеджер не архивирует ни застройщика (и каскадом его ЖК), ни сам ЖК.
+    await db.as(user(manager), async (tx) => {
+      await tx.query("update developers set status = 'archived' where id = $1", [developerId]);
+      await tx.query("update complexes set status = 'archived' where developer_id = $1", [
+        developerId,
+      ]);
+    });
+    const untouched = await db.admin.query<{ status: string }>(
+      `select status from developers where id = $1
+       union all select status from complexes where developer_id = $1 order by status`,
+      [developerId],
+    );
+    expect(untouched.rows.map((row) => row.status)).toEqual(["draft", "published", "published"]);
     await db.as(user(head), (tx) =>
       tx.query("update developers set status = 'archived' where id = $1", [developerId]),
     );

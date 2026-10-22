@@ -11,12 +11,12 @@ const ICON = { size: 18, strokeWidth: 1.8 } as const;
 export function PasswordField(props: Omit<FieldProps, "type" | "trailing">) {
   const t = useTranslations("admin.login");
   const [visible, setVisible] = useState(false);
-  const label = visible ? t("hidePassword") : t("showPassword");
+  // Подпись постоянная, состояние — aria-pressed: иначе диктор читал «Скрыть пароль, нажата».
   const reveal = (
     <button
       type="button"
       className="icon-button icon-button--sm icon-button--bare"
-      aria-label={label}
+      aria-label={t("showPassword")}
       aria-pressed={visible}
       onClick={() => setVisible((current) => !current)}
     >

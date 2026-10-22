@@ -49,7 +49,7 @@ export default async function AdminHomePage() {
   const t = await getTranslations("admin");
 
   const topbar = (
-    <Suspense fallback={<AdminTopbar title="" person={person} pending />}>
+    <Suspense fallback={<AdminTopbar title={t("nav.home")} person={person} pending />}>
       <HomeTopbar person={person} withStock={allowed} />
     </Suspense>
   );

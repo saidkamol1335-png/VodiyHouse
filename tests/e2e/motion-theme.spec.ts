@@ -26,13 +26,18 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
     await expect(html(page)).toHaveAttribute("data-motion", "full", { timeout: 5000 });
   });
 
-  test("390 с CPU ×4 без подсказки → lite", async ({ page }, testInfo) => {
+  // Сохранённый full ставит скрипт в <head>: lite в конце доказывает, что определение отработало
+  // (иначе тест прошёл бы и без него — сервер и так рисует lite). Lite здесь дают сигналы
+  // (палец и ширина < 768), проба FPS у телефона не запускается — CPU ×4 для честности условий.
+  test("390 с CPU ×4 без подсказки → lite (даже с сохранённым full)", async ({
+    page,
+  }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile-390", "только телефон");
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+    await page.addInitScript(() => localStorage.setItem("vh-motion", "full"));
     await page.goto("/uz");
-    await page.waitForTimeout(1000);
-    await expect(html(page)).toHaveAttribute("data-motion", "lite");
+    await expect(html(page)).toHaveAttribute("data-motion", "lite", { timeout: 5000 });
   });
 
   test("prefers-reduced-motion — none поверх ?motion=full", async ({ browser }) => {
@@ -40,6 +45,39 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
     const page = await context.newPage();
     await page.goto("/uz?motion=full");
     await expect(html(page)).toHaveAttribute("data-motion", "none");
+    await context.close();
+  });
+});
+
+// Кабинет — та же оболочка (RootDocument), но экраны свои: режим определяется и там, а none
+// глушит анимации фазы 1 (пульс «live», вспышка пилюли).
+test.describe("режимы анимации в кабинете", () => {
+  for (const path of ["/admin/vhod", "/dev/glavnaya"]) {
+    test(`${path}: без подсказки — 1440 → full, 390 → lite`, async ({ page }, testInfo) => {
+      await page.goto(path);
+      const expected = testInfo.project.name === "desktop-1440" ? "full" : "lite";
+      await expect(html(page)).toHaveAttribute("data-motion", expected, { timeout: 5000 });
+    });
+  }
+
+  test("reduced-motion — none: пульс «live» и вспышка пилюли не анимируются", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.clock.install();
+    await page.goto("/dev/glavnaya?demo=change&motion=full");
+    await expect(html(page)).toHaveAttribute("data-motion", "none");
+    await page.waitForLoadState("networkidle");
+    const ping = await page
+      .locator(".live-status__dot")
+      .evaluate((element) => getComputedStyle(element, "::after").animationName);
+    expect(ping).toBe("none");
+    await page.clock.runFor(65_000);
+    const flash = page.locator(".stock-badge__flash").first();
+    await expect(flash).toBeAttached();
+    const timing = await flash.evaluate((element) => getComputedStyle(element).animationDuration);
+    expect(Number.parseFloat(timing)).toBeLessThan(0.02);
     await context.close();
   });
 });

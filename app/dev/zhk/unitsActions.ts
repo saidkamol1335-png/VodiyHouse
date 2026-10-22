@@ -1,5 +1,6 @@
 "use server";
 
+import { devOnly } from "../devOnly";
 import { refresh } from "next/cache";
 import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
 import { demoLayouts } from "@/lib/admin/complexes/demoLayouts";
@@ -44,10 +45,6 @@ import {
 // перерисовка не перечитывает список. Раз DEMO не меняется, «было» всегда берётся из сида:
 // второй тап по той же квартире на стенде даёт ложное «в базе было …» и откат после чтения —
 // в облаке база ответит верно (это проверяет юнит-тест statusOutcome, а не e2e).
-
-function devOnly() {
-  if (process.env.NODE_ENV === "production") throw new Error("Стенд только для разработки");
-}
 
 /** Генератор: тот же разбор и те же строки lib/units — ответ «создано N». */
 export async function demoCreateBlockUnitsAction(

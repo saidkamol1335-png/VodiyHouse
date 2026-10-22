@@ -118,6 +118,7 @@ test.describe("кабинет · справочники и журнал", () => 
         await page.waitForLoadState("networkidle");
         await page.evaluate(() => document.fonts.ready);
         await page.screenshot({
+          caret: "initial",
           path: `${folder}/s10-settings-${name}-${theme}.png`,
           fullPage: true,
         });

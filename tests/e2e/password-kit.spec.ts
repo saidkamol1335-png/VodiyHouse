@@ -48,7 +48,7 @@ test.describe("первая смена пароля", () => {
       await expect(input).toHaveAttribute("type", "password");
       await field.getByRole("button", { name: "Показать пароль" }).click();
       await expect(input).toHaveAttribute("type", "text");
-      await field.getByRole("button", { name: "Скрыть пароль" }).click();
+      await field.getByRole("button", { name: "Показать пароль", pressed: true }).click();
       await expect(input).toHaveAttribute("type", "password");
     }
   });

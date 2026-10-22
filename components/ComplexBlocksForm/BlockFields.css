@@ -1,0 +1,78 @@
+/* Поля блока в раскрытой карточке: срок, отделка, валюта, «что входит в цену». */
+.block-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.block-fields__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
+.block-fields__currency {
+  display: grid;
+  gap: 6px;
+}
+
+.block-fields__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.block-fields__includes {
+  display: grid;
+  gap: 10px;
+}
+
+.block-fields__includes summary {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.block-fields__include {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 32px;
+  align-items: end;
+  gap: 10px;
+}
+
+/* Корзина — всегда в своей колонке, есть ли поле цены («Отдельно») или нет. */
+.block-fields__include-remove {
+  grid-column: -2 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 48px;
+  border: 0;
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  /* Пункт — RU | UZ на всю ширину, ниже «Входит / Отдельно» и корзина, ещё ниже — цена. */
+  .block-fields__include {
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .block-fields__include > :first-child,
+  .block-fields__include > .field:not(.choice-field) {
+    grid-column: 1 / -1;
+  }
+
+  .block-fields__include-remove {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
