@@ -37,6 +37,16 @@ function trackActions(page: Page) {
   return posts;
 }
 
+/**
+ * «Запроса больше нет»: networkidle после действия на загруженной странице не ждёт ничего (он
+ * отмечается раз на документ), поэтому ждём сам запрос — и он не должен прийти за 1,5 с.
+ */
+async function expectNoMoreActions(page: Page) {
+  const action = (request: Request) =>
+    request.method() === "POST" && Boolean(request.headers()["next-action"]);
+  await expect(page.waitForRequest(action, { timeout: 1500 })).rejects.toThrow();
+}
+
 async function openFilters(page: Page) {
   if (isMobile(page)) await page.getByRole("button", { name: /^Фильтры/ }).click();
 }
@@ -139,7 +149,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
       "true",
     );
     // Страница перерисовалась (refresh, как updateTag), а список не перечитан: один запрос.
-    await page.waitForLoadState("networkidle");
+    await expectNoMoreActions(page);
     expect(posts).toHaveLength(1);
 
     await bar(page)
@@ -147,7 +157,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
       .click();
     await expect(bar(page)).toContainText(`Вернули: кв. ${number} — свободна`);
     await expect(pill(page, "Свободны")).toContainText("12");
-    await page.waitForLoadState("networkidle");
+    await expectNoMoreActions(page);
     expect(posts).toHaveLength(2);
 
     // Тот же статус — без запроса.
@@ -156,7 +166,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
       .getByRole("group", { name: `Статус кв. ${number}` })
       .getByRole("button", { name: "свободна" })
       .click();
-    await page.waitForLoadState("networkidle");
+    await expectNoMoreActions(page);
     expect(posts).toHaveLength(2);
   });
 
@@ -376,6 +386,37 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await expect(bar(page)).not.toContainText("Блок A ·");
   });
 
+  test("блок без списка: полоса тапа из A видна и там, «Отменить» — только в блоке тапа", async ({
+    page,
+  }) => {
+    test.slow();
+    await page.clock.install();
+    await open(page, `${SHODLIK}?demo=mixed`);
+    const button = statusButtons(page, "свободна").first();
+    const number = /^Кв\. (\S+),/.exec((await button.getAttribute("aria-label"))!)![1]!;
+    await button.click();
+    await page.locator(".unit-status-picker").getByRole("button", { name: "бронь" }).click();
+    await expect(bar(page)).toContainText(`Кв. ${number}: свободна → бронь`);
+    await expect(bar(page)).not.toContainText("Сохраняем");
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+    const switcher = page.getByRole("navigation", { name: "Блок" });
+    await switcher.getByRole("link", { name: /Блок B/ }).click();
+    await expect(page.getByRole("heading", { name: "Наличие по планировкам" })).toBeVisible(SWITCH);
+    await expect(bar(page)).toContainText(`Блок A · Кв. ${number}: свободна → бронь`);
+    await expect(bar(page).getByRole("button", { name: /Отменить/ })).toHaveCount(0);
+    await switcher.getByRole("link", { name: /Блок A/ }).click();
+    await expect(bar(page).getByRole("button", { name: /Отменить/ })).toBeVisible(SWITCH);
+  });
+
+  test("«К действиям · N» — с клавиатуры сразу к массовой панели", async ({ page }) => {
+    await open(page);
+    await page.getByRole("checkbox", { name: "Выбрать кв. 1", exact: true }).check();
+    // Ссылка-пропуск видна только в фокусе с клавиатуры — так её и нажимают.
+    await page.getByRole("button", { name: "К действиям · 1" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("[data-units-bulk] button").first()).toBeFocused();
+  });
+
   test("список удалили, пока страница была открыта, — «обновите страницу», а не «ничего не найдено»", async ({
     page,
   }) => {
@@ -493,8 +534,9 @@ test.describe("кабинет · ЖК · список квартир", () => {
       await openFilters(page);
       await page.screenshot({ path: `${dir}/s12-list-filters.png`, fullPage: false });
     }
+    // Ключ — как у приложения (THEME_STORAGE_KEY), атрибут — чтобы не перезагружать страницу.
     await page.evaluate(() => {
-      localStorage.setItem("theme", "dark");
+      localStorage.setItem("vh-theme", "dark");
       document.documentElement.dataset.theme = "dark";
     });
     await page.screenshot({ path: `${dir}/s12-list-dark.png`, fullPage: false });

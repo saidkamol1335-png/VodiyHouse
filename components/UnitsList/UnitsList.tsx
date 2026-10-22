@@ -161,7 +161,11 @@ function ToBulkActions({ count }: { count: number }) {
   if (count === 0) return null;
   const jump = () => document.querySelector<HTMLElement>("[data-units-bulk] button")?.focus();
   return (
-    <button type="button" className="units-list__select-button" onClick={jump}>
+    <button
+      type="button"
+      className="units-list__select-button units-list__select-button--skip"
+      onClick={jump}
+    >
       {t("toActions", { count })}
     </button>
   );

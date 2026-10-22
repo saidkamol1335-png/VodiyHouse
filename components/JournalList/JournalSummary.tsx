@@ -123,16 +123,16 @@ function DeleteSummary({ summary }: { summary: Of<"delete" | "delete_list"> }) {
       </Line>
       <Line>{t("statuses", summary.statuses)}</Line>
       {summary.reservedNumbers ? (
-        <Line>
+        <LongLine>
           {t.rich("reservedWere", {
             numbers: () => <LongNumbers numbers={summary.reservedNumbers!} />,
           })}
-        </Line>
+        </LongLine>
       ) : null}
       {summary.soldNumbers ? (
-        <Line>
+        <LongLine>
           {t.rich("soldWere", { numbers: () => <LongNumbers numbers={summary.soldNumbers!} /> })}
-        </Line>
+        </LongLine>
       ) : null}
     </Summary>
   );
@@ -201,6 +201,10 @@ const Summary = ({ children }: { children: ReactNode }) => (
 );
 const Line = ({ children }: { children: ReactNode }) => (
   <p className="journal-list__summary-line">{children}</p>
+);
+// Строка с «показать все» (details) — div: details в p HTML не допускает, гидратация бы упала.
+const LongLine = ({ children }: { children: ReactNode }) => (
+  <div className="journal-list__summary-line">{children}</div>
 );
 const Note = ({ children }: { children: ReactNode }) => (
   <p className="journal-list__note">{children}</p>

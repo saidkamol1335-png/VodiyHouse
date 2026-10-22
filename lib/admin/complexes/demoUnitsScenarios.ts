@@ -7,7 +7,8 @@ import { demoPlanUnits } from "./demoUnitsPlan";
 // «нет в наличии» у блока без списка; big — блок
 // на пределе в 5000 квартир; fail — база отказывает в статусе; conflict — статус успел поменять
 // другой сотрудник; empty — список удалили, пока страница была открыта (чтение пустое); notready —
-// ЖК на сайте, и снятая цена убрала бы «цену от» (vh:not_ready). Каждый сценарий привязан к
+// ЖК на сайте, и снятая цена убрала бы «цену от» (vh:not_ready); mixed — у Shodlik блок B без
+// списка (полоса вкладки на блоке без списка, 12.7). Каждый сценарий привязан к
 // действиям через .bind: без общего состояния между воркерами Playwright.
 
 export const DEMO_UNITS_SCENARIOS = [
@@ -17,6 +18,7 @@ export const DEMO_UNITS_SCENARIOS = [
   "conflict",
   "empty",
   "notready",
+  "mixed",
 ] as const;
 export type DemoUnitsScenario = (typeof DEMO_UNITS_SCENARIOS)[number] | null;
 
@@ -97,8 +99,16 @@ function big(tab: Tab): Tab {
   return { ...tab, blocks, block, units };
 }
 
+/** Блок B без списка: у него «Наличие по планировкам» и генератор, у A — список. */
+function mixed(tab: Tab): Tab {
+  const blocks = tab.blocks.map((item) => (item.name === "B" ? { ...item, unitCount: 0 } : item));
+  const block = blocks.find((item) => item.id === tab.block?.id) ?? null;
+  return { ...tab, blocks, block, units: block?.unitCount === 0 ? [] : tab.units };
+}
+
 export function applyDemoUnitsScenario(scenario: DemoUnitsScenario, tab: Tab): Tab {
   if (scenario === "variety") return variety(tab);
+  if (scenario === "mixed") return mixed(tab);
   if (scenario === "big") return big(tab);
   return tab;
 }

@@ -159,7 +159,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
     await page.getByRole("button", { name: /Стояки ·/ }).click();
     await position(page, 3).getByRole("button", { name: "+ Уточнить для подъезда" }).click();
     const refine = position(page, 3).locator(".risers-editor__row--refine");
-    await refine.getByLabel("Подъезд").selectOption({ label: "Подъезд 2" });
+    await refine.getByLabel(/^Подъезд/).selectOption({ label: "Подъезд 2" });
     await refine.getByLabel("Планировка").selectOption({ label: "3-комн. · 84,3 м²" });
     await page.getByRole("button", { name: "Сохранить стояки" }).click();
     // Позиция 3 подъезда 2 на эт. 2–12 — 11 квартир.
@@ -190,7 +190,9 @@ test.describe("кабинет · ЖК · квартиры", () => {
     const refine = position(page, 1).getByRole("button", { name: "+ Уточнить для подъезда" });
     await refine.click();
     await refine.click();
-    const scopes = position(page, 1).locator(".risers-editor__row--refine").getByLabel("Подъезд");
+    const scopes = position(page, 1)
+      .locator(".risers-editor__row--refine")
+      .getByLabel(/^Подъезд/);
     await expect(scopes.nth(0)).toHaveValue("1");
     await expect(scopes.nth(1)).toHaveValue("2");
     await expect(refine).toHaveCount(0);
@@ -208,7 +210,10 @@ test.describe("кабинет · ЖК · квартиры", () => {
     await open(page, SHODLIK);
     await page.getByRole("button", { name: /Стояки ·/ }).click();
     await position(page, 2).getByRole("button", { name: "+ Разделить по этажам" }).click();
-    await position(page, 2).getByRole("button", { name: /^Убрать строку/ }).first().click();
+    await position(page, 2)
+      .getByRole("button", { name: /^Убрать строку/ })
+      .first()
+      .click();
     // Позиция 2, эт. 2–11 в двух подъездах.
     await expect(page.locator(".units-risers__warning")).toContainText("Вне стояков: 20 мест");
   });

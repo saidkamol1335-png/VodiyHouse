@@ -119,6 +119,21 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     for (const hidden of ["Цена", "Отделка", "Удалить"])
       await expect(bulk(page).getByRole("button", { name: hidden, exact: true })).toHaveCount(0);
     expect(await noHorizontalScroll(page)).toBe(0);
+
+    // Массовый «Статус» и «Отменить» после него — менеджеру тоже («Решаю сам» шага 12).
+    await page.getByRole("checkbox", { name: "Выбрать кв. 4", exact: true }).check();
+    await bulk(page).getByRole("button", { name: "Статус", exact: true }).click();
+    await bulk(page)
+      .getByRole("group", { name: "Статус выбранных" })
+      .getByRole("button", { name: "бронь" })
+      .click();
+    await expect(bar(page)).toContainText("2 квартиры → бронь");
+    await expect(rowOf(page, "4").getByRole("button", { name: /бронь/ })).toBeVisible();
+    await bar(page)
+      .getByRole("button", { name: /Отменить/ })
+      .click();
+    await expect(bar(page)).toContainText("Вернули");
+    await expect(rowOf(page, "4").getByRole("button", { name: /свободна/ })).toBeVisible();
   });
 
   test("Namuna: «Наличие по планировкам» без генератора; тап сохраняет сразу", async ({ page }) => {

@@ -102,6 +102,20 @@ test.describe("менеджер и видеограф", () => {
     await expect(page.getByRole("button", { name: /^Стояки/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "+ Квартира" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Удалить список блока" })).toHaveCount(0);
+    // Настоящая цепочка «действие → функция базы → тег ЖК» менеджером: тап и «Отменить» — DEMO
+    // возвращается сам (приёмка 12.7: стенд ходит в demo-действия, а не в эти).
+    const free = page.getByRole("button", { name: /, свободна\. Сменить статус$/ }).first();
+    const number = /^Кв\. (\S+),/.exec((await free.getAttribute("aria-label"))!)![1]!;
+    await free.click();
+    await page
+      .getByRole("group", { name: new RegExp(`^Статус кв\\. ${number}`) })
+      .getByRole("button", { name: "бронь" })
+      .click();
+    const bar = page.locator(".units-undo");
+    await expect(bar).toContainText(`Кв. ${number}: свободна → бронь`);
+    await expect(bar).not.toContainText("Сохраняем");
+    await bar.getByRole("button", { name: /Отменить/ }).click();
+    await expect(bar).toContainText(`Вернули: кв. ${number} — свободна`);
     await context.close();
   });
 

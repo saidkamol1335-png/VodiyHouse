@@ -34,6 +34,10 @@ function trackActions(page: Page) {
   return posts;
 }
 
+/** «Уйти без сохранения?» должен появиться — и получить «Нет»; не появился — тест упадёт по таймауту. */
+const dismissNextDialog = (page: Page) =>
+  page.waitForEvent("dialog").then((dialog) => dialog.dismiss());
+
 async function step(page: Page, name: string) {
   await bulk(page).getByRole("button", { name, exact: true }).click();
 }
@@ -176,8 +180,9 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await expect(page.locator(".unit-edit")).toContainText("Квартира с таким номером уже есть");
     expect(posts).toHaveLength(0);
 
-    page.once("dialog", (dialog) => dialog.dismiss());
+    const asked = dismissNextDialog(page);
     await page.keyboard.press("Escape");
+    await asked;
     await expect(page.locator(".unit-edit")).toBeVisible();
 
     await number.fill("1А");
@@ -274,12 +279,18 @@ test.describe("кабинет · ЖК · квартиры: правки руко
       .click();
     await page.getByRole("button", { name: "Изменить квартиру" }).click();
     await page.getByLabel("Номер", { exact: true }).fill("1Б");
-    page.once("dialog", (dialog) => dialog.dismiss());
+    // Диалог был, «Нет» оставил и фильтр, и форму; фокус — там, где нажимали, а не на body.
+    let asked = dismissNextDialog(page);
     await pill(page, "Свободны").click();
+    await asked;
+    await expect(pill(page, "Свободны")).toHaveAttribute("aria-pressed", "false");
     await expect(page.locator(".unit-edit")).toBeVisible();
-    page.once("dialog", (dialog) => dialog.dismiss());
-    await page.getByRole("button", { name: "Отмена" }).click();
+    asked = dismissNextDialog(page);
+    const cancel = page.getByRole("button", { name: "Отмена" });
+    await cancel.click();
+    await asked;
     await expect(page.locator(".unit-edit")).toBeVisible();
+    await expect(cancel).toBeFocused();
   });
 
   test("«Удалить список блока»: «Отмена», пока шёл запрос, — отказ строкой в полосе", async ({
@@ -311,7 +322,9 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await check(page, "1").check();
     await expect
       .poll(padding)
-      .toMatch(/calc\(min\(\d+(\.\d+)?px, 50vh\) \+ var\(--units-dock-gap\)\)/);
+      .toMatch(
+        /calc\(min\(\d+(\.\d+)?px, var\(--units-dock-cover-max\)\) \+ var\(--units-dock-gap\)\)/,
+      );
     await bulk(page).getByRole("button", { name: "Снять выделение" }).click();
     await expect.poll(padding).toBe("");
   });
