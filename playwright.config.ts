@@ -12,6 +12,9 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  // Узкое место — один dev-сервер, а не браузеры: 16 воркеров (половина ядер) при фоновой нагрузке
+  // на машину растягивали переходы дольше 5 с, 8 — так же быстро и без сбоев (22.10.2026).
+  workers: 8,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],

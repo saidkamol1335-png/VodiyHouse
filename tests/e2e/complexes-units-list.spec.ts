@@ -16,6 +16,11 @@ const pill = (page: Page, name: string) =>
 const statusButtons = (page: Page, status: string) =>
   page.getByRole("button", { name: new RegExp(`^Кв\\. .+, ${status}\\. Статус и правка$`) });
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 0) < 760;
+// Блок сменили, пока статус сохраняется: Next вытесняет это действие переходом, а раз оно сбросило
+// тег ЖК — после перехода делает refresh, и новый блок появляется только после него. Три запроса
+// подряд; весь e2e на dev-сервере растягивает их дольше 5 с (trace 22.10.2026, так же на 01010ae),
+// а такие тесты целиком — дольше 30 с, поэтому они ещё и test.slow().
+const SWITCH = { timeout: 15_000 };
 
 async function open(page: Page, url: string = SHODLIK) {
   await page.goto(url);
@@ -220,6 +225,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
   test("отказ прежнего тапа не теряется ни за вторым тапом, ни при смене блока", async ({
     page,
   }) => {
+    test.slow();
     // Ответы действий — с задержкой: второй тап и переход успевают до ответа первого.
     await page.route(`**${SHODLIK}*`, async (route) => {
       if (route.request().method() === "POST")
@@ -248,7 +254,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
       .getByRole("navigation", { name: "Блок" })
       .getByRole("link", { name: /Блок B/ })
       .click();
-    await expect(pill(page, "Свободны")).toContainText("29");
+    await expect(pill(page, "Свободны")).toContainText("29", SWITCH);
     await expect(bar(page)).toContainText(`Блок A · Не сохранили кв. ${first}.`);
   });
 
@@ -348,6 +354,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
   test("блок A → B → A: свой список у каждого; полоса одна на вкладку — с названием блока", async ({
     page,
   }) => {
+    test.slow();
     await page.clock.install();
     await open(page);
     const button = statusButtons(page, "свободна").first();
@@ -355,13 +362,17 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await button.click();
     await page.locator(".unit-status-picker").getByRole("button", { name: "бронь" }).click();
     await expect(bar(page)).toContainText(`Кв. ${number}: свободна → бронь`);
+    // Смена блока до ответа — в тесте отказа выше; здесь — после. Полоса живёт 5 с от ответа, а
+    // переход под нагрузкой бывает дольше: часы стоят до конца теста.
+    await expect(bar(page)).not.toContainText("Сохраняем");
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
     const switcher = page.getByRole("navigation", { name: "Блок" });
     await switcher.getByRole("link", { name: /Блок B/ }).click();
-    await expect(pill(page, "Свободны")).toContainText("29");
+    await expect(pill(page, "Свободны")).toContainText("29", SWITCH);
     await expect(bar(page)).toContainText(`Блок A · Кв. ${number}: свободна → бронь`);
     await switcher.getByRole("link", { name: /Блок A/ }).click();
     // Список A прочитан заново: DEMO не меняется — квартира снова свободна.
-    await expect(pill(page, "Свободны")).toContainText("12");
+    await expect(pill(page, "Свободны")).toContainText("12", SWITCH);
     await expect(bar(page)).not.toContainText("Блок A ·");
   });
 
