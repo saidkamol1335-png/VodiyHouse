@@ -1,7 +1,13 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { componentOf, reachableModules, readSource, routeFiles } from "@/tests/unit/importGraph";
+import {
+  adminRootFiles,
+  componentOf,
+  reachableModules,
+  readSource,
+  routeFiles,
+} from "@/tests/unit/importGraph";
 
 // CSS по разделам (шаг 14в): сайт не грузит кабинет, вход — только своё. Компонент, который
 // попадёт на страницу без своего CSS, выглядел бы сломанным только там — тест ловит это сразу.
@@ -15,12 +21,7 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
     entries: [...routeFiles("app/[locale]"), "app/global-not-found.tsx"],
     bundles: ["globals", "site"],
   },
-  adminRoot: {
-    entries: ["layout.tsx", "error.tsx", "vhod/page.tsx", "parol/page.tsx"].map(
-      (f) => `app/admin/${f}`,
-    ),
-    bundles: ["globals", "admin"],
-  },
+  adminRoot: { entries: adminRootFiles(), bundles: ["globals", "admin"] },
   cabinet: { entries: routeFiles("app/admin/(cabinet)"), bundles: ["globals", "admin", "cabinet"] },
   dev: { entries: routeFiles("app/dev"), bundles: [...BUNDLES] },
 };

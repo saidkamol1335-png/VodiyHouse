@@ -22,6 +22,12 @@ function resolveImport(from: string, specifier: string): string | null {
   return null;
 }
 
+function importsOf(file: string, source: string): string[] {
+  return [...source.matchAll(IMPORT)]
+    .map((match) => resolveImport(file, match[1] ?? match[2]!))
+    .filter((target): target is string => target !== null);
+}
+
 /** Все модули проекта (.ts / .tsx), достижимые из входных файлов, включая их самих. */
 export function reachableModules(entries: readonly string[]): string[] {
   const seen = new Set<string>();
@@ -30,12 +36,31 @@ export function reachableModules(entries: readonly string[]): string[] {
     const file = stack.pop()!;
     if (seen.has(file)) continue;
     seen.add(file);
-    for (const match of readSource(file).matchAll(IMPORT)) {
-      const target = resolveImport(file, match[1] ?? match[2]!);
-      if (target) stack.push(target);
-    }
+    stack.push(...importsOf(file, readSource(file)));
   }
   return [...seen];
+}
+
+/**
+ * Модули, которые уйдут в браузер: с "use client" и всё, что они импортируют, — граница
+ * клиента наследуется (Logo без директивы, но в шапке-клиенте он клиентский).
+ */
+export function reachableClientModules(entries: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const client = new Set<string>();
+  const stack = entries.map((entry) => ({ file: path.resolve(ROOT, entry), inClient: false }));
+  while (stack.length > 0) {
+    const { file, inClient: parentInClient } = stack.pop()!;
+    const source = readSource(file);
+    const inClient = parentInClient || /^["']use client["']/m.test(source);
+    // Один файл бывает и серверным, и клиентским — обходим его в каждой роли по разу.
+    const key = `${inClient}:${file}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (inClient) client.add(file);
+    for (const target of importsOf(file, source)) stack.push({ file: target, inClient });
+  }
+  return [...client];
 }
 
 /** Страницы и layout маршрутов под папкой (без тестов). */
@@ -46,6 +71,10 @@ export function routeFiles(dir: string): string[] {
     return /\.tsx?$/.test(entry.name) && !entry.name.includes(".test.") ? [relative] : [];
   });
 }
+
+/** Корень /admin вне кабинета: вход, смена пароля, ошибка — свои CSS и сообщения. */
+export const adminRootFiles = () =>
+  routeFiles("app/admin").filter((file) => !/[\\/]\(cabinet\)[\\/]/.test(file));
 
 /** Папка компонента (components/<Имя>/…) или null. */
 export function componentOf(file: string): string | null {
