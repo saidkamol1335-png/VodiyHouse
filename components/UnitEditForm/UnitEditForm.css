@@ -21,7 +21,7 @@
   gap: 14px 18px;
 }
 
-.unit-edit__fields .unit-price-fields {
+.unit-edit__price {
   grid-column: 1 / -1;
 }
 
@@ -44,7 +44,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .unit-edit__actions .button {
+  .unit-edit__action {
     flex: 1 1 0;
   }
 }

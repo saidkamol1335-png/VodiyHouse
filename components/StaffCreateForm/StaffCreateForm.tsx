@@ -31,7 +31,7 @@ export function StaffCreateForm({ action }: StaffCreateFormProps) {
   if (!open) {
     return (
       <div className="staff-create staff-create--closed">
-        <Button size="sm" onClick={() => setOpen(true)}>
+        <Button size="sm" onClick={() => setOpen(true)} className="staff-create__button">
           <Plus size={16} strokeWidth={2} aria-hidden />
           {t("add")}
         </Button>
@@ -85,10 +85,10 @@ function StaffCreatePanel({ action, onClose }: StaffCreateFormProps & { onClose:
         </div>
         {failed?.error ? <FormStatus tone="error">{t(`errors.${failed.error}`)}</FormStatus> : null}
         <div className="staff-create__actions">
-          <Button type="submit" pending={pending}>
+          <Button type="submit" pending={pending} className="staff-create__button">
             {pending ? t("create.pending") : t("create.submit")}
           </Button>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} className="staff-create__button">
             {t("create.cancel")}
           </Button>
         </div>

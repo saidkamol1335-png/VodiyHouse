@@ -22,7 +22,7 @@
 
 /* Едва заметный наезд камеры на кадр — только full, только transform. */
 [data-motion="full"] .login-backdrop__image {
-  animation: login-backdrop-push 20s var(--ease-2) both;
+  animation: login-backdrop-push var(--dur-push) var(--ease-2) both;
 }
 
 .login-backdrop__shade {

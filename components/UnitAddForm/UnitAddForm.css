@@ -65,7 +65,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .unit-add__actions .button {
+  .unit-add__action {
     flex: 1 1 0;
   }
 }

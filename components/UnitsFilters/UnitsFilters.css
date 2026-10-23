@@ -14,11 +14,11 @@
   min-width: 0;
 }
 
-.units-filters__search .search-field {
+.units-filters__search-field {
   flex: 1;
 }
 
-.units-filters__search .field__input {
+.units-filters__search-input {
   height: 38px;
   border-radius: var(--r-pill);
 }
@@ -28,7 +28,7 @@
   flex: none;
   align-items: center;
   gap: 8px;
-  height: 44px;
+  height: var(--touch-target);
   padding: 0 16px;
   border: 1px solid var(--chip-border);
   border-radius: var(--r-pill);
@@ -86,7 +86,7 @@
   color: var(--fg-3);
 }
 
-.units-filters__floor.field__input {
+.units-filters__floor {
   width: 76px;
   height: 32px;
   padding: 0 10px;
@@ -115,8 +115,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .units-filters__search .field__input {
-    height: 44px;
+  .units-filters__search-input {
+    height: var(--touch-target);
   }
 
   .units-filters__toggle {
@@ -142,22 +142,22 @@
     align-items: flex-start;
   }
 
-  .units-filters__floor.field__input {
+  .units-filters__floor {
     width: 96px;
-    height: 44px;
+    height: var(--touch-target);
   }
 
   .units-filters__reset {
     align-self: flex-start;
-    height: 44px;
+    height: var(--touch-target);
   }
 }
 
 /* Планшет пальцем (контейнер шире 620): поиск, этажи и «Сбросить» — 44 px, как на телефоне. */
 @media (pointer: coarse) {
-  .units-filters__search .field__input,
-  .units-filters__floor.field__input,
+  .units-filters__search-input,
+  .units-filters__floor,
   .units-filters__reset {
-    height: 44px;
+    height: var(--touch-target);
   }
 }

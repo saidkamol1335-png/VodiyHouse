@@ -101,6 +101,6 @@
 /* «Доступна | Нет в наличии» — 44 px: на телефоне и на планшете пальцем. */
 @media (max-width: 760px), (pointer: coarse) {
   .units-availability__row .units-availability__option {
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 }

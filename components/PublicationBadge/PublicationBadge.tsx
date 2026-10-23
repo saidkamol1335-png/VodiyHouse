@@ -11,10 +11,17 @@ const TONES: Record<PublicationStatus, BadgeTone> = {
 };
 
 /** Плашка статуса ЖК или застройщика в списках и на странице кабинета (решение Д1). */
-export function PublicationBadge({ status }: { status: PublicationStatus }) {
+export function PublicationBadge({
+  status,
+  className,
+}: {
+  status: PublicationStatus;
+  /** Микс с элементом блока-владельца по БЭМ. */
+  className?: string;
+}) {
   const t = useTranslations("admin.publication");
   return (
-    <Badge tone={TONES[status]} dot>
+    <Badge tone={TONES[status]} dot className={className}>
       {t(status)}
     </Badge>
   );

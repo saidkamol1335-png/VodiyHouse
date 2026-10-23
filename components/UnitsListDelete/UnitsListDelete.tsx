@@ -49,7 +49,13 @@ export function UnitsListDelete({ id, blockName, count, edit }: UnitsListDeleteP
           }}
         />
       ) : (
-        <Button ref={opener} variant="danger" size="sm" onClick={() => setOpen(true)}>
+        <Button
+          ref={opener}
+          variant="danger"
+          size="sm"
+          onClick={() => setOpen(true)}
+          className="units-list-delete__open"
+        >
           {t("open")}
         </Button>
       )}
@@ -118,10 +124,17 @@ function DeleteListActions({ pending, ready, onCancel }: DeleteListActionsProps)
   const submit = useRefocusAfter(pending);
   return (
     <div className="units-list-delete__actions">
-      <Button variant="ghost" onClick={onCancel}>
+      <Button variant="ghost" onClick={onCancel} className="units-list-delete__action">
         {t("cancel")}
       </Button>
-      <Button ref={submit} type="submit" variant="danger" pending={pending} disabled={!ready}>
+      <Button
+        ref={submit}
+        type="submit"
+        variant="danger"
+        pending={pending}
+        disabled={!ready}
+        className="units-list-delete__action"
+      >
         {pending ? t("pending") : t("submit")}
       </Button>
     </div>

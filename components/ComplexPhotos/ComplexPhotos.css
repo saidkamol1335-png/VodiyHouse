@@ -92,7 +92,7 @@
 }
 
 .complex-photos__add[aria-disabled] {
-  opacity: 0.45;
+  opacity: var(--opacity-unavailable);
   cursor: not-allowed;
 }
 
@@ -154,47 +154,6 @@
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-}
-
-/* Панель фото: кадры слева направо, действия — строкой ниже. */
-.photo-panel {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-l);
-  background: var(--bg-2);
-  animation: photo-panel-reveal var(--dur-fast) var(--ease) both;
-}
-
-@keyframes photo-panel-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-
-.photo-panel__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.photo-panel__note,
-.photo-panel__confirm {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  color: var(--fg-2);
-  font-size: var(--fs-small);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .photo-panel {
-    animation: none;
-  }
 }
 
 @media (max-width: 1100px) {

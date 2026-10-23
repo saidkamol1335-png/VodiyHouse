@@ -42,7 +42,7 @@
   margin: 0;
   font-size: var(--fs-h4);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--ls-panel-title);
 }
 
 /* «Застройщик: …» со страницы застройщика: пилюля с крестиком — вернуться ко всем ЖК. */

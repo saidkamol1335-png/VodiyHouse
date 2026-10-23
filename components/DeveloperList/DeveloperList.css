@@ -32,7 +32,7 @@
   margin: 0;
   font-size: var(--fs-h4);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--ls-panel-title);
 }
 
 .developer-list__count {

@@ -23,12 +23,18 @@ export function LogoMark({ className = "logo__mark" }: { className?: string }) {
 type LogoProps = {
   /** На телефоне после прокрутки вместо «Vodiy House» показывается название страницы. */
   hideText?: boolean;
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
-export function Logo({ hideText = false }: LogoProps) {
+export function Logo({ hideText = false, className }: LogoProps) {
   const t = useTranslations("header");
   return (
-    <Link href={ROUTES.home} className="logo" aria-label={t("home")}>
+    <Link
+      href={ROUTES.home}
+      className={["logo", className].filter(Boolean).join(" ")}
+      aria-label={t("home")}
+    >
       <LogoMark />
       <span className={hideText ? "logo__text logo__text--hidden" : "logo__text"}>Vodiy House</span>
     </Link>

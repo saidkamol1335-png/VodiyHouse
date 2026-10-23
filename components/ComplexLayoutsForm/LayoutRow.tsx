@@ -79,6 +79,7 @@ export function LayoutRow(props: LayoutRowProps) {
         onChange={(value) => onChange({ rooms: value === "" ? null : Number(value) })}
       />
       <Field
+        className="layout-row__area"
         id={id("area")}
         label={t("fields.area")}
         inputMode="decimal"

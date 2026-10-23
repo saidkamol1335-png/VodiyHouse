@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { fontVariables } from "@/lib/fonts";
 import "./globals.css";
+import "./site.css";
 
 export const metadata: Metadata = {
   title: "404 · Vodiy House",

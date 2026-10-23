@@ -2,7 +2,7 @@
 .admin-topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: var(--z-admin-topbar);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,7 +25,7 @@
   font-size: var(--fs-admin-title);
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--ls-admin-title);
 }
 
 .admin-topbar__subtitle {

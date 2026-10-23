@@ -71,7 +71,7 @@
 
 @media (max-width: 760px) {
   .filter-pills__pill {
-    height: 44px;
+    height: var(--touch-target);
     padding: 0 16px;
     font-size: var(--fs-control);
   }
@@ -90,8 +90,8 @@
 
 @media (max-width: 760px) {
   .filter-pills--wrap .filter-pills__pill {
-    min-width: 44px;
-    height: 44px;
+    min-width: var(--touch-target);
+    height: var(--touch-target);
     justify-content: center;
   }
 }
@@ -101,7 +101,7 @@
   .filter-pills__pill,
   .filter-pills--wrap .filter-pills__pill {
     justify-content: center;
-    min-width: 44px;
-    height: 44px;
+    min-width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

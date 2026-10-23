@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NextIntlClientProvider } from "next-intl";
+import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import { BackgroundColumns } from "@/components/BackgroundColumns";
 import { FilmGrain } from "@/components/FilmGrain";
 import { HEAD_BOOT_SCRIPT } from "@/lib/boot/headScript";
@@ -11,13 +11,15 @@ type RootDocumentProps = {
   children: ReactNode;
   /** Линии колонок на фоне — только публичный сайт (дизайн-решение Э1, 19.10.2026). */
   withColumns?: boolean;
+  /** Сообщения для браузера; без них — все (lib/i18n/clientMessages.ts). */
+  messages?: AbstractIntlMessages;
 };
 
 /**
  * Общая оболочка <html> для корневых layout сайта, кабинета и /dev.
  * Сервер всегда рендерит светлую тему и lite; скрипт в <head> поправит до первой отрисовки.
  */
-export function RootDocument({ lang, children, withColumns = false }: RootDocumentProps) {
+export function RootDocument({ lang, children, withColumns = false, messages }: RootDocumentProps) {
   return (
     <html
       lang={lang}
@@ -34,7 +36,7 @@ export function RootDocument({ lang, children, withColumns = false }: RootDocume
       <body>
         {withColumns ? <BackgroundColumns /> : null}
         <div className="page-layer">
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
         </div>
         <FilmGrain />
         <MotionController />

@@ -87,6 +87,8 @@ function SearchRow({ filter, onChange, panel, onTogglePanel }: SearchRowProps) {
         placeholder={t("searchPlaceholder")}
         value={filter.query}
         onChange={(query) => onChange({ ...filter, query })}
+        className="units-filters__search-field"
+        inputClassName="units-filters__search-input"
       />
       <button
         type="button"

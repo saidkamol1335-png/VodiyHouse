@@ -74,7 +74,7 @@
 
 @media (max-width: 760px) {
   .unit-status-picker__option {
-    height: 44px;
+    height: var(--touch-target);
     padding: 0 16px;
     font-size: var(--fs-control);
   }
@@ -83,6 +83,6 @@
 /* Планшет пальцем: варианты статуса — 44 px, как на телефоне. */
 @media (pointer: coarse) {
   .unit-status-picker__option {
-    height: 44px;
+    height: var(--touch-target);
   }
 }

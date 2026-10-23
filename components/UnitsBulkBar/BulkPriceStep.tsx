@@ -51,6 +51,7 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
   return (
     <form className="units-bulk__form" onSubmit={submitWith(apply, focusInvalid)}>
       <UnitPriceFields
+        className="units-bulk__field"
         draft={draft}
         onChange={(next) => {
           setDraft(next);
@@ -67,7 +68,7 @@ export function BulkPriceStep({ selection, edit, block, layouts, onDone }: BulkS
         <p className="units-bulk__note">{t("allStatuses", { count: notFree })}</p>
       )}
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
-      <Button ref={submit} type="submit" pending={pending}>
+      <Button ref={submit} type="submit" pending={pending} className="units-bulk__button">
         {draft.mode === "none" ? t("applyNone") : t("apply")}
       </Button>
     </form>

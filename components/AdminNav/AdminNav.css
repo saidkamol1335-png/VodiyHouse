@@ -88,7 +88,7 @@
   .admin-nav--strip {
     position: sticky;
     top: 0;
-    z-index: 31;
+    z-index: var(--z-admin-strip);
     display: block;
     border-bottom: 1px dashed var(--dash);
     background: var(--glass);

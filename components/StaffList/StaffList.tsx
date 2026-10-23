@@ -50,7 +50,7 @@ function StaffRow({ member, isSelf, actions }: { member: StaffMember; isSelf: bo
   const rowClass = `staff-list__row${member.isActive ? "" : " staff-list__row--inactive"}`;
   return (
     <li className={rowClass}>
-      <Avatar name={member.fullName} />
+      <Avatar name={member.fullName} className="staff-list__avatar" />
       <div className="staff-list__person">
         <span className="staff-list__name">{member.fullName}</span>
         <span className="staff-list__email">{member.email}</span>

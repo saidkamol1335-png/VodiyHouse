@@ -89,7 +89,7 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
       <ChecksPanel {...sections} />
       <div className="complex-main__save">
         <ComplexSaveFeedback state={state} />
-        <Button type="submit" pending={pending}>
+        <Button type="submit" pending={pending} className="complex-main__submit">
           {pending ? t("pending") : t("save")}
         </Button>
       </div>

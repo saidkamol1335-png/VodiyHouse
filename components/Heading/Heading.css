@@ -28,7 +28,7 @@
   font-size: var(--fs-h4);
   line-height: 1.35;
   font-weight: 650;
-  letter-spacing: -0.012em;
+  letter-spacing: var(--ls-h4);
 }
 
 /* Акцент крупнее на 14 %: у Cormorant низкие строчные, в том же кегле он выглядит мельче Manrope. */
@@ -39,6 +39,6 @@
   font-weight: 500;
   font-size: 1.14em;
   line-height: 0.9;
-  letter-spacing: -0.012em;
+  letter-spacing: var(--ls-h4);
   color: var(--gold);
 }

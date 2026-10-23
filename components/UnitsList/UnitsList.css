@@ -227,12 +227,12 @@
 
   .units-list__reset,
   .units-list__select-button {
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 
-  .units-list__more .button {
+  .units-list__more-button {
     width: 100%;
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 }
 
@@ -240,7 +240,7 @@
 @media (pointer: coarse) {
   .units-list__reset,
   .units-list__select-button,
-  .units-list__more .button {
-    min-height: 44px;
+  .units-list__more-button {
+    min-height: var(--touch-target);
   }
 }

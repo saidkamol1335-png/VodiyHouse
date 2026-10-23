@@ -99,7 +99,7 @@ export function StatusCapsule(props: StatusCapsuleProps) {
     <>
       <form className="status-capsule" action={formAction} aria-label={t("label")}>
         <input type="hidden" name="id" value={entity.id} />
-        <PublicationBadge status={entity.status} />
+        <PublicationBadge status={entity.status} className="status-capsule__badge" />
         {moves.map((to) => (to === "archived" ? null : moveButton(to)))}
         {canArchive ? (
           <Button size="sm" variant="ghost" disabled={pending} onClick={() => setPanel("archive")}>

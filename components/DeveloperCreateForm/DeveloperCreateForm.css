@@ -19,7 +19,7 @@
 }
 
 @media (max-width: 760px) {
-  .developer-create__actions .button {
+  .developer-create__action {
     flex: 1 1 auto;
   }
 }

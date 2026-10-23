@@ -49,11 +49,15 @@ export function SiteHeader({ transparentAtTop = false, overPhoto = false, pageTi
       <header className={headerClasses(solid, transparentAtTop, overPhoto)}>
         <div className="site-header__inner">
           {backHref ? (
-            <IconButton className="site-header__back" label={t("back")} href={backHref}>
+            <IconButton
+              className="site-header__icon site-header__back"
+              label={t("back")}
+              href={backHref}
+            >
               <ChevronLeft {...ICON} aria-hidden />
             </IconButton>
           ) : null}
-          <Logo hideText={showTitle} />
+          <Logo hideText={showTitle} className="site-header__logo" />
           {pageTitle ? (
             <span className={showTitle ? "site-header__title site-header__title--visible" : "site-header__title"} aria-hidden={!showTitle}>
               {pageTitle}
@@ -65,20 +69,25 @@ export function SiteHeader({ transparentAtTop = false, overPhoto = false, pageTi
               <LanguageSwitch />
               <ThemeToggle />
             </div>
-            <IconButton label={t("favorites")} href={ROUTES.favorites}>
+            <IconButton className="site-header__icon" label={t("favorites")} href={ROUTES.favorites}>
               <Heart {...ICON} aria-hidden />
             </IconButton>
             {VODIY_HOUSE_PHONE ? (
               <>
                 <PhoneButton phone={VODIY_HOUSE_PHONE} className="site-header__phone" />
-                <IconButton className="site-header__call" label={t("call")} href={phoneHref(VODIY_HOUSE_PHONE)} external>
+                <IconButton
+                  className="site-header__icon site-header__call"
+                  label={t("call")}
+                  href={phoneHref(VODIY_HOUSE_PHONE)}
+                  external
+                >
                   <Phone {...ICON} aria-hidden />
                 </IconButton>
               </>
             ) : null}
             <IconButton
               ref={toggleButton}
-              className="site-header__menu-button"
+              className="site-header__icon site-header__menu-button"
               label={menuOpen ? t("closeMenu") : t("openMenu")}
               onClick={toggleMenu}
               expanded={menuOpen}

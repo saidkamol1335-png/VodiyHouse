@@ -99,6 +99,7 @@ function BulkFinishingStep({ selection, edit, block, finishings, onDone }: BulkS
   return (
     <form className="units-bulk__form" onSubmit={submitWith(apply)}>
       <SelectField
+        className="units-bulk__field"
         id={id}
         label={t("label")}
         placeholder={t("choose")}
@@ -107,7 +108,13 @@ function BulkFinishingStep({ selection, edit, block, finishings, onDone }: BulkS
         onChange={(event) => setValue(event.target.value)}
       />
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
-      <Button ref={submit} type="submit" pending={pending} disabled={!value}>
+      <Button
+        ref={submit}
+        type="submit"
+        pending={pending}
+        disabled={!value}
+        className="units-bulk__button"
+      >
         {t("apply")}
       </Button>
     </form>

@@ -14,6 +14,8 @@ type QuarterSelectProps = {
   minYear: number;
   maxYear: number;
   onChange?: (isoDate: string | null) => void;
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 const toIso = (quarter: QuarterNumber | null, year: number | null) =>
@@ -28,6 +30,7 @@ export function QuarterSelect({
   minYear,
   maxYear,
   onChange,
+  className,
 }: QuarterSelectProps) {
   const t = useTranslations("admin.quarters");
   const initial = defaultValue ? quarterOf(defaultValue) : null;
@@ -47,7 +50,11 @@ export function QuarterSelect({
   };
 
   return (
-    <div className="field" role="group" aria-labelledby={`${id}-label`}>
+    <div
+      className={["field", className].filter(Boolean).join(" ")}
+      role="group"
+      aria-labelledby={`${id}-label`}
+    >
       <span className="field__label" id={`${id}-label`}>
         {label}
       </span>

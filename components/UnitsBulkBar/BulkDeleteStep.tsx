@@ -35,7 +35,7 @@ export function BulkDeleteStep(props: BulkStepProps) {
     return (
       <div className="units-bulk__form">
         <p className="units-bulk__warning">{t("whole")}</p>
-        <Button variant="ghost" onClick={onToWhole}>
+        <Button variant="ghost" onClick={onToWhole} className="units-bulk__button">
           {t("toWhole")}
         </Button>
       </div>
@@ -78,10 +78,16 @@ function DeleteQuestion({
       <DeleteWarnings id={`${id}-warnings`} units={units} visible={visible} published={published} />
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
       <div className="units-bulk__buttons">
-        <Button variant="ghost" onClick={onCancel}>
+        <Button variant="ghost" onClick={onCancel} className="units-bulk__button">
           {t("no")}
         </Button>
-        <Button ref={yes} variant="danger" pending={pending} onClick={() => void remove()}>
+        <Button
+          ref={yes}
+          variant="danger"
+          pending={pending}
+          onClick={() => void remove()}
+          className="units-bulk__button"
+        >
           {t("yes")}
         </Button>
       </div>

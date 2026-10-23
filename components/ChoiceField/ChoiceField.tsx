@@ -19,6 +19,8 @@ type ChoiceFieldProps = {
   value?: string;
   /** sm — в строке таблицы (планировки), lg — в форме (44 px, как меню телефона). */
   size?: "sm" | "lg";
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 /** Выбор из 2–4 значений одним тапом — сегментом, как RU | UZ в шапке («реши сам» шага 11). */
@@ -33,6 +35,7 @@ export function ChoiceField({
   onChange,
   value: controlled,
   size = "lg",
+  className,
 }: ChoiceFieldProps) {
   const [inner, setInner] = useState(defaultValue ?? "");
   const value = controlled ?? inner;
@@ -42,7 +45,7 @@ export function ChoiceField({
   };
   return (
     <div
-      className="field choice-field"
+      className={["field choice-field", className].filter(Boolean).join(" ")}
       role="radiogroup"
       aria-labelledby={`${id}-label`}
       aria-describedby={error ? `${id}-error` : undefined}

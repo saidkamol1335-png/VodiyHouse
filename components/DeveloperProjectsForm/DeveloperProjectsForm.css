@@ -121,7 +121,7 @@
 /* Телефон: «План» и «Факт» друг под другом — иначе год не помещается в список. */
 @media (max-width: 560px) {
   .developer-projects__row {
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: var(--touch-target) minmax(0, 1fr);
   }
 
   .developer-projects__handle {
@@ -130,7 +130,7 @@
 
   .developer-projects__name,
   .developer-projects__end,
-  .developer-projects__row > .field {
+  .developer-projects__quarter {
     grid-column: 2;
   }
 

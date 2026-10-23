@@ -158,6 +158,7 @@ function ProjectRow({ row, dragging, handle, issues, onChange, onRemove }: Proje
         minYear={YEARS.min}
         maxYear={YEARS.max}
         onChange={(plannedOn) => onChange({ plannedOn })}
+        className="developer-projects__quarter"
       />
       <QuarterSelect
         id={`project-${row.key}-delivered`}
@@ -167,6 +168,7 @@ function ProjectRow({ row, dragging, handle, issues, onChange, onRemove }: Proje
         minYear={YEARS.min}
         maxYear={YEARS.max}
         onChange={(deliveredOn) => onChange({ deliveredOn })}
+        className="developer-projects__quarter"
       />
       <div className="developer-projects__end">
         <span data-testid="project-status">

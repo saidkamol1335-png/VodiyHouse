@@ -140,15 +140,15 @@
 /* Цели касания — от 44 px, как в остальном шаге: на телефоне и на планшете пальцем. */
 @media (max-width: 760px), (pointer: coarse) {
   .risers-editor {
-    --risers-editor-remove-w: 44px;
+    --risers-editor-remove-w: var(--touch-target);
   }
 
   .risers-editor__input,
   .risers-editor__select,
-  .risers-editor__actions .button,
+  .risers-editor__action,
   .risers-editor__remove,
   .risers-editor__remove-gap {
-    height: 44px;
+    height: var(--touch-target);
   }
 
   /* «Все подъезды» — по низу поля 44 px. */

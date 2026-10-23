@@ -15,6 +15,9 @@ import type { DeveloperOption } from "@/lib/admin/complexes/types";
 // Три панели «Основного» (И1) — как разделы страницы ЖК на сайте: «О ЖК» (8 фактов),
 // «Расположение», «Проверено Vodiy House». Поля — общие компоненты кабинета (Д3, «реши сам»).
 
+/** Поле в ряду на общей сетке: подписи разной высоты, а поля на одной линии. */
+const ROW_FIELD = "field--subgrid complex-main__field";
+
 export type SectionProps = {
   fields: ComplexMainFields;
   issue: (field: keyof ComplexMainFields) => string | undefined;
@@ -45,6 +48,7 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
         />
         <div className="complex-main__row">
           <SelectField
+            className={ROW_FIELD}
             id="complex-developer"
             name="developerId"
             label={t("fields.developer")}
@@ -56,6 +60,7 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
             error={issue("developerId")}
           />
           <ChoiceField
+            className={ROW_FIELD}
             id="complex-class"
             name="class"
             label={t("fields.class")}
@@ -67,6 +72,7 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
         </div>
         <div className="complex-main__row complex-main__row--three">
           <ChoiceField
+            className={ROW_FIELD}
             id="complex-house-type"
             name="houseType"
             label={t("fields.houseType")}
@@ -76,6 +82,7 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
             error={issue("houseType")}
           />
           <ChoiceField
+            className={ROW_FIELD}
             id="complex-parking"
             name="parking"
             label={t("fields.parking")}
@@ -85,6 +92,7 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
             error={issue("parking")}
           />
           <Field
+            className={ROW_FIELD}
             id="complex-ceiling"
             name="ceilingHeight"
             label={t("fields.ceilingHeight")}
@@ -120,6 +128,7 @@ export function LocationPanel({ fields, issue, locations }: SectionProps) {
       <div className="complex-main__grid">
         <div className="complex-main__row">
           <SelectField
+            className={ROW_FIELD}
             id="complex-location"
             name="locationId"
             label={t("fields.location")}
@@ -129,6 +138,7 @@ export function LocationPanel({ fields, issue, locations }: SectionProps) {
             error={issue("locationId")}
           />
           <Field
+            className={ROW_FIELD}
             id="complex-minutes"
             name="minutesToCenter"
             label={t("fields.minutesToCenter")}
@@ -174,6 +184,7 @@ export function ChecksPanel({ fields, issue }: SectionProps) {
   const t = useTranslations("admin.complexes");
   const date = (name: "permitCheckedAt" | "landCheckedAt" | "staffVisitedAt") => (
     <Field
+      className={ROW_FIELD}
       id={`complex-${name}`}
       name={name}
       label={t(`fields.${name}`)}

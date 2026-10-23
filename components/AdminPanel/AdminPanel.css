@@ -11,7 +11,7 @@
   margin: 0 0 8px;
   font-size: var(--fs-h4);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--ls-panel-title);
 }
 
 .admin-panel__body {

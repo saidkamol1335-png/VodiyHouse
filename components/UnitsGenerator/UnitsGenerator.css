@@ -149,7 +149,7 @@
 /* Флажок «В подъездах по-разному» — цель всей строкой не ниже 44 px: телефон и планшет пальцем. */
 @media (max-width: 760px), (pointer: coarse) {
   .units-generator__check {
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 }
 
@@ -163,7 +163,7 @@
   .units-generator__actions {
     position: sticky;
     bottom: min(var(--units-dock-cover), var(--units-dock-cover-max));
-    z-index: 5;
+    z-index: var(--z-sticky-actions);
     margin: 0 calc(-1 * var(--admin-panel-pad));
     padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);

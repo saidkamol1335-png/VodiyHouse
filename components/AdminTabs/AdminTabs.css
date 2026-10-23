@@ -62,7 +62,7 @@
 /* Телефон: палец — 44 px, как у пилюль мобильного мокапа. */
 @media (max-width: 760px) {
   .admin-tabs__tab {
-    height: 44px;
+    height: var(--touch-target);
     padding: 0 16px;
     font-size: var(--fs-control);
   }

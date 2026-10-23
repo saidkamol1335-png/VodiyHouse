@@ -76,7 +76,7 @@
   outline-offset: 2px;
 }
 
-.units-row__status-button:hover .badge {
+.units-row__status-button:hover .units-row__badge {
   box-shadow: var(--chip-on-ring);
 }
 
@@ -121,8 +121,8 @@
     padding: 8px 8px 10px 14px;
   }
 
-  .units-row + .units-row,
-  .unit-detail + .units-row {
+  /* В tbody — только строки и их раскрытия: разделитель у всех, кроме первой. */
+  .units-row:not(:first-child) {
     border-top: 1px solid var(--line);
   }
 
@@ -221,8 +221,8 @@
 
   /* Плашка — кнопка 44 × 44 и больше: попасть пальцем. */
   .units-row__status-button {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
     justify-content: flex-end;
     padding: 0 6px;
   }
@@ -231,6 +231,6 @@
 /* Планшет пальцем: таблица, а не карточки, — плашка статуса всё равно не меньше 44 px. */
 @media (pointer: coarse) {
   .units-row__status-button {
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 }

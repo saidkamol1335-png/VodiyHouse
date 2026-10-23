@@ -1,0 +1,84 @@
+/* Кабинет: разделы после входа. Подключает app/admin/(cabinet)/layout.tsx — после globals.css
+   и admin.css, поэтому правило блока кабинета поверх общего блока не зависит от алфавита. */
+
+/* Простые блоки — первыми: их миксуют составные (className="…__элемент"), и правило элемента
+   владельца при той же специфичности побеждает, потому что грузится позже, а не по алфавиту. */
+@import "../components/AdminTabs/AdminTabs.css";
+@import "../components/Avatar/Avatar.css";
+@import "../components/Badge/Badge.css";
+@import "../components/BilingualField/BilingualField.css";
+@import "../components/ChoiceField/ChoiceField.css";
+@import "../components/PointField/PointField.css";
+@import "../components/QuarterSelect/QuarterSelect.css";
+@import "../components/SearchField/SearchField.css";
+@import "../components/SelectField/SelectField.css";
+@import "../components/SortHandle/SortHandle.css";
+@import "../components/UnitPriceFields/UnitPriceFields.css";
+
+/* Составные блоки и разделы. */
+@import "../components/AdminBrand/AdminBrand.css";
+@import "../components/AdminDenied/AdminDenied.css";
+@import "../components/AdminEntityHead/AdminEntityHead.css";
+@import "../components/AdminNav/AdminNav.css";
+@import "../components/AdminPage/AdminPage.css";
+@import "../components/AdminShell/AdminShell.css";
+@import "../components/AdminTopbar/AdminTopbar.css";
+@import "../components/AdminUser/AdminUser.css";
+@import "../components/AdminUserMenu/AdminUserMenu.css";
+@import "../components/ComplexBlocksForm/ComplexBlocksForm.css";
+@import "../components/ComplexBlocksForm/BlockCard.css";
+@import "../components/ComplexBlocksForm/BlockFields.css";
+@import "../components/ComplexCreateForm/ComplexCreateForm.css";
+@import "../components/ComplexLayoutsForm/ComplexLayoutsForm.css";
+@import "../components/ComplexLayoutsForm/LayoutRow.css";
+@import "../components/ComplexList/ComplexList.css";
+@import "../components/ComplexMainForm/ComplexMainForm.css";
+@import "../components/ComplexPhotos/ComplexPhotos.css";
+@import "../components/ComplexPhotos/PhotoPanel.css";
+@import "../components/ComplexReadiness/ComplexReadiness.css";
+@import "../components/ComplexUnitsTab/ComplexUnitsTab.css";
+@import "../components/DeveloperCreateForm/DeveloperCreateForm.css";
+@import "../components/DeveloperList/DeveloperList.css";
+@import "../components/DeveloperMainForm/DeveloperMainForm.css";
+@import "../components/DeveloperPrivateForm/DeveloperPrivateForm.css";
+@import "../components/DeveloperProjectsForm/DeveloperProjectsForm.css";
+@import "../components/DictionaryEditor/DictionaryEditor.css";
+@import "../components/DictionaryEditor/DictionaryItemForm.css";
+@import "../components/DrawingTile/DrawingTile.css";
+@import "../components/FilterPills/FilterPills.css";
+@import "../components/FocusPreview/FocusPreview.css";
+@import "../components/JournalList/JournalList.css";
+@import "../components/LiveStatus/LiveStatus.css";
+@import "../components/MediaDrop/MediaDrop.css";
+@import "../components/PublishCheck/PublishCheck.css";
+@import "../components/RisersEditor/RisersEditor.css";
+@import "../components/Rule12Check/Rule12Check.css";
+@import "../components/SiteStockDetails/SiteStockDetails.css";
+@import "../components/SiteStockPanel/SiteStockPanel.css";
+@import "../components/SiteStockRow/SiteStockRow.css";
+@import "../components/StaffCreateForm/StaffCreateForm.css";
+@import "../components/StaffList/StaffList.css";
+@import "../components/StaffPasswordReveal/StaffPasswordReveal.css";
+@import "../components/StaffRowActions/StaffRowActions.css";
+@import "../components/StatusCapsule/StatusCapsule.css";
+@import "../components/StockBadge/StockBadge.css";
+@import "../components/StockRooms/StockRooms.css";
+@import "../components/UnitAddForm/UnitAddForm.css";
+@import "../components/UnitDetail/UnitDetail.css";
+@import "../components/UnitEditForm/UnitEditForm.css";
+@import "../components/UnitsAvailability/UnitsAvailability.css";
+@import "../components/UnitsBarDock/UnitsBarDock.css";
+@import "../components/UnitsBlockSwitch/UnitsBlockSwitch.css";
+@import "../components/UnitsBlockView/UnitsBlockView.css";
+@import "../components/UnitsBulkBar/UnitsBulkBar.css";
+@import "../components/UnitsCheck/UnitsCheck.css";
+@import "../components/UnitsDock/UnitsDock.css";
+@import "../components/UnitsFilters/UnitsFilters.css";
+@import "../components/UnitsGenerator/UnitsGenerator.css";
+@import "../components/UnitsList/UnitsList.css";
+@import "../components/UnitsListDelete/UnitsListDelete.css";
+@import "../components/UnitsNotice/UnitsNotice.css";
+@import "../components/UnitsRisers/UnitsRisers.css";
+@import "../components/UnitsRow/UnitsRow.css";
+@import "../components/UnitStatusPicker/UnitStatusPicker.css";
+@import "../components/UnitsUndoBar/UnitsUndoBar.css";

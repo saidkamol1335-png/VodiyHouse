@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const MENU_OPEN_CLASS = "has-open-menu";
-
 /** Прокручена ли страница: метка в начале документа ушла из виду — шапка становится стеклом. */
 export function useScrolledPast() {
   const sentinel = useRef<HTMLDivElement>(null);
@@ -18,7 +16,7 @@ export function useScrolledPast() {
   return { sentinel, scrolled };
 }
 
-/** Меню: открыть / закрыть, Escape, без прокрутки страницы под полноэкранным меню телефона. */
+/** Меню: открыть / закрыть, Escape. Прокрутку под меню телефона гасит CSS (PhoneMenu.css). */
 export function useMenu() {
   const [open, setOpen] = useState(false);
   const toggleButton = useRef<HTMLButtonElement | null>(null);
@@ -27,8 +25,6 @@ export function useMenu() {
 
   useEffect(() => {
     if (!open) return;
-    const root = document.documentElement;
-    root.classList.add(MENU_OPEN_CLASS);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setOpen(false);
@@ -36,7 +32,6 @@ export function useMenu() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      root.classList.remove(MENU_OPEN_CLASS);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);

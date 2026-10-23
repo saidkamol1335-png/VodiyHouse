@@ -14,16 +14,6 @@
   gap: 12px;
 }
 
-.developer-main__facts > .field {
-  display: grid;
-  grid-row: span 3;
-  grid-template-rows: subgrid;
-}
-
-.developer-main__facts .field__label {
-  align-self: end;
-}
-
 .developer-main__media {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -57,7 +47,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .developer-main__save .button {
+  .developer-main__submit {
     width: 100%;
   }
 }

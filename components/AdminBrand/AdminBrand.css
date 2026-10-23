@@ -17,7 +17,7 @@
 .admin-brand__name {
   display: block;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--ls-brand);
   line-height: var(--lh-snug);
 }
 

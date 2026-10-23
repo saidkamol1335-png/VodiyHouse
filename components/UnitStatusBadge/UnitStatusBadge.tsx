@@ -12,13 +12,15 @@ export const UNIT_STATUS_TONES: Record<UnitStatus, BadgeTone> = {
 type UnitStatusBadgeProps = {
   status: UnitStatus;
   size?: "md" | "sm";
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 /** Плашка статуса квартиры — одна на журнал и список квартир. */
-export function UnitStatusBadge({ status, size = "sm" }: UnitStatusBadgeProps) {
+export function UnitStatusBadge({ status, size = "sm", className }: UnitStatusBadgeProps) {
   const t = useTranslations("admin.journal.unitStatus");
   return (
-    <Badge tone={UNIT_STATUS_TONES[status]} size={size} dot={size === "md"}>
+    <Badge tone={UNIT_STATUS_TONES[status]} size={size} dot={size === "md"} className={className}>
       {t(status)}
     </Badge>
   );

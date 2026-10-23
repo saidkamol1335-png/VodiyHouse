@@ -64,11 +64,11 @@ export function StaffPasswordReveal({ name, email, password, onDone }: StaffPass
         </>
       ) : null}
       <div className="staff-password__actions">
-        <Button onClick={copy}>
+        <Button onClick={copy} className="staff-password__action">
           <Copy size={16} strokeWidth={1.8} aria-hidden />
           {t("copy")}
         </Button>
-        <Button variant="ghost" onClick={onDone}>
+        <Button variant="ghost" onClick={onDone} className="staff-password__action">
           {t("done")}
         </Button>
       </div>

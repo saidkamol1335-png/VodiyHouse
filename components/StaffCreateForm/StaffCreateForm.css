@@ -50,8 +50,7 @@
 }
 
 @media (max-width: 760px) {
-  .staff-create--closed .button,
-  .staff-create__actions .button {
+  .staff-create__button {
     width: 100%;
   }
 }

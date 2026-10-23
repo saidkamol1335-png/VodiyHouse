@@ -19,19 +19,21 @@ type AdminTabsProps = {
   tabs: readonly AdminTab[];
   /** Подпись точки для экранного диктора: «не хватает для публикации». */
   attentionLabel?: string;
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 /**
  * Вкладки-пилюли страницы ЖК и застройщика (решения фазы 1, в. 6, и Д2). Каждая вкладка —
  * свой адрес: работает «назад», ссылку на вкладку можно отправить. Стоит в layout раздела.
  */
-export function AdminTabs({ label, tabs, attentionLabel }: AdminTabsProps) {
+export function AdminTabs({ label, tabs, attentionLabel, className }: AdminTabsProps) {
   const segment = useSelectedLayoutSegment();
   const track = useRef<HTMLDivElement>(null);
   const edges = useStripScroll(track, true, segment ?? "");
 
   return (
-    <nav className="admin-tabs" aria-label={label}>
+    <nav className={["admin-tabs", className].filter(Boolean).join(" ")} aria-label={label}>
       <div
         ref={track}
         className="admin-tabs__track"

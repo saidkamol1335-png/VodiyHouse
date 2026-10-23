@@ -2,7 +2,7 @@
 .phone-menu {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: var(--z-phone-menu);
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -122,7 +122,7 @@
 .phone-menu__footer a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: var(--touch-target);
   color: var(--fg-2);
   font-size: var(--fs-small);
   text-decoration: none;
@@ -135,9 +135,9 @@
   }
 }
 
-/* Под полноэкранным меню страница не прокручивается (класс ставит useMenu). */
+/* Под полноэкранным меню страница не прокручивается: меню есть в DOM, только пока открыто. */
 @media (max-width: 760px) {
-  html.has-open-menu {
+  html:has(.phone-menu) {
     overflow: hidden;
   }
 }

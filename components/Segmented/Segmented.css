@@ -38,7 +38,7 @@
 .segmented--sm .segmented__item {
   height: 27px;
   padding: 0 10px;
-  font-size: 12px;
+  font-size: var(--fs-segment-s);
 }
 
 /* Большой сегмент — как в мобильном мокапе: серый фон, активный — карточка с лёгкой тенью. */
@@ -51,7 +51,7 @@
 }
 
 .segmented--lg .segmented__item {
-  min-height: 44px;
+  min-height: var(--touch-target);
   padding: 0 12px;
   font-size: var(--fs-control);
   font-weight: 650;

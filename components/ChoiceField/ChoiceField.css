@@ -65,7 +65,8 @@
    («После сдачи») переносится на вторую строку, а не обрезается. */
 @media (max-width: 760px) {
   /* Ширина — по подписи, и не уже самого длинного слова: «Оформляется» не режется. */
-  /* Три класса: segmented--lg из Segmented.css грузится позже и иначе перебил бы отступы. */
+  /* Три класса: правило поверх segmented--lg не зависит от порядка файлов CSS (общий
+     Segmented.css — в globals.css, этот — в cabinet.css). */
   .choice-field__row .choice-field__options .choice-field__option {
     flex: 1 1 auto;
     min-width: min-content;

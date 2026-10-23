@@ -83,8 +83,8 @@
   height: 22px;
   border: 0;
   border-radius: var(--r-pill);
-  background: rgba(0, 0, 0, 0.7);
-  color: #ffffff;
+  background: var(--over-photo-button-strong);
+  color: var(--over-photo-fg);
   cursor: pointer;
 }
 
@@ -169,6 +169,6 @@
    точка фокуса работают. */
 .media-drop--locked .media-drop__tile,
 .media-drop--locked .media-drop__zone {
-  opacity: 0.45;
+  opacity: var(--opacity-unavailable);
   cursor: not-allowed;
 }

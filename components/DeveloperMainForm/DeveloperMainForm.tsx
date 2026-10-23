@@ -73,6 +73,7 @@ export function DeveloperMainForm({
         <input type="hidden" name="id" value={developer.id} />
         <div className="developer-main__facts">
           <Field
+            className="field--subgrid"
             id="developer-name"
             name="name"
             label={t("fields.name")}
@@ -81,6 +82,7 @@ export function DeveloperMainForm({
             error={issue("name")}
           />
           <Field
+            className="field--subgrid"
             id="developer-founded"
             name="foundedYear"
             label={t("fields.foundedYear")}
@@ -92,6 +94,7 @@ export function DeveloperMainForm({
             error={issue("foundedYear")}
           />
           <Field
+            className="field--subgrid"
             id="developer-flats"
             name="flatsDelivered"
             label={t("fields.flatsDelivered")}
@@ -102,6 +105,7 @@ export function DeveloperMainForm({
             error={issue("flatsDelivered")}
           />
           <Field
+            className="field--subgrid"
             id="developer-checked"
             name="deliveredCheckedAt"
             label={t("fields.deliveredCheckedAt")}
@@ -144,7 +148,7 @@ export function DeveloperMainForm({
         />
         <div className="developer-main__save">
           <SaveFeedback state={state} />
-          <Button type="submit" pending={pending}>
+          <Button type="submit" pending={pending} className="developer-main__submit">
             {pending ? t("pending") : t("fields.save")}
           </Button>
         </div>

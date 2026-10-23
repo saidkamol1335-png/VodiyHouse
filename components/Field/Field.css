@@ -6,6 +6,18 @@
   min-width: 0;
 }
 
+/* В ряду полей на общей сетке (subgrid): подпись, поле и строка под ним стоят по рядам —
+   у соседей с подписью в две строки поля всё равно на одной линии. */
+.field--subgrid {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.field--subgrid .field__label {
+  align-self: end;
+}
+
 .field__label {
   font-family: var(--mono);
   font-size: var(--fs-label);

@@ -22,6 +22,8 @@ type UnitPriceFieldsProps = {
   issue: PriceIssue | null;
   /** Квартира для примера «Кв. 41: 64,5 м² × 620 = $39 990» (цена за м²). */
   example: { number: string; area: number | null } | null;
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 const MODES: readonly PriceMode[] = ["per_m2", "total", "none"];
@@ -37,12 +39,13 @@ export function UnitPriceFields({
   currency,
   issue,
   example,
+  className,
 }: UnitPriceFieldsProps) {
   const t = useTranslations("admin.complexes.units.price");
   const id = useId();
   const label = draft.mode === "per_m2" ? "valuePerM2" : "valueTotal";
   return (
-    <div className="unit-price-fields">
+    <div className={["unit-price-fields", className].filter(Boolean).join(" ")}>
       <ChoiceField
         id={`${id}-mode`}
         name={`${id}-mode`}
@@ -80,7 +83,7 @@ function PriceExample({
   draft,
   currency,
   example,
-}: Omit<UnitPriceFieldsProps, "onChange" | "issue">) {
+}: Omit<UnitPriceFieldsProps, "onChange" | "issue" | "className">) {
   const t = useTranslations("admin.complexes.units.price");
   if (draft.mode !== "per_m2" || !example) return null;
   // Тот же разбор и предел, что у «Поставить»: пример не обещает цену, которую не примут.

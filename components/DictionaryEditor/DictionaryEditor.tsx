@@ -161,7 +161,12 @@ export function DictionaryEditor({ dictionary, items, actions }: DictionaryEdito
           onCancel={() => setEditing(null)}
         />
       ) : (
-        <Button variant="ghost" size="sm" onClick={() => startEdit("new")}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => startEdit("new")}
+          className="dictionary-editor__add"
+        >
           <Plus size={16} aria-hidden="true" />
           {t("dictionaries.add")}
         </Button>
@@ -191,7 +196,12 @@ function DictionaryRow({ item, dragging, handle, confirming, pending, ...on }: D
   if (dragging) classes.push("dictionary-editor__row--dragging");
   return (
     <li className={classes.join(" ")} data-sortable-row data-testid="dictionary-row">
-      <SortHandle label={t("move", { name: item.name.ru })} active={dragging} {...handle} />
+      <SortHandle
+        label={t("move", { name: item.name.ru })}
+        active={dragging}
+        className="dictionary-editor__handle"
+        {...handle}
+      />
       <div className="dictionary-editor__text">
         <span className="dictionary-editor__name">{item.name.ru}</span>
         <span className="dictionary-editor__uz" lang="uz">
@@ -223,13 +233,29 @@ function DictionaryRow({ item, dragging, handle, confirming, pending, ...on }: D
         </div>
       ) : (
         <div className="dictionary-editor__actions">
-          <Button size="sm" variant="ghost" onClick={on.onEdit}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={on.onEdit}
+            className="dictionary-editor__action"
+          >
             {t("edit")}
           </Button>
-          <Button size="sm" variant="ghost" disabled={pending} onClick={on.onToggle}>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={pending}
+            onClick={on.onToggle}
+            className="dictionary-editor__action"
+          >
             {item.isActive ? t("hide") : t("show")}
           </Button>
-          <Button size="sm" variant="ghost" onClick={on.onAskRemove}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={on.onAskRemove}
+            className="dictionary-editor__action"
+          >
             {t("remove")}
           </Button>
         </div>

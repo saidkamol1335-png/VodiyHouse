@@ -24,7 +24,12 @@ export function AdminEntityHead({
   return (
     <div className="admin-entity-head">
       {statusControls ?? <PublicationBadge status={status} />}
-      <AdminTabs label={tabsLabel} tabs={tabs} attentionLabel={attentionLabel} />
+      <AdminTabs
+        label={tabsLabel}
+        tabs={tabs}
+        attentionLabel={attentionLabel}
+        className="admin-entity-head__tabs"
+      />
     </div>
   );
 }

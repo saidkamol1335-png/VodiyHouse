@@ -97,6 +97,7 @@ test.describe("шапка · телефон 390", () => {
     await shot(page, "390-menu");
     await menu.getByRole("button", { name: "Закрыть меню" }).click();
     await expect(menu).toHaveCount(0);
+    await expect(page.locator("html")).not.toHaveCSS("overflow", "hidden");
   });
 
   test("Ш6: поверх фото → после прокрутки стекло и название страницы", async ({ page }) => {

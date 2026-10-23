@@ -98,6 +98,6 @@
 @media (max-width: 760px), (pointer: coarse) {
   .units-block__add,
   .units-block__retry {
-    height: 44px;
+    height: var(--touch-target);
   }
 }

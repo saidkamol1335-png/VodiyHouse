@@ -57,7 +57,7 @@ export function DeveloperPrivateForm({ developerId, notes, action }: DeveloperPr
           {failed ? (
             <FormStatus tone="error">{t(`errors.${failed.error ?? "invalid"}`)}</FormStatus>
           ) : null}
-          <Button type="submit" pending={pending}>
+          <Button type="submit" pending={pending} className="developer-private__submit">
             {pending ? t("pending") : t("private.save")}
           </Button>
         </div>

@@ -128,7 +128,7 @@
 
 @media (pointer: coarse) {
   .site-stock-details__link {
-    min-height: 44px;
+    min-height: var(--touch-target);
   }
 }
 

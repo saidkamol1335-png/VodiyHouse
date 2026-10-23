@@ -7,7 +7,7 @@
 [data-motion="full"] .film-grain {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: var(--z-grain);
   display: block;
   pointer-events: none;
   opacity: 0.035;

@@ -4,9 +4,9 @@
   align-items: center;
   gap: 10px;
   color: var(--fg);
-  font-size: 17px;
+  font-size: var(--fs-brand);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--ls-brand);
   text-decoration: none;
 }
 
@@ -25,9 +25,9 @@
 
   .logo {
     gap: 8px;
-    height: 44px;
+    height: var(--touch-target);
     padding: 0 6px;
-    font-size: 16px;
+    font-size: var(--fs-h4);
     font-weight: 800;
     letter-spacing: -0.025em;
   }

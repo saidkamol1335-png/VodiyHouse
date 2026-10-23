@@ -31,6 +31,8 @@ type SelectFieldProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "className
   placeholder?: string;
   error?: string;
   hint?: string;
+  /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
+  className?: string;
 };
 
 /** Список выбора в виде поля мокапа: подпись моно-шрифтом, 48 px, своя стрелка. */
@@ -41,6 +43,7 @@ export function SelectField({
   placeholder,
   error,
   hint,
+  className,
   ...select
 }: SelectFieldProps) {
   const errorId = `${id}-error`;
@@ -48,7 +51,7 @@ export function SelectField({
   const showHint = Boolean(hint) && !error;
   const describedBy = [showHint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
   return (
-    <div className="field">
+    <div className={["field", className].filter(Boolean).join(" ")}>
       <label className="field__label" htmlFor={id}>
         {label}
       </label>

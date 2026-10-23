@@ -40,7 +40,7 @@ export function AdminUserMenu({ person }: { person: CabinetPerson }) {
         aria-controls={PANEL_ID}
         onClick={() => setOpen((value) => !value)}
       >
-        <Avatar name={person.name} />
+        <Avatar name={person.name} size="sm" />
       </button>
       {open ? (
         <div id={PANEL_ID} className="admin-user-menu__panel">

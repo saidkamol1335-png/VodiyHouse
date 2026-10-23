@@ -67,7 +67,7 @@
   }
 
   .block-fields__include > :first-child,
-  .block-fields__include > .field:not(.choice-field) {
+  .block-fields__include-price {
     grid-column: 1 / -1;
   }
 

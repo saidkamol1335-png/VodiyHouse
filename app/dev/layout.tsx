@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { RootDocument } from "@/components/RootDocument";
 import { ADMIN_LOCALE } from "@/lib/i18n/routing";
 import "../globals.css";
+import "../site.css";
+import "../admin.css";
+import "../cabinet.css";
+import "../dev.css";
 
 export const metadata: Metadata = {
   title: "Dev · Vodiy House",

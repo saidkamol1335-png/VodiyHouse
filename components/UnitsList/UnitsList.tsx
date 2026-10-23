@@ -203,6 +203,7 @@ function ShowMore({ left, limit, onClick }: { left: number; limit: number; onCli
         <Button
           variant="ghost"
           size="sm"
+          className="units-list__more-button"
           onClick={() => {
             // Первая новая — сразу за порцией (закреплённые встанут на свои места по номеру).
             firstNew.current = limit;

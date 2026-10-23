@@ -7,13 +7,13 @@
   min-width: 0;
 }
 
-.admin-entity-head .admin-tabs {
+.admin-entity-head__tabs {
   flex: 1;
   min-width: 0;
 }
 
 @media (max-width: 760px) {
-  .admin-entity-head .admin-tabs {
+  .admin-entity-head__tabs {
     flex-basis: 100%;
   }
 }

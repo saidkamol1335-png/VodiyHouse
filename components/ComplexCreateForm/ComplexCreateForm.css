@@ -30,7 +30,7 @@
 }
 
 @media (max-width: 760px) {
-  .complex-create__actions .button {
+  .complex-create__action {
     flex: 1 1 auto;
   }
 }

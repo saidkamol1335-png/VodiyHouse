@@ -195,7 +195,7 @@ function StatusCell({ unit, open, detailId, button, onOpen, onPick, canEdit }: S
         aria-controls={open ? detailId : undefined}
         onClick={() => onOpen(open ? null : unit.id)}
       >
-        <UnitStatusBadge status={unit.status} />
+        <UnitStatusBadge status={unit.status} className="units-row__badge" />
         <ChevronDown className="units-row__chevron" size={14} aria-hidden="true" />
       </button>
     </td>

@@ -63,10 +63,10 @@ function DeveloperCreatePanel({
         />
         {failed?.error ? <FormStatus tone="error">{t(`errors.${failed.error}`)}</FormStatus> : null}
         <div className="developer-create__actions">
-          <Button type="submit" pending={pending}>
+          <Button type="submit" pending={pending} className="developer-create__action">
             {pending ? t("create.pending") : t("create.submit")}
           </Button>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} className="developer-create__action">
             {t("create.cancel")}
           </Button>
         </div>

@@ -11,7 +11,7 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: var(--z-site-header);
   isolation: isolate;
   color: var(--fg);
 }
@@ -100,7 +100,9 @@
     display: inline-flex;
   }
 
-  .site-header .icon-button {
+  /* С :hover — поверх рамки .icon-button:hover: на телефоне у иконок шапки рамки нет. */
+  .site-header__icon,
+  .site-header__icon:hover {
     border-color: transparent;
     background: none;
     box-shadow: none;
@@ -130,7 +132,7 @@
 
   /* Поверх фото: белые иконки на тёмных кружках и лёгкое затемнение сверху. */
   .site-header--over-photo,
-  .site-header--over-photo .logo {
+  .site-header--over-photo .site-header__logo {
     color: var(--over-photo-fg);
   }
 
@@ -142,7 +144,7 @@
     background: var(--over-photo-shade);
   }
 
-  .site-header--over-photo .icon-button {
+  .site-header--over-photo .site-header__icon {
     background: var(--over-photo-button);
     color: var(--over-photo-fg);
     -webkit-backdrop-filter: var(--over-photo-filter);

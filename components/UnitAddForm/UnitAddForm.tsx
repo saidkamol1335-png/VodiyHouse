@@ -50,10 +50,10 @@ export function UnitAddForm({ onClose, ...params }: UnitAddFormProps) {
       {added ? <FormStatus tone="success">{t("added", { number: added })}</FormStatus> : null}
       {reply && !OWN_FIELDS.has(fieldOf(reply)) ? <ComplexSaveFeedback state={reply} /> : null}
       <div className="unit-add__actions">
-        <Button variant="ghost" onClick={onClose}>
+        <Button variant="ghost" onClick={onClose} className="unit-add__action">
           {t("close")}
         </Button>
-        <Button ref={submit} type="submit" pending={pending}>
+        <Button ref={submit} type="submit" pending={pending} className="unit-add__action">
           {pending ? t("adding") : t("submit")}
         </Button>
       </div>

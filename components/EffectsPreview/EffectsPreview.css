@@ -22,7 +22,7 @@
   font-size: var(--fs-h2);
   font-weight: 600;
   letter-spacing: var(--ls-h2);
-  color: #fff;
+  color: var(--over-photo-fg);
 }
 
 .effects-preview__bar {

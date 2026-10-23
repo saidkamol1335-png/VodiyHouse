@@ -6,7 +6,7 @@
   position: fixed;
   right: var(--units-dock-inset);
   bottom: calc(var(--units-dock-inset) + env(safe-area-inset-bottom));
-  z-index: 45;
+  z-index: var(--z-units-dock);
   display: flex;
   flex-direction: column;
   gap: 10px;

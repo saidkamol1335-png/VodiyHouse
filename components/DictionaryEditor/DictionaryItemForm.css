@@ -1,0 +1,40 @@
+/* Правка справочника на месте (DictionaryItemForm.tsx): поля RU | UZ, вид у городов, кнопки. */
+.dictionary-form {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-m);
+}
+
+.dictionary-form__kind {
+  max-width: 240px;
+}
+
+.dictionary-form__select {
+  position: relative;
+  display: block;
+}
+
+/* Место под шеврон. Два класса — поверх padding у .field__input (тот же элемент) при любом порядке
+   файлов CSS: до шага 14в алфавит молча отдавал победу .field__input, и текст уходил под шеврон. */
+.dictionary-form__select > .dictionary-form__select-input {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.dictionary-form__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.dictionary-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

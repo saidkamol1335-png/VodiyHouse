@@ -19,7 +19,7 @@
   margin: 0;
   font-size: var(--fs-h4);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--ls-panel-title);
 }
 
 .staff-list__count {
@@ -52,7 +52,7 @@
 }
 
 .staff-list__row--inactive .staff-list__person,
-.staff-list__row--inactive .avatar {
+.staff-list__row--inactive .staff-list__avatar {
   opacity: var(--opacity-disabled);
 }
 

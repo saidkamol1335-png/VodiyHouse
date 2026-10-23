@@ -14,7 +14,7 @@
 }
 
 /* Кнопка лежит на тёмном фото — как иконки шапки поверх фото (решение Ш6). */
-.login-screen__theme.icon-button {
+.login-screen__theme {
   border-color: transparent;
   background: var(--over-photo-button);
   box-shadow: none;
@@ -23,7 +23,7 @@
   backdrop-filter: var(--over-photo-filter);
 }
 
-.login-screen__theme.icon-button:hover {
+.login-screen__theme:hover {
   border-color: var(--amber-line);
 }
 

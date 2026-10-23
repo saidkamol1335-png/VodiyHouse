@@ -99,8 +99,7 @@
   display: contents;
 }
 
-.units-bulk__form > .field,
-.units-bulk__form > .unit-price-fields {
+.units-bulk__field {
   justify-self: stretch;
 }
 
@@ -168,7 +167,7 @@
     max-height: 60dvh;
   }
 
-  .units-bulk__form .button {
+  .units-bulk__button {
     width: 100%;
   }
 
@@ -176,7 +175,7 @@
     width: 100%;
   }
 
-  .units-bulk__buttons .button {
+  .units-bulk__buttons .units-bulk__button {
     flex: 1 1 0;
   }
 }
@@ -185,10 +184,10 @@
 @media (max-width: 760px), (pointer: coarse) {
   .units-bulk__action,
   .units-bulk__close {
-    height: 44px;
+    height: var(--touch-target);
   }
 
   .units-bulk__close {
-    width: 44px;
+    width: var(--touch-target);
   }
 }

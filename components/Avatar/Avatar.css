@@ -12,3 +12,16 @@
   font-weight: 800;
   letter-spacing: 0;
 }
+
+/* Рядом с кнопкой ☀/☾ (.icon-button--sm) в верхней строке: 34 px, на телефоне 40 px. */
+.avatar--sm {
+  width: 34px;
+  height: 34px;
+}
+
+@media (max-width: 760px) {
+  .avatar--sm {
+    width: 40px;
+    height: 40px;
+  }
+}

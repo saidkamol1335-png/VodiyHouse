@@ -25,14 +25,14 @@
 
 @media (pointer: coarse) {
   .units-check {
-    width: 44px;
-    height: 44px;
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }
 
 @container units-list (max-width: 719px) {
   .units-check {
-    width: 44px;
-    height: 44px;
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

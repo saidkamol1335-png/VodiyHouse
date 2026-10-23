@@ -167,12 +167,19 @@ function PositionActions(props: PositionProps & { titleId: string }) {
           size="sm"
           aria-describedby={titleId}
           onClick={() => refine(refinement)}
+          className="risers-editor__action"
         >
           {t("refine")}
         </Button>
       ) : null}
       {top && top.riser.floorTo > top.riser.floorFrom ? (
-        <Button variant="ghost" size="sm" aria-describedby={titleId} onClick={() => split(top)}>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-describedby={titleId}
+          onClick={() => split(top)}
+          className="risers-editor__action"
+        >
           {t("split")}
         </Button>
       ) : null}

@@ -49,6 +49,7 @@ export function PriceIncludes({ block, error, onChange }: PriceIncludesProps) {
           />
           {row.included ? null : (
             <Field
+              className="block-fields__include-price"
               id={`include-${row.key}-price`}
               label={t("fields.includePrice", { currency: t(`values.${block.currency}`) })}
               inputMode="numeric"

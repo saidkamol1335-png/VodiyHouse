@@ -16,7 +16,7 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  min-height: 44px;
+  min-height: var(--touch-target);
   padding: 11px 4px;
   border: 0;
   border-radius: var(--r-s);

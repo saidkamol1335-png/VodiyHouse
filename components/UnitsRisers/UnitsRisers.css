@@ -77,7 +77,7 @@
   .units-risers__actions {
     position: sticky;
     bottom: min(var(--units-dock-cover), var(--units-dock-cover-max));
-    z-index: 5;
+    z-index: var(--z-sticky-actions);
     margin: 0 calc(-1 * var(--units-risers-pad)) calc(-1 * var(--units-risers-pad));
     padding: 12px var(--units-risers-pad) calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);

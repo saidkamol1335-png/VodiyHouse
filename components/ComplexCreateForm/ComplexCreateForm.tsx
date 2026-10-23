@@ -96,10 +96,10 @@ function ComplexCreatePanel({
           <FormStatus tone="error">{t(`developers.errors.${failed.error}`)}</FormStatus>
         ) : null}
         <div className="complex-create__actions">
-          <Button type="submit" pending={pending}>
+          <Button type="submit" pending={pending} className="complex-create__action">
             {pending ? t("complexes.create.pending") : t("complexes.create.submit")}
           </Button>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose} className="complex-create__action">
             {t("complexes.create.cancel")}
           </Button>
         </div>

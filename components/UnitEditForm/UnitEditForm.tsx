@@ -55,10 +55,10 @@ export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
       ) : null}
       {reply && !OWN_FIELDS.has(fieldOf(reply)) ? <ComplexSaveFeedback state={reply} /> : null}
       <div className="unit-edit__actions">
-        <Button variant="ghost" onClick={onDone}>
+        <Button variant="ghost" onClick={onDone} className="unit-edit__action">
           {t("cancel")}
         </Button>
-        <Button ref={submit} type="submit" pending={pending}>
+        <Button ref={submit} type="submit" pending={pending} className="unit-edit__action">
           {pending ? t("saving") : t("save")}
         </Button>
       </div>
@@ -116,6 +116,7 @@ function EditFields({ form }: { form: UnitEditFormState }) {
         onChange={(event) => change(withField(draft, "layoutId", event.target.value))}
       />
       <UnitPriceFields
+        className="unit-edit__price"
         draft={draft.price}
         onChange={(price) => change(withField(draft, "price", price))}
         currency={context.block.currency}

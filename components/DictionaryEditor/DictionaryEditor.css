@@ -14,7 +14,7 @@
   width: 100%;
 }
 
-.dictionary-editor > .button {
+.dictionary-editor__add {
   width: auto;
 }
 
@@ -30,7 +30,7 @@
   margin: 0;
   font-size: var(--fs-h4);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--ls-panel-title);
 }
 
 .dictionary-editor__count {
@@ -118,45 +118,6 @@
   font-weight: 600;
 }
 
-/* Правка на месте: поля RU | UZ, вид у городов, кнопки. */
-.dictionary-form {
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-  border: 1px dashed var(--line-2);
-  border-radius: var(--r-m);
-}
-
-.dictionary-form__kind {
-  max-width: 240px;
-}
-
-.dictionary-form__select {
-  position: relative;
-  display: block;
-}
-
-.dictionary-form__select-input {
-  padding-right: 36px;
-  appearance: none;
-  cursor: pointer;
-}
-
-.dictionary-form__chevron {
-  position: absolute;
-  top: 50%;
-  right: 13px;
-  color: var(--fg-3);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-.dictionary-form__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 /* Телефон: плашка — справа от названия, кнопки — одной строкой под ним (отступы кнопок
    уже: три «Изменить · Скрыть · Удалить» помещаются в 390 px), ручка — слева на всю высоту. */
 @media (max-width: 760px) {
@@ -165,10 +126,10 @@
   }
 
   .dictionary-editor__row {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-columns: var(--touch-target) minmax(0, 1fr) auto;
   }
 
-  .dictionary-editor__row > .sort-handle {
+  .dictionary-editor__handle {
     grid-row: 1 / span 2;
     align-self: start;
   }
@@ -190,7 +151,7 @@
     margin-left: -10px;
   }
 
-  .dictionary-editor__actions .button {
+  .dictionary-editor__action {
     padding: 0 10px;
   }
 }
