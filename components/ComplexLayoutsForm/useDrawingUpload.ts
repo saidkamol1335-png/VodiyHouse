@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { LayoutDraft } from "@/lib/admin/complexes/layouts";
 import type { ComplexMediaResult } from "@/lib/admin/complexes/types";
-import { UploadRefused, uploadComplexFile } from "@/lib/admin/complexes/upload";
+import { uploadComplexFile } from "@/lib/admin/complexes/upload";
+import { UploadRefused } from "@/lib/admin/storageUpload";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { processImage } from "@/lib/media";
 

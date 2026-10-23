@@ -19,6 +19,7 @@ import {
   manualAuthConfig,
   projectRefFromUrl,
 } from "../lib/supabase/cloudCheck.ts";
+import { dbClientConfig } from "../lib/supabase/dbClient.ts";
 
 const TIMEOUT_MS = 10_000;
 const MIGRATIONS_DIR = path.join(import.meta.dirname, "..", "supabase", "migrations");
@@ -99,7 +100,10 @@ async function databaseLines(connectionString) {
   const local = (await readdir(MIGRATIONS_DIR))
     .filter((file) => file.endsWith(".sql"))
     .map((file) => file.split("_")[0]);
-  const client = new pg.Client({ connectionString, connectionTimeoutMillis: TIMEOUT_MS });
+  const client = new pg.Client({
+    ...dbClientConfig(connectionString),
+    connectionTimeoutMillis: TIMEOUT_MS,
+  });
   try {
     await client.connect();
   } catch (error) {

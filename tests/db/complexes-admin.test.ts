@@ -47,7 +47,12 @@ describe("кабинет ЖК", () => {
     );
   const publish = (id: string) =>
     asHead((tx) =>
-      tx.query("update complexes set status = 'published', files_checked_at = now() where id = $1", [id]),
+      // clock_timestamp, а не now(): облачный прогон — одна транзакция на файл, now() в ней стоит,
+      // и повторная отметка 1.2 совпала бы с прошлой.
+      tx.query(
+        "update complexes set status = 'published', files_checked_at = clock_timestamp() where id = $1",
+        [id],
+      ),
     );
   const readyPublished = async (slug: string) => {
     const id = await createComplex(slug, slug);

@@ -170,10 +170,9 @@ function DeveloperMediaFields({ developerId, published, media, actions }: MediaF
   const logo = useDeveloperMedia({ ...params, kind: "logo", initial: media.logo });
   const cover = useDeveloperMedia({ ...params, kind: "cover", initial: media.cover });
   const error = logo.error ?? cover.error;
-  // Отметка 1.2 — на одну загрузку (И8): после удачной снимается.
+  // Отметка 1.2 — на одну загрузку (И8): после удачной снимается, после отказа остаётся.
   const uploaded = (upload: typeof logo.upload) => async (image: ProcessedImage) => {
-    await upload(image);
-    setRule12(false);
+    if (await upload(image)) setRule12(false);
   };
   return (
     <>

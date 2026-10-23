@@ -2,21 +2,14 @@
 
 import { MEDIA_BUCKET, mediaPath, mediaPublicUrl, type ProcessedImage } from "@/lib/media";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import type { ContentErrorCode } from "../developers/errors";
 import type { FormAction } from "../developers/types";
+import { refuseUpload, UploadRefused } from "../storageUpload";
 import type { ComplexMediaResult } from "./types";
 
 // Фото и чертежи ЖК (И5, И6): браузер кладёт подготовленный файл в бакет сессией руководителя,
 // сервер привязывает его к ЖК (media_assets). Без облака (служебный стенд) — превью в браузере.
 
 const YEAR_SECONDS = "31536000";
-
-/** Отказ сервера: код для messages (admin.developers.errors), бакет уже прибран. */
-export class UploadRefused extends Error {
-  constructor(readonly code: ContentErrorCode) {
-    super(`complex-upload-${code}`);
-  }
-}
 
 type UploadParams = {
   complexId: string;
@@ -44,7 +37,7 @@ export async function uploadComplexFile({ complexId, image, attach, rule12 }: Up
     cacheControl: YEAR_SECONDS,
     upsert: false,
   });
-  if (uploaded.error) throw new Error("complex-upload-failed", { cause: uploaded.error });
+  if (uploaded.error) await refuseUpload(supabase, uploaded.error);
   const result = await attach(
     form({
       id: complexId,

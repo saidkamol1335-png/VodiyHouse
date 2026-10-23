@@ -6,6 +6,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
+import { dbClientConfig } from "../lib/supabase/dbClient.ts";
 
 const DEMO_DIR = path.join(import.meta.dirname, "..", "supabase", "demo");
 // Сид всегда начинается с удаления: повторный запуск даёт чистый DEMO, а не дубли.
@@ -23,7 +24,7 @@ if (!connectionString) {
   process.exit(1);
 }
 
-const client = new pg.Client({ connectionString });
+const client = new pg.Client(dbClientConfig(connectionString));
 await client.connect();
 try {
   for (const file of STEPS[action]) {

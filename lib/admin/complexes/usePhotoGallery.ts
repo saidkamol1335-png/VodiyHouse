@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_FOCUS, processImage, type FocusPoint, type MediaIssue } from "@/lib/media";
 import { settle } from "@/lib/ui/settle";
 import type { ContentErrorCode } from "../developers/errors";
+import { UploadRefused } from "../storageUpload";
 import {
   movePhoto,
   PHOTO_LIMITS,
@@ -14,7 +15,7 @@ import {
 } from "./photos";
 import type { ComplexRequirement } from "./readiness";
 import type { ComplexMediaResult } from "./types";
-import { UploadRefused, uploadComplexFile } from "./upload";
+import { uploadComplexFile } from "./upload";
 
 // Галерея ЖК в браузере (И6): загрузка пачкой — по одному файлу (память телефона), порядок,
 // удаление и точка фокуса сохраняются сразу; отказ сервера или сбой сети — возвращаем как было

@@ -5,6 +5,7 @@
 // на чистой базе (справочники — как в миграциях).
 
 import pg from "pg";
+import { dbClientConfig } from "../../lib/supabase/dbClient";
 import { claimsOf, migrationFiles, PG_ROLE, type Actor, type Db, type TestDb } from "./harness";
 
 const SANDBOX_CLEANUP = `
@@ -20,7 +21,7 @@ export async function createRemoteTestDb(): Promise<TestDb> {
   const connectionString = process.env.SUPABASE_DB_URL;
   if (!connectionString) throw new Error("Нет SUPABASE_DB_URL в .env.local — см. .env.example.");
 
-  const client = new pg.Client({ connectionString });
+  const client = new pg.Client({ ...dbClientConfig(connectionString), types: { getTypeParser } });
   await client.connect();
   await assertMigrationsApplied(client);
   await client.query("begin");
@@ -29,9 +30,20 @@ export async function createRemoteTestDb(): Promise<TestDb> {
   // Тесты ждут и ошибок владельца (check, unique): без точки сохранения такая ошибка прервала бы
   // транзакцию всего файла, как и у as() ниже.
   let adminSavepoints = 0;
-  const admin: Db = {
-    query: async <T>(sql: string, params?: unknown[]) => {
-      const savepoint = `admin_${(adminSavepoints += 1)}`;
+  // Запросы одного соединения идут по очереди, и точки сохранения двух одновременных вызовов
+  // перемешались бы: release первой снимает и вторую, транзакция файла прерывается — и падают
+  // все следующие тесты. В PGlite этого не видно, поэтому параллельный вызов — сразу ошибка.
+  let queryBusy = false;
+  let asBusy = false;
+  // Запрос, отказанный стражем, не останавливает соседний: as() дожидается его до отката.
+  let inFlight: Promise<unknown> = Promise.resolve();
+  const exclusive = (busy: boolean) => {
+    if (busy)
+      throw new Error("В облачном прогоне запросы к базе — только по одному (без Promise.all)");
+  };
+  const savepointQuery = async <T>(sql: string, params?: unknown[]) => {
+    const savepoint = `admin_${(adminSavepoints += 1)}`;
+    try {
       await client.query(`savepoint ${savepoint}`);
       try {
         const result = await client.query(sql, params);
@@ -41,12 +53,33 @@ export async function createRemoteTestDb(): Promise<TestDb> {
         await client.query(`rollback to savepoint ${savepoint}`);
         throw error;
       }
+    } finally {
+      queryBusy = false;
+    }
+  };
+  const ownQuery = <T>(sql: string, params?: unknown[]) => {
+    exclusive(queryBusy);
+    queryBusy = true;
+    const work = savepointQuery<T>(sql, params);
+    inFlight = work.catch(() => undefined);
+    return work;
+  };
+  const exec = (sql: string) => {
+    // Фиксация транзакции оставила бы тестовые строки в облаке — такие запросы запрещены.
+    if (/\bcommit\b/i.test(sql)) throw new Error("В облачном прогоне commit запрещён");
+    return client.query(sql);
+  };
+  // Владелец не вклинивается в as(): его запрос пошёл бы от роли теста (в PGlite — взаимная блокировка).
+  const admin: Db = {
+    query: async <T>(sql: string, params?: unknown[]) => {
+      exclusive(asBusy);
+      return ownQuery<T>(sql, params);
     },
-    exec: (sql: string) => {
-      // Фиксация транзакции оставила бы тестовые строки в облаке — такие запросы запрещены.
-      if (/\bcommit\b/i.test(sql)) throw new Error("В облачном прогоне commit запрещён");
-      return client.query(sql);
-    },
+    exec,
+  };
+  const scoped: Db = {
+    query: <T>(sql: string, params?: unknown[]) => ownQuery<T>(sql, params),
+    exec,
   };
 
   // Каждая служебная команда — отдельным запросом: медленнее, но откат после ошибки проходит
@@ -59,6 +92,15 @@ export async function createRemoteTestDb(): Promise<TestDb> {
   const timeouts = await roleTimeouts(client);
   let savepoints = 0;
   const as = async <T>(actor: Actor, run: (db: Db) => Promise<T>): Promise<T> => {
+    exclusive(asBusy || queryBusy);
+    asBusy = true;
+    try {
+      return await asActor(actor, run);
+    } finally {
+      asBusy = false;
+    }
+  };
+  const asActor = async <T>(actor: Actor, run: (db: Db) => Promise<T>): Promise<T> => {
     const savepoint = `as_${(savepoints += 1)}`;
     await client.query(`savepoint ${savepoint}`);
     try {
@@ -67,7 +109,7 @@ export async function createRemoteTestDb(): Promise<TestDb> {
       const timeout = timeouts.get(PG_ROLE[actor.kind]);
       if (timeout)
         await client.query("select set_config('statement_timeout', $1, true)", [timeout]);
-      const result = await run(admin);
+      const result = await run(scoped);
       await client.query("reset role");
       await client.query("select set_config('statement_timeout', $1, true)", [ownTimeout]);
       await client.query("select set_config('request.jwt.claims', '', true)");
@@ -79,6 +121,7 @@ export async function createRemoteTestDb(): Promise<TestDb> {
       await client.query(`release savepoint ${savepoint}`);
       return result;
     } catch (error) {
+      await inFlight;
       await client.query(`rollback to savepoint ${savepoint}`);
       await client.query("reset role");
       throw error;
@@ -92,6 +135,15 @@ export async function createRemoteTestDb(): Promise<TestDb> {
       await client.query("rollback");
       await client.end();
     },
+  };
+}
+
+/** bigint (int8) — числом, как в PGlite; pg по умолчанию отдаёт строку, и toEqual с числом падал бы. */
+function getTypeParser(oid: number, format?: "text" | "binary") {
+  if (oid !== pg.types.builtins.INT8) return pg.types.getTypeParser(oid, format);
+  return (value: string) => {
+    const number = Number(value);
+    return Number.isSafeInteger(number) ? number : BigInt(value);
   };
 }
 

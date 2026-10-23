@@ -24,13 +24,22 @@ export function cabinetState(persona: "head" | "manager" | "videographer"): stri
   return hasCloud ? `test-results/.auth/${persona}.json` : undefined;
 }
 
-/** Вход через форму /admin/vhod. */
-export async function signIn(page: Page, email: string, password: string): Promise<void> {
+/** Отправка формы /admin/vhod без ожидания перехода — для входов, которые должны не пройти. */
+export async function submitSignIn(page: Page, email: string, password: string): Promise<void> {
   await page.goto("/admin/vhod");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Пароль", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Войти" }).click();
-  await expect(page).not.toHaveURL(/\/admin\/vhod/);
+}
+
+/**
+ * Вход через форму /admin/vhod. Переход — после Auth во Франкфурте, чтения профиля и отрисовки
+ * /admin (первый раз — с компиляцией): 5 с по умолчанию мало, а упавший вход в проекте setup
+ * снимает с прогона все тесты, и стенды тоже.
+ */
+export async function signIn(page: Page, email: string, password: string): Promise<void> {
+  await submitSignIn(page, email, password);
+  await expect(page).not.toHaveURL(/\/admin\/vhod/, { timeout: 30_000 });
 }
 
 /** Тестовые сотрудники создаются и удаляются только в проекте E2E_SUPABASE_PROJECT_REF. */

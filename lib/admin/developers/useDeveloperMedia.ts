@@ -11,6 +11,7 @@ import {
   type ProcessedImage,
 } from "@/lib/media";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { refuseUpload, UploadRefused } from "../storageUpload";
 import type { ContentErrorCode } from "./errors";
 import type { DeveloperMediaActions } from "./types";
 
@@ -39,7 +40,10 @@ function mediaForm(fields: Record<string, string | number>): FormData {
   return form;
 }
 
-/** Файл в бакет → строка media_assets; отказ сервера — файл убираем, MediaDrop покажет ошибку. */
+/**
+ * Файл в бакет → строка media_assets. Отказ Storage или сервера (файл убран) — UploadRefused,
+ * его текст показывает форма; сбой сети — обычная ошибка, MediaDrop скажет «проверьте связь».
+ */
 async function uploadToCloud(
   params: UseDeveloperMediaParams & { actions: DeveloperMediaActions },
   image: ProcessedImage,
@@ -52,7 +56,7 @@ async function uploadToCloud(
     cacheControl: YEAR_SECONDS,
     upsert: false,
   });
-  if (uploaded.error) throw new Error("media-upload-failed", { cause: uploaded.error });
+  if (uploaded.error) await refuseUpload(supabase, uploaded.error);
   const result = await params.actions.attach(
     mediaForm({
       id: params.developerId,
@@ -68,7 +72,7 @@ async function uploadToCloud(
   );
   if (result.status === "error") {
     await bucket.remove([path]);
-    throw new Error(`media-attach-${result.error}`);
+    throw new UploadRefused(result.error);
   }
   return mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", path);
 }
@@ -93,13 +97,21 @@ export function useDeveloperMedia(params: UseDeveloperMediaParams) {
     return localUrl.current;
   };
 
-  const upload = async (image: ProcessedImage) => {
+  /** false — отказ: текст в форме (`error`); сбой сети бросается дальше, в MediaDrop. */
+  const upload = async (image: ProcessedImage): Promise<boolean> => {
     setError(null);
     const { actions } = params;
-    const src = actions
-      ? await uploadToCloud({ ...params, actions }, image)
-      : showLocal(image.blob)!;
-    setPreview({ src, width: image.width, height: image.height, focus: DEFAULT_FOCUS });
+    try {
+      const src = actions
+        ? await uploadToCloud({ ...params, actions }, image)
+        : showLocal(image.blob)!;
+      setPreview({ src, width: image.width, height: image.height, focus: DEFAULT_FOCUS });
+      return true;
+    } catch (failure) {
+      if (!(failure instanceof UploadRefused)) throw failure;
+      setError(failure.code);
+      return false;
+    }
   };
 
   const remove = async () => {

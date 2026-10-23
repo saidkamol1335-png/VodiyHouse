@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PUBLICATION_STATUSES } from "../publication";
-import { contentDbErrorCode } from "./errors";
+import { contentDbErrorCode, storageErrorCode } from "./errors";
 import {
   filterCounts,
   filterDevelopers,
@@ -96,6 +96,23 @@ describe("ошибки базы → коды", () => {
     expect(contentDbErrorCode({ code: "23505" })).toBe("duplicate");
     expect(contentDbErrorCode({ code: "", message: "TypeError: fetch failed" })).toBe("network");
     expect(contentDbErrorCode({ code: "XX000" })).toBe("unknown");
+  });
+
+  it("отказ Storage при загрузке: политика, сессия, сеть — не всё «нет связи»", () => {
+    const rls = "new row violates row-level security policy";
+    expect(storageErrorCode({ status: 400, statusCode: "403", message: rls })).toBe("forbidden");
+    expect(storageErrorCode({ status: 400, message: rls })).toBe("forbidden");
+    expect(storageErrorCode({ status: 400, statusCode: "403", message: "jwt expired" })).toBe(
+      "session",
+    );
+    expect(storageErrorCode({ status: 401, message: "Unauthorized" })).toBe("session");
+    // Текст jose в storage-api при истёкшем токене (часы компьютера отстают).
+    const expired = '"exp" claim timestamp check failed';
+    expect(storageErrorCode({ status: 400, statusCode: "403", message: expired })).toBe("session");
+    expect(storageErrorCode({ status: 404, statusCode: "404", message: "Bucket not found" })).toBe(
+      "unknown",
+    );
+    expect(storageErrorCode({ message: "Failed to fetch" })).toBe("network");
   });
 
   it("квартиры: свой код у каждого отказа, detail различает номер и место", () => {

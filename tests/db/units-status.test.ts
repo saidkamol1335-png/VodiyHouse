@@ -103,9 +103,9 @@ describe("квартиры: статус, «Отменить» и журнал",
     });
 
     it("массово по смешанной выборке — одна запись, группы и undo на каждый прежний статус", async () => {
-      const [a, b, c] = await Promise.all(
-        ["2", "3", "4"].map((n) => unitByNumber(db.admin, block, n)),
-      );
+      const a = await unitByNumber(db.admin, block, "2");
+      const b = await unitByNumber(db.admin, block, "3");
+      const c = await unitByNumber(db.admin, block, "4");
       await callAs(db, head, "set_units_status($1, $2, 'sold')", [block, [c!.id]]);
       const since = await lastAuditId(db.admin);
 
@@ -166,9 +166,9 @@ describe("квартиры: статус, «Отменить» и журнал",
     });
 
     it("«Отменить» не затирает чужую правку и считает удалённые квартиры", async () => {
-      const [a, b, c] = await Promise.all(
-        ["5", "6", "7"].map((n) => unitByNumber(db.admin, block, n)),
-      );
+      const a = await unitByNumber(db.admin, block, "5");
+      const b = await unitByNumber(db.admin, block, "6");
+      const c = await unitByNumber(db.admin, block, "7");
       const result = await callAs<StatusResult>(
         db,
         manager,

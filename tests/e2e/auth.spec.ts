@@ -7,6 +7,7 @@ import { collectPageErrors } from "./helpers";
 test.skip(!hasCloud, NO_CLOUD);
 
 const desktopOnly = (projectName: string) => test.skip(projectName !== "desktop-1440", "входы — только на 1440");
+const SECRET_KEY_SHAPE = /sb_secret_[A-Za-z0-9_-]{20,}/;
 
 test.describe("без входа", () => {
   test("/admin и /admin/parol → 307 на /admin/vhod; экран входа без cookie сессии", async ({ request }) => {
@@ -61,11 +62,26 @@ test.describe("руководитель", () => {
 
     const session = (await context.cookies()).find((cookie) => /^sb-.+-auth-token/.test(cookie.name));
     expect(session).toMatchObject({ sameSite: "Lax", path: "/" });
+    // Ищем ключ по форме, а не голый префикс: он есть в комментарии env.ts (чанк разработки
+    // /admin/nastroyki) и в коде supabase-js — это не утечка.
     const secret = process.env.SUPABASE_SECRET_KEY ?? "";
     for (const source of sources) {
-      expect(source).not.toContain("sb_secret_");
+      expect(source).not.toMatch(SECRET_KEY_SHAPE);
       if (secret) expect(source).not.toContain(secret);
     }
+  });
+
+  // cloud:check видит ключ в JWKS и тогда, когда он ещё «в ожидании», а сессии подписывает HS256 —
+  // это видно только по самому токену. С HS256 каждый переход по кабинету — запрос /user к Auth.
+  test("сессия подписана асимметричным ключом, а не HS256", async ({ context }) => {
+    const chunks = (await context.cookies())
+      .filter((cookie) => /^sb-.+-auth-token(\.\d+)?$/.test(cookie.name))
+      .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
+    const cookie = chunks.map((chunk) => chunk.value).join("").replace(/^base64-/, "");
+    const fromBase64 = (value: string) => JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    const session = fromBase64(cookie) as { access_token: string };
+    const header = fromBase64(session.access_token.split(".")[0]!) as { alg: string };
+    expect(header.alg).toMatch(/^(ES|RS|PS|EdDSA)/);
   });
 });
 
@@ -82,7 +98,9 @@ test.describe("менеджер и видеограф", () => {
 
   // 12.6 (Н2): права роли в облаке — меню, список, вкладки и действия квартир (DEMO после demo:seed).
   // Н7 здесь не проверить: в сиде у всех блоков есть список — его проверяют тесты базы и стенд.
-  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({ browser }) => {
+  // Только на 1440: оба проекта тапнули бы одну и ту же свободную квартиру общего DEMO в облаке.
+  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({ browser }, testInfo) => {
+    desktopOnly(testInfo.project.name);
     const context = await browser.newContext({ storageState: cabinetState("manager") });
     const page = await context.newPage();
     await page.goto("/admin");

@@ -77,10 +77,31 @@ describe("журнал изменений", () => {
     expect(await entries("locations")).toHaveLength(before);
   });
 
+  // Секретный ключ сервер берёт только для профилей: у service_role нет прав на другие таблицы
+  // (в облачных проектах с 30.05.2026 права по умолчанию не выдаются).
   it("действие сервера записывается без автора", async () => {
-    await db.as(service, (tx) => tx.query("update locations set sort = 11 where slug = 'fergana'"));
-    const last = (await entries("locations")).at(-1);
-    expect(last).toMatchObject({ actor_id: null, action: "update", changes: { sort: [10, 11] } });
+    await db.as(service, (tx) =>
+      tx.query("update profiles set full_name = 'Сервер' where id = $1", [manager]),
+    );
+    const last = (await entries("profiles")).at(-1);
+    expect(last).toMatchObject({
+      actor_id: null,
+      action: "update",
+      changes: { full_name: ["Тест · manager", "Сервер"] },
+    });
+  });
+
+  it("у сервера нет прав на таблицы, кроме профилей", async () => {
+    const { rows } = await db.admin.query<{ relname: string }>(
+      `select c.relname from pg_class c
+       where c.relnamespace = 'public'::regnamespace and c.relkind in ('r', 'p', 'v', 'm')
+         and (has_table_privilege('service_role', c.oid, 'select')
+           or has_table_privilege('service_role', c.oid, 'insert')
+           or has_table_privilege('service_role', c.oid, 'update')
+           or has_table_privilege('service_role', c.oid, 'delete'))
+       order by c.relname`,
+    );
+    expect(rows.map((row) => row.relname)).toEqual(["profiles"]);
   });
 
   it("читают руководитель и менеджер; видеограф ничего не видит, посетителю закрыто", async () => {

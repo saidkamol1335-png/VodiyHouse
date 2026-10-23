@@ -1,13 +1,19 @@
 import { expect, test, type Page } from "@playwright/test";
-import { cabinetState, hasCloud, NO_CLOUD, signIn } from "./cloud";
+import { cabinetState, hasCloud, NO_CLOUD, signIn, submitSignIn } from "./cloud";
 
 // «Настройки → Сотрудники» против облака (шаг 8): руководитель — сохранённая сессия,
 // сотрудник — свой контекст браузера. Только 1440: каждый сценарий входит заново.
 test.skip(!hasCloud, NO_CLOUD);
 test.use({ storageState: cabinetState("head"), permissions: ["clipboard-read", "clipboard-write"] });
-test.beforeEach(({}, testInfo) => test.skip(testInfo.project.name !== "desktop-1440", "входы — только на 1440"));
+test.beforeEach(({}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop-1440", "входы — только на 1440");
+  // В каждом сценарии два-три входа и действия Auth по сети до Франкфурта — 30 с на тест мало.
+  test.slow();
+});
 
 const row = (page: Page, text: string) => page.locator(".staff-list__row").filter({ hasText: text });
+// Пустая сессия явно: иначе Playwright переносит в newContext() storageState руководителя из test.use.
+const staffContext = { storageState: { cookies: [], origins: [] } };
 
 /** Создаёт сотрудника через форму и возвращает показанный один раз пароль. */
 async function createStaff(page: Page, fullName: string, email: string): Promise<string> {
@@ -33,7 +39,7 @@ test("создание → пароль один раз → после «Гот�
   expect(await page.content()).not.toContain(password);
   await expect(row(page, email)).toContainText("Ждёт первого входа");
 
-  const staff = await browser.newContext();
+  const staff = await browser.newContext(staffContext);
   const staffPage = await staff.newPage();
   await signIn(staffPage, email, password);
   await expect(staffPage).toHaveURL(/\/admin\/parol$/);
@@ -56,7 +62,7 @@ test("отключение закрывает вход сразу; включе�
   const password = await createStaff(page, "E2E Отключаемый", email);
   await page.getByRole("button", { name: "Готово" }).click();
 
-  const staff = await browser.newContext();
+  const staff = await browser.newContext(staffContext);
   const staffPage = await staff.newPage();
   await signIn(staffPage, email, password);
 
@@ -66,7 +72,7 @@ test("отключение закрывает вход сразу; включе�
 
   await staffPage.goto("/admin/parol");
   await expect(staffPage).toHaveURL(/\/admin\/vhod/);
-  await signIn(staffPage, email, password).catch(() => undefined);
+  await submitSignIn(staffPage, email, password);
   await expect(staffPage.locator(".login-form .form-status--error")).toHaveText("Неверный email или пароль");
 
   await page.reload();
@@ -87,9 +93,9 @@ test("«Новый пароль»: старый не подходит, новы�
   await expect(value).toHaveText(/^\S{12}$/);
   const newPassword = (await value.textContent()) ?? "";
 
-  const staff = await browser.newContext();
+  const staff = await browser.newContext(staffContext);
   const staffPage = await staff.newPage();
-  await signIn(staffPage, email, oldPassword).catch(() => undefined);
+  await submitSignIn(staffPage, email, oldPassword);
   await expect(staffPage.locator(".login-form .form-status--error")).toHaveText("Неверный email или пароль");
   await signIn(staffPage, email, newPassword);
   await expect(staffPage).toHaveURL(/\/admin\/parol$/);

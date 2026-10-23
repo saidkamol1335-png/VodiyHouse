@@ -82,9 +82,11 @@ alter table storage.buckets enable row level security;
 alter table storage.objects enable row level security;
 grant all on storage.buckets, storage.objects to anon, authenticated, service_role;
 
--- Права по умолчанию как в облаке: всё новое в public доступно ролям Data API,
--- защищает только RLS. Миграции обязаны сами отзывать лишнее — тесты это проверяют.
+-- Права по умолчанию для anon и authenticated — худший случай облака (галочка «Automatically
+-- expose new tables»): всё новое в public им открыто, защищает только RLS. Миграции обязаны сами
+-- отзывать лишнее — тесты это проверяют. service_role прав на таблицы по умолчанию не получает —
+-- как в проектах, созданных после 30.05.2026: забытый grant для сервера виден уже здесь.
 grant usage on schema public to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;

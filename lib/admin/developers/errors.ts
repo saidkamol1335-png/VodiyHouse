@@ -78,6 +78,24 @@ const BY_CODE: Record<string, ContentErrorCode> = {
   "57014": "timeout",
 };
 
+/** Ошибка Storage из supabase-js: status — HTTP-ответ, statusCode — код в теле. */
+export type StorageErrorLike = { status?: number; statusCode?: string; message?: string };
+
+/**
+ * Отказ Storage при загрузке файла из браузера. Политика (RLS) приходит как 400 с кодом «403»
+ * в теле, истёкшая сессия — «jwt expired» или текст jose `"exp" claim timestamp check failed`;
+ * без статуса ответа не было — сеть. Раньше любой отказ показывался как «нет связи», и ошибку
+ * настроек облака нельзя было отличить. Сессию, потерянную в браузере, различает refuseUpload.
+ */
+export function storageErrorCode(error: StorageErrorLike): ContentErrorCode {
+  if (/jwt|"?exp"? claim/i.test(error.message ?? "")) return "session";
+  const status = error.statusCode ?? (error.status ? String(error.status) : "");
+  if (!status) return "network";
+  if (status === "401") return "session";
+  if (status === "403" || /row-level security/i.test(error.message ?? "")) return "forbidden";
+  return "unknown";
+}
+
 /** Отказ базы через PostgREST; сбой сети (fetch failed) — у ошибки нет кода Postgres. */
 export function contentDbErrorCode(
   error: DbErrorLike & { message?: string; details?: string | null },

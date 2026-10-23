@@ -8,7 +8,15 @@ import {
   type BlockPlan,
 } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
-import { createStaff, createTestDb, expectHint, user, type Db, type TestDb } from "./harness";
+import {
+  createStaff,
+  createTestDb,
+  expectHint,
+  isRemoteTarget,
+  user,
+  type Db,
+  type TestDb,
+} from "./harness";
 
 // Приёмка фазы 1: блок 16 эт. × 3 подъезда × 4 кв. создаётся генератором; здесь — та часть,
 // что идёт в базу: строки генератора проходят ограничения и права руководителя.
@@ -81,7 +89,8 @@ describe("генератор блока → база", () => {
 
     expect(inserted).toBe(180);
     // Запас к приёмке «< 1 мин»: база тратит доли секунды, остальное — время человека.
-    expect(elapsed).toBeLessThan(5_000);
+    // В облаке сюда входят и ~27 запросов харнесса по сети (по 0,1 с), а не только база.
+    expect(elapsed).toBeLessThan(isRemoteTarget ? 15_000 : 5_000);
 
     const byRooms = await db.as(user(head), (tx) =>
       tx.query<{ rooms: number; free_count: number }>(
