@@ -42,36 +42,18 @@ function roomOptions(current: number | null, studioLabel: string) {
 
 /** Строка планировки (И5): чертёж · комнаты · площадь · «цена от» · «доступна» · плашки. */
 export function LayoutRow(props: LayoutRowProps) {
-  const { row, currency, hasUnits, issues, onChange } = props;
+  const { row, issues, onChange } = props;
   const t = useTranslations("admin.complexes.layouts");
   const rooms = useTranslations("admin.complexes.rooms");
-  const [busy, setBusy] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const drawing = useDrawingPick(props.onDrawing);
   const issue = (field: "rooms" | "area" | "priceFrom") =>
     issues?.[field] ? t(`issues.${issues[field]}`) : undefined;
-  const pick = async (file: File | undefined) => {
-    if (!file) return;
-    setBusy(true);
-    setUploadError(await props.onDrawing(file));
-    setBusy(false);
-  };
-  const id = (field: string) => `layout-${row.key}-${field}`;
   return (
     <li className="layout-row" data-testid="layout-row">
-      <div className="layout-row__drawing">
-        <DrawingTile
-          id={id("drawing")}
-          src={row.drawingSrc}
-          busy={busy}
-          disabled={props.uploadLocked}
-          label={t("drawingAdd")}
-          onPick={(file) => void pick(file)}
-          onRemove={() => onChange({ drawingId: null, drawingSrc: null })}
-        />
-      </div>
+      <RowDrawing {...props} busy={drawing.busy} onPick={drawing.pick} />
       <ChoiceField
-        id={id("rooms")}
-        name={id("rooms")}
+        id={fieldId(row, "rooms")}
+        name={fieldId(row, "rooms")}
         label={t("fields.rooms")}
         options={roomOptions(row.rooms, rooms("studio"))}
         value={row.rooms === null ? "" : String(row.rooms)}
@@ -80,30 +62,79 @@ export function LayoutRow(props: LayoutRowProps) {
       />
       <Field
         className="layout-row__area"
-        id={id("area")}
+        id={fieldId(row, "area")}
         label={t("fields.area")}
         inputMode="decimal"
         value={row.area}
         error={issue("area")}
         onChange={(event) => onChange({ area: event.target.value })}
       />
-      {hasUnits ? (
-        <OfferText row={row} currency={currency} />
-      ) : (
-        <div className="layout-row__price">
-          <Field
-            id={id("price")}
-            label={t("fields.priceFrom", { currency: t(`currency.${currency}`) })}
-            inputMode="numeric"
-            value={row.priceFrom}
-            error={issue("priceFrom")}
-            onChange={(event) => onChange({ priceFrom: event.target.value })}
-          />
-        </div>
-      )}
+      <RowPrice {...props} error={issue("priceFrom")} />
       <RowEnd {...props} />
-      {uploadError ? <p className="field__error layout-row__issue">{uploadError}</p> : null}
+      {/* Последним ребёнком строки: ошибка загрузки встаёт на всю ширину под ней. */}
+      {drawing.error ? <p className="field__error layout-row__issue">{drawing.error}</p> : null}
     </li>
+  );
+}
+
+const fieldId = (row: LayoutDraft, field: string) => `layout-${row.key}-${field}`;
+
+/** Загрузка чертежа: пока идёт — плитка занята; отказ — текст под строкой. */
+function useDrawingPick(onDrawing: LayoutRowProps["onDrawing"]) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setError(await onDrawing(file));
+    setBusy(false);
+  };
+  return { busy, error, pick };
+}
+
+type RowDrawingProps = LayoutRowProps & {
+  busy: boolean;
+  onPick: (file: File | undefined) => Promise<void>;
+};
+
+function RowDrawing({ row, uploadLocked, busy, onPick, onChange }: RowDrawingProps) {
+  const t = useTranslations("admin.complexes.layouts");
+  return (
+    <div className="layout-row__drawing">
+      <DrawingTile
+        id={fieldId(row, "drawing")}
+        src={row.drawingSrc}
+        busy={busy}
+        disabled={uploadLocked}
+        label={t("drawingAdd")}
+        onPick={(file) => void onPick(file)}
+        onRemove={() => onChange({ drawingId: null, drawingSrc: null })}
+      />
+    </div>
+  );
+}
+
+/** «Цена от»: у блока со списком — из квартир (только чтение), иначе — поле. */
+function RowPrice({
+  row,
+  currency,
+  hasUnits,
+  error,
+  onChange,
+}: LayoutRowProps & { error?: string }) {
+  const t = useTranslations("admin.complexes.layouts");
+  if (hasUnits) return <OfferText row={row} currency={currency} />;
+  return (
+    <div className="layout-row__price">
+      <Field
+        id={fieldId(row, "price")}
+        label={t("fields.priceFrom", { currency: t(`currency.${currency}`) })}
+        inputMode="numeric"
+        value={row.priceFrom}
+        error={error}
+        onChange={(event) => onChange({ priceFrom: event.target.value })}
+      />
+    </div>
   );
 }
 
@@ -124,27 +155,9 @@ function OfferText({ row, currency }: { row: LayoutDraft; currency: Currency }) 
 
 function RowEnd({ row, hasUnits, variant, onDuplicate, onRemove }: LayoutRowProps) {
   const t = useTranslations("admin.complexes.layouts");
-  const priced = hasUnits ? row.offer?.priceFrom != null : Boolean(row.priceFrom.trim());
   return (
     <div className="layout-row__end">
-      <span className="layout-row__badges">
-        {row.drawingSrc ? null : (
-          <Badge tone="amber" size="sm">
-            {t("noDrawing")}
-          </Badge>
-        )}
-        {priced ? null : <Badge size="sm">{t("noPrice")}</Badge>}
-        {/* Двойник (те же комнаты и площадь) — тот же «вариант N», что в списках «Квартир». */}
-        {variant ? <Badge size="sm">{t("variant", { n: variant })}</Badge> : null}
-        {/* «Нет в наличии» ставят на «Квартирах» (Н7) — здесь только видно, почему сайт так пишет. */}
-        {!hasUnits && !row.available ? (
-          <span title={t("unavailableHint")}>
-            <Badge tone="bad" size="sm">
-              {t("unavailable")}
-            </Badge>
-          </span>
-        ) : null}
-      </span>
+      <RowBadges row={row} hasUnits={hasUnits} variant={variant} />
       <button
         type="button"
         className="layout-row__icon"
@@ -164,5 +177,34 @@ function RowEnd({ row, hasUnits, variant, onDuplicate, onRemove }: LayoutRowProp
         <Trash2 size={16} aria-hidden="true" />
       </button>
     </div>
+  );
+}
+
+function RowBadges({
+  row,
+  hasUnits,
+  variant,
+}: Pick<LayoutRowProps, "row" | "hasUnits" | "variant">) {
+  const t = useTranslations("admin.complexes.layouts");
+  const priced = hasUnits ? row.offer?.priceFrom != null : Boolean(row.priceFrom.trim());
+  return (
+    <span className="layout-row__badges">
+      {row.drawingSrc ? null : (
+        <Badge tone="amber" size="sm">
+          {t("noDrawing")}
+        </Badge>
+      )}
+      {priced ? null : <Badge size="sm">{t("noPrice")}</Badge>}
+      {/* Двойник (те же комнаты и площадь) — тот же «вариант N», что в списках «Квартир». */}
+      {variant ? <Badge size="sm">{t("variant", { n: variant })}</Badge> : null}
+      {/* «Нет в наличии» ставят на «Квартирах» (Н7) — здесь только видно, почему сайт так пишет. */}
+      {!hasUnits && !row.available ? (
+        <span title={t("unavailableHint")}>
+          <Badge tone="bad" size="sm">
+            {t("unavailable")}
+          </Badge>
+        </span>
+      ) : null}
+    </span>
   );
 }

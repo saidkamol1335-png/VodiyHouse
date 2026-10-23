@@ -3,7 +3,7 @@
 import { ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { FilterPills } from "@/components/FilterPills";
 import { PublicationBadge } from "@/components/PublicationBadge";
 import { SearchField } from "@/components/SearchField";
@@ -40,47 +40,66 @@ export function ComplexList({
   initialFilter = "all",
   access,
 }: ComplexListProps) {
-  const t = useTranslations("admin.complexes");
-  const [query, setQuery] = useState("");
-  const [pickedFilter, setPickedFilter] = useState<PublicationFilter>(initialFilter);
-  // Менеджеру архив не нужен вовсе (М1): «пусто» и «ничего не нашлось» — без него.
-  const scoped = access.manage ? rows : rows.filter((row) => row.status !== "archived");
-  const filter = access.manage ? pickedFilter : "all";
   const developerId = developer?.id ?? null;
-  const visible = filterComplexes(scoped, { query, filter, developerId });
+  const list = useListFilter(rows, access, developerId, initialFilter);
   return (
     <section
       className={access.manage ? "complex-list" : "complex-list complex-list--stock"}
       aria-labelledby="complex-list-title"
     >
-      <div className="complex-list__toolbar">
-        <SearchField
-          id="complex-search"
-          label={t("searchLabel")}
-          placeholder={t("searchPlaceholder")}
-          value={query}
-          onChange={setQuery}
-        />
+      <ListToolbar query={list.query} onQueryChange={list.setQuery}>
         {access.manage ? (
           <PublicationPills
             rows={rows}
             developerId={developerId}
-            value={filter}
-            onChange={setPickedFilter}
+            value={list.filter}
+            onChange={list.setPickedFilter}
           />
         ) : null}
-      </div>
+      </ListToolbar>
       <div className="complex-list__panel">
-        <ListHead baseHref={baseHref} developer={developer} count={visible.length} />
-        <ListRows
-          visible={visible}
-          emptyText={emptyText(t, access.manage, scoped.length === 0)}
-          baseHref={baseHref}
-          access={access}
-        />
-        <PartialFootnote visible={visible} />
+        <ListHead baseHref={baseHref} developer={developer} count={list.visible.length} />
+        <ListRows visible={list.visible} noRows={list.noRows} baseHref={baseHref} access={access} />
+        <PartialFootnote visible={list.visible} />
       </div>
     </section>
+  );
+}
+
+/** Поиск и пилюли статусов. Менеджеру архив не нужен вовсе (М1): «пусто» и «ничего не нашлось» — без него. */
+function useListFilter(
+  rows: readonly ComplexListRow[],
+  access: ComplexAccess,
+  developerId: string | null,
+  initialFilter: PublicationFilter,
+) {
+  const [query, setQuery] = useState("");
+  const [pickedFilter, setPickedFilter] = useState<PublicationFilter>(initialFilter);
+  const scoped = access.manage ? rows : rows.filter((row) => row.status !== "archived");
+  const filter = access.manage ? pickedFilter : "all";
+  const visible = filterComplexes(scoped, { query, filter, developerId });
+  return { query, setQuery, filter, setPickedFilter, visible, noRows: scoped.length === 0 };
+}
+
+type ListToolbarProps = {
+  query: string;
+  onQueryChange: (query: string) => void;
+  children: ReactNode;
+};
+
+function ListToolbar({ query, onQueryChange, children }: ListToolbarProps) {
+  const t = useTranslations("admin.complexes");
+  return (
+    <div className="complex-list__toolbar">
+      <SearchField
+        id="complex-search"
+        label={t("searchLabel")}
+        placeholder={t("searchPlaceholder")}
+        value={query}
+        onChange={onQueryChange}
+      />
+      {children}
+    </div>
   );
 }
 
@@ -124,13 +143,17 @@ function ListHead({ baseHref, developer, count }: ListHeadProps) {
 
 type ListRowsProps = {
   visible: readonly ComplexListRow[];
-  emptyText: string;
+  /** Строк нет вовсе (а не «ничего не нашлось» по поиску). */
+  noRows: boolean;
   baseHref: string;
   access: ComplexAccess;
 };
 
-function ListRows({ visible, emptyText, baseHref, access }: ListRowsProps) {
-  if (visible.length === 0) return <p className="complex-list__empty">{emptyText}</p>;
+function ListRows({ visible, noRows, baseHref, access }: ListRowsProps) {
+  const t = useTranslations("admin.complexes");
+  if (visible.length === 0) {
+    return <p className="complex-list__empty">{emptyText(t, access.manage, noRows)}</p>;
+  }
   const entryTab = access.tabs[0] ?? "main";
   return (
     <ul className="complex-list__rows">

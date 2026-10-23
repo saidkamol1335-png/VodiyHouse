@@ -25,30 +25,45 @@ export function StaffPasswordReveal({ name, email, password, onDone }: StaffPass
   // Несколько панелей сразу (новый сотрудник и «Новый пароль» в строке) — свой id у каждой.
   const titleId = useId();
   const title = useRef<HTMLHeadingElement>(null);
-  const message = () => t("telegram", { url: loginUrlOf(window.location.origin), email, password });
-  const { state: copyState, copy, fallback } = useCopyForTelegram(message);
-
   // Фокус на заголовок: скринридер сразу читает, что появился пароль.
   useEffect(() => title.current?.focus(), []);
-
   return (
     <section className="staff-password" aria-labelledby={titleId}>
       <h3 id={titleId} ref={title} tabIndex={-1} className="staff-password__title">
         {t("title", { name })}
       </h3>
       <p className="staff-password__lead">{t("lead")}</p>
-      <dl className="staff-password__grid">
-        <dt>{t("email")}</dt>
-        <dd className="staff-password__email">{email}</dd>
-        <dt>{t("password")}</dt>
-        <dd className="staff-password__value">
-          {groupsOf(password).map((group, index) => (
-            <span key={index} className="staff-password__group">
-              {group}
-            </span>
-          ))}
-        </dd>
-      </dl>
+      <PasswordGrid email={email} password={password} />
+      <TelegramCopy email={email} password={password} onDone={onDone} />
+    </section>
+  );
+}
+
+function PasswordGrid({ email, password }: { email: string; password: string }) {
+  const t = useTranslations("admin.staff.reveal");
+  return (
+    <dl className="staff-password__grid">
+      <dt>{t("email")}</dt>
+      <dd className="staff-password__email">{email}</dd>
+      <dt>{t("password")}</dt>
+      <dd className="staff-password__value">
+        {groupsOf(password).map((group, index) => (
+          <span key={index} className="staff-password__group">
+            {group}
+          </span>
+        ))}
+      </dd>
+    </dl>
+  );
+}
+
+/** «Скопировать для Telegram»; буфер недоступен — текст в поле, выделенный, чтобы скопировать рукой. */
+function TelegramCopy({ email, password, onDone }: Omit<StaffPasswordRevealProps, "name">) {
+  const t = useTranslations("admin.staff.reveal");
+  const message = () => t("telegram", { url: loginUrlOf(window.location.origin), email, password });
+  const { state: copyState, copy, fallback } = useCopyForTelegram(message);
+  return (
+    <>
       {copyState === "copied" ? <FormStatus tone="success">{t("copied")}</FormStatus> : null}
       {copyState === "failed" ? (
         <>
@@ -72,6 +87,6 @@ export function StaffPasswordReveal({ name, email, password, onDone }: StaffPass
           {t("done")}
         </Button>
       </div>
-    </section>
+    </>
   );
 }

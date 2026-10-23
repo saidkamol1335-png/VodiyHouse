@@ -21,13 +21,17 @@ type PhotoPanelProps = {
 
 /** Панель выбранного фото (И6): точка фокуса и три кадра, «Сделать обложкой», ← →, «Удалить». */
 export function PhotoPanel(props: PhotoPanelProps) {
-  const { photo, index, count, moveLocked, onMove, onFocus, onRemove } = props;
+  const { photo, index, moveLocked, onMove } = props;
   const t = useTranslations("admin.complexes.photos");
-  const [confirming, setConfirming] = useState(false);
   const coverAllowed = canBeCover(photo);
   return (
     <section className="photo-panel" aria-label={t("panel", { index: index + 1 })}>
-      <FocusPreview src={photo.src} size={photo} focus={photo.focus} onFocusChange={onFocus} />
+      <FocusPreview
+        src={photo.src}
+        size={photo}
+        focus={photo.focus}
+        onFocusChange={props.onFocus}
+      />
       <div className="photo-panel__actions">
         {index > 0 ? (
           <Button size="sm" disabled={!coverAllowed || moveLocked} onClick={() => onMove(0)}>
@@ -36,43 +40,8 @@ export function PhotoPanel(props: PhotoPanelProps) {
         ) : (
           <span className="photo-panel__note">{t("isCover")}</span>
         )}
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={index === 0 || moveLocked}
-          aria-label={t("left")}
-          onClick={() => onMove(index - 1)}
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={index === count - 1 || moveLocked}
-          aria-label={t("right")}
-          onClick={() => onMove(index + 1)}
-        >
-          <ArrowRight size={16} aria-hidden="true" />
-        </Button>
-        {confirming ? (
-          <span className="photo-panel__confirm">
-            {t("removeConfirm")}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => void onRemove().then(() => setConfirming(false))}
-            >
-              {t("removeYes")}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
-              {t("removeCancel")}
-            </Button>
-          </span>
-        ) : (
-          <Button size="sm" variant="ghost" onClick={() => setConfirming(true)}>
-            {t("remove")}
-          </Button>
-        )}
+        <MoveArrows {...props} />
+        <RemovePhoto onRemove={props.onRemove} />
       </div>
       {index > 0 && !coverAllowed ? (
         <p className="field__meta">
@@ -81,5 +50,59 @@ export function PhotoPanel(props: PhotoPanelProps) {
       ) : null}
       <p className="field__meta">{t("size", { width: photo.width, height: photo.height })}</p>
     </section>
+  );
+}
+
+function MoveArrows({ index, count, moveLocked, onMove }: PhotoPanelProps) {
+  const t = useTranslations("admin.complexes.photos");
+  return (
+    <>
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={index === 0 || moveLocked}
+        aria-label={t("left")}
+        onClick={() => onMove(index - 1)}
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={index === count - 1 || moveLocked}
+        aria-label={t("right")}
+        onClick={() => onMove(index + 1)}
+      >
+        <ArrowRight size={16} aria-hidden="true" />
+      </Button>
+    </>
+  );
+}
+
+/** «Удалить» → «Да / Отмена» на месте кнопки. */
+function RemovePhoto({ onRemove }: { onRemove: () => Promise<void> }) {
+  const t = useTranslations("admin.complexes.photos");
+  const [confirming, setConfirming] = useState(false);
+  if (!confirming) {
+    return (
+      <Button size="sm" variant="ghost" onClick={() => setConfirming(true)}>
+        {t("remove")}
+      </Button>
+    );
+  }
+  return (
+    <span className="photo-panel__confirm">
+      {t("removeConfirm")}
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => void onRemove().then(() => setConfirming(false))}
+      >
+        {t("removeYes")}
+      </Button>
+      <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
+        {t("removeCancel")}
+      </Button>
+    </span>
   );
 }

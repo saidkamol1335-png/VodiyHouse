@@ -103,6 +103,11 @@ export function newBlockDraft(): BlockDraft {
   };
 }
 
+/** Новый пункт «что входит в цену»: входит, без цены. */
+export function newPriceInclude(): PriceInclude {
+  return { key: crypto.randomUUID(), item: { ru: "", uz: "" }, included: true, price: "" };
+}
+
 const oneOf = <T extends string>(values: readonly T[], value: unknown): value is T =>
   typeof value === "string" && (values as readonly string[]).includes(value);
 

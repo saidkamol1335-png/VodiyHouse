@@ -80,22 +80,8 @@ async function uploadToCloud(
 export function useDeveloperMedia(params: UseDeveloperMediaParams) {
   const [preview, setPreview] = useState<MediaPreview | null>(params.initial);
   const [error, setError] = useState<ContentErrorCode | null>(null);
-  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const localUrl = useRef<string | null>(null);
-
-  useEffect(
-    () => () => {
-      if (focusTimer.current) clearTimeout(focusTimer.current);
-      if (localUrl.current) URL.revokeObjectURL(localUrl.current);
-    },
-    [],
-  );
-
-  const showLocal = (blob: Blob | null) => {
-    if (localUrl.current) URL.revokeObjectURL(localUrl.current);
-    localUrl.current = blob ? URL.createObjectURL(blob) : null;
-    return localUrl.current;
-  };
+  const showLocal = useLocalUrl();
+  const saveFocus = useFocusSave(params);
 
   /** false — отказ: текст в форме (`error`); сбой сети бросается дальше, в MediaDrop. */
   const upload = async (image: ProcessedImage): Promise<boolean> => {
@@ -116,18 +102,55 @@ export function useDeveloperMedia(params: UseDeveloperMediaParams) {
 
   const remove = async () => {
     setError(null);
-    if (params.actions) {
-      const result = await params.actions.remove(
-        mediaForm({ id: params.developerId, kind: params.kind }),
-      );
-      if (result.status === "error") return setError(result.error);
-    }
+    const refused = await removeFromCloud(params);
+    if (refused) return setError(refused);
     showLocal(null);
     setPreview(null);
   };
 
   const setFocus = (focus: FocusPoint) => {
     setPreview((current) => current && { ...current, focus });
+    saveFocus(focus);
+  };
+
+  return { preview, error, upload, remove: () => void remove(), setFocus };
+}
+
+/** Удаление в облаке: код отказа или null (удалено; без облака — удалять нечего). */
+async function removeFromCloud(params: UseDeveloperMediaParams): Promise<ContentErrorCode | null> {
+  if (!params.actions) return null;
+  const result = await params.actions.remove(
+    mediaForm({ id: params.developerId, kind: params.kind }),
+  );
+  return result.status === "error" ? result.error : null;
+}
+
+/** Превью без облака — blob: URL; прошлый отзывается, последний — при размонтировании. */
+function useLocalUrl() {
+  const localUrl = useRef<string | null>(null);
+  useEffect(
+    () => () => {
+      if (localUrl.current) URL.revokeObjectURL(localUrl.current);
+    },
+    [],
+  );
+  return (blob: Blob | null) => {
+    if (localUrl.current) URL.revokeObjectURL(localUrl.current);
+    localUrl.current = blob ? URL.createObjectURL(blob) : null;
+    return localUrl.current;
+  };
+}
+
+/** Точка фокуса сохраняется через паузу: перетаскивание — одна запись, а не десятки. */
+function useFocusSave(params: UseDeveloperMediaParams) {
+  const focusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (focusTimer.current) clearTimeout(focusTimer.current);
+    },
+    [],
+  );
+  return (focus: FocusPoint) => {
     const { actions } = params;
     if (!actions) return;
     if (focusTimer.current) clearTimeout(focusTimer.current);
@@ -137,6 +160,4 @@ export function useDeveloperMedia(params: UseDeveloperMediaParams) {
       );
     }, FOCUS_SAVE_DELAY_MS);
   };
-
-  return { preview, error, upload, remove: () => void remove(), setFocus };
 }

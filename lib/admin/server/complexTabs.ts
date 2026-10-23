@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { blockDraftsFrom, type BlockDraft, type BlockRecord } from "../complexes/blocks";
-import { sortLayouts, type BlockLayouts } from "../complexes/layouts";
+import { sortLayouts, type BlockLayouts, type LayoutDraft } from "../complexes/layouts";
 import type { PhotoItem } from "../complexes/photos";
 
 // Чтение вкладок страницы ЖК («Блоки», «Планировки», «Квартиры», «Фото») сессией сотрудника.
@@ -88,38 +88,53 @@ export async function readBlockLayouts(
   if (blocks.error) unavailable("block-layouts", blocks.error);
   if (offers.error) unavailable("layout-offers", offers.error);
   const offerOf = new Map(((offers.data ?? []) as OfferRow[]).map((row) => [row.layout_id, row]));
-  return ((blocks.data ?? []) as unknown as BlockLayoutsRow[]).map((block) => {
-    const hasUnits = (block.units[0]?.count ?? 0) > 0;
-    const layouts = block.layouts.map((layout) => {
-      const offer = offerOf.get(layout.id);
-      return {
-        key: layout.id,
-        id: layout.id,
-        rooms: layout.rooms,
-        area: decimalText(layout.area),
-        drawingId: layout.drawing_id,
-        drawingSrc: layout.drawing ? src(layout.drawing.path) : null,
-        priceFrom: decimalText(layout.price_from),
-        available: layout.available,
-        saved: { priceFrom: decimalText(layout.price_from) },
-        units: layout.units[0]?.count ?? 0,
-        offer:
-          hasUnits && offer
-            ? {
-                freeCount: offer.free_count,
-                priceFrom: offer.price_from === null ? null : Number(offer.price_from),
-              }
-            : null,
-      };
-    });
-    return {
-      blockId: block.id,
-      blockName: block.name,
-      currency: block.currency === "UZS" ? "UZS" : "USD",
-      hasUnits,
-      layouts: sortLayouts(layouts),
-    };
-  });
+  return ((blocks.data ?? []) as unknown as BlockLayoutsRow[]).map((block) =>
+    blockLayouts(block, offerOf, src),
+  );
+}
+
+/** Блок вкладки: у блока со списком квартир «цена от» и «свободно» планировки — из квартир. */
+function blockLayouts(
+  block: BlockLayoutsRow,
+  offerOf: ReadonlyMap<string, OfferRow>,
+  src: (path: string) => string,
+): BlockLayouts {
+  const hasUnits = (block.units[0]?.count ?? 0) > 0;
+  const layouts = block.layouts.map((layout) =>
+    layoutDraft(layout, hasUnits ? offerOf.get(layout.id) : undefined, src),
+  );
+  return {
+    blockId: block.id,
+    blockName: block.name,
+    currency: block.currency === "UZS" ? "UZS" : "USD",
+    hasUnits,
+    layouts: sortLayouts(layouts),
+  };
+}
+
+function layoutDraft(
+  layout: LayoutRow,
+  offer: OfferRow | undefined,
+  src: (path: string) => string,
+): LayoutDraft {
+  return {
+    key: layout.id,
+    id: layout.id,
+    rooms: layout.rooms,
+    area: decimalText(layout.area),
+    drawingId: layout.drawing_id,
+    drawingSrc: layout.drawing ? src(layout.drawing.path) : null,
+    priceFrom: decimalText(layout.price_from),
+    available: layout.available,
+    saved: { priceFrom: decimalText(layout.price_from) },
+    units: layout.units[0]?.count ?? 0,
+    offer: offer
+      ? {
+          freeCount: offer.free_count,
+          priceFrom: offer.price_from === null ? null : Number(offer.price_from),
+        }
+      : null,
+  };
 }
 
 type PhotoRow = {

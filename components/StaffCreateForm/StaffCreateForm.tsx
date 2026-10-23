@@ -41,6 +41,8 @@ export function StaffCreateForm({ action }: StaffCreateFormProps) {
   return <StaffCreatePanel key={round} action={action} onClose={close} />;
 }
 
+type CreateFailed = Extract<CreateStaffResult, { status: "error" }>;
+
 function StaffCreatePanel({ action, onClose }: StaffCreateFormProps & { onClose: () => void }) {
   const t = useTranslations("admin.staff");
   // Обёртка: в действие уходит только FormData, прошлое состояние (с паролем) — нет.
@@ -53,47 +55,61 @@ function StaffCreatePanel({ action, onClose }: StaffCreateFormProps & { onClose:
     return <StaffPasswordReveal name={member.fullName} email={member.email} password={password} onDone={onClose} />;
   }
   const failed = state.status === "error" ? state : null;
+  return (
+    <AdminPanel title={t("add")} wide>
+      <form className="staff-create" action={formAction} noValidate>
+        <StaffFields failed={failed} />
+        {failed?.error ? <FormStatus tone="error">{t(`errors.${failed.error}`)}</FormStatus> : null}
+        <CreateActions pending={pending} onCancel={onClose} />
+      </form>
+    </AdminPanel>
+  );
+}
+
+function StaffFields({ failed }: { failed: CreateFailed | null }) {
+  const t = useTranslations("admin.staff");
   const fieldError = (field: "fullName" | "email" | "role") => {
     const code = failed?.fieldErrors[field];
     return code ? t(`errors.${code}`, { max: STAFF_LIMITS.fullNameMax }) : undefined;
   };
   return (
-    <AdminPanel title={t("add")} wide>
-      <form className="staff-create" action={formAction} noValidate>
-        <div className="staff-create__fields">
-          <Field
-            id="staff-full-name"
-            name="fullName"
-            autoComplete="off"
-            maxLength={STAFF_LIMITS.fullNameMax}
-            label={t("fields.fullName")}
-            defaultValue={failed?.fields.fullName}
-            error={fieldError("fullName")}
-          />
-          <Field
-            id="staff-email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="off"
-            label={t("fields.email")}
-            defaultValue={failed?.fields.email}
-            error={fieldError("email")}
-          />
-          {/* key: после ответа сервера список роли встаёт на присланное значение. */}
-          <RoleSelect key={failed?.fields.role ?? "manager"} initial={failed?.fields.role} error={fieldError("role")} />
-        </div>
-        {failed?.error ? <FormStatus tone="error">{t(`errors.${failed.error}`)}</FormStatus> : null}
-        <div className="staff-create__actions">
-          <Button type="submit" pending={pending} className="staff-create__button">
-            {pending ? t("create.pending") : t("create.submit")}
-          </Button>
-          <Button variant="ghost" onClick={onClose} className="staff-create__button">
-            {t("create.cancel")}
-          </Button>
-        </div>
-      </form>
-    </AdminPanel>
+    <div className="staff-create__fields">
+      <Field
+        id="staff-full-name"
+        name="fullName"
+        autoComplete="off"
+        maxLength={STAFF_LIMITS.fullNameMax}
+        label={t("fields.fullName")}
+        defaultValue={failed?.fields.fullName}
+        error={fieldError("fullName")}
+      />
+      <Field
+        id="staff-email"
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="off"
+        label={t("fields.email")}
+        defaultValue={failed?.fields.email}
+        error={fieldError("email")}
+      />
+      {/* key: после ответа сервера список роли встаёт на присланное значение. */}
+      <RoleSelect key={failed?.fields.role ?? "manager"} initial={failed?.fields.role} error={fieldError("role")} />
+    </div>
+  );
+}
+
+function CreateActions({ pending, onCancel }: { pending: boolean; onCancel: () => void }) {
+  const t = useTranslations("admin.staff.create");
+  return (
+    <div className="staff-create__actions">
+      <Button type="submit" pending={pending} className="staff-create__button">
+        {pending ? t("pending") : t("submit")}
+      </Button>
+      <Button variant="ghost" onClick={onCancel} className="staff-create__button">
+        {t("cancel")}
+      </Button>
+    </div>
   );
 }
 

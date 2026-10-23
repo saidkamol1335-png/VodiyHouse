@@ -38,20 +38,39 @@ function NumberField({ onValue, ...field }: NumberFieldProps) {
 
 /** Поля генератора: подъезды, первый жилой, квартир на этаже (одно число или по подъездам), № 1. */
 export function GeneratorFields(props: GeneratorFieldsProps) {
-  const { idPrefix, inputs, floors, entrances, issues, onChange } = props;
-  const t = useTranslations("admin.complexes.units.generator");
+  const { inputs, entrances, onChange } = props;
   const set = (patch: Partial<GeneratorInputs>) => onChange({ ...inputs, ...patch });
+  const { issueText, issue } = useIssueText(props.issues);
+  const part = { ...props, set, issueText, issue };
+  return (
+    <div className="units-generator__fields">
+      <PlanFields {...part} />
+      <NumberingFields {...part} />
+      {entrances > 1 ? <PerEntrance {...part} /> : null}
+    </div>
+  );
+}
+
+/** Текст отказа плана по коду (или по условию — у «по подъездам» свой подъезд). */
+function useIssueText(issues: readonly BlockPlanIssue[]) {
+  const t = useTranslations("admin.complexes.units.generator");
   const issueText = (match: (issue: BlockPlanIssue) => boolean) => {
     const found = issues.find(match);
     return found ? t(`issues.${found.code}`, found) : undefined;
   };
   const issue = (code: BlockPlanIssue["code"]) => issueText((item) => item.code === code);
-  // Одно число на все подъезды — без «(подъезд 1)» из текста кода.
-  const perFloorError = issue("unitsPerFloorOutOfRange")
-    ? t("perFloorOutOfRange")
-    : issue("unitsPerFloorCountMismatch");
+  return { issueText, issue };
+}
+
+type PartProps = GeneratorFieldsProps & {
+  set: (patch: Partial<GeneratorInputs>) => void;
+} & ReturnType<typeof useIssueText>;
+
+/** Подъезды и первый жилой этаж. */
+function PlanFields({ idPrefix, inputs, floors, set, issue }: PartProps) {
+  const t = useTranslations("admin.complexes.units.generator");
   return (
-    <div className="units-generator__fields">
+    <>
       <NumberField
         id={`${idPrefix}-entrances`}
         label={t("entrances")}
@@ -67,6 +86,19 @@ export function GeneratorFields(props: GeneratorFieldsProps) {
         error={issue("firstResidentialFloorOutOfRange") ?? issue("floorsOutOfRange")}
         onValue={(firstFloor) => set({ firstFloor })}
       />
+    </>
+  );
+}
+
+/** Квартир на этаже (одно число, если не «по-разному») и первый номер. */
+function NumberingFields({ idPrefix, inputs, entrances, set, issue }: PartProps) {
+  const t = useTranslations("admin.complexes.units.generator");
+  // Одно число на все подъезды — без «(подъезд 1)» из текста кода.
+  const perFloorError = issue("unitsPerFloorOutOfRange")
+    ? t("perFloorOutOfRange")
+    : issue("unitsPerFloorCountMismatch");
+  return (
+    <>
       {inputs.perEntrance && entrances > 1 ? null : (
         <NumberField
           id={`${idPrefix}-per-floor`}
@@ -83,18 +115,12 @@ export function GeneratorFields(props: GeneratorFieldsProps) {
         error={issue("startNumberOutOfRange")}
         onValue={(startNumber) => set({ startNumber })}
       />
-      {entrances > 1 ? <PerEntrance {...props} set={set} issueText={issueText} /> : null}
-    </div>
+    </>
   );
 }
 
-type PerEntranceProps = GeneratorFieldsProps & {
-  set: (patch: Partial<GeneratorInputs>) => void;
-  issueText: (match: (issue: BlockPlanIssue) => boolean) => string | undefined;
-};
-
 /** «В подъездах по-разному»: своё число у каждого подъезда, начинают с общего. */
-function PerEntrance({ idPrefix, inputs, entrances, set, issueText }: PerEntranceProps) {
+function PerEntrance({ idPrefix, inputs, entrances, set, issueText }: PartProps) {
   const t = useTranslations("admin.complexes.units.generator");
   const values = Array.from(
     { length: entrances },

@@ -70,69 +70,94 @@ function TypeSample({ role, className }: { role: (typeof TYPE_ROLES)[number][0];
 }
 
 export function TokenPreview({ children }: { children?: ReactNode }) {
+  return (
+    <main className="token-preview">
+      <TokenBar />
+      {children}
+      <ColorSection />
+      <TypeSection />
+      <ShapeSection />
+    </main>
+  );
+}
+
+/** Верхняя строка: тема и режим анимации сейчас, переключатель темы, ?motion= для проверки. */
+function TokenBar() {
   const { theme, toggleTheme } = useTheme();
   const motion = useMotion();
   const t = useTranslations("admin.dev.preview.tokens");
   const header = useTranslations("header");
   return (
-    <main className="token-preview">
-      <header className="token-preview__bar">
-        <strong>{t("title")}</strong>
-        <span className="token-preview__mono">
-          {t.rich("status", {
-            theme,
-            motion,
-            b: (chunks) => <b data-testid="motion-tier">{chunks}</b>,
-          })}
-        </span>
-        <button type="button" className="token-preview__button" onClick={toggleTheme}>
-          {theme === "dark" ? `☀ ${header("themeLight")}` : `☾ ${header("themeDark")}`}
-        </button>
-        <a className="token-preview__button" href="?motion=full">?motion=full</a>
-        <a className="token-preview__button" href="?motion=lite">?motion=lite</a>
-      </header>
+    <header className="token-preview__bar">
+      <strong>{t("title")}</strong>
+      <span className="token-preview__mono">
+        {t.rich("status", {
+          theme,
+          motion,
+          b: (chunks) => <b data-testid="motion-tier">{chunks}</b>,
+        })}
+      </span>
+      <button type="button" className="token-preview__button" onClick={toggleTheme}>
+        {theme === "dark" ? `☀ ${header("themeLight")}` : `☾ ${header("themeDark")}`}
+      </button>
+      <a className="token-preview__button" href="?motion=full">?motion=full</a>
+      <a className="token-preview__button" href="?motion=lite">?motion=lite</a>
+    </header>
+  );
+}
 
-      {children}
-
-      <section className="token-preview__section">
-        <h2 className="heading heading--h3">{t("sections.colors")}</h2>
-        <div className="token-preview__themes">
-          <div className="token-preview__panel">
-            <Swatches />
-          </div>
-          <div className="token-preview__panel" data-theme-island="dark">
-            <Swatches />
-          </div>
+/** Цвета темы страницы и тёмного островка рядом. */
+function ColorSection() {
+  const t = useTranslations("admin.dev.preview.tokens");
+  return (
+    <section className="token-preview__section">
+      <h2 className="heading heading--h3">{t("sections.colors")}</h2>
+      <div className="token-preview__themes">
+        <div className="token-preview__panel">
+          <Swatches />
         </div>
-      </section>
+        <div className="token-preview__panel" data-theme-island="dark">
+          <Swatches />
+        </div>
+      </div>
+    </section>
+  );
+}
 
-      <section className="token-preview__section">
-        <h2 className="heading heading--h3">{t("sections.type")}</h2>
-        {TYPE_ROLES.map(([role, className]) => (
-          <div key={role} className="token-preview__type-row">
-            <span className="token-preview__mono">{role}</span>
-            <TypeSample role={role} className={className} />
+function TypeSection() {
+  const t = useTranslations("admin.dev.preview.tokens");
+  return (
+    <section className="token-preview__section">
+      <h2 className="heading heading--h3">{t("sections.type")}</h2>
+      {TYPE_ROLES.map(([role, className]) => (
+        <div key={role} className="token-preview__type-row">
+          <span className="token-preview__mono">{role}</span>
+          <TypeSample role={role} className={className} />
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function ShapeSection() {
+  const t = useTranslations("admin.dev.preview.tokens");
+  return (
+    <section className="token-preview__section">
+      <h2 className="heading heading--h3">{t("sections.shape")}</h2>
+      <div className="token-preview__row">
+        {RADII.map((token) => (
+          <div key={token} className="token-preview__radius" style={{ borderRadius: `var(${token})` }}>
+            <code>{token}</code>
           </div>
         ))}
-      </section>
-
-      <section className="token-preview__section">
-        <h2 className="heading heading--h3">{t("sections.shape")}</h2>
-        <div className="token-preview__row">
-          {RADII.map((token) => (
-            <div key={token} className="token-preview__radius" style={{ borderRadius: `var(${token})` }}>
-              <code>{token}</code>
-            </div>
-          ))}
-        </div>
-        <div className="token-preview__row">
-          {SHADOWS.map((token) => (
-            <div key={token} className="token-preview__shadow" style={{ boxShadow: `var(${token})` }}>
-              <code>{token}</code>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+      </div>
+      <div className="token-preview__row">
+        {SHADOWS.map((token) => (
+          <div key={token} className="token-preview__shadow" style={{ boxShadow: `var(${token})` }}>
+            <code>{token}</code>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

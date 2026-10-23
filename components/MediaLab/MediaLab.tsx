@@ -1,121 +1,68 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
 import { FocusPreview } from "@/components/FocusPreview";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import { formatFileSize } from "@/lib/format";
 import {
-  DEFAULT_FOCUS,
   MEDIA_KINDS,
   MEDIA_LIMITS,
   canBeComplexCover,
-  hasExif,
-  processImage,
   type FocusPoint,
-  type MediaIssue,
   type MediaKind,
-  type ProcessedImage,
 } from "@/lib/media";
-
-type Prepared = {
-  image: ProcessedImage;
-  url: string;
-  sourceExif: boolean;
-  storedExif: boolean;
-  milliseconds: number;
-};
-
-type LabState =
-  | { status: "idle" }
-  | { status: "processing" }
-  | { status: "rejected"; issue: MediaIssue }
-  | ({ status: "ready" } & Prepared);
-
-const exifOf = async (blob: Blob) => hasExif(new Uint8Array(await blob.arrayBuffer()));
-
-async function prepare(file: File, kind: MediaKind): Promise<LabState> {
-  const started = performance.now();
-  const result = await processImage(file, kind);
-  if (!result.ok) return { status: "rejected", issue: result.issue };
-  const [sourceExif, storedExif] = await Promise.all([exifOf(file), exifOf(result.image.blob)]);
-  return {
-    status: "ready",
-    image: result.image,
-    url: URL.createObjectURL(result.image.blob),
-    sourceExif,
-    storedExif,
-    milliseconds: Math.round(performance.now() - started),
-  };
-}
+import { useMediaLab, type LabState, type Prepared } from "./useMediaLab";
 
 /** /dev/media: стенд подготовки фото перед загрузкой (шаг 9). Только разработка. */
 export function MediaLab() {
-  const t = useTranslations("admin.media");
   const lab = useTranslations("admin.dev.media");
-  const [kind, setKind] = useState<MediaKind>("photo");
-  const [file, setFile] = useState<File | null>(null);
-  const [state, setState] = useState<LabState>({ status: "idle" });
-  const [focus, setFocus] = useState<FocusPoint>(DEFAULT_FOCUS);
-  // Быстрая смена вида — несколько подготовок подряд: показываем только последнюю.
-  const runId = useRef(0);
-
-  useEffect(
-    () => () => (state.status === "ready" ? URL.revokeObjectURL(state.url) : undefined),
-    [state],
-  );
-
-  const run = async (nextFile: File, nextKind: MediaKind) => {
-    const id = (runId.current += 1);
-    setState({ status: "processing" });
-    const next = await prepare(nextFile, nextKind);
-    if (id !== runId.current) return;
-    setState(next);
-    setFocus(DEFAULT_FOCUS);
-  };
-
-  const chooseFile = (event: ChangeEvent<HTMLInputElement>) => {
-    const chosen = event.target.files?.[0] ?? null;
-    setFile(chosen);
-    if (chosen) void run(chosen, kind);
-  };
-
-  const chooseKind = (nextKind: MediaKind) => {
-    setKind(nextKind);
-    if (file) void run(file, nextKind);
-  };
-
+  const { kind, state, focus, setFocus, chooseFile, chooseKind } = useMediaLab();
   return (
     <main className="media-lab">
       <h1 className="media-lab__title">{lab("title")}</h1>
       <p className="media-lab__lead">{lab("lead")}</p>
-      <div className="media-lab__controls">
-        <div className="media-lab__kinds">
-          <Segmented label={lab("kindLabel")}>
-            {MEDIA_KINDS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={segmentedItemClass(option === kind)}
-                aria-pressed={option === kind}
-                onClick={() => chooseKind(option)}
-              >
-                {t(`kinds.${option}`)}
-              </button>
-            ))}
-          </Segmented>
-        </div>
-        <input
-          className="media-lab__input"
-          type="file"
-          accept={MEDIA_LIMITS.acceptedTypes.join(",")}
-          onChange={chooseFile}
-          aria-label={t("fileLabel")}
-          data-testid="media-input"
-        />
-      </div>
+      <MediaLabControls kind={kind} onKind={chooseKind} onFile={chooseFile} />
       <MediaLabState state={state} focus={focus} onFocusChange={setFocus} />
     </main>
+  );
+}
+
+type ControlsProps = {
+  kind: MediaKind;
+  onKind: (kind: MediaKind) => void;
+  onFile: (event: ChangeEvent<HTMLInputElement>) => void;
+};
+
+function MediaLabControls({ kind, onKind, onFile }: ControlsProps) {
+  const t = useTranslations("admin.media");
+  const lab = useTranslations("admin.dev.media");
+  return (
+    <div className="media-lab__controls">
+      <div className="media-lab__kinds">
+        <Segmented label={lab("kindLabel")}>
+          {MEDIA_KINDS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={segmentedItemClass(option === kind)}
+              aria-pressed={option === kind}
+              onClick={() => onKind(option)}
+            >
+              {t(`kinds.${option}`)}
+            </button>
+          ))}
+        </Segmented>
+      </div>
+      <input
+        className="media-lab__input"
+        type="file"
+        accept={MEDIA_LIMITS.acceptedTypes.join(",")}
+        onChange={onFile}
+        aria-label={t("fileLabel")}
+        data-testid="media-input"
+      />
+    </div>
   );
 }
 

@@ -54,7 +54,6 @@ function DeleteQuestion({
 }: BulkStepProps & { units: readonly UnitRecord[]; onCancel: () => void }) {
   const t = useTranslations("admin.complexes.units.bulk.remove");
   const { reply, pending, send, here } = useEditRequest();
-  const yes = useRefocusAfter(pending);
   const id = useId();
   const remove = async () => {
     if (!edit) return;
@@ -77,20 +76,31 @@ function DeleteQuestion({
       </p>
       <DeleteWarnings id={`${id}-warnings`} units={units} visible={visible} published={published} />
       {reply ? <ComplexSaveFeedback state={reply} /> : null}
-      <div className="units-bulk__buttons">
-        <Button variant="ghost" onClick={onCancel} className="units-bulk__button">
-          {t("no")}
-        </Button>
-        <Button
-          ref={yes}
-          variant="danger"
-          pending={pending}
-          onClick={() => void remove()}
-          className="units-bulk__button"
-        >
-          {t("yes")}
-        </Button>
-      </div>
+      <DeleteAnswers pending={pending} onNo={onCancel} onYes={() => void remove()} />
+    </div>
+  );
+}
+
+type DeleteAnswersProps = { pending: boolean; onNo: () => void; onYes: () => void };
+
+/** «Нет» / «Да»; после отказа базы фокус возвращается на «Да» (кнопка была занята). */
+function DeleteAnswers({ pending, onNo, onYes }: DeleteAnswersProps) {
+  const t = useTranslations("admin.complexes.units.bulk.remove");
+  const yes = useRefocusAfter(pending);
+  return (
+    <div className="units-bulk__buttons">
+      <Button variant="ghost" onClick={onNo} className="units-bulk__button">
+        {t("no")}
+      </Button>
+      <Button
+        ref={yes}
+        variant="danger"
+        pending={pending}
+        onClick={onYes}
+        className="units-bulk__button"
+      >
+        {t("yes")}
+      </Button>
     </div>
   );
 }

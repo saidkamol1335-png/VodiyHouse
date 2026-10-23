@@ -1,36 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { DEFAULT_FOCUS, processImage, type FocusPoint, type MediaIssue } from "@/lib/media";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import type { FocusPoint } from "@/lib/media";
 import { settle } from "@/lib/ui/settle";
 import type { ContentErrorCode } from "../developers/errors";
-import { UploadRefused } from "../storageUpload";
-import {
-  movePhoto,
-  PHOTO_LIMITS,
-  restoreOrder,
-  worsensCover,
-  type PhotoActions,
-  type PhotoItem,
-} from "./photos";
+import { movePhoto, restoreOrder, worsensCover, type PhotoActions, type PhotoItem } from "./photos";
 import type { ComplexRequirement } from "./readiness";
 import type { ComplexMediaResult } from "./types";
-import { uploadComplexFile } from "./upload";
+import { usePhotoUploads } from "./usePhotoUploads";
+
+export type { PendingPhoto } from "./usePhotoUploads";
 
 // Галерея ЖК в браузере (И6): загрузка пачкой — по одному файлу (память телефона), порядок,
 // удаление и точка фокуса сохраняются сразу; отказ сервера или сбой сети — возвращаем как было
 // и говорим почему.
 
 const FOCUS_SAVE_DELAY_MS = 400;
-
-/** Файл в работе: превью ещё нет — плитка «Готовлю…» или ошибка с причиной. */
-export type PendingPhoto = {
-  key: string;
-  name: string;
-  issue: MediaIssue | null;
-  error: ContentErrorCode | null;
-  failed: boolean;
-};
 
 /** notCover — перестановка поставила бы обложкой фото меньше 2400 px. */
 export type GalleryError = {
@@ -92,66 +84,42 @@ function useFocusSaver(params: Params, onResult: (result: ComplexMediaResult) =>
 export function usePhotoGallery(params: Params) {
   const { complexId, initial, actions, rule12 } = params;
   const [photos, setPhotos] = useState<PhotoItem[]>([...initial]);
-  const [pending, setPending] = useState<PendingPhoto[]>([]);
   const [error, setError] = useState<GalleryError>(null);
-  const uploading = pending.some((item) => !item.failed);
+  const uploads = usePhotoUploads({ complexId, actions, rule12 }, photos.length, (photo) =>
+    setPhotos((current) => [...current, photo]),
+  );
+  const edits = usePhotoEdits(params, { photos, setPhotos, setError, locked: uploads.uploading });
+  return {
+    photos,
+    error,
+    ...uploads,
+    ...edits,
+    /** Пачка файлов: прошлая ошибка галереи гаснет до начала загрузки. */
+    upload: (files: readonly File[]) => {
+      setError(null);
+      return uploads.upload(files);
+    },
+  };
+}
 
+export type PhotoGallery = ReturnType<typeof usePhotoGallery>;
+
+type GalleryState = {
+  photos: PhotoItem[];
+  setPhotos: Dispatch<SetStateAction<PhotoItem[]>>;
+  setError: (error: GalleryError) => void;
+  /** Идёт загрузка: порядок не меняем — база сверяет полный список фото. */
+  locked: boolean;
+};
+
+/** Порядок, удаление, точка фокуса: сохраняются сразу, отказ — возвращаем как было. */
+function usePhotoEdits(params: Params, { photos, setPhotos, setError, locked }: GalleryState) {
+  const { complexId, actions } = params;
   const refused = (result: ComplexMediaResult) =>
-    result.status === "error"
-      ? setError({ error: result.error, broken: result.broken })
-      : setError(null);
+    setError(result.status === "error" ? { error: result.error, broken: result.broken } : null);
   const queueFocus = useFocusSaver(params, refused);
-
-  /** true — фото в галерее; false — плитка с причиной отказа. */
-  const uploadOne = async (file: File, key: string): Promise<boolean> => {
-    const mark = (patch: Partial<PendingPhoto>) =>
-      setPending((current) =>
-        current.map((item) => (item.key === key ? { ...item, ...patch } : item)),
-      );
-    const prepared = await processImage(file, "photo");
-    if (!prepared.ok) {
-      mark({ issue: prepared.issue, failed: true });
-      return false;
-    }
-    try {
-      const image = prepared.image;
-      const attach = actions?.attach ?? null;
-      const { id, src } = await uploadComplexFile({ complexId, image, attach, rule12 });
-      const photo = { id, src, width: image.width, height: image.height, focus: DEFAULT_FOCUS };
-      setPhotos((current) => [...current, photo]);
-      setPending((current) => current.filter((item) => item.key !== key));
-      return true;
-    } catch (failure) {
-      mark({ failed: true, error: failure instanceof UploadRefused ? failure.code : "network" });
-      return false;
-    }
-  };
-
-  /**
-   * Пачка файлов: место — до 30 фото; остальные сразу с ошибкой «галерея заполнена».
-   * Ответ — сколько фото легло в галерею (отметка 1.2 снимается только после удачной загрузки).
-   */
-  const upload = async (files: readonly File[]): Promise<number> => {
-    setError(null);
-    const room = PHOTO_LIMITS.max - photos.length - pending.filter((item) => !item.failed).length;
-    const items = files.map((file, index) => ({
-      key: crypto.randomUUID(),
-      name: file.name,
-      issue: null,
-      error: index < room ? null : ("galleryFull" as const),
-      failed: index >= room,
-    }));
-    setPending((current) => [...current, ...items]);
-    let uploaded = 0;
-    for (const [index, file] of files.entries()) {
-      if (index < room && (await uploadOne(file, items[index]!.key))) uploaded += 1;
-    }
-    return uploaded;
-  };
-
-  /** Пока идёт загрузка, порядок не меняем: база сверяет полный список фото. */
   const move = async (id: string, to: number) => {
-    if (uploading) return;
+    if (locked) return;
     const next = movePhoto(photos, id, to);
     if (worsensCover(photos, next)) return setError({ error: "notCover", broken: [] });
     const beforeIds = photos.map((photo) => photo.id);
@@ -162,7 +130,6 @@ export function usePhotoGallery(params: Params) {
     refused(result);
     if (result.status === "error") setPhotos((current) => restoreOrder(current, beforeIds));
   };
-
   const remove = async (id: string) => {
     if (actions) {
       const result = await settle(
@@ -175,21 +142,9 @@ export function usePhotoGallery(params: Params) {
     setPhotos((current) => current.filter((photo) => photo.id !== id));
     return true;
   };
-
   const setFocus = (id: string, focus: FocusPoint) => {
     setPhotos((current) => current.map((photo) => (photo.id === id ? { ...photo, focus } : photo)));
     queueFocus(id, focus);
   };
-
-  return {
-    photos,
-    pending,
-    error,
-    uploading,
-    upload,
-    remove,
-    setFocus,
-    move,
-    dismiss: (key: string) => setPending((current) => current.filter((item) => item.key !== key)),
-  };
+  return { move, remove, setFocus };
 }

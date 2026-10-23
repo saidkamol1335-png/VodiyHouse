@@ -17,48 +17,57 @@ type DrawingTileProps = {
 };
 
 /** Чертёж в строке планировки (И5): плитка 64×44, «+» — загрузка, тап — крупно в окне. */
-export function DrawingTile({
-  id,
-  src,
-  busy,
-  disabled,
-  label,
-  onPick,
-  onRemove,
-}: DrawingTileProps) {
-  const t = useTranslations("admin.complexes.layouts");
-  const dialog = useRef<HTMLDialogElement>(null);
-  const input = (
+export function DrawingTile(props: DrawingTileProps) {
+  return props.src ? <FilledTile {...props} src={props.src} /> : <EmptyTile {...props} />;
+}
+
+type DrawingInputProps = {
+  id: string;
+  disabled: boolean;
+  onPick: (file: File | undefined) => void;
+  /** После выбора файла: окно «крупно» закрывается. */
+  onPicked?: () => void;
+};
+
+function DrawingInput({ id, disabled, onPick, onPicked }: DrawingInputProps) {
+  return (
     <input
       id={id}
       className="drawing-tile__input"
       type="file"
       accept={MEDIA_LIMITS.acceptedTypes.join(",")}
-      disabled={disabled || busy}
+      disabled={disabled}
       onChange={(event) => {
         onPick(event.target.files?.[0]);
         event.target.value = "";
-        dialog.current?.close();
+        onPicked?.();
       }}
     />
   );
-  if (!src) {
-    return (
-      <label
-        className="drawing-tile"
-        htmlFor={id}
-        aria-disabled={disabled || undefined}
-        aria-busy={busy}
-      >
-        {input}
-        {busy ? (
-          <span className="drawing-tile__busy">{t("processing")}</span>
-        ) : (
-          <Plus size={18} aria-label={label} />
-        )}
-      </label>
-    );
-  }
+}
+
+function EmptyTile({ id, busy, disabled, label, onPick }: DrawingTileProps) {
+  const t = useTranslations("admin.complexes.layouts");
+  return (
+    <label
+      className="drawing-tile"
+      htmlFor={id}
+      aria-disabled={disabled || undefined}
+      aria-busy={busy}
+    >
+      <DrawingInput id={id} disabled={disabled || busy} onPick={onPick} />
+      {busy ? (
+        <span className="drawing-tile__busy">{t("processing")}</span>
+      ) : (
+        <Plus size={18} aria-label={label} />
+      )}
+    </label>
+  );
+}
+
+function FilledTile({ src, ...props }: DrawingTileProps & { src: string }) {
+  const t = useTranslations("admin.complexes.layouts");
+  const dialog = useRef<HTMLDialogElement>(null);
   return (
     <>
       <button
@@ -79,35 +88,40 @@ export function DrawingTile({
           loading="lazy"
           decoding="async"
         />
-        <div className="drawing-tile__actions">
-          <label
-            className="button button--ghost button--sm"
-            htmlFor={id}
-            aria-disabled={disabled || undefined}
-          >
-            {input}
-            {t("drawingReplace")}
-          </label>
-          <button
-            type="button"
-            className="button button--ghost button--sm"
-            onClick={() => {
-              onRemove();
-              dialog.current?.close();
-            }}
-          >
-            {t("drawingRemove")}
-          </button>
-          <button
-            type="button"
-            className="button button--ghost button--sm"
-            onClick={() => dialog.current?.close()}
-          >
-            <X size={14} aria-hidden="true" />
-            {t("drawingClose")}
-          </button>
-        </div>
+        <DrawingActions {...props} onClose={() => dialog.current?.close()} />
       </dialog>
     </>
+  );
+}
+
+type DrawingActionsProps = Omit<DrawingTileProps, "src" | "label"> & { onClose: () => void };
+
+function DrawingActions({ id, busy, disabled, onPick, onRemove, onClose }: DrawingActionsProps) {
+  const t = useTranslations("admin.complexes.layouts");
+  return (
+    <div className="drawing-tile__actions">
+      <label
+        className="button button--ghost button--sm"
+        htmlFor={id}
+        aria-disabled={disabled || undefined}
+      >
+        <DrawingInput id={id} disabled={disabled || busy} onPick={onPick} onPicked={onClose} />
+        {t("drawingReplace")}
+      </label>
+      <button
+        type="button"
+        className="button button--ghost button--sm"
+        onClick={() => {
+          onRemove();
+          onClose();
+        }}
+      >
+        {t("drawingRemove")}
+      </button>
+      <button type="button" className="button button--ghost button--sm" onClick={onClose}>
+        <X size={14} aria-hidden="true" />
+        {t("drawingClose")}
+      </button>
+    </div>
   );
 }

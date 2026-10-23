@@ -58,11 +58,7 @@ export function SelectField({
       <span className="select-field">
         <select
           id={id}
-          className={
-            error
-              ? "field__input select-field__select field__input--error"
-              : "field__input select-field__select"
-          }
+          className={selectClass(error)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           {...select}
@@ -72,7 +68,28 @@ export function SelectField({
         </select>
         <ChevronDown className="select-field__chevron" size={16} aria-hidden="true" />
       </span>
-      {showHint ? (
+      <FieldNotes
+        hintId={hintId}
+        errorId={errorId}
+        hint={showHint ? hint : undefined}
+        error={error}
+      />
+    </div>
+  );
+}
+
+const selectClass = (error: string | undefined) =>
+  error
+    ? "field__input select-field__select field__input--error"
+    : "field__input select-field__select";
+
+type FieldNotesProps = { hintId: string; errorId: string; hint?: string; error?: string };
+
+/** Строка под полем: подсказка или ошибка (ошибка обычно повторяет то же правило — заменяет). */
+function FieldNotes({ hintId, errorId, hint, error }: FieldNotesProps) {
+  return (
+    <>
+      {hint ? (
         <p id={hintId} className="field__meta">
           {hint}
         </p>
@@ -82,6 +99,6 @@ export function SelectField({
           {error}
         </p>
       ) : null}
-    </div>
+    </>
   );
 }

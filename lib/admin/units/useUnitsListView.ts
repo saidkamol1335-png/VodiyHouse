@@ -34,20 +34,11 @@ type Params = {
 export function useUnitsListView({ units, sticky, pinned, rooms, onFilterChange, dirty }: Params) {
   const [filter, setFilter] = useState<UnitFilter>(EMPTY_UNIT_FILTER);
   const [limit, setLimit] = useState(UNITS_PAGE_SIZE);
-  const [open, setOpen] = useState<UnitsOpen>(null);
+  const { open, setOpen, openRow } = useOpenRow(dirty);
   const deferred = useDeferredValue(filter);
-  const keep = useMemo(() => ({ sticky, pinned }), [sticky, pinned]);
   const options = useMemo(() => unitFilterOptions(units, rooms), [units, rooms]);
   const counts = useMemo(() => countUnitStatuses(units, deferred, rooms), [units, deferred, rooms]);
-  // Раскрытая строка не исчезает из-под руки, если её поменяли и список перечитали.
-  const shownKeep = useMemo(
-    () => (open ? { sticky, pinned: new Set([...pinned, open.id]) } : keep),
-    [open, sticky, pinned, keep],
-  );
-  const visible = useMemo(
-    () => filterUnits(units, deferred, rooms, shownKeep),
-    [units, deferred, rooms, shownKeep],
-  );
+  const list = useShownUnits({ units, sticky, pinned, rooms, filter: deferred, open, limit });
   const changeFilter = (next: UnitFilter) => {
     if (!dirty.confirmLeave()) return;
     setFilter(next);
@@ -55,6 +46,27 @@ export function useUnitsListView({ units, sticky, pinned, rooms, onFilterChange,
     setOpen(null);
     onFilterChange();
   };
+  return {
+    filter,
+    busy: filter !== deferred,
+    options,
+    counts,
+    visible: list.visible,
+    shown: list.shown,
+    limit,
+    showMore: () => setLimit(limit + UNITS_PAGE_SIZE),
+    open,
+    openRow,
+    changeFilter,
+    /** По текущему фильтру, а не отложенному: «Выбрать все» не возьмёт набор прежнего ввода.
+     *  Тот же набор, что виден (с раскрытой строкой), — счётчик кнопки сходится с выбранным. */
+    matchingNow: () => filterUnits(units, filter, rooms, list.shownKeep),
+  };
+}
+
+/** Раскрытая строка; другая строка или закрытие — только если правку не держат (EditDirty). */
+function useOpenRow(dirty: EditDirty) {
+  const [open, setOpen] = useState<UnitsOpen>(null);
   /** false — правку не бросили («Уйти без сохранения?» — «Нет»): раскрытое остаётся. */
   const openRow = useCallback(
     (id: string | null, mode: "status" | "edit" = "status") => {
@@ -64,27 +76,34 @@ export function useUnitsListView({ units, sticky, pinned, rooms, onFilterChange,
     },
     [dirty],
   );
+  return { open, setOpen, openRow };
+}
+
+type ShownParams = Omit<Params, "onFilterChange" | "dirty"> & {
+  /** Отложенный фильтр: ввод номера не ждёт пересчёта 5000 строк. */
+  filter: UnitFilter;
+  open: UnitsOpen;
+  limit: number;
+};
+
+/** Видимые строки и порция; раскрытая строка держится и там, и там. */
+function useShownUnits({ units, sticky, pinned, rooms, filter, open, limit }: ShownParams) {
+  const keep = useMemo(() => ({ sticky, pinned }), [sticky, pinned]);
+  // Раскрытая строка не исчезает из-под руки, если её поменяли и список перечитали.
+  const shownKeep = useMemo(
+    () => (open ? { sticky, pinned: new Set([...pinned, open.id]) } : keep),
+    [open, sticky, pinned, keep],
+  );
+  const visible = useMemo(
+    () => filterUnits(units, filter, rooms, shownKeep),
+    [units, filter, rooms, shownKeep],
+  );
   // Раскрытая строка держится и в порции: перечитанный список мог увести её за 200-ю.
   const shown = useMemo(
     () => pageWithPinned(visible, limit, shownKeep.pinned),
     [visible, limit, shownKeep],
   );
-  return {
-    filter,
-    busy: filter !== deferred,
-    options,
-    counts,
-    visible,
-    shown,
-    limit,
-    showMore: () => setLimit(limit + UNITS_PAGE_SIZE),
-    open,
-    openRow,
-    changeFilter,
-    /** По текущему фильтру, а не отложенному: «Выбрать все» не возьмёт набор прежнего ввода.
-     *  Тот же набор, что виден (с раскрытой строкой), — счётчик кнопки сходится с выбранным. */
-    matchingNow: () => filterUnits(units, filter, rooms, shownKeep),
-  };
+  return { shownKeep, visible, shown };
 }
 
 export type UnitsListView = ReturnType<typeof useUnitsListView>;

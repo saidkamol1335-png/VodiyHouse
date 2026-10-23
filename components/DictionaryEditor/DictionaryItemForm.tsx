@@ -53,28 +53,55 @@ export function DictionaryItemForm({
         defaultValue={item?.name}
         required
       />
-      {second ? (
-        <BilingualField
-          id={`${prefix}-second`}
-          name="second"
-          label={t(`dictionaries.fields.${second}`)}
-          uzLabel={t(`dictionaries.fields.${second}Uz`)}
-          maxLength={DICTIONARY_LIMITS.secondMax}
-          defaultValue={item?.second ?? undefined}
-          multiline
-        />
-      ) : null}
+      {second ? <SecondField prefix={prefix} second={second} item={item} /> : null}
       {hasKind ? <KindSelect id={`${prefix}-kind`} initial={item?.kind ?? "district"} /> : null}
       {problems.length > 0 ? <p className="field__error">{problems.join(" · ")}</p> : null}
-      <div className="dictionary-form__actions">
-        <Button type="submit" size="sm" pending={pending}>
-          {item ? t("dictionaries.save") : t("dictionaries.add")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel}>
-          {t("dictionaries.cancel")}
-        </Button>
-      </div>
+      <ItemFormActions isNew={!item} pending={pending} onCancel={onCancel} />
     </form>
+  );
+}
+
+type SecondFieldProps = {
+  prefix: string;
+  second: NonNullable<(typeof DICTIONARIES)[DictionaryKey]["second"]>;
+  item: DictionaryItem | null;
+};
+
+/** Второе поле справочника (у районов — центр, у тем — пояснение): RU | UZ, многострочное. */
+function SecondField({ prefix, second, item }: SecondFieldProps) {
+  const t = useTranslations("admin.dictionaries.fields");
+  return (
+    <BilingualField
+      id={`${prefix}-second`}
+      name="second"
+      label={t(second)}
+      uzLabel={t(`${second}Uz`)}
+      maxLength={DICTIONARY_LIMITS.secondMax}
+      defaultValue={item?.second ?? undefined}
+      multiline
+    />
+  );
+}
+
+function ItemFormActions({
+  isNew,
+  pending,
+  onCancel,
+}: {
+  isNew: boolean;
+  pending: boolean;
+  onCancel: () => void;
+}) {
+  const t = useTranslations("admin.dictionaries");
+  return (
+    <div className="dictionary-form__actions">
+      <Button type="submit" size="sm" pending={pending}>
+        {isNew ? t("add") : t("save")}
+      </Button>
+      <Button size="sm" variant="ghost" onClick={onCancel}>
+        {t("cancel")}
+      </Button>
+    </div>
   );
 }
 

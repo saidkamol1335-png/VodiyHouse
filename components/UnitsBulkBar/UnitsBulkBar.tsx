@@ -67,49 +67,78 @@ function useFocusOutOnUnmount(onGone: () => void) {
 
 function BulkPanel(props: UnitsBulkBarProps) {
   const t = useTranslations("admin.complexes.units.bulk");
-  const [step, setStep] = useState<BulkStep | null>(null);
   const stepId = useId();
-  const buttons = useRef<Partial<Record<BulkStep, HTMLButtonElement | null>>>({});
-  const { selection } = props;
+  const steps = useOpenStep();
   const box = useFocusOutOnUnmount(props.onCleared);
-  const closeStep = () => {
-    if (step) buttons.current[step]?.focus();
-    setStep(null);
-  };
-  const keydown = (event: KeyboardEvent) => {
-    if (event.key !== "Escape" || !step) return;
-    event.stopPropagation();
-    closeStep();
-  };
   // Шаг — раньше строки и в DOM: порядок Tab совпадает с видом (шаг над строкой).
   return (
     <section
       ref={box}
       className="units-bulk"
       aria-label={t("label")}
-      onKeyDown={keydown}
+      onKeyDown={steps.keydown}
       data-units-bulk
     >
-      {step ? <BulkSteps id={stepId} step={step} {...props} onDone={closeStep} /> : null}
+      {steps.step ? (
+        <BulkSteps id={stepId} step={steps.step} {...props} onDone={steps.close} />
+      ) : null}
       <div className="units-bulk__bar">
         <BulkCount {...props} />
-        <div className="units-bulk__actions">
-          {availableSteps(props).map((key) => (
-            <StepButton
-              key={key}
-              step={key}
-              open={step === key}
-              controls={stepId}
-              buttonRef={(element) => {
-                buttons.current[key] = element;
-              }}
-              onToggle={() => setStep(step === key ? null : key)}
-            />
-          ))}
-        </div>
-        <ClearButton onClick={selection.clear} />
+        <StepActions
+          steps={availableSteps(props)}
+          open={steps.step}
+          controls={stepId}
+          refFor={steps.refFor}
+          onToggle={steps.toggle}
+        />
+        <ClearButton onClick={props.selection.clear} />
       </div>
     </section>
+  );
+}
+
+/** Открытый шаг; закрытие (и Esc) возвращает фокус на кнопку этого шага. */
+function useOpenStep() {
+  const [step, setStep] = useState<BulkStep | null>(null);
+  const buttons = useRef<Partial<Record<BulkStep, HTMLButtonElement | null>>>({});
+  const close = () => {
+    if (step) buttons.current[step]?.focus();
+    setStep(null);
+  };
+  const keydown = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !step) return;
+    event.stopPropagation();
+    close();
+  };
+  const refFor = (key: BulkStep) => (element: HTMLButtonElement | null) => {
+    buttons.current[key] = element;
+  };
+  const toggle = (key: BulkStep) => setStep(step === key ? null : key);
+  return { step, close, keydown, refFor, toggle };
+}
+
+type StepActionsProps = {
+  steps: readonly BulkStep[];
+  open: BulkStep | null;
+  controls: string;
+  refFor: (key: BulkStep) => (element: HTMLButtonElement | null) => void;
+  onToggle: (key: BulkStep) => void;
+};
+
+function StepActions({ steps, open, controls, refFor, onToggle }: StepActionsProps) {
+  return (
+    <div className="units-bulk__actions">
+      {steps.map((key) => (
+        <StepButton
+          key={key}
+          step={key}
+          open={open === key}
+          controls={controls}
+          buttonRef={refFor(key)}
+          onToggle={() => onToggle(key)}
+        />
+      ))}
+    </div>
   );
 }
 

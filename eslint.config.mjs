@@ -54,6 +54,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // CLAUDE.md §1: функция — до ~40 строк, файл — до ~250. «~»: 45 без пустых строк и комментариев
+    // (подпись компонента с разбором пропсов — уже 8–10 строк). Тесты и shadcn/ui — не наш код
+    // правил: describe-блоки длинные по природе.
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "components/ui/**"],
+    rules: {
+      "max-lines-per-function": ["error", { max: 45, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
+    },
+  },
   globalIgnores([
     ".next/**",
     "out/**",

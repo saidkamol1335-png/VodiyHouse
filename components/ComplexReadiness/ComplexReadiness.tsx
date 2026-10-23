@@ -34,31 +34,48 @@ export function ComplexReadiness({ items, base }: ComplexReadinessProps) {
       {open ? (
         <ul className="complex-readiness__list">
           {items.map((item) => (
-            <li
+            <ReadinessRow
               key={item.requirement}
-              className={
-                item.ok
-                  ? "complex-readiness__item complex-readiness__item--ok"
-                  : "complex-readiness__item"
-              }
-            >
-              {item.ok ? (
-                <Check size={14} aria-label={t("done")} />
-              ) : (
-                <Circle size={12} aria-label={t("todo")} />
-              )}
-              <Link href={complexTabHref(base, REQUIREMENT_TAB[item.requirement])}>
-                {t(`items.${item.requirement}`)}
-              </Link>
-              {item.requirement === "photos" && !item.ok ? (
-                <span className="complex-readiness__note">
-                  {t("photosShort", { count: photosShort(items) })}
-                </span>
-              ) : null}
-            </li>
+              item={item}
+              base={base}
+              missingPhotos={photosShort(items)}
+            />
           ))}
         </ul>
       ) : null}
     </div>
+  );
+}
+
+type ReadinessRowProps = {
+  item: ReadinessItem;
+  base: string;
+  /** Сколько фото не хватает до публикации — подпись у пункта «Фото». */
+  missingPhotos: number;
+};
+
+/** Пункт готовности — ссылка на вкладку, где его закрывают. */
+function ReadinessRow({ item, base, missingPhotos }: ReadinessRowProps) {
+  const t = useTranslations("admin.complexes.readiness");
+  return (
+    <li
+      className={
+        item.ok ? "complex-readiness__item complex-readiness__item--ok" : "complex-readiness__item"
+      }
+    >
+      {item.ok ? (
+        <Check size={14} aria-label={t("done")} />
+      ) : (
+        <Circle size={12} aria-label={t("todo")} />
+      )}
+      <Link href={complexTabHref(base, REQUIREMENT_TAB[item.requirement])}>
+        {t(`items.${item.requirement}`)}
+      </Link>
+      {item.requirement === "photos" && !item.ok ? (
+        <span className="complex-readiness__note">
+          {t("photosShort", { count: missingPhotos })}
+        </span>
+      ) : null}
+    </li>
   );
 }

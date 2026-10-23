@@ -48,21 +48,29 @@ export function DeveloperPrivateForm({ developerId, notes, action }: DeveloperPr
           max={PRIVATE_LIMITS.notesMax}
           rows={6}
         />
-        <div className="developer-private__save">
-          {state.status === "saved" ? (
-            <FormStatus key={state.at} tone="success">
-              {t("saved")}
-            </FormStatus>
-          ) : null}
-          {failed ? (
-            <FormStatus tone="error">{t(`errors.${failed.error ?? "invalid"}`)}</FormStatus>
-          ) : null}
-          <Button type="submit" pending={pending} className="developer-private__submit">
-            {pending ? t("pending") : t("private.save")}
-          </Button>
-        </div>
+        <PrivateSave state={state} pending={pending} />
       </form>
     </AdminPanel>
+  );
+}
+
+/** «Сохранено» (key — заново на каждое сохранение, диктор читает снова) или отказ, и кнопка. */
+function PrivateSave({ state, pending }: { state: SavePrivateResult; pending: boolean }) {
+  const t = useTranslations("admin.developers");
+  return (
+    <div className="developer-private__save">
+      {state.status === "saved" ? (
+        <FormStatus key={state.at} tone="success">
+          {t("saved")}
+        </FormStatus>
+      ) : null}
+      {state.status === "error" ? (
+        <FormStatus tone="error">{t(`errors.${state.error ?? "invalid"}`)}</FormStatus>
+      ) : null}
+      <Button type="submit" pending={pending} className="developer-private__submit">
+        {pending ? t("pending") : t("private.save")}
+      </Button>
+    </div>
   );
 }
 

@@ -480,7 +480,7 @@
       - 14в.2 [x] 3 файла с двумя блоками разнесены, 37 стилей чужих блоков → миксы своих элементов и модификаторы (`avatar--sm`, `field--subgrid`)
       - 14в.3 [x] токены: `--touch-target` (50 мест), цвета, `--dur-push`, слои `--z-*`, шрифт бренда и заголовков панелей, `--opacity-unavailable`
       - 14в.4 [x] тексты стендов `/dev` и заголовки вкладок кабинета — в `messages/ru.json` (`admin.meta`, `admin.dev`; кабинет и стенды только на русском); повторно — `nav.*`, `header.theme*`, `admin.journal.unitStatus.*`, `admin.complexes.namePrefixed`, `admin.media.processing`. Оставлено: самоназвания языков на глобальной 404 («O‘zbekcha», «Русский» — одинаковы на обоих языках, страница вне всех layout), пример «3,0» в поле потолков, «сум» / «м²» в `lib/format` (фаза 3)
-      - 14в.5 [ ] длинные функции (68 длиннее 40 строк без пустых и комментариев, 44 — длиннее 45) → подкомпоненты, хуки, помощники; правило ESLint, чтобы не вернулось
+      - 14в.5 [x] длинные функции: было 68 длиннее 40 строк (без пустых и комментариев), 44 — длиннее 45 → 0 длиннее 45 (планы разбиения — Workflow, писал сам; DOM, классы, id, ключи и порядок эффектов прежние; новые файлы: `useBlocksDraft`, `CurrencyField`, `useLayoutsDraft`, `LayoutRows`, `PhotoGrid`, `usePhotoUploads`, `DeveloperMediaFields`, `ProjectRow`, `DictionaryRow`, `useDictionaryEditor`, `StatusMoves`, `useMediaLab`); правило ESLint `max-lines-per-function` 45 и `max-lines` 250 для `app`, `components`, `lib` (без тестов и `components/ui`) — ошибка, а не предупреждение
       - 14в.6 [ ] ревью Workflow, весь e2e, скриншоты, Lighthouse, коммит
 
 ### Журнал

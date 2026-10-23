@@ -82,64 +82,79 @@ function StatusBadge({ block, t }: { block: BlockDraft; t: Translate }) {
 
 /** Карточка блока (И4): сводка, стрелки порядка, «Изменить» раскрывает поля на месте. */
 export function BlockCard(props: BlockCardProps) {
-  const { block, index, count, open, onToggle, onMove } = props;
+  const { block, open } = props;
   const t = useTranslations("admin.complexes.blocks");
-  const [upArrow, downArrow] = useMoveFocus(props.focusMove, props.onMoveFocused);
   const title = block.name ? t("blockName", { name: block.name }) : t("unnamed");
-  const progress = Number(block.progressPct);
   // Раскрыта одна карточка (И4): у свёрнутых с ошибками последнего сохранения — плашка в шапке.
   const hiddenIssues = !open && Boolean(props.issues);
-  const className = [
-    "block-card",
-    open ? "block-card--open" : null,
-    hiddenIssues ? "block-card--error" : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
   return (
-    <li className={className} data-testid="block-card">
+    <li className={cardClass(open, hiddenIssues)} data-testid="block-card">
       <div className="block-card__head">
         <b className="block-card__title">{title}</b>
         <StatusBadge block={block} t={t} />
         {hiddenIssues ? <Badge tone="bad">{t("hasIssues")}</Badge> : null}
-        <span className="block-card__tools">
-          <button
-            ref={upArrow}
-            type="button"
-            className="block-card__move"
-            aria-label={t("moveUp", { name: title })}
-            disabled={index === 0}
-            onClick={() => onMove("up")}
-          >
-            <ArrowUp size={16} aria-hidden="true" />
-          </button>
-          <button
-            ref={downArrow}
-            type="button"
-            className="block-card__move"
-            aria-label={t("moveDown", { name: title })}
-            disabled={index === count - 1}
-            onClick={() => onMove("down")}
-          >
-            <ArrowDown size={16} aria-hidden="true" />
-          </button>
-          <Button size="sm" variant="ghost" aria-expanded={open} onClick={onToggle}>
-            {open ? t("close") : t("edit")}
-            <ChevronDown className="block-card__chevron" size={14} aria-hidden="true" />
-          </Button>
-        </span>
+        <BlockCardTools {...props} title={title} />
       </div>
-      {block.buildStatus === "building" && progress > 0 ? (
-        <span className="block-card__bar" aria-hidden="true">
-          <span
-            className="block-card__bar-fill"
-            style={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }}
-          />
-        </span>
-      ) : null}
+      <ProgressBar block={block} />
       <p className="block-card__summary">{summaryOf(block, props.finishings, t)}</p>
       {open ? <BlockBody {...props} title={title} /> : null}
     </li>
+  );
+}
+
+function cardClass(open: boolean, hiddenIssues: boolean): string {
+  const classes = ["block-card"];
+  if (open) classes.push("block-card--open");
+  if (hiddenIssues) classes.push("block-card--error");
+  return classes.join(" ");
+}
+
+/** Стрелки порядка и «Изменить»: фокус после переноса — здесь же, где кнопки со ссылками. */
+function BlockCardTools(props: BlockCardProps & { title: string }) {
+  const { index, count, open, title, onToggle, onMove } = props;
+  const t = useTranslations("admin.complexes.blocks");
+  const [upArrow, downArrow] = useMoveFocus(props.focusMove, props.onMoveFocused);
+  return (
+    <span className="block-card__tools">
+      <button
+        ref={upArrow}
+        type="button"
+        className="block-card__move"
+        aria-label={t("moveUp", { name: title })}
+        disabled={index === 0}
+        onClick={() => onMove("up")}
+      >
+        <ArrowUp size={16} aria-hidden="true" />
+      </button>
+      <button
+        ref={downArrow}
+        type="button"
+        className="block-card__move"
+        aria-label={t("moveDown", { name: title })}
+        disabled={index === count - 1}
+        onClick={() => onMove("down")}
+      >
+        <ArrowDown size={16} aria-hidden="true" />
+      </button>
+      <Button size="sm" variant="ghost" aria-expanded={open} onClick={onToggle}>
+        {open ? t("close") : t("edit")}
+        <ChevronDown className="block-card__chevron" size={14} aria-hidden="true" />
+      </Button>
+    </span>
+  );
+}
+
+/** Полоса готовности строящегося блока: доля — через scaleX (анимируем только transform). */
+function ProgressBar({ block }: { block: BlockDraft }) {
+  const progress = Number(block.progressPct);
+  if (block.buildStatus !== "building" || !(progress > 0)) return null;
+  return (
+    <span className="block-card__bar" aria-hidden="true">
+      <span
+        className="block-card__bar-fill"
+        style={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }}
+      />
+    </span>
   );
 }
 

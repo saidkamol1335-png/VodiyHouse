@@ -27,13 +27,22 @@ export type SectionProps = {
   blocksHref: string;
 };
 
-export function AboutPanel({ fields, issue, developers, floors, blocksHref }: SectionProps) {
+type Translate = ReturnType<typeof useTranslations<"admin.complexes">>;
+
+/** Варианты сегмента из словаря значений ЖК («Эконом · Комфорт · …»). */
+const choiceValues = (
+  t: Translate,
+  group: "class" | "houseType" | "parking",
+  keys: readonly string[],
+) =>
+  keys.map((key) => ({
+    value: key,
+    label: t(`values.${group}.${key}` as "values.class.econom"),
+  }));
+
+export function AboutPanel(props: SectionProps) {
+  const { fields, issue, floors, blocksHref } = props;
   const t = useTranslations("admin.complexes");
-  const values = (group: "class" | "houseType" | "parking", keys: readonly string[]) =>
-    keys.map((key) => ({
-      value: key,
-      label: t(`values.${group}.${key}` as "values.class.econom"),
-    }));
   return (
     <AdminPanel title={t("sections.about")} wide>
       <div className="complex-main__grid">
@@ -46,62 +55,8 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
           defaultValue={fields.name}
           error={issue("name")}
         />
-        <div className="complex-main__row">
-          <SelectField
-            className={ROW_FIELD}
-            id="complex-developer"
-            name="developerId"
-            label={t("fields.developer")}
-            options={developers.map((developer) => ({
-              value: developer.id,
-              label: developer.name,
-            }))}
-            defaultValue={fields.developerId}
-            error={issue("developerId")}
-          />
-          <ChoiceField
-            className={ROW_FIELD}
-            id="complex-class"
-            name="class"
-            label={t("fields.class")}
-            options={values("class", COMPLEX_CLASSES)}
-            defaultValue={fields.class}
-            clearLabel={t("clear")}
-            error={issue("class")}
-          />
-        </div>
-        <div className="complex-main__row complex-main__row--three">
-          <ChoiceField
-            className={ROW_FIELD}
-            id="complex-house-type"
-            name="houseType"
-            label={t("fields.houseType")}
-            options={values("houseType", HOUSE_TYPES)}
-            defaultValue={fields.houseType}
-            clearLabel={t("clear")}
-            error={issue("houseType")}
-          />
-          <ChoiceField
-            className={ROW_FIELD}
-            id="complex-parking"
-            name="parking"
-            label={t("fields.parking")}
-            options={values("parking", PARKING_TYPES)}
-            defaultValue={fields.parking}
-            clearLabel={t("clear")}
-            error={issue("parking")}
-          />
-          <Field
-            className={ROW_FIELD}
-            id="complex-ceiling"
-            name="ceilingHeight"
-            label={t("fields.ceilingHeight")}
-            inputMode="decimal"
-            placeholder="3,0"
-            defaultValue={fields.ceilingHeight}
-            error={issue("ceilingHeight")}
-          />
-        </div>
+        <DeveloperClassRow {...props} />
+        <HouseRow {...props} />
         <p className="complex-main__floors">
           {floors ? t("floors", { floors }) : t("floorsEmpty")}{" "}
           <Link href={blocksHref}>{t("floorsLink")}</Link>
@@ -121,35 +76,78 @@ export function AboutPanel({ fields, issue, developers, floors, blocksHref }: Se
   );
 }
 
-export function LocationPanel({ fields, issue, locations }: SectionProps) {
+function DeveloperClassRow({ fields, issue, developers }: SectionProps) {
+  const t = useTranslations("admin.complexes");
+  return (
+    <div className="complex-main__row">
+      <SelectField
+        className={ROW_FIELD}
+        id="complex-developer"
+        name="developerId"
+        label={t("fields.developer")}
+        options={developers.map((developer) => ({ value: developer.id, label: developer.name }))}
+        defaultValue={fields.developerId}
+        error={issue("developerId")}
+      />
+      <ChoiceField
+        className={ROW_FIELD}
+        id="complex-class"
+        name="class"
+        label={t("fields.class")}
+        options={choiceValues(t, "class", COMPLEX_CLASSES)}
+        defaultValue={fields.class}
+        clearLabel={t("clear")}
+        error={issue("class")}
+      />
+    </div>
+  );
+}
+
+function HouseRow({ fields, issue }: SectionProps) {
+  const t = useTranslations("admin.complexes");
+  return (
+    <div className="complex-main__row complex-main__row--three">
+      <ChoiceField
+        className={ROW_FIELD}
+        id="complex-house-type"
+        name="houseType"
+        label={t("fields.houseType")}
+        options={choiceValues(t, "houseType", HOUSE_TYPES)}
+        defaultValue={fields.houseType}
+        clearLabel={t("clear")}
+        error={issue("houseType")}
+      />
+      <ChoiceField
+        className={ROW_FIELD}
+        id="complex-parking"
+        name="parking"
+        label={t("fields.parking")}
+        options={choiceValues(t, "parking", PARKING_TYPES)}
+        defaultValue={fields.parking}
+        clearLabel={t("clear")}
+        error={issue("parking")}
+      />
+      <Field
+        className={ROW_FIELD}
+        id="complex-ceiling"
+        name="ceilingHeight"
+        label={t("fields.ceilingHeight")}
+        inputMode="decimal"
+        placeholder="3,0"
+        defaultValue={fields.ceilingHeight}
+        error={issue("ceilingHeight")}
+      />
+    </div>
+  );
+}
+
+export function LocationPanel(props: SectionProps) {
+  const { fields, issue } = props;
   const t = useTranslations("admin.complexes");
   return (
     <AdminPanel title={t("sections.location")} wide>
       <div className="complex-main__grid">
-        <div className="complex-main__row">
-          <SelectField
-            className={ROW_FIELD}
-            id="complex-location"
-            name="locationId"
-            label={t("fields.location")}
-            placeholder={t("fields.locationPlaceholder")}
-            options={locations}
-            defaultValue={fields.locationId}
-            error={issue("locationId")}
-          />
-          <Field
-            className={ROW_FIELD}
-            id="complex-minutes"
-            name="minutesToCenter"
-            label={t("fields.minutesToCenter")}
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={COMPLEX_LIMITS.minutesMax}
-            defaultValue={fields.minutesToCenter}
-            error={issue("minutesToCenter")}
-          />
-        </div>
+        <LocationRow {...props} />
         <BilingualField
           id="complex-address"
           name="address"
@@ -177,6 +175,36 @@ export function LocationPanel({ fields, issue, locations }: SectionProps) {
         />
       </div>
     </AdminPanel>
+  );
+}
+
+function LocationRow({ fields, issue, locations }: SectionProps) {
+  const t = useTranslations("admin.complexes");
+  return (
+    <div className="complex-main__row">
+      <SelectField
+        className={ROW_FIELD}
+        id="complex-location"
+        name="locationId"
+        label={t("fields.location")}
+        placeholder={t("fields.locationPlaceholder")}
+        options={locations}
+        defaultValue={fields.locationId}
+        error={issue("locationId")}
+      />
+      <Field
+        className={ROW_FIELD}
+        id="complex-minutes"
+        name="minutesToCenter"
+        label={t("fields.minutesToCenter")}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={COMPLEX_LIMITS.minutesMax}
+        defaultValue={fields.minutesToCenter}
+        error={issue("minutesToCenter")}
+      />
+    </div>
   );
 }
 

@@ -2,27 +2,17 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useState } from "react";
+import { useState } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
-import { Button } from "@/components/Button";
-import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import { Rule12Check } from "@/components/Rule12Check";
-import {
-  LAYOUT_LIMITS,
-  newLayoutDraft,
-  type BlockLayouts,
-  type LayoutDraft,
-  type LayoutRowErrors,
-} from "@/lib/admin/complexes/layouts";
+import type { BlockLayouts, LayoutDraft } from "@/lib/admin/complexes/layouts";
 import type { ComplexMediaResult, SaveRowsResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
-import { layoutVariants } from "@/lib/admin/units/layoutVariants";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
-import { useDraftRows } from "@/lib/ui/useDraftRows";
-import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
-import { BlockSwitch, EmptyBlock } from "./BlockSwitch";
-import { LayoutRow } from "./LayoutRow";
+import { BlockSwitch } from "./BlockSwitch";
+import { LayoutRows, LayoutsActions } from "./LayoutRows";
 import { useDrawingUpload } from "./useDrawingUpload";
+import { useLayoutsDraft } from "./useLayoutsDraft";
 
 type ComplexLayoutsFormProps = {
   complexId: string;
@@ -36,8 +26,6 @@ type ComplexLayoutsFormProps = {
   /** Вкладка «Квартиры»: «нет в наличии» у блока без списка меняют там (Н7). */
   unitsHref: string;
 };
-
-const IDLE: SaveRowsResult = { status: "idle" };
 
 /** Вкладка «Планировки» (И5): переключатель блоков, строки выбранного блока, сохранение блоком. */
 export function ComplexLayoutsForm(props: ComplexLayoutsFormProps) {
@@ -68,131 +56,82 @@ type BlockFormProps = ComplexLayoutsFormProps & {
   onSwitch: (blockId: string) => void;
 };
 
-function BlockLayoutsForm({
-  block,
-  blocks,
-  complexId,
-  published,
-  action,
-  attach,
-  unitsHref,
-  onSwitch,
-}: BlockFormProps) {
-  const t = useTranslations("admin");
-  const guard = useUnsavedGuard(t("complexes.layouts.unsaved"));
-  const [rule12, setRule12] = useState(false);
-  const [state, formAction, pending] = useActionState(
-    (_previous: SaveRowsResult, formData: FormData) => action(formData),
-    IDLE,
-  );
-  const savedAt = state.status === "saved" ? state.at : null;
-  const { reset, dirty } = guard;
-  const { rows, update, change, remove } = useDraftRows(block.layouts, {
-    dirty,
-    savedAt,
-    markDirty: guard.onInput,
-  });
-  const add = (copies: LayoutDraft[] = [newLayoutDraft()]) =>
-    change((current) => [...current, ...copies]);
-  useEffect(() => {
-    if (savedAt) reset();
-  }, [savedAt, reset]);
-  const rowErrors = (state.status === "error" ? state.rowErrors : {}) as LayoutRowErrors;
-  const drawings = useDrawingUpload({
-    complexId,
-    attach,
-    rule12,
-    onUploaded: (key, drawing) => {
-      update(key, drawing);
-      setRule12(false);
-    },
-  });
-
-  const switchTo = (next: string) => {
-    if (next === block.blockId) return;
-    if (dirty && !window.confirm(t("complexes.layouts.unsaved"))) return;
-    onSwitch(next);
-  };
-  const others = blocks.filter((item) => item.blockId !== block.blockId && item.layouts.length > 0);
-
-  // Сохранённые двойники — «вариант N», как в списках «Квартир» (новые строки id ещё не имеют).
-  const variants = layoutVariants(
-    rows.flatMap((row) => (row.id ? [{ id: row.id, rooms: row.rooms, area: row.area }] : [])),
-  );
+function BlockLayoutsForm(props: BlockFormProps) {
+  const { block, blocks, complexId, published, attach } = props;
+  const t = useTranslations("admin.complexes.layouts");
+  const draft = useLayoutsDraft(props);
+  const drawings = useDrawingUpload({ complexId, attach, published, onUploaded: draft.update });
   return (
-    <AdminPanel title={t("complexes.layouts.title")} wide>
+    <AdminPanel title={t("title")} wide>
       {/* Отметка 1.2 — не правка вкладки: вне формы, иначе «Уйти без сохранения?» без правок. */}
-      {published ? (
-        <Rule12Check
-          id={`rule12-${block.blockId}`}
-          checked={rule12}
-          onChange={setRule12}
-          context="drawing"
-        />
-      ) : (
-        <p className="field__meta">{t("media.rule12Hint")}</p>
-      )}
+      <DrawingRule12 published={published} blockId={block.blockId} drawings={drawings} />
       <form
         className="complex-layouts"
-        onSubmit={submitKeepingForm(formAction)}
-        onInput={guard.onInput}
+        onSubmit={submitKeepingForm(draft.formAction)}
+        onInput={draft.onInput}
         noValidate
       >
         <input type="hidden" name="block" value={block.blockId} />
-        <input type="hidden" name="layouts" value={JSON.stringify(rows)} />
-        {blocks.length > 1 ? (
-          <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={switchTo} />
-        ) : null}
-        <p className="complex-layouts__lead">{t("complexes.layouts.lead")}</p>
-        {/* Плашку «нет в наличии» объясняет видимый текст: title на телефоне не открыть. */}
-        {!block.hasUnits && rows.some((row) => !row.available) ? (
-          <p className="complex-layouts__lead">
-            {t("complexes.layouts.unavailableNote")}{" "}
-            <Link className="complex-layouts__link" href={`${unitsHref}?blok=${block.blockId}`}>
-              {t("complexes.layouts.toUnits")}
-            </Link>
-          </p>
-        ) : null}
-        {rows.length === 0 ? (
-          <EmptyBlock
-            others={others}
-            onCopy={(from) => add(from.layouts.map((row) => newLayoutDraft(row)))}
-          />
-        ) : null}
-        <ul className="complex-layouts__rows">
-          {rows.map((row) => (
-            <LayoutRow
-              key={row.key}
-              row={row}
-              currency={block.currency}
-              hasUnits={block.hasUnits}
-              variant={(row.id && variants.get(row.id)) || null}
-              issues={rowErrors[row.key]}
-              uploadLocked={published && !rule12}
-              onChange={(patch) => update(row.key, patch)}
-              onDrawing={(file) => drawings.upload(row.key, file)}
-              onDuplicate={() => add([newLayoutDraft(row)])}
-              onRemove={() => remove(row.key)}
-            />
-          ))}
-        </ul>
-        <div className="complex-layouts__actions">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => add()}
-            disabled={rows.length >= LAYOUT_LIMITS.maxRows}
-          >
-            + {t("complexes.layouts.add")}
-          </Button>
-          <div className="complex-layouts__save">
-            <ComplexSaveFeedback state={state} />
-            <Button type="submit" pending={pending} disabled={drawings.uploading}>
-              {pending ? t("complexes.pending") : t("complexes.save")}
-            </Button>
-          </div>
-        </div>
+        <input type="hidden" name="layouts" value={JSON.stringify(draft.rows)} />
+        <LayoutsIntro
+          blocks={blocks}
+          block={block}
+          rows={draft.rows}
+          unitsHref={props.unitsHref}
+          onSwitch={draft.switchTo}
+        />
+        <LayoutRows block={block} blocks={blocks} draft={draft} drawings={drawings} />
+        <LayoutsActions draft={draft} uploading={drawings.uploading} />
       </form>
     </AdminPanel>
+  );
+}
+
+type DrawingRule12Props = {
+  published: boolean;
+  blockId: string;
+  drawings: ReturnType<typeof useDrawingUpload>;
+};
+
+function DrawingRule12({ published, blockId, drawings }: DrawingRule12Props) {
+  const t = useTranslations("admin.media");
+  if (!published) return <p className="field__meta">{t("rule12Hint")}</p>;
+  return (
+    <Rule12Check
+      id={`rule12-${blockId}`}
+      checked={drawings.rule12}
+      onChange={drawings.setRule12}
+      context="drawing"
+    />
+  );
+}
+
+type LayoutsIntroProps = {
+  blocks: readonly BlockLayouts[];
+  block: BlockLayouts;
+  rows: LayoutDraft[];
+  unitsHref: string;
+  /** С подтверждением «Уйти без сохранения?», если вкладку правили. */
+  onSwitch: (blockId: string) => void;
+};
+
+function LayoutsIntro({ blocks, block, rows, unitsHref, onSwitch }: LayoutsIntroProps) {
+  const t = useTranslations("admin.complexes.layouts");
+  return (
+    <>
+      {blocks.length > 1 ? (
+        <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={onSwitch} />
+      ) : null}
+      <p className="complex-layouts__lead">{t("lead")}</p>
+      {/* Плашку «нет в наличии» объясняет видимый текст: title на телефоне не открыть. */}
+      {!block.hasUnits && rows.some((row) => !row.available) ? (
+        <p className="complex-layouts__lead">
+          {t("unavailableNote")}{" "}
+          <Link className="complex-layouts__link" href={`${unitsHref}?blok=${block.blockId}`}>
+            {t("toUnits")}
+          </Link>
+        </p>
+      ) : null}
+    </>
   );
 }

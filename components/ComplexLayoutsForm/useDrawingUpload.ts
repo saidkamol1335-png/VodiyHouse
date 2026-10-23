@@ -13,8 +13,9 @@ type DrawingUpload = {
   complexId: string;
   /** null — без облака (служебный стенд): чертежи остаются в браузере. */
   attach: FormAction<ComplexMediaResult> | null;
-  rule12: boolean;
-  /** После загрузки: строка получает чертёж, отметка 1.2 снимается (И8: при каждой загрузке). */
+  /** Опубликованный ЖК: чертёж сразу на сайте — загрузка только с отметкой правила 1.2 (И8). */
+  published: boolean;
+  /** После загрузки строка получает чертёж; отметка 1.2 снимается — она на одну загрузку (И8). */
   onUploaded: (key: string, drawing: Pick<LayoutDraft, "drawingId" | "drawingSrc">) => void;
 };
 
@@ -23,9 +24,10 @@ type DrawingUpload = {
  * uploading — пока идёт загрузка, вкладку не сохраняют: новая строка получит id с сервера, и
  * ответ загрузки уже не найдёт её по ключу.
  */
-export function useDrawingUpload({ complexId, attach, rule12, onUploaded }: DrawingUpload) {
+export function useDrawingUpload({ complexId, attach, published, onUploaded }: DrawingUpload) {
   const t = useTranslations("admin");
   const [uploads, setUploads] = useState(0);
+  const [rule12, setRule12] = useState(false);
   const prepareAndAttach = async (key: string, file: File): Promise<string | null> => {
     const result = await processImage(file, "drawing");
     if (!result.ok) return t(`media.issues.${result.issue.code}`, result.issue);
@@ -37,6 +39,7 @@ export function useDrawingUpload({ complexId, attach, rule12, onUploaded }: Draw
         rule12,
       });
       onUploaded(key, { drawingId: id, drawingSrc: src });
+      setRule12(false);
       return null;
     } catch (error) {
       return error instanceof UploadRefused
@@ -53,5 +56,5 @@ export function useDrawingUpload({ complexId, attach, rule12, onUploaded }: Draw
       setUploads((count) => count - 1);
     }
   };
-  return { upload, uploading: uploads > 0 };
+  return { upload, uploading: uploads > 0, rule12, setRule12, locked: published && !rule12 };
 }

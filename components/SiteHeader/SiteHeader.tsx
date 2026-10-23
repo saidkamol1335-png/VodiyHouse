@@ -2,6 +2,7 @@
 
 import { ChevronLeft, Heart, Menu, Phone, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { Ref } from "react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { IconButton } from "@/components/IconButton";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -37,69 +38,90 @@ function headerClasses(solid: boolean, transparentAtTop: boolean, overPhoto: boo
 }
 
 export function SiteHeader({ transparentAtTop = false, overPhoto = false, pageTitle, backHref }: SiteHeaderProps) {
-  const t = useTranslations("header");
   const { sentinel, scrolled } = useScrolledPast();
   const { open: menuOpen, close: closeMenu, toggle: toggleMenu, toggleButton } = useMenu();
   const solid = scrolled || !transparentAtTop || menuOpen;
-  const showTitle = Boolean(pageTitle) && scrolled;
-
   return (
     <>
       <div ref={sentinel} className="site-header__sentinel" aria-hidden="true" />
       <header className={headerClasses(solid, transparentAtTop, overPhoto)}>
         <div className="site-header__inner">
-          {backHref ? (
-            <IconButton
-              className="site-header__icon site-header__back"
-              label={t("back")}
-              href={backHref}
-            >
-              <ChevronLeft {...ICON} aria-hidden />
-            </IconButton>
-          ) : null}
-          <Logo hideText={showTitle} className="site-header__logo" />
-          {pageTitle ? (
-            <span className={showTitle ? "site-header__title site-header__title--visible" : "site-header__title"} aria-hidden={!showTitle}>
-              {pageTitle}
-            </span>
-          ) : null}
+          <HeaderBrand backHref={backHref} pageTitle={pageTitle} showTitle={Boolean(pageTitle) && scrolled} />
           <HeaderNav />
-          <div className="site-header__tools">
-            <div className="site-header__wide-only">
-              <LanguageSwitch />
-              <ThemeToggle />
-            </div>
-            <IconButton className="site-header__icon" label={t("favorites")} href={ROUTES.favorites}>
-              <Heart {...ICON} aria-hidden />
-            </IconButton>
-            {VODIY_HOUSE_PHONE ? (
-              <>
-                <PhoneButton phone={VODIY_HOUSE_PHONE} className="site-header__phone" />
-                <IconButton
-                  className="site-header__icon site-header__call"
-                  label={t("call")}
-                  href={phoneHref(VODIY_HOUSE_PHONE)}
-                  external
-                >
-                  <Phone {...ICON} aria-hidden />
-                </IconButton>
-              </>
-            ) : null}
-            <IconButton
-              ref={toggleButton}
-              className="site-header__icon site-header__menu-button"
-              label={menuOpen ? t("closeMenu") : t("openMenu")}
-              onClick={toggleMenu}
-              expanded={menuOpen}
-              controls={MENU_ID}
-            >
-              {menuOpen ? <X {...ICON} aria-hidden /> : <Menu {...ICON} aria-hidden />}
-            </IconButton>
-          </div>
+          <HeaderTools ref={toggleButton} menuOpen={menuOpen} onToggleMenu={toggleMenu} />
         </div>
         {menuOpen ? <TabletMenu id={MENU_ID} onNavigate={closeMenu} /> : null}
       </header>
       {menuOpen ? <PhoneMenu id={`${MENU_ID}-phone`} onClose={closeMenu} /> : null}
+    </>
+  );
+}
+
+type HeaderBrandProps = { backHref?: string; pageTitle?: string; showTitle: boolean };
+
+/** «Назад», логотип и название страницы (телефон после прокрутки) — без обёртки: порядок в строке шапки. */
+function HeaderBrand({ backHref, pageTitle, showTitle }: HeaderBrandProps) {
+  const t = useTranslations("header");
+  return (
+    <>
+      {backHref ? (
+        <IconButton className="site-header__icon site-header__back" label={t("back")} href={backHref}>
+          <ChevronLeft {...ICON} aria-hidden />
+        </IconButton>
+      ) : null}
+      <Logo hideText={showTitle} className="site-header__logo" />
+      {pageTitle ? (
+        <span className={showTitle ? "site-header__title site-header__title--visible" : "site-header__title"} aria-hidden={!showTitle}>
+          {pageTitle}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+type HeaderToolsProps = {
+  menuOpen: boolean;
+  onToggleMenu: () => void;
+  /** Кнопка меню: на неё возвращается фокус после Escape (useMenu). */
+  ref: Ref<HTMLButtonElement>;
+};
+
+function HeaderTools({ menuOpen, onToggleMenu, ref }: HeaderToolsProps) {
+  const t = useTranslations("header");
+  return (
+    <div className="site-header__tools">
+      <div className="site-header__wide-only">
+        <LanguageSwitch />
+        <ThemeToggle />
+      </div>
+      <IconButton className="site-header__icon" label={t("favorites")} href={ROUTES.favorites}>
+        <Heart {...ICON} aria-hidden />
+      </IconButton>
+      <HeaderPhone />
+      <IconButton
+        ref={ref}
+        className="site-header__icon site-header__menu-button"
+        label={menuOpen ? t("closeMenu") : t("openMenu")}
+        onClick={onToggleMenu}
+        expanded={menuOpen}
+        controls={MENU_ID}
+      >
+        {menuOpen ? <X {...ICON} aria-hidden /> : <Menu {...ICON} aria-hidden />}
+      </IconButton>
+    </div>
+  );
+}
+
+/** Телефон Vodiy House (правило ТЗ 1.2) — только когда он известен (TODO-заказчик). */
+function HeaderPhone() {
+  const t = useTranslations("header");
+  if (!VODIY_HOUSE_PHONE) return null;
+  return (
+    <>
+      <PhoneButton phone={VODIY_HOUSE_PHONE} className="site-header__phone" />
+      <IconButton className="site-header__icon site-header__call" label={t("call")} href={phoneHref(VODIY_HOUSE_PHONE)} external>
+        <Phone {...ICON} aria-hidden />
+      </IconButton>
     </>
   );
 }

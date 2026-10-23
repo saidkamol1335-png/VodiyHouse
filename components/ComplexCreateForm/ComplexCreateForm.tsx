@@ -43,67 +43,86 @@ export function ComplexCreateForm(props: ComplexCreateFormProps) {
   return <ComplexCreatePanel {...props} onClose={() => setOpen(false)} />;
 }
 
-function ComplexCreatePanel({
-  action,
-  developers,
-  developerId,
-  developersHref,
-  onClose,
-}: ComplexCreateFormProps & { onClose: () => void }) {
+type Failed = Extract<CreateComplexResult, { status: "error" }> | null;
+
+function ComplexCreatePanel(props: ComplexCreateFormProps & { onClose: () => void }) {
+  const { action, developers } = props;
   const t = useTranslations("admin");
   const [state, formAction, pending] = useActionState(
     (_previous: CreateComplexResult, formData: FormData) => action(formData),
     IDLE,
   );
   const failed = state.status === "error" ? state : null;
-  const developerIssue = failed?.fieldErrors.developerId;
-  const nameIssue = failed?.fieldErrors.name;
-
-  if (developers.length === 0) {
-    return (
-      <AdminPanel title={t("complexes.create.title")} wide>
-        <p className="complex-create__empty">
-          {t("complexes.create.noDevelopers")}{" "}
-          <Link href={developersHref}>{t("complexes.create.toDevelopers")}</Link>
-        </p>
-      </AdminPanel>
-    );
-  }
+  if (developers.length === 0) return <NoDevelopers href={props.developersHref} />;
   return (
     <AdminPanel title={t("complexes.create.title")} wide>
       <form className="complex-create" action={formAction} noValidate>
-        <SelectField
-          id="complex-create-developer"
-          name="developerId"
-          label={t("complexes.create.developer")}
-          placeholder={t("complexes.create.developerPlaceholder")}
-          options={developers.map((developer) => ({ value: developer.id, label: developer.name }))}
-          defaultValue={failed?.fields.developerId || developerId || ""}
-          error={developerIssue ? t(`complexes.issues.${developerIssue}`) : undefined}
-        />
-        <BilingualField
-          id="complex-create-name"
-          name="name"
-          label={t("complexes.create.name")}
-          uzLabel={t("complexes.create.nameUz")}
-          maxLength={COMPLEX_NAME_MAX}
-          defaultValue={failed?.fields.name}
-          mirrorUz={toUzbekLatin}
-          error={nameIssue ? t(`developers.issues.${nameIssue}`, { min: 0 }) : undefined}
-        />
-        {nameIssue ? null : <p className="field__meta">{t("complexes.create.nameHint")}</p>}
+        <CreateFields developers={developers} developerId={props.developerId} failed={failed} />
         {failed?.error ? (
           <FormStatus tone="error">{t(`developers.errors.${failed.error}`)}</FormStatus>
         ) : null}
-        <div className="complex-create__actions">
-          <Button type="submit" pending={pending} className="complex-create__action">
-            {pending ? t("complexes.create.pending") : t("complexes.create.submit")}
-          </Button>
-          <Button variant="ghost" onClick={onClose} className="complex-create__action">
-            {t("complexes.create.cancel")}
-          </Button>
-        </div>
+        <CreateActions pending={pending} onClose={props.onClose} />
       </form>
     </AdminPanel>
+  );
+}
+
+/** Без застройщиков ЖК не создать: ведём к их списку. */
+function NoDevelopers({ href }: { href: string }) {
+  const t = useTranslations("admin.complexes.create");
+  return (
+    <AdminPanel title={t("title")} wide>
+      <p className="complex-create__empty">
+        {t("noDevelopers")} <Link href={href}>{t("toDevelopers")}</Link>
+      </p>
+    </AdminPanel>
+  );
+}
+
+type CreateFieldsProps = Pick<ComplexCreateFormProps, "developers" | "developerId"> & {
+  failed: Failed;
+};
+
+function CreateFields({ developers, developerId, failed }: CreateFieldsProps) {
+  const t = useTranslations("admin");
+  const developerIssue = failed?.fieldErrors.developerId;
+  const nameIssue = failed?.fieldErrors.name;
+  return (
+    <>
+      <SelectField
+        id="complex-create-developer"
+        name="developerId"
+        label={t("complexes.create.developer")}
+        placeholder={t("complexes.create.developerPlaceholder")}
+        options={developers.map((developer) => ({ value: developer.id, label: developer.name }))}
+        defaultValue={failed?.fields.developerId || developerId || ""}
+        error={developerIssue ? t(`complexes.issues.${developerIssue}`) : undefined}
+      />
+      <BilingualField
+        id="complex-create-name"
+        name="name"
+        label={t("complexes.create.name")}
+        uzLabel={t("complexes.create.nameUz")}
+        maxLength={COMPLEX_NAME_MAX}
+        defaultValue={failed?.fields.name}
+        mirrorUz={toUzbekLatin}
+        error={nameIssue ? t(`developers.issues.${nameIssue}`, { min: 0 }) : undefined}
+      />
+      {nameIssue ? null : <p className="field__meta">{t("complexes.create.nameHint")}</p>}
+    </>
+  );
+}
+
+function CreateActions({ pending, onClose }: { pending: boolean; onClose: () => void }) {
+  const t = useTranslations("admin.complexes.create");
+  return (
+    <div className="complex-create__actions">
+      <Button type="submit" pending={pending} className="complex-create__action">
+        {pending ? t("pending") : t("submit")}
+      </Button>
+      <Button variant="ghost" onClick={onClose} className="complex-create__action">
+        {t("cancel")}
+      </Button>
+    </div>
   );
 }
