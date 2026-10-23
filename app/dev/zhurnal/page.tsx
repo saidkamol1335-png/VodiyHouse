@@ -23,7 +23,7 @@ export default async function DevJournalPage() {
         topbar={
           <AdminTopbar
             title={t("settings.title")}
-            subtitle="Журнал · DEMO · служебная страница"
+            subtitle={t("dev.subtitleSection", { section: t("settings.tabs.journal") })}
             person={person}
           />
         }

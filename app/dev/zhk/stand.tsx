@@ -68,7 +68,8 @@ export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
   const scope = access.manage
     ? complexListScope(scopeId, DEMO_DEVELOPER_OPTIONS, DEMO_COMPLEX_ROWS)
     : { developer: null, archived: false };
-  const subtitle = `DEMO · служебная страница · ${person.roleLabel}`;
+  const tDev = await getTranslations("admin.dev");
+  const subtitle = tDev("subtitleRole", { role: person.roleLabel });
   return (
     <AdminShell viewer={stand.viewer}>
       <AdminPage topbar={<AdminTopbar title={t("title")} subtitle={subtitle} person={person} />}>
@@ -103,6 +104,7 @@ export async function ComplexStandLayout({ stand, id, children }: ComplexStandLa
   if (!complex || !canOpenComplex(access, complex.status)) notFound();
   const person = await cabinetPerson(stand.viewer);
   const t = await getTranslations("admin.complexes");
+  const tDev = await getTranslations("admin.dev");
   const subtitle = t("entitySubtitle", {
     developer: complex.developerName,
     address: `${ROUTES.catalog}/${complex.slug}`,
@@ -110,7 +112,7 @@ export async function ComplexStandLayout({ stand, id, children }: ComplexStandLa
   const topbar = (
     <AdminTopbar
       title={t("namePrefixed", { name: complex.name.ru })}
-      subtitle={`${subtitle} · DEMO`}
+      subtitle={tDev("demoSuffix", { text: subtitle })}
       person={person}
     />
   );

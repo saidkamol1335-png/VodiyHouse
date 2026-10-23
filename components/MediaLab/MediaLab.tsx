@@ -52,6 +52,7 @@ async function prepare(file: File, kind: MediaKind): Promise<LabState> {
 /** /dev/media: стенд подготовки фото перед загрузкой (шаг 9). Только разработка. */
 export function MediaLab() {
   const t = useTranslations("admin.media");
+  const lab = useTranslations("admin.dev.media");
   const [kind, setKind] = useState<MediaKind>("photo");
   const [file, setFile] = useState<File | null>(null);
   const [state, setState] = useState<LabState>({ status: "idle" });
@@ -86,14 +87,11 @@ export function MediaLab() {
 
   return (
     <main className="media-lab">
-      <h1 className="media-lab__title">Подготовка фото перед загрузкой</h1>
-      <p className="media-lab__lead">
-        Служебная страница шага 9: проверка, уменьшение до 3200 px, без EXIF, blur и точка фокуса. В
-        бакет ничего не уходит.
-      </p>
+      <h1 className="media-lab__title">{lab("title")}</h1>
+      <p className="media-lab__lead">{lab("lead")}</p>
       <div className="media-lab__controls">
         <div className="media-lab__kinds">
-          <Segmented label="Вид файла">
+          <Segmented label={lab("kindLabel")}>
             {MEDIA_KINDS.map((option) => (
               <button
                 key={option}
@@ -133,7 +131,7 @@ function MediaLabState({ state, focus, onFocusChange }: MediaLabStateProps) {
   if (state.status === "processing") {
     return (
       <p className="media-lab__status" role="status">
-        Готовлю фото…
+        {t("processing")}
       </p>
     );
   }
@@ -162,26 +160,25 @@ function MediaLabState({ state, focus, onFocusChange }: MediaLabStateProps) {
   );
 }
 
+const yesNo = (value: boolean) => (value ? "yes" : "no");
+
 function MediaLabFacts({ prepared }: { prepared: Prepared }) {
+  const t = useTranslations("admin.dev.media.facts");
   const { image, sourceExif, storedExif, milliseconds } = prepared;
   const facts: [string, string, string][] = [
     [
-      "Исходник",
+      t("source"),
       `${image.source.width} × ${image.source.height} · ${formatFileSize(image.source.bytes)}`,
       "source",
     ],
     [
-      "В бакет",
+      t("stored"),
       `${image.width} × ${image.height} · ${formatFileSize(image.blob.size)} · ${image.type}`,
       "stored",
     ],
-    [
-      "EXIF",
-      `исходник — ${sourceExif ? "есть" : "нет"}, в бакет — ${storedExif ? "есть" : "нет"}`,
-      "exif",
-    ],
-    ["Blur", `${image.blur.length} символов`, "blur"],
-    ["Время", `${milliseconds} мс`, "time"],
+    [t("exif"), t("exifValue", { source: yesNo(sourceExif), stored: yesNo(storedExif) }), "exif"],
+    [t("blur"), t("blurValue", { count: image.blur.length }), "blur"],
+    [t("time"), t("timeValue", { ms: milliseconds }), "time"],
   ];
   return (
     <div className="media-lab__summary">

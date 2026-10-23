@@ -26,6 +26,7 @@ export default async function DevDeveloperLayout({ children, params }: DevDevelo
   if (!developer) notFound();
   const person = await cabinetPerson(DEV_VIEWER);
   const t = await getTranslations("admin.developers");
+  const tDev = await getTranslations("admin.dev");
   const tabs = developerTabs(`/dev/zastroyshchiki/${developer.id}`, (key) => t(`tabs.${key}`));
   const address = `${ROUTES.developers}/${developer.slug}`;
   return (
@@ -34,7 +35,7 @@ export default async function DevDeveloperLayout({ children, params }: DevDevelo
         topbar={
           <AdminTopbar
             title={developer.name}
-            subtitle={`${t("entitySubtitle", { address })} · DEMO`}
+            subtitle={tDev("demoSuffix", { text: t("entitySubtitle", { address }) })}
             person={person}
           />
         }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { RootDocument } from "@/components/RootDocument";
 import { ADMIN_LOCALE } from "@/lib/i18n/routing";
 import "../globals.css";
@@ -8,10 +9,10 @@ import "../admin.css";
 import "../cabinet.css";
 import "../dev.css";
 
-export const metadata: Metadata = {
-  title: "Dev · Vodiy House",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("admin.dev");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
 
 // Стенды — только для разработки. Защита здесь, до любых ожиданий: стенд, который сначала ждёт
 // searchParams, звал notFound() уже после статичной оболочки — ответ уходил с кодом 200 (приёмка

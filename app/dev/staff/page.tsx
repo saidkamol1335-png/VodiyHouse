@@ -29,6 +29,7 @@ export default async function DevStaffPage() {
   if (process.env.NODE_ENV === "production") notFound();
   const person = await cabinetPerson(DEV_VIEWER);
   const t = await getTranslations("admin.settings");
+  const tDev = await getTranslations("admin.dev");
   const tabs = [{ segment: null, href: "/dev/staff", label: t("tabs.staff") }];
   return (
     <AdminShell viewer={DEV_VIEWER}>
@@ -36,7 +37,7 @@ export default async function DevStaffPage() {
         topbar={
           <AdminTopbar
             title={t("title")}
-            subtitle="Сотрудники · DEMO · служебная страница"
+            subtitle={tDev("subtitleSection", { section: t("tabs.staff") })}
             person={person}
           />
         }

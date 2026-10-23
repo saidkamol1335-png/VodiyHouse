@@ -20,7 +20,7 @@ export async function HomeStand({ stand, demo }: HomeStandProps) {
   const scenario = siteStockScenario(demo);
   const person = await cabinetPerson(stand.viewer);
   const t = await getTranslations("admin");
-  const subtitle = `DEMO · служебная страница · ${person.roleLabel}`;
+  const subtitle = t("dev.subtitleRole", { role: person.roleLabel });
   return (
     <AdminShell viewer={stand.viewer}>
       <AdminPage topbar={<AdminTopbar title={t("nav.home")} subtitle={subtitle} person={person} />}>

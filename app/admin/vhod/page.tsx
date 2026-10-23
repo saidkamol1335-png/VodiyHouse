@@ -7,9 +7,9 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { signInAction } from "@/lib/admin/actions/auth";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 
-export const metadata: Metadata = {
-  title: "Вход · Кабинет · Vodiy House",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("admin.meta"))("login") };
+}
 
 // Статичная страница: сессию не читает (proxy сюда никогда не перенаправляет обратно).
 export default async function AdminLoginPage() {

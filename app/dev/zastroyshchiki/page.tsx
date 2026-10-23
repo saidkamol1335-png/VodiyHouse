@@ -16,13 +16,12 @@ export default async function DevDevelopersPage() {
   if (process.env.NODE_ENV === "production") notFound();
   const person = await cabinetPerson(DEV_VIEWER);
   const t = await getTranslations("admin.developers");
+  const tDev = await getTranslations("admin.dev");
   const rows = DEMO_DEVELOPER_ROWS.map((row) => ({ ...row, logoSrc: null }));
   return (
     <AdminShell viewer={DEV_VIEWER}>
       <AdminPage
-        topbar={
-          <AdminTopbar title={t("title")} subtitle="DEMO · служебная страница" person={person} />
-        }
+        topbar={<AdminTopbar title={t("title")} subtitle={tDev("subtitle")} person={person} />}
       >
         <DeveloperCreateForm action={demoCreateDeveloperAction} />
         <DeveloperList rows={rows} baseHref="/dev/zastroyshchiki" />

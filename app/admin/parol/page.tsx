@@ -8,9 +8,9 @@ import { changePasswordAction } from "@/lib/admin/actions/auth";
 import { passwordPageTarget } from "@/lib/admin/landing";
 import { getCabinetSession } from "@/lib/admin/session";
 
-export const metadata: Metadata = {
-  title: "Смена пароля · Кабинет · Vodiy House",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getTranslations("admin.meta"))("password") };
+}
 
 // Сессия читается на каждый запрос, редирект — до первого байта (как у разделов кабинета).
 export const instant = false;

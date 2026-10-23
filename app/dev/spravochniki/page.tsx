@@ -41,7 +41,8 @@ export default async function DevDictionariesPage() {
         topbar={
           <AdminTopbar
             title={t("settings.title")}
-            subtitle="Справочники · служебная страница"
+            // Без «DEMO»: значения — настоящий сид миграций.
+            subtitle={t("dev.subtitleSeed", { section: t("settings.tabs.dictionaries") })}
             person={person}
           />
         }
