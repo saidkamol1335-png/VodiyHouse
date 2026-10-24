@@ -2,6 +2,7 @@
    тёмная панель MobFlat (Р9). Сумма — по ширине карточки (cqi), длинная — мельче. */
 
 .calc-total {
+  position: relative;
   display: grid;
   gap: 14px;
   padding: 24px;
@@ -10,6 +11,11 @@
   background: var(--bg-2);
   box-shadow: var(--shadow-1);
   container-type: inline-size;
+}
+
+.calc-total--plain {
+  border-color: var(--line);
+  box-shadow: none;
 }
 
 .calc-total__top {
@@ -117,6 +123,7 @@
     --line-2: var(--calc-dark-line);
     --dash: var(--calc-dark-line);
     --glass-3: var(--calc-dark-glass);
+    --bg-2: var(--calc-dark-glass);
     --seg-bg: var(--calc-dark-glass);
     --seg-border: var(--calc-dark-line);
     --seg-on-bg: var(--calc-dark-seg-on);

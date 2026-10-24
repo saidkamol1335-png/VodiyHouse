@@ -16,10 +16,12 @@ import { type CalcT, moneyIn, programName, termText } from "./calcText";
 // Итог, сравнение и сноски калькулятора — из состояния (lib/calc/view). Строки скидки кабинет
 // добавляет своей функцией decorate (сайт про скидки не знает, PLAN §3.13).
 
+/** program — выбранная программа: процент скидки кабинет берёт из её условий, а не из чисел. */
 export type DecorateRows = (
   rows: TotalRow[],
   calc: Calculation,
   context: TotalContext,
+  program: CalcProgram,
 ) => TotalRow[];
 
 export type CalcTotalView = {
@@ -52,7 +54,7 @@ export function totalView<P extends CalcProgram>(
   return {
     eyebrow,
     head: totalHead(calc, context),
-    rows: decorate?.(rows, calc, context) ?? rows,
+    rows: decorate?.(rows, calc, context, view.selected.program) ?? rows,
     problem: null,
   };
 }
@@ -64,8 +66,11 @@ export function footnotes<P extends CalcProgram>(
 ): string[] {
   const { t, rate } = context;
   const notes = [t("total.disclaimer")];
-  if (context.actualAt)
-    notes.push(t("total.actual", { date: formatDate(new Date(context.actualAt)) }));
+  // «Актуальны на» у программы — позднее из её правки и отметки «Условия проверены» (Р5).
+  const actual = [view.selected?.updatedAt, context.actualAt]
+    .filter((date): date is string => Boolean(date))
+    .reduce<string | null>((latest, date) => (latest && latest > date ? latest : date), null);
+  if (actual) notes.push(t("total.actual", { date: formatDate(new Date(actual)) }));
   const calc = view.result?.ok ? view.result.calculation : null;
   const converted =
     calc && (calc.currency !== view.price.currency || view.outCurrency !== calc.currency);

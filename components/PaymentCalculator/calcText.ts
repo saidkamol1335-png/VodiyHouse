@@ -3,7 +3,7 @@ import { type Currency, convertMoney, type ExchangeRate } from "@/lib/calc/money
 import type { ProgramOption } from "@/lib/calc/options";
 import type { CalcStock } from "@/lib/calc/priceSource";
 import { type CalcProgram, isTiered } from "@/lib/calc/programs";
-import { formatPercent, formatPrice, termParts } from "@/lib/format";
+import { formatPercent, formatPrice, formatPriceShort, termParts } from "@/lib/format";
 
 // Тексты калькулятора (раздел calc — сайт и кабинет, ru и uz): названия программ, сроки, суммы
 // в валюте итога. Слова «скидка» здесь нет — его добавляет только кабинет (PLAN §3.13).
@@ -28,6 +28,20 @@ export function moneyIn(
   return converted === null
     ? formatPrice(amount, from, locale)
     : formatPrice(converted, to, locale);
+}
+
+/** Коротко для тесных мест: «22,5 млн сум»; доллары — как есть. */
+export function shortIn(
+  amount: number,
+  from: Currency,
+  to: Currency,
+  rate: ExchangeRate | null,
+  locale: CalcLocale,
+): string {
+  const converted = convertMoney(amount, from, to, rate);
+  return converted === null
+    ? formatPriceShort(amount, from, locale)
+    : formatPriceShort(converted, to, locale);
 }
 
 /** «≈ 17 847 000 сум» — та же сумма в другой валюте; без курса — null. */

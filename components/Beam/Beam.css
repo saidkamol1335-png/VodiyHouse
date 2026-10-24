@@ -1,0 +1,51 @@
+/* Луч по рамке (мокап: .beam). В мокапе вращается угол градиента — это перерисовка на каждом
+   кадре; здесь кольцо 1 px вырезано маской, а под ним вращается слой через transform. Владелец —
+   position: relative и свой border-radius; вне экрана вращение на паузе. */
+.beam {
+  display: none;
+}
+
+[data-motion="full"] .beam {
+  position: absolute;
+  inset: -1px;
+  display: block;
+  padding: 1px;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+[data-motion="full"] .beam::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    transparent 0deg 280deg,
+    var(--beam-color) 320deg,
+    var(--beam-tip) 340deg,
+    transparent 360deg
+  );
+  transform: translate(-50%, -50%);
+  animation: beam-turn var(--dur-beam) linear infinite;
+  will-change: transform;
+}
+
+[data-motion="full"] .beam[data-paused]::before {
+  animation-play-state: paused;
+}
+
+@keyframes beam-turn {
+  to {
+    transform: translate(-50%, -50%) rotate(1turn);
+  }
+}

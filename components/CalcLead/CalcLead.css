@@ -1,0 +1,136 @@
+/* «Получить точный расчёт» (мокап MobLead): на 1440 — окно по центру, на телефоне — шторка снизу;
+   контекст — янтарная плашка с пунктиром, как «ЖК Shodlik». Появление — opacity и сдвиг (§3). */
+
+.calc-lead {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  /* Preflight Tailwind обнуляет margin, а по центру окно ставит именно margin: auto. */
+  margin: auto;
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  color: var(--fg);
+  box-shadow: var(--shadow-3);
+}
+
+.calc-lead::backdrop {
+  background: var(--scrim);
+}
+
+.calc-lead[open] {
+  display: grid;
+  gap: 16px;
+  animation: calc-lead-in var(--dur-fast) var(--ease) both;
+}
+
+.calc-lead__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calc-lead__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+
+.calc-lead__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.calc-lead__close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.calc-lead__context {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-m);
+  background: var(--amber-soft);
+  font-size: var(--fs-small);
+}
+
+.calc-lead__form {
+  display: grid;
+  gap: 14px;
+}
+
+.calc-lead__note,
+.calc-lead__next,
+.calc-lead__stand {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.calc-lead__next {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-3);
+}
+
+.calc-lead__next svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--amber-2);
+}
+
+.calc-lead__collected {
+  display: grid;
+  gap: 8px;
+}
+
+.calc-lead__rows {
+  display: grid;
+  margin: 0;
+  font-size: var(--fs-small);
+}
+
+.calc-lead__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--dash);
+}
+
+.calc-lead__row dd {
+  margin: 0;
+  font-weight: 650;
+  text-align: right;
+}
+
+@media (max-width: 767px) {
+  .calc-lead {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+}
+
+@keyframes calc-lead-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

@@ -22,14 +22,23 @@ import {
 
 export type CalcExtras<P extends CalcProgram> = {
   /** «· скидка 12%» к условиям программы — только кабинет. */
-  programSuffix?: (option: ProgramOption<P>) => string | null;
+  programSuffix?: (option: ProgramOption<P>, options: readonly ProgramOption<P>[]) => string | null;
   /** «→ −6%» у чипа взноса — только кабинет. */
-  downBadge?: (option: ProgramOption<P>, down: DownOption) => string | null;
+  downBadge?: (
+    option: ProgramOption<P>,
+    down: DownOption,
+    options: readonly ProgramOption<P>[],
+  ) => string | null;
   /** Заголовок ряда чипов: кабинет — «Скидка за первый взнос». */
   downTitle?: string;
 };
 
 type Patch = (patch: Partial<CalcParams>) => void;
+
+/** После перерисовки: то, на чём был фокус, исчезло — ставим его на то, что пришло на смену. */
+export function focusLater(selector: string) {
+  requestAnimationFrame(() => document.querySelector<HTMLElement>(selector)?.focus());
+}
 
 export function programChoices<P extends CalcProgram>(
   view: CalcView<P>,
@@ -38,7 +47,8 @@ export function programChoices<P extends CalcProgram>(
 ): CalcProgramChoice[] {
   const { t, locale, extras } = context;
   return view.options.map((option) => {
-    const suffix = extras.programSuffix?.(option);
+    // Программы, что действуют для этой стоимости (блок квартиры), — не все у застройщика.
+    const suffix = extras.programSuffix?.(option, view.options);
     const note = programNote(option, t);
     return {
       id: option.id,
@@ -74,10 +84,14 @@ export function downChips<P extends CalcProgram>(
       : down.targetId
         ? t("down.now")
         : null,
-    badge: extras.downBadge?.(selected, down) ?? null,
+    badge: extras.downBadge?.(selected, down, view.options) ?? null,
     active: chipActive(selected.program, down, view.downPct),
-    onPick: () =>
-      update(down.targetId ? { program: down.targetId } : { downPct: down.downPct, months: null }),
+    onPick: () => {
+      if (!down.targetId) return update({ downPct: down.downPct, months: null });
+      update({ program: down.targetId, months: null });
+      // Чип исчез вместе со взносом (у «100% оплаты» его нет) — фокус на выбранную программу.
+      focusLater(`input[type="radio"][value="${down.targetId}"]`);
+    },
   }));
 }
 
@@ -128,7 +142,11 @@ export function termMessage(
       text: t("term.suggest", values),
       action: {
         label: t("term.suggestButton", { from }),
-        onClick: () => update({ downPct: suggestion.fromDownPct, months: suggestion.months }),
+        onClick: () => {
+          update({ downPct: suggestion.fromDownPct, months: suggestion.months });
+          // Строка с кнопкой исчезла — фокус на срок, который теперь посчитан.
+          focusLater(".calc-term__button--active, .calc-term__input");
+        },
       },
     };
   }

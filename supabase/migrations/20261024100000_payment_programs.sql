@@ -620,8 +620,9 @@ end;
 $$;
 
 -- «Пример: 60 м² × $620 …» на карточке и цена м² по умолчанию в расчёте (Р8): минимальная цена м²
--- свободных квартир застройщика (ЖК кроме архива); блоки в обеих валютах — в долларах.
-create function private.developer_price_hint(p_developer uuid)
+-- свободных квартир застройщика; блоки в обеих валютах — в долларах. Кабинет — ЖК кроме архива,
+-- сайт (p_public) — только опубликованные.
+create function private.developer_price_hint(p_developer uuid, p_public boolean default false)
 returns jsonb
 language sql
 stable
@@ -634,7 +635,8 @@ as $$
     join public.blocks b on b.id = u.block_id
     join public.complexes c on c.id = b.complex_id
     left join public.layouts l on l.id = u.layout_id
-    where c.developer_id = p_developer and c.status <> 'archived' and u.status = 'free'
+    where c.developer_id = p_developer and u.status = 'free'
+      and case when p_public then private.is_public_complex(c.id) else c.status <> 'archived' end
   ) as x
   where x.per_m2 > 0
   group by x.currency
@@ -642,8 +644,8 @@ as $$
   limit 1
 $$;
 
-revoke all on function private.developer_price_hint(uuid) from public;
-grant execute on function private.developer_price_hint(uuid) to authenticated;
+revoke all on function private.developer_price_hint(uuid, boolean) from public;
+grant execute on function private.developer_price_hint(uuid, boolean) to authenticated;
 
 -- Экран «Программы оплаты»: панели застройщиков (кроме архива) с программами целиком (у сотрудников
 -- — со скидками) и блоками для выбора. Руководитель и менеджер; остальным — пустой список.
@@ -959,6 +961,35 @@ grant execute on function public.save_calculation(uuid, uuid, jsonb, jsonb) to a
 
 -- ─── «Расчёт для клиента» в кабинете (шаг 2.5, Р1, Р8) ──────────────────────────────────────
 
+-- ЖК застройщика для калькулятора: блоки (валюта) и планировки — «цена от» и «доступна» как на
+-- сайте (private.layout_offers). Кабинет — кроме архива, сайт (p_public) — только опубликованные.
+create function private.calc_complexes(p_developer uuid, p_public boolean)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name, 'blocks', (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'id', b.id, 'name', b.name, 'currency', b.currency, 'layouts', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'id', o.layout_id, 'rooms', o.rooms, 'area', o.area, 'price_from', o.price_from,
+          'available', o.available
+        ) order by o.rooms, o.area, o.sort), '[]'::jsonb)
+        from private.layout_offers o
+        where o.block_id = b.id)
+    ) order by b.sort, b.name), '[]'::jsonb)
+    from public.blocks b
+    where b.complex_id = c.id)
+  ) order by c.sort, c.name), '[]'::jsonb)
+  from public.complexes c
+  where c.developer_id = p_developer
+    and case when p_public then private.is_public_complex(c.id) else c.status <> 'archived' end
+$$;
+
+revoke all on function private.calc_complexes(uuid, boolean) from public;
+
 -- Выбранный застройщик целиком: включённые программы (у сотрудников — со скидками; «выбранные»
 -- без блоков не действуют — их нет), ЖК кроме архива с блоками и планировками («цена от» — как
 -- на сайте, private.layout_offers), свободные квартиры с ценой (нет цены — null, «по запросу»).
@@ -970,10 +1001,8 @@ set search_path = ''
 as $$
   select jsonb_build_object(
     'id', d.id, 'slug', d.slug, 'name', d.name,
-    -- «Условия актуальны на»: позднее из правки включённых программ и «Условия проверены» (Р5).
-    'checked_at', greatest(d.programs_checked_at, (
-      select max(p.updated_at) from public.payment_programs p
-      where p.developer_id = d.id and p.is_active)),
+    -- «Условия проверены» (Р5): «актуальны на» у программы — позднее из её правки и этой отметки.
+    'checked_at', d.programs_checked_at,
     'price_hint', private.developer_price_hint(d.id),
     'programs', (
       select coalesce(jsonb_agg(to_jsonb(p) || jsonb_build_object('bank', bk.name)
@@ -982,22 +1011,7 @@ as $$
       left join public.banks bk on bk.id = p.bank_id
       where p.developer_id = d.id and p.is_active
         and (p.blocks_scope = 'all' or cardinality(p.block_ids) > 0)),
-    'complexes', (
-      select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name, 'blocks', (
-        select coalesce(jsonb_agg(jsonb_build_object(
-          'id', b.id, 'name', b.name, 'currency', b.currency, 'layouts', (
-            select coalesce(jsonb_agg(jsonb_build_object(
-              'id', o.layout_id, 'rooms', o.rooms, 'area', o.area, 'price_from', o.price_from,
-              'available', o.available
-            ) order by o.rooms, o.area, o.sort), '[]'::jsonb)
-            from private.layout_offers o
-            where o.block_id = b.id)
-        ) order by b.sort, b.name), '[]'::jsonb)
-        from public.blocks b
-        where b.complex_id = c.id)
-      ) order by c.sort, c.name), '[]'::jsonb)
-      from public.complexes c
-      where c.developer_id = d.id and c.status <> 'archived'),
+    'complexes', private.calc_complexes(d.id, false),
     'units', (
       select coalesce(jsonb_agg(jsonb_build_object(
         'id', u.id, 'number', u.number, 'floor', u.floor, 'block_id', u.block_id,
@@ -1034,7 +1048,10 @@ begin
       select d.id, d.slug, d.name, d.sort
       from public.developers d
       where d.status <> 'archived'
-        and exists (select 1 from public.payment_programs p where p.developer_id = d.id and p.is_active)
+        and exists (
+          select 1 from public.payment_programs p
+          where p.developer_id = d.id and p.is_active
+            and (p.blocks_scope = 'all' or cardinality(p.block_ids) > 0))
     ), picked as (
       select l.id from listed l
       order by l.slug is not distinct from p_developer desc, l.sort, l.name
@@ -1054,3 +1071,57 @@ comment on function public.client_calc_screen(text) is
 
 revoke all on function public.client_calc_screen(text) from public, anon;
 grant execute on function public.client_calc_screen(text) to authenticated;
+
+-- ─── Калькулятор сайта /kalkulyator (шаг 2.6, Р7–Р9) ─────────────────────────────────────────
+
+-- Как «Расчёт для клиента», но для всех и без скидок (PLAN §3.13): опубликованные застройщики с
+-- программами для опубликованных блоков; у выбранного (?developer=slug, нет такого — первый) —
+-- программы без полей скидки (private.site_program), опубликованные ЖК с планировками и цена м²
+-- по умолчанию. Квартир нет: расчёт квартиры получает её цену со страницы ЖК (шаг 2.7).
+create function public.site_calc_screen(p_developer text default null)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with listed as (
+    select d.id, d.slug, d.name, d.sort, d.programs_checked_at
+    from public.developers d
+    where d.status = 'published'
+      and exists (
+        select 1 from public.payment_programs p
+        where p.developer_id = d.id and p.is_active
+          and (p.blocks_scope = 'all' or cardinality(private.public_block_ids(p.block_ids)) > 0))
+  ), picked as (
+    select l.* from listed l
+    order by l.slug is not distinct from p_developer desc, l.sort, l.name
+    limit 1
+  )
+  select jsonb_build_object(
+    'rate', private.exchange_rate(),
+    'developers', (
+      select coalesce(jsonb_agg(jsonb_build_object('id', l.id, 'slug', l.slug, 'name', l.name)
+        order by l.sort, l.name), '[]'::jsonb)
+      from listed l),
+    'current', (
+      select jsonb_build_object(
+        'id', k.id, 'slug', k.slug, 'name', k.name,
+        'checked_at', k.programs_checked_at,
+        'price_hint', private.developer_price_hint(k.id, true),
+        'programs', (
+          select coalesce(jsonb_agg(private.site_program(p, k.programs_checked_at)
+            order by p.sort, p.created_at), '[]'::jsonb)
+          from public.payment_programs p
+          where p.developer_id = k.id and p.is_active
+            and (p.blocks_scope = 'all' or cardinality(private.public_block_ids(p.block_ids)) > 0)),
+        'complexes', private.calc_complexes(k.id, true))
+      from picked k)
+  )
+$$;
+
+comment on function public.site_calc_screen(text) is
+  '/kalkulyator: курс, опубликованные застройщики с программами и выбранный — программы без скидок, ЖК с планировками.';
+
+revoke all on function public.site_calc_screen(text) from public;
+grant execute on function public.site_calc_screen(text) to anon, authenticated, service_role;

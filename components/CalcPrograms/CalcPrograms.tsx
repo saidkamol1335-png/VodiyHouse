@@ -18,16 +18,19 @@ type CalcProgramsProps = {
   value: string | null;
   onChange: (id: string) => void;
   empty: string;
+  /** Заголовок уже над шагом (сайт, «02 Программа оплаты») — подпись группы только для диктора. */
+  legendHidden?: boolean;
 };
 
 /**
  * Выбор программы (мокап r1 и MobFlat): на 1440 — карточки в две колонки, на телефоне —
  * список с кружком справа. Радиокнопки настоящие — стрелки клавиатуры и диктор работают сами.
  */
-export function CalcPrograms({ name, legend, choices, value, onChange, empty }: CalcProgramsProps) {
+export function CalcPrograms(props: CalcProgramsProps) {
+  const { name, legend, choices, value, onChange, empty } = props;
   return (
     <fieldset className="calc-programs">
-      <legend className="calc-programs__legend">{legend}</legend>
+      <legend className={props.legendHidden ? "sr-only" : "calc-programs__legend"}>{legend}</legend>
       {choices.length === 0 ? <p className="calc-programs__empty">{empty}</p> : null}
       <div className="calc-programs__grid">
         {choices.map((choice) => (

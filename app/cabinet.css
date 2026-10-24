@@ -11,7 +11,6 @@
 @import "../components/PointField/PointField.css";
 @import "../components/QuarterSelect/QuarterSelect.css";
 @import "../components/SearchField/SearchField.css";
-@import "../components/SelectField/SelectField.css";
 @import "../components/SortHandle/SortHandle.css";
 @import "../components/Switch/Switch.css";
 @import "../components/UnitPriceFields/UnitPriceFields.css";
@@ -49,7 +48,6 @@
 @import "../components/DictionaryEditor/DictionaryEditor.css";
 @import "../components/DictionaryEditor/DictionaryItemForm.css";
 @import "../components/DrawingTile/DrawingTile.css";
-@import "../components/FilterPills/FilterPills.css";
 @import "../components/FocusPreview/FocusPreview.css";
 @import "../components/JournalList/JournalList.css";
 @import "../components/LiveStatus/LiveStatus.css";

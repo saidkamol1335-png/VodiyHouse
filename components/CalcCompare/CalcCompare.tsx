@@ -97,7 +97,7 @@ function CompareRow({ row, texts, onSelect }: CompareRowProps) {
         >
           {row.name}
         </button>
-        <span className="calc-compare__brief" aria-hidden="true">
+        <span className="calc-compare__brief">
           {row.down} · {row.term}
         </span>
       </th>
@@ -110,7 +110,7 @@ function CompareRow({ row, texts, onSelect }: CompareRowProps) {
       <td className="calc-compare__total">
         <span className="calc-compare__total-value">{row.total}</span>
         {row.cheapest ? <Label tone="amber">{texts.cheapest}</Label> : null}
-        <span className="calc-compare__total-short" aria-hidden="true">
+        <span className="calc-compare__total-short">
           {row.totalShort}
         </span>
       </td>

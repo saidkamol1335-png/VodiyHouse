@@ -35,7 +35,8 @@ export function CalcStickyBar({ watch, label, value, action }: CalcStickyBarProp
     <div
       className="calc-sticky-bar"
       data-hidden={offscreen ? undefined : ""}
-      aria-hidden={!offscreen}
+      // Итог на экране — полоса уехала: ни диктору, ни клавиатуре её кнопка не нужна.
+      inert={!offscreen}
     >
       <p className="calc-sticky-bar__text">
         <span className="calc-sticky-bar__label">{label}</span>

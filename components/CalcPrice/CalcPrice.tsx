@@ -20,6 +20,8 @@ type CalcPriceProps = {
   onChange: (patch: Partial<CalcParams>) => void;
   t: CalcT;
   locale: CalcLocale;
+  /** Заголовок уже над шагом (сайт, «03 Стоимость квартиры») — только для диктора. */
+  titleHidden?: boolean;
 };
 
 /**
@@ -30,7 +32,7 @@ export function CalcPrice(props: CalcPriceProps) {
   const { id, modes, price, onChange, t } = props;
   return (
     <section className="calc-price" aria-labelledby={`${id}-title`}>
-      <h3 id={`${id}-title`} className="calc-price__title">
+      <h3 id={`${id}-title`} className={props.titleHidden ? "sr-only" : "calc-price__title"}>
         {t("price.title")}
       </h3>
       {modes.length > 1 ? (

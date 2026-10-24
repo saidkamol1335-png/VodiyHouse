@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Beam } from "@/components/Beam";
 import type { TotalHead, TotalRow } from "./totalRows";
 
 type CalcTotalProps = {
@@ -13,6 +14,10 @@ type CalcTotalProps = {
   /** Кнопки: «Скопировать для Telegram», «Получить точный расчёт». */
   actions?: ReactNode;
   footnotes: readonly string[];
+  /** Луч по рамке (только full) — у итога /kalkulyator (В4 A), не в кабинете. */
+  beam?: boolean;
+  /** Нейтральная рамка — итог внутри янтарного блока (кабинет, расчёт квартиры; В4 A). */
+  plain?: boolean;
 };
 
 /**
@@ -27,9 +32,16 @@ export function CalcTotal({
   problem,
   actions,
   footnotes,
+  beam = false,
+  plain = false,
 }: CalcTotalProps) {
   return (
-    <section className="calc-total" aria-label={eyebrow} data-testid="calc-total">
+    <section
+      className={plain ? "calc-total calc-total--plain" : "calc-total"}
+      aria-label={eyebrow}
+      data-testid="calc-total"
+    >
+      {beam ? <Beam /> : null}
       <div className="calc-total__top">
         <p className="calc-total__eyebrow">{eyebrow}</p>
         {currency}
@@ -51,7 +63,7 @@ export function CalcTotal({
 function HeadBlock({ head }: { head: TotalHead }) {
   const long = head.value.length > 11;
   return (
-    <div className="calc-total__head" aria-live="polite">
+    <div className="calc-total__head">
       <p className="calc-total__label">{head.label}</p>
       <p className={long ? "calc-total__value calc-total__value--long" : "calc-total__value"}>
         {head.value}

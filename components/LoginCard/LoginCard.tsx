@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { Beam } from "@/components/Beam";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -19,7 +20,7 @@ export async function LoginCard({ title, lead, children, footer }: LoginCardProp
   const t = await getTranslations("admin.login");
   return (
     <section className="login-card" aria-labelledby="login-title">
-      <span className="login-card__beam" aria-hidden="true" />
+      <Beam />
       <div className="login-card__brand">
         <LogoMark className="login-card__mark" />
         Vodiy House

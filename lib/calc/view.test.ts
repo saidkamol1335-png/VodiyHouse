@@ -133,6 +133,9 @@ describe("калькулятор: выбор и цифры", () => {
     expect(sum.price.price).toBe(84_000);
     const blank = calculatorView(SITE_ENGINE, DATA, params({ mode: "sum" }), true);
     expect(blank.result).toBeNull();
+    // Стёрли площадь — не подменяем 60 м², а просим стоимость.
+    const erased = calculatorView(SITE_ENGINE, DATA, params({ mode: "area", area: "" }), true);
+    expect(erased.price).toMatchObject({ price: null, areaM2: null, perM2: 690 });
   });
 
   it("100 % оплата — взнос 100; взнос ниже минимума поднимается, выше 90 — до 90", () => {
@@ -172,6 +175,12 @@ describe("калькулятор: выбор и цифры", () => {
     );
   });
 
+  it("сравнение — на сроке выбранной программы: банк 24 мес. → схема тоже на 24", () => {
+    const view = calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), true);
+    const scheme = view.comparison!.rows.find((row) => row.program === SIFAT_SCHEME)!;
+    expect(scheme.calculation.months).toBe(24);
+  });
+
   it("сравнение — все программы стоимости, «меньше платёж» и «выгоднее всего»", () => {
     const view = calculatorView(CABINET_ENGINE, DATA, params({ downPct: 50 }), true);
     const rows = view.comparison!.rows;
@@ -197,6 +206,11 @@ describe("адрес расчёта", () => {
       "developer=demo-sifat&mode=area&area=64%2C2&m2=700&down=50&months=17&in=USD&out=UZS",
     );
     expect(readCalcParams(search)).toEqual(value);
+  });
+
+  it("длинный slug застройщика не обрезается", () => {
+    const slug = "farg-ona-sifat-qurilish-mchj-yangi-uylar-qurilish-kompaniyasi";
+    expect(readCalcParams({ developer: slug }).developer).toBe(slug);
   });
 
   it("чужие значения — как будто ключа нет", () => {

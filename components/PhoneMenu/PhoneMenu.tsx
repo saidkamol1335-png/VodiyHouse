@@ -8,7 +8,8 @@ import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { LogoMark } from "@/components/Logo";
 import { ThemeSegmented } from "@/components/ThemeToggle";
 import { phoneHref, telegramHref, VODIY_HOUSE_PHONE, VODIY_HOUSE_TELEGRAM } from "@/lib/contacts";
-import { Link } from "@/lib/i18n/navigation";
+import { isActivePath } from "@/components/HeaderNav";
+import { Link, usePathname } from "@/lib/i18n/navigation";
 import { ADMIN_ROUTE, MENU_NAV, ROUTES } from "@/lib/routes";
 
 type PhoneMenuProps = {
@@ -81,10 +82,17 @@ function PhoneMenuHead({ onClose }: { onClose: () => void }) {
 
 function PhoneMenuNav() {
   const t = useTranslations();
+  const pathname = usePathname();
   return (
     <nav aria-label={t("header.navLabel")}>
       {MENU_NAV.map(({ key, href }, index) => (
-        <Link key={key} href={href} className="phone-menu__item" style={{ "--d": index } as CSSProperties}>
+        <Link
+          key={key}
+          href={href}
+          className="phone-menu__item"
+          style={{ "--d": index } as CSSProperties}
+          aria-current={isActivePath(pathname, href) ? "page" : undefined}
+        >
           <span className="phone-menu__number">{String(index + 1).padStart(2, "0")}</span>
           <span className="phone-menu__title">{t(`nav.${key}`)}</span>
           <ArrowRight {...ICON} aria-hidden />

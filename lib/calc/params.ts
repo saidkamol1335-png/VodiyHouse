@@ -61,7 +61,8 @@ type Search = URLSearchParams | Record<string, string | string[] | undefined>;
 function readRaw(search: Search, key: string): string | null {
   const value = search instanceof URLSearchParams ? search.get(key) : search[key];
   const text = Array.isArray(value) ? value[0] : value;
-  const trimmed = text?.trim().slice(0, 40);
+  // Предел от мусора в адресе, а не от длины slug (у застройщика он бывает и за 40 знаков).
+  const trimmed = text?.trim().slice(0, 120);
   return trimmed ? trimmed : null;
 }
 

@@ -48,7 +48,13 @@
    остальные — в файлах разделов (site.css, admin.css, cabinet.css, dev.css), их подключают
    корневые layout. Новый блок — в файл того раздела, где он показывается. */
 @import "../components/BackgroundColumns/BackgroundColumns.css";
+@import "../components/Beam/Beam.css";
+@import "../components/Button/Button.css";
+@import "../components/Field/Field.css";
+@import "../components/FilterPills/FilterPills.css";
+@import "../components/FormStatus/FormStatus.css";
 @import "../components/FilmGrain/FilmGrain.css";
 @import "../components/IconButton/IconButton.css";
 @import "../components/Logo/Logo.css";
 @import "../components/Segmented/Segmented.css";
+@import "../components/SelectField/SelectField.css";

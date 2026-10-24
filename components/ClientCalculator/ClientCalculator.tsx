@@ -1,10 +1,9 @@
 "use client";
 
 import { type AbstractIntlMessages, useTranslations } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { FilterPills } from "@/components/FilterPills";
 import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import { DeveloperPills } from "@/components/PaymentCalculator/DeveloperPills";
 import {
   PaymentCalculator,
   type CalcSnapshot,
@@ -12,7 +11,7 @@ import {
 import type { ClientCalcScreen } from "@/lib/admin/calc/screen";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
 import { CABINET_ENGINE } from "@/lib/calc/cabinet/engine";
-import type { CalcParams, PriceMode } from "@/lib/calc/params";
+import { type CalcParams, type PriceMode, writeCalcParams } from "@/lib/calc/params";
 import { cabinetExtras, discountDecorator } from "./cabinetExtras";
 import { telegramMessage, type Translators, uzTranslators } from "./telegramMessage";
 import { TelegramCopy } from "./TelegramCopy";
@@ -47,14 +46,16 @@ export function ClientCalculator({
   const current = screen.current;
   if (!current) return <p className="client-calculator__empty">{t("noDevelopers")}</p>;
   const extras = {
-    ...cabinetExtras(current.data.options, t),
+    ...cabinetExtras(t),
     decorate: discountDecorator(tDiscount),
   };
   return (
     <div className="client-calculator">
       <PaymentCalculator
-        key={current.id}
+        // Новый адрес с сервера (пример, пилюля застройщика) — расчёт начинается с него заново.
+        key={`${current.id}?${writeCalcParams(initialParams)}`}
         id="client-calc"
+        embedded
         engine={CABINET_ENGINE}
         data={current.data}
         initialParams={initialParams}
@@ -62,7 +63,13 @@ export function ClientCalculator({
         developerName={current.name}
         actualAt={current.checkedAt}
         extras={extras}
-        header={<DeveloperPills screen={screen} />}
+        header={
+          <DeveloperPills
+            label={t("developer")}
+            developers={screen.developers}
+            value={current.slug}
+          />
+        }
         renderActions={(snapshot) => telegram.render(snapshot, false)}
         renderStickyAction={(snapshot) => telegram.render(snapshot, true)}
       />
@@ -89,43 +96,17 @@ function useTelegram(
       developerName: current.name,
       actualAt: current.checkedAt,
     };
-    const onCopy = () =>
-      control.copy(
-        snapshot,
-        language,
-        telegramMessage(snapshot, input, language, language === "uz" ? uz : ru),
-      );
+    const message = telegramMessage(snapshot, input, language, language === "uz" ? uz : ru);
     return (
       <TelegramCopy
         control={control}
         language={language}
         onLanguage={setLanguage}
-        onCopy={onCopy}
+        message={message}
+        onCopy={() => control.copy(snapshot, language, message)}
         compact={compact}
       />
     );
   };
   return { render };
-}
-
-/** Застройщик — пилюли (мокап /kalkulyator «01»); смена — новый адрес, данные читает сервер. */
-function DeveloperPills({ screen }: { screen: ClientCalcScreen }) {
-  const t = useTranslations("admin.calc");
-  const router = useRouter();
-  const pathname = usePathname();
-  if (screen.developers.length < 2 || !screen.current) return null;
-  const pills = screen.developers.map((developer) => ({
-    key: developer.slug,
-    label: developer.name,
-  }));
-  return (
-    <FilterPills
-      label={t("developer")}
-      pills={pills}
-      value={screen.current.slug}
-      onChange={(slug) =>
-        router.replace(`${pathname}?developer=${encodeURIComponent(slug)}`, { scroll: false })
-      }
-    />
-  );
 }

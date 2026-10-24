@@ -52,8 +52,14 @@ describe("сообщения для браузера", () => {
     const used = [...clientNamespaces(routeFiles("app/[locale]"))];
     expect(used.length).toBeGreaterThan(0);
     expect(used.filter((namespace) => namespace.startsWith(CABINET_NAMESPACE))).toEqual([]);
-    // Калькулятор сайта (2.6) получит calc своим провайдером — до тех пор раздел никто не читает.
-    expect(used.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
+    // Тексты калькулятора — только /kalkulyator: у неё свой провайдер с CALC_MESSAGES.
+    const outside = routeFiles("app/[locale]").filter(
+      (file) => !/[\\/]kalkulyator[\\/]/.test(file),
+    );
+    const elsewhere = [...clientNamespaces(outside)];
+    expect(elsewhere.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
+    const page = readSource("app/[locale]/kalkulyator/page.tsx");
+    expect(page).toContain("pickMessages(messages, CALC_MESSAGES)");
   });
 
   it("корню /admin хватает разделов входа: каждый useTranslations вне кабинета ими покрыт", () => {

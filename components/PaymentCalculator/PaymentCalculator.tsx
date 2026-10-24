@@ -41,11 +41,17 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
   initialParams: CalcParams;
   modes: readonly PriceMode[];
   developerName: string;
-  /** «Условия актуальны на» — позднее из правки программ и отметки «проверены» (Р5). */
+  /** Отметка «Условия проверены» застройщика: «актуальны на» — позднее из неё и правки программы (Р5). */
   actualAt: string | null;
   extras?: CalcExtras<P> & { decorate?: DecorateRows };
-  /** Над калькулятором — выбор застройщика (кабинет). */
+  /** Выбор застройщика: в кабинете — над калькулятором, на сайте — шаг «01 Застройщик». */
   header?: ReactNode;
+  /** card — одна карточка полей (кабинет, мокап r1), steps — шаги 01–04 (сайт, мокап SiteCalc). */
+  layout?: "card" | "steps";
+  /** Луч по рамке итога (только full) — /kalkulyator (В4 A). */
+  beam?: boolean;
+  /** Внутри экрана (кабинет, расчёт квартиры): блок в янтарной рамке, итог — с нейтральной (В4 A). */
+  embedded?: boolean;
   renderActions?: (snapshot: CalcSnapshot<P>) => ReactNode;
   renderStickyAction?: (snapshot: CalcSnapshot<P>) => ReactNode;
 };
@@ -70,8 +76,12 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
   };
   const totalRef = useRef<HTMLDivElement>(null);
   return (
-    <div className="payment-calculator">
-      {props.header}
+    <div
+      className={
+        props.embedded ? "payment-calculator payment-calculator--embedded" : "payment-calculator"
+      }
+    >
+      {props.layout === "steps" ? null : props.header}
       <div className="payment-calculator__main">
         <CalcInputs {...props} view={view} params={params} update={update} t={t} locale={locale} />
         <div ref={totalRef} className="payment-calculator__result">
@@ -82,7 +92,7 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
       <CalcStickyBar
         watch={totalRef}
         label={snapshot.total.head?.label ?? t("sticky.monthly")}
-        value={snapshot.total.head?.value ?? null}
+        value={snapshot.total.head?.short ?? null}
         action={props.renderStickyAction?.(snapshot)}
       />
     </div>
@@ -95,7 +105,8 @@ type PartProps<P extends CalcProgram> = PaymentCalculatorProps<P> & {
   t: CalcT;
 };
 
-function ResultPanel<P extends CalcProgram>({ snapshot, update, renderActions, t }: PartProps<P>) {
+function ResultPanel<P extends CalcProgram>(props: PartProps<P>) {
+  const { snapshot, update, renderActions, t } = props;
   const { view, total } = snapshot;
   const currency = snapshot.context.rate ? (
     <OutCurrency
@@ -113,6 +124,8 @@ function ResultPanel<P extends CalcProgram>({ snapshot, update, renderActions, t
       problem={total.problem}
       actions={total.head ? renderActions?.(snapshot) : null}
       footnotes={snapshot.footnotes}
+      beam={props.beam}
+      plain={props.embedded}
     />
   );
 }
@@ -137,10 +150,22 @@ function CalcFooter<P extends CalcProgram>({ snapshot, update, t }: PartProps<P>
         rows={compared.rows}
         texts={compareTexts(t)}
         note={compared.note}
-        onSelect={(program) => update({ program })}
+        onSelect={(program) => update(pickFromComparison(view, program))}
       />
     </div>
   );
+}
+
+/** Строка сравнения выбирает программу с её взносом и сроком — итог совпадает со строкой. */
+function pickFromComparison<P extends CalcProgram>(
+  view: CalcView<P>,
+  id: string,
+): Partial<CalcParams> {
+  const option = view.options.find((item) => item.id === id);
+  const row = view.comparison?.rows.find((item) => item.program === option?.program);
+  if (!row) return { program: id, months: null };
+  const { downPct, months } = row.calculation;
+  return { program: id, downPct, months: months > 0 ? months : null };
 }
 
 type OutCurrencyProps = { value: Currency; onChange: (currency: Currency) => void; t: CalcT };

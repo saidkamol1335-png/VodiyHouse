@@ -7,6 +7,12 @@
   scrollbar-width: none;
 }
 
+.filter-pills--wrap {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  overflow-x: visible;
+}
+
 .filter-pills::-webkit-scrollbar {
   display: none;
 }

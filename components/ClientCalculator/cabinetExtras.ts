@@ -8,6 +8,7 @@ import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
 import { discountPctOf } from "@/lib/calc/cabinet/discounts";
 import { downOptionDiscountPct } from "@/lib/calc/cabinet/engine";
 import type { ProgramOption } from "@/lib/calc/options";
+import type { CalcProgram } from "@/lib/calc/programs";
 import { formatPercent } from "@/lib/format";
 
 // Скидки «Расчёта для клиента» (Р1, мокап r1): строки «Цена по прайсу / Скидка за взнос 50% /
@@ -17,15 +18,14 @@ import { formatPercent } from "@/lib/format";
 export type DiscountT = ReturnType<typeof useTranslations<"admin.calcTelegram">>;
 export type AdminCalcT = ReturnType<typeof useTranslations<"admin.calc">>;
 
-const roundPct = (value: number) => Math.round(value * 10) / 10;
-
 /** Строки скидки после «Цены по прайсу»; без скидки — строки как у сайта. */
 export function discountDecorator(labels: DiscountT): DecorateRows {
-  return (rows: TotalRow[], calc: Calculation, context: TotalContext) => {
+  return (rows: TotalRow[], calc: Calculation, context: TotalContext, program: CalcProgram) => {
     if (calc.programPrice >= calc.price) return rows;
     const money = (amount: number) =>
       moneyIn(amount, calc.currency, context.out, context.rate, context.locale);
-    const pct = formatPercent(roundPct((1 - calc.programPrice / calc.price) * 100));
+    // Процент — из условий программы (ступень или «100% оплата»), как на чипах и карточках.
+    const pct = formatPercent(discountPctOf(program as CabinetProgram, calc.tierIndex));
     const discount: TotalRow = {
       key: "discount",
       label:
@@ -64,13 +64,10 @@ function programSuffix(
   return pct > 0 ? t("schemeNote", { pct: formatPercent(pct) }) : null;
 }
 
-export function cabinetExtras(
-  options: readonly ProgramOption<CabinetProgram>[],
-  t: AdminCalcT,
-): CalcExtras<CabinetProgram> {
+export function cabinetExtras(t: AdminCalcT): CalcExtras<CabinetProgram> {
   return {
-    programSuffix: (option) => programSuffix(option, options, t),
-    downBadge: (option, down) => {
+    programSuffix: (option, options) => programSuffix(option, options, t),
+    downBadge: (option, down, options) => {
       const pct = downOptionDiscountPct(option, down, options);
       return pct > 0 ? t("downDiscount", { pct: formatPercent(pct) }) : null;
     },

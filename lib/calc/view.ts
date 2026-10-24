@@ -54,6 +54,21 @@ function downOf(program: CalcProgram, requested: number | null) {
   return { min, down: clamp(requested ?? min, min, DOWN_MAX_PCT) };
 }
 
+/**
+ * Сравнение — на сроке выбранной программы (мокап: тот же срок, если он есть у программы, иначе её
+ * самый длинный), а не на сроке «по умолчанию»: иначе строки посчитаны на разных сроках.
+ */
+function compareOn<P extends CalcProgram>(
+  engine: CalcEngine<P>,
+  options: readonly ProgramOption<P>[],
+  input: CalcInput,
+  result: CalcResult | null,
+) {
+  const applied = result?.ok && result.calculation.months > 0 ? result.calculation.months : null;
+  const programs = options.map((option) => option.program);
+  return engine.compare(programs, { ...input, months: applied ?? input.months });
+}
+
 export function calculatorView<P extends CalcProgram>(
   engine: CalcEngine<P>,
   data: CalcData<P>,
@@ -88,12 +103,7 @@ export function calculatorView<P extends CalcProgram>(
     requestedMonths: params.months,
     input,
     result,
-    comparison: input
-      ? engine.compare(
-          options.map((option) => option.program),
-          input,
-        )
-      : null,
+    comparison: input ? compareOn(engine, options, input, result) : null,
     // Нет курса — итог только в валюте расчёта.
     outCurrency: data.rate ? (params.outCurrency ?? calcCurrency) : calcCurrency,
   };

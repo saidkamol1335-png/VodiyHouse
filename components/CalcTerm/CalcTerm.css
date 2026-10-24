@@ -120,6 +120,11 @@
   box-shadow: var(--chip-on-ring);
 }
 
+.calc-term__field:focus-within {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 .calc-term__input {
   width: 100%;
   min-width: 0;

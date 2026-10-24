@@ -3,6 +3,7 @@ import {
   type CalcT,
   approxIn,
   moneyIn,
+  shortIn,
   termText,
 } from "@/components/PaymentCalculator/calcText";
 import type { Calculation } from "@/lib/calc/calculate";
@@ -20,8 +21,11 @@ export type TotalRow = {
   tone?: "accent" | "minus";
 };
 
-/** approx — «≈ 17 847 000 сум»: та же сумма в другой валюте; без курса — null. */
-export type TotalHead = { label: string; value: string; approx: string | null };
+/**
+ * approx — «≈ 17 847 000 сум»: та же сумма в другой валюте; без курса — null. short — для тесной
+ * липкой полосы телефона: «22,5 млн сум» (мокап MobFlatBank).
+ */
+export type TotalHead = { label: string; value: string; approx: string | null; short: string };
 
 export type TotalContext = {
   out: Currency;
@@ -48,6 +52,7 @@ export function totalHead(calc: Calculation, context: TotalContext): TotalHead {
     label,
     value: money(amount, calc, context),
     approx: approx === null ? null : t("total.approx", { amount: approx }),
+    short: shortIn(amount, calc.currency, context.out, context.rate, context.locale),
   };
 }
 

@@ -1,11 +1,9 @@
 /* Корень /admin: вход, смена пароля, «кабинет недоступен» — и всё, что из этого нужно кабинету
-   (кнопка, поле, панель). Подключает app/admin/layout.tsx; грузится после globals.css. */
+   (панель). Кнопка, поле и строка ответа — в globals.css: их берёт и калькулятор сайта (фаза 2).
+   Подключает app/admin/layout.tsx; грузится после globals.css. */
 
 @import "../components/AdminPanel/AdminPanel.css";
 @import "../components/AdminUnavailable/AdminUnavailable.css";
-@import "../components/Button/Button.css";
-@import "../components/Field/Field.css";
-@import "../components/FormStatus/FormStatus.css";
 @import "../components/LoginBackdrop/LoginBackdrop.css";
 @import "../components/LoginCard/LoginCard.css";
 @import "../components/LoginForm/LoginForm.css";

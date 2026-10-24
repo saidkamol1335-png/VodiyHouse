@@ -12,51 +12,44 @@ type TelegramCopyProps = {
   control: TelegramCopyControl;
   language: CalcLocale;
   onLanguage: (language: CalcLocale) => void;
+  /** Текст, который сейчас уйдёт в буфер: ответ на прошлое копирование — только про него. */
+  message: string | null;
   onCopy: () => void;
-  /** В липкой полосе телефона — кнопка и ответ строкой, без выбора языка. */
+  /** В липкой полосе телефона — одна кнопка; ответ — её подписью (высота полосы не меняется). */
   compact?: boolean;
 };
 
 /** «Скопировать для Telegram» (мокап r1): язык сообщения RU | UZ, кнопка, ответ строкой. */
-export function TelegramCopy({
-  control,
-  language,
-  onLanguage,
-  onCopy,
-  compact = false,
-}: TelegramCopyProps) {
+export function TelegramCopy(props: TelegramCopyProps) {
   const t = useTranslations("calc");
-  const { status, pending } = control;
-  const button = (
-    <Button
-      variant={compact ? "primary" : "ghost"}
-      block={!compact}
-      pending={pending}
-      onClick={onCopy}
-    >
-      <Copy size={16} aria-hidden="true" />
-      {t("telegram.copy")}
-    </Button>
-  );
-  if (compact) {
-    // В полосе итог не виден — ответ «Скопировано» здесь же, под кнопкой.
+  const { pending } = props.control;
+  const status = props.control.status?.message === props.message ? props.control.status : null;
+  if (props.compact) {
+    const label = !status
+      ? t("telegram.copy")
+      : status.tone === "success"
+        ? t("telegram.copiedShort")
+        : t("telegram.failedShort");
     return (
-      <div className="telegram-copy telegram-copy--compact">
-        {button}
-        {status ? <FormStatus tone={status.tone}>{status.text}</FormStatus> : null}
-      </div>
+      <Button pending={pending} onClick={props.onCopy}>
+        <Copy size={16} aria-hidden="true" />
+        <span role="status">{label}</span>
+      </Button>
     );
   }
   return (
     <div className="telegram-copy">
-      <LanguageChoice value={language} onChange={onLanguage} />
-      {button}
+      <LanguageChoice value={props.language} onChange={props.onLanguage} />
+      <Button variant="outline" block pending={pending} onClick={props.onCopy}>
+        <Copy size={16} aria-hidden="true" />
+        {t("telegram.copy")}
+      </Button>
       {status ? <FormStatus tone={status.tone}>{status.text}</FormStatus> : null}
       {status?.manual ? (
         <textarea
           className="telegram-copy__manual"
           readOnly
-          value={status.manual}
+          value={status.message}
           aria-label={t("telegram.copy")}
         />
       ) : null}

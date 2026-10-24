@@ -2,8 +2,11 @@
    уже ~900 px контейнера — одна колонка, итог под полями (на телефоне — тёмная панель, Р9).
    Где липнуть, задаёт страница: --payment-calculator-top (под шапкой кабинета или сайта). */
 
+/* Колонки — minmax(0, 1fr): иначе неявная колонка auto растягивается по ленте пилюль
+   застройщиков, и на телефоне появляется горизонтальная прокрутка страницы. */
 .payment-calculator {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   min-width: 0;
   container-type: inline-size;
@@ -11,12 +14,21 @@
 
 .payment-calculator__main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
 
+.payment-calculator--embedded .payment-calculator__main {
+  padding: 16px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-2xl);
+  background: var(--bg-3);
+}
+
 .payment-calculator__inputs {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
   min-width: 0;
   padding: 24px;
@@ -25,12 +37,20 @@
   background: var(--bg-2);
 }
 
+.payment-calculator__steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+
 .payment-calculator__result {
   min-width: 0;
 }
 
 .payment-calculator__footer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   min-width: 0;
 }
@@ -43,6 +63,8 @@
   .payment-calculator__result {
     position: sticky;
     top: var(--payment-calculator-top, 16px);
+    max-height: calc(100dvh - var(--payment-calculator-top, 16px) - 16px);
+    overflow-y: auto;
   }
 }
 

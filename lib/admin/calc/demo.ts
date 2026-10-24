@@ -81,17 +81,16 @@ function developerRecord(panel: PanelRecord): CalcDeveloperRecord {
   const own = (block: number) => panel.blocks.some((item) => blockN(item.id) === block);
   const layouts = LAYOUTS.filter((layout) => own(layout.block));
   const complexes = [...new Map(panel.blocks.map((block) => [block.complex_id, block])).values()];
-  const latest = panel.programs.reduce(
-    (at, item) => (item.updated_at > at ? item.updated_at : at),
-    "",
-  );
   return {
     id: panel.id,
     slug: panel.slug,
     name: panel.name,
-    checked_at: latest,
+    checked_at: panel.programs_checked_at,
     price_hint: panel.price_hint,
-    programs: panel.programs.filter((item) => item.is_active),
+    // Как client_calc_developer: «выбранные» без блоков не действуют — их в расчёте нет.
+    programs: panel.programs.filter(
+      (item) => item.is_active && (item.blocks_scope === "all" || item.block_ids.length > 0),
+    ),
     complexes: complexes.map((complex) => ({
       id: complex.complex_id,
       name: complex.complex_name,

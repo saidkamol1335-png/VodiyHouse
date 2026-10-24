@@ -25,46 +25,7 @@
   --login-card-rise-offset: var(--rise-offset);
 }
 
-/* Луч по рамке (мокап: .beam). В мокапе вращается угол градиента — это перерисовка на каждом
-   кадре; здесь кольцо 1 px вырезано маской, а под ним вращается слой через transform. */
-.login-card__beam {
-  display: none;
-}
-
-[data-motion="full"] .login-card__beam {
-  position: absolute;
-  inset: -1px;
-  display: block;
-  padding: 1px;
-  overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-}
-
-[data-motion="full"] .login-card__beam::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 250%;
-  aspect-ratio: 1;
-  background: conic-gradient(
-    transparent 0deg 280deg,
-    var(--beam-color) 320deg,
-    var(--beam-tip) 340deg,
-    transparent 360deg
-  );
-  transform: translate(-50%, -50%);
-  animation: login-card-beam var(--dur-beam) linear infinite;
-  will-change: transform;
-}
+/* Луч по рамке — общий блок Beam (components/Beam): тот же у итога /kalkulyator. */
 
 .login-card__brand {
   display: flex;
@@ -119,12 +80,6 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes login-card-beam {
-  to {
-    transform: translate(-50%, -50%) rotate(1turn);
   }
 }
 

@@ -6,13 +6,6 @@
   gap: 10px;
 }
 
-.telegram-copy--compact {
-  justify-items: end;
-  gap: 4px;
-  max-width: 60%;
-  font-size: var(--fs-caption);
-}
-
 .telegram-copy__language {
   justify-self: start;
 }

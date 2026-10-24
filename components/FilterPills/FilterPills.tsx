@@ -11,6 +11,8 @@ type FilterPillsProps<Key extends string> = {
   pills: readonly FilterPill<Key>[];
   value: Key;
   onChange: (key: Key) => void;
+  /** Переносить пилюли на новые ряды вместо ленты (мокап PhoneCalc «01 Застройщик»). */
+  wrap?: boolean;
 };
 
 /** Пилюли-фильтры над списком (мокап: «Все застройщики» в «Программах оплаты»): одна выбрана. */
@@ -19,6 +21,7 @@ export function FilterPills<Key extends string>({
   pills,
   value,
   onChange,
+  wrap = false,
 }: FilterPillsProps<Key>) {
   const format = useFormatter();
   const track = useRef<HTMLDivElement>(null);
@@ -27,7 +30,7 @@ export function FilterPills<Key extends string>({
   return (
     <div
       ref={track}
-      className="filter-pills"
+      className={wrap ? "filter-pills filter-pills--wrap" : "filter-pills"}
       role="group"
       aria-label={label}
       data-fade-start={edges.start || undefined}

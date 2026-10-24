@@ -7,7 +7,7 @@ type ButtonProps = {
    * primary — янтарная пилюля с бликом, ghost — прозрачная, danger — прозрачная с красной рамкой
    * для того, что не отменить (мокап: .btn--primary, .btn--ghost, .btn--danger).
    */
-  variant?: "primary" | "ghost" | "danger";
+  variant?: "primary" | "ghost" | "outline" | "danger";
   size?: "md" | "sm";
   block?: boolean;
   /** Ссылка без префикса языка: кабинет и переходы на сайт из кабинета. */

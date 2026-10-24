@@ -96,6 +96,20 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
     );
   });
 
+  it("застройщик, у которого программы ни к одному блоку, — не в списке и не открывается", async () => {
+    const { rows } = await db.admin.query<{ id: string }>(
+      `update payment_programs set blocks_scope = 'selected', block_ids = '{}'
+        where developer_id = (select id from developers where slug = 'demo-kamalak') and is_active
+        returning id`,
+    );
+    const listed = (await screen("demo-kamalak")).developers.map((developer) => developer.slug);
+    expect(listed).not.toContain("demo-kamalak");
+    expect((await screen("demo-kamalak")).current!.slug).not.toBe("demo-kamalak");
+    await db.admin.query("update payment_programs set blocks_scope = 'all' where id = any($1)", [
+      rows.map((row) => row.id),
+    ]);
+  });
+
   it("свободные квартиры — с ценой целиком (цена или цена м² × площадь), без проданных", async () => {
     const current = (await screen()).current!;
     const { rows } = await db.admin.query<{ id: string; price: string | null }>(

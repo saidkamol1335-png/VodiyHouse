@@ -10,8 +10,16 @@ import { settle } from "@/lib/ui/settle";
 
 export type SaveCalculation = (formData: FormData) => Promise<ProgramActionResult<string>>;
 
-/** manual — текст в поле, если буфер обмена недоступен: скопировать руками. */
-export type CopyStatus = { tone: "success" | "error"; text: string; manual?: string } | null;
+/**
+ * Ответ на «Скопировать»: относится к тексту message — расчёт поменялся, ответ уже не про него.
+ * manual — буфер обмена недоступен: этот текст показываем в поле, чтобы скопировать руками.
+ */
+export type CopyStatus = {
+  tone: "success" | "error";
+  text: string;
+  message: string;
+  manual: boolean;
+} | null;
 
 /** Снимок для истории (решение фазы 2): что посчитали; условия и курс база возьмёт сама. */
 function snapshotForm(snapshot: CalcSnapshot<CabinetProgram>, language: CalcLocale): FormData {
@@ -36,21 +44,24 @@ export function useTelegramCopy(save: SaveCalculation) {
   const copy = (
     snapshot: CalcSnapshot<CabinetProgram>,
     language: CalcLocale,
-    text: string | null,
+    message: string | null,
   ) =>
     start(async () => {
-      if (!text) return;
-      const copied = await navigator.clipboard?.writeText(text).then(
+      if (!message) return;
+      const copied = await navigator.clipboard?.writeText(message).then(
         () => true,
         () => false,
       );
       const saved = await settle(() => save(snapshotForm(snapshot, language)), NETWORK_FAILURE);
-      if (!copied) return setStatus({ tone: "error", text: t("telegram.failed"), manual: text });
+      if (!copied) {
+        return setStatus({ tone: "error", text: t("telegram.failed"), message, manual: true });
+      }
       if (saved.status === "error") {
         const reason = tAdmin(`developers.errors.${(saved.error ?? "unknown") as "unknown"}`);
-        return setStatus({ tone: "error", text: tAdmin("calc.notSaved", { reason }) });
+        const text = tAdmin("calc.notSaved", { reason });
+        return setStatus({ tone: "error", text, message, manual: false });
       }
-      setStatus({ tone: "success", text: t("telegram.copied") });
+      setStatus({ tone: "success", text: t("telegram.copied"), message, manual: false });
     });
   return { status, pending, copy };
 }

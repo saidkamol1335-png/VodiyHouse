@@ -15,11 +15,19 @@ import {
 const BUNDLES = ["globals", "site", "admin", "cabinet", "calc", "dev"] as const;
 type Bundle = (typeof BUNDLES)[number];
 
+const siteFiles = routeFiles("app/[locale]");
+const isCalculatorRoute = (file: string) => /[\\/]kalkulyator[\\/]/.test(file);
+
 /** Какие разделы грузит корень маршрутов — в порядке каскада. */
 const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
   site: {
-    entries: [...routeFiles("app/[locale]"), "app/global-not-found.tsx"],
+    entries: [...siteFiles.filter((file) => !isCalculatorRoute(file)), "app/global-not-found.tsx"],
     bundles: ["globals", "site"],
+  },
+  // /kalkulyator (шаг 2.6) — ещё и блоки калькулятора; остальные страницы сайта их не грузят.
+  siteCalculator: {
+    entries: siteFiles.filter(isCalculatorRoute),
+    bundles: ["globals", "site", "calc"],
   },
   adminRoot: { entries: adminRootFiles(), bundles: ["globals", "admin"] },
   cabinet: {
@@ -31,6 +39,7 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
 
 const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/layout.tsx": ["globals", "site"],
+  "app/[locale]/kalkulyator/layout.tsx": ["calc"],
   "app/global-not-found.tsx": ["globals", "site"],
   "app/admin/layout.tsx": ["globals", "admin"],
   "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],

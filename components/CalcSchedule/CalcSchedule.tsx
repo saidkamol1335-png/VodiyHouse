@@ -78,9 +78,15 @@ function SchedulePanel({
         </tbody>
         <ScheduleFoot columns={columns} rows={rows} money={money} t={t} />
       </table>
-      {!all && rows.length > FIRST_ROWS ? (
-        <button type="button" className="calc-schedule__more" onClick={() => setAll(true)}>
-          {t("schedule.more", { count: rows.length })}
+      {rows.length > FIRST_ROWS ? (
+        // Одна кнопка на месте: «Показать все N» ↔ «Свернуть» — фокус не теряется.
+        <button
+          type="button"
+          className="calc-schedule__more"
+          aria-expanded={all}
+          onClick={() => setAll(!all)}
+        >
+          {all ? t("schedule.less") : t("schedule.more", { count: rows.length })}
         </button>
       ) : null}
     </div>

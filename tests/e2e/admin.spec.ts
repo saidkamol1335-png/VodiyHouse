@@ -75,12 +75,13 @@ test.describe("экран входа /admin/vhod", () => {
 
   test("К1.2: луч по рамке только в full, вращается через transform", async ({ page }) => {
     await page.goto("/admin/vhod?motion=full");
-    const beam = page.locator(".login-card__beam");
+    // Луч — общий блок Beam (тот же у итога калькулятора, шаг 2.6).
+    const beam = page.locator(".login-card .beam");
     await expect(beam).toBeVisible();
     const beamAnimation = await beam.evaluate(
       (element) => getComputedStyle(element, "::before").animationName,
     );
-    expect(beamAnimation).toBe("login-card-beam");
+    expect(beamAnimation).toBe("beam-turn");
     await page.goto("/admin/vhod?motion=lite");
     await expect(beam).toBeHidden();
   });

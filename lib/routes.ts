@@ -13,7 +13,7 @@ export const ROUTES = {
 } as const;
 
 /** Публичные страницы, которые уже есть в коде. Остальные адреса шапки — разделы фазы 3. */
-const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home]);
+const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home, ROUTES.calculator]);
 
 export function isRouteReady(pathname: string | null | undefined): boolean {
   return typeof pathname === "string" && READY_ROUTES.has(pathname);

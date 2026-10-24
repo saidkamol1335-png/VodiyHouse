@@ -138,14 +138,19 @@ export function resolvePrice(
   if (chosen === "layout") return layoutPrice(stock, params);
   const currency = params.inCurrency ?? stock.priceHint?.currency ?? "USD";
   if (chosen === "sum") return { ...empty("sum", currency), price: parseAmountText(params.sum) };
-  // Площадь × цена м²: цена м² по умолчанию — в валюте подсказки; валюту сменили — поле пустое.
+  // Площадь × цена м²: по умолчанию — 60 м² и цена м² подсказки (в её валюте; валюту сменили —
+  // поле пустое). Набранное, но пустое или чужое — не подменяем: «Введите стоимость».
   const sameCurrency = currency === (stock.priceHint?.currency ?? currency);
-  const areaM2 = parseAmountText(params.area) ?? DEFAULT_AREA_M2;
+  const areaM2 = params.area === null ? DEFAULT_AREA_M2 : parseAmountText(params.area);
   const perM2 =
-    parseAmountText(params.perM2) ?? (sameCurrency ? defaultPerM2(stock.priceHint) : null);
+    params.perM2 === null
+      ? sameCurrency
+        ? defaultPerM2(stock.priceHint)
+        : null
+      : parseAmountText(params.perM2);
   return {
     ...empty("area", currency),
-    price: perM2 === null ? null : areaM2 * perM2,
+    price: perM2 === null || areaM2 === null ? null : areaM2 * perM2,
     areaM2,
     perM2,
   };

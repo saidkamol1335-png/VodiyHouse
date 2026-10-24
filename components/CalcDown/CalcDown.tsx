@@ -41,9 +41,9 @@ export function CalcDown(props: CalcDownProps) {
         <h3 id={`${id}-title`} className="calc-down__title">
           {props.title} <span className="calc-down__min">· {props.minText}</span>
         </h3>
-        <output htmlFor={id} className="calc-down__value">
+        <span className="calc-down__value" aria-hidden="true">
           {props.valueText}
-        </output>
+        </span>
       </div>
       <input
         id={id}

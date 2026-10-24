@@ -47,6 +47,23 @@
     "skeleton": "Sayt karkasi · 0-bosqich"
   },
   "calc": {
+    "page": {
+      "metaTitle": "Muddatli to‘lov va ipoteka kalkulyatori — Vodiy House",
+      "metaDescription": "Farg‘ona yangi uylaridagi kvartira uchun oylik to‘lov, ortiqcha to‘lov va yakuniy narxni hisoblang: quruvchidan va bank orqali muddatli to‘lov, ipoteka.",
+      "eyebrow": "Kalkulyator",
+      "title": "Kalkulyator:",
+      "titleAccent": "muddatli to‘lov va ipoteka",
+      "lead": "Quruvchi va dasturni tanlang — oylik to‘lov, ortiqcha to‘lov va yakuniy narx darhol hisoblanadi.",
+      "examples": "Hisob-kitob namunalari",
+      "example": "{area} m² · {term}",
+      "empty": "Kalkulyator quruvchilar to‘lov dasturlarini qo‘shganda ishlaydi. Hozircha birga hisoblaymiz — Vodiy House’ga yozing."
+    },
+    "steps": {
+      "developer": "Quruvchi",
+      "program": "To‘lov dasturi",
+      "price": "Kvartira narxi",
+      "downTerm": "Boshlang‘ich to‘lov va muddat"
+    },
     "kinds": {
       "full": "100% to‘lov",
       "scheme": "Quruvchidan muddatli to‘lov",
@@ -61,9 +78,9 @@
     "programs": {
       "title": "To‘lov dasturi",
       "full": "butun summa birdaniga, to‘lovlarsiz",
-      "scheme": "{down} dan · {term} gacha · ustamasiz",
-      "markup": "{down} dan · {term} gacha · ustama {rate} gacha",
-      "bank": "{down} dan · {term} gacha · yillik {rate}",
+      "scheme": "kamida {down} · {term}gacha · ustamasiz",
+      "markup": "kamida {down} · {term}gacha · ustama {rate}gacha",
+      "bank": "kamida {down} · {term}gacha · yillik {rate}",
       "blocks": "{complex}, {block} blok",
       "empty": "Bu narx uchun dasturlar yo‘q — shartlarni Vodiy House aniqlaydi"
     },
@@ -82,7 +99,7 @@
       "unitGroup": "{complex}, {block} blok",
       "noUnits": "Narxi bor bo‘sh kvartiralar yo‘q — maydon bo‘yicha hisoblang",
       "layout": "Planirovka",
-      "layoutOption": "{rooms} · {area} m² · {price} dan",
+      "layoutOption": "{rooms} · {area} m² · {price}dan",
       "layoutNoPrice": "{rooms} · {area} m² · narxi so‘rov bo‘yicha",
       "noLayouts": "Narxi bor planirovkalar yo‘q — maydon bo‘yicha hisoblang",
       "area": "Maydon",
@@ -102,7 +119,7 @@
       "value": "{pct} · {amount}",
       "slider": "Boshlang‘ich to‘lov, %",
       "options": "Boshlang‘ich to‘lov variantlari",
-      "upTo": "{term} gacha",
+      "upTo": "{term}gacha",
       "now": "darhol"
     },
     "term": {
@@ -116,10 +133,10 @@
       "less": "Bir oy kamroq",
       "more": "Bir oy ko‘proq",
       "unit": "oy",
-      "hint": "Istalgan butun oylar soni: {down} boshlang‘ich to‘lovda {min} dan {max} gacha",
+      "hint": "Istalgan butun oylar soni: {min}–{max} oy, boshlang‘ich to‘lov {down} bo‘lganda",
       "aboveMax": "{down} boshlang‘ich to‘lovda ko‘pi bilan {max} oy — {max} oyga hisoblaymiz",
       "suggest": "{months} oy — {from}–{to} boshlang‘ich to‘lovda. Hozir {max} oyga hisoblaymiz",
-      "suggestButton": "{from} ni qo‘yish",
+      "suggestButton": "Boshlang‘ich to‘lov: {from}",
       "lead": "{down} boshlang‘ich to‘lovda {max} oydan ko‘p — quruvchidan aniqlaymiz",
       "belowMin": "Kamida {min} oy — {min} oyga hisoblaymiz"
     },
@@ -164,7 +181,8 @@
       "markup": "Ustama",
       "balance": "Qoldiq",
       "total": "Jami",
-      "more": "Hammasini ko‘rsatish ({count})"
+      "more": "Hammasini ko‘rsatish ({count})",
+      "less": "Yig‘ish"
     },
     "compare": {
       "title": "Barcha dasturlar",
@@ -192,13 +210,32 @@
       "signature": "Vodiy House",
       "unit": "{place} · {number}-kv., {floor}-qavat, {area} m²",
       "area": "{area} m² × {perM2}",
-      "layout": "{place} · {rooms}, {area} m²"
+      "layout": "{place} · {rooms}, {area} m²",
+      "link": "Hisob-kitob: {url}",
+      "unitNoArea": "{place} · {number}-kv., {floor}-qavat",
+      "copiedShort": "Nusxalandi",
+      "failedShort": "Nusxalanmadi — matn natijada"
     },
     "sticky": {
-      "monthly": "Oylik to‘lov"
+      "monthly": "Oylik to‘lov",
+      "toTotal": "Hisob-kitobga"
     },
     "months": "{count} oy",
-    "years": "{count} yil"
+    "years": "{count} yil",
+    "lead": {
+      "open": "Aniq hisob-kitob olish",
+      "title": "Aniq hisob-kitob",
+      "close": "Yopish",
+      "name": "Ism",
+      "phone": "Telefon",
+      "phonePlaceholder": "+998 XX XXX XX XX",
+      "submit": "Yuborish",
+      "consent": "«Yuborish» tugmasini bosib, shaxsiy ma’lumotlarni qayta ishlashga rozilik bildirasiz.",
+      "next": "Keyin nima: Vodiy House menejeri qo‘ng‘iroq qiladi, shartlarni quruvchi bilan tekshiradi va aniq hisob-kitobni yuboradi.",
+      "required": "To‘ldiring",
+      "phoneInvalid": "Raqam +998 XX XXX XX XX ko‘rinishida",
+      "stand": "Stend: ariza yuborilmaydi — unga nima kirishi quyida"
+    }
   },
   "admin": {
     "calcTelegram": {

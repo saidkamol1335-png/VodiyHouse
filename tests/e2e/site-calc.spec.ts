@@ -1,0 +1,121 @@
+import { expect, test, type Page } from "@playwright/test";
+import { collectPageErrors } from "./helpers";
+
+// Шаг 2.6: /kalkulyator на стенде /dev/kalkulyator (DEMO мокапа через тот же преобразователь
+// ответа базы): шаги 01–04, примеры SiteCalc1 и SiteCalc2, без скидок (PLAN §3.13), окно
+// «Получить точный расчёт» (на сайте — после заявок фазы 3), текст для Telegram со ссылкой.
+
+const STAND = "/dev/kalkulyator";
+const total = (page: Page) => page.getByTestId("calc-total");
+const head = (page: Page) => total(page).locator(".calc-total__value");
+// Подпись — с начала строки: «Стоимость» не должна совпасть с «Итоговая стоимость».
+const row = (page: Page, label: string) =>
+  total(page)
+    .locator(".calc-total__row")
+    .filter({ has: page.locator("dt", { hasText: new RegExp(`^${label}`) }) })
+    .locator("dd");
+const amount = (text: string) => new RegExp(`^${text.replace(/\$/g, "\\$").replace(/ /g, "\\s")}$`);
+
+async function open(page: Page, query = "", path = STAND) {
+  await page.goto(`${path}${query}`);
+  await expect(total(page)).toBeVisible();
+  await page.waitForLoadState("networkidle");
+}
+
+test.describe("сайт · калькулятор", () => {
+  let errors: string[];
+
+  test.beforeEach(({ page }) => {
+    errors = collectPageErrors(page);
+  });
+
+  test.afterEach(() => {
+    expect(errors).toEqual([]);
+  });
+
+  test("шаги 01–04 и пример SiteCalc1: 120 м² × $700, Ipoteka Bank 20 % · 24 мес.", async ({
+    page,
+  }) => {
+    await open(page);
+    await expect(page.locator(".calc-step__title")).toHaveText([
+      /01\s*Застройщик/,
+      /02\s*Программа оплаты/,
+      /03\s*Стоимость квартиры/,
+      /04\s*Взнос и срок/,
+    ]);
+    await page.getByRole("link", { name: /120 м² · 2 года/ }).click();
+    await expect(head(page)).toHaveText(amount("39 617 000 сум"));
+    await expect(total(page)).toContainText(/≈ \$3\s355/);
+    await expect(row(page, "Стоимость")).toHaveText(amount("991 936 000 сум"));
+    await expect(row(page, "Проценты банка")).toHaveText(amount("157 264 000 сум"));
+    await expect(row(page, "Переплата")).toHaveText(amount("166 700 000 сум"));
+    await expect(row(page, "Итоговая стоимость")).toHaveText(amount("1 158 636 000 сум"));
+    await total(page)
+      .getByRole("group", { name: "Валюта итога" })
+      .getByRole("button", { name: "$" })
+      .click();
+    await expect(head(page)).toHaveText(amount("$3 355"));
+  });
+
+  test("PLAN §7: $100 000, взнос 50 %, свой срок 17 → на сайте $2 941, без строк скидки", async ({
+    page,
+  }) => {
+    await open(page, "?mode=sum&sum=100000&in=USD&down=50&months=17");
+    await expect(head(page)).toHaveText(amount("$2 941"));
+    await expect(row(page, "Первоначальный взнос · 50%")).toHaveText(amount("$50 000"));
+    await expect(page.locator("main")).not.toContainText(/скидк/i);
+    await expect(page.locator(".calc-down__chip-badge")).toHaveCount(0);
+  });
+
+  test("окно «Получить точный расчёт»: проверка полей, что попадёт в заявку, Escape закрывает", async ({
+    page,
+  }) => {
+    await open(page);
+    await total(page).getByRole("button", { name: "Получить точный расчёт" }).click();
+    const dialog = page.getByRole("dialog", { name: "Точный расчёт" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Отправить" }).click();
+    await expect(dialog.getByText("Заполните")).toHaveCount(2);
+    await dialog.getByLabel("Имя").fill("Азиз");
+    await dialog.getByLabel("Телефон").fill("90 12");
+    await dialog.getByRole("button", { name: "Отправить" }).click();
+    await expect(dialog.getByText("Номер в формате +998 XX XXX XX XX")).toBeVisible();
+    await dialog.getByLabel("Телефон").fill("+998 90 123 45 67");
+    await dialog.getByRole("button", { name: "Отправить" }).click();
+    await expect(dialog.getByText("Стенд: заявка не отправляется")).toBeVisible();
+    await expect(dialog.locator(".calc-lead__rows")).toContainText("+998901234567");
+    await expect(dialog.locator(".calc-lead__rows")).toContainText("Рассрочка от застройщика");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
+
+  test("Telegram: текст без скидок и со ссылкой на этот расчёт", async ({ page }) => {
+    await page.addInitScript(() => {
+      const copied: string[] = [];
+      Object.defineProperty(window, "__copied", { value: copied });
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: async (text: string) => void copied.push(text) },
+      });
+    });
+    await open(page, "?mode=sum&sum=100000&in=USD&down=50&months=17");
+    await total(page).getByRole("button", { name: "Скопировать для Telegram" }).click();
+    await expect(total(page).getByText("Скопировано — вставьте в Telegram")).toBeVisible();
+    const text = await page.evaluate(
+      () => (window as unknown as { __copied: string[] }).__copied[0],
+    );
+    expect(text).toMatch(/Платёж в месяц: \$2\s941/);
+    expect(text).toMatch(/Расчёт: http:\/\/localhost:\d+\/dev\/kalkulyator\?.*months=17/);
+    expect(text).not.toMatch(/скидк/i);
+  });
+
+  test("по-узбекски: заголовок, шаги, so‘m и текст без русских слов", async ({ page }) => {
+    await open(page, "", `${STAND}/uz`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Kalkulyator: muddatli to‘lov va ipoteka",
+    );
+    await expect(page.locator(".calc-step__title").first()).toHaveText(/01\s*Quruvchi/);
+    await page.getByRole("link", { name: /120 m² · 2 yil/ }).click();
+    await expect(head(page)).toHaveText(amount("39 617 000 so‘m"));
+    await expect(page.locator(".payment-calculator")).not.toContainText(/[а-яё]/i);
+  });
+});
