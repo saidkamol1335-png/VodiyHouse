@@ -120,6 +120,12 @@ describe("рассрочка с наценкой и банки (PLAN §7)", () =
     expect(noRate).toEqual({ ok: false, problem: "noRate" });
     expect(calculate(SIFAT_SCHEME, usd(0, 50, null))).toEqual({ ok: false, problem: "noPrice" });
   });
+
+  // Недописанный срок в превью редактора (2.4) давал «0 мес. → ∞/мес».
+  it("срок 0 мес. не считается: нет сроков, а не деление на ноль", () => {
+    const zero = { ...markup, terms: [{ months: 0, ratePct: 10 }] };
+    expect(calculate(zero, usd(60_000, 30, null))).toEqual({ ok: false, problem: "noTerms" });
+  });
 });
 
 describe("числа экранов мокапа", () => {

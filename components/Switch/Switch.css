@@ -1,0 +1,81 @@
+/* Тумблер мокапа (.switch 44×26, включён — --ok со свечением). Анимируются только transform и
+   opacity (CLAUDE.md §3): фон «включено» — слой ::before, ручка — ::after со сдвигом. */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--touch-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch:disabled {
+  cursor: default;
+  opacity: var(--opacity-disabled);
+}
+
+.switch__track {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  background: var(--switch-off-bg);
+  border: 1px solid var(--line-2);
+}
+
+.switch__track::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--ok);
+  box-shadow: var(--switch-on-glow);
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+
+.switch__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--switch-knob);
+  box-shadow: var(--switch-knob-shadow);
+  transition: transform var(--dur-base) var(--ease);
+}
+
+.switch--on {
+  color: var(--fg);
+}
+
+.switch--on .switch__track::before {
+  opacity: 1;
+}
+
+.switch--on .switch__track::after {
+  transform: translateX(18px);
+}
+
+.switch:focus-visible {
+  outline: none;
+}
+
+.switch:focus-visible .switch__track {
+  box-shadow: 0 0 0 3px var(--field-ring);
+}
+
+/* Свечение включённого — статичная тень мокапа; без анимаций (none) его нет. */
+[data-motion="none"] .switch__track::before {
+  box-shadow: none;
+}

@@ -55,6 +55,18 @@ export function expireDictionaries(): void {
   updateTag(DICTIONARIES_TAG);
 }
 
+/**
+ * Программы оплаты и курс (фаза 2): калькулятор сайта — 'use cache' + cacheTag(PROGRAMS_TAG);
+ * «Платёж от» на карточках ЖК — ещё CATALOG_TAG; программы на странице застройщика — его тег.
+ */
+export const PROGRAMS_TAG = "payment-programs";
+
+export function expirePrograms(developerId?: string | null): void {
+  updateTag(PROGRAMS_TAG);
+  updateTag(CATALOG_TAG);
+  if (developerId) updateTag(developerTag(developerId));
+}
+
 /** id ЖК из ответа функции базы {complex_id, …}. */
 export function complexIdFrom(data: unknown): string | null {
   if (typeof data !== "object" || data === null) return null;

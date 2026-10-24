@@ -153,7 +153,7 @@ function termsCalculation(
   programPrice: number,
 ): CalcResult {
   const resolved = resolveTermRow(program, input.months);
-  if (!resolved) return { ok: false, problem: "noTerms" };
+  if (!resolved || !(resolved.row.months >= 1)) return { ok: false, problem: "noTerms" };
   const { row, term } = resolved;
   const downPct = clamp(input.downPct, program.minDownPct, DOWN_MAX_PCT);
   const down = (programPrice * downPct) / 100;

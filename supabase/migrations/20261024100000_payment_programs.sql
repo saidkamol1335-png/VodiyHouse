@@ -632,6 +632,24 @@ as $$
     select d.sort, d.name, jsonb_build_object(
       'id', d.id, 'slug', d.slug, 'name', d.name, 'status', d.status,
       'programs_checked_at', d.programs_checked_at,
+      'complexes', (
+        select count(*)::int from public.complexes c where c.developer_id = d.id and c.status <> 'archived'),
+      -- «Пример: 60 м² × $620 …» на карточке (Р8): минимальная цена м² свободных квартир; если
+      -- у застройщика блоки в обеих валютах — в долларах.
+      'price_hint', (
+        select jsonb_build_object('per_m2', min(x.per_m2), 'currency', x.currency)
+        from (
+          select coalesce(u.price_per_m2, u.price / nullif(l.area, 0)) as per_m2, b.currency
+          from public.units u
+          join public.blocks b on b.id = u.block_id
+          join public.complexes c on c.id = b.complex_id
+          left join public.layouts l on l.id = u.layout_id
+          where c.developer_id = d.id and c.status <> 'archived' and u.status = 'free'
+        ) as x
+        where x.per_m2 > 0
+        group by x.currency
+        order by x.currency = 'USD' desc
+        limit 1),
       'blocks', (
         select coalesce(jsonb_agg(jsonb_build_object(
           'id', b.id, 'name', b.name, 'complex_id', c.id, 'complex_name', c.name, 'currency', b.currency

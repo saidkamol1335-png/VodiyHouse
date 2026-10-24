@@ -1,0 +1,200 @@
+/* Открытая карточка программы (Р2, В1 B): на всю ширину сетки; шире ~960 px — поля слева,
+   справа липкое превью; уже — превью над полями. Раскрытие — opacity и сдвиг (как И4). */
+
+.program-editor {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line-3);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  container-type: inline-size;
+  animation: program-editor-in var(--dur-fast) var(--ease) both;
+}
+
+.program-editor__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  letter-spacing: var(--ls-h4);
+}
+
+.program-editor__layout {
+  display: grid;
+  gap: 20px;
+}
+
+.program-editor__fields {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.program-editor__preview {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  order: -1;
+}
+
+.program-editor__preview-label,
+.program-editor__label,
+.program-editor__legend {
+  margin: 0;
+  padding: 0;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.program-editor__basics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.program-editor__segment {
+  align-self: end;
+  justify-self: start;
+}
+
+.program-editor__rules,
+.program-editor__blocks {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.program-editor__presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.program-editor__preset {
+  min-height: var(--touch-target);
+  padding: 0 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.program-editor__preset[aria-pressed="true"] {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+  color: var(--fg);
+}
+
+.program-editor__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--touch-target);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.program-editor__check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--amber);
+}
+
+.program-editor__over {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.program-editor__block-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.program-editor__hint {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.program-editor__error {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-small);
+}
+
+.program-editor__footer {
+  display: grid;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--dash);
+}
+
+.program-editor__actions,
+.program-editor__extra,
+.program-editor__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.program-editor__extra {
+  justify-content: space-between;
+}
+
+.program-editor__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+/* 960, а не 1100: на 1440 с меню у карточки ~1040 px — превью должно встать справа уже там. */
+@container (min-width: 960px) {
+  .program-editor__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    align-items: start;
+  }
+
+  .program-editor__preview {
+    order: 0;
+    position: sticky;
+    top: calc(var(--admin-topbar-h) + 16px);
+  }
+}
+
+/* На телефоне «Сохранить» прилипает к низу (Р2, как «Сохранить вкладку» шага 11). */
+@media (max-width: 760px) {
+  .program-editor__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--z-sticky-actions);
+    padding: 12px 0;
+    background: var(--bg-2);
+  }
+}
+
+@keyframes program-editor-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

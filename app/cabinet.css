@@ -13,9 +13,11 @@
 @import "../components/SearchField/SearchField.css";
 @import "../components/SelectField/SelectField.css";
 @import "../components/SortHandle/SortHandle.css";
+@import "../components/Switch/Switch.css";
 @import "../components/UnitPriceFields/UnitPriceFields.css";
 
 /* Составные блоки и разделы. */
+@import "../components/ActionToast/ActionToast.css";
 @import "../components/AdminBrand/AdminBrand.css";
 @import "../components/AdminDenied/AdminDenied.css";
 @import "../components/AdminEntityHead/AdminEntityHead.css";
@@ -50,6 +52,12 @@
 @import "../components/JournalList/JournalList.css";
 @import "../components/LiveStatus/LiveStatus.css";
 @import "../components/MediaDrop/MediaDrop.css";
+@import "../components/PaymentPrograms/PaymentPrograms.css";
+@import "../components/PaymentPrograms/ProgramPanel.css";
+@import "../components/PaymentPrograms/ProgramRate.css";
+@import "../components/ProgramCard/ProgramCard.css";
+@import "../components/ProgramEditor/ProgramEditor.css";
+@import "../components/ProgramEditor/ProgramRows.css";
 @import "../components/PublishCheck/PublishCheck.css";
 @import "../components/RisersEditor/RisersEditor.css";
 @import "../components/Rule12Check/Rule12Check.css";

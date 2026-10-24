@@ -16,14 +16,19 @@ const keysFor = (role: Parameters<typeof visibleNav>[0]) =>
   visibleNav(role, allReady).map((item) => item.key);
 
 describe("меню кабинета", () => {
-  it("сейчас: руководитель — Главная, ЖК, Застройщики и Настройки; менеджер — Главная и ЖК (12.6)", () => {
+  it("сейчас: руководитель — Главная, ЖК, Застройщики, Программы, Настройки; менеджер — Главная, ЖК, Программы (2.4)", () => {
     expect(visibleNav("head").map((item) => item.key)).toEqual([
       "home",
       "complexes",
       "developers",
+      "programs",
       "settings",
     ]);
-    expect(visibleNav("manager").map((item) => item.key)).toEqual(["home", "complexes"]);
+    expect(visibleNav("manager").map((item) => item.key)).toEqual([
+      "home",
+      "complexes",
+      "programs",
+    ]);
     expect(visibleNav("videographer")).toEqual([]);
     expect(isSectionOpen("manager", "complexes")).toBe(true);
     expect(isSectionOpen("manager", "developers")).toBe(false);
@@ -36,7 +41,7 @@ describe("меню кабинета", () => {
     expect(isSectionOpen("head", "complexes", partly)).toBe(true);
     expect(isSectionOpen("manager", "complexes", partly)).toBe(false);
     expect(isSectionOpen("manager", "home", partly)).toBe(true);
-    expect(visibleNav("manager", partly).map((item) => item.key)).toEqual(["home"]);
+    expect(visibleNav("manager", partly).map((item) => item.key)).toEqual(["home", "programs"]);
   });
 
   it("руководитель видит все 8 разделов в порядке PLAN §7", () => {

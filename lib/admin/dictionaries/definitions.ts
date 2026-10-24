@@ -9,13 +9,15 @@ import {
 import { readText } from "../credentials";
 
 // «Настройки → Справочники» (решение Д6, ТЗ 13.2): города и районы, типы документов, темы
-// деталей, уровни отделки. Подсказки к терминам — с расчётом (фаза 2): их набор задаёт код.
+// деталей, уровни отделки, банки программ оплаты (фаза 2). Подсказки к терминам — с расчётом:
+// их набор задаёт код.
 
 export const DICTIONARY_KEYS = [
   "locations",
   "document_types",
   "detail_topics",
   "finishings",
+  "banks",
 ] as const;
 export type DictionaryKey = (typeof DICTIONARY_KEYS)[number];
 
@@ -36,6 +38,7 @@ export const DICTIONARIES: Record<DictionaryKey, DictionaryDefinition> = {
   document_types: { second: "hint", hasKind: false, slugFallback: "hujjat" },
   detail_topics: { second: null, hasKind: false, slugFallback: "mavzu" },
   finishings: { second: "description", hasKind: false, slugFallback: "pardoz" },
+  banks: { second: null, hasKind: false, slugFallback: "bank" },
 };
 
 export const DICTIONARY_LIMITS = { nameMax: 80, secondMax: 300, maxItems: 500 } as const;

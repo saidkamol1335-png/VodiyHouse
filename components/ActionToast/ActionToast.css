@@ -1,0 +1,79 @@
+/* Итог действия (мокап: .toast): справа снизу колонки контента, на телефоне — во всю ширину.
+   Появление — opacity и transform (CLAUDE.md §3); в none — сразу. */
+
+.action-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: var(--z-popover);
+  max-width: min(440px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.action-toast__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px 10px 14px;
+  border-radius: var(--r-l);
+  border: 1px solid var(--line-2);
+  background: var(--panel-bg);
+  box-shadow: var(--toast-shadow);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  pointer-events: auto;
+  animation: action-toast-in var(--dur-fast) var(--ease) both;
+}
+
+.action-toast__item--success .action-toast__icon {
+  color: var(--ok);
+}
+
+.action-toast__item--error .action-toast__icon {
+  color: var(--bad);
+}
+
+.action-toast__icon {
+  flex: none;
+}
+
+.action-toast__text {
+  flex: 1;
+}
+
+.action-toast__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  margin: -8px 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-3);
+  cursor: pointer;
+}
+
+.action-toast__close:hover,
+.action-toast__close:focus-visible {
+  color: var(--fg);
+}
+
+@keyframes action-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 760px) {
+  .action-toast {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+}

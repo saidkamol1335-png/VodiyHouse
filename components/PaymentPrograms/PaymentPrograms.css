@@ -1,0 +1,39 @@
+/* Экран «Программы оплаты» (мокап CabProg): синяя плашка, ряд пилюль застройщиков и строка курса,
+   панели застройщиков ниже. */
+
+.payment-programs {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Плашка мокапа .notice--info. */
+.payment-programs__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--badge-blue-border);
+  border-radius: var(--r-m);
+  background: var(--blue-soft);
+  color: var(--badge-blue-fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.payment-programs__notice svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.payment-programs__toolbar {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.payment-programs__empty {
+  margin: 0;
+  color: var(--fg-3);
+}

@@ -1,0 +1,44 @@
+/* Строка курса (мокап: моно-строка «КУРС ЦБ: 1$ = 11808,76 СУМ · 01.10.2026») и у руководителя —
+   кнопки «Зафиксировать» / «Вернуть курс ЦБ» с полем на месте (Р6). */
+
+.program-rate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+}
+
+.program-rate__line,
+.program-rate__none {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+}
+
+.program-rate__line {
+  color: var(--fg-3);
+}
+
+.program-rate__none {
+  color: var(--amber-2);
+}
+
+.program-rate__buttons,
+.program-rate__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+
+.program-rate__form {
+  align-items: center;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}

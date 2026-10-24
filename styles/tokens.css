@@ -161,6 +161,11 @@
 
   --ok: #178048;
   --ok-soft: rgba(23, 128, 72, 0.1);
+  /* тумблер мокапа (.switch): выключен — светлая подложка, включён — --ok со свечением */
+  --switch-off-bg: rgba(255, 255, 255, 0.94);
+  --switch-knob: #fff;
+  --switch-knob-shadow: 0 1px 3px rgba(40, 28, 12, 0.12);
+  --switch-on-glow: 0 0 18px rgba(91, 212, 140, 0.22);
   --bad: #c9402f;
   --bad-soft: rgba(201, 64, 47, 0.08);
   --blue: #2a66cc;
@@ -318,6 +323,9 @@
 
   --ok: #5bd48c;
   --ok-soft: rgba(91, 212, 140, 0.13);
+  --switch-off-bg: rgba(255, 240, 220, 0.14);
+  --switch-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --switch-on-glow: 0 0 18px rgba(91, 212, 140, 0.4);
   --bad: #ff7a6b;
   --bad-soft: rgba(255, 122, 107, 0.12);
   --blue: #7cb4ff;

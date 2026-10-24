@@ -37,7 +37,7 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
   { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: true },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
-  { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: false },
+  { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: true },
   {
     key: "video",
     href: ADMIN_ROUTES.video,

@@ -16,7 +16,8 @@ import {
 const MIGRATION = readFileSync(
   path.resolve(
     import.meta.dirname,
-    "../../../supabase/migrations/20261020150000_developers_admin.sql",
+    // Последнее определение private.dictionary_table — фаза 2 добавила банки.
+    "../../../supabase/migrations/20261024100000_payment_programs.sql",
   ),
   "utf8",
 );

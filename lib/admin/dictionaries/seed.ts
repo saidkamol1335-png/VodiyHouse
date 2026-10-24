@@ -107,4 +107,6 @@ export const SEED_DICTIONARIES: Record<DictionaryKey, DictionaryItem[]> = {
     { slug: "white-box", name: { ru: "White box", uz: "White box" }, sort: 30 },
     { slug: "turnkey", name: { ru: "Под ключ", uz: "Kalit tayyor" }, sort: 40 },
   ]),
+  // Банков миграция не вставляет: их заводит руководитель (в DEMO — Ipoteka и Ipak Yuli).
+  banks: [],
 };

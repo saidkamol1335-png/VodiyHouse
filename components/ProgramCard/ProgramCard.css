@@ -1,0 +1,189 @@
+/* Карточка программы оплаты (мокап CabProg: .prog-card). Выключенная — приглушены условия, а не
+   кнопки (В3, «Решаю сам»): «Изменить» и «Удалить» у неё нужны. */
+
+.program-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+}
+
+.program-card--preview {
+  background: var(--bg);
+}
+
+.program-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.program-card__mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  font-weight: 600;
+  letter-spacing: var(--ls-mono);
+}
+
+.program-card__titles {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.program-card__title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.program-card__subtitle {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
+.program-card__switch,
+.program-card__state {
+  flex: none;
+}
+
+.program-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Чип мокапа (.terms > span): значение сверху, моно-подпись снизу. */
+.program-card__chip {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  letter-spacing: var(--ls-mono);
+  line-height: var(--lh-snug);
+}
+
+.program-card__chip b {
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: var(--fs-small-l);
+  letter-spacing: normal;
+}
+
+.program-card__kv {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.program-card__row {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 12px;
+  font-size: var(--fs-small);
+}
+
+.program-card__row dt {
+  padding-top: 2px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.program-card__row dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.program-card__example {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.program-card__refusal {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-small);
+}
+
+.program-card--off :is(.program-card__chips, .program-card__kv, .program-card__example) {
+  opacity: var(--opacity-unavailable);
+}
+
+.program-card__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.program-card__chevron {
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.program-card__edit[aria-expanded="true"] .program-card__chevron {
+  transform: rotate(180deg);
+}
+
+.program-card__moves {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.program-card__move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.program-card__move:hover:not(:disabled) {
+  color: var(--fg);
+  border-color: var(--line-3);
+}
+
+.program-card__move:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+
+@media (pointer: coarse) {
+  .program-card__move {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}

@@ -1,0 +1,87 @@
+/* Панель застройщика в «Программах оплаты» (мокап CabProg): шапка со знаком и сетка карточек
+   auto-fill minmax(320px, 1fr), gap 12; на телефоне — одна колонка. */
+
+.program-panel {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: var(--admin-panel-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2xl);
+  background: var(--panel-bg);
+}
+
+.program-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.program-panel__mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-s);
+  background: var(--admin-mark-bg);
+  color: var(--admin-mark-fg);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  font-weight: 600;
+  letter-spacing: var(--ls-mono);
+}
+
+.program-panel__titles {
+  display: grid;
+  flex: 1 1 240px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.program-panel__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  letter-spacing: var(--ls-panel-title);
+}
+
+.program-panel__meta {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.program-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.program-panel__add {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  min-height: 120px;
+  padding: 16px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-xl);
+}
+
+.program-panel__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.program-panel__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}

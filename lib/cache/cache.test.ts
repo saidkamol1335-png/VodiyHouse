@@ -72,6 +72,7 @@ const CONTENT_FILES = [
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",
+  "programs.ts",
   "units.ts",
   "unitsMass.ts",
   "unitsStatus.ts",
@@ -85,7 +86,7 @@ const WITHOUT_TAG = new Set([
   "saveDeveloperPrivateAction",
 ]);
 const EXPIRES =
-  /\b(expireComplex|expireDeveloper|expireDictionaries|markComplexStale|markDeveloperStale)\(/;
+  /\b(expireComplex|expireDeveloper|expireDictionaries|expirePrograms|markComplexStale|markDeveloperStale)\(/;
 
 describe("действия контента сбрасывают кэш сайта", () => {
   const all = readdirSync(ACTIONS_DIR).filter(
