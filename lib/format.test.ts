@@ -4,12 +4,17 @@ import {
   formatDate,
   formatDateTime,
   formatFileSize,
+  formatPercent,
   formatPrice,
+  formatPriceShort,
+  formatRate,
   formatWeekdayDate,
   hourIn,
   initialsOf,
+  parseMonthsInput,
   parsePriceInput,
   relativeStamp,
+  termParts,
 } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
@@ -73,6 +78,32 @@ describe("formatPrice", () => {
     expect(plain(formatPrice(31000, "USD"))).toBe("$31 000");
     expect(plain(formatPrice(40270.4, "USD"))).toBe("$40 270");
     expect(plain(formatPrice(354_123_456, "UZS"))).toBe("354 123 000 сум");
+    expect(plain(formatPrice(354_123_456, "UZS", "uz"))).toBe("354 123 000 so‘m");
+  });
+
+  it("коротко для тесных мест: «22,5 млн сум», «1,2 млрд сум»; доллары и меньше миллиона — полностью", () => {
+    const plain = (text: string) => text.replace(/\s/g, " ");
+    expect(plain(formatPriceShort(22_468_615, "UZS"))).toBe("22,5 млн сум");
+    expect(plain(formatPriceShort(22_468_615, "UZS", "uz"))).toBe("22,5 mln so‘m");
+    expect(plain(formatPriceShort(1_158_636_000, "UZS"))).toBe("1,2 млрд сум");
+    expect(plain(formatPriceShort(950_400, "UZS"))).toBe("950 000 сум");
+    expect(plain(formatPriceShort(1401.18, "USD"))).toBe("$1 401");
+  });
+
+  it("курс, проценты, срок годами от 5 лет", () => {
+    expect(formatRate(11808.76).replace(/\s/g, " ")).toBe("11 808,76");
+    expect(formatPercent(20)).toBe("20%");
+    expect(formatPercent(17.5)).toBe("17,5%");
+    expect(termParts(24)).toEqual({ unit: "months", count: 24 });
+    expect(termParts(180)).toEqual({ unit: "years", count: 15 });
+    expect(termParts(66)).toEqual({ unit: "months", count: 66 });
+  });
+
+  it("свой срок: целое 1–600 мес.", () => {
+    expect(parseMonthsInput("17")).toBe(17);
+    expect(parseMonthsInput(" 600 ")).toBe(600);
+    for (const raw of ["0", "601", "1.5", "-3", "", "abc"])
+      expect(parseMonthsInput(raw)).toBeNull();
   });
 
   it("ввод цены: разряды пробелами (и неразрывными); запятая, точка, минус и 10¹² — ошибка", () => {

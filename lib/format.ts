@@ -1,5 +1,8 @@
-// Форматирование для интерфейса. Даты — по времени Ташкента (PLAN §4: lib/format.ts).
-// Деньги и телефоны появятся здесь вместе с lib/calc (фаза 2) и формами (фаза 3).
+import { type Currency, roundMoney } from "@/lib/calc/money";
+import type { Locale } from "@/lib/i18n/routing";
+
+// Форматирование для интерфейса. Даты — по времени Ташкента (PLAN §4: lib/format.ts), деньги —
+// шагом вывода lib/calc. Телефоны появятся здесь вместе с формами (фаза 3).
 
 export const APP_TIME_ZONE = "Asia/Tashkent";
 
@@ -136,19 +139,66 @@ export function initialsOf(name: string): string {
 }
 
 const GROUPED = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
-const SUM_STEP = 1000;
+/** Число как есть: разряды, до двух знаков после запятой — площадь, набранная сумма, процент. */
+const DECIMAL = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+
+/** Название сума на языке страницы: кабинет — по-русски, сайт — «so‘m» на /uz. */
+const SUM_WORD: Readonly<Record<Locale, string>> = { ru: "сум", uz: "so‘m" };
 
 /**
  * Цена для кабинета и сайта (ТЗ 1.5, предложение): USD — до доллара, «$31 000»; сум — до тысячи,
  * «354 000 000 сум». Хранится цена без округления — округляет только вывод (PLAN §0.10).
  */
-export function formatPrice(amount: number, currency: "USD" | "UZS"): string {
-  if (currency === "USD") return `$${GROUPED.format(Math.round(amount))}`;
-  return `${GROUPED.format(Math.round(amount / SUM_STEP) * SUM_STEP)} сум`;
+export function formatPrice(amount: number, currency: Currency, locale: Locale = "ru"): string {
+  const rounded = GROUPED.format(roundMoney(amount, currency));
+  return currency === "USD" ? `$${rounded}` : `${rounded} ${SUM_WORD[locale]}`;
 }
 
-/** Число как есть: разряды, до двух знаков после запятой — площадь и набранная сумма. */
-const DECIMAL = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+const SHORT_SCALES = [
+  { from: 1_000_000_000, ru: "млрд", uz: "mlrd" },
+  { from: 1_000_000, ru: "млн", uz: "mln" },
+] as const;
+const ONE_DECIMAL = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+
+/** Коротко для тесных мест (липкая панель телефона, мокап MobFlatBank): «22,5 млн сум». */
+export function formatPriceShort(
+  amount: number,
+  currency: Currency,
+  locale: Locale = "ru",
+): string {
+  const scale = SHORT_SCALES.find((item) => Math.abs(amount) >= item.from);
+  if (currency === "USD" || !scale) return formatPrice(amount, currency, locale);
+  return `${ONE_DECIMAL.format(amount / scale.from)} ${scale[locale]} ${SUM_WORD[locale]}`;
+}
+
+const RATE = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Курс как у ЦБ: «11 808,76». */
+export function formatRate(usdUzs: number): string {
+  return RATE.format(usdUzs);
+}
+
+/** «20%», «17,5%» — взнос, ставка, скидка (без пробела, как в мокапе). */
+export function formatPercent(value: number): string {
+  return `${DECIMAL.format(value)}%`;
+}
+
+/** Срок для подписи: от 5 лет ровными годами — «15 лет», иначе — «24 мес.» (мокап). */
+export function termParts(months: number): { unit: "months" | "years"; count: number } {
+  if (months >= 60 && months % 12 === 0) return { unit: "years", count: months / 12 };
+  return { unit: "months", count: months };
+}
+
+/** Свой срок рассрочки — целое число месяцев (PLAN §3.14). */
+export const CUSTOM_MONTHS_MAX = 600;
+
+/** Свой срок, набранный руками: только цифры, 1–600. */
+export function parseMonthsInput(raw: string): number | null {
+  const digits = raw.trim();
+  if (!/^\d{1,3}$/.test(digits)) return null;
+  const months = Number(digits);
+  return months >= 1 && months <= CUSTOM_MONTHS_MAX ? months : null;
+}
 
 /** Сумма, как её набрали, — с разрядами и без округления до тысячи сумов: «8 320 500». */
 export function formatAmount(amount: number): string {
@@ -161,7 +211,7 @@ export function formatArea(area: number): string {
 }
 
 /** «$620/м²», «4 100 000 сум/м²» — цена за м² квартиры (Н3). */
-export function formatPricePerM2(amount: number, currency: "USD" | "UZS"): string {
+export function formatPricePerM2(amount: number, currency: Currency): string {
   return `${formatPrice(amount, currency)}/м²`;
 }
 
