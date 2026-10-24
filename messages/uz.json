@@ -235,6 +235,26 @@
       "required": "To‘ldiring",
       "phoneInvalid": "Raqam +998 XX XXX XX XX ko‘rinishida",
       "stand": "Stend: ariza yuborilmaydi — unga nima kirishi quyida"
+    },
+    "flat": {
+      "eyebrow": "Shu kvartira uchun hisob-kitob",
+      "title": "{rooms} · {area} m²",
+      "place": "{complex} TJM · {block} blok · {developer}",
+      "plan": "Reja: {title}",
+      "close": "Hisob-kitobni yopish",
+      "price": "Narxi",
+      "priceFrom": "Narxi (dan)",
+      "unit": "{number}-kv. · {floor}-qavat",
+      "perM2": "{amount}/m²",
+      "units": "Shu planirovkadagi bo‘sh kvartiralar · {count}",
+      "unitOption": "{number}-kv. · {floor}-qavat · {price}",
+      "unitNoPrice": "{number}-kv. · {floor}-qavat · narxi so‘rov bo‘yicha",
+      "unitChip": "№ {number}",
+      "unitChipNote": "{floor}-qavat · {price}",
+      "unitChipNoPrice": "{floor}-qavat · so‘rov bo‘yicha",
+      "open": "To‘lovni hisoblash",
+      "standTitle": "Stend: shu kvartira uchun hisob-kitob",
+      "standBlock": "Shodlik TJM · {block} blok"
     }
   },
   "admin": {

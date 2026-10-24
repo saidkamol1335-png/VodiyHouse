@@ -56,6 +56,9 @@ const KEYS = {
   outCurrency: "out",
 } as const satisfies Record<keyof CalcParams, string>;
 
+/** Ключи адреса, которые принадлежат расчёту; остальные (utm_*, ?plan=) расчёт не трогает. */
+export const CALC_PARAM_KEYS: readonly string[] = Object.values(KEYS);
+
 type Search = URLSearchParams | Record<string, string | string[] | undefined>;
 
 function readRaw(search: Search, key: string): string | null {

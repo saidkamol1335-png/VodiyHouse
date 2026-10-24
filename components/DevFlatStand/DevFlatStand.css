@@ -1,0 +1,41 @@
+/* Стенд «Расчёта для этой квартиры»: карточки планировок — упрощённый раздел «Планировки» ЖК. */
+
+.dev-flat-stand {
+  display: grid;
+  gap: 24px;
+  padding: 48px 0 64px;
+}
+
+.dev-flat-stand__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+}
+
+.dev-flat-stand__layouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev-flat-stand__layout {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+}
+
+.dev-flat-stand__layout b {
+  font-size: var(--fs-h4);
+}
+
+.dev-flat-stand__layout span {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}

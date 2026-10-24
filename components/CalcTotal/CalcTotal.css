@@ -11,6 +11,13 @@
   background: var(--bg-2);
   box-shadow: var(--shadow-1);
   container-type: inline-size;
+  /* «К расчёту ↓» прокручивает к итогу — он встаёт под липкую шапку страницы, а не за неё. */
+  scroll-margin-top: var(--payment-calculator-top, 16px);
+}
+
+/* Фокус ставит «К расчёту ↓», а не пользователь: рамка не нужна, карточка — не элемент управления. */
+.calc-total:focus {
+  outline: none;
 }
 
 .calc-total--plain {

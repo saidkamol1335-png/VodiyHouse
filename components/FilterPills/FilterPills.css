@@ -7,7 +7,9 @@
   scrollbar-width: none;
 }
 
-.filter-pills--wrap {
+/* Пилюли в несколько рядов того же размера (застройщики /kalkulyator, мокап SiteCalc); у чипов
+   FilterChips — свой модификатор --wrap с меньшими пилюлями. */
+.filter-pills--rows {
   flex-wrap: wrap;
   row-gap: 8px;
   overflow-x: visible;

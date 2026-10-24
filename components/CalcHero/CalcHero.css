@@ -48,6 +48,13 @@
   border-color: var(--chip-on-border);
 }
 
+/* Применённый пример — как выбранная пилюля (мокап SiteCalc1: янтарная рамка и фон). */
+.calc-hero__example--active,
+.calc-hero__example--active:hover {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+}
+
 .calc-hero__example:focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 2px;

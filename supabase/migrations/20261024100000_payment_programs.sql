@@ -828,7 +828,9 @@ as $$
   where b.id = any (p_blocks) and private.is_public_complex(b.complex_id)
 $$;
 
--- Программа для сайта: полей скидки нет вовсе — ни у «100% оплаты», ни у ступеней схемы.
+-- Программа для сайта: полей скидки нет вовсе — ни у «100% оплаты», ни у ступеней схемы. Текста
+-- «Условия для клиента» тоже нет: сайт его не показывает, а свободный текст мог бы принести на сайт
+-- слово «скидка» (PLAN §3б) — вернётся вместе с проверкой, когда понадобится странице ЖК.
 create function private.site_program(p public.payment_programs, p_checked_at timestamptz)
 returns jsonb
 language sql
@@ -846,7 +848,6 @@ as $$
     'preset_months', to_jsonb(p.preset_months), 'allow_custom_months', p.allow_custom_months,
     'over_max_behavior', p.over_max_behavior, 'currency', p.currency,
     'blocks_scope', p.blocks_scope, 'block_ids', to_jsonb(private.public_block_ids(p.block_ids)),
-    'conditions', p.conditions,
     -- «Условия актуальны на» (Р5): позднее из правки и отметки «проверены».
     'updated_at', greatest(p.updated_at, p_checked_at)
   )
@@ -1125,3 +1126,53 @@ comment on function public.site_calc_screen(text) is
 
 revoke all on function public.site_calc_screen(text) from public;
 grant execute on function public.site_calc_screen(text) to anon, authenticated, service_role;
+
+-- ─── «Расчёт для этой квартиры» (шаг 2.7, мокапы SiteJkCalc1, MobFlat) ────────────────────────
+
+-- Планировка опубликованного ЖК для расчёта на странице ЖК (фазы 3–5): блок и его валюта, ЖК,
+-- застройщик с отметкой «Условия проверены», «цена от» и чертёж, свободные квартиры этой
+-- планировки с ценой (как block_units: только свободные, без отделки и дат), программы блока —
+-- без полей скидки (private.site_program, PLAN §3.13). Планировки нет на сайте — null.
+create function public.site_layout_calc(p_layout uuid)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'rate', private.exchange_rate(),
+    'developer', jsonb_build_object('name', d.name, 'checked_at', d.programs_checked_at),
+    'complex', jsonb_build_object('id', c.id, 'name', c.name),
+    'block', jsonb_build_object('id', b.id, 'name', b.name, 'currency', b.currency),
+    'layout', jsonb_build_object(
+      'id', o.layout_id, 'rooms', o.rooms, 'area', o.area, 'price_from', o.price_from,
+      'available', o.available, 'drawing', m.path),
+    'units', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+        'id', u.id, 'number', u.number, 'floor', u.floor,
+        'price', coalesce(u.price, u.price_per_m2 * o.area)
+      ) order by u.floor, u.number), '[]'::jsonb)
+      from public.units u
+      where u.layout_id = o.layout_id and u.status = 'free'),
+    'programs', (
+      select coalesce(jsonb_agg(private.site_program(p, d.programs_checked_at)
+        order by p.sort, p.created_at), '[]'::jsonb)
+      from public.payment_programs p
+      where p.developer_id = d.id and p.is_active
+        and (p.blocks_scope = 'all' or b.id = any (p.block_ids)))
+  )
+  from private.layout_offers o
+  join public.blocks b on b.id = o.block_id
+  join public.complexes c on c.id = b.complex_id
+  join public.developers d on d.id = c.developer_id
+  join public.layouts l on l.id = o.layout_id
+  left join public.media_assets m on m.id = l.drawing_id
+  where o.layout_id = p_layout and private.is_public_complex(c.id)
+$$;
+
+comment on function public.site_layout_calc(uuid) is
+  '«Расчёт для этой квартиры»: планировка опубликованного ЖК, её свободные квартиры с ценой и программы блока без скидок.';
+
+revoke all on function public.site_layout_calc(uuid) from public;
+grant execute on function public.site_layout_calc(uuid) to anon, authenticated, service_role;

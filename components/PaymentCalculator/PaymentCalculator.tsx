@@ -50,8 +50,15 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
   layout?: "card" | "steps";
   /** Луч по рамке итога (только full) — /kalkulyator (В4 A). */
   beam?: boolean;
-  /** Внутри экрана (кабинет, расчёт квартиры): блок в янтарной рамке, итог — с нейтральной (В4 A). */
-  embedded?: boolean;
+  /**
+   * page — страница (/kalkulyator); framed — внутри экрана кабинета: поля и итог в янтарной рамке,
+   * итог — с нейтральной (В4 A); bare — внутри своей рамки (расчёт квартиры): поля без карточки.
+   */
+  surface?: "page" | "framed" | "bare";
+  /** Шапка над калькулятором из состояния (расчёт квартиры: выбранная квартира и её цена). */
+  renderHeader?: (snapshot: CalcSnapshot<P>) => ReactNode;
+  /** Своя «Стоимость» вместо режимов (расчёт квартиры: свободные квартиры планировки). */
+  renderPrice?: (view: CalcView<P>, update: (patch: Partial<CalcParams>) => void) => ReactNode;
   renderActions?: (snapshot: CalcSnapshot<P>) => ReactNode;
   renderStickyAction?: (snapshot: CalcSnapshot<P>) => ReactNode;
 };
@@ -76,11 +83,8 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
   };
   const totalRef = useRef<HTMLDivElement>(null);
   return (
-    <div
-      className={
-        props.embedded ? "payment-calculator payment-calculator--embedded" : "payment-calculator"
-      }
-    >
+    <div className={surfaceClass(props.surface)}>
+      {props.renderHeader?.(snapshot)}
       {props.layout === "steps" ? null : props.header}
       <div className="payment-calculator__main">
         <CalcInputs {...props} view={view} params={params} update={update} t={t} locale={locale} />
@@ -98,6 +102,9 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
     </div>
   );
 }
+
+const surfaceClass = (surface: PaymentCalculatorProps<CalcProgram>["surface"] = "page") =>
+  surface === "page" ? "payment-calculator" : `payment-calculator payment-calculator--${surface}`;
 
 type PartProps<P extends CalcProgram> = PaymentCalculatorProps<P> & {
   snapshot: CalcSnapshot<P>;
@@ -125,7 +132,7 @@ function ResultPanel<P extends CalcProgram>(props: PartProps<P>) {
       actions={total.head ? renderActions?.(snapshot) : null}
       footnotes={snapshot.footnotes}
       beam={props.beam}
-      plain={props.embedded}
+      plain={(props.surface ?? "page") !== "page"}
     />
   );
 }

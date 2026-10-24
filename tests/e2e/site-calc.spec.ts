@@ -76,13 +76,19 @@ test.describe("сайт · калькулятор", () => {
     await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(dialog.getByText("Заполните")).toHaveCount(2);
+    // Фокус — на первое неверное поле: диктор читает его ошибку.
+    await expect(dialog.getByLabel("Имя")).toBeFocused();
     await dialog.getByLabel("Имя").fill("Азиз");
     await dialog.getByLabel("Телефон").fill("90 12");
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(dialog.getByText("Номер в формате +998 XX XXX XX XX")).toBeVisible();
+    await expect(dialog.getByLabel("Телефон")).toBeFocused();
     await dialog.getByLabel("Телефон").fill("+998 90 123 45 67");
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(dialog.getByText("Стенд: заявка не отправляется")).toBeVisible();
+    await expect(dialog.locator(".calc-lead__collected")).toBeFocused();
+    // Собранное — снимок на момент «Отправить»: правка поля после него не меняет заявку.
+    await dialog.getByLabel("Телефон").fill("+998 90");
     await expect(dialog.locator(".calc-lead__rows")).toContainText("+998901234567");
     await expect(dialog.locator(".calc-lead__rows")).toContainText("Рассрочка от застройщика");
     await page.keyboard.press("Escape");
@@ -106,6 +112,45 @@ test.describe("сайт · калькулятор", () => {
     expect(text).toMatch(/Платёж в месяц: \$2\s941/);
     expect(text).toMatch(/Расчёт: http:\/\/localhost:\d+\/dev\/kalkulyator\?.*months=17/);
     expect(text).not.toMatch(/скидк/i);
+  });
+
+  test("ссылка в Telegram воспроизводит расчёт по умолчанию — с программой, площадью и сроком", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: async (text: string) => void localStorage.setItem("copied", text) },
+      });
+    });
+    await open(page);
+    const before = await head(page).textContent();
+    await total(page).getByRole("button", { name: "Скопировать для Telegram" }).click();
+    const text = await page.evaluate(() => localStorage.getItem("copied") ?? "");
+    const link = /Расчёт: (\S+)/.exec(text)![1]!;
+    expect(link).toMatch(
+      /developer=demo-sifat.*program=.*mode=area.*area=60.*m2=\d+.*down=30.*months=36/,
+    );
+    await page.goto(link);
+    await expect(head(page)).toHaveText(before!);
+  });
+
+  test("пример: отмечен, пока расчёт совпадает; повторный клик сбрасывает правки", async ({
+    page,
+  }) => {
+    await open(page);
+    const example = page.getByRole("link", { name: /120 м² · 2 года/ });
+    await example.click();
+    await expect(head(page)).toHaveText(amount("39 617 000 сум"));
+    await expect(example).toHaveAttribute("aria-current", "true");
+    await page
+      .getByRole("region", { name: "Срок" })
+      .getByRole("button", { name: /^12 мес\./ })
+      .click();
+    await expect(head(page)).not.toHaveText(amount("39 617 000 сум"));
+    await expect(example).not.toHaveAttribute("aria-current", "true");
+    await example.click();
+    await expect(head(page)).toHaveText(amount("39 617 000 сум"));
+    await expect(example).toHaveAttribute("aria-current", "true");
   });
 
   test("по-узбекски: заголовок, шаги, so‘m и текст без русских слов", async ({ page }) => {

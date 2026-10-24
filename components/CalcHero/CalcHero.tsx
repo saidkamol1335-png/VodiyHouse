@@ -1,6 +1,6 @@
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
-import Link from "next/link";
+import { CalcHeroExamples } from "./CalcHeroExamples";
 
 /** href — готовый адрес с языком (/ru/kalkulyator?…) или стенда (/dev/kalkulyator?…). */
 export type CalcHeroExample = { href: string; title: string; note: string };
@@ -24,17 +24,7 @@ export function CalcHero({ eyebrow, title, accent, lead, examplesLabel, examples
         {`${title} `}
       </Heading>
       <p className="calc-hero__lead">{lead}</p>
-      {examples.length > 0 ? (
-        <nav className="calc-hero__examples" aria-label={examplesLabel}>
-          <span className="calc-hero__examples-label">{examplesLabel}</span>
-          {examples.map((example) => (
-            <Link key={example.href} href={example.href} className="calc-hero__example">
-              <b>{example.title}</b>
-              <span className="calc-hero__example-note">{example.note}</span>
-            </Link>
-          ))}
-        </nav>
-      ) : null}
+      {examples.length > 0 ? <CalcHeroExamples label={examplesLabel} examples={examples} /> : null}
     </header>
   );
 }

@@ -1,0 +1,181 @@
+/* «Расчёт для этой квартиры» (мокапы SiteJkCalc1, MobFlat, В4 A): шире телефона — панель на месте
+   в янтарной рамке с тёплым бликом справа, без затемнения; на телефоне — шторка снизу почти на весь
+   экран. Один <dialog>: show() на месте, showModal() шторкой. Появление — opacity и сдвиг (§3). */
+
+.flat-calc {
+  position: static;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-2xl);
+  background:
+    radial-gradient(circle at 100% 0, var(--amber-soft), transparent 32%),
+    var(--bg-2);
+  color: var(--fg);
+}
+
+.flat-calc[open] {
+  display: block;
+  animation: flat-calc-in var(--dur-fast) var(--ease) both;
+}
+
+.flat-calc__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "plan heading price close";
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed var(--line-2);
+}
+
+.flat-calc__plan {
+  grid-area: plan;
+  width: 120px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  aspect-ratio: 4 / 3;
+}
+
+.flat-calc__plan img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.flat-calc__heading {
+  display: grid;
+  grid-area: heading;
+  gap: 6px;
+  min-width: 0;
+}
+
+.flat-calc__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-kpi);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+/* Фокус на заголовке ставит само окно при открытии — рамка не нужна, это не элемент управления. */
+.flat-calc__title:focus {
+  outline: none;
+}
+
+.flat-calc__place {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+}
+
+.flat-calc__price {
+  display: grid;
+  grid-area: price;
+  justify-items: end;
+  gap: 4px;
+  text-align: right;
+}
+
+.flat-calc__price-label {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.flat-calc__price-value {
+  color: var(--fg-heading);
+  font-size: var(--fs-kpi);
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.flat-calc__price-details {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.flat-calc__close {
+  display: inline-flex;
+  grid-area: close;
+  align-self: start;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.flat-calc__close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .flat-calc:modal {
+    position: fixed;
+    inset: auto 0 0;
+    max-height: calc(100dvh - 24px);
+    padding: 16px 16px 0;
+    overflow-y: auto;
+    border-width: 1px 0 0;
+    border-color: var(--line);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    background: var(--bg);
+    box-shadow: var(--shadow-3);
+    overscroll-behavior: contain;
+  }
+
+  .flat-calc::backdrop {
+    background: var(--scrim);
+  }
+
+  .flat-calc__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "heading close"
+      "plan plan"
+      "price price";
+    gap: 16px;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .flat-calc__plan {
+    width: 100%;
+    border-radius: var(--r-l);
+  }
+
+  .flat-calc__title {
+    font-size: var(--fs-h3);
+    font-weight: 700;
+  }
+
+  .flat-calc__place {
+    font-size: var(--fs-caption);
+  }
+
+  .flat-calc__price {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+@keyframes flat-calc-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

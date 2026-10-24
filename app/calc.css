@@ -14,5 +14,8 @@
 @import "../components/CalcTerm/CalcTerm.css";
 @import "../components/CalcTotal/CalcTotal.css";
 
+@import "../components/FlatCalculator/FlatUnits.css";
+
 @import "../components/PaymentCalculator/PaymentCalculator.css";
+@import "../components/FlatCalculator/FlatCalculator.css";
 @import "../components/SiteCalculator/SiteCalculator.css";

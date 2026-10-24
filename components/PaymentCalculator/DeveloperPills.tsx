@@ -8,7 +8,8 @@ type DeveloperPillsProps = {
   label: string;
   developers: readonly { slug: string; name: string }[];
   value: string;
-  wrap?: boolean;
+  /** Ряды вместо ленты (сайт, мокап SiteCalc). */
+  rows?: boolean;
 };
 
 // Пилюлю нажали — калькулятор пересоздаётся с данными нового застройщика (ключ в обёртке), и
@@ -19,7 +20,7 @@ let refocus: string | null = null;
  * Застройщик — пилюли (мокап /kalkulyator «01», «Расчёт для клиента»): смена — новый адрес
  * ?developer=slug, данные выбранного читает сервер; остальные параметры расчёта сбрасываются.
  */
-export function DeveloperPills({ label, developers, value, wrap }: DeveloperPillsProps) {
+export function DeveloperPills({ label, developers, value, rows }: DeveloperPillsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const box = useRef<HTMLDivElement>(null);
@@ -36,8 +37,10 @@ export function DeveloperPills({ label, developers, value, wrap }: DeveloperPill
         label={label}
         pills={pills}
         value={value}
-        wrap={wrap}
+        rows={rows}
         onChange={(slug) => {
+          // Тот же застройщик — не переход: расчёт и адрес остаются, как есть.
+          if (slug === value) return;
           refocus = slug;
           router.replace(`${pathname}?developer=${encodeURIComponent(slug)}`, { scroll: false });
         }}

@@ -19,7 +19,6 @@ const record = (patch: Partial<SiteProgramRecord>): SiteProgramRecord => ({
   currency: null,
   blocks_scope: "all",
   block_ids: [],
-  conditions: null,
   updated_at: "2026-10-01T09:00:00+00:00",
   ...patch,
 });

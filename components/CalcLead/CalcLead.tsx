@@ -2,7 +2,7 @@
 
 import { Clock, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type FormEvent, useRef, useState, useSyncExternalStore } from "react";
+import { type FormEvent, type Ref, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
@@ -81,18 +81,33 @@ function contactErrors(contact: Contact, t: (key: "required" | "phoneInvalid") =
   return errors;
 }
 
-/** Имя и телефон: «Заполните» под пустым, телефон — +998 и 9 цифр; верно — что соберётся в заявку. */
-function LeadForm({ id, rows }: { id: string; rows: readonly CalcLeadRow[] }) {
+/**
+ * Проверка и «отправка»: ошибка — фокус на первое неверное поле (диктор читает её через
+ * aria-describedby); верно — снимок контакта на момент «Отправить» и фокус на собранное.
+ */
+function useLeadForm(id: string) {
   const t = useTranslations("calc.lead");
   const [contact, setContact] = useState<Contact>({ name: "", phone: "" });
   const [errors, setErrors] = useState<Errors>({});
-  const [collected, setCollected] = useState(false);
+  const [sent, setSent] = useState<Contact | null>(null);
+  const collected = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (sent) collected.current?.focus();
+  }, [sent]);
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const next = contactErrors(contact, t);
     setErrors(next);
-    setCollected(Object.keys(next).length === 0);
+    const invalid = (["name", "phone"] as const).find((key) => next[key]);
+    setSent(invalid ? null : { ...contact });
+    if (invalid) document.getElementById(`${id}-${invalid}`)?.focus();
   };
+  return { t, contact, setContact, errors, sent, collected, submit };
+}
+
+/** Имя и телефон: «Заполните» под пустым, телефон — +998 и 9 цифр; верно — что соберётся в заявку. */
+function LeadForm({ id, rows }: { id: string; rows: readonly CalcLeadRow[] }) {
+  const { t, contact, setContact, errors, sent, collected, submit } = useLeadForm(id);
   return (
     <>
       <form className="calc-lead__form" noValidate onSubmit={submit}>
@@ -123,12 +138,14 @@ function LeadForm({ id, rows }: { id: string; rows: readonly CalcLeadRow[] }) {
         <Clock size={16} aria-hidden="true" />
         {t("next")}
       </p>
-      {collected ? <Collected rows={rows} contact={contact} /> : null}
+      {sent ? <Collected ref={collected} rows={rows} contact={sent} /> : null}
     </>
   );
 }
 
-function Collected({ rows, contact }: { rows: readonly CalcLeadRow[]; contact: Contact }) {
+type CollectedProps = { rows: readonly CalcLeadRow[]; contact: Contact; ref: Ref<HTMLElement> };
+
+function Collected({ rows, contact, ref }: CollectedProps) {
   const t = useTranslations("calc.lead");
   const all = [
     ...rows,
@@ -136,7 +153,7 @@ function Collected({ rows, contact }: { rows: readonly CalcLeadRow[]; contact: C
     { label: t("phone"), value: `+${phoneDigits(contact.phone)}` },
   ];
   return (
-    <section className="calc-lead__collected" role="status">
+    <section ref={ref} className="calc-lead__collected" role="status" tabIndex={-1}>
       <p className="calc-lead__stand">{t("stand")}</p>
       <dl className="calc-lead__rows">
         {all.map((row) => (

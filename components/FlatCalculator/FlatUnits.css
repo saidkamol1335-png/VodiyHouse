@@ -1,0 +1,85 @@
+/* Свободные квартиры планировки: шире телефона — список (SiteJkCalc1 «Квартира · свободно: 2»),
+   на телефоне — лента карточек MobFlat «№ 11 · 4 эт. · $45 480», выбранная — янтарная. */
+
+.flat-units__chips {
+  display: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.flat-units__legend {
+  margin-bottom: 10px;
+  padding: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.flat-units__row {
+  display: flex;
+  gap: 8px;
+  margin-inline: -16px;
+  padding: 2px 16px 4px;
+  overflow-x: auto;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+
+.flat-units__row::-webkit-scrollbar {
+  display: none;
+}
+
+.flat-units__chip {
+  display: grid;
+  flex: none;
+  gap: 2px;
+  min-width: 112px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.flat-units__chip b {
+  font-size: var(--fs-control-l);
+  font-weight: 700;
+}
+
+.flat-units__chip span {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+
+.flat-units__chip:has(input:checked) {
+  border-color: var(--amber-line);
+  background: var(--amber-soft);
+}
+
+.flat-units__chip:has(input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.flat-units__chip:has(input:disabled) {
+  cursor: default;
+  opacity: 0.55;
+}
+
+@media (max-width: 767px) {
+  /* Микс с .field: класс блока повышает вес над display поля из globals. */
+  .flat-units .flat-units__select {
+    display: none;
+  }
+
+  .flat-units__chips {
+    display: block;
+  }
+}

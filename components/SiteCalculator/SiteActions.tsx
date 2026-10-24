@@ -2,22 +2,22 @@
 
 import { ArrowDown, Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { type RefObject, useState } from "react";
 import { Button } from "@/components/Button";
 import { CalcLead, type CalcLeadRow } from "@/components/CalcLead";
 import { FormStatus } from "@/components/FormStatus";
 import { programName, termText } from "@/components/PaymentCalculator/calcText";
 import type { CalcSnapshot } from "@/components/PaymentCalculator/PaymentCalculator";
-import { calcTelegramText } from "@/components/PaymentCalculator/telegramText";
-import type { SiteCalcScreen } from "@/lib/calc/siteScreen";
+import { calcTelegramText, type TelegramSource } from "@/components/PaymentCalculator/telegramText";
+import { searchWith } from "@/components/PaymentCalculator/useCalcParams";
 import type { CalcProgram } from "@/lib/calc/programs";
+import { shareParams } from "@/lib/calc/view";
 import { formatPercent } from "@/lib/format";
-
-type Current = NonNullable<SiteCalcScreen["current"]>;
 
 type SiteActionsProps = {
   snapshot: CalcSnapshot<CalcProgram>;
-  current: Current;
+  /** Застройщик и наличие для строки «где» в тексте Telegram (страница или квартира). */
+  source: Omit<TelegramSource, "link">;
   /** «Получить точный расчёт» — до заявок фазы 3 только на стенде (решение фазы 2). */
   leadEnabled: boolean;
 };
@@ -38,14 +38,12 @@ function leadRows(snapshot: CalcSnapshot<CalcProgram>): CalcLeadRow[] {
   ];
 }
 
-/** Кнопки итога сайта (мокап SiteCalc): «Получить точный расчёт» и «Скопировать для Telegram». */
-export function SiteActions({ snapshot, current, leadEnabled }: SiteActionsProps) {
+/**
+ * Кнопки итога сайта (мокапы SiteCalc, SiteJkCalc1): «Получить точный расчёт» и «Скопировать для
+ * Telegram» — у /kalkulyator и у расчёта квартиры.
+ */
+export function SiteActions({ snapshot, source, leadEnabled }: SiteActionsProps) {
   const { view, total, context } = snapshot;
-  const source = {
-    stock: current.data.stock,
-    developerName: current.name,
-    actualAt: current.checkedAt,
-  };
   const leadContext = total.head ? `${total.eyebrow} · ${total.head.value}` : total.eyebrow;
   return (
     <>
@@ -54,10 +52,19 @@ export function SiteActions({ snapshot, current, leadEnabled }: SiteActionsProps
       ) : null}
       <SiteTelegramCopy
         message={calcTelegramText(view, source, context)}
-        withLink={() => calcTelegramText(view, { ...source, link: window.location.href }, context)}
+        withLink={() => calcTelegramText(view, { ...source, link: shareLink(snapshot) }, context)}
       />
     </>
   );
+}
+
+/**
+ * Ссылка «Расчёт: …» — эта страница с параметрами, которые воспроизводят расчёт на экране (а не
+ * строка адреса: в ней нет выбранного по умолчанию); чужие ключи (?plan=, utm) — как есть.
+ */
+function shareLink({ view, params }: CalcSnapshot<CalcProgram>): string {
+  const { origin, pathname, search } = window.location;
+  return `${origin}${pathname}?${searchWith(search, shareParams(view, params))}`;
 }
 
 type Status = { tone: "success" | "error"; text: string; message: string; manual: boolean } | null;
@@ -106,14 +113,22 @@ function SiteTelegramCopy({ message, withLink }: SiteTelegramCopyProps) {
   );
 }
 
-/** В липкой полосе телефона (В7 B): «К расчёту ↓» — к итогу со строками и кнопками. */
-export function ToTotal() {
+/**
+ * В липкой полосе телефона (В7 B): «К расчёту ↓» — к итогу со строками и кнопками; scope — где
+ * искать итог (шторка расчёта квартиры), без него — вся страница.
+ */
+export function ToTotal({ scope }: { scope?: RefObject<HTMLElement | null> }) {
   const t = useTranslations("calc.sticky");
   return (
     <Button
-      onClick={() =>
-        document.querySelector("[data-testid=calc-total]")?.scrollIntoView({ block: "start" })
-      }
+      onClick={() => {
+        const total = (scope?.current ?? document).querySelector<HTMLElement>(
+          "[data-testid=calc-total]",
+        );
+        total?.scrollIntoView({ block: "start" });
+        // Полоса сейчас станет inert — фокус уходит на итог, к которому просили, а не в body.
+        total?.focus({ preventScroll: true });
+      }}
     >
       {t("toTotal")}
       <ArrowDown size={16} aria-hidden="true" />

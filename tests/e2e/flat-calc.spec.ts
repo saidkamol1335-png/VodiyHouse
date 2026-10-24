@@ -1,0 +1,129 @@
+import { expect, test, type Page } from "@playwright/test";
+import { collectPageErrors } from "./helpers";
+
+// Шаг 2.7: «Расчёт для этой квартиры» на стенде /dev/raschet-kvartiry (DEMO мокапа через тот же
+// преобразователь, что ответ site_layout_calc()): на 1440 — панель под карточками (SiteJkCalc1),
+// на телефоне — шторка (MobFlat, MobFlatTerm); без скидок (PLAN §3.13).
+
+const STAND = "/dev/raschet-kvartiry";
+const LAYOUT_64 = "00000000-0000-4000-8000-0000000e1001";
+const LAYOUT_78 = "00000000-0000-4000-8000-0000000e1002";
+const UNIT_43 = "00000000-0000-4000-8000-0000000e2002";
+const UNIT_88 = "00000000-0000-4000-8000-0000000e2005";
+const SCHEME = "00000000-0000-4000-8000-000000000102";
+const IPOTEKA = "00000000-0000-4000-8000-000000000103";
+
+const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 768;
+const flat = (page: Page) => page.locator("dialog.flat-calc");
+const head = (page: Page) => flat(page).locator(".calc-total__value");
+const amount = (text: string) => new RegExp(`^${text.replace(/\$/g, "\\$").replace(/ /g, "\\s")}$`);
+
+async function open(page: Page, query: string) {
+  await page.goto(`${STAND}?${query}`);
+  await expect(flat(page)).toHaveAttribute("open", "");
+  await page.waitForLoadState("networkidle");
+}
+
+test.describe("сайт · расчёт для этой квартиры", () => {
+  let errors: string[];
+
+  test.beforeEach(({ page }) => {
+    errors = collectPageErrors(page);
+  });
+
+  test.afterEach(() => {
+    expect(errors).toEqual([]);
+  });
+
+  test("«Рассчитать оплату» открывает расчёт планировки; × закрывает и возвращает фокус", async ({
+    page,
+  }) => {
+    await page.goto(STAND);
+    await page.waitForLoadState("networkidle");
+    const opener = page.getByRole("button", { name: "Рассчитать оплату" }).nth(1);
+    await opener.click();
+    await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}`));
+    const dialog = page.getByRole("dialog", { name: "3-комн. · 78 м²" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "3-комн. · 78 м²" })).toBeFocused();
+    // Шире телефона — панель на месте страницы, на телефоне — модальная шторка.
+    expect(await flat(page).evaluate((element) => element.matches(":modal"))).toBe(isPhone(page));
+    await expect(dialog.locator(".flat-calc__price")).toContainText(/\$54\s930/);
+    await expect(dialog.locator(".flat-calc__price")).toContainText(
+      /Кв\. 8 · 3 эт\. · \$704\/м² · ≈ 648\s655\s000 сум/,
+    );
+    await dialog.getByRole("button", { name: "Закрыть расчёт" }).click();
+    await expect(flat(page)).toHaveCount(0);
+    await expect(page).not.toHaveURL(/plan=/);
+    await expect(opener).toBeFocused();
+  });
+
+  test("SiteJkCalc1: Ipoteka Bank 20 % · 24 мес. → 25 907 000 сум, итог 758 184 000 сум", async ({
+    page,
+  }) => {
+    await open(page, `plan=${LAYOUT_78}&program=${IPOTEKA}&down=20&months=24`);
+    await expect(head(page)).toHaveText(amount("25 907 000 сум"));
+    await expect(flat(page).locator(".calc-total")).toContainText(/≈ \$2\s194/);
+    const total = flat(page).locator(".calc-total__row").filter({ hasText: "Итоговая стоимость" });
+    await expect(total.locator("dd")).toHaveText(amount("758 184 000 сум"));
+    await expect(flat(page)).not.toContainText(/скидк/i);
+  });
+
+  test("другая квартира — цена в шапке и расчёт по ней; ?plan= в адресе остаётся", async ({
+    page,
+  }) => {
+    await open(page, `plan=${LAYOUT_78}`);
+    if (isPhone(page)) {
+      await flat(page).getByText("№ 88").click();
+    } else {
+      await flat(page).getByLabel("Квартира · свободно: 2").selectOption(UNIT_88);
+    }
+    await expect(flat(page).locator(".flat-calc__price-value")).toHaveText(amount("$57 880"));
+    await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}.*unit=${UNIT_88}`));
+  });
+
+  test("MobFlatTerm: кв. 43, схема 50 % и свои 17 мес. → $1 401; Telegram — со ссылкой", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const copied: string[] = [];
+      Object.defineProperty(window, "__copied", { value: copied });
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: async (text: string) => void copied.push(text) },
+      });
+    });
+    await open(page, `plan=${LAYOUT_64}&unit=${UNIT_43}&program=${SCHEME}&down=50&months=17`);
+    await expect(flat(page).locator(".flat-calc__price-value")).toHaveText(amount("$47 640"));
+    await expect(head(page)).toHaveText(amount("$1 401"));
+    await flat(page).getByRole("button", { name: "Скопировать для Telegram" }).click();
+    await expect(flat(page).getByText("Скопировано — вставьте в Telegram")).toBeVisible();
+    const text = await page.evaluate(
+      () => (window as unknown as { __copied: string[] }).__copied[0],
+    );
+    expect(text).toMatch(/кв\. 43, 12 эт\., 64,2 м²/);
+    expect(text).toMatch(new RegExp(`Расчёт: http://localhost:\\d+${STAND}\\?plan=${LAYOUT_64}`));
+    expect(text).not.toMatch(/скидк/i);
+  });
+
+  test("телефон: шторка, «К расчёту ↓» ведёт к итогу внутри неё, Escape закрывает", async ({
+    page,
+  }) => {
+    test.skip(!isPhone(page), "шторка — только на телефоне");
+    await open(page, `plan=${LAYOUT_64}&unit=${UNIT_43}`);
+    await expect(flat(page).getByRole("radio", { name: /№ 43/ })).toBeChecked();
+    const bar = flat(page).locator(".calc-sticky-bar");
+    await bar.getByRole("button", { name: "К расчёту" }).click();
+    await expect(flat(page).getByTestId("calc-total")).toBeInViewport();
+    await page.keyboard.press("Escape");
+    await expect(flat(page)).toHaveCount(0);
+    await expect(page).not.toHaveURL(/plan=/);
+  });
+
+  test("по-узбекски: шапка расчёта и ни одного русского слова", async ({ page }) => {
+    await page.goto(`${STAND}/uz?plan=${LAYOUT_78}`);
+    await expect(flat(page)).toHaveAttribute("open", "");
+    await expect(flat(page).locator(".eyebrow")).toHaveText("Shu kvartira uchun hisob-kitob");
+    await expect(flat(page)).toContainText("3-xonali · 78 m²");
+    await expect(flat(page)).not.toContainText(/[а-яё]/i);
+  });
+});

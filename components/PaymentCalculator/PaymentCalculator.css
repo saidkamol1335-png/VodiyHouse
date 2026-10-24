@@ -19,7 +19,7 @@
   align-items: start;
 }
 
-.payment-calculator--embedded .payment-calculator__main {
+.payment-calculator--framed .payment-calculator__main {
   padding: 16px;
   border: 1px solid var(--amber-line);
   border-radius: var(--r-2xl);
@@ -35,6 +35,13 @@
   border: 1px solid var(--line);
   border-radius: var(--r-xl);
   background: var(--bg-2);
+}
+
+/* Расчёт квартиры рисует рамку сам: поля лежат прямо в ней, без своей карточки (SiteJkCalc1). */
+.payment-calculator--bare .payment-calculator__inputs {
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 .payment-calculator__steps {

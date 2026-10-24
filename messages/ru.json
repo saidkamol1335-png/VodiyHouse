@@ -235,6 +235,26 @@
       "required": "Заполните",
       "phoneInvalid": "Номер в формате +998 XX XXX XX XX",
       "stand": "Стенд: заявка не отправляется — вот что в неё попадёт"
+    },
+    "flat": {
+      "eyebrow": "Расчёт для этой квартиры",
+      "title": "{rooms} · {area} м²",
+      "place": "ЖК {complex} · Блок {block} · {developer}",
+      "plan": "План: {title}",
+      "close": "Закрыть расчёт",
+      "price": "Стоимость",
+      "priceFrom": "Стоимость от",
+      "unit": "Кв. {number} · {floor} эт.",
+      "perM2": "{amount}/м²",
+      "units": "Свободные квартиры этой планировки · {count}",
+      "unitOption": "Кв. {number} · {floor} эт. · {price}",
+      "unitNoPrice": "Кв. {number} · {floor} эт. · цена по запросу",
+      "unitChip": "№ {number}",
+      "unitChipNote": "{floor} эт. · {price}",
+      "unitChipNoPrice": "{floor} эт. · по запросу",
+      "open": "Рассчитать оплату",
+      "standTitle": "Стенд: расчёт для этой квартиры",
+      "standBlock": "ЖК Shodlik · блок {block}"
     }
   },
   "admin": {

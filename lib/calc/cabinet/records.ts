@@ -1,4 +1,9 @@
-import { programFromRecord, type SiteProgramRecord, type SiteTierRecord } from "../records";
+import {
+  type BilingualRecord,
+  programFromRecord,
+  type SiteProgramRecord,
+  type SiteTierRecord,
+} from "../records";
 import type { CabinetProgram } from "./discounts";
 
 // Запись программы для кабинета (payment_program_panels: строка payment_programs целиком, со
@@ -14,6 +19,8 @@ export type CabinetProgramRecord = Omit<SiteProgramRecord, "tiers"> & {
   is_active: boolean;
   sort: number;
   created_at: string;
+  /** «Условия для клиента» — только в кабинете: на сайт текст не уходит (private.site_program). */
+  conditions: BilingualRecord | null;
 };
 
 export function cabinetProgramFromRecord(record: CabinetProgramRecord): CabinetProgram {

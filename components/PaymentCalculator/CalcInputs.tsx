@@ -47,7 +47,7 @@ export function CalcInputs<P extends CalcProgram>(props: CalcInputsProps<P>) {
   if (props.layout === "steps") return <StepInputs {...props} />;
   return (
     <div className="payment-calculator__inputs">
-      <PricePart {...props} />
+      {props.renderPrice ? props.renderPrice(props.view, props.update) : <PricePart {...props} />}
       <ProgramsPart {...props} />
       {installment ? <DownPart {...props} /> : null}
       {installment ? <TermPart {...props} /> : null}

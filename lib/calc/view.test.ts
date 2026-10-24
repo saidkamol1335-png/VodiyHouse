@@ -12,7 +12,7 @@ import { roundMoney } from "./money";
 import { type ProgramOption, SITE_ENGINE } from "./options";
 import { EMPTY_CALC_PARAMS, type CalcParams, readCalcParams, writeCalcParams } from "./params";
 import type { CalcStock } from "./priceSource";
-import { type CalcData, calculatorView } from "./view";
+import { type CalcData, calculatorView, shareParams } from "./view";
 
 // Калькулятор из данных и адреса (шаг 2.5): один и тот же адрес в кабинете и на сайте даёт
 // одинаковый выбор, а цифры — каждый своим движком (PLAN §7: 17 мес. → $2 765 и $2 941).
@@ -223,5 +223,26 @@ describe("адрес расчёта", () => {
       out: ["uzs", "usd"],
     });
     expect(read).toEqual({ ...EMPTY_CALC_PARAMS, outCurrency: "UZS" });
+  });
+});
+
+describe("ссылка на расчёт", () => {
+  const cases: [string, Partial<CalcParams>][] = [
+    ["по умолчанию (квартира, схема)", {}],
+    ["площадь × цена м² по подсказке", { mode: "area", program: "bank" }],
+    ["своя площадь и срок", { mode: "area", area: "64,2", perM2: "742", months: 17 }],
+    ["сумма в сумах", { mode: "sum", sum: "500 000 000", inCurrency: "UZS", program: "mortgage" }],
+  ];
+
+  it.each(cases)("%s: тот же расчёт, даже если подсказка цены м² завтра другая", (_, patch) => {
+    const view = calculatorView(SITE_ENGINE, DATA, params(patch), true);
+    const tomorrow = {
+      ...DATA,
+      stock: { ...STOCK, priceHint: { perM2: 999, currency: "USD" as const } },
+    };
+    const shared = calculatorView(SITE_ENGINE, tomorrow, shareParams(view, params(patch)), true);
+    expect(shared.selected?.id).toBe(view.selected?.id);
+    expect(shared.price.price).toBe(view.price.price);
+    expect(paymentOf(shared)).toBe(paymentOf(view));
   });
 });

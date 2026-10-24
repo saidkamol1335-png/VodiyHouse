@@ -32,7 +32,6 @@ export type SiteProgramRecord = {
   currency: Currency | null;
   blocks_scope: "all" | "selected";
   block_ids: string[];
-  conditions: BilingualRecord | null;
   /** «Условия актуальны на» — позднее из правки и отметки «проверены» (Р5). */
   updated_at: string;
 };

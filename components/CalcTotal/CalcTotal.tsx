@@ -40,6 +40,8 @@ export function CalcTotal({
       className={plain ? "calc-total calc-total--plain" : "calc-total"}
       aria-label={eyebrow}
       data-testid="calc-total"
+      // Цель «К расчёту ↓» в липкой полосе: фокус сюда, а не на исчезающую полосу.
+      tabIndex={-1}
     >
       {beam ? <Beam /> : null}
       <div className="calc-total__top">

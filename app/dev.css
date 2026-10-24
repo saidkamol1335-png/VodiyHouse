@@ -1,6 +1,7 @@
 /* Только стенды /dev (в продакшене их нет). Подключает app/dev/layout.tsx — после site.css,
    admin.css и cabinet.css: стенды показывают и сайт, и кабинет. */
 
+@import "../components/DevFlatStand/DevFlatStand.css";
 @import "../components/DevHeaderStage/DevHeaderStage.css";
 @import "../components/EffectsPreview/EffectsPreview.css";
 @import "../components/MediaLab/MediaLab.css";

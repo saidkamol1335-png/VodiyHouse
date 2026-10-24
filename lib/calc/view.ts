@@ -108,3 +108,33 @@ export function calculatorView<P extends CalcProgram>(
     outCurrency: data.rate ? (params.outCurrency ?? calcCurrency) : calcCurrency,
   };
 }
+
+const amountText = (value: number | null) => (value === null ? null : String(value));
+
+/**
+ * Параметры, которые воспроизводят расчёт на экране, — для ссылки «Расчёт: …» в Telegram. Выбранное
+ * по умолчанию (программа, 60 м² × цена м², срок) пишется явно: ссылка не зависит от того, что
+ * сервер выберет по умолчанию завтра (продали квартиру, опубликовали застройщика).
+ */
+export function shareParams<P extends CalcProgram>(
+  view: CalcView<P>,
+  params: CalcParams,
+): CalcParams {
+  const { price } = view;
+  const calc = view.result?.ok ? view.result.calculation : null;
+  const typed = price.mode === "area" || price.mode === "sum";
+  return {
+    ...params,
+    program: view.selected?.id ?? params.program,
+    mode: price.mode,
+    unit: price.mode === "unit" ? price.unitId : null,
+    layout: price.mode === "layout" ? price.layoutId : null,
+    area: price.mode === "area" ? amountText(price.areaM2) : null,
+    perM2: price.mode === "area" ? amountText(price.perM2) : null,
+    sum: price.mode === "sum" ? params.sum : null,
+    inCurrency: typed ? price.currency : null,
+    downPct: view.selected && view.selected.program.type !== "full" ? view.downPct : null,
+    months: calc && calc.months > 0 ? calc.months : null,
+    outCurrency: view.outCurrency,
+  };
+}

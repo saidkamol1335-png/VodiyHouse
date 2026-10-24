@@ -99,6 +99,11 @@
   gap: 8px;
 }
 
+/* Фокус ставит окно после «Отправить», чтобы диктор прочёл собранное, — рамка не нужна. */
+.calc-lead__collected:focus {
+  outline: none;
+}
+
 .calc-lead__rows {
   display: grid;
   margin: 0;

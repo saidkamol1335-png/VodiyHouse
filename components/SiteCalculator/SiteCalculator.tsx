@@ -40,16 +40,27 @@ export function SiteCalculator({ screen, initialParams, leadEnabled }: SiteCalcu
         actualAt={current.checkedAt}
         layout="steps"
         beam
+        // Шаг «01 Застройщик» — только когда выбирать есть из кого (иначе пустая карточка).
         header={
-          <DeveloperPills
-            label={t("steps.developer")}
-            developers={screen.developers}
-            value={current.slug}
-            wrap
-          />
+          screen.developers.length > 1 ? (
+            <DeveloperPills
+              label={t("steps.developer")}
+              developers={screen.developers}
+              value={current.slug}
+              rows
+            />
+          ) : undefined
         }
         renderActions={(snapshot) => (
-          <SiteActions snapshot={snapshot} current={current} leadEnabled={leadEnabled} />
+          <SiteActions
+            snapshot={snapshot}
+            source={{
+              stock: current.data.stock,
+              developerName: current.name,
+              actualAt: current.checkedAt,
+            }}
+            leadEnabled={leadEnabled}
+          />
         )}
         renderStickyAction={() => <ToTotal />}
       />
