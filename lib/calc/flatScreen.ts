@@ -46,7 +46,7 @@ export type FlatCalcScreen = {
   complexName: BilingualRecord;
   blockName: string;
   layout: { id: string; rooms: number; area: number; drawing: string | null };
-  /** Есть свободные квартиры — выбор квартиры; нет — «цена от» планировки. */
+  /** Есть свободная квартира с ценой — выбор квартиры; нет — «цена от» планировки. */
   modes: readonly PriceMode[];
   data: CalcData<CalcProgram>;
 };
@@ -69,7 +69,7 @@ export function flatCalcFrom(record: FlatCalcRecord): FlatCalcScreen {
     complexName: bilingualRecord(record.complex.name),
     blockName: block.name,
     layout: { id: layout.id, rooms: layout.rooms, area, drawing: layout.drawing },
-    modes: units.length > 0 ? ["unit"] : ["layout"],
+    modes: units.some((unit) => Number(unit.price) > 0) ? ["unit"] : ["layout"],
     data: {
       options: record.programs.map(siteOptionFrom),
       stock: stockFrom(

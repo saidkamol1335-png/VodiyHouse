@@ -77,9 +77,14 @@ export function defaultPerM2(hint: CalcStock["priceHint"]): number | null {
 const priced = <T extends { price?: number | null; priceFrom?: number | null }>(item: T) =>
   (item.price ?? item.priceFrom ?? 0) > 0;
 
-/** Режим по умолчанию: есть свободные квартиры с ценой — «Квартира», иначе площадь × цена м². */
-export function defaultMode(stock: CalcStock, allowUnits: boolean): PriceMode {
-  return allowUnits && stock.units.some(priced) ? "unit" : "area";
+/**
+ * Режим по умолчанию из разрешённых экраном: есть свободные квартиры с ценой — «Квартира», иначе
+ * площадь × цена м², а у расчёта квартиры (один режим) — он сам.
+ */
+export function defaultMode(stock: CalcStock, modes: readonly PriceMode[]): PriceMode {
+  if (modes.includes("unit") && stock.units.some(priced)) return "unit";
+  if (modes.includes("area")) return "area";
+  return modes[0] ?? "area";
 }
 
 function unitPrice(stock: CalcStock, params: CalcParams): ResolvedPrice {
@@ -126,14 +131,17 @@ function empty(mode: PriceMode, currency: Currency): ResolvedPrice {
   };
 }
 
-/** Стоимость по режиму из адреса; режима нет или он недоступен — режим по умолчанию. */
+/**
+ * Стоимость по режиму из адреса; режима нет или экран его не разрешает (?mode=sum у расчёта
+ * квартиры) — режим по умолчанию.
+ */
 export function resolvePrice(
   stock: CalcStock,
   params: CalcParams,
-  allowUnits: boolean,
+  modes: readonly PriceMode[],
 ): ResolvedPrice {
-  const mode = params.mode === "unit" && !allowUnits ? null : params.mode;
-  const chosen = mode ?? defaultMode(stock, allowUnits);
+  const mode = params.mode !== null && modes.includes(params.mode) ? params.mode : null;
+  const chosen = mode ?? defaultMode(stock, modes);
   if (chosen === "unit") return unitPrice(stock, params);
   if (chosen === "layout") return layoutPrice(stock, params);
   const currency = params.inCurrency ?? stock.priceHint?.currency ?? "USD";

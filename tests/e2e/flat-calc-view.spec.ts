@@ -50,6 +50,12 @@ test.describe("сайт · расчёт квартиры: раскладка", (
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBe(0);
+    // На телефоне шторка прокручивается сама — вбок не должна и она (лента квартир — своя прокрутка).
+    await page.goto(`${STAND}?plan=${LAYOUT_64}`);
+    await settle(page);
+    expect(await flat(page).evaluate((element) => element.scrollWidth - element.clientWidth)).toBe(
+      0,
+    );
     await expect(flat(page).locator(".calc-total .beam")).toHaveCount(0);
     await expect(flat(page).locator(".calc-total--plain")).toHaveCount(1);
   });

@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/dictionaries/definitions";
 import { SEED_DICTIONARIES } from "@/lib/admin/dictionaries/seed";
 import type { DictionaryActionResult } from "@/lib/admin/dictionaries/types";
+import { type HintActionResult, parseHint } from "@/lib/admin/hints/hints";
 
 // Подделка для стенда /dev/spravochniki: настоящие проверки, без базы. Удаление ведёт себя как
 // remove_dictionary_item: «Фергана» стоит у DEMO-ЖК — она скрывается, остальное удаляется.
@@ -66,4 +67,16 @@ export async function demoReorderDictionaryAction(
 ): Promise<DictionaryActionResult> {
   devOnly();
   return readDictionaryKey(formData) && readOrder(formData) ? done() : invalid;
+}
+
+/** Подсказка «?»: те же проверки, что у saveHintAction, без базы. */
+export async function demoSaveHintAction(formData: FormData): Promise<HintActionResult> {
+  devOnly();
+  const parsed = parseHint(formData);
+  if (parsed.ok) return { status: "done", at: Date.now() };
+  return {
+    status: "error",
+    error: parsed.unknown ? "invalid" : null,
+    fieldErrors: parsed.fieldErrors,
+  };
 }

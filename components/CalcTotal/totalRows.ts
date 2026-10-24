@@ -7,6 +7,7 @@ import {
   termText,
 } from "@/components/PaymentCalculator/calcText";
 import type { Calculation } from "@/lib/calc/calculate";
+import type { CalcHintSlug } from "@/lib/calc/hints";
 import type { Currency, ExchangeRate } from "@/lib/calc/money";
 import { formatPercent } from "@/lib/format";
 
@@ -16,6 +17,8 @@ import { formatPercent } from "@/lib/format";
 export type TotalRow = {
   key: string;
   label: string;
+  /** «?» к термину строки (шаг 2.8): «Переплата», «Проценты банка», разовые платежи. */
+  hint?: CalcHintSlug;
   note?: string;
   value: string;
   tone?: "accent" | "minus";
@@ -69,19 +72,29 @@ function middleRows(calc: Calculation, context: TotalContext): TotalRow[] {
   const loan = calc.method === "markup" ? t("total.rest") : t("total.loan");
   const extra =
     calc.method === "markup"
-      ? { label: t("total.markup"), note: t("total.markupNote", { rate, term }) }
-      : { label: t("total.interest"), note: t("total.interestNote", { rate, term }) };
+      ? {
+          label: t("total.markup"),
+          note: t("total.markupNote", { rate, term }),
+          hint: "markup" as const,
+        }
+      : {
+          label: t("total.interest"),
+          note: t("total.interestNote", { rate, term }),
+          hint: "bank-interest" as const,
+        };
   return [
     { key: "loan", label: loan, value: money(calc.financed, calc, context) },
     { key: "extra", ...extra, value: money(calc.extra, calc, context) },
     ...calc.fees.map((fee) => ({
       key: `fee-${fee.name}`,
       label: t(`total.fees.${fee.name}`),
+      hint: fee.name,
       value: money(fee.amount, calc, context),
     })),
     {
       key: "overpayment",
       label: t("total.overpayment"),
+      hint: "overpayment",
       value: money(calc.overpayment, calc, context),
     },
   ];

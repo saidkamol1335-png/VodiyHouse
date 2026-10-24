@@ -5,6 +5,7 @@ import { DeveloperPills } from "@/components/PaymentCalculator/DeveloperPills";
 import { PaymentCalculator } from "@/components/PaymentCalculator/PaymentCalculator";
 import { SITE_ENGINE } from "@/lib/calc/options";
 import { type CalcParams, type PriceMode, writeCalcParams } from "@/lib/calc/params";
+import type { CalcHints } from "@/lib/calc/hints";
 import type { SiteCalcScreen } from "@/lib/calc/siteScreen";
 import { SiteActions, ToTotal } from "./SiteActions";
 
@@ -16,13 +17,15 @@ type SiteCalculatorProps = {
   initialParams: CalcParams;
   /** «Получить точный расчёт» — до заявок фазы 3 только на стенде (решение фазы 2). */
   leadEnabled: boolean;
+  /** Тексты «?» из справочника hints (шаг 2.8). */
+  hints?: CalcHints;
 };
 
 /**
  * /kalkulyator (шаг 2.6, мокап SiteCalc, В6 A): шаги 01–04, итог с лучом в full, график и
  * сравнение; без скидок — движок сайта (PLAN §3.13). Параметры — в адресе: ссылкой можно поделиться.
  */
-export function SiteCalculator({ screen, initialParams, leadEnabled }: SiteCalculatorProps) {
+export function SiteCalculator({ screen, initialParams, leadEnabled, hints }: SiteCalculatorProps) {
   const t = useTranslations("calc");
   const current = screen.current;
   if (!current) return <p className="site-calculator__empty">{t("page.empty")}</p>;
@@ -40,6 +43,7 @@ export function SiteCalculator({ screen, initialParams, leadEnabled }: SiteCalcu
         actualAt={current.checkedAt}
         layout="steps"
         beam
+        hints={hints}
         // Шаг «01 Застройщик» — только когда выбирать есть из кого (иначе пустая карточка).
         header={
           screen.developers.length > 1 ? (

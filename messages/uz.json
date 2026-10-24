@@ -255,6 +255,9 @@
       "open": "To‘lovni hisoblash",
       "standTitle": "Stend: shu kvartira uchun hisob-kitob",
       "standBlock": "Shodlik TJM · {block} blok"
+    },
+    "hint": {
+      "open": "«{term}» nima degani?"
     }
   },
   "admin": {

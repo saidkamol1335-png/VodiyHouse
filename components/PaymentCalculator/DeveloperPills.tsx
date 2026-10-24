@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { FilterPills } from "@/components/FilterPills";
+import { markCalcNavigation } from "./useCalcParams";
 
 type DeveloperPillsProps = {
   label: string;
@@ -42,6 +43,7 @@ export function DeveloperPills({ label, developers, value, rows }: DeveloperPill
           // Тот же застройщик — не переход: расчёт и адрес остаются, как есть.
           if (slug === value) return;
           refocus = slug;
+          markCalcNavigation();
           router.replace(`${pathname}?developer=${encodeURIComponent(slug)}`, { scroll: false });
         }}
       />

@@ -38,6 +38,13 @@
 }
 
 /* Расчёт квартиры рисует рамку сам: поля лежат прямо в ней, без своей карточки (SiteJkCalc1). */
+/* Внутри своей рамки (расчёт квартиры) — колонка flex, а не сетка: липкая строка заголовка
+   шторки держится на всю высоту (у элемента сетки sticky ограничен его строкой). */
+.payment-calculator--bare {
+  display: flex;
+  flex-direction: column;
+}
+
 .payment-calculator--bare .payment-calculator__inputs {
   padding: 0;
   border: 0;

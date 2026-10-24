@@ -5,15 +5,18 @@ import { AdminShell } from "@/components/AdminShell";
 import { AdminTabs } from "@/components/AdminTabs";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { DictionaryEditor } from "@/components/DictionaryEditor";
+import { HintsEditor } from "@/components/HintsEditor";
 import { DEV_VIEWER } from "@/lib/admin/access";
 import { DICTIONARY_KEYS } from "@/lib/admin/dictionaries/definitions";
 import { SEED_DICTIONARIES } from "@/lib/admin/dictionaries/seed";
 import type { DictionaryActionSet } from "@/lib/admin/dictionaries/types";
 import { cabinetPerson } from "@/lib/admin/person";
+import { CALC_HINT_DRAFTS, CALC_HINT_SLUGS } from "@/lib/calc/hints";
 import {
   demoAddDictionaryItemAction,
   demoRemoveDictionaryItemAction,
   demoReorderDictionaryAction,
+  demoSaveHintAction,
   demoSetDictionaryItemActiveAction,
   demoUpdateDictionaryItemAction,
 } from "./actions";
@@ -57,6 +60,14 @@ export default async function DevDictionariesPage() {
             actions={DEMO_ACTIONS}
           />
         ))}
+        <HintsEditor
+          items={CALC_HINT_SLUGS.map((slug) => ({
+            slug,
+            ...CALC_HINT_DRAFTS[slug],
+            isActive: true,
+          }))}
+          action={demoSaveHintAction}
+        />
       </AdminPage>
     </AdminShell>
   );

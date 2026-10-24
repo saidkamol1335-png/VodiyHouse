@@ -5,6 +5,7 @@ import { CalcPrice } from "@/components/CalcPrice";
 import { CalcPrograms } from "@/components/CalcPrograms";
 import { CalcStep } from "@/components/CalcStep";
 import { CalcTerm, type CalcTermTexts } from "@/components/CalcTerm";
+import { Hint } from "@/components/Hint";
 import type { ExchangeRate } from "@/lib/calc/money";
 import type { CalcParams } from "@/lib/calc/params";
 import { type CalcProgram, DOWN_MAX_PCT } from "@/lib/calc/programs";
@@ -158,6 +159,7 @@ function DownPart<P extends CalcProgram>({
       max={DOWN_MAX_PCT}
       onChange={(downPct) => update({ downPct })}
       chipsTitle={extras?.downTitle ?? t("down.options")}
+      hint={<Hint slug="down-payment" />}
       chips={downChips(view, update, { t, extras: extras ?? {} })}
     />
   );

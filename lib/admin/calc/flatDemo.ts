@@ -22,10 +22,42 @@ function demoLayouts() {
   );
 }
 
+/**
+ * «Доступна» и «цена от» — как private.layout_offers: у блока со списком квартир — по свободным
+ * (цена — минимальная из заданных, иначе ручная), без списка — ручные флаг и цена.
+ */
+function offerOf(layout: {
+  id: string;
+  area: number | string;
+  price_from: number | string | null;
+  available: boolean;
+}) {
+  const units = unitsOf(layout.id, Number(layout.area));
+  const prices = units.map((unit) => Number(unit.price)).filter((price) => price > 0);
+  const listed = blockHasUnits(layout.id);
+  return {
+    units,
+    available: listed ? units.length > 0 : layout.available,
+    priceFrom: prices.length ? Math.min(...prices) : layout.price_from,
+  };
+}
+
+const blockHasUnits = (layoutId: string) => {
+  const cabinet = demoClientCalc(DEVELOPER).current!;
+  const blockId = cabinet.complexes
+    .flatMap((complex) => complex.blocks)
+    .find((block) => block.layouts.some((layout) => layout.id === layoutId))?.id;
+  return cabinet.units.some((unit) => unit.block_id === blockId);
+};
+
+/** Расчёт есть, как у site_layout_calc: планировка доступна и цена известна (не «по запросу»). */
+const calculable = (offer: ReturnType<typeof offerOf>) =>
+  offer.available && offer.priceFrom !== null && Number(offer.priceFrom) > 0;
+
 /** Планировки стенда — карточки «Рассчитать оплату», как раздел «Планировки» страницы ЖК. */
 export function demoFlatLayouts(): DemoFlatLayout[] {
   return demoLayouts()
-    .filter(({ layout }) => layout.available)
+    .filter(({ layout }) => calculable(offerOf(layout)))
     .map(({ block, layout }) => ({
       id: layout.id,
       rooms: layout.rooms,
@@ -45,26 +77,21 @@ function unitsOf(layoutId: string, area: number): FlatUnitRecord[] {
     .sort((a, b) => a.floor - b.floor || a.number.localeCompare(b.number));
 }
 
-/** Как site_layout_calc(p_layout): планировки нет на сайте — null. */
+/** Как site_layout_calc(p_layout): планировки нет на сайте, нет свободных или нет цены — null. */
 export function demoFlatCalc(layoutId: string | null): FlatCalcRecord | null {
   const site = demoSiteCalc(DEVELOPER);
   const found = demoLayouts().find(({ layout }) => layout.id === layoutId);
   if (!found || !site.current) return null;
   const { complex, block, layout } = found;
-  const units = unitsOf(layout.id, Number(layout.area));
-  const prices = units.map((unit) => Number(unit.price)).filter((price) => price > 0);
+  const offer = offerOf(layout);
+  if (!calculable(offer)) return null;
   return {
     rate: site.rate,
     developer: { name: site.current.name, checked_at: site.current.checked_at },
     complex: { id: complex.id, name: complex.name },
     block: { id: block.id, name: block.name, currency: block.currency },
-    // «Цена от» — как private.layout_offers: минимум свободных квартир с ценой.
-    layout: {
-      ...layout,
-      price_from: prices.length ? Math.min(...prices) : layout.price_from,
-      drawing: null,
-    },
-    units,
+    layout: { ...layout, price_from: offer.priceFrom, available: offer.available, drawing: null },
+    units: offer.units,
     programs: site.current.programs.filter(
       (program) => program.blocks_scope === "all" || program.block_ids.includes(block.id),
     ),

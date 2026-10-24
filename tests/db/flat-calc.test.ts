@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { flatCalcFrom, type FlatCalcRecord } from "@/lib/calc/flatScreen";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 // Шаг 2.7: «Расчёт для этой квартиры» — site_layout_calc() на DEMO-сиде: планировка опубликованного
@@ -85,12 +86,66 @@ describe.skipIf(isRemoteTarget)("расчёт квартиры: данные д�
     expect(JSON.stringify(data)).not.toMatch(/discount/i);
   });
 
+  it("ответ проходит преобразователь страницы: чертёж, «Условия проверены», режим квартиры", async () => {
+    const { rows } = await db.admin.query<{ path: string; checked: string }>(
+      `with drawing as (
+         insert into media_assets (complex_id, kind, path, width, height)
+         select b.complex_id, 'drawing',
+                private.media_folder(b.complex_id, null) || '/plan-test.png', 800, 600
+           from layouts l join blocks b on b.id = l.block_id where l.id = $1
+         returning id, path)
+       update layouts set drawing_id = (select id from drawing) where id = $1
+       returning (select path from drawing) as path,
+                 (select programs_checked_at::text from developers d
+                    join complexes c on c.developer_id = d.id
+                    join blocks b on b.complex_id = c.id
+                   where b.id = layouts.block_id) as checked`,
+      [layoutId],
+    );
+    await db.admin.query(
+      `update developers d set programs_checked_at = '2026-10-20T09:00:00Z'
+         from complexes c join blocks b on b.complex_id = c.id join layouts l on l.block_id = b.id
+        where c.developer_id = d.id and l.id = $1`,
+      [layoutId],
+    );
+    const screen = flatCalcFrom((await flat(layoutId)) as unknown as FlatCalcRecord);
+    expect(screen.layout.drawing).toBe(rows[0]!.path);
+    expect(new Date(screen.checkedAt!).toISOString()).toBe("2026-10-20T09:00:00.000Z");
+    expect(screen.modes).toEqual(["unit"]);
+    expect(typeof screen.layout.area).toBe("number");
+    expect(screen.data.stock.units.every((unit) => unit.layoutId === layoutId)).toBe(true);
+  });
+
+  it("распроданная планировка и цена «по запросу» — null: считать нечего", async () => {
+    const { rows } = await db.admin.query<{ id: string }>(
+      `select l.id from layouts l join blocks b on b.id = l.block_id
+        where private.is_public_complex(b.complex_id) and l.id <> $1
+          and exists (select 1 from units u where u.layout_id = l.id and u.status = 'free'
+                        and u.price is not null)
+        order by l.area desc limit 1`,
+      [layoutId],
+    );
+    const other = rows[0]!.id;
+    expect(await flat(other)).not.toBeNull();
+    // Свободные остались, но без цены, ручной цены нет — «по запросу».
+    await db.admin.query(
+      "update units set price = null, price_per_m2 = null where layout_id = $1 and status = 'free'",
+      [other],
+    );
+    await db.admin.query("update layouts set price_from = null where id = $1", [other]);
+    expect(await flat(other)).toBeNull();
+    // Свободных нет вовсе.
+    await db.admin.query(
+      "update units set status = 'sold' where layout_id = $1 and status = 'free'",
+      [other],
+    );
+    expect(await flat(other)).toBeNull();
+  });
+
   it("скрытый ЖК и чужой id — null", async () => {
     expect(await flat("00000000-0000-4000-8000-000000000000")).toBeNull();
     const data = (await flat(layoutId))!;
-    await db.admin.query("update complexes set status = 'hidden' where id = $1", [
-      data.complex.id,
-    ]);
+    await db.admin.query("update complexes set status = 'hidden' where id = $1", [data.complex.id]);
     expect(await flat(layoutId)).toBeNull();
   });
 });

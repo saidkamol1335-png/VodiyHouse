@@ -153,6 +153,27 @@ test.describe("сайт · калькулятор", () => {
     await expect(example).toHaveAttribute("aria-current", "true");
   });
 
+  test("«Назад» после правки возвращает прошлый расчёт, «Вперёд» — поправленный", async ({
+    page,
+  }) => {
+    await open(page);
+    const before = await head(page).textContent();
+    const example = page.getByRole("link", { name: /120 м² · 2 года/ });
+    await example.click();
+    await expect(head(page)).toHaveText(amount("39 617 000 сум"));
+    await page
+      .getByRole("region", { name: "Срок" })
+      .getByRole("button", { name: /^12 мес\./ })
+      .click();
+    const edited = await head(page).textContent();
+    expect(edited).not.toBe("39 617 000 сум");
+    await page.goBack();
+    await expect(head(page)).toHaveText(before!);
+    await expect(example).not.toHaveAttribute("aria-current", "true");
+    await page.goForward();
+    await expect(head(page)).toHaveText(edited!);
+  });
+
   test("по-узбекски: заголовок, шаги, so‘m и текст без русских слов", async ({ page }) => {
     await open(page, "", `${STAND}/uz`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(

@@ -12,6 +12,7 @@ import { CALC_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import { ROUTES } from "@/lib/routes";
 import { LEAD_FORM_ENABLED } from "@/lib/site/flags";
 import { readSiteCalc } from "@/lib/site/calculator";
+import { readSiteCalcHints } from "@/lib/site/hints";
 
 type Search = Record<string, string | string[] | undefined>;
 type CalculatorPageProps = { searchParams: Promise<Search> };
@@ -71,7 +72,7 @@ async function Calculator({ searchParams }: { searchParams: Promise<Search> }) {
     getMessages(),
   ]);
   const params = readCalcParams(await searchParams);
-  const screen = await readSiteCalc(params.developer);
+  const [screen, hints] = await Promise.all([readSiteCalc(params.developer), readSiteCalcHints()]);
   return (
     <>
       <CalcHero {...heroTexts(t)} examples={await examplesOf(t, tCalc)} />
@@ -81,6 +82,7 @@ async function Calculator({ searchParams }: { searchParams: Promise<Search> }) {
           screen={screen ?? { developers: [], current: null }}
           initialParams={{ ...params, developer: screen?.current?.slug ?? null }}
           leadEnabled={LEAD_FORM_ENABLED}
+          hints={hints}
         />
       </NextIntlClientProvider>
     </>

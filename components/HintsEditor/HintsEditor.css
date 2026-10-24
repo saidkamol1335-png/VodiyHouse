@@ -1,0 +1,71 @@
+/* «Справочники → Подсказки «?»»: строки как у справочников (Д6) — термин RU, под ним UZ, пояснение
+   серым; правка открывается на месте строки. */
+
+.hints-editor__lead {
+  max-width: 720px;
+  margin: 0 0 12px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.hints-editor__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hints-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.hints-editor__text {
+  display: grid;
+  flex: 1 1 320px;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hints-editor__term {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-weight: 650;
+}
+
+.hints-editor__uz,
+.hints-editor__explain {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 400;
+}
+
+.hints-editor__form {
+  display: grid;
+  flex: 1 1 100%;
+  gap: 14px;
+}
+
+.hints-editor__active {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--touch-target);
+  font-size: var(--fs-small);
+}
+
+.hints-editor__active input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--amber);
+}
+
+.hints-editor__actions {
+  display: flex;
+  gap: 8px;
+}

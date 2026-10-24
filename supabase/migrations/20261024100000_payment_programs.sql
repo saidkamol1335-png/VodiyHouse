@@ -1132,7 +1132,8 @@ grant execute on function public.site_calc_screen(text) to anon, authenticated, 
 -- Планировка опубликованного ЖК для расчёта на странице ЖК (фазы 3–5): блок и его валюта, ЖК,
 -- застройщик с отметкой «Условия проверены», «цена от» и чертёж, свободные квартиры этой
 -- планировки с ценой (как block_units: только свободные, без отделки и дат), программы блока —
--- без полей скидки (private.site_program, PLAN §3.13). Планировки нет на сайте — null.
+-- без полей скидки (private.site_program, PLAN §3.13). Планировки нет на сайте, свободных нет или
+-- цена «по запросу» — null: считать нечего, у такой планировки на странице ЖК — «Узнать цену».
 create function public.site_layout_calc(p_layout uuid)
 returns jsonb
 language sql
@@ -1169,6 +1170,7 @@ as $$
   join public.layouts l on l.id = o.layout_id
   left join public.media_assets m on m.id = l.drawing_id
   where o.layout_id = p_layout and private.is_public_complex(c.id)
+    and o.available and o.price_from > 0
 $$;
 
 comment on function public.site_layout_calc(uuid) is

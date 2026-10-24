@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
 import { SelectField } from "@/components/SelectField";
 import type { CalcParams } from "@/lib/calc/params";
@@ -11,7 +11,6 @@ type FlatUnitsProps = {
   id: string;
   stock: CalcStock;
   price: ResolvedPrice;
-  locale: CalcLocale;
   onChange: (patch: Partial<CalcParams>) => void;
 };
 
@@ -21,8 +20,9 @@ const priced = (price: number | null): price is number => price !== null && pric
  * Свободные квартиры этой планировки: на 1440 — список «Кв. 8 · 3 эт. · $54 930» (SiteJkCalc1),
  * на телефоне — лента карточек «№ 11 · 4 эт. · $45 480» (MobFlat). Без цены — видна, не выбирается.
  */
-export function FlatUnits({ id, stock, price, locale, onChange }: FlatUnitsProps) {
+export function FlatUnits({ id, stock, price, onChange }: FlatUnitsProps) {
   const t = useTranslations("calc");
+  const locale = useLocale() as CalcLocale;
   const currency = stock.blocks[0]?.currency ?? "USD";
   if (price.mode !== "unit" || stock.units.length === 0) return null;
   const free = stock.units.filter((unit) => priced(unit.price)).length;

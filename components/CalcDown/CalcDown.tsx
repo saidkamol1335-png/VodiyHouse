@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export type CalcDownChip = {
   key: string;
@@ -26,6 +26,8 @@ type CalcDownProps = {
   onChange: (pct: number) => void;
   chipsTitle: string;
   chips: readonly CalcDownChip[];
+  /** «?» к термину «Первоначальный взнос» (шаг 2.8); пояснение раскрывается строкой под ним. */
+  hint?: ReactNode;
 };
 
 /**
@@ -38,9 +40,12 @@ export function CalcDown(props: CalcDownProps) {
   return (
     <section className="calc-down" aria-labelledby={`${id}-title`}>
       <div className="calc-down__head">
-        <h3 id={`${id}-title`} className="calc-down__title">
-          {props.title} <span className="calc-down__min">· {props.minText}</span>
-        </h3>
+        <div className="calc-down__term">
+          <h3 id={`${id}-title`} className="calc-down__title">
+            {props.title} <span className="calc-down__min">· {props.minText}</span>
+          </h3>
+          {props.hint}
+        </div>
         <span className="calc-down__value" aria-hidden="true">
           {props.valueText}
         </span>

@@ -10,7 +10,13 @@ import {
 } from "./fixtures";
 import { roundMoney } from "./money";
 import { type ProgramOption, SITE_ENGINE } from "./options";
-import { EMPTY_CALC_PARAMS, type CalcParams, readCalcParams, writeCalcParams } from "./params";
+import {
+  EMPTY_CALC_PARAMS,
+  type CalcParams,
+  readCalcParams,
+  writeCalcParams,
+  PRICE_MODES,
+} from "./params";
 import type { CalcStock } from "./priceSource";
 import { type CalcData, calculatorView, shareParams } from "./view";
 
@@ -93,18 +99,21 @@ const paymentOf = (view: ReturnType<typeof calculatorView>) => {
   return roundMoney(firstPayment, currency);
 };
 
+/** /kalkulyator: квартир нет. */
+const SITE_MODES = PRICE_MODES.filter((mode) => mode !== "unit");
+
 describe("калькулятор: выбор и цифры", () => {
   it("квартира $100 000, схема, взнос 50 %, свой срок 17: кабинет $2 765, сайт $2 941", () => {
     const chosen = params({ unit: "u1", downPct: 50, months: 17 });
-    const cabinet = calculatorView(CABINET_ENGINE, DATA, chosen, true);
+    const cabinet = calculatorView(CABINET_ENGINE, DATA, chosen, PRICE_MODES);
     expect(cabinet.selected?.id).toBe("scheme");
     expect(paymentOf(cabinet)).toBe(2765);
-    const site = calculatorView(SITE_ENGINE, DATA, chosen, true);
+    const site = calculatorView(SITE_ENGINE, DATA, chosen, PRICE_MODES);
     expect(paymentOf(site)).toBe(2941);
   });
 
   it("по умолчанию: квартира с ценой, рассрочка застройщика, минимальный взнос", () => {
-    const view = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, true);
+    const view = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, PRICE_MODES);
     expect(view.price).toMatchObject({ mode: "unit", unitId: "u1", price: 100_000, blockId: "b1" });
     expect(view.selected?.id).toBe("scheme");
     expect(view.downPct).toBe(30);
@@ -113,41 +122,57 @@ describe("калькулятор: выбор и цифры", () => {
   });
 
   it("программы по блоку квартиры; площадь × цена м² — все, 60 м² × $690", () => {
-    const unit = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, true);
+    const unit = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, PRICE_MODES);
     expect(unit.options.map((item) => item.id)).toEqual(["full", "scheme", "bank"]);
-    const area = calculatorView(CABINET_ENGINE, DATA, params({ mode: "area" }), true);
+    const area = calculatorView(CABINET_ENGINE, DATA, params({ mode: "area" }), PRICE_MODES);
     expect(area.options).toHaveLength(4);
     expect(area.price).toMatchObject({ price: 41_400, areaM2: 60, perM2: 690, currency: "USD" });
   });
 
   it("без квартир (сайт) — площадь; планировка без цены не выбирается; сумма — как набрана", () => {
-    expect(calculatorView(SITE_ENGINE, DATA, EMPTY_CALC_PARAMS, false).price.mode).toBe("area");
+    expect(calculatorView(SITE_ENGINE, DATA, EMPTY_CALC_PARAMS, SITE_MODES).price.mode).toBe(
+      "area",
+    );
     const layout = calculatorView(
       SITE_ENGINE,
       DATA,
       params({ mode: "layout", layout: "l0" }),
-      true,
+      PRICE_MODES,
     );
     expect(layout.price).toMatchObject({ layoutId: "l1", price: 45_480, blockId: "b2" });
-    const sum = calculatorView(SITE_ENGINE, DATA, params({ mode: "sum", sum: "84 000" }), true);
+    const sum = calculatorView(
+      SITE_ENGINE,
+      DATA,
+      params({ mode: "sum", sum: "84 000" }),
+      PRICE_MODES,
+    );
     expect(sum.price.price).toBe(84_000);
-    const blank = calculatorView(SITE_ENGINE, DATA, params({ mode: "sum" }), true);
+    const blank = calculatorView(SITE_ENGINE, DATA, params({ mode: "sum" }), PRICE_MODES);
     expect(blank.result).toBeNull();
     // Стёрли площадь — не подменяем 60 м², а просим стоимость.
-    const erased = calculatorView(SITE_ENGINE, DATA, params({ mode: "area", area: "" }), true);
+    const erased = calculatorView(
+      SITE_ENGINE,
+      DATA,
+      params({ mode: "area", area: "" }),
+      PRICE_MODES,
+    );
     expect(erased.price).toMatchObject({ price: null, areaM2: null, perM2: 690 });
   });
 
   it("100 % оплата — взнос 100; взнос ниже минимума поднимается, выше 90 — до 90", () => {
-    expect(calculatorView(CABINET_ENGINE, DATA, params({ program: "full" }), true).downPct).toBe(
-      100,
+    expect(
+      calculatorView(CABINET_ENGINE, DATA, params({ program: "full" }), PRICE_MODES).downPct,
+    ).toBe(100);
+    expect(calculatorView(CABINET_ENGINE, DATA, params({ downPct: 10 }), PRICE_MODES).downPct).toBe(
+      30,
     );
-    expect(calculatorView(CABINET_ENGINE, DATA, params({ downPct: 10 }), true).downPct).toBe(30);
-    expect(calculatorView(CABINET_ENGINE, DATA, params({ downPct: 95 }), true).downPct).toBe(90);
+    expect(calculatorView(CABINET_ENGINE, DATA, params({ downPct: 95 }), PRICE_MODES).downPct).toBe(
+      90,
+    );
   });
 
   it("чипы взноса: в кабинете у схемы — ступени со скидкой и «100%» в программу «100% оплата»", () => {
-    const view = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, true);
+    const view = calculatorView(CABINET_ENGINE, DATA, EMPTY_CALC_PARAMS, PRICE_MODES);
     expect(view.downOptions.map((down) => [down.downPct, down.maxMonths, down.targetId])).toEqual([
       [30, 36, null],
       [50, 18, null],
@@ -158,31 +183,31 @@ describe("калькулятор: выбор и цифры", () => {
       downOptionDiscountPct(view.selected!, down, view.options),
     );
     expect(discounts).toEqual([0, 6, 9, 12]);
-    const site = calculatorView(SITE_ENGINE, DATA, EMPTY_CALC_PARAMS, true);
+    const site = calculatorView(SITE_ENGINE, DATA, EMPTY_CALC_PARAMS, PRICE_MODES);
     expect(site.downOptions.map((down) => down.downPct)).toEqual([30, 50, 70]);
-    const bank = calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), true);
+    const bank = calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), PRICE_MODES);
     expect(bank.downOptions.map((down) => down.downPct)).toEqual([20, 30, 50]);
   });
 
   it("валюта итога: выбор из адреса; без курса — только валюта расчёта", () => {
     const bank = params({ program: "bank", outCurrency: "USD" });
-    expect(calculatorView(SITE_ENGINE, DATA, bank, true).outCurrency).toBe("USD");
-    const noRate = calculatorView(SITE_ENGINE, { ...DATA, rate: null }, bank, true);
+    expect(calculatorView(SITE_ENGINE, DATA, bank, PRICE_MODES).outCurrency).toBe("USD");
+    const noRate = calculatorView(SITE_ENGINE, { ...DATA, rate: null }, bank, PRICE_MODES);
     expect(noRate.outCurrency).toBe("USD");
     expect(noRate.result).toEqual({ ok: false, problem: "noRate" });
-    expect(calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), true).outCurrency).toBe(
-      "UZS",
-    );
+    expect(
+      calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), PRICE_MODES).outCurrency,
+    ).toBe("UZS");
   });
 
   it("сравнение — на сроке выбранной программы: банк 24 мес. → схема тоже на 24", () => {
-    const view = calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), true);
+    const view = calculatorView(SITE_ENGINE, DATA, params({ program: "bank" }), PRICE_MODES);
     const scheme = view.comparison!.rows.find((row) => row.program === SIFAT_SCHEME)!;
     expect(scheme.calculation.months).toBe(24);
   });
 
   it("сравнение — все программы стоимости, «меньше платёж» и «выгоднее всего»", () => {
-    const view = calculatorView(CABINET_ENGINE, DATA, params({ downPct: 50 }), true);
+    const view = calculatorView(CABINET_ENGINE, DATA, params({ downPct: 50 }), PRICE_MODES);
     const rows = view.comparison!.rows;
     expect(rows).toHaveLength(3);
     expect(rows.find((row) => row.cheapest)?.program).toBe(SIFAT_FULL);
@@ -235,12 +260,17 @@ describe("ссылка на расчёт", () => {
   ];
 
   it.each(cases)("%s: тот же расчёт, даже если подсказка цены м² завтра другая", (_, patch) => {
-    const view = calculatorView(SITE_ENGINE, DATA, params(patch), true);
+    const view = calculatorView(SITE_ENGINE, DATA, params(patch), PRICE_MODES);
     const tomorrow = {
       ...DATA,
       stock: { ...STOCK, priceHint: { perM2: 999, currency: "USD" as const } },
     };
-    const shared = calculatorView(SITE_ENGINE, tomorrow, shareParams(view, params(patch)), true);
+    const shared = calculatorView(
+      SITE_ENGINE,
+      tomorrow,
+      shareParams(view, params(patch)),
+      PRICE_MODES,
+    );
     expect(shared.selected?.id).toBe(view.selected?.id);
     expect(shared.price.price).toBe(view.price.price);
     expect(paymentOf(shared)).toBe(paymentOf(view));

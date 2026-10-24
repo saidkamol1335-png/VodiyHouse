@@ -61,6 +61,13 @@
   font-size: var(--fs-calc-total-long);
 }
 
+/* Термин и «?» рядом; пояснение подсказки — строкой под ними (шаг 2.8). */
+.calc-total__term {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .calc-total__approx,
 .calc-total__footnote,
 .calc-total__note {

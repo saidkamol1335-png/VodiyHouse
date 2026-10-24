@@ -2,6 +2,7 @@ import { ClientCalculator } from "@/components/ClientCalculator";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { saveCalculationAction } from "@/lib/admin/actions/calculations";
 import { readClientCalc } from "@/lib/admin/server/clientCalc";
+import { readCalcHints } from "@/lib/admin/server/hints";
 import { requireSection } from "@/lib/admin/session";
 import { readCalcParams } from "@/lib/calc/params";
 import { pickMessages } from "@/lib/i18n/clientMessages";
@@ -21,13 +22,18 @@ export default async function ClientCalcPage({ searchParams }: ClientCalcPagePro
   const { allowed } = await requireSection("programs");
   if (!allowed || isCabinetOpenWithoutLogin || !hasSupabaseEnv()) return null;
   const params = readCalcParams(await searchParams);
-  const screen = await readClientCalc(await createSupabaseServerClient(), params.developer);
+  const supabase = await createSupabaseServerClient();
+  const [screen, hints] = await Promise.all([
+    readClientCalc(supabase, params.developer),
+    readCalcHints(supabase),
+  ]);
   return (
     <ClientCalculator
       screen={screen}
       initialParams={{ ...params, developer: screen.current?.slug ?? null }}
       uzMessages={UZ_TELEGRAM}
       save={saveCalculationAction}
+      hints={hints}
     />
   );
 }

@@ -2,11 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { FlatCalculator } from "@/components/FlatCalculator";
 import type { DemoFlatLayout } from "@/lib/admin/calc/flatDemo";
 import type { FlatCalcScreen } from "@/lib/calc/flatScreen";
+import { CALC_HINT_DRAFTS } from "@/lib/calc/hints";
 import type { CalcParams } from "@/lib/calc/params";
 
 const AREA = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
@@ -51,10 +52,16 @@ export function DevFlatStand({ layouts, open }: DevFlatStandProps) {
   const router = useRouter();
   const pathname = usePathname();
   const openers = useRef(new Map<string, HTMLButtonElement>());
+  // Каждое «Рассчитать оплату» — новое открытие (та же планировка, закрытие ещё в пути).
+  const [opened, setOpened] = useState(0);
+  // Закрыли — фокус на «Рассчитать оплату» той планировки, расчёт которой закрыли.
   const close = () => {
     router.replace(pathname, { scroll: false });
-    // Фокус — на «Рассчитать оплату» той планировки, расчёт которой закрыли.
     if (open) openers.current.get(open.screen.layout.id)?.focus();
+  };
+  const openPlan = (id: string) => {
+    setOpened((count) => count + 1);
+    router.replace(`${pathname}?plan=${encodeURIComponent(id)}`, { scroll: false });
   };
   return (
     <div className="dev-flat-stand">
@@ -69,20 +76,19 @@ export function DevFlatStand({ layouts, open }: DevFlatStandProps) {
               if (node) openers.current.set(layout.id, node);
               else openers.current.delete(layout.id);
             }}
-            onOpen={() =>
-              router.replace(`${pathname}?plan=${encodeURIComponent(layout.id)}`, { scroll: false })
-            }
+            onOpen={() => openPlan(layout.id)}
           />
         ))}
       </ul>
       {open ? (
         <FlatCalculator
-          key={open.screen.layout.id}
+          key={`${open.screen.layout.id}-${opened}`}
           id="flat-calc"
           screen={open.screen}
           initialParams={open.params}
           leadEnabled
           onClose={close}
+          hints={CALC_HINT_DRAFTS}
         />
       ) : null}
     </div>

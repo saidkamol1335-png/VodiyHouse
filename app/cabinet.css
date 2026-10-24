@@ -47,6 +47,7 @@
 @import "../components/DeveloperProjectsForm/DeveloperProjectsForm.css";
 @import "../components/DictionaryEditor/DictionaryEditor.css";
 @import "../components/DictionaryEditor/DictionaryItemForm.css";
+@import "../components/HintsEditor/HintsEditor.css";
 @import "../components/DrawingTile/DrawingTile.css";
 @import "../components/FocusPreview/FocusPreview.css";
 @import "../components/JournalList/JournalList.css";

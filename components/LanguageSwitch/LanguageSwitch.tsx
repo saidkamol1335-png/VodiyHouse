@@ -38,7 +38,9 @@ export function LanguageSwitch({ variant = "short", onNavigate }: LanguageSwitch
           onClick={(event) => {
             onNavigate?.();
             const search = window.location.search;
-            if (!search) return;
+            // Новая вкладка (Ctrl, Cmd, Shift, средняя кнопка) — как у обычной ссылки.
+            const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+            if (!search || modified || event.button !== 0) return;
             // Свой язык при параметрах — никуда не уходим: переход сбросил бы расчёт.
             event.preventDefault();
             if (locale !== current) {

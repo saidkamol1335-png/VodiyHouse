@@ -6,7 +6,9 @@ import { CalcCompare } from "@/components/CalcCompare";
 import { CalcSchedule } from "@/components/CalcSchedule";
 import { CalcStickyBar } from "@/components/CalcStickyBar";
 import { CalcTotal, type TotalContext } from "@/components/CalcTotal";
+import { HintsContext } from "@/components/Hint";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
+import type { CalcHints } from "@/lib/calc/hints";
 import type { Currency } from "@/lib/calc/money";
 import type { CalcEngine } from "@/lib/calc/options";
 import type { CalcParams, PriceMode } from "@/lib/calc/params";
@@ -59,6 +61,8 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
   renderHeader?: (snapshot: CalcSnapshot<P>) => ReactNode;
   /** Своя «Стоимость» вместо режимов (расчёт квартиры: свободные квартиры планировки). */
   renderPrice?: (view: CalcView<P>, update: (patch: Partial<CalcParams>) => void) => ReactNode;
+  /** Тексты «?» из справочника hints (шаг 2.8); нет текста — нет и «?». */
+  hints?: CalcHints;
   renderActions?: (snapshot: CalcSnapshot<P>) => ReactNode;
   renderStickyAction?: (snapshot: CalcSnapshot<P>) => ReactNode;
 };
@@ -72,7 +76,7 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
   const t = useTranslations("calc");
   const locale = useLocale() as CalcLocale;
   const { params, update } = useCalcParams(props.initialParams);
-  const view = calculatorView(props.engine, props.data, params, props.modes.includes("unit"));
+  const view = calculatorView(props.engine, props.data, params, props.modes);
   const context: TotalContext = { out: view.outCurrency, rate: props.data.rate, t, locale };
   const snapshot: CalcSnapshot<P> = {
     view,
@@ -83,25 +87,36 @@ export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculato
   };
   const totalRef = useRef<HTMLDivElement>(null);
   return (
-    <div className={surfaceClass(props.surface)}>
-      {props.renderHeader?.(snapshot)}
-      {props.layout === "steps" ? null : props.header}
-      <div className="payment-calculator__main">
-        <CalcInputs {...props} view={view} params={params} update={update} t={t} locale={locale} />
-        <div ref={totalRef} className="payment-calculator__result">
-          <ResultPanel {...props} snapshot={snapshot} update={update} t={t} />
+    <HintsContext.Provider value={props.hints ?? NO_HINTS}>
+      <div className={surfaceClass(props.surface)}>
+        {props.renderHeader?.(snapshot)}
+        {props.layout === "steps" ? null : props.header}
+        <div className="payment-calculator__main">
+          <CalcInputs
+            {...props}
+            view={view}
+            params={params}
+            update={update}
+            t={t}
+            locale={locale}
+          />
+          <div ref={totalRef} className="payment-calculator__result">
+            <ResultPanel {...props} snapshot={snapshot} update={update} t={t} />
+          </div>
         </div>
+        <CalcFooter {...props} snapshot={snapshot} update={update} t={t} />
+        <CalcStickyBar
+          watch={totalRef}
+          label={snapshot.total.head?.label ?? t("sticky.monthly")}
+          value={snapshot.total.head?.short ?? null}
+          action={props.renderStickyAction?.(snapshot)}
+        />
       </div>
-      <CalcFooter {...props} snapshot={snapshot} update={update} t={t} />
-      <CalcStickyBar
-        watch={totalRef}
-        label={snapshot.total.head?.label ?? t("sticky.monthly")}
-        value={snapshot.total.head?.short ?? null}
-        action={props.renderStickyAction?.(snapshot)}
-      />
-    </div>
+    </HintsContext.Provider>
   );
 }
+
+const NO_HINTS: CalcHints = {};
 
 const surfaceClass = (surface: PaymentCalculatorProps<CalcProgram>["surface"] = "page") =>
   surface === "page" ? "payment-calculator" : `payment-calculator payment-calculator--${surface}`;
@@ -125,6 +140,7 @@ function ResultPanel<P extends CalcProgram>(props: PartProps<P>) {
   return (
     <CalcTotal
       eyebrow={total.eyebrow}
+      eyebrowHint={total.eyebrowHint}
       currency={currency}
       head={total.head}
       rows={total.rows}

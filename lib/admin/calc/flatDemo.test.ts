@@ -18,7 +18,7 @@ function viewOf(
 ) {
   const screen = flatCalcFrom(demoFlatCalc(layoutOf(area).id)!);
   const params = { ...EMPTY_CALC_PARAMS, ...patch(screen) };
-  return { screen, view: calculatorView(SITE_ENGINE, screen.data, params, true) };
+  return { screen, view: calculatorView(SITE_ENGINE, screen.data, params, screen.modes) };
 }
 
 const optionId = (screen: ReturnType<typeof flatCalcFrom>, type: string) =>
@@ -69,5 +69,23 @@ describe("DEMO расчёта квартиры", () => {
   it("ответ без полей скидки; чужая планировка — null", () => {
     expect(JSON.stringify(demoFlatCalc(layoutOf(78).id))).not.toMatch(/discount/i);
     expect(demoFlatCalc("00000000-0000-4000-8000-000000000000")).toBeNull();
+  });
+
+  it("планировка «по запросу» (свободная кв. 5 без цены) — расчёта нет, карточки на стенде нет", () => {
+    expect(demoFlatLayouts().map((layout) => layout.area)).not.toContain(42.5);
+  });
+
+  it("без квартир с ценой — «цена от» планировки, а не пустой расчёт без поля", () => {
+    const record = { ...demoFlatCalc(layoutOf(78).id)!, units: [] };
+    const screen = flatCalcFrom(record);
+    expect(screen.modes).toEqual(["layout"]);
+    const view = calculatorView(SITE_ENGINE, screen.data, EMPTY_CALC_PARAMS, screen.modes);
+    expect(view.price).toMatchObject({ mode: "layout", price: 54_930 });
+    expect(view.result?.ok).toBe(true);
+  });
+
+  it("?mode=sum из адреса не подменяет цену квартиры", () => {
+    const { view } = viewOf(78, () => ({ mode: "sum", sum: "1000" }));
+    expect(view.price).toMatchObject({ mode: "unit", price: 54_930 });
   });
 });

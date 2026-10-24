@@ -7,6 +7,7 @@ import { SiteCalculator } from "@/components/SiteCalculator";
 import { SiteHeader } from "@/components/SiteHeader";
 import { demoSiteCalc } from "@/lib/admin/calc/siteDemo";
 import { CALC_EXAMPLES, exampleSearch, exampleYears } from "@/lib/calc/examples";
+import { CALC_HINT_DRAFTS } from "@/lib/calc/hints";
 import { readCalcParams } from "@/lib/calc/params";
 import { siteCalcFrom } from "@/lib/calc/siteScreen";
 import { CALC_MESSAGES, pickMessages, siteMessages } from "@/lib/i18n/clientMessages";
@@ -67,6 +68,7 @@ export function CalculatorStand({ search, locale }: { search: Search; locale: St
           screen={screen}
           initialParams={{ ...params, developer: screen.current?.slug ?? null }}
           leadEnabled
+          hints={CALC_HINT_DRAFTS}
         />
       </Container>
     </NextIntlClientProvider>

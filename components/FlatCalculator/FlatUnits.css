@@ -23,7 +23,8 @@
   display: flex;
   gap: 8px;
   margin-inline: -16px;
-  padding: 2px 16px 4px;
+  /* 4 px сверху и снизу — под кольцо фокуса карточки: лента его не обрезает. */
+  padding: 4px 16px;
   overflow-x: auto;
   scroll-padding-inline: 16px;
   scrollbar-width: none;
@@ -34,6 +35,8 @@
 }
 
 .flat-units__chip {
+  /* Опора для скрытой радиокнопки: иначе она вне ленты и шторка прокручивается вбок. */
+  position: relative;
   display: grid;
   flex: none;
   gap: 2px;

@@ -8,7 +8,7 @@ import { DEMO_PROGRAMS_SCREEN } from "@/lib/admin/programs/demo";
 import { effectiveRate } from "@/lib/admin/programs/types";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
 import { CABINET_ENGINE } from "@/lib/calc/cabinet/engine";
-import { EMPTY_CALC_PARAMS } from "@/lib/calc/params";
+import { EMPTY_CALC_PARAMS, PRICE_MODES } from "@/lib/calc/params";
 import { calculatorView } from "@/lib/calc/view";
 import { pickMessages } from "@/lib/i18n/clientMessages";
 import ru from "@/messages/ru.json";
@@ -41,7 +41,7 @@ function messageIn(locale: "ru" | "uz") {
           }) as unknown as DiscountT,
         };
   const params = { ...EMPTY_CALC_PARAMS, unit: unit88.id, downPct: 50 };
-  const view = calculatorView(CABINET_ENGINE, current.data, params, true);
+  const view = calculatorView(CABINET_ENGINE, current.data, params, PRICE_MODES);
   const snapshot = {
     view,
     context: { out: view.outCurrency, rate, t: translators.calc, locale },

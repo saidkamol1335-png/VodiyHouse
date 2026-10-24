@@ -13,6 +13,7 @@
 @import "../components/CalcStickyBar/CalcStickyBar.css";
 @import "../components/CalcTerm/CalcTerm.css";
 @import "../components/CalcTotal/CalcTotal.css";
+@import "../components/Hint/Hint.css";
 
 @import "../components/FlatCalculator/FlatUnits.css";
 

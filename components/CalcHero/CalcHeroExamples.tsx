@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { markCalcNavigation } from "@/components/PaymentCalculator/useCalcParams";
 import type { CalcHeroExample } from "./CalcHero";
 
 /** Те же параметры, порядок неважен: адрес примера и строка адреса страницы. */
@@ -32,6 +33,7 @@ export function CalcHeroExamples({ label, examples }: CalcHeroExamplesProps) {
               active ? "calc-hero__example calc-hero__example--active" : "calc-hero__example"
             }
             aria-current={active ? "true" : undefined}
+            onClick={markCalcNavigation}
           >
             <b>{example.title}</b>
             <span className="calc-hero__example-note">{example.note}</span>

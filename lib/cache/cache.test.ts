@@ -72,6 +72,7 @@ const CONTENT_FILES = [
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",
+  "hints.ts",
   "programs.ts",
   "units.ts",
   "unitsMass.ts",

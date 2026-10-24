@@ -14,21 +14,57 @@
     radial-gradient(circle at 100% 0, var(--amber-soft), transparent 32%),
     var(--bg-2);
   color: var(--fg);
+  /* Липкий итог панели — под шапкой сайта, как у /kalkulyator (в шторке шапки нет — 16 px). */
+  --payment-calculator-top: calc(var(--header-h) + 16px);
 }
 
 .flat-calc[open] {
   display: block;
-  animation: flat-calc-in var(--dur-fast) var(--ease) both;
+  /* backwards, а не both: transform после появления сделал бы окно опорой для position: fixed,
+     и липкая полоса «Платёж в месяц» уехала бы вместе с прокруткой шторки. */
+  animation: flat-calc-in var(--dur-fast) var(--ease) backwards;
+}
+
+/* Шторка — модальное окно только на телефоне, но правила — без условия ширины: повернули телефон
+   с открытой шторкой — она остаётся внизу экрана, а не уезжает к началу страницы. */
+.flat-calc:modal {
+  position: fixed;
+  inset: auto 0 0;
+  max-height: calc(100dvh - 24px);
+  padding: 0 16px;
+  overflow-y: auto;
+  border-width: 1px 0 0;
+  border-color: var(--line);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--bg);
+  box-shadow: var(--shadow-3);
+  overscroll-behavior: contain;
+  --payment-calculator-top: 16px;
+}
+
+.flat-calc::backdrop {
+  background: var(--scrim);
 }
 
 .flat-calc__head {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  grid-template-areas: "plan heading price close";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "heading price close";
   align-items: center;
   gap: 20px;
   padding-bottom: 20px;
   border-bottom: 1px dashed var(--line-2);
+}
+
+/* Чертёж есть — колонка под него слева; нет — места под него нет (и отступа сетки тоже). */
+.flat-calc__head--plan {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: "plan heading price close";
+}
+
+/* На панели заголовок и «Закрыть» — свои места в сетке шапки; в шторке — липкая строка. */
+.flat-calc__bar {
+  display: contents;
 }
 
 .flat-calc__plan {
@@ -105,6 +141,7 @@
 
 .flat-calc__close {
   display: inline-flex;
+  flex: none;
   grid-area: close;
   align-self: start;
   align-items: center;
@@ -124,33 +161,25 @@
 }
 
 @media (max-width: 767px) {
-  .flat-calc:modal {
-    position: fixed;
-    inset: auto 0 0;
-    max-height: calc(100dvh - 24px);
-    padding: 16px 16px 0;
-    overflow-y: auto;
-    border-width: 1px 0 0;
-    border-color: var(--line);
-    border-radius: var(--r-xl) var(--r-xl) 0 0;
-    background: var(--bg);
-    box-shadow: var(--shadow-3);
-    overscroll-behavior: contain;
-  }
-
-  .flat-calc::backdrop {
-    background: var(--scrim);
-  }
-
+  /* Шапка «растворяется» в калькуляторе: строка заголовка становится его прямым потомком и
+     прилипает на всю высоту шторки (sticky держится только внутри родителя). */
   .flat-calc__head {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "heading close"
-      "plan plan"
-      "price price";
-    gap: 16px;
-    padding-bottom: 0;
-    border-bottom: 0;
+    display: contents;
+  }
+
+  /* Заголовок и «Закрыть» прилипают к верху шторки (MobFlatTerm): закрыть можно с любого места. */
+  .flat-calc__bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    grid-area: bar;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-inline: -16px;
+    padding: 16px 16px 12px;
+    background: var(--bg);
   }
 
   .flat-calc__plan {

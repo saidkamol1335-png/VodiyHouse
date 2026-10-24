@@ -2,7 +2,7 @@ import type { CalcInput, CalcResult } from "./calculate";
 import { type Currency, type ExchangeRate } from "./money";
 import type { CalcEngine, Comparison, DownOption, ProgramOption } from "./options";
 import { appliesToBlock } from "./options";
-import type { CalcParams } from "./params";
+import type { CalcParams, PriceMode } from "./params";
 import { type ResolvedPrice, resolvePrice, type CalcStock } from "./priceSource";
 import { type CalcProgram, DOWN_MAX_PCT, minDownOf } from "./programs";
 import { allowsCustomMonths, termButtons } from "./terms";
@@ -73,9 +73,9 @@ export function calculatorView<P extends CalcProgram>(
   engine: CalcEngine<P>,
   data: CalcData<P>,
   params: CalcParams,
-  allowUnits: boolean,
+  modes: readonly PriceMode[],
 ): CalcView<P> {
-  const price = resolvePrice(data.stock, params, allowUnits);
+  const price = resolvePrice(data.stock, params, modes);
   const options = data.options.filter((option) => appliesToBlock(option, price.blockId));
   const selected = pickProgram(options, params.program);
   const { min, down } = selected ? downOf(selected.program, params.downPct) : { min: 0, down: 0 };

@@ -1,10 +1,14 @@
 import type { ReactNode } from "react";
 import { Beam } from "@/components/Beam";
+import { Hint } from "@/components/Hint";
+import type { CalcHintSlug } from "@/lib/calc/hints";
 import type { TotalHead, TotalRow } from "./totalRows";
 
 type CalcTotalProps = {
   /** Моно-строка сверху: «РАССРОЧКА ОТ ЗАСТРОЙЩИКА», «IPOTEKA BANK · ИПОТЕКА». */
   eyebrow: string;
+  /** «?» к виду программы в надписи (шаг 2.8). */
+  eyebrowHint?: CalcHintSlug;
   /** Переключатель $ | сум (В9) — когда есть курс. */
   currency?: ReactNode;
   head: TotalHead | null;
@@ -26,6 +30,7 @@ type CalcTotalProps = {
  */
 export function CalcTotal({
   eyebrow,
+  eyebrowHint,
   currency,
   head,
   rows,
@@ -45,7 +50,10 @@ export function CalcTotal({
     >
       {beam ? <Beam /> : null}
       <div className="calc-total__top">
-        <p className="calc-total__eyebrow">{eyebrow}</p>
+        <p className="calc-total__eyebrow">
+          {eyebrow}
+          {eyebrowHint ? <Hint slug={eyebrowHint} /> : null}
+        </p>
         {currency}
       </div>
       {head ? <HeadBlock head={head} /> : null}
@@ -84,7 +92,14 @@ function RowList({ rows }: { rows: readonly TotalRow[] }) {
           className={row.tone ? `calc-total__row calc-total__row--${row.tone}` : "calc-total__row"}
         >
           <dt>
-            {row.label}
+            {row.hint ? (
+              <span className="calc-total__term">
+                {row.label}
+                <Hint slug={row.hint} />
+              </span>
+            ) : (
+              row.label
+            )}
             {row.note ? <span className="calc-total__note">{row.note}</span> : null}
           </dt>
           <dd>{row.value}</dd>

@@ -101,8 +101,16 @@ test.describe("сайт · расчёт для этой квартиры", () =>
       () => (window as unknown as { __copied: string[] }).__copied[0],
     );
     expect(text).toMatch(/кв\. 43, 12 эт\., 64,2 м²/);
-    expect(text).toMatch(new RegExp(`Расчёт: http://localhost:\\d+${STAND}\\?plan=${LAYOUT_64}`));
     expect(text).not.toMatch(/скидк/i);
+    // Ссылка открывает тот же расчёт: та же квартира, программа, взнос и свой срок.
+    const link = /Расчёт: (\S+)/.exec(text ?? "")![1]!;
+    expect(link).toMatch(new RegExp(`${STAND}\\?plan=${LAYOUT_64}&`));
+    for (const part of [`unit=${UNIT_43}`, `program=${SCHEME}`, "down=50", "months=17"]) {
+      expect(link).toContain(part);
+    }
+    await page.goto(link);
+    await expect(flat(page).locator(".flat-calc__price-value")).toHaveText(amount("$47 640"));
+    await expect(head(page)).toHaveText(amount("$1 401"));
   });
 
   test("телефон: шторка, «К расчёту ↓» ведёт к итогу внутри неё, Escape закрывает", async ({
@@ -112,11 +120,65 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await open(page, `plan=${LAYOUT_64}&unit=${UNIT_43}`);
     await expect(flat(page).getByRole("radio", { name: /№ 43/ })).toBeChecked();
     const bar = flat(page).locator(".calc-sticky-bar");
+    // Шторку прокрутили: полоса — у низа экрана, «Закрыть» — у верха (MobFlatTerm).
+    await flat(page).evaluate((element) => element.scrollTo({ top: 400 }));
+    const viewport = page.viewportSize()!;
+    await expect
+      .poll(async () => {
+        const box = await bar.boundingBox();
+        return box ? Math.round(box.y + box.height) : null;
+      })
+      .toBe(viewport.height);
+    await expect(flat(page).getByRole("button", { name: "Закрыть расчёт" })).toBeInViewport();
+    // Наверх шторки: оттуда «К расчёту ↓» ведёт к итогу (у итога полоса прячется).
+    await flat(page).evaluate((element) => element.scrollTo({ top: 0 }));
+    await expect(bar).not.toHaveAttribute("data-hidden", "");
     await bar.getByRole("button", { name: "К расчёту" }).click();
-    await expect(flat(page).getByTestId("calc-total")).toBeInViewport();
+    const total = flat(page).getByTestId("calc-total");
+    await expect(total).toBeInViewport();
+    await expect(total).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(flat(page)).toHaveCount(0);
     await expect(page).not.toHaveURL(/plan=/);
+    // Открыли по адресу — фокус возвращается на «Рассчитать оплату» этой планировки.
+    await expect(page.getByRole("button", { name: "Рассчитать оплату" }).first()).toBeFocused();
+  });
+
+  test("открыто по адресу: Escape закрывает и панель на 1440, фокус — на её «Рассчитать оплату»", async ({
+    page,
+  }) => {
+    await open(page, `plan=${LAYOUT_78}`);
+    await page.keyboard.press("Escape");
+    await expect(flat(page)).toHaveCount(0);
+    await expect(page).not.toHaveURL(/plan=/);
+    await expect(page.getByRole("button", { name: "Рассчитать оплату" }).nth(1)).toBeFocused();
+  });
+
+  test("окно заявки внутри расчёта: закрыли его — расчёт квартиры остаётся открытым", async ({
+    page,
+  }) => {
+    await open(page, `plan=${LAYOUT_78}`);
+    await flat(page).getByRole("button", { name: "Получить точный расчёт" }).click();
+    const lead = page.getByRole("dialog", { name: "Точный расчёт" });
+    await expect(lead).toBeVisible();
+    await lead.getByRole("button", { name: "Закрыть" }).click();
+    await expect(lead).toBeHidden();
+    await expect(flat(page)).toHaveAttribute("open", "");
+    await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}`));
+  });
+
+  test("закрыли и сразу снова «Рассчитать оплату» той же планировки — расчёт открыт", async ({
+    page,
+  }) => {
+    await page.goto(STAND);
+    await page.waitForLoadState("networkidle");
+    const opener = page.getByRole("button", { name: "Рассчитать оплату" }).nth(1);
+    await opener.click();
+    await expect(flat(page)).toHaveAttribute("open", "");
+    await flat(page).getByRole("button", { name: "Закрыть расчёт" }).click();
+    await opener.click();
+    await expect(flat(page)).toHaveAttribute("open", "");
+    await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}`));
   });
 
   test("по-узбекски: шапка расчёта и ни одного русского слова", async ({ page }) => {

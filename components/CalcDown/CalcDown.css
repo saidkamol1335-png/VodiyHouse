@@ -15,6 +15,14 @@
   gap: 4px 12px;
 }
 
+/* Заголовок и «?» рядом, пояснение — под ними в левой колонке (шаг 2.8). */
+.calc-down__term {
+  display: flex;
+  flex: 1 1 260px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .calc-down__title,
 .calc-down__options-title {
   margin: 0;

@@ -1,15 +1,28 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useEffect, useRef } from "react";
+import { type KeyboardEvent, type SyntheticEvent, useEffect, useRef } from "react";
 import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
 import { PaymentCalculator } from "@/components/PaymentCalculator/PaymentCalculator";
 import { SiteActions, ToTotal } from "@/components/SiteCalculator/SiteActions";
 import type { FlatCalcScreen } from "@/lib/calc/flatScreen";
+import type { CalcHints } from "@/lib/calc/hints";
 import { SITE_ENGINE } from "@/lib/calc/options";
 import { type CalcParams, writeCalcParams } from "@/lib/calc/params";
 import { FlatHead } from "./FlatHead";
 import { FlatUnits } from "./FlatUnits";
+
+/** Окно заявки — портал, но его close всплывает по дереву React сюда: реагируем только на своё. */
+const ownClose = (onClose: () => void) => (event: SyntheticEvent<HTMLDialogElement>) => {
+  if (event.target === event.currentTarget) onClose();
+};
+
+/** Шторку Escape закрывает сам браузер; панель на месте (show) — нет: закрываем её так же. */
+function closeOnEscape(event: KeyboardEvent<HTMLDialogElement>) {
+  if (event.key !== "Escape" || event.currentTarget.matches(":modal")) return;
+  event.preventDefault();
+  event.currentTarget.close();
+}
 
 const sourceOf = (screen: FlatCalcScreen) => ({
   stock: screen.data.stock,
@@ -27,6 +40,8 @@ type FlatCalculatorProps = {
   /** «Получить точный расчёт» — до заявок фазы 3 только на стенде (решение фазы 2). */
   leadEnabled: boolean;
   onClose: () => void;
+  /** Тексты «?» из справочника hints (шаг 2.8). */
+  hints?: CalcHints;
 };
 
 /**
@@ -56,12 +71,19 @@ export function FlatCalculator({
   initialParams,
   leadEnabled,
   onClose,
+  hints,
 }: FlatCalculatorProps) {
   const locale = useLocale() as CalcLocale;
   const dialog = useOpenDialog();
   const close = () => dialog.current?.close();
   return (
-    <dialog ref={dialog} className="flat-calc" aria-labelledby={`${id}-title`} onClose={onClose}>
+    <dialog
+      ref={dialog}
+      className="flat-calc"
+      aria-labelledby={`${id}-title`}
+      onClose={ownClose(onClose)}
+      onKeyDown={closeOnEscape}
+    >
       <PaymentCalculator
         key={`${screen.layout.id}?${writeCalcParams(initialParams)}`}
         id={id}
@@ -72,17 +94,12 @@ export function FlatCalculator({
         developerName={screen.developerName}
         actualAt={screen.checkedAt}
         surface="bare"
+        hints={hints}
         renderHeader={({ view }) => (
           <FlatHead id={id} screen={screen} view={view} locale={locale} onClose={close} />
         )}
         renderPrice={(view, update) => (
-          <FlatUnits
-            id={id}
-            stock={screen.data.stock}
-            price={view.price}
-            locale={locale}
-            onChange={update}
-          />
+          <FlatUnits id={id} stock={screen.data.stock} price={view.price} onChange={update} />
         )}
         renderActions={(snapshot) => (
           <SiteActions snapshot={snapshot} source={sourceOf(screen)} leadEnabled={leadEnabled} />

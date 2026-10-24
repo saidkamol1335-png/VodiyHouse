@@ -8,7 +8,8 @@ import {
 } from "@/components/CalcTotal";
 import type { Calculation } from "@/lib/calc/calculate";
 import type { ExchangeRate } from "@/lib/calc/money";
-import type { CalcProgram } from "@/lib/calc/programs";
+import type { CalcHintSlug } from "@/lib/calc/hints";
+import type { CalcProgram, ProgramKind } from "@/lib/calc/programs";
 import type { CalcView } from "@/lib/calc/view";
 import { formatDate, formatPercent, formatRate } from "@/lib/format";
 import { type CalcT, moneyIn, programName, termText } from "./calcText";
@@ -26,9 +27,19 @@ export type DecorateRows = (
 
 export type CalcTotalView = {
   eyebrow: string;
+  /** «?» к виду выбранной программы; у «100% оплаты» пояснять нечего. */
+  eyebrowHint?: CalcHintSlug;
   head: TotalHead | null;
   rows: TotalRow[];
   problem: string | null;
+};
+
+const KIND_HINTS: Readonly<Record<ProgramKind, CalcHintSlug | undefined>> = {
+  full: undefined,
+  scheme: "installment",
+  markup: "installment-markup",
+  bank: "bank-installment",
+  mortgage: "mortgage",
 };
 
 export function totalView<P extends CalcProgram>(
@@ -53,6 +64,7 @@ export function totalView<P extends CalcProgram>(
   const rows = totalRows(calc, context);
   return {
     eyebrow,
+    eyebrowHint: KIND_HINTS[view.selected.kind],
     head: totalHead(calc, context),
     rows: decorate?.(rows, calc, context, view.selected.program) ?? rows,
     problem: null,

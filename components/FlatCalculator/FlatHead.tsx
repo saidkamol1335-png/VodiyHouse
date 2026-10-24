@@ -29,45 +29,48 @@ export function FlatHead({ id, screen, view, locale, onClose }: FlatHeadProps) {
     rooms: t("price.rooms", { count: screen.layout.rooms }),
     area: AREA.format(screen.layout.area),
   });
+  const planUrl = drawingUrl(screen.layout.drawing);
   return (
-    <header className="flat-calc__head">
-      <FlatPlan drawing={screen.layout.drawing} alt={t("flat.plan", { title })} />
-      <div className="flat-calc__heading">
-        <Eyebrow>{t("flat.eyebrow")}</Eyebrow>
-        <h2 id={`${id}-title`} className="flat-calc__title" tabIndex={-1}>
-          {title}
-        </h2>
-        <p className="flat-calc__place">
-          {t("flat.place", {
-            complex: screen.complexName[locale],
-            block: screen.blockName,
-            developer: screen.developerName,
-          })}
-        </p>
+    <header className={planUrl ? "flat-calc__head flat-calc__head--plan" : "flat-calc__head"}>
+      {planUrl ? (
+        <figure className="flat-calc__plan">
+          {/* eslint-disable-next-line @next/next/no-img-element -- чертёж из бакета, размеры неизвестны */}
+          <img src={planUrl} alt={t("flat.plan", { title })} loading="lazy" decoding="async" />
+        </figure>
+      ) : null}
+      {/* Заголовок и «Закрыть» — одна строка: в шторке она прилипает к верху (MobFlatTerm). */}
+      <div className="flat-calc__bar">
+        <div className="flat-calc__heading">
+          <Eyebrow>{t("flat.eyebrow")}</Eyebrow>
+          <h2 id={`${id}-title`} className="flat-calc__title" tabIndex={-1}>
+            {title}
+          </h2>
+          <p className="flat-calc__place">
+            {t("flat.place", {
+              complex: screen.complexName[locale],
+              block: screen.blockName,
+              developer: screen.developerName,
+            })}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="flat-calc__close"
+          aria-label={t("flat.close")}
+          onClick={onClose}
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
       </div>
       <FlatPrice screen={screen} view={view} locale={locale} />
-      <button
-        type="button"
-        className="flat-calc__close"
-        aria-label={t("flat.close")}
-        onClick={onClose}
-      >
-        <X size={18} aria-hidden="true" />
-      </button>
     </header>
   );
 }
 
-/** Чертёж планировки из медиа ЖК; чертежа нет — места под него нет. */
-function FlatPlan({ drawing, alt }: { drawing: string | null; alt: string }) {
+/** Чертёж планировки из медиа ЖК; чертежа (или облака) нет — места под него нет. */
+function drawingUrl(drawing: string | null): string | null {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!drawing || !base) return null;
-  return (
-    <figure className="flat-calc__plan">
-      {/* eslint-disable-next-line @next/next/no-img-element -- чертёж из бакета, размеры неизвестны */}
-      <img src={mediaPublicUrl(base, drawing)} alt={alt} loading="lazy" decoding="async" />
-    </figure>
-  );
+  return drawing && base ? mediaPublicUrl(base, drawing) : null;
 }
 
 type FlatPriceProps = Pick<FlatHeadProps, "screen" | "view" | "locale">;

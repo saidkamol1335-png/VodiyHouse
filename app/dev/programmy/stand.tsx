@@ -28,6 +28,7 @@ import {
   demoSetManualRateAction,
   demoSetProgramActiveAction,
 } from "./actions";
+import { CALC_HINT_DRAFTS } from "@/lib/calc/hints";
 
 // Стенды «Программ оплаты» на DEMO мокапа: /dev/programmy — руководитель, /dev/menedzher/programmy —
 // менеджер (читает, PLAN §5); вкладка «Расчёт для клиента» — у обоих. Те же компоненты, что у
@@ -101,6 +102,7 @@ export function ClientCalcStand({ search }: CalcProps) {
       initialParams={{ ...params, developer: screen.current?.slug ?? null }}
       uzMessages={pickMessages(uz, ["calc", "admin.calcTelegram"])}
       save={demoSaveCalculationAction}
+      hints={CALC_HINT_DRAFTS}
     />
   );
 }

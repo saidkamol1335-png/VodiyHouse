@@ -1,0 +1,62 @@
+/* «?» у термина (мокап: .hintbtn — пунктирный кружок 20 px; на телефоне цель 44 px, как .hint
+   телефонного мокапа). Пояснение — строкой под термином во всю ширину ряда: в flex-ряду
+   переносится последним, в блоке — просто следующей строкой. */
+
+.hint {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 1px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+/* Цель нажатия 44 px вокруг маленького кружка — без сдвига соседей. */
+.hint::after {
+  content: "";
+  position: absolute;
+  inset: calc((20px - var(--touch-target)) / 2);
+}
+
+.hint:hover,
+.hint[aria-expanded="true"] {
+  border-color: var(--amber);
+  color: var(--fg);
+}
+
+.hint:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.hint__text {
+  display: block;
+  flex-basis: 100%;
+  order: 1;
+  margin-top: 6px;
+  color: var(--fg-2);
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.hint__text[hidden] {
+  display: none;
+}

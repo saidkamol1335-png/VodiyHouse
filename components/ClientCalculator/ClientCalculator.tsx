@@ -11,6 +11,7 @@ import {
 import type { ClientCalcScreen } from "@/lib/admin/calc/screen";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
 import { CABINET_ENGINE } from "@/lib/calc/cabinet/engine";
+import type { CalcHints } from "@/lib/calc/hints";
 import { type CalcParams, type PriceMode, writeCalcParams } from "@/lib/calc/params";
 import { cabinetExtras, discountDecorator } from "./cabinetExtras";
 import { telegramMessage, type Translators, uzTranslators } from "./telegramMessage";
@@ -27,6 +28,8 @@ type ClientCalculatorProps = {
   /** calc и admin.calcTelegram на узбекском — для текста клиенту (кабинет — на русском). */
   uzMessages: AbstractIntlMessages;
   save: SaveCalculation;
+  /** Тексты «?» из справочника hints (шаг 2.8). */
+  hints?: CalcHints;
 };
 
 /**
@@ -39,6 +42,7 @@ export function ClientCalculator({
   initialParams,
   uzMessages,
   save,
+  hints,
 }: ClientCalculatorProps) {
   const t = useTranslations("admin.calc");
   const tDiscount = useTranslations("admin.calcTelegram");
@@ -63,6 +67,7 @@ export function ClientCalculator({
         developerName={current.name}
         actualAt={current.checkedAt}
         extras={extras}
+        hints={hints}
         header={
           <DeveloperPills
             label={t("developer")}
