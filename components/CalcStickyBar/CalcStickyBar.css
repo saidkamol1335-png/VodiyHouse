@@ -1,0 +1,46 @@
+/* Липкая полоса «Платёж в месяц» (В7 B, мокап MobFlat): только телефон; итог на экране — уезжает
+   вниз (transform), без анимаций — просто пропадает. */
+
+.calc-sticky-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .calc-sticky-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-calc-bar);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    box-shadow: var(--shadow-sheet);
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .calc-sticky-bar[data-hidden] {
+    transform: translateY(110%);
+    pointer-events: none;
+  }
+}
+
+.calc-sticky-bar__text {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.calc-sticky-bar__label {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.calc-sticky-bar__value {
+  font-size: var(--fs-h3);
+  font-variant-numeric: tabular-nums;
+}

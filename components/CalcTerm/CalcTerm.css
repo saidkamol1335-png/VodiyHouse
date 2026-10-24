@@ -1,0 +1,181 @@
+/* Срок (мокап r1 «Срок», MobFlatTerm): кнопки-карточки «12 мес. / без наценки», «Свой» —
+   пунктир; степпер − [17 мес.] +; превышение — янтарная строка, подсказка — серая. */
+
+.calc-term {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.calc-term__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calc-term__title {
+  margin: 0;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.calc-term__value {
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.calc-term__buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.calc-term__button {
+  display: grid;
+  gap: 2px;
+  min-height: var(--touch-target);
+  padding: 12px 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-m);
+  background: var(--chip-bg);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.calc-term__button:hover {
+  border-color: var(--line-3);
+}
+
+.calc-term__button:focus-visible,
+.calc-term__step:focus-visible,
+.calc-term__action:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.calc-term__button--custom {
+  border-style: dashed;
+}
+
+.calc-term__button--active,
+.calc-term__button--active:hover {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+  box-shadow: var(--chip-on-ring);
+}
+
+.calc-term__button-label {
+  font-size: var(--fs-control);
+  font-weight: 700;
+}
+
+.calc-term__button-note {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.calc-term__custom {
+  display: grid;
+  gap: 8px;
+}
+
+.calc-term__stepper {
+  display: grid;
+  grid-template-columns: var(--touch-target) minmax(0, 1fr) var(--touch-target);
+  align-items: center;
+  gap: 10px;
+  max-width: 360px;
+}
+
+.calc-term__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.calc-term__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--touch-target);
+  padding: 0 16px;
+  border: 1px solid var(--chip-on-border);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  box-shadow: var(--chip-on-ring);
+}
+
+.calc-term__input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.calc-term__unit {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.calc-term__hint {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.calc-term__message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border-radius: var(--r-m);
+  font-size: var(--fs-small);
+}
+
+.calc-term__message p {
+  margin: 0;
+}
+
+.calc-term__message--warn {
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.calc-term__message--info {
+  background: var(--badge-bg);
+  color: var(--fg-2);
+}
+
+.calc-term__action {
+  min-height: var(--touch-target);
+  padding: 0 14px;
+  border: 1px solid var(--badge-amber-border);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}

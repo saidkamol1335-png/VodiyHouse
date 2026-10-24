@@ -12,7 +12,7 @@ import {
 // CSS по разделам (шаг 14в): сайт не грузит кабинет, вход — только своё. Компонент, который
 // попадёт на страницу без своего CSS, выглядел бы сломанным только там — тест ловит это сразу.
 
-const BUNDLES = ["globals", "site", "admin", "cabinet", "dev"] as const;
+const BUNDLES = ["globals", "site", "admin", "cabinet", "calc", "dev"] as const;
 type Bundle = (typeof BUNDLES)[number];
 
 /** Какие разделы грузит корень маршрутов — в порядке каскада. */
@@ -22,7 +22,10 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
     bundles: ["globals", "site"],
   },
   adminRoot: { entries: adminRootFiles(), bundles: ["globals", "admin"] },
-  cabinet: { entries: routeFiles("app/admin/(cabinet)"), bundles: ["globals", "admin", "cabinet"] },
+  cabinet: {
+    entries: routeFiles("app/admin/(cabinet)"),
+    bundles: ["globals", "admin", "cabinet", "calc"],
+  },
   dev: { entries: routeFiles("app/dev"), bundles: [...BUNDLES] },
 };
 
@@ -30,7 +33,7 @@ const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/layout.tsx": ["globals", "site"],
   "app/global-not-found.tsx": ["globals", "site"],
   "app/admin/layout.tsx": ["globals", "admin"],
-  "app/admin/(cabinet)/layout.tsx": ["cabinet"],
+  "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],
   "app/dev/layout.tsx": [...BUNDLES],
 };
 

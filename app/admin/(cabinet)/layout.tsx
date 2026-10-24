@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { AdminShell } from "@/components/AdminShell";
 import { requireViewer } from "@/lib/admin/session";
 import "../../cabinet.css";
+import "../../calc.css";
 
 // Сессия читается на каждый запрос и не попадает в статичную оболочку: раздел ждёт её на сервере,
 // чтобы редирект на вход был настоящим 307, а не тегом после начала потока (docs: instant-navigation).

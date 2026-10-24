@@ -1,0 +1,14 @@
+/* Калькулятор платежа (фаза 2): один набор блоков на кабинет («Расчёт для клиента»), /kalkulyator
+   и расчёт квартиры. Подключают только страницы с калькулятором — не каждая страница сайта. */
+
+/* Части — первыми: их собирает PaymentCalculator, его правила раскладки грузятся позже. */
+@import "../components/CalcCompare/CalcCompare.css";
+@import "../components/CalcDown/CalcDown.css";
+@import "../components/CalcPrice/CalcPrice.css";
+@import "../components/CalcPrograms/CalcPrograms.css";
+@import "../components/CalcSchedule/CalcSchedule.css";
+@import "../components/CalcStickyBar/CalcStickyBar.css";
+@import "../components/CalcTerm/CalcTerm.css";
+@import "../components/CalcTotal/CalcTotal.css";
+
+@import "../components/PaymentCalculator/PaymentCalculator.css";

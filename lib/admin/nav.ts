@@ -13,6 +13,7 @@ export const ADMIN_ROUTES = {
   complexes: `${ADMIN_ROUTE}/zhk`,
   developers: `${ADMIN_ROUTE}/zastroyshchiki`,
   programs: `${ADMIN_ROUTE}/programmy`,
+  programsCalc: `${ADMIN_ROUTE}/programmy/raschet`,
   video: `${ADMIN_ROUTE}/video`,
   stats: `${ADMIN_ROUTE}/statistika`,
   settings: `${ADMIN_ROUTE}/nastroyki`,
@@ -28,6 +29,8 @@ export type AdminNavItem = {
   ready: boolean;
   /** Готов пока не для всех своих ролей: раздел делается по шагам плана. */
   readyFor?: readonly StaffRole[];
+  /** Свой адрес для роли: менеджеру «Программы оплаты» открываются сразу «Расчётом для клиента». */
+  hrefFor?: Partial<Record<StaffRole, string>>;
 };
 
 // Порядок и доступ — PLAN §7 и §3а: менеджер видит заявки, наличие квартир (ЖК) и расчёт
@@ -37,7 +40,13 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
   { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: true },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
-  { key: "programs", href: ADMIN_ROUTES.programs, roles: ["head", "manager"], ready: true },
+  {
+    key: "programs",
+    href: ADMIN_ROUTES.programs,
+    roles: ["head", "manager"],
+    ready: true,
+    hrefFor: { manager: ADMIN_ROUTES.programsCalc },
+  },
   {
     key: "video",
     href: ADMIN_ROUTES.video,
@@ -54,11 +63,16 @@ export function isReadyFor(item: AdminNavItem, role: StaffRole): boolean {
 }
 
 /** Пункты меню для роли: недоступное роли и ещё не сделанное не показываются (PLAN §3а). */
+/** Пункт меню роли: href — куда ведёт ссылка, section — адрес раздела (пункт активен во всём нём). */
+export type VisibleNavItem = AdminNavItem & { section: string };
+
 export function visibleNav(
   role: StaffRole,
   items: readonly AdminNavItem[] = ADMIN_NAV,
-): AdminNavItem[] {
-  return items.filter((item) => isReadyFor(item, role) && item.roles.includes(role));
+): VisibleNavItem[] {
+  return items
+    .filter((item) => isReadyFor(item, role) && item.roles.includes(role))
+    .map((item) => ({ ...item, href: item.hrefFor?.[role] ?? item.href, section: item.href }));
 }
 
 /** Страница раздела открыта роли сейчас: по правам PLAN §7 и готовности для неё. */

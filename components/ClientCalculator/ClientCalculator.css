@@ -1,0 +1,12 @@
+/* «Расчёт для клиента» в кабинете: итог липнет под верхней строкой кабинета. */
+
+.client-calculator {
+  --payment-calculator-top: calc(var(--admin-topbar-h) + 16px);
+  min-width: 0;
+}
+
+.client-calculator__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-control);
+}

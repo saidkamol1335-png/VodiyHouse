@@ -14,7 +14,7 @@ type AdminShellProps = {
 /** Оболочка кабинета: боковая панель 250 px (≥ 981 px) или лента пилюль (≤ 980 px) + раздел. */
 export async function AdminShell({ viewer, children }: AdminShellProps) {
   const person = await cabinetPerson(viewer);
-  const items = visibleNav(viewer.role).map(({ key, href }) => ({ key, href }));
+  const items = visibleNav(viewer.role).map(({ key, href, section }) => ({ key, href, section }));
   return (
     <div className="admin-shell">
       <aside className="admin-shell__side">

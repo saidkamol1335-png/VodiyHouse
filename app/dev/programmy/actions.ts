@@ -111,3 +111,11 @@ export async function demoRefreshCbuRateAction(): Promise<ProgramActionResult<Ra
   devOnly();
   return done(DEMO_RATE);
 }
+
+/** «Скопировать для Telegram» на стенде: снимок не пишется, ответ — как у настоящего действия. */
+export async function demoSaveCalculationAction(
+  formData: FormData,
+): Promise<ProgramActionResult<string>> {
+  devOnly();
+  return readUuid(formData, "program") ? done("demo-calculation") : fail("invalid");
+}

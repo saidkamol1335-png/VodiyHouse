@@ -65,6 +65,15 @@ describe("меню кабинета", () => {
     expect(keysFor("videographer")).toEqual(["video"]);
   });
 
+  it("менеджеру «Программы оплаты» открываются «Расчётом для клиента», пункт активен во всём разделе", () => {
+    const managerPrograms = visibleNav("manager").find((item) => item.key === "programs")!;
+    expect(managerPrograms.href).toBe(ADMIN_ROUTES.programsCalc);
+    expect(managerPrograms.section).toBe(ADMIN_ROUTES.programs);
+    expect(visibleNav("head").find((item) => item.key === "programs")!.href).toBe(
+      ADMIN_ROUTES.programs,
+    );
+  });
+
   it("активный пункт: главная — только на /admin, раздел — и на вложенных", () => {
     expect(isNavItemActive(ADMIN_ROUTES.home, "/admin")).toBe(true);
     expect(isNavItemActive(ADMIN_ROUTES.home, "/admin/zayavki")).toBe(false);

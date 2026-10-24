@@ -54,6 +54,10 @@
       "bank": "Рассрочка через банк",
       "mortgage": "Ипотека"
     },
+    "currency": {
+      "usd": "$",
+      "uzs": "сум"
+    },
     "programs": {
       "title": "Программа оплаты",
       "full": "вся сумма сразу, без платежей",
@@ -184,10 +188,11 @@
       "copied": "Скопировано — вставьте в Telegram",
       "failed": "Не удалось скопировать — выделите текст ниже и скопируйте вручную",
       "term": "Срок: {term}",
-      "payment": "Платёж в месяц: {amount}",
-      "paymentFirst": "Первый платёж: {amount}",
       "line": "{label}: {value}",
-      "signature": "Vodiy House"
+      "signature": "Vodiy House",
+      "unit": "{place} · кв. {number}, {floor} эт., {area} м²",
+      "area": "{area} м² × {perM2}",
+      "layout": "{place} · {rooms}, {area} м²"
     },
     "sticky": {
       "monthly": "Платёж в месяц"

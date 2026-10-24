@@ -1,0 +1,31 @@
+/* «Скопировать для Telegram» в итоге (мокап r1): язык сообщения RU | UZ, кнопка на всю ширину,
+   ответ строкой; не удалось скопировать — текст в поле, чтобы скопировать руками. */
+
+.telegram-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.telegram-copy--compact {
+  justify-items: end;
+  gap: 4px;
+  max-width: 60%;
+  font-size: var(--fs-caption);
+}
+
+.telegram-copy__language {
+  justify-self: start;
+}
+
+.telegram-copy__manual {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  resize: vertical;
+}

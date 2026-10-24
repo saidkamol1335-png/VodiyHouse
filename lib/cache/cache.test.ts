@@ -77,8 +77,15 @@ const CONTENT_FILES = [
   "unitsMass.ts",
   "unitsStatus.ts",
 ];
-// Без контента сайта: вход, сотрудники, чтение журнала и списка квартир.
-const NO_CONTENT_FILES = ["auth.ts", "journal.ts", "siteStock.ts", "staff.ts", "unitsList.ts"];
+// Без контента сайта: вход, сотрудники, снимки расчётов, чтение журнала и списка квартир.
+const NO_CONTENT_FILES = [
+  "auth.ts",
+  "calculations.ts",
+  "journal.ts",
+  "siteStock.ts",
+  "staff.ts",
+  "unitsList.ts",
+];
 const WITHOUT_TAG = new Set([
   "createComplexAction",
   "createDeveloperAction",

@@ -1,0 +1,105 @@
+/* График платежей (В8 B, мокапы SiteCalc и MobFlatCmp): кнопка-раскрытие на всю ширину, таблица
+   без прокрутки внутри; на телефоне — те же строки, мельче. */
+
+.calc-schedule {
+  display: grid;
+  gap: 12px;
+}
+
+.calc-schedule__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.calc-schedule__toggle:focus-visible,
+.calc-schedule__more:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.calc-schedule__chevron {
+  margin-left: auto;
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.calc-schedule__toggle[aria-expanded="true"] .calc-schedule__chevron {
+  transform: rotate(180deg);
+}
+
+.calc-schedule__panel {
+  display: grid;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.calc-schedule__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-schedule__table th,
+.calc-schedule__table td {
+  padding: 9px 12px;
+  border-bottom: 1px dashed var(--dash);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.calc-schedule__table thead th {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.calc-schedule__table th:first-child {
+  text-align: left;
+}
+
+.calc-schedule__table tfoot th,
+.calc-schedule__table tfoot td {
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.calc-schedule__more {
+  justify-self: start;
+  min-height: var(--touch-target);
+  padding: 0 16px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* Телефон: долг и проценты в сумах не помещаются — месяц, платёж и остаток (без прокрутки, В8 B). */
+@media (max-width: 767px) {
+  .calc-schedule__table th,
+  .calc-schedule__table td {
+    padding: 8px 6px;
+  }
+
+  .calc-schedule__cell--principal,
+  .calc-schedule__cell--interest {
+    display: none;
+  }
+}

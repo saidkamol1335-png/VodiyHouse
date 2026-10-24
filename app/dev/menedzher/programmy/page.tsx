@@ -1,14 +1,6 @@
-import type { CabinetViewer } from "@/lib/admin/access";
-import { ProgramsStand } from "../../programmy/stand";
+import { DEV_MANAGER, ProgramsListStand } from "../../programmy/stand";
 
 export const instant = false;
-
-const DEV_MANAGER: CabinetViewer = {
-  id: "dev-manager",
-  role: "manager",
-  name: null,
-  mustChangePassword: false,
-};
 
 type DevManagerProgramsPageProps = { searchParams: Promise<{ developer?: string | string[] }> };
 
@@ -16,5 +8,5 @@ type DevManagerProgramsPageProps = { searchParams: Promise<{ developer?: string 
 export default async function DevManagerProgramsPage({
   searchParams,
 }: DevManagerProgramsPageProps) {
-  return <ProgramsStand viewer={DEV_MANAGER} developer={(await searchParams).developer} />;
+  return <ProgramsListStand viewer={DEV_MANAGER} developer={(await searchParams).developer} />;
 }

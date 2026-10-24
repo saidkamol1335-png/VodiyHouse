@@ -74,6 +74,8 @@ describe("Server Actions кабинета", () => {
       setUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       revertUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       setLayoutAvailableAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // «Расчёт для клиента» считают оба (PLAN §3б): снимок при «Скопировать для Telegram».
+      saveCalculationAction: /requireActionViewer\(\["head", "manager"\]\)/,
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {

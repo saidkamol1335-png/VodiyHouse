@@ -1,0 +1,135 @@
+/* Итог расчёта (В4 A): светлая карточка с янтарной рамкой (мокап SiteCalc, r1); на телефоне —
+   тёмная панель MobFlat (Р9). Сумма — по ширине карточки (cqi), длинная — мельче. */
+
+.calc-total {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-1);
+  container-type: inline-size;
+}
+
+.calc-total__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calc-total__eyebrow,
+.calc-total__label {
+  margin: 0;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.calc-total__head {
+  display: grid;
+  gap: 4px;
+}
+
+.calc-total__value {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-calc-total);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-admin-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-total__value--long {
+  font-size: var(--fs-calc-total-long);
+}
+
+.calc-total__approx,
+.calc-total__footnote,
+.calc-total__note {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.calc-total__problem {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+}
+
+.calc-total__rows {
+  display: grid;
+  margin: 0;
+}
+
+.calc-total__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px dashed var(--dash);
+  font-size: var(--fs-control);
+}
+
+.calc-total__row dt {
+  display: grid;
+  gap: 2px;
+  color: var(--fg-2);
+}
+
+.calc-total__row dd {
+  margin: 0;
+  color: var(--fg);
+  font-weight: 650;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-total__row--accent dd {
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+.calc-total__actions {
+  display: grid;
+  gap: 10px;
+}
+
+/*
+ * Телефон: тёмная панель мокапа в любой теме — сумма читается как итог, а не как поле. Палитру
+ * панель задаёт токенами на себе: вложенные блоки ($ | сум, RU | UZ, кнопка, строка ответа) берут
+ * тёмные цвета сами, без чужих правил.
+ */
+@media (max-width: 767px) {
+  .calc-total {
+    --fg: var(--calc-dark-fg);
+    --fg-heading: var(--calc-dark-fg);
+    --fg-2: var(--calc-dark-fg-2);
+    --fg-3: var(--calc-dark-fg-2);
+    --line: var(--calc-dark-line);
+    --line-2: var(--calc-dark-line);
+    --dash: var(--calc-dark-line);
+    --glass-3: var(--calc-dark-glass);
+    --seg-bg: var(--calc-dark-glass);
+    --seg-border: var(--calc-dark-line);
+    --seg-on-bg: var(--calc-dark-seg-on);
+    --amber-2: var(--calc-dark-accent);
+    --badge-ok-fg: var(--calc-dark-ok);
+    --badge-bad-fg: var(--calc-dark-bad);
+    padding: 20px;
+    border-color: transparent;
+    background: var(--calc-dark-bg);
+    color: var(--fg);
+  }
+
+  .calc-total__row {
+    border-top-style: solid;
+  }
+}

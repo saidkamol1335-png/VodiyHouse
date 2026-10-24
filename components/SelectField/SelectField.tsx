@@ -1,13 +1,16 @@
 import { ChevronDown } from "lucide-react";
 import type { SelectHTMLAttributes } from "react";
 
-/** group — подпись группы (<optgroup>): «Города» и «Районы» у городов и районов. */
-export type SelectOption = { value: string; label: string; group?: string };
+/**
+ * group — подпись группы (<optgroup>): «Города» и «Районы» у городов и районов.
+ * disabled — видна, но не выбирается: «Планировка … · цена по запросу» (Р8).
+ */
+export type SelectOption = { value: string; label: string; group?: string; disabled?: boolean };
 
 function OptionList({ options }: { options: readonly SelectOption[] }) {
   const groups = [...new Set(options.map((option) => option.group))];
   const render = (option: SelectOption) => (
-    <option key={option.value} value={option.value}>
+    <option key={option.value} value={option.value} disabled={option.disabled}>
       {option.label}
     </option>
   );

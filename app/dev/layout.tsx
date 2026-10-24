@@ -7,6 +7,7 @@ import "../globals.css";
 import "../site.css";
 import "../admin.css";
 import "../cabinet.css";
+import "../calc.css";
 import "../dev.css";
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -98,6 +98,7 @@
   --z-site-header: 40;
   --z-units-dock: 45; /* док «Квартир»: «Отменить» и массовая панель */
   --z-calc-bar: 44; /* липкая полоса «Платёж в месяц» калькулятора на телефоне (В7) */
+  --calc-bar-space: 96px; /* место под этой полосой внизу страницы */
   --z-popover: 50; /* меню пользователя */
   --z-phone-menu: 60;
   --z-grain: 200; /* зерно плёнки — поверх всего, но не ловит касания */
@@ -173,6 +174,10 @@
   --calc-dark-fg-2: rgba(246, 239, 228, 0.66);
   --calc-dark-line: rgba(246, 239, 228, 0.14);
   --calc-dark-accent: #f6a43a;
+  --calc-dark-glass: rgba(246, 239, 228, 0.06);
+  --calc-dark-seg-on: rgba(248, 155, 13, 0.16);
+  --calc-dark-ok: #5bd48c;
+  --calc-dark-bad: #ff7a6b;
   /* крупная сумма итога — по ширине карточки (cqi), длинная сумма в сумах — мельче */
   --fs-calc-total: clamp(30px, 13cqi, 46px);
   --fs-calc-total-long: clamp(24px, 9cqi, 38px);

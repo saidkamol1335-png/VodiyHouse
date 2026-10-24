@@ -27,6 +27,8 @@
 @import "../components/AdminTopbar/AdminTopbar.css";
 @import "../components/AdminUser/AdminUser.css";
 @import "../components/AdminUserMenu/AdminUserMenu.css";
+@import "../components/ClientCalculator/ClientCalculator.css";
+@import "../components/ClientCalculator/TelegramCopy.css";
 @import "../components/ComplexBlocksForm/ComplexBlocksForm.css";
 @import "../components/ComplexBlocksForm/BlockCard.css";
 @import "../components/ComplexBlocksForm/BlockFields.css";

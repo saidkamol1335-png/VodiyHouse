@@ -54,6 +54,10 @@
       "bank": "Bank orqali muddatli to‘lov",
       "mortgage": "Ipoteka"
     },
+    "currency": {
+      "usd": "$",
+      "uzs": "so‘m"
+    },
     "programs": {
       "title": "To‘lov dasturi",
       "full": "butun summa birdaniga, to‘lovlarsiz",
@@ -184,10 +188,11 @@
       "copied": "Nusxalandi — Telegramga joylang",
       "failed": "Nusxalab bo‘lmadi — quyidagi matnni belgilab, qo‘lda nusxalang",
       "term": "Muddat: {term}",
-      "payment": "Oylik to‘lov: {amount}",
-      "paymentFirst": "Birinchi to‘lov: {amount}",
       "line": "{label}: {value}",
-      "signature": "Vodiy House"
+      "signature": "Vodiy House",
+      "unit": "{place} · {number}-kv., {floor}-qavat, {area} m²",
+      "area": "{area} m² × {perM2}",
+      "layout": "{place} · {rooms}, {area} m²"
     },
     "sticky": {
       "monthly": "Oylik to‘lov"

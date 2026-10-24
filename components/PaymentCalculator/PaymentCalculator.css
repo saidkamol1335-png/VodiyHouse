@@ -1,0 +1,58 @@
+/* Калькулятор (мокапы r1 и SiteCalc): слева карточка полей, справа итог — на широком липкий;
+   уже ~900 px контейнера — одна колонка, итог под полями (на телефоне — тёмная панель, Р9).
+   Где липнуть, задаёт страница: --payment-calculator-top (под шапкой кабинета или сайта). */
+
+.payment-calculator {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.payment-calculator__main {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+}
+
+.payment-calculator__inputs {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+}
+
+.payment-calculator__result {
+  min-width: 0;
+}
+
+.payment-calculator__footer {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+@container (min-width: 900px) {
+  .payment-calculator__main {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  }
+
+  .payment-calculator__result {
+    position: sticky;
+    top: var(--payment-calculator-top, 16px);
+  }
+}
+
+/* Телефон: место под липкой полосой «Платёж в месяц» (В7 B). */
+@media (max-width: 767px) {
+  .payment-calculator {
+    padding-bottom: var(--calc-bar-space);
+  }
+
+  .payment-calculator__inputs {
+    padding: 18px;
+  }
+}
