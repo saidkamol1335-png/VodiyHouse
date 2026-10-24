@@ -40,9 +40,11 @@
   box-shadow: var(--shadow-3);
   overscroll-behavior: contain;
   /* Липкая строка заголовка сверху: «К расчёту ↓» и фокус ставят итог и поля под неё, а не за неё
-     (высоту строки пишет FlatCalculator — заголовок бывает в одну и в две строки). */
+     (высоту строки пишет FlatCalculator — заголовок бывает в одну и в две строки). Отступ под
+     строкой даёт scroll-padding окна, у итога — только свои 16 px: иначе высота строки дважды. */
   --payment-calculator-top: calc(var(--flat-calc-bar-h, 0px) + 16px);
-  scroll-padding-top: var(--payment-calculator-top);
+  --payment-calculator-scroll-top: 16px;
+  scroll-padding-top: var(--flat-calc-bar-h, 0px);
 }
 
 .flat-calc::backdrop {
@@ -176,7 +178,7 @@
     order: -1;
     position: sticky;
     top: 0;
-    z-index: var(--z-sticky-actions);
+    z-index: var(--z-sheet-bar);
     display: flex;
     grid-area: bar;
     align-items: flex-start;

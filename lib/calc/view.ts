@@ -14,6 +14,8 @@ export type CalcData<P extends CalcProgram> = {
   options: readonly ProgramOption<P>[];
   stock: CalcStock;
   rate: ExchangeRate | null;
+  /** Сайт: курса нет, и программы банков в чужой валюте убраны (lib/calc/siteOptions). */
+  hiddenForRate?: boolean;
 };
 
 export type CalcView<P extends CalcProgram> = {
@@ -107,6 +109,41 @@ export function calculatorView<P extends CalcProgram>(
     // Нет курса — итог только в валюте расчёта.
     outCurrency: data.rate ? (params.outCurrency ?? calcCurrency) : calcCurrency,
   };
+}
+
+/** Где искать стоимость для программы из адреса, если режима в адресе нет. */
+const PIN_ORDER: readonly PriceMode[] = ["unit", "layout", "area"];
+
+/**
+ * Начальные параметры: программа пришла из адреса («Рассчитать» у программы блока B в кабинете), а
+ * стоимость по умолчанию — из блока, где она не действует (первая свободная квартира в блоке A,
+ * проданная квартира из старой ссылки). Тогда берём квартиру, планировку или площадь, к которым
+ * программа подходит, и закрепляем в адресе: иначе расчёт молча взял бы другую программу, а смена
+ * программы потом меняла бы квартиру. Квартиру (планировку), выбранную в адресе и свободную, не трогаем.
+ */
+export function pinProgramBlock<P extends CalcProgram>(
+  data: CalcData<P>,
+  params: CalcParams,
+  modes: readonly PriceMode[],
+): CalcParams {
+  const wanted = data.options.find((option) => option.id === params.program);
+  if (!wanted) return params;
+  const fits = (blockId: string | null) => appliesToBlock(wanted, blockId);
+  const current = resolvePrice(data.stock, params, modes);
+  const chosen =
+    (params.unit !== null && current.unitId === params.unit) ||
+    (params.layout !== null && current.layoutId === params.layout);
+  if (chosen || fits(current.blockId)) return params;
+  const order = params.mode ? [params.mode] : PIN_ORDER.filter((mode) => modes.includes(mode));
+  for (const mode of order) {
+    const pinned = { ...params, mode, unit: null, layout: null };
+    const price = resolvePrice(data.stock, pinned, modes, fits);
+    // Квартира и планировка должны найтись; у площади и суммы блока нет — подходит любая программа.
+    const found = price.blockId !== null || mode === "area" || mode === "sum";
+    if (found && fits(price.blockId))
+      return { ...pinned, unit: price.unitId, layout: price.layoutId };
+  }
+  return params;
 }
 
 const amountText = (value: number | null) => (value === null ? null : String(value));

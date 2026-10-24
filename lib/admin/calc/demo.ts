@@ -1,5 +1,5 @@
 import { DEMO_PANEL_RECORDS } from "../programs/demo";
-import type { PanelRecord } from "../programs/panels";
+import { calculable, type PanelRecord } from "../programs/panels";
 import type { CalcDeveloperRecord, ClientCalcRecord } from "./screen";
 
 // DEMO «Расчёта для клиента» (стенд /dev/programmy/raschet): программы — те же, что у стенда
@@ -87,10 +87,7 @@ function developerRecord(panel: PanelRecord): CalcDeveloperRecord {
     name: panel.name,
     checked_at: panel.programs_checked_at,
     price_hint: panel.price_hint,
-    // Как client_calc_developer: «выбранные» без блоков не действуют — их в расчёте нет.
-    programs: panel.programs.filter(
-      (item) => item.is_active && (item.blocks_scope === "all" || item.block_ids.length > 0),
-    ),
+    programs: panel.programs.filter((item) => calculable(item.is_active, item)),
     complexes: complexes.map((complex) => ({
       id: complex.complex_id,
       name: complex.complex_name,

@@ -18,6 +18,8 @@ type CalcProgramsProps = {
   value: string | null;
   onChange: (id: string) => void;
   empty: string;
+  /** Строка под списком: часть программ скрыта (сайт без курса — «курс недоступен»). */
+  notice?: string | null;
   /** Заголовок уже над шагом (сайт, «02 Программа оплаты») — подпись группы только для диктора. */
   legendHidden?: boolean;
 };
@@ -58,6 +60,7 @@ export function CalcPrograms(props: CalcProgramsProps) {
           </label>
         ))}
       </div>
+      {props.notice ? <p className="calc-programs__notice">{props.notice}</p> : null}
     </fieldset>
   );
 }

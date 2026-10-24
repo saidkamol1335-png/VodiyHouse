@@ -1,5 +1,6 @@
 import type { Currency } from "./money";
 import type { PriceMode } from "./params";
+import type { CalcStock } from "./priceSource";
 import type { CalcProgram } from "./programs";
 import {
   type BilingualRecord,
@@ -7,7 +8,7 @@ import {
   type RateRecord,
   type SiteProgramRecord,
 } from "./records";
-import { siteOptionFrom } from "./siteOptions";
+import { pricedOptions, siteOptionFrom } from "./siteOptions";
 import { bilingualRecord, stockFrom } from "./stockRecords";
 import type { CalcData } from "./view";
 
@@ -63,6 +64,11 @@ export function flatCalcFrom(record: FlatCalcRecord): FlatCalcScreen {
     rooms: layout.rooms,
     area,
   }));
+  const stock = stockFrom(
+    [{ ...complex, blocks: [{ ...block, layouts: [layoutRecord] }] }],
+    units,
+    null,
+  );
   return {
     developerName: record.developer.name,
     checkedAt: record.developer.checked_at,
@@ -70,14 +76,16 @@ export function flatCalcFrom(record: FlatCalcRecord): FlatCalcScreen {
     blockName: block.name,
     layout: { id: layout.id, rooms: layout.rooms, area, drawing: layout.drawing },
     modes: units.some((unit) => Number(unit.price) > 0) ? ["unit"] : ["layout"],
-    data: {
-      options: record.programs.map(siteOptionFrom),
-      stock: stockFrom(
-        [{ ...complex, blocks: [{ ...block, layouts: [layoutRecord] }] }],
-        units,
-        null,
-      ),
-      rate: rateFromRecord(record.rate),
-    },
+    data: flatData(record, stock),
   };
+}
+
+function flatData(record: FlatCalcRecord, stock: CalcStock): CalcData<CalcProgram> {
+  const rate = rateFromRecord(record.rate);
+  const { options, hiddenForRate } = pricedOptions(
+    record.programs.map(siteOptionFrom),
+    stock,
+    rate,
+  );
+  return { options, stock, rate, hiddenForRate };
 }

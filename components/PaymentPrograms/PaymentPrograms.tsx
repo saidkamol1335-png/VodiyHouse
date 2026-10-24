@@ -59,8 +59,10 @@ function useDeveloperFilter(
   return { filter, choose, visible };
 }
 
-/** Экран «Программы оплаты» (мокап CabProg, шаг 2.4): плашка, фильтр, курс, панели застройщиков. */
-/** Экран программ; адрес вкладки расчёта — контекстом для «Рассчитать» в карточках и панелях. */
+/**
+ * Экран «Программы оплаты» (мокап CabProg, шаг 2.4): плашка, фильтр, курс, панели застройщиков.
+ * Адрес вкладки расчёта — контекстом для «Рассчитать» в карточках и панелях.
+ */
 export function PaymentPrograms({ calcBase, ...props }: PaymentProgramsProps) {
   return (
     <CalcBaseContext.Provider value={calcBase ?? null}>

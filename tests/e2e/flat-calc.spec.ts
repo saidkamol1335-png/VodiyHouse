@@ -167,6 +167,43 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}`));
   });
 
+  test("окно заявки внутри расчёта: Escape закрывает только его", async ({ page }) => {
+    await open(page, `plan=${LAYOUT_78}`);
+    await flat(page).getByRole("button", { name: "Получить точный расчёт" }).click();
+    const lead = page.getByRole("dialog", { name: "Точный расчёт" });
+    await expect(lead).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(lead).toBeHidden();
+    await expect(flat(page)).toHaveAttribute("open", "");
+    await expect(page).toHaveURL(new RegExp(`plan=${LAYOUT_78}`));
+  });
+
+  test("телефон: строка заголовка шторки — над чертежом и липкая; итог встаёт под неё", async ({
+    page,
+  }) => {
+    test.skip(!isPhone(page), "шторка — только на телефоне");
+    await open(page, `plan=${LAYOUT_64}`);
+    const bar = flat(page).locator(".flat-calc__bar");
+    const plan = flat(page).locator(".flat-calc__plan img");
+    await expect(plan).toBeVisible();
+    await expect(plan).toHaveJSProperty("complete", true);
+    const [barBox, planBox] = [await bar.boundingBox(), await plan.boundingBox()];
+    expect(barBox!.y + barBox!.height).toBeLessThanOrEqual(planBox!.y + 1);
+    await flat(page).locator(".calc-sticky-bar").getByRole("button", { name: "К расчёту" }).click();
+    const total = flat(page).getByTestId("calc-total");
+    await expect(total).toBeFocused();
+    // Строка осталась у верха шторки, итог — под ней с зазором 16 px (высота строки — один раз).
+    const gap = async () => {
+      const [top, head] = [await total.boundingBox(), await bar.boundingBox()];
+      return Math.round(top!.y - (head!.y + head!.height));
+    };
+    await expect.poll(gap).toBeLessThanOrEqual(20);
+    expect(await gap()).toBeGreaterThanOrEqual(12);
+    const sheetTop = (await flat(page).boundingBox())!.y;
+    // Строка — у верхнего края шторки (под её рамкой в 1 px).
+    expect(Math.abs((await bar.boundingBox())!.y - sheetTop)).toBeLessThanOrEqual(2);
+  });
+
   test("закрыли и сразу снова «Рассчитать оплату» той же планировки — расчёт открыт", async ({
     page,
   }) => {

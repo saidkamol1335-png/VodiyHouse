@@ -130,6 +130,7 @@ function ProgramsPart<P extends CalcProgram>(props: PartProps<P>) {
       // Срок другой программы новой не подходит (ипотека 180 мес. → схема): как в мокапе — сначала.
       onChange={(program) => update({ program, months: null })}
       empty={t("programs.empty")}
+      notice={props.data.hiddenForRate ? t("programs.noRate") : null}
       legendHidden={props.hidden}
     />
   );

@@ -20,7 +20,8 @@
   text-transform: uppercase;
 }
 
-.calc-programs__empty {
+.calc-programs__empty,
+.calc-programs__notice {
   margin: 0;
   color: var(--fg-3);
   font-size: var(--fs-small);

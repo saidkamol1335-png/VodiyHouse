@@ -1,6 +1,6 @@
 import type { CalcProgram } from "./programs";
 import { rateFromRecord, type RateRecord, type SiteProgramRecord } from "./records";
-import { siteOptionFrom } from "./siteOptions";
+import { pricedOptions, siteOptionFrom } from "./siteOptions";
 import { type ComplexRecord, type PriceHintRecord, stockFrom } from "./stockRecords";
 import type { CalcData } from "./view";
 
@@ -28,6 +28,20 @@ export type SiteCalcScreen = {
   current: (SiteCalcDeveloper & { checkedAt: string | null; data: CalcData<CalcProgram> }) | null;
 };
 
+function currentData(
+  record: SiteCalcRecord,
+  current: NonNullable<SiteCalcRecord["current"]>,
+): CalcData<CalcProgram> {
+  const stock = stockFrom(current.complexes, [], current.price_hint);
+  const rate = rateFromRecord(record.rate);
+  const { options, hiddenForRate } = pricedOptions(
+    current.programs.map(siteOptionFrom),
+    stock,
+    rate,
+  );
+  return { options, stock, rate, hiddenForRate };
+}
+
 export function siteCalcFrom(record: SiteCalcRecord): SiteCalcScreen {
   const current = record.current;
   return {
@@ -37,11 +51,7 @@ export function siteCalcFrom(record: SiteCalcRecord): SiteCalcScreen {
       slug: current.slug,
       name: current.name,
       checkedAt: current.checked_at,
-      data: {
-        options: current.programs.map(siteOptionFrom),
-        stock: stockFrom(current.complexes, [], current.price_hint),
-        rate: rateFromRecord(record.rate),
-      },
+      data: currentData(record, current),
     },
   };
 }

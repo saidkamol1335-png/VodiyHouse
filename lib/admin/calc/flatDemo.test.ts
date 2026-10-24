@@ -84,6 +84,17 @@ describe("DEMO расчёта квартиры", () => {
     expect(view.result?.ok).toBe(true);
   });
 
+  it("курса нет — программ банков в сумах нет, вместо них строка «курс недоступен»", () => {
+    const screen = flatCalcFrom({ ...demoFlatCalc(layoutOf(78).id)!, rate: null });
+    const currencies = screen.data.options.map((option) =>
+      "currency" in option.program ? option.program.currency : null,
+    );
+    expect(currencies).not.toContain("UZS");
+    expect(screen.data.options.length).toBeGreaterThan(0);
+    expect(screen.data.hiddenForRate).toBe(true);
+    expect(flatCalcFrom(demoFlatCalc(layoutOf(78).id)!).data.hiddenForRate).toBe(false);
+  });
+
   it("?mode=sum из адреса не подменяет цену квартиры", () => {
     const { view } = viewOf(78, () => ({ mode: "sum", sum: "1000" }));
     expect(view.price).toMatchObject({ mode: "unit", price: 54_930 });

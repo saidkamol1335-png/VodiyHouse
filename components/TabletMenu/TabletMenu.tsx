@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useNavItems } from "@/components/HiddenNav";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { phoneHref, VODIY_HOUSE_PHONE } from "@/lib/contacts";
@@ -15,9 +16,10 @@ type TabletMenuProps = {
 /** Меню 761–1279 px: выпадающий список под шапкой (решение Ш4). */
 export function TabletMenu({ id, onNavigate }: TabletMenuProps) {
   const t = useTranslations();
+  const items = useNavItems(MENU_NAV);
   return (
     <nav id={id} className="tablet-menu" aria-label={t("header.menu")}>
-      {MENU_NAV.map(({ key, href }) => (
+      {items.map(({ key, href }) => (
         <Link key={key} href={href} className="tablet-menu__link" onClick={onNavigate}>
           {t(`nav.${key}`)}
         </Link>

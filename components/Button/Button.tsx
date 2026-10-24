@@ -65,7 +65,12 @@ export function Button({
   const classes = buttonClasses(look);
   if (href) {
     return (
-      <Link className={classes} href={href}>
+      <Link
+        className={classes}
+        href={href}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
+      >
         {children}
       </Link>
     );

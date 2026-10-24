@@ -83,6 +83,61 @@ test.describe("кабинет · программы оплаты: руковод
     await expect(cardsOf(page, SIFAT).nth(1)).toContainText("100% оплата");
   });
 
+  test("«Рассчитать» и «Расчёт для клиента» открывают расчёт с программой и застройщиком (Р1 A)", async ({
+    page,
+  }) => {
+    await open(page);
+    const bank = "Ipoteka Bank · Рассрочка через банк";
+    await panelOf(page, SIFAT)
+      .getByRole("link", { name: `Рассчитать: ${bank}` })
+      .click();
+    await expect(page).toHaveURL(/\/dev\/programmy\/raschet\?developer=demo-sifat&program=[\w-]+$/);
+    await expect(
+      page.getByRole("radio", { name: /Ipoteka Bank.*Рассрочка через банк/ }),
+    ).toBeChecked();
+
+    await open(page);
+    await panelOf(page, MARGILAN)
+      .getByRole("link", { name: `Расчёт для клиента: ${MARGILAN}` })
+      .click();
+    await expect(page).toHaveURL(`${STAND}/raschet?developer=demo-margilan-invest`);
+    await expect(
+      page.getByRole("group", { name: "Застройщик" }).getByRole("button", { name: MARGILAN }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("несохранённая правка: «Расчёт для клиента» и «Рассчитать» сначала спрашивают", async ({
+    page,
+  }) => {
+    await open(page);
+    const sifat = panelOf(page, SIFAT);
+    await cardsOf(page, SIFAT).nth(1).getByRole("button", { name: "Изменить" }).click();
+    await editor(page).getByLabel("Взнос от, %").first().fill("40");
+    page.once("dialog", (dialog) => {
+      expect(dialog.message()).toBe("Уйти без сохранения?");
+      void dialog.dismiss();
+    });
+    await sifat.getByRole("link", { name: `Расчёт для клиента: ${SIFAT}` }).click();
+    await expect(editor(page)).toBeVisible();
+    await expect(page).toHaveURL(STAND);
+    page.once("dialog", (dialog) => void dialog.accept());
+    await sifat
+      .getByRole("link", { name: "Рассчитать: Ipoteka Bank · Рассрочка через банк" })
+      .click();
+    await expect(page).toHaveURL(/\/dev\/programmy\/raschet\?developer=demo-sifat&program=/);
+  });
+
+  test("выключенную программу не посчитать: «Рассчитать» пропадает вместе с тумблером", async ({
+    page,
+  }) => {
+    await open(page);
+    const sifat = panelOf(page, SIFAT);
+    await expect(sifat.getByRole("link", { name: /^Рассчитать: / })).toHaveCount(4);
+    await sifat.getByRole("switch", { name: "100% оплата: на сайте" }).click();
+    await expect(sifat.getByRole("link", { name: "Рассчитать: 100% оплата" })).toHaveCount(0);
+    await expect(sifat.getByRole("link", { name: /^Рассчитать: / })).toHaveCount(3);
+  });
+
   test("условия старше 60 дней → «Условия проверены сегодня» снимает метку", async ({ page }) => {
     // DEMO обновлено 01.10.2026; стенд отвечает настоящим временем — оно моложе 60 дней.
     await page.clock.setFixedTime(new Date(Math.max(Date.parse("2026-12-01"), Date.now())));

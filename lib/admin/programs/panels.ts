@@ -14,6 +14,15 @@ import type {
 
 // Ответ payment_program_panels() (20261024100000_payment_programs.sql) → панели экрана.
 
+/**
+ * Включённую программу можно посчитать в «Расчёте для клиента» — как в client_calc_developer:
+ * «выбранные» без блоков не действуют («Рассчитать» у карточки, DEMO расчёта).
+ */
+export const calculable = (
+  isActive: boolean,
+  record: Pick<CabinetProgramRecord, "blocks_scope" | "block_ids">,
+) => isActive && (record.blocks_scope === "all" || record.block_ids.length > 0);
+
 type BlockRecord = {
   id: string;
   name: string;

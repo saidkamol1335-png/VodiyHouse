@@ -110,6 +110,49 @@ test.describe("сайт · страница калькулятора", () => {
     expect(top).toBeGreaterThanOrEqual(header);
   });
 
+  test("стенд без курса: программ банков в сумах нет — строка «курс недоступен»; пример банка скрыт", async ({
+    page,
+  }, testInfo) => {
+    await page.goto(`${STAND}?rate=none`);
+    await page.waitForLoadState("networkidle");
+    const programs = page.getByRole("group", { name: "Программа оплаты" });
+    await expect(programs).toContainText(
+      "Курс недоступен — часть программ банков сейчас не показывается",
+    );
+    await expect(programs.getByRole("radio", { name: /Ipoteka Bank/ })).toHaveCount(0);
+    await expect(programs.getByRole("radio", { name: /Рассрочка от застройщика/ })).toBeChecked();
+    await expect(page.getByRole("link", { name: /Ipoteka Bank/ })).toHaveCount(0);
+    await expect(page.getByTestId("calc-total").locator(".calc-total__value")).toBeVisible();
+    await page.clock.setFixedTime(SHOT_TIME);
+    await programs.scrollIntoViewIfNeeded();
+    await settle(page);
+    const dir = `test-results/screens/${testInfo.project.name}`;
+    await page.screenshot({ path: `${dir}/s29-no-rate.png`, caret: "initial" });
+  });
+
+  test("стенд без застройщиков с программами: «заработает…», пункта «Калькулятор» в меню нет", async ({
+    page,
+  }, testInfo) => {
+    await page.goto(`${STAND}?developers=none`);
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator(".site-calculator__empty")).toContainText("Калькулятор заработает");
+    await expect(page.getByRole("link", { name: /120 м²/ })).toHaveCount(0);
+    if (isPhone(page)) await menu(page, "ru").click();
+    await expect(page.getByRole("link", { name: "Застройщикам" }).first()).toBeVisible();
+    // На телефоне имя пункта — «04 Калькулятор»: ищем по вхождению.
+    await expect(page.getByRole("link", { name: "Калькулятор" })).toHaveCount(0);
+    await settle(page);
+    const dir = `test-results/screens/${testInfo.project.name}`;
+    await page.screenshot({ path: `${dir}/s29-no-programs.png`, caret: "initial" });
+    if (isPhone(page)) return;
+    // Планшет (761–1279 px): выпадающее меню — тот же список без пункта.
+    await page.setViewportSize({ width: 1100, height: 900 });
+    await menu(page, "ru").click();
+    const tablet = page.locator(".tablet-menu");
+    await expect(tablet.getByRole("link", { name: "Застройщикам" })).toBeVisible();
+    await expect(tablet.getByRole("link", { name: "Калькулятор" })).toHaveCount(0);
+  });
+
   test("луч итога — только в full; в lite его нет", async ({ page }) => {
     await page.goto(`${STAND}?motion=full`);
     await page.waitForLoadState("networkidle");

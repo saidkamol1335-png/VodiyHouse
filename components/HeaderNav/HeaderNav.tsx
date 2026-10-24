@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { RollText } from "@/components/RollText";
+import { useNavItems } from "@/components/HiddenNav";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { HEADER_NAV } from "@/lib/routes";
 
@@ -13,9 +14,10 @@ export function isActivePath(pathname: string, href: string): boolean {
 export function HeaderNav() {
   const t = useTranslations();
   const pathname = usePathname();
+  const items = useNavItems(HEADER_NAV);
   return (
     <nav className="header-nav" aria-label={t("header.navLabel")}>
-      {HEADER_NAV.map(({ key, href }) => {
+      {items.map(({ key, href }) => {
         const active = isActivePath(pathname, href);
         return (
           <Link

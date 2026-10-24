@@ -50,6 +50,14 @@ const screenOf = async (db: TestDb, slug: string | null = null) => {
   return rows[0]!.data;
 };
 
+/** Пункт «Калькулятор» в меню сайта (приёмка 2.9) — ролью посетителя. */
+const calculatorAvailable = async (db: TestDb) => {
+  const { rows } = await db.as(anon, (tx) =>
+    tx.query<{ ok: boolean }>("select site_calculator_available() as ok"),
+  );
+  return rows[0]!.ok;
+};
+
 describe.skipIf(isRemoteTarget)("/kalkulyator: данные калькулятора сайта", () => {
   let db: TestDb;
 
@@ -71,6 +79,10 @@ describe.skipIf(isRemoteTarget)("/kalkulyator: данные калькулято
     expect(all.current!.slug).toBe(rows[0]!.slug);
     const second = rows[1]!.slug;
     expect((await screenOf(db, second)).current!.slug).toBe(second);
+  });
+
+  it("пункт «Калькулятор» в меню: посетителю видно, что застройщики с программами есть", async () => {
+    expect(await calculatorAvailable(db)).toBe(true);
   });
 
   it("ответ проходит преобразователь страницы и совпадает с DEMO стенда /dev/kalkulyator", async () => {
@@ -166,5 +178,12 @@ describe.skipIf(isRemoteTarget)("/kalkulyator: кого не видно на с�
     // Чужой или скрытый slug — первый из видимых, а не скрытый застройщик.
     expect((await screenOf(db, "demo-kamalak")).current!.slug).toBe(slugs[0]);
     expect((await screenOf(db, "no-such-slug")).current!.slug).toBe(slugs[0]);
+  });
+
+  it("пункт «Калькулятор» совпадает с site_calc_screen(): никого не видно — пункта нет", async () => {
+    expect(await calculatorAvailable(db)).toBe((await screenOf(db)).developers.length > 0);
+    await db.admin.query("update developers set status = 'draft'");
+    expect((await screenOf(db)).developers).toEqual([]);
+    expect(await calculatorAvailable(db)).toBe(false);
   });
 });

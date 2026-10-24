@@ -13,7 +13,7 @@ import type { Currency } from "@/lib/calc/money";
 import type { CalcEngine } from "@/lib/calc/options";
 import type { CalcParams, PriceMode } from "@/lib/calc/params";
 import type { CalcProgram } from "@/lib/calc/programs";
-import { type CalcData, type CalcView, calculatorView } from "@/lib/calc/view";
+import { type CalcData, type CalcView, calculatorView, pinProgramBlock } from "@/lib/calc/view";
 import { CalcInputs } from "./CalcInputs";
 import type { CalcExtras } from "./inputParts";
 import {
@@ -75,7 +75,9 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
 export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculatorProps<P>) {
   const t = useTranslations("calc");
   const locale = useLocale() as CalcLocale;
-  const { params, update } = useCalcParams(props.initialParams);
+  const { params, update } = useCalcParams(
+    pinProgramBlock(props.data, props.initialParams, props.modes),
+  );
   const view = calculatorView(props.engine, props.data, params, props.modes);
   const context: TotalContext = { out: view.outCurrency, rate: props.data.rate, t, locale };
   const snapshot: CalcSnapshot<P> = {

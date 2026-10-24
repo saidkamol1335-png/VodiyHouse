@@ -18,7 +18,7 @@ import {
   PRICE_MODES,
 } from "./params";
 import type { CalcStock } from "./priceSource";
-import { type CalcData, calculatorView, shareParams } from "./view";
+import { type CalcData, calculatorView, pinProgramBlock, shareParams } from "./view";
 
 // Калькулятор из данных и адреса (шаг 2.5): один и тот же адрес в кабинете и на сайте даёт
 // одинаковый выбор, а цифры — каждый своим движком (PLAN §7: 17 мес. → $2 765 и $2 941).
@@ -157,6 +157,54 @@ describe("калькулятор: выбор и цифры", () => {
       PRICE_MODES,
     );
     expect(erased.price).toMatchObject({ price: null, areaM2: null, perM2: 690 });
+  });
+
+  it("программа блока B из адреса: квартира и планировка по умолчанию — из блока B", () => {
+    const unitB = { ...STOCK.units[1]!, id: "u2", number: "12", blockId: "b2", price: 60_000 };
+    const layoutA = { ...STOCK.layouts[0]!, id: "l2", priceFrom: 30_000 };
+    const stock = {
+      ...STOCK,
+      units: [...STOCK.units, unitB],
+      layouts: [layoutA, ...STOCK.layouts],
+    };
+    const data = { ...DATA, stock };
+    const pinned = pinProgramBlock(data, params({ program: "mortgage" }), PRICE_MODES);
+    expect(pinned).toMatchObject({ program: "mortgage", unit: "u2" });
+    const view = calculatorView(CABINET_ENGINE, data, pinned, PRICE_MODES);
+    expect(view.price).toMatchObject({ mode: "unit", unitId: "u2", blockId: "b2" });
+    expect(view.selected?.id).toBe("mortgage");
+    // Сменили программу — квартира та же.
+    const scheme = calculatorView(
+      CABINET_ENGINE,
+      data,
+      { ...pinned, program: "scheme" },
+      PRICE_MODES,
+    );
+    expect(scheme.price.unitId).toBe("u2");
+    const layout = (program: string | null) =>
+      pinProgramBlock(data, params({ program, mode: "layout" }), PRICE_MODES).layout;
+    expect(layout("mortgage")).toBe("l1");
+    expect(layout(null)).toBeNull();
+    // Квартиру выбрали сами — она важнее программы.
+    const chosen = params({ program: "mortgage", unit: "u1" });
+    expect(pinProgramBlock(data, chosen, PRICE_MODES)).toBe(chosen);
+    // Квартиру из старой ссылки продали — как будто её не выбирали.
+    const sold = pinProgramBlock(data, params({ program: "mortgage", unit: "sold" }), PRICE_MODES);
+    expect(sold).toMatchObject({ unit: "u2" });
+  });
+
+  it("в блоке программы нет квартир с ценой — планировка блока, нет и её — площадь × цена м²", () => {
+    const toLayout = pinProgramBlock(DATA, params({ program: "mortgage" }), PRICE_MODES);
+    expect(toLayout).toMatchObject({ mode: "layout", layout: "l1", unit: null });
+    expect(calculatorView(CABINET_ENGINE, DATA, toLayout, PRICE_MODES).selected?.id).toBe(
+      "mortgage",
+    );
+    const onlyA = { ...DATA, stock: { ...STOCK, layouts: [STOCK.layouts[0]!] } };
+    const toArea = pinProgramBlock(onlyA, params({ program: "mortgage" }), PRICE_MODES);
+    expect(toArea).toMatchObject({ mode: "area", unit: null, layout: null });
+    expect(calculatorView(CABINET_ENGINE, onlyA, toArea, PRICE_MODES).selected?.id).toBe(
+      "mortgage",
+    );
   });
 
   it("100 % оплата — взнос 100; взнос ниже минимума поднимается, выше 90 — до 90", () => {

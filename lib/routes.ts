@@ -34,6 +34,10 @@ export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
   { key: "forDevelopers", href: ROUTES.forDevelopers },
 ];
 
+/** Скрытые пункты (решение «Пустые состояния»): «Калькулятор» — без застройщиков с программами. */
+export const hiddenNav = ({ calculator }: { calculator: boolean }): NavKey[] =>
+  calculator ? [] : ["calculator"];
+
 /** Меню планшета и телефона: пункты шапки + «Подбор за 1 минуту» (решение Ш5). */
 export const MENU_NAV: readonly { key: NavKey; href: string }[] = [
   ...HEADER_NAV,

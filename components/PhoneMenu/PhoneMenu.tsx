@@ -9,6 +9,7 @@ import { LogoMark } from "@/components/Logo";
 import { ThemeSegmented } from "@/components/ThemeToggle";
 import { phoneHref, telegramHref, VODIY_HOUSE_PHONE, VODIY_HOUSE_TELEGRAM } from "@/lib/contacts";
 import { isActivePath } from "@/components/HeaderNav";
+import { useNavItems } from "@/components/HiddenNav";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { ADMIN_ROUTE, MENU_NAV, ROUTES } from "@/lib/routes";
 
@@ -83,9 +84,10 @@ function PhoneMenuHead({ onClose }: { onClose: () => void }) {
 function PhoneMenuNav() {
   const t = useTranslations();
   const pathname = usePathname();
+  const items = useNavItems(MENU_NAV);
   return (
     <nav aria-label={t("header.navLabel")}>
-      {MENU_NAV.map(({ key, href }, index) => (
+      {items.map(({ key, href }, index) => (
         <Link
           key={key}
           href={href}

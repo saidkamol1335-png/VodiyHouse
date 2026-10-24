@@ -51,6 +51,18 @@ test.describe("кабинет · программы оплаты: просмот
     await expect(page.getByTestId("program-rate")).toContainText("Курс ЦБ: 1 $ = 11");
   });
 
+  test("менеджер: «Рассчитать» ведёт в его вкладку расчёта с этой программой", async ({ page }) => {
+    await open(page, MANAGER);
+    await page
+      .getByRole("region", { name: SIFAT })
+      .getByRole("link", { name: "Рассчитать: Ipoteka Bank · Ипотека" })
+      .click();
+    await expect(page).toHaveURL(
+      /\/dev\/menedzher\/programmy\/raschet\?developer=demo-sifat&program=[\w-]+$/,
+    );
+    await expect(page.getByRole("radio", { name: /Ipoteka Bank.*Ипотека/ })).toBeChecked();
+  });
+
   test("раскладка: экран и открытая правка без горизонтальной прокрутки", async ({ page }) => {
     await open(page, HEAD);
     expect(await noHorizontalScroll(page)).toBe(0);

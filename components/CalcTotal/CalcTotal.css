@@ -11,8 +11,9 @@
   background: var(--bg-2);
   box-shadow: var(--shadow-1);
   container-type: inline-size;
-  /* «К расчёту ↓» прокручивает к итогу — он встаёт под липкую шапку страницы, а не за неё. */
-  scroll-margin-top: var(--payment-calculator-top, 16px);
+  /* «К расчёту ↓» прокручивает к итогу — он встаёт под липкую шапку страницы, а не за неё (в шторке
+     расчёта квартиры под строку заголовка ставит её scroll-padding — здесь только зазор). */
+  scroll-margin-top: var(--payment-calculator-scroll-top, var(--payment-calculator-top, 16px));
 }
 
 /* Фокус ставит «К расчёту ↓», а не пользователь: рамка не нужна, карточка — не элемент управления. */

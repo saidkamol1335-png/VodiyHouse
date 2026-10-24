@@ -4,6 +4,7 @@ import { Calculator } from "lucide-react";
 import { createContext, useContext } from "react";
 import { Button } from "@/components/Button";
 import type { ProgramsT } from "@/components/ProgramCard/cardText";
+import { calculable } from "@/lib/admin/programs/panels";
 import type { ProgramItem, ProgramPanel } from "@/lib/admin/programs/types";
 
 // Вход в «Расчёт для клиента» из списка программ (Р1 A, PLAN §7 «открывается с выбранной
@@ -19,12 +20,11 @@ function calcHref(base: string, developer: string, program?: string): string {
 }
 
 /** Посчитать можно только включённую программу, которая действует хотя бы на один блок. */
-const calculable = (item: ProgramItem) =>
-  item.isActive && (item.record.blocks_scope === "all" || item.record.block_ids.length > 0);
+const canCalculate = (item: ProgramItem) => calculable(item.isActive, item.record);
 
 export function PanelCalcLink({ panel, t }: { panel: ProgramPanel; t: ProgramsT }) {
   const base = useContext(CalcBaseContext);
-  if (!base || !panel.programs.some(calculable)) return null;
+  if (!base || !panel.programs.some(canCalculate)) return null;
   return (
     <Button
       size="sm"
@@ -42,7 +42,7 @@ type ProgramCalcLinkProps = { panel: ProgramPanel; item: ProgramItem; name: stri
 
 export function ProgramCalcLink({ panel, item, name, t }: ProgramCalcLinkProps) {
   const base = useContext(CalcBaseContext);
-  if (!base || !calculable(item)) return null;
+  if (!base || !canCalculate(item)) return null;
   return (
     <Button
       size="sm"

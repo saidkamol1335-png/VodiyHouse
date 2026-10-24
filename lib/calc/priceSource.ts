@@ -87,9 +87,16 @@ export function defaultMode(stock: CalcStock, modes: readonly PriceMode[]): Pric
   return modes[0] ?? "area";
 }
 
-function unitPrice(stock: CalcStock, params: CalcParams): ResolvedPrice {
+/** Блок подходит программе из адреса: квартира и планировка по умолчанию — из такого блока. */
+export type BlockFit = (blockId: string) => boolean;
+
+const ANY_BLOCK: BlockFit = () => true;
+
+function unitPrice(stock: CalcStock, params: CalcParams, fits: BlockFit): ResolvedPrice {
   const unit =
-    stock.units.find((item) => item.id === params.unit && priced(item)) ?? stock.units.find(priced);
+    stock.units.find((item) => item.id === params.unit && priced(item)) ??
+    stock.units.find((item) => priced(item) && fits(item.blockId)) ??
+    stock.units.find(priced);
   const block = stock.blocks.find((item) => item.id === unit?.blockId);
   const price = unit?.price ?? null;
   return {
@@ -102,10 +109,11 @@ function unitPrice(stock: CalcStock, params: CalcParams): ResolvedPrice {
   };
 }
 
-function layoutPrice(stock: CalcStock, params: CalcParams): ResolvedPrice {
+function layoutPrice(stock: CalcStock, params: CalcParams, fits: BlockFit): ResolvedPrice {
   const choosable = (item: CalcLayout) => item.available && priced(item);
   const layout =
     stock.layouts.find((item) => item.id === params.layout && choosable(item)) ??
+    stock.layouts.find((item) => choosable(item) && fits(item.blockId)) ??
     stock.layouts.find(choosable);
   const block = stock.blocks.find((item) => item.id === layout?.blockId);
   return {
@@ -145,11 +153,12 @@ export function resolvePrice(
   stock: CalcStock,
   params: CalcParams,
   modes: readonly PriceMode[],
+  fits: BlockFit = ANY_BLOCK,
 ): ResolvedPrice {
   const mode = params.mode !== null && modes.includes(params.mode) ? params.mode : null;
   const chosen = mode ?? defaultMode(stock, modes);
-  if (chosen === "unit") return unitPrice(stock, params);
-  if (chosen === "layout") return layoutPrice(stock, params);
+  if (chosen === "unit") return unitPrice(stock, params, fits);
+  if (chosen === "layout") return layoutPrice(stock, params, fits);
   const currency = params.inCurrency ?? stock.priceHint?.currency ?? blocksCurrency(stock) ?? "USD";
   if (chosen === "sum") return { ...empty("sum", currency), price: parseAmountText(params.sum) };
   // Площадь × цена м²: по умолчанию — 60 м² и цена м² подсказки (в её валюте; валюту сменили —
