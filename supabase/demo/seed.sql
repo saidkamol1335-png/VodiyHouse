@@ -1,5 +1,6 @@
 -- DEMO-данные (PLAN §0.11, CLAUDE.md §8): вымышленные застройщики и ЖК из мокапа —
--- 3 застройщика, 4 ЖК (Shodlik, Namuna, Yulduz, Orzu), блоки, планировки, 506 квартир.
+-- 3 застройщика, 4 ЖК (Shodlik, Namuna, Yulduz, Orzu), блоки, планировки, 506 квартир;
+-- банки и программы оплаты мокапа, курс мокапа (фаза 2).
 -- Пометка DEMO — префикс «demo-» в slug застройщика и ЖК. Удаление — `npm run demo:remove`,
 -- повторный `npm run demo:seed` пересоздаёт DEMO с нуля. Фото DEMO — вместе со Storage (шаг 9).
 -- Свободные квартиры по типам совпадают с «Остатками по ЖК» на главной кабинета в мокапе:
@@ -211,5 +212,82 @@ set status = case
 end::public.unit_status
 from ranked r
 where r.id = u.id;
+
+-- ─── Банки и программы оплаты (мокап: BANKS, PROGS; фаза 2) ─────────────────────────────
+-- Названия банков настоящие, условия — вымышленные (DEMO). Кнопки сроков — по PLAN (без 18 мес.
+-- мокапа: такой срок — «свой»), минимальный срок ступени — 1 мес. Ипотека Sifat — только Shodlik A
+-- (Mehr из мокапа в DEMO нет), схема Kamalak — только Orzu 2.
+
+insert into public.banks (slug, name, sort) values
+  ('demo-ipoteka', '{"ru": "Ipoteka Bank", "uz": "Ipoteka Bank"}', 10),
+  ('demo-ipak-yuli', '{"ru": "Ipak Yuli Bank", "uz": "Ipak Yuli Bank"}', 20);
+
+insert into public.payment_programs (
+  developer_id, bank_id, type, method, discount_pct, min_down_pct, tiers, terms, fees,
+  preset_months, allow_custom_months, currency, blocks_scope, block_ids, is_active, sort
+)
+select
+  d.id, b.id, p.type::public.payment_program_type, p.method::public.payment_method, p.discount,
+  p.min_down, p.tiers::jsonb, p.terms::jsonb, p.fees::jsonb, p.presets::smallint[], p.custom,
+  p.currency::public.currency, p.scope::public.program_blocks_scope,
+  coalesce((
+    select array_agg(bl.id order by bl.id)
+    from public.blocks bl
+    join public.complexes c on c.id = bl.complex_id
+    where c.slug || ':' || bl.name = any (p.blocks::text[])
+  ), '{}'),
+  true, p.sort
+from (values
+  ('demo-sifat', null, 'full', null, 12, null, '[]', '[]', '[]', '{}', false, null, 'all', '{}', 10),
+  ('demo-sifat', null, 'installment', 'tiers', null, null,
+   '[{"min_down_pct": 30, "discount_pct": 0, "min_months": 1, "max_months": 36},
+     {"min_down_pct": 50, "discount_pct": 6, "min_months": 1, "max_months": 18},
+     {"min_down_pct": 70, "discount_pct": 9, "min_months": 1, "max_months": 12}]',
+   '[]', '[]', '{12,24,36,48}', true, null, 'all', '{}', 20),
+  ('demo-sifat', 'demo-ipoteka', 'bank_installment', 'annuity', null, 20, '[]',
+   '[{"months": 12, "rate_pct": 16}, {"months": 24, "rate_pct": 18}]',
+   '[{"name": "appraisal", "kind": "fixed", "value": 1500000}, {"name": "commission", "kind": "pct", "value": 1}]',
+   '{}', false, 'UZS', 'all', '{}', 30),
+  ('demo-sifat', 'demo-ipoteka', 'mortgage', 'annuity', null, 25, '[]',
+   '[{"months": 60, "rate_pct": 17.5}, {"months": 120, "rate_pct": 17.5}, {"months": 180, "rate_pct": 17.5}]',
+   '[{"name": "appraisal", "kind": "fixed", "value": 1500000}, {"name": "insurance", "kind": "pct", "value": 0.5}]',
+   '{}', false, 'UZS', 'selected', '{demo-shodlik:A}', 40),
+  ('demo-margilan-invest', null, 'full', null, 10, null, '[]', '[]', '[]', '{}', false, null, 'all', '{}', 10),
+  ('demo-margilan-invest', null, 'installment', 'tiers', null, null,
+   '[{"min_down_pct": 40, "discount_pct": 0, "min_months": 1, "max_months": 36},
+     {"min_down_pct": 60, "discount_pct": 5, "min_months": 1, "max_months": 24},
+     {"min_down_pct": 80, "discount_pct": 8, "min_months": 1, "max_months": 12}]',
+   '[]', '[]', '{12,24,36,48}', true, null, 'all', '{}', 20),
+  ('demo-margilan-invest', 'demo-ipak-yuli', 'bank_installment', 'differentiated', null, 25, '[]',
+   '[{"months": 12, "rate_pct": 15}, {"months": 24, "rate_pct": 16}, {"months": 36, "rate_pct": 17}]',
+   '[{"name": "commission", "kind": "pct", "value": 1}]',
+   '{}', false, 'UZS', 'all', '{}', 30),
+  ('demo-margilan-invest', 'demo-ipak-yuli', 'mortgage', 'annuity', null, 20, '[]',
+   '[{"months": 120, "rate_pct": 18}, {"months": 180, "rate_pct": 18}, {"months": 240, "rate_pct": 18}]',
+   '[{"name": "appraisal", "kind": "fixed", "value": 1200000}]',
+   '{}', false, 'UZS', 'all', '{}', 40),
+  ('demo-kamalak', null, 'full', null, 9, null, '[]', '[]', '[]', '{}', false, null, 'all', '{}', 10),
+  ('demo-kamalak', null, 'installment', 'tiers', null, null,
+   '[{"min_down_pct": 30, "discount_pct": 0, "min_months": 1, "max_months": 18},
+     {"min_down_pct": 50, "discount_pct": 5, "min_months": 1, "max_months": 12}]',
+   '[]', '[]', '{12,24,36,48}', true, null, 'selected', '{demo-orzu:2}', 20),
+  ('demo-kamalak', 'demo-ipak-yuli', 'bank_installment', 'annuity', null, 30, '[]',
+   '[{"months": 24, "rate_pct": 16}]',
+   '[{"name": "commission", "kind": "pct", "value": 1}]',
+   '{}', false, 'UZS', 'all', '{}', 30)
+) as p (developer, bank, type, method, discount, min_down, tiers, terms, fees, presets, custom,
+        currency, scope, blocks, sort)
+join public.developers d on d.slug = p.developer
+left join public.banks b on b.slug = p.bank;
+
+-- Курс мокапа на 01.10.2026 (с ним сходятся все числа экранов). Пометка demo: настоящий курс ЦБ
+-- её снимает, demo:remove удаляет только помеченный; настоящий курс не трогаем.
+insert into public.settings (key, value, is_public)
+values (
+  'exchange.usd_uzs',
+  '{"cbu": {"usd_uzs": 11808.76, "date": "2026-10-01"}, "manual": null, "demo": true}',
+  true
+)
+on conflict (key) do nothing;
 
 commit;

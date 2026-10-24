@@ -1,6 +1,6 @@
 -- Удаление DEMO одной командой (PLAN §0.11): `npm run demo:remove`.
--- DEMO — застройщики и ЖК со slug «demo-…»; блоки, планировки, квартиры, медиа, сданные
--- объекты и внутренние контакты уходят каскадом. Записи журнала о DEMO тоже удаляются.
+-- DEMO — застройщики, ЖК и банки со slug «demo-…»; блоки, планировки, квартиры, медиа, сданные
+-- объекты, внутренние контакты и программы оплаты уходят каскадом. Записи журнала о DEMO тоже удаляются.
 
 begin;
 
@@ -36,7 +36,22 @@ where complex_id in (select id from public.complexes where slug like 'demo-%')
          where d.slug like 'demo-%'
        ));
 
+-- Снимки расчётов по DEMO-программам — тоже DEMO (фаза 2).
+delete from public.calculations
+where program_id in (
+  select p.id from public.payment_programs p
+  join public.developers d on d.id = p.developer_id
+  where d.slug like 'demo-%'
+);
+
 delete from public.complexes where slug like 'demo-%';
 delete from public.developers where slug like 'demo-%';
+
+-- Банки DEMO и их журнал (программы ушли каскадом с застройщиками; программа настоящего
+-- застройщика с DEMO-банком остановит удаление — внешний ключ). Курс — только помеченный demo.
+delete from public.audit_log
+where entity = 'banks' and entity_id in (select id::text from public.banks where slug like 'demo-%');
+delete from public.banks where slug like 'demo-%';
+delete from public.settings where key = 'exchange.usd_uzs' and value ? 'demo';
 
 commit;

@@ -9,6 +9,9 @@ import {
   type RoomOfferRecord,
   type SiteStock,
 } from "@/lib/admin/home/siteStock";
+import { calculate } from "@/lib/calc/calculate";
+import { roundMoney } from "@/lib/calc/money";
+import { programFromRecord, rateFromRecord, type SiteProgramsRecord } from "@/lib/calc/records";
 import { generateUnits } from "@/lib/units";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import { anon, createStaff, createTestDb, isRemoteTarget, user, type TestDb } from "./harness";
@@ -155,6 +158,28 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     }
   });
 
+  it("программы оплаты мокапа: сайт видит их без скидок, SiteCalc1 сходится до суммы", async () => {
+    const { rows } = await db.as(anon, (tx) =>
+      tx.query<{ data: SiteProgramsRecord }>("select site_payment_programs() as data"),
+    );
+    const data = rows[0]!.data;
+    expect(JSON.stringify(data)).not.toMatch(/discount/);
+    expect(
+      Object.fromEntries(
+        data.developers.map((developer) => [developer.slug, developer.programs.length]),
+      ),
+    ).toEqual({ "demo-sifat": 4, "demo-margilan-invest": 4, "demo-kamalak": 3 });
+    const rate = rateFromRecord(data.rate);
+    expect(rate).toEqual({ usdUzs: 11808.76, date: "2026-10-01", source: "cbu" });
+    // SiteCalc1: 120 м² × $700, Ipoteka Bank — рассрочка через банк, 20 % на 24 мес.
+    const sifat = data.developers.find((developer) => developer.slug === "demo-sifat")!;
+    const bankRecord = sifat.programs.find((program) => program.type === "bank_installment")!;
+    const input = { price: 84_000, priceCurrency: "USD" as const, downPct: 20, months: 24, rate };
+    const result = calculate(programFromRecord(bankRecord), input);
+    expect(result.ok && roundMoney(result.calculation.firstPayment, "UZS")).toBe(39_617_000);
+    expect(result.ok && roundMoney(result.calculation.total, "UZS")).toBe(1_158_636_000);
+  });
+
   it("сид не пишет в журнал; повторный сид не плодит дубли", async () => {
     // Записи о настоящих фикстурах есть; о DEMO — ни одной.
     const demoEntries = () =>
@@ -194,6 +219,12 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     expect(await count("select count(*)::int as n from blocks")).toBe(2);
     expect(await count("select count(*)::int as n from layouts")).toBe(2);
     expect(await count("select count(*)::int as n from developer_past_projects")).toBe(2);
+    // Программы ушли каскадом, банки DEMO — следом; курс DEMO снят (настоящего не было).
+    expect(await count("select count(*)::int as n from payment_programs")).toBe(0);
+    expect(await count("select count(*)::int as n from banks")).toBe(0);
+    expect(
+      await count("select count(*)::int as n from settings where key = 'exchange.usd_uzs'"),
+    ).toBe(0);
     // Сводка смены статуса привязана к блоку и ЖК DEMO — уходит вместе с ними.
     expect(
       await count(

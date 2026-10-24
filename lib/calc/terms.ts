@@ -1,11 +1,11 @@
 import {
   type CalcProgram,
-  type DownDiscountProgram,
+  type TieredProgram,
   type DownTier,
   type OverMaxBehavior,
   type TermRow,
   type TermsProgram,
-  isDownDiscount,
+  isTiered,
 } from "./programs";
 
 // Сроки (PLAN §3б, §7 фаза 2): у схемы застройщика — ступень по взносу, кнопки 12/24/36/48
@@ -41,7 +41,7 @@ export function tierIndexFor(tiers: readonly DownTier[], downPct: number): numbe
 /** Кнопки сроков: у схемы — preset ∩ [min, max] ступени; у остальных — строки программы. */
 export function termButtons(program: CalcProgram, downPct: number): number[] {
   if (program.type === "full") return [];
-  if (!isDownDiscount(program)) return program.terms.map((row) => row.months);
+  if (!isTiered(program)) return program.terms.map((row) => row.months);
   const tier = program.tiers[tierIndexFor(program.tiers, downPct)];
   if (!tier) return [];
   return [...program.presetMonths]
@@ -50,7 +50,7 @@ export function termButtons(program: CalcProgram, downPct: number): number[] {
 }
 
 export const allowsCustomMonths = (program: CalcProgram) =>
-  isDownDiscount(program) && program.allowCustomMonths;
+  isTiered(program) && program.allowCustomMonths;
 
 /** Ступень ниже текущей, где такой срок есть, — ближайшая к выбранному взносу. */
 function suggestTier(
@@ -69,7 +69,7 @@ function suggestTier(
 }
 
 /** Без своего срока по умолчанию — самая длинная кнопка, иначе — максимум ступени. */
-function defaultSchemeMonths(program: DownDiscountProgram, buttons: number[], max: number) {
+function defaultSchemeMonths(program: TieredProgram, buttons: number[], max: number) {
   return program.allowCustomMonths ? max : (buttons.at(-1) ?? max);
 }
 
@@ -78,7 +78,7 @@ function defaultSchemeMonths(program: DownDiscountProgram, buttons: number[], ma
  * suggest_tier — тоже на максимуме и подсказка взноса, lead — на просимом сроке.
  */
 export function resolveSchemeMonths(
-  program: DownDiscountProgram,
+  program: TieredProgram,
   downPct: number,
   requested: number | null,
 ): TermOutcome {

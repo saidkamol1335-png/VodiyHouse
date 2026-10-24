@@ -2,12 +2,12 @@ import { type FeeAmount, annuityPayment, differentiatedPayments, feeAmounts } fr
 import { type Currency, type ExchangeRate, convertMoney } from "./money";
 import {
   type CalcProgram,
-  type DownDiscountProgram,
+  type TieredProgram,
   type ProgramMethod,
   type TermRow,
   type TermsProgram,
   DOWN_MAX_PCT,
-  isDownDiscount,
+  isTiered,
   minDownOf,
   programCurrency,
 } from "./programs";
@@ -74,7 +74,7 @@ export function calculate(
   const priceOf: PriceOf = (tierIndex) => pricing?.({ price, tierIndex }) ?? price;
   if (program.type === "full")
     return { ok: true, calculation: paidInFull(currency, price, priceOf) };
-  if (isDownDiscount(program)) return schemeCalculation(program, input, currency, price, priceOf);
+  if (isTiered(program)) return schemeCalculation(program, input, currency, price, priceOf);
   return termsCalculation(program, input, currency, price, priceOf(null));
 }
 
@@ -104,7 +104,7 @@ function paidInFull(currency: Currency, price: number, priceOf: PriceOf): Calcul
 
 /** Схема застройщика: взнос — от цены по программе, платёж — остаток / срок, наценки нет. */
 function schemeCalculation(
-  program: DownDiscountProgram,
+  program: TieredProgram,
   input: CalcInput,
   currency: Currency,
   price: number,
@@ -123,7 +123,7 @@ function schemeCalculation(
     ok: true,
     calculation: {
       currency,
-      method: "down_discount",
+      method: "tiers",
       price,
       programPrice,
       tierIndex,

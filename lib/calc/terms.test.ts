@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SIFAT_IPOTEKA_MORTGAGE, SIFAT_SCHEME } from "./fixtures";
-import type { DownDiscountProgram } from "./programs";
+import type { TieredProgram } from "./programs";
 import {
   allowsCustomMonths,
   resolveSchemeMonths,
@@ -11,7 +11,7 @@ import {
 
 // Правила сроков PLAN §3б и решения фазы 2: кнопки, свой срок, превышение, строки банков.
 
-const scheme = (patch: Partial<DownDiscountProgram>): DownDiscountProgram => ({
+const scheme = (patch: Partial<TieredProgram>): TieredProgram => ({
   ...SIFAT_SCHEME,
   ...patch,
 });

@@ -4,7 +4,7 @@ import type { Currency } from "./money";
 // на сайте их не бывает (PLAN §3.13), кабинет добавляет их в lib/calc/cabinet.
 
 export type ProgramType = "full" | "installment" | "bank_installment" | "mortgage";
-export type ProgramMethod = "down_discount" | "markup" | "annuity" | "differentiated";
+export type ProgramMethod = "tiers" | "markup" | "annuity" | "differentiated";
 export type OverMaxBehavior = "block" | "suggest_tier" | "lead";
 export type FeeName = "appraisal" | "commission" | "insurance";
 
@@ -20,9 +20,9 @@ export type FeeRule = { name: FeeName; kind: "fixed" | "pct"; value: number };
 export type FullPaymentProgram = { type: "full" };
 
 /** Схема застройщика: правила сроков (PLAN §3б) есть только у неё. */
-export type DownDiscountProgram = {
+export type TieredProgram = {
   type: "installment";
-  method: "down_discount";
+  method: "tiers";
   tiers: readonly DownTier[];
   presetMonths: readonly number[];
   allowCustomMonths: boolean;
@@ -32,7 +32,7 @@ export type DownDiscountProgram = {
 /** Наценка застройщика и банки: сроки — строки, своего срока нет. */
 export type TermsProgram = {
   type: Exclude<ProgramType, "full">;
-  method: Exclude<ProgramMethod, "down_discount">;
+  method: Exclude<ProgramMethod, "tiers">;
   minDownPct: number;
   terms: readonly TermRow[];
   fees: readonly FeeRule[];
@@ -40,7 +40,7 @@ export type TermsProgram = {
   currency: Currency | null;
 };
 
-export type CalcProgram = FullPaymentProgram | DownDiscountProgram | TermsProgram;
+export type CalcProgram = FullPaymentProgram | TieredProgram | TermsProgram;
 
 /** Взнос выше — уже «100% оплата» отдельной программой (решение фазы 2). */
 export const DOWN_MAX_PCT = 90;
@@ -48,11 +48,11 @@ export const DOWN_MAX_PCT = 90;
 /** Кнопки сроков, которые может включить руководитель (PLAN §3б). */
 export const PRESET_MONTHS = [12, 24, 36, 48] as const;
 
-export const isDownDiscount = (program: CalcProgram): program is DownDiscountProgram =>
-  program.type !== "full" && program.method === "down_discount";
+export const isTiered = (program: CalcProgram): program is TieredProgram =>
+  program.type !== "full" && program.method === "tiers";
 
 export const isTermsProgram = (program: CalcProgram): program is TermsProgram =>
-  program.type !== "full" && program.method !== "down_discount";
+  program.type !== "full" && program.method !== "tiers";
 
 /** Валюта расчёта: у банков — своя, у программ застройщика — валюта цены. */
 export function programCurrency(program: CalcProgram, priceCurrency: Currency): Currency {
@@ -62,13 +62,13 @@ export function programCurrency(program: CalcProgram, priceCurrency: Currency): 
 /** Минимальный взнос, %: у схемы — порог первой ступени. */
 export function minDownOf(program: CalcProgram): number {
   if (program.type === "full") return 100;
-  if (isDownDiscount(program)) return program.tiers[0]?.minDownPct ?? 0;
+  if (isTiered(program)) return program.tiers[0]?.minDownPct ?? 0;
   return program.minDownPct;
 }
 
 /** Самый длинный срок программы, мес. (у схемы — при минимальном взносе). */
 export function maxMonthsOf(program: CalcProgram): number {
   if (program.type === "full") return 0;
-  if (isDownDiscount(program)) return program.tiers[0]?.maxMonths ?? 0;
+  if (isTiered(program)) return program.tiers[0]?.maxMonths ?? 0;
   return program.terms.reduce((longest, row) => Math.max(longest, row.months), 0);
 }

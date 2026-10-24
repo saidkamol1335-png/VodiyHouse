@@ -1,4 +1,4 @@
-import type { CabinetDownDiscountProgram, CabinetFullProgram } from "./cabinet/discounts";
+import type { CabinetTieredProgram, CabinetFullProgram } from "./cabinet/discounts";
 import type { ExchangeRate } from "./money";
 import type { TermsProgram } from "./programs";
 
@@ -17,9 +17,9 @@ const tier = (minDownPct: number, discountPct: number, maxMonths: number) => ({
 
 /** Farg‘ona Sifat Qurilish (Shodlik) — tiers тестов PLAN §7. */
 export const SIFAT_FULL: CabinetFullProgram = { type: "full", discountPct: 12 };
-export const SIFAT_SCHEME: CabinetDownDiscountProgram = {
+export const SIFAT_SCHEME: CabinetTieredProgram = {
   type: "installment",
-  method: "down_discount",
+  method: "tiers",
   tiers: [tier(30, 0, 36), tier(50, 6, 18), tier(70, 9, 12)],
   presetMonths: [12, 24, 36, 48],
   allowCustomMonths: true,
@@ -53,7 +53,7 @@ export const SIFAT_IPOTEKA_MORTGAGE: TermsProgram = {
 
 /** Marg‘ilon Invest — tiers примера PLAN §3б, дифференцированный банк. */
 export const MARGILAN_FULL: CabinetFullProgram = { type: "full", discountPct: 10 };
-export const MARGILAN_SCHEME: CabinetDownDiscountProgram = {
+export const MARGILAN_SCHEME: CabinetTieredProgram = {
   ...SIFAT_SCHEME,
   tiers: [tier(40, 0, 36), tier(60, 5, 24), tier(80, 8, 12)],
 };
@@ -79,7 +79,7 @@ export const MARGILAN_IPAK_MORTGAGE: TermsProgram = {
 };
 
 /** Kamalak Development — короткая схема (до 18 мес.). */
-export const KAMALAK_SCHEME: CabinetDownDiscountProgram = {
+export const KAMALAK_SCHEME: CabinetTieredProgram = {
   ...SIFAT_SCHEME,
   tiers: [tier(30, 0, 18), tier(50, 5, 12)],
 };

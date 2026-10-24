@@ -91,7 +91,8 @@ describe("журнал изменений", () => {
     });
   });
 
-  it("у сервера нет прав на таблицы, кроме профилей", async () => {
+  // Профили — создание сотрудников (шаг 8), настройки — курс ЦБ по расписанию (фаза 2).
+  it("у сервера нет прав на таблицы, кроме профилей и настроек", async () => {
     const { rows } = await db.admin.query<{ relname: string }>(
       `select c.relname from pg_class c
        where c.relnamespace = 'public'::regnamespace and c.relkind in ('r', 'p', 'v', 'm')
@@ -101,7 +102,7 @@ describe("журнал изменений", () => {
            or has_table_privilege('service_role', c.oid, 'delete'))
        order by c.relname`,
     );
-    expect(rows.map((row) => row.relname)).toEqual(["profiles"]);
+    expect(rows.map((row) => row.relname)).toEqual(["profiles", "settings"]);
   });
 
   it("читают руководитель и менеджер; видеограф ничего не видит, посетителю закрыто", async () => {
