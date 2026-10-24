@@ -1,12 +1,12 @@
 import { cabinetProgramFromRecord, type CabinetProgramRecord } from "@/lib/calc/cabinet/records";
 import type { Currency } from "@/lib/calc/money";
+import { kindOf } from "@/lib/calc/programs";
 import { bilingualFrom } from "../bilingual";
 import type { PublicationStatus } from "../publication";
 import type {
   BankOption,
   PriceHint,
   ProgramItem,
-  ProgramKind,
   ProgramPanel,
   RatePart,
   RateSetting,
@@ -33,12 +33,6 @@ export type PanelRecord = {
   programs: (CabinetProgramRecord & { bank: unknown })[];
   price_hint: { per_m2: number; currency: Currency } | null;
 };
-
-export function kindOf(record: Pick<CabinetProgramRecord, "type" | "method">): ProgramKind {
-  if (record.type === "full") return "full";
-  if (record.type === "installment") return record.method === "markup" ? "markup" : "scheme";
-  return record.type === "mortgage" ? "mortgage" : "bank";
-}
 
 export function programItemFrom(record: CabinetProgramRecord & { bank: unknown }): ProgramItem {
   return {
@@ -91,8 +85,14 @@ export function rateSettingFrom(value: unknown): RateSetting {
   return { cbu: ratePartFrom(raw.cbu), manual: ratePartFrom(raw.manual) };
 }
 
-export function banksFrom(records: readonly { id: number; name: unknown }[]): BankOption[] {
-  return records.map((record) => ({ id: record.id, name: bilingualFrom(record.name) }));
+export function banksFrom(
+  records: readonly { id: number; name: unknown; is_active: boolean }[],
+): BankOption[] {
+  return records.map((record) => ({
+    id: record.id,
+    name: bilingualFrom(record.name),
+    isActive: record.is_active,
+  }));
 }
 
 /** «Обновлено» панели: позднее из правки условий программ и отметки «проверены» (Р5). */

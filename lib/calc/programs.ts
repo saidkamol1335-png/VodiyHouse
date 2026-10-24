@@ -72,3 +72,20 @@ export function maxMonthsOf(program: CalcProgram): number {
   if (isTiered(program)) return program.tiers[0]?.maxMonths ?? 0;
   return program.terms.reduce((longest, row) => Math.max(longest, row.months), 0);
 }
+
+/** Вид программы в интерфейсе: тип и метод одним словом (кабинет, сайт, сравнение). */
+export type ProgramKind = "full" | "scheme" | "markup" | "bank" | "mortgage";
+
+export const PROGRAM_KINDS: readonly ProgramKind[] = [
+  "full",
+  "scheme",
+  "markup",
+  "bank",
+  "mortgage",
+];
+
+export function kindOf(record: { type: ProgramType; method: ProgramMethod | null }): ProgramKind {
+  if (record.type === "full") return "full";
+  if (record.type === "installment") return record.method === "markup" ? "markup" : "scheme";
+  return record.type === "mortgage" ? "mortgage" : "bank";
+}

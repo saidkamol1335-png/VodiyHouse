@@ -9,6 +9,7 @@ import {
 import {
   ADMIN_ROOT_MESSAGES,
   CABINET_NAMESPACE,
+  CALC_NAMESPACE,
   pickMessages,
   siteMessages,
 } from "./clientMessages";
@@ -37,9 +38,12 @@ describe("сообщения для браузера", () => {
     expect(() => pickMessages(messages, ["a.x"])).toThrow("a.x");
   });
 
-  it("сайт получает всё, кроме текстов кабинета", () => {
+  it("сайт получает всё, кроме текстов кабинета и калькулятора (у него свой провайдер)", () => {
     const picked = siteMessages(ru);
-    expect(Object.keys(picked)).toEqual(Object.keys(ru).filter((key) => key !== CABINET_NAMESPACE));
+    const shared = Object.keys(ru).filter(
+      (key) => key !== CABINET_NAMESPACE && key !== CALC_NAMESPACE,
+    );
+    expect(Object.keys(picked)).toEqual(shared);
     expect(JSON.stringify(picked).length).toBeLessThan(JSON.stringify(ru).length / 10);
   });
 
@@ -48,6 +52,8 @@ describe("сообщения для браузера", () => {
     const used = [...clientNamespaces(routeFiles("app/[locale]"))];
     expect(used.length).toBeGreaterThan(0);
     expect(used.filter((namespace) => namespace.startsWith(CABINET_NAMESPACE))).toEqual([]);
+    // Калькулятор сайта (2.6) получит calc своим провайдером — до тех пор раздел никто не читает.
+    expect(used.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
   });
 
   it("корню /admin хватает разделов входа: каждый useTranslations вне кабинета ими покрыт", () => {

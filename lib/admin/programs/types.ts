@@ -1,22 +1,14 @@
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
 import type { CabinetProgramRecord } from "@/lib/calc/cabinet/records";
 import type { Currency, ExchangeRate } from "@/lib/calc/money";
+import type { ProgramKind } from "@/lib/calc/programs";
 import type { BilingualValue } from "../bilingual";
 import type { ContentErrorCode } from "../developers/errors";
 import type { PublicationStatus } from "../publication";
 
 // Экран «Программы оплаты» (шаг 2.4, Р2–Р6, В1–В3): данные панелей, курса и ответы действий.
 
-/** Вид программы в интерфейсе: тип и метод одним выбором («+ Программа» — сначала вид). */
-export type ProgramKind = "full" | "scheme" | "markup" | "bank" | "mortgage";
-
-export const PROGRAM_KINDS: readonly ProgramKind[] = [
-  "full",
-  "scheme",
-  "markup",
-  "bank",
-  "mortgage",
-];
+export { PROGRAM_KINDS, type ProgramKind } from "@/lib/calc/programs";
 
 export type ProgramBlockOption = {
   id: string;
@@ -58,7 +50,8 @@ export type RatePart = { usdUzs: number; date: string };
 /** Курс (Р6): ЦБ и ручной; действует ручной, если он есть. */
 export type RateSetting = { cbu: RatePart | null; manual: RatePart | null };
 
-export type BankOption = { id: number; name: BilingualValue };
+/** Банк справочника; скрытый не предлагается новым программам, но остаётся у своих. */
+export type BankOption = { id: number; name: BilingualValue; isActive: boolean };
 
 export type ProgramsScreenData = {
   panels: ProgramPanel[];
@@ -72,6 +65,13 @@ export type ProgramFieldErrors = Record<string, string>;
 export type ProgramActionResult<Payload = undefined> =
   | { status: "done"; at: number; payload: Payload }
   | { status: "error"; error: ContentErrorCode | null; fieldErrors: ProgramFieldErrors };
+
+/** Обрыв связи или 5xx: действие пришло исключением — экран показывает «Нет связи» (lib/ui/settle). */
+export const NETWORK_FAILURE: ProgramActionResult<never> = {
+  status: "error",
+  error: "network",
+  fieldErrors: {},
+};
 
 export type ProgramActions = {
   save: (formData: FormData) => Promise<ProgramActionResult<ProgramItem>>;

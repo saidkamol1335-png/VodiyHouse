@@ -100,12 +100,13 @@ function feeColumns({ control, t }: KindRowsProps): RowColumn<FeeDraft>[] {
     {
       field: "name",
       label: t("editor.fees.name"),
-      render: (row) => (
+      render: (row, _index, error) => (
         <SelectField
           id={`${row.key}-name`}
           label={t("editor.fees.name")}
           options={names}
           value={row.name}
+          error={error}
           onChange={(event) =>
             control.fees.update(row.key, { name: event.target.value as FeeName })
           }
@@ -115,13 +116,16 @@ function feeColumns({ control, t }: KindRowsProps): RowColumn<FeeDraft>[] {
     {
       field: "kind",
       label: t("editor.fees.kind"),
-      render: (row) => (
-        <SegmentChoice
-          label={t("editor.fees.kind")}
-          value={row.kind}
-          options={kinds.map((kind) => ({ value: kind, label: t(`editor.fees.${kind}`) }))}
-          onChange={(kind) => control.fees.update(row.key, { kind })}
-        />
+      render: (row, _index, error) => (
+        <>
+          <SegmentChoice
+            label={t("editor.fees.kind")}
+            value={row.kind}
+            options={kinds.map((kind) => ({ value: kind, label: t(`editor.fees.${kind}`) }))}
+            onChange={(kind) => control.fees.update(row.key, { kind })}
+          />
+          {error ? <p className="program-rows__error">{error}</p> : null}
+        </>
       ),
     },
     { field: "value", label: t("editor.fees.value") },

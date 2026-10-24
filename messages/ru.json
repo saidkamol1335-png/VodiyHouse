@@ -46,6 +46,155 @@
     "titleAccent": "по цене застройщика",
     "skeleton": "Каркас сайта · фаза 0"
   },
+  "calc": {
+    "kinds": {
+      "full": "100% оплата",
+      "scheme": "Рассрочка от застройщика",
+      "markup": "Рассрочка с наценкой",
+      "bank": "Рассрочка через банк",
+      "mortgage": "Ипотека"
+    },
+    "programs": {
+      "title": "Программа оплаты",
+      "full": "вся сумма сразу, без платежей",
+      "scheme": "от {down} · до {term} · без наценки",
+      "markup": "от {down} · до {term} · наценка до {rate}",
+      "bank": "от {down} · до {term} · {rate} годовых",
+      "blocks": "{complex}, блок {block}",
+      "empty": "Для этой стоимости программ нет — условия уточнит Vodiy House"
+    },
+    "price": {
+      "title": "Стоимость квартиры",
+      "modesLabel": "Откуда стоимость",
+      "modes": {
+        "unit": "Квартира",
+        "area": "Площадь × цена м²",
+        "layout": "Планировка",
+        "sum": "Сумма"
+      },
+      "unit": "Квартира · свободно: {count}",
+      "unitOption": "Кв. {number} · {floor} эт. · {rooms} · {area} м² · {price}",
+      "unitNoPrice": "Кв. {number} · {floor} эт. · цена по запросу",
+      "unitGroup": "{complex}, блок {block}",
+      "noUnits": "Свободных квартир с ценой нет — посчитайте по площади",
+      "layout": "Планировка",
+      "layoutOption": "{rooms} · {area} м² · от {price}",
+      "layoutNoPrice": "{rooms} · {area} м² · цена по запросу",
+      "noLayouts": "Планировок с ценой нет — посчитайте по площади",
+      "area": "Площадь",
+      "areaUnit": "м²",
+      "perM2": "Цена за м²",
+      "perM2Unit": "{currency}/м²",
+      "sum": "Сумма",
+      "currency": "Валюта стоимости",
+      "total": "Стоимость",
+      "approx": "≈ {amount}",
+      "empty": "Введите стоимость",
+      "rooms": "{count, plural, =0 {студия} other {#-комн.}}"
+    },
+    "down": {
+      "title": "Первоначальный взнос",
+      "min": "минимум {pct}",
+      "value": "{pct} · {amount}",
+      "slider": "Первоначальный взнос, %",
+      "options": "Варианты взноса",
+      "upTo": "до {term}",
+      "now": "сразу"
+    },
+    "term": {
+      "title": "Срок",
+      "scheme": "без наценки",
+      "markup": "наценка {rate}",
+      "bank": "{rate} годовых",
+      "custom": "Свой",
+      "customNote": "срок",
+      "input": "Срок, мес.",
+      "less": "Меньше на месяц",
+      "more": "Больше на месяц",
+      "unit": "мес.",
+      "hint": "Любое целое число месяцев: от {min} до {max} при взносе {down}",
+      "aboveMax": "При взносе {down} можно максимум {max} мес. — считаем на {max} мес.",
+      "suggest": "{months} мес. — при взносе {from}–{to}. Сейчас считаем на {max} мес.",
+      "suggestButton": "Подставить {from}",
+      "lead": "Больше {max} мес. при взносе {down} — уточним у застройщика",
+      "belowMin": "Минимум {min} мес. — считаем на {min} мес."
+    },
+    "total": {
+      "currency": "Валюта итога",
+      "monthly": "Платёж в месяц",
+      "first": "Первый платёж",
+      "now": "К оплате сразу",
+      "approx": "≈ {amount}",
+      "price": "Стоимость",
+      "programPrice": "Цена по программе",
+      "down": "Первоначальный взнос · {pct}",
+      "rest": "Остаток",
+      "restNote": "без наценки · {term}",
+      "markup": "Наценка",
+      "markupNote": "{rate} за срок · {term}",
+      "loan": "Сумма кредита",
+      "interest": "Проценты банка",
+      "interestNote": "{rate} годовых · {term}",
+      "fees": {
+        "appraisal": "Оценка квартиры",
+        "commission": "Комиссия банка",
+        "insurance": "Страхование"
+      },
+      "overpayment": "Переплата",
+      "total": "Итоговая стоимость",
+      "disclaimer": "Расчёт иллюстративный и не является предложением банка.",
+      "actual": "Условия актуальны на {date}.",
+      "rate": "Курс {source, select, manual {} other {ЦБ}}: 1 $ = {rate} сум на {date}.",
+      "noRate": "Курс недоступен — программы банков в сумах сейчас не считаются",
+      "noPrice": "Введите стоимость — посчитаем платёж",
+      "noTerms": "У программы нет сроков — условия уточнит Vodiy House"
+    },
+    "schedule": {
+      "show": "Показать график платежей",
+      "hide": "Скрыть график платежей",
+      "caption": "График платежей",
+      "month": "Месяц",
+      "payment": "Платёж",
+      "principal": "Основной долг",
+      "interest": "Проценты",
+      "markup": "Наценка",
+      "balance": "Остаток",
+      "total": "Всего",
+      "more": "Показать все {count}"
+    },
+    "compare": {
+      "title": "Все программы",
+      "titleUnit": "Все программы для этой квартиры",
+      "program": "Программа",
+      "down": "Первоначальный взнос",
+      "term": "Срок",
+      "payment": "Платёж в месяц",
+      "total": "Итоговая стоимость",
+      "overpayment": "Переплата",
+      "cheapest": "выгоднее всего",
+      "lowest": "меньше платёж",
+      "totalShort": "итого {amount}",
+      "perMonth": "{amount}/мес",
+      "now": "К оплате сразу",
+      "none": "—",
+      "unavailable": "Не посчитать без курса: {names}"
+    },
+    "telegram": {
+      "copy": "Скопировать для Telegram",
+      "copied": "Скопировано — вставьте в Telegram",
+      "failed": "Не удалось скопировать — выделите текст ниже и скопируйте вручную",
+      "term": "Срок: {term}",
+      "payment": "Платёж в месяц: {amount}",
+      "paymentFirst": "Первый платёж: {amount}",
+      "line": "{label}: {value}",
+      "signature": "Vodiy House"
+    },
+    "sticky": {
+      "monthly": "Платёж в месяц"
+    },
+    "months": "{count} мес.",
+    "years": "{count, plural, one {# год} few {# года} other {# лет}}"
+  },
   "admin": {
     "brand": "Кабинет",
     "brandSub": "Проект-1",
@@ -379,6 +528,7 @@
         "lastProgram": "Нельзя выключить все программы: у застройщика должна остаться хотя бы одна",
         "programActive": "Удалить можно только выключенную программу",
         "invalidRate": "Курс — от 1 000 до 100 000 сум за доллар",
+        "savedReload": "Сохранено, но экран не обновился — обновите страницу",
         "network": "Нет связи с сервером — попробуйте ещё раз",
         "notConfigured": "Облачная база не подключена — данные появятся после шага 7",
         "unknown": "Не получилось сохранить — попробуйте ещё раз",
@@ -1474,7 +1624,9 @@
         "checkedDone": "Отмечено: условия {name} проверены сегодня",
         "add": "Программа",
         "addLabel": "Вид новой программы",
-        "noPrograms": "Программ пока нет"
+        "noPrograms": "Программ пока нет",
+        "addFor": "Программа для {name}",
+        "checkedFor": "Условия проверены сегодня: {name}"
       },
       "kinds": {
         "full": "100% оплата",
@@ -1505,9 +1657,11 @@
         "fees": "Разовые",
         "rules": "Сроки",
         "downFull": "100%, скидка {pct}",
+        "downFullPlain": "100%",
         "downFrom": "от {pct}",
         "currencyPrice": "как у цены блока",
         "currencyUzs": "сум, по курсу ЦБ",
+        "currencyUzsManual": "сум, по курсу на {date}",
         "currencyUsd": "USD",
         "blocksAll": "все",
         "blocksNone": "не выбраны — программа не действует",
@@ -1526,14 +1680,16 @@
           "lead": "сверх максимума — уточнить у застройщика"
         },
         "exampleFull": "Пример: {area} м² × {perM2} = {price} → {total} со скидкой",
+        "examplePlain": "Пример: {area} м² × {perM2} = {price}",
         "exampleMonthly": "Пример: {area} м² × {perM2}, взнос {down}, {term} → {payment}/мес{first, select, true { (первый)} other {}}",
         "exampleNoRate": "Пример посчитается, когда будет курс",
         "edit": "Изменить",
         "close": "Свернуть",
-        "up": "Выше",
-        "down2": "Ниже",
+        "up": "Выше: {name}",
+        "down2": "Ниже: {name}",
         "months": "{count} мес.",
-        "years": "{count, plural, one {# год} few {# года} other {# лет}}"
+        "years": "{count, plural, one {# год} few {# года} other {# лет}}",
+        "editFor": "Изменить: {name}"
       },
       "editor": {
         "newTitle": "Новая программа: {kind}",
@@ -1541,6 +1697,7 @@
         "bank": "Банк",
         "bankPlaceholder": "Выберите банк",
         "bankEmpty": "Банков нет — добавьте их в «Настройки → Справочники»",
+        "bankHidden": "{name} (скрыт в справочнике)",
         "method": "Как начисляются проценты",
         "currency": "Валюта программы",
         "discountPct": "Скидка за 100 % оплату, %",
@@ -1630,6 +1787,34 @@
         "deleted": "Программа удалена",
         "close": "Закрыть"
       }
+    },
+    "calc": {
+      "title": "Расчёт для клиента",
+      "subtitle": "Включённые программы застройщика — со скидками, только для кабинета",
+      "tabsLabel": "Разделы программ оплаты",
+      "tabs": {
+        "list": "Программы",
+        "calc": "Расчёт для клиента"
+      },
+      "developer": "Застройщик",
+      "noDevelopers": "Включённых программ пока нет — включите программу в «Программах оплаты»",
+      "listPrice": "Цена по прайсу",
+      "discountDown": "Скидка за взнос {pct}",
+      "discountFull": "Скидка за 100% оплату",
+      "discountedPrice": "Цена со скидкой",
+      "downDiscount": "→ −{pct}",
+      "optionsTitle": "Скидка за первый взнос",
+      "fullNote": "скидка {pct}",
+      "schemeNote": "−{pct} при 100%",
+      "language": "Язык сообщения",
+      "saved": "Расчёт сохранён в истории",
+      "notSaved": "Скопировано, но расчёт не сохранён в истории — {reason}"
+    },
+    "calcTelegram": {
+      "listPrice": "Цена по прайсу",
+      "discountDown": "Скидка за взнос {pct}",
+      "discountFull": "Скидка за 100% оплату",
+      "discountedPrice": "Цена со скидкой"
     }
   }
 }

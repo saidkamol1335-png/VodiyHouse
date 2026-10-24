@@ -53,12 +53,13 @@ export const emptyTier = (): TierDraft => ({
   maxMonths: "",
 });
 export const emptyTerm = (): TermDraft => ({ key: rowKey(), months: "", ratePct: "" });
-export const emptyFee = (kind: "fixed" | "pct" = "pct"): FeeDraft => ({
-  key: rowKey(),
-  name: "commission",
-  kind,
-  value: "",
-});
+const FEE_NAMES: readonly FeeName[] = ["commission", "appraisal", "insurance"];
+
+/** Новый разовый платёж — с названием, которого в списке ещё нет (два одинаковых база не примет). */
+export function emptyFee(kind: "fixed" | "pct" = "pct", taken: readonly FeeDraft[] = []): FeeDraft {
+  const name = FEE_NAMES.find((fee) => !taken.some((row) => row.name === fee)) ?? "commission";
+  return { key: rowKey(), name, kind, value: "" };
+}
 
 /** Новая программа выбранного вида: в схеме — одна пустая ступень, у банков — одна строка. */
 export function newDraft(kind: ProgramKind, developerId: string): ProgramDraft {

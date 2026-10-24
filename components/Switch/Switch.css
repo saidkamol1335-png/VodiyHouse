@@ -72,7 +72,8 @@
 }
 
 .switch:focus-visible .switch__track {
-  box-shadow: 0 0 0 3px var(--field-ring);
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
 }
 
 /* Свечение включённого — статичная тень мокапа; без анимаций (none) его нет. */

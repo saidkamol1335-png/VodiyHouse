@@ -123,6 +123,10 @@ test.describe("кабинет · программы оплаты: руковод
     page.once("dialog", (dialog) => void dialog.accept());
     await page.keyboard.press("Escape");
     await expect(editor(page)).toHaveCount(0);
+    // Фокус — обратно на «Изменить» той же карточки, а не на body.
+    await expect(
+      scheme.getByRole("button", { name: "Изменить: Рассрочка от застройщика" }),
+    ).toBeFocused();
   });
 
   test("новая программа: вид → поля → «Пример» в превью → выключенная карточка", async ({
@@ -178,6 +182,9 @@ test.describe("кабинет · программы оплаты: руковод
     await expect(rateLine(page)).toContainText(/Курс: 1 \$ = 12\s650,50 сум · зафиксирован/);
     await expect(rate.getByText("ручной")).toBeVisible();
     await expect(page.locator(".payment-programs__notice")).toContainText("по ручному курсу");
+    await expect(cardsOf(page, SIFAT).nth(2)).toContainText(
+      /Валюта\s*сум, по курсу на \d{2}\.\d{2}\.\d{4}/,
+    );
     await expect(bank).not.toHaveText(cbuExample!);
 
     await rate.getByRole("button", { name: "Вернуть курс ЦБ" }).click();

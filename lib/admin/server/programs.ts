@@ -32,7 +32,8 @@ export async function readRateSetting(supabase: SupabaseClient): Promise<RateSet
 export async function readProgramsScreen(supabase: SupabaseClient): Promise<ProgramsScreenData> {
   const panels = await supabase.rpc("payment_program_panels");
   if (panels.error) unavailable("program-panels", panels.error);
-  const banks = await supabase.from("banks").select("id, name").eq("is_active", true).order("sort");
+  // И скрытые: у программы со скрытым банком в списке должен остаться её банк.
+  const banks = await supabase.from("banks").select("id, name, is_active").order("sort");
   if (banks.error) unavailable("banks", banks.error);
   return {
     panels: panelsFrom((panels.data ?? []) as PanelRecord[]),

@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { type Ref, useState, useTransition } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import type { ProgramsT } from "@/components/ProgramCard/cardText";
-import type { ProgramActionResult, ProgramActions, RateSetting } from "@/lib/admin/programs/types";
+import {
+  NETWORK_FAILURE,
+  type ProgramActionResult,
+  type ProgramActions,
+  type RateSetting,
+} from "@/lib/admin/programs/types";
 import { formatDate, formatRate } from "@/lib/format";
+import { settle } from "@/lib/ui/settle";
+import { useSwapFocus } from "@/lib/ui/useSwapFocus";
 import { formOf, type ProgramsState } from "./useProgramsState";
 
 type RateActions = Pick<ProgramActions, "setManualRate" | "refreshCbuRate">;
@@ -54,7 +61,7 @@ function useRateRun(state: ProgramsState, t: ProgramsT, onDone: () => void) {
   const [pending, startTransition] = useTransition();
   const run = (action: () => Promise<RateResult>, done: string) =>
     startTransition(async () => {
-      const result = await action();
+      const result = await settle(action, NETWORK_FAILURE);
       if (result.status === "error") {
         const issue = result.fieldErrors.rate as "required" | "number" | "range" | undefined;
         if (issue) return setError(t(`rate.issues.${issue}`));
@@ -65,7 +72,7 @@ function useRateRun(state: ProgramsState, t: ProgramsT, onDone: () => void) {
       onDone();
       state.notify("success", done);
     });
-  return { error, pending, run };
+  return { error, pending, run, reset: () => setError(undefined) };
 }
 
 type FixRateFormProps = {
@@ -76,7 +83,7 @@ type FixRateFormProps = {
   t: ProgramsT;
 };
 
-/** «Зафиксировать курс»: поле на месте строки, «Сохранить / Отмена». */
+/** «Зафиксировать курс»: поле на месте строки (фокус сразу в нём), «Сохранить / Отмена». */
 function FixRateForm({ error, pending, onSave, onCancel, t }: FixRateFormProps) {
   const [value, setValue] = useState("");
   return (
@@ -87,6 +94,7 @@ function FixRateForm({ error, pending, onSave, onCancel, t }: FixRateFormProps) 
         inputMode="decimal"
         value={value}
         error={error}
+        autoFocus
         onChange={(event) => setValue(event.target.value)}
       />
       <RateFormButtons
@@ -99,27 +107,36 @@ function FixRateForm({ error, pending, onSave, onCancel, t }: FixRateFormProps) 
   );
 }
 
+/**
+ * Кнопки курса и формы на их месте. Пока запрос идёт, отменить и открыть другое нельзя — иначе
+ * поздний ответ закрыл бы форму, открытую уже после него. После формы фокус — на «Зафиксировать».
+ */
 function RateControls({ state, actions, t }: ProgramRateProps & { actions: RateActions }) {
   const [mode, setMode] = useState<Mode>("idle");
-  const { error, pending, run } = useRateRun(state, t, () => setMode("idle"));
+  const { error, pending, run, reset } = useRateRun(state, t, () => setMode("idle"));
+  const { trigger, target } = useSwapFocus(mode !== "idle");
+  const go = (next: Mode) => {
+    reset();
+    setMode(next);
+  };
   const manual = (fields: Record<string, string>, done: string) =>
     run(() => actions.setManualRate(formOf(fields)), done);
-  const back = () => setMode("idle");
   if (mode === "fix") {
     const save = (rate: string) => manual({ rate }, t("rate.saved"));
-    return <FixRateForm error={error} pending={pending} onSave={save} onCancel={back} t={t} />;
+    return (
+      <FixRateForm
+        error={error}
+        pending={pending}
+        onSave={save}
+        onCancel={() => go("idle")}
+        t={t}
+      />
+    );
   }
   if (mode === "return") {
+    const yes = () => manual({ clear: "1" }, t("rate.returned"));
     return (
-      <div className="program-rate__form" role="group" aria-label={t("rate.returnConfirm")}>
-        <span>{t("rate.returnConfirm")}</span>
-        <RateFormButtons
-          pending={pending}
-          onYes={() => manual({ clear: "1" }, t("rate.returned"))}
-          onNo={back}
-          labels={[t("rate.yes"), t("rate.no")]}
-        />
-      </div>
+      <ReturnConfirm pending={pending} yesRef={target} onYes={yes} onNo={() => go("idle")} t={t} />
     );
   }
   const refresh = () => run(() => actions.refreshCbuRate(new FormData()), t("rate.refreshed"));
@@ -127,27 +144,53 @@ function RateControls({ state, actions, t }: ProgramRateProps & { actions: RateA
     <RateButtons
       manual={Boolean(state.rate.manual)}
       pending={pending}
-      onMode={setMode}
+      fixRef={trigger}
+      onMode={go}
       onRefresh={refresh}
       t={t}
     />
   );
 }
 
+type ReturnConfirmProps = {
+  pending: boolean;
+  yesRef: Ref<HTMLButtonElement>;
+  onYes: () => void;
+  onNo: () => void;
+  t: ProgramsT;
+};
+
+/** «Вернуть курс ЦБ?» — «Да / Отмена» на месте кнопок; фокус сразу на «Да». */
+function ReturnConfirm({ pending, yesRef, onYes, onNo, t }: ReturnConfirmProps) {
+  return (
+    <div className="program-rate__form" role="group" aria-label={t("rate.returnConfirm")}>
+      <span>{t("rate.returnConfirm")}</span>
+      <RateFormButtons
+        pending={pending}
+        yesRef={yesRef}
+        onYes={onYes}
+        onNo={onNo}
+        labels={[t("rate.yes"), t("rate.no")]}
+      />
+    </div>
+  );
+}
+
 type RateFormButtonsProps = {
   pending: boolean;
+  yesRef?: Ref<HTMLButtonElement>;
   onYes: () => void;
   onNo: () => void;
   labels: readonly [string, string];
 };
 
-function RateFormButtons({ pending, onYes, onNo, labels }: RateFormButtonsProps) {
+function RateFormButtons({ pending, yesRef, onYes, onNo, labels }: RateFormButtonsProps) {
   return (
     <>
-      <Button size="sm" pending={pending} onClick={onYes}>
+      <Button ref={yesRef} size="sm" pending={pending} onClick={onYes}>
         {labels[0]}
       </Button>
-      <Button size="sm" variant="ghost" onClick={onNo}>
+      <Button size="sm" variant="ghost" disabled={pending} onClick={onNo}>
         {labels[1]}
       </Button>
     </>
@@ -157,15 +200,22 @@ function RateFormButtons({ pending, onYes, onNo, labels }: RateFormButtonsProps)
 type RateButtonsProps = {
   manual: boolean;
   pending: boolean;
+  fixRef: Ref<HTMLButtonElement>;
   onMode: (mode: Mode) => void;
   onRefresh: () => void;
   t: ProgramsT;
 };
 
-function RateButtons({ manual, pending, onMode, onRefresh, t }: RateButtonsProps) {
+function RateButtons({ manual, pending, fixRef, onMode, onRefresh, t }: RateButtonsProps) {
   return (
     <div className="program-rate__buttons">
-      <Button size="sm" variant="ghost" onClick={() => onMode("fix")}>
+      <Button
+        ref={fixRef}
+        size="sm"
+        variant="ghost"
+        disabled={pending}
+        onClick={() => onMode("fix")}
+      >
         {t("rate.fix")}
       </Button>
       {manual ? (

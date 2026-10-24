@@ -7,8 +7,8 @@ import type { BankOption, ProgramsScreenData, RateSetting } from "./types";
 // преобразователь, что у кабинета (panelsFrom). Совпадение с базой — tests/db/programs-demo.test.ts.
 
 const BANKS: Record<"ipoteka" | "ipak", BankOption> = {
-  ipoteka: { id: 901, name: { ru: "Ipoteka Bank", uz: "Ipoteka Bank" } },
-  ipak: { id: 902, name: { ru: "Ipak Yuli Bank", uz: "Ipak Yuli Bank" } },
+  ipoteka: { id: 901, name: { ru: "Ipoteka Bank", uz: "Ipoteka Bank" }, isActive: true },
+  ipak: { id: 902, name: { ru: "Ipak Yuli Bank", uz: "Ipak Yuli Bank" }, isActive: true },
 };
 
 const developerId = (n: number) => `00000000-0000-4000-8000-0000000000d${n}`;

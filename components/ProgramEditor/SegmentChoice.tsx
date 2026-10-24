@@ -17,7 +17,7 @@ export function SegmentChoice<Value extends string>({
   onChange,
 }: SegmentChoiceProps<Value>) {
   return (
-    <Segmented label={label} wrap className="program-editor__segment">
+    <Segmented label={label} form className="program-editor__segment">
       {options.map((option) => (
         <button
           key={option.value}

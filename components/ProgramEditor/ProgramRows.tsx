@@ -18,8 +18,8 @@ export type RowColumn<R extends Row> = {
   field: keyof R & string;
   label: string;
   inputMode?: "numeric" | "decimal";
-  /** Своя ячейка (выбор вида разового платежа), вместо поля ввода. */
-  render?: (row: R, index: number) => ReactNode;
+  /** Своя ячейка (выбор вида разового платежа), вместо поля ввода; error — ошибка этой ячейки. */
+  render?: (row: R, index: number, error: string | undefined) => ReactNode;
 };
 
 type ProgramRowsProps<R extends Row> = {
@@ -70,7 +70,10 @@ type LineProps<R extends Row> = ProgramRowsProps<R> & { row: R; index: number };
 
 function RowCell<R extends Row>({ column, ...props }: LineProps<R> & { column: RowColumn<R> }) {
   const { list, row, index, commands, errors, t } = props;
-  if (column.render) return <div className="program-rows__cell">{column.render(row, index)}</div>;
+  const error = errorText(errors, `${list}.${index}.${column.field}`, t);
+  if (column.render) {
+    return <div className="program-rows__cell">{column.render(row, index, error)}</div>;
+  }
   return (
     <Field
       id={`${row.key}-${column.field}`}
@@ -80,7 +83,7 @@ function RowCell<R extends Row>({ column, ...props }: LineProps<R> & { column: R
       onChange={(event) =>
         commands.update(row.key, { [column.field]: event.target.value } as Partial<R>)
       }
-      error={errorText(errors, `${list}.${index}.${column.field}`, t)}
+      error={error}
       className="program-rows__cell"
     />
   );

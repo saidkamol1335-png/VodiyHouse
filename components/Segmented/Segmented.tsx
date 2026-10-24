@@ -5,8 +5,11 @@ type SegmentedProps = {
   children: ReactNode;
   /** sm — шапка (27 px), lg — меню телефона на всю ширину (44 px). */
   size?: "sm" | "lg";
-  /** Длинные подписи (три варианта в узкой колонке) переносятся строкой ниже, а не распирают её. */
-  wrap?: boolean;
+  /**
+   * Сегмент в форме (редактор программы): длинные подписи переносятся строкой ниже, а не
+   * распирают колонку; на телефоне вариант — цель касания 44 px.
+   */
+  form?: boolean;
   /** Элемент блока-владельца (БЭМ-примесь): раскладку сегмента в своей строке задаёт он. */
   className?: string;
 };
@@ -16,10 +19,10 @@ export function Segmented({
   label,
   children,
   size = "sm",
-  wrap = false,
+  form = false,
   className,
 }: SegmentedProps) {
-  const classes = [`segmented segmented--${size}`, wrap ? "segmented--wrap" : "", className ?? ""]
+  const classes = [`segmented segmented--${size}`, form ? "segmented--form" : "", className ?? ""]
     .filter(Boolean)
     .join(" ");
   return (

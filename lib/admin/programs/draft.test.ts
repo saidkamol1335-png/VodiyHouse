@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_PROGRAMS_SCREEN } from "./demo";
-import { draftFromItem, draftNumber, newDraft, recordFromDraft, typeAndMethod } from "./draft";
-import { kindOf, panelUpdatedAt, programItemFrom, rateSettingFrom } from "./panels";
+import {
+  draftFromItem,
+  draftNumber,
+  emptyFee,
+  newDraft,
+  recordFromDraft,
+  typeAndMethod,
+} from "./draft";
+import { kindOf } from "@/lib/calc/programs";
+import { panelUpdatedAt, programItemFrom, rateSettingFrom } from "./panels";
 import { effectiveRate, PROGRAM_KINDS } from "./types";
 
 // Черновик редактора и превью карточки (2.4, В1): превью показывает программу так, как её покажет
@@ -29,6 +37,14 @@ describe("превью черновика", () => {
     const scheme = recordFromDraft(newDraft("scheme", "d1"), base, null);
     expect(bank.terms).toEqual([]);
     expect(scheme.tiers).toEqual([]);
+  });
+
+  it("новый разовый — с названием, которого в списке ещё нет (два одинаковых база не примет)", () => {
+    const first = emptyFee();
+    const second = emptyFee("pct", [first]);
+    const third = emptyFee("fixed", [first, second]);
+    expect([first.name, second.name, third.name]).toEqual(["commission", "appraisal", "insurance"]);
+    expect(emptyFee("pct", [first, second, third]).name).toBe("commission");
   });
 
   it("набранное число: пробелы и запятая; пусто и буквы — null", () => {

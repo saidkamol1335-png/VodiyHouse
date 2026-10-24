@@ -19,10 +19,11 @@ import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
 type RowList = "tiers" | "terms" | "fees";
 type RowOf<K extends RowList> = ProgramDraft[K][number];
 
-const EMPTY_ROW: { [K in RowList]: () => RowOf<K> } = {
-  tiers: emptyTier,
-  terms: emptyTerm,
-  fees: () => emptyFee(),
+/** Новая строка списка; разовый берёт свободное название (rows — уже набранные). */
+const EMPTY_ROW: { [K in RowList]: (rows: readonly RowOf<K>[]) => RowOf<K> } = {
+  tiers: () => emptyTier(),
+  terms: () => emptyTerm(),
+  fees: (rows) => emptyFee("pct", rows),
 };
 
 export type RowCommands<Row> = {
@@ -47,7 +48,7 @@ export function useProgramDraft(initial: ProgramDraft, leaveMessage: string) {
       guard.onInput();
     };
     return {
-      add: () => change((current) => [...current, EMPTY_ROW[list]()]),
+      add: () => change((current) => [...current, EMPTY_ROW[list](current)]),
       update: (key, fields) =>
         change((current) => current.map((row) => (row.key === key ? { ...row, ...fields } : row))),
       remove: (key) => change((current) => current.filter((row) => row.key !== key)),

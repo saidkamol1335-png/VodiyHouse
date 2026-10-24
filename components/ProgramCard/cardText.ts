@@ -2,7 +2,7 @@ import type { useTranslations } from "next-intl";
 import type { ProgramItem, ProgramPanel } from "@/lib/admin/programs/types";
 import { programExample } from "@/lib/calc/example";
 import type { ExchangeRate } from "@/lib/calc/money";
-import { formatPercent, formatPrice, initialsOf, termParts } from "@/lib/format";
+import { formatDate, formatPercent, formatPrice, initialsOf, termParts } from "@/lib/format";
 
 // Тексты карточки программы (мокап CabProg): чипы, строки «Взнос / Валюта / Блоки / Разовые»,
 // «Пример». В кабинете скидки видны (PLAN §3б); карточка сайту не нужна.
@@ -96,26 +96,37 @@ function rulesText(item: ProgramItem, t: ProgramsT): string | null {
 
 function downText(item: ProgramItem, t: ProgramsT): string {
   const { program } = item;
-  if (program.type === "full")
+  if (program.type === "full") {
+    if (program.discountPct === 0) return t("card.downFullPlain");
     return t("card.downFull", { pct: formatPercent(program.discountPct) });
+  }
   const min = program.method === "tiers" ? (program.tiers[0]?.minDownPct ?? 0) : program.minDownPct;
   return t("card.downFrom", { pct: formatPercent(min) });
 }
 
-function currencyText(item: ProgramItem, t: ProgramsT): string {
+/** Валюта: у банка в сумах — по какому курсу (ручной — «по курсу на дд.мм», Р6). */
+function currencyText(item: ProgramItem, rate: ExchangeRate | null, t: ProgramsT): string {
   const { program } = item;
   if (program.type === "full" || program.method === "tiers" || program.currency === null) {
     return t("card.currencyPrice");
   }
-  return program.currency === "UZS" ? t("card.currencyUzs") : t("card.currencyUsd");
+  if (program.currency === "USD") return t("card.currencyUsd");
+  return rate?.source === "manual"
+    ? t("card.currencyUzsManual", { date: formatDate(new Date(rate.date)) })
+    : t("card.currencyUzs");
 }
 
-export function programRows(item: ProgramItem, panel: ProgramPanel, t: ProgramsT): KvRow[] {
+export function programRows(
+  item: ProgramItem,
+  panel: ProgramPanel,
+  rate: ExchangeRate | null,
+  t: ProgramsT,
+): KvRow[] {
   const rules = rulesText(item, t);
   const showFees = item.kind !== "full" && item.kind !== "scheme";
   return [
     { key: "down", label: t("card.down"), value: downText(item, t) },
-    { key: "currency", label: t("card.currency"), value: currencyText(item, t) },
+    { key: "currency", label: t("card.currency"), value: currencyText(item, rate, t) },
     { key: "blocks", label: t("card.blocks"), value: blocksText(item, panel, t) },
     ...(showFees ? [{ key: "fees", label: t("card.fees"), value: feesText(item, t) }] : []),
     ...(rules ? [{ key: "rules", label: t("card.rules"), value: rules }] : []),
@@ -138,6 +149,9 @@ export function exampleText(
   const perM2 = formatPrice(example.perM2, example.priceCurrency);
   if (calc.method === null) {
     const price = formatPrice(example.price, example.priceCurrency);
+    if (calc.programPrice === calc.price) {
+      return t("card.examplePlain", { area: example.areaM2, perM2, price });
+    }
     return t("card.exampleFull", {
       area: example.areaM2,
       perM2,

@@ -48,7 +48,13 @@ export function EditorBasics({ control, banks, t }: EditorBasicsProps) {
 
 function BankFields({ control, banks, t }: EditorBasicsProps) {
   const { draft, errors, patch } = control;
-  const options = banks.map((bank) => ({ value: String(bank.id), label: bank.name.ru }));
+  // Скрытый в справочнике банк новым программам не предлагаем, но у своей программы он остаётся.
+  const options = banks
+    .filter((bank) => bank.isActive || bank.id === draft.bankId)
+    .map((bank) => ({
+      value: String(bank.id),
+      label: bank.isActive ? bank.name.ru : t("editor.bankHidden", { name: bank.name.ru }),
+    }));
   return (
     <>
       <SelectField
@@ -61,7 +67,7 @@ function BankFields({ control, banks, t }: EditorBasicsProps) {
           patch({ bankId: event.target.value ? Number(event.target.value) : null })
         }
         error={errorText(errors, "bank", t)}
-        hint={banks.length === 0 ? t("editor.bankEmpty") : undefined}
+        hint={options.length === 0 ? t("editor.bankEmpty") : undefined}
       />
       <SegmentChoice
         label={t("editor.method")}

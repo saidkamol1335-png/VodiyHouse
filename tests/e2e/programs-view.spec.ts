@@ -82,7 +82,10 @@ test.describe("кабинет · программы оплаты: просмот
     await page.keyboard.press("Escape");
 
     await sifat.getByRole("button", { name: "Программа" }).click();
-    await sifat.getByRole("button", { name: "Рассрочка через банк" }).click();
+    await sifat
+      .getByRole("group", { name: "Вид новой программы" })
+      .getByRole("button", { name: "Рассрочка через банк" })
+      .click();
     await editor(page).scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${dir}/s24-new-bank.png`, caret: "initial" });
 

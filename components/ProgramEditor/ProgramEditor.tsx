@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, type KeyboardEvent } from "react";
 import { BilingualField } from "@/components/BilingualField";
 import { FormStatus } from "@/components/FormStatus";
 import { ProgramCard } from "@/components/ProgramCard";
@@ -27,6 +27,8 @@ type ProgramEditorProps = EditorCallbacks & {
   copyTargets: readonly { id: string; name: string }[];
   banks: readonly BankOption[];
   rate: ExchangeRate | null;
+  /** Есть несохранённое — экран спросит «Уйти без сохранения?», прежде чем открыть другую. */
+  onDirtyChange: (dirty: boolean) => void;
   onClose: () => void;
 };
 
@@ -34,13 +36,18 @@ const NEW_RECORD_BASE = { is_active: false, sort: 0, created_at: "", updated_at:
 
 /**
  * Открытая карточка (Р2, В1 B): поля слева, справа живое превью карточки с «Примером» — опечатка
- * в ставке видна до «Сохранить»; уже ~1100 px превью встаёт над полями.
+ * в ставке видна до «Сохранить»; уже ~960 px превью встаёт над полями.
  */
 export function ProgramEditor(props: ProgramEditorProps) {
   const { item, panel, banks, rate } = props;
   const t = useTranslations("admin.programs");
   const control = useProgramDraft(props.initial, t("editor.leave"));
   const { draft } = control;
+  const { onDirtyChange } = props;
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => onDirtyChange(control.dirty), [control.dirty, onDirtyChange]);
+  // Открылась на месте карточки: фокус — на заголовок, иначе он остался бы на исчезнувшей кнопке.
+  useEffect(() => title.current?.focus(), []);
   const preview = useMemo(() => {
     const bank = banks.find((option) => option.id === draft.bankId)?.name ?? null;
     return programItemFrom(recordFromDraft(draft, item?.record ?? NEW_RECORD_BASE, bank));
@@ -54,7 +61,7 @@ export function ProgramEditor(props: ProgramEditorProps) {
   };
   return (
     <li className="program-editor" data-testid="program-editor" onKeyDown={onKeyDown}>
-      <h3 className="program-editor__title">
+      <h3 ref={title} tabIndex={-1} className="program-editor__title">
         {item ? programTitle(preview, t) : t("editor.newTitle", { kind: t(`kinds.${draft.kind}`) })}
       </h3>
       <div className="program-editor__layout">

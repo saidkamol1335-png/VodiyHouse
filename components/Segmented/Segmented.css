@@ -41,16 +41,22 @@
   font-size: var(--fs-segment-s);
 }
 
-/* Перенос: варианты занимают строку целиком, рамка не пилюля — две строки в пилюле читаются
-   как две разные кнопки. */
-.segmented--wrap {
+/* В форме: варианты переносятся и занимают строку целиком, рамка не пилюля — две строки в
+   пилюле читались бы как две разные кнопки. */
+.segmented--form {
   flex-wrap: wrap;
   max-width: 100%;
   border-radius: var(--r-m);
 }
 
-.segmented--wrap .segmented__item {
+.segmented--form .segmented__item {
   flex: 1 1 auto;
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .segmented--form .segmented__item {
+    min-height: var(--touch-target);
+  }
 }
 
 /* Большой сегмент — как в мобильном мокапе: серый фон, активный — карточка с лёгкой тенью. */

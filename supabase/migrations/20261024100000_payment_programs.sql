@@ -619,6 +619,32 @@ begin
 end;
 $$;
 
+-- «Пример: 60 м² × $620 …» на карточке и цена м² по умолчанию в расчёте (Р8): минимальная цена м²
+-- свободных квартир застройщика (ЖК кроме архива); блоки в обеих валютах — в долларах.
+create function private.developer_price_hint(p_developer uuid)
+returns jsonb
+language sql
+stable
+set search_path = ''
+as $$
+  select jsonb_build_object('per_m2', min(x.per_m2), 'currency', x.currency)
+  from (
+    select coalesce(u.price_per_m2, u.price / nullif(l.area, 0)) as per_m2, b.currency
+    from public.units u
+    join public.blocks b on b.id = u.block_id
+    join public.complexes c on c.id = b.complex_id
+    left join public.layouts l on l.id = u.layout_id
+    where c.developer_id = p_developer and c.status <> 'archived' and u.status = 'free'
+  ) as x
+  where x.per_m2 > 0
+  group by x.currency
+  order by x.currency = 'USD' desc
+  limit 1
+$$;
+
+revoke all on function private.developer_price_hint(uuid) from public;
+grant execute on function private.developer_price_hint(uuid) to authenticated;
+
 -- Экран «Программы оплаты»: панели застройщиков (кроме архива) с программами целиком (у сотрудников
 -- — со скидками) и блоками для выбора. Руководитель и менеджер; остальным — пустой список.
 create function public.payment_program_panels()
@@ -634,22 +660,7 @@ as $$
       'programs_checked_at', d.programs_checked_at,
       'complexes', (
         select count(*)::int from public.complexes c where c.developer_id = d.id and c.status <> 'archived'),
-      -- «Пример: 60 м² × $620 …» на карточке (Р8): минимальная цена м² свободных квартир; если
-      -- у застройщика блоки в обеих валютах — в долларах.
-      'price_hint', (
-        select jsonb_build_object('per_m2', min(x.per_m2), 'currency', x.currency)
-        from (
-          select coalesce(u.price_per_m2, u.price / nullif(l.area, 0)) as per_m2, b.currency
-          from public.units u
-          join public.blocks b on b.id = u.block_id
-          join public.complexes c on c.id = b.complex_id
-          left join public.layouts l on l.id = u.layout_id
-          where c.developer_id = d.id and c.status <> 'archived' and u.status = 'free'
-        ) as x
-        where x.per_m2 > 0
-        group by x.currency
-        order by x.currency = 'USD' desc
-        limit 1),
+      'price_hint', private.developer_price_hint(d.id),
       'blocks', (
         select coalesce(jsonb_agg(jsonb_build_object(
           'id', b.id, 'name', b.name, 'complex_id', c.id, 'complex_name', c.name, 'currency', b.currency
@@ -945,3 +956,101 @@ $$;
 
 revoke all on function public.save_calculation(uuid, uuid, jsonb, jsonb) from public, anon;
 grant execute on function public.save_calculation(uuid, uuid, jsonb, jsonb) to authenticated;
+
+-- ─── «Расчёт для клиента» в кабинете (шаг 2.5, Р1, Р8) ──────────────────────────────────────
+
+-- Выбранный застройщик целиком: включённые программы (у сотрудников — со скидками; «выбранные»
+-- без блоков не действуют — их нет), ЖК кроме архива с блоками и планировками («цена от» — как
+-- на сайте, private.layout_offers), свободные квартиры с ценой (нет цены — null, «по запросу»).
+create function private.client_calc_developer(p_developer uuid)
+returns jsonb
+language sql
+stable
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'id', d.id, 'slug', d.slug, 'name', d.name,
+    -- «Условия актуальны на»: позднее из правки включённых программ и «Условия проверены» (Р5).
+    'checked_at', greatest(d.programs_checked_at, (
+      select max(p.updated_at) from public.payment_programs p
+      where p.developer_id = d.id and p.is_active)),
+    'price_hint', private.developer_price_hint(d.id),
+    'programs', (
+      select coalesce(jsonb_agg(to_jsonb(p) || jsonb_build_object('bank', bk.name)
+        order by p.sort, p.created_at), '[]'::jsonb)
+      from public.payment_programs p
+      left join public.banks bk on bk.id = p.bank_id
+      where p.developer_id = d.id and p.is_active
+        and (p.blocks_scope = 'all' or cardinality(p.block_ids) > 0)),
+    'complexes', (
+      select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'name', c.name, 'blocks', (
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'id', b.id, 'name', b.name, 'currency', b.currency, 'layouts', (
+            select coalesce(jsonb_agg(jsonb_build_object(
+              'id', o.layout_id, 'rooms', o.rooms, 'area', o.area, 'price_from', o.price_from,
+              'available', o.available
+            ) order by o.rooms, o.area, o.sort), '[]'::jsonb)
+            from private.layout_offers o
+            where o.block_id = b.id)
+        ) order by b.sort, b.name), '[]'::jsonb)
+        from public.blocks b
+        where b.complex_id = c.id)
+      ) order by c.sort, c.name), '[]'::jsonb)
+      from public.complexes c
+      where c.developer_id = d.id and c.status <> 'archived'),
+    'units', (
+      select coalesce(jsonb_agg(jsonb_build_object(
+        'id', u.id, 'number', u.number, 'floor', u.floor, 'block_id', u.block_id,
+        'layout_id', u.layout_id, 'rooms', l.rooms, 'area', l.area,
+        'price', coalesce(u.price, u.price_per_m2 * l.area)
+      ) order by c.sort, b.sort, b.name, u.floor, u.number), '[]'::jsonb)
+      from public.units u
+      join public.blocks b on b.id = u.block_id
+      join public.complexes c on c.id = b.complex_id
+      left join public.layouts l on l.id = u.layout_id
+      where c.developer_id = d.id and c.status <> 'archived' and u.status = 'free')
+  )
+  from public.developers d
+  where d.id = p_developer
+$$;
+
+revoke all on function private.client_calc_developer(uuid) from public;
+
+-- Экран расчёта: застройщики с включёнными программами (кроме архива) и выбранный целиком — по
+-- адресу (?developer=slug), нет такого — первый. Руководитель и менеджер.
+create function public.client_calc_screen(p_developer text default null)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not private.has_role('head', 'manager') then
+    raise exception 'Расчёт видит сотрудник' using errcode = 'insufficient_privilege', hint = 'vh:forbidden';
+  end if;
+  return (
+    with listed as (
+      select d.id, d.slug, d.name, d.sort
+      from public.developers d
+      where d.status <> 'archived'
+        and exists (select 1 from public.payment_programs p where p.developer_id = d.id and p.is_active)
+    ), picked as (
+      select l.id from listed l
+      order by l.slug is not distinct from p_developer desc, l.sort, l.name
+      limit 1
+    )
+    select jsonb_build_object(
+      'developers', (select coalesce(jsonb_agg(jsonb_build_object('id', l.id, 'slug', l.slug, 'name', l.name)
+        order by l.sort, l.name), '[]'::jsonb) from listed l),
+      'current', (select private.client_calc_developer(p.id) from picked p)
+    )
+  );
+end;
+$$;
+
+comment on function public.client_calc_screen(text) is
+  '«Расчёт для клиента»: застройщики с включёнными программами и выбранный целиком (программы, ЖК, планировки, свободные квартиры).';
+
+revoke all on function public.client_calc_screen(text) from public, anon;
+grant execute on function public.client_calc_screen(text) to authenticated;

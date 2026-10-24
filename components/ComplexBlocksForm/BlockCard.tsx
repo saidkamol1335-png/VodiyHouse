@@ -2,15 +2,16 @@
 
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import type { SelectOption } from "@/components/SelectField";
 import type { BlockDraft, BlockRowErrors } from "@/lib/admin/complexes/blocks";
 import { quarterOf } from "@/lib/quarters";
+import { type MoveDirection, useMoveFocus } from "@/lib/ui/useMoveFocus";
 import { BlockFields } from "./BlockFields";
 
-export type MoveDirection = "up" | "down";
+export type { MoveDirection };
 
 type BlockCardProps = {
   block: BlockDraft;
@@ -28,19 +29,6 @@ type BlockCardProps = {
   onMove: (direction: MoveDirection) => void;
   onRemove: () => void;
 };
-
-/** Стрелки порядка: после переноса узла фокус уходит на body — возвращаем, на краю — на соседнюю. */
-function useMoveFocus(focusMove: MoveDirection | undefined, onFocused: () => void) {
-  const up = useRef<HTMLButtonElement>(null);
-  const down = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (!focusMove) return;
-    const [target, fallback] = focusMove === "up" ? [up, down] : [down, up];
-    (target.current && !target.current.disabled ? target : fallback).current?.focus();
-    onFocused();
-  }, [focusMove, onFocused]);
-  return [up, down] as const;
-}
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.blocks">>;
 

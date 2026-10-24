@@ -107,8 +107,8 @@ function checkFees(draft: ProgramDraft, check: Checker, errors: ProgramFieldErro
     const value = amount
       ? (amount.value ?? check(field, AMOUNT_ISSUES[amount.issue ?? "required"]))
       : check(field, percent(fee.value, 100, false));
-    // Разовый платёж в 0 — не платёж (база: от 0,01).
-    if (value === 0) errors[field] = "range";
+    // Разовый платёж в 0 — не платёж (база: от 0,01; NaN — ошибка уже стоит).
+    if (value < 0.01) errors[field] = "range";
     return { name: fee.name, kind: fee.kind, value };
   });
 }

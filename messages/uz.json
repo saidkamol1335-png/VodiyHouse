@@ -45,5 +45,162 @@
     "title": "Farg‘ona yangi uylaridagi kvartiralar — ",
     "titleAccent": "quruvchi narxida",
     "skeleton": "Sayt karkasi · 0-bosqich"
+  },
+  "calc": {
+    "kinds": {
+      "full": "100% to‘lov",
+      "scheme": "Quruvchidan muddatli to‘lov",
+      "markup": "Ustama bilan muddatli to‘lov",
+      "bank": "Bank orqali muddatli to‘lov",
+      "mortgage": "Ipoteka"
+    },
+    "programs": {
+      "title": "To‘lov dasturi",
+      "full": "butun summa birdaniga, to‘lovlarsiz",
+      "scheme": "{down} dan · {term} gacha · ustamasiz",
+      "markup": "{down} dan · {term} gacha · ustama {rate} gacha",
+      "bank": "{down} dan · {term} gacha · yillik {rate}",
+      "blocks": "{complex}, {block} blok",
+      "empty": "Bu narx uchun dasturlar yo‘q — shartlarni Vodiy House aniqlaydi"
+    },
+    "price": {
+      "title": "Kvartira narxi",
+      "modesLabel": "Narx qayerdan",
+      "modes": {
+        "unit": "Kvartira",
+        "area": "Maydon × m² narxi",
+        "layout": "Planirovka",
+        "sum": "Summa"
+      },
+      "unit": "Kvartira · bo‘sh: {count}",
+      "unitOption": "{number}-kv. · {floor}-qavat · {rooms} · {area} m² · {price}",
+      "unitNoPrice": "{number}-kv. · {floor}-qavat · narxi so‘rov bo‘yicha",
+      "unitGroup": "{complex}, {block} blok",
+      "noUnits": "Narxi bor bo‘sh kvartiralar yo‘q — maydon bo‘yicha hisoblang",
+      "layout": "Planirovka",
+      "layoutOption": "{rooms} · {area} m² · {price} dan",
+      "layoutNoPrice": "{rooms} · {area} m² · narxi so‘rov bo‘yicha",
+      "noLayouts": "Narxi bor planirovkalar yo‘q — maydon bo‘yicha hisoblang",
+      "area": "Maydon",
+      "areaUnit": "m²",
+      "perM2": "1 m² narxi",
+      "perM2Unit": "{currency}/m²",
+      "sum": "Summa",
+      "currency": "Narx valyutasi",
+      "total": "Narxi",
+      "approx": "≈ {amount}",
+      "empty": "Narxni kiriting",
+      "rooms": "{count, plural, =0 {studiya} other {#-xonali}}"
+    },
+    "down": {
+      "title": "Boshlang‘ich to‘lov",
+      "min": "kamida {pct}",
+      "value": "{pct} · {amount}",
+      "slider": "Boshlang‘ich to‘lov, %",
+      "options": "Boshlang‘ich to‘lov variantlari",
+      "upTo": "{term} gacha",
+      "now": "darhol"
+    },
+    "term": {
+      "title": "Muddat",
+      "scheme": "ustamasiz",
+      "markup": "ustama {rate}",
+      "bank": "yillik {rate}",
+      "custom": "Boshqa",
+      "customNote": "muddat",
+      "input": "Muddat, oy",
+      "less": "Bir oy kamroq",
+      "more": "Bir oy ko‘proq",
+      "unit": "oy",
+      "hint": "Istalgan butun oylar soni: {down} boshlang‘ich to‘lovda {min} dan {max} gacha",
+      "aboveMax": "{down} boshlang‘ich to‘lovda ko‘pi bilan {max} oy — {max} oyga hisoblaymiz",
+      "suggest": "{months} oy — {from}–{to} boshlang‘ich to‘lovda. Hozir {max} oyga hisoblaymiz",
+      "suggestButton": "{from} ni qo‘yish",
+      "lead": "{down} boshlang‘ich to‘lovda {max} oydan ko‘p — quruvchidan aniqlaymiz",
+      "belowMin": "Kamida {min} oy — {min} oyga hisoblaymiz"
+    },
+    "total": {
+      "currency": "Natija valyutasi",
+      "monthly": "Oylik to‘lov",
+      "first": "Birinchi to‘lov",
+      "now": "Darhol to‘lanadi",
+      "approx": "≈ {amount}",
+      "price": "Narxi",
+      "programPrice": "Dastur bo‘yicha narx",
+      "down": "Boshlang‘ich to‘lov · {pct}",
+      "rest": "Qoldiq",
+      "restNote": "ustamasiz · {term}",
+      "markup": "Ustama",
+      "markupNote": "muddat uchun {rate} · {term}",
+      "loan": "Kredit summasi",
+      "interest": "Bank foizlari",
+      "interestNote": "yillik {rate} · {term}",
+      "fees": {
+        "appraisal": "Kvartirani baholash",
+        "commission": "Bank komissiyasi",
+        "insurance": "Sug‘urta"
+      },
+      "overpayment": "Ortiqcha to‘lov",
+      "total": "Yakuniy narx",
+      "disclaimer": "Hisob-kitob taxminiy va bank taklifi hisoblanmaydi.",
+      "actual": "Shartlar {date} holatiga ko‘ra.",
+      "rate": "{source, select, manual {Kurs} other {MB kursi}}: 1 $ = {rate} so‘m, {date}.",
+      "noRate": "Kurs mavjud emas — so‘mdagi bank dasturlari hozir hisoblanmaydi",
+      "noPrice": "Narxni kiriting — to‘lovni hisoblaymiz",
+      "noTerms": "Dasturda muddatlar yo‘q — shartlarni Vodiy House aniqlaydi"
+    },
+    "schedule": {
+      "show": "To‘lov jadvalini ko‘rsatish",
+      "hide": "To‘lov jadvalini yashirish",
+      "caption": "To‘lov jadvali",
+      "month": "Oy",
+      "payment": "To‘lov",
+      "principal": "Asosiy qarz",
+      "interest": "Foizlar",
+      "markup": "Ustama",
+      "balance": "Qoldiq",
+      "total": "Jami",
+      "more": "Hammasini ko‘rsatish ({count})"
+    },
+    "compare": {
+      "title": "Barcha dasturlar",
+      "titleUnit": "Shu kvartira uchun barcha dasturlar",
+      "program": "Dastur",
+      "down": "Boshlang‘ich to‘lov",
+      "term": "Muddat",
+      "payment": "Oylik to‘lov",
+      "total": "Yakuniy narx",
+      "overpayment": "Ortiqcha to‘lov",
+      "cheapest": "eng foydali",
+      "lowest": "kichikroq to‘lov",
+      "totalShort": "jami {amount}",
+      "perMonth": "{amount}/oy",
+      "now": "Darhol to‘lanadi",
+      "none": "—",
+      "unavailable": "Kurssiz hisoblab bo‘lmaydi: {names}"
+    },
+    "telegram": {
+      "copy": "Telegram uchun nusxalash",
+      "copied": "Nusxalandi — Telegramga joylang",
+      "failed": "Nusxalab bo‘lmadi — quyidagi matnni belgilab, qo‘lda nusxalang",
+      "term": "Muddat: {term}",
+      "payment": "Oylik to‘lov: {amount}",
+      "paymentFirst": "Birinchi to‘lov: {amount}",
+      "line": "{label}: {value}",
+      "signature": "Vodiy House"
+    },
+    "sticky": {
+      "monthly": "Oylik to‘lov"
+    },
+    "months": "{count} oy",
+    "years": "{count} yil"
+  },
+  "admin": {
+    "calcTelegram": {
+      "listPrice": "Prays bo‘yicha narx",
+      "discountDown": "{pct} boshlang‘ich to‘lov uchun chegirma",
+      "discountFull": "100% to‘lov uchun chegirma",
+      "discountedPrice": "Chegirmali narx"
+    }
   }
 }

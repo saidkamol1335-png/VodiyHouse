@@ -11,8 +11,9 @@ import {
   type ProgramPanel as PanelData,
   type ProgramsScreenData,
 } from "@/lib/admin/programs/types";
-import { ProgramPanel, type EditorTarget } from "./ProgramPanel";
+import { ProgramPanel } from "./ProgramPanel";
 import { ProgramRate } from "./ProgramRate";
+import { type EditingControl, useEditing } from "./useEditing";
 import { useProgramsState } from "./useProgramsState";
 
 const ALL = "all";
@@ -25,12 +26,26 @@ type PaymentProgramsProps = {
   initialDeveloper?: string | null;
 };
 
-/** Фильтр застройщика: пилюля выбрана — адрес ?developer=slug (без перехода и перерисовки). */
-function useDeveloperFilter(panels: readonly PanelData[], initial: string | null | undefined) {
+/**
+ * Фильтр застройщика: пилюля выбрана — адрес ?developer=slug (без перехода и перерисовки).
+ * Открытая карточка скрылась бы с правками — сначала «Уйти без сохранения?».
+ */
+function useDeveloperFilter(
+  panels: readonly PanelData[],
+  initial: string | null | undefined,
+  editing: EditingControl,
+) {
   const [filter, setFilter] = useState(
     initial && panels.some((panel) => panel.slug === initial) ? initial : ALL,
   );
   const choose = (key: string) => {
+    const open = editing.editing;
+    const hidden =
+      open && key !== ALL && panels.find((panel) => panel.id === open.developerId)?.slug !== key;
+    if (hidden) {
+      if (!editing.confirmLeave()) return;
+      editing.close(() => true, null);
+    }
     setFilter(key);
     const url = new URL(window.location.href);
     if (key === ALL) url.searchParams.delete("developer");
@@ -45,8 +60,8 @@ function useDeveloperFilter(panels: readonly PanelData[], initial: string | null
 export function PaymentPrograms({ screen, actions, initialDeveloper }: PaymentProgramsProps) {
   const t = useTranslations("admin.programs");
   const state = useProgramsState(screen, actions, t);
-  const { filter, choose, visible } = useDeveloperFilter(state.panels, initialDeveloper);
-  const [editing, setEditing] = useState<EditorTarget | null>(null);
+  const editing = useEditing(t("editor.leave"));
+  const { filter, choose, visible } = useDeveloperFilter(state.panels, initialDeveloper, editing);
   const rate = effectiveRate(state.rate);
   const pills = [
     { key: ALL, label: t("filterAll") },
@@ -72,7 +87,6 @@ export function PaymentPrograms({ screen, actions, initialDeveloper }: PaymentPr
           rate={rate}
           actions={actions}
           editing={editing}
-          onEdit={setEditing}
           t={t}
         />
       ))}

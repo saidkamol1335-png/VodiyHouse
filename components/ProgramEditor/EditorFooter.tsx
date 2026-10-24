@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/Button";
 import type { ProgramsT } from "@/components/ProgramCard/cardText";
 import { SelectField } from "@/components/SelectField";
+import { useSwapFocus } from "@/lib/ui/useSwapFocus";
 
 type EditorFooterProps = {
   editorId: string;
@@ -69,10 +70,11 @@ function CopyControl({ editorId, copyTargets, pending, onCopy, t }: EditorFooter
 
 function RemoveControl({ isActive, pending, onRemove, t }: EditorFooterProps) {
   const [confirming, setConfirming] = useState(false);
+  const { trigger, target } = useSwapFocus(confirming);
   if (isActive) return <p className="program-editor__hint">{t("editor.remove.onlyOff")}</p>;
   if (!confirming) {
     return (
-      <Button size="sm" variant="danger" onClick={() => setConfirming(true)}>
+      <Button ref={trigger} size="sm" variant="danger" onClick={() => setConfirming(true)}>
         {t("editor.remove.label")}
       </Button>
     );
@@ -80,10 +82,10 @@ function RemoveControl({ isActive, pending, onRemove, t }: EditorFooterProps) {
   return (
     <div className="program-editor__confirm" role="group" aria-label={t("editor.remove.confirm")}>
       <span>{t("editor.remove.confirm")}</span>
-      <Button size="sm" variant="danger" pending={pending} onClick={onRemove}>
+      <Button ref={target} size="sm" variant="danger" pending={pending} onClick={onRemove}>
         {t("editor.remove.yes")}
       </Button>
-      <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
+      <Button size="sm" variant="ghost" disabled={pending} onClick={() => setConfirming(false)}>
         {t("editor.remove.no")}
       </Button>
     </div>

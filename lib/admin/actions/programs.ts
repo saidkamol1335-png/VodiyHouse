@@ -52,10 +52,23 @@ function parseProgram(formData: FormData): Record<string, unknown> | null {
   }
 }
 
-async function itemOrFail(supabase: SupabaseClient, id: unknown) {
-  const item = typeof id === "string" ? await readProgramItem(supabase, id) : null;
-  return item ? done(item) : fail("notFound");
+/**
+ * Ответ после записи: запись уже в базе — сбой чтения не исключение (экран упал бы, а повторное
+ * «Сохранить» создало бы вторую программу), а просьба обновить страницу.
+ */
+async function afterWrite<Payload>(read: () => Promise<Payload | null>) {
+  try {
+    const payload = await read();
+    return payload === null ? fail("notFound") : done(payload);
+  } catch {
+    return fail("savedReload");
+  }
 }
+
+const itemOrFail = (supabase: SupabaseClient, id: unknown) =>
+  afterWrite(() =>
+    typeof id === "string" ? readProgramItem(supabase, id) : Promise.resolve(null),
+  );
 
 /** Карточка целиком: без id — новая (выключена, Р4), с id — правка. */
 export async function saveProgramAction(
@@ -162,7 +175,7 @@ export async function setManualRateAction(
   const { error } = await guard.supabase.rpc("set_manual_exchange_rate", { p_rate: parsed.value });
   if (error) return dbFailure(error);
   expirePrograms(null);
-  return done(await readRateSetting(guard.supabase));
+  return afterWrite(() => readRateSetting(guard.supabase));
 }
 
 /** «Обновить курс ЦБ» — тот же источник, что у команды и расписания (lib/rates/cbu.ts). */
@@ -181,5 +194,5 @@ export async function refreshCbuRateAction(): Promise<ProgramActionResult<RateSe
   });
   if (error) return dbFailure(error);
   expirePrograms(null);
-  return done(await readRateSetting(guard.supabase));
+  return afterWrite(() => readRateSetting(guard.supabase));
 }

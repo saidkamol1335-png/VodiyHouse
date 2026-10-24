@@ -33,6 +33,7 @@ export const CONTENT_ERRORS = [
   "lastProgram",
   "programActive",
   "invalidRate",
+  "savedReload",
   "network",
   "notConfigured",
   "unknown",

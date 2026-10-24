@@ -102,11 +102,13 @@ describe("правила полей", () => {
       { ...emptyFee("fixed"), name: "appraisal" as const, value: "1 500 000" },
       { ...emptyFee("pct"), name: "appraisal" as const, value: "0" },
       { ...emptyFee("fixed"), name: "insurance" as const, value: "15,5" },
+      { ...emptyFee("pct"), name: "commission" as const, value: "0,005" },
     ];
     expect(errorsOf({ ...bank, fees })).toEqual({
       "fees.1.name": "duplicate",
       "fees.1.value": "range",
       "fees.2.value": "number",
+      "fees.3.value": "range",
     });
     const fixed = [{ ...emptyFee("fixed"), value: "100" }];
     expect(errorsOf({ ...markup, terms: [term], fees: fixed })).toEqual({

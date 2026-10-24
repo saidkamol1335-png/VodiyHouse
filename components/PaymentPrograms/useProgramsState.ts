@@ -4,13 +4,15 @@ import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import type { ToastMessage } from "@/components/ActionToast";
 import { programFullName, type ProgramsT } from "@/components/ProgramCard/cardText";
-import type {
-  ProgramActionResult,
-  ProgramActions,
-  ProgramItem,
-  ProgramPanel,
-  ProgramsScreenData,
+import {
+  NETWORK_FAILURE,
+  type ProgramActionResult,
+  type ProgramActions,
+  type ProgramItem,
+  type ProgramPanel,
+  type ProgramsScreenData,
 } from "@/lib/admin/programs/types";
+import { settle } from "@/lib/ui/settle";
 import { useSyncedState } from "@/lib/ui/useSyncedState";
 
 // Состояние экрана «Программы оплаты»: панели и курс — от сервера; ответ действия меняет экран
@@ -70,20 +72,41 @@ function movedOrder(panel: ProgramPanel, id: string, direction: "up" | "down"): 
   return order;
 }
 
+/** Карточки в порядке ids; те, что успели появиться или пропасть, — как есть. */
+function inOrder(programs: readonly ProgramItem[], ids: readonly string[]): ProgramItem[] {
+  const rank = new Map(ids.map((id, index) => [id, index]));
+  const known = programs.filter((item) => rank.has(item.id));
+  const rest = programs.filter((item) => !rank.has(item.id));
+  return [...known.sort((a, b) => rank.get(a.id)! - rank.get(b.id)!), ...rest];
+}
+
 /** Отказ тумблера («последнюю не выключить») — строкой в своей карточке, а не полосой внизу. */
 export type ToggleRefusal = { id: string; text: string };
 
-function useCommands(store: Panels, toast: Toast, actions: ProgramActions | null, t: ProgramsT) {
+/** Что сейчас в работе: тумблер карточки (по id) и перестановка панели (по id застройщика). */
+function usePending() {
+  const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
+  const mark = (key: string, busy: boolean) =>
+    setPending((current) => {
+      const next = new Set(current);
+      if (busy) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  return { pending, mark };
+}
+
+function useToggle(store: Panels, toast: Toast, actions: ProgramActions | null, t: ProgramsT) {
   const tAdmin = useTranslations("admin");
-  const [pendingId, setPendingId] = useState<string | null>(null);
+  const { pending, mark } = usePending();
   const [refusal, setRefusal] = useState<ToggleRefusal | null>(null);
   const toggle = async (item: ProgramItem, next: boolean) => {
     if (!actions) return;
-    setPendingId(item.id);
+    mark(item.id, true);
     setRefusal(null);
     const fields = { id: item.id, active: String(next), developerId: item.developerId };
-    const result = await actions.setActive(formOf(fields));
-    setPendingId(null);
+    const result = await settle(() => actions.setActive(formOf(fields)), NETWORK_FAILURE);
+    mark(item.id, false);
     if (result.status === "error") {
       const code = (result.error ?? "invalid") as "invalid";
       return setRefusal({ id: item.id, text: tAdmin(`developers.errors.${code}`) });
@@ -91,28 +114,43 @@ function useCommands(store: Panels, toast: Toast, actions: ProgramActions | null
     store.putItem({ ...item, isActive: next, record: { ...item.record, is_active: next } });
     toast.notify("success", t(next ? "toast.on" : "toast.off", { name: programFullName(item, t) }));
   };
+  return { pending, refusal, toggle };
+}
+
+function useCommands(store: Panels, toast: Toast, actions: ProgramActions | null, t: ProgramsT) {
+  const toggles = useToggle(store, toast, actions, t);
+  const moving = usePending();
   const move = async (panel: ProgramPanel, item: ProgramItem, direction: "up" | "down") => {
     const order = actions ? movedOrder(panel, item.id, direction) : null;
     if (!actions || !order) return;
-    const byId = new Map(panel.programs.map((program) => [program.id, program]));
+    const before = panel.programs.map((program) => program.id);
     store.updatePanel(panel.id, (current) => ({
       ...current,
-      programs: order.map((id) => byId.get(id)!),
+      programs: inOrder(current.programs, order),
     }));
-    const result = await actions.reorder(formOf({ developerId: panel.id, ids: order }));
-    if (result.status === "error") {
-      store.updatePanel(panel.id, () => panel);
-      toast.failed(result);
-    }
+    moving.mark(panel.id, true);
+    const form = formOf({ developerId: panel.id, ids: order });
+    const result = await settle(() => actions.reorder(form), NETWORK_FAILURE);
+    moving.mark(panel.id, false);
+    if (result.status === "done") return;
+    // Возвращаем только порядок: тумблер и правка, что успели за это время, остаются.
+    store.updatePanel(panel.id, (current) => ({
+      ...current,
+      programs: inOrder(current.programs, before),
+    }));
+    toast.failed(result);
   };
   const markChecked = async (panel: ProgramPanel) => {
     if (!actions) return;
-    const result = await actions.markChecked(formOf({ developerId: panel.id }));
+    const form = formOf({ developerId: panel.id });
+    const result = await settle(() => actions.markChecked(form), NETWORK_FAILURE);
     if (result.status === "error") return toast.failed(result);
     store.updatePanel(panel.id, (current) => ({ ...current, checkedAt: result.payload }));
     toast.notify("success", t("panel.checkedDone", { name: panel.name }));
   };
-  return { pendingId, refusal, toggle, move, markChecked };
+  const isPending = (item: ProgramItem) =>
+    toggles.pending.has(item.id) || moving.pending.has(item.developerId);
+  return { isPending, refusal: toggles.refusal, toggle: toggles.toggle, move, markChecked };
 }
 
 export function useProgramsState(

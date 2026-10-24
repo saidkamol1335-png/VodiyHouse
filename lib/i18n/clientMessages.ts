@@ -36,8 +36,17 @@ export function pickMessages(
   return picked;
 }
 
-/** Сайт: все разделы, кроме текстов кабинета. */
+/**
+ * Тексты калькулятора (~7 тыс. знаков) — только страницам с калькулятором: свой провайдер с
+ * CALC_MESSAGES (фаза 2: /kalkulyator, расчёт квартиры), а не HTML каждой страницы сайта.
+ */
+export const CALC_NAMESPACE = "calc";
+export const CALC_MESSAGES = [CALC_NAMESPACE] as const;
+
+/** Сайт: все разделы, кроме текстов кабинета и калькулятора. */
 export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
-  const paths = Object.keys(messages).filter((key) => key !== CABINET_NAMESPACE);
+  const paths = Object.keys(messages).filter(
+    (key) => key !== CABINET_NAMESPACE && key !== CALC_NAMESPACE,
+  );
   return pickMessages(messages, paths);
 }

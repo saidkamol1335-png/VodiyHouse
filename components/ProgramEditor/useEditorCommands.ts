@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useState, useTransition, type TransitionStartFunction } from "react";
 import type { ProgramsT } from "@/components/ProgramCard/cardText";
-import type { ProgramActions, ProgramItem } from "@/lib/admin/programs/types";
+import { NETWORK_FAILURE, type ProgramActions, type ProgramItem } from "@/lib/admin/programs/types";
 import { validateDraft } from "@/lib/admin/programs/validate";
+import { settle } from "@/lib/ui/settle";
 import type { ProgramDraftControl } from "./useProgramDraft";
 
 // Команды открытой карточки: сохранить, скопировать к застройщику, удалить. Ответ действия
@@ -43,7 +44,8 @@ function saveCommand({ control, callbacks, run, failed, succeeded, t }: CommandC
   }
   run(async () => {
     const program = JSON.stringify(checked.payload);
-    const result = await callbacks.actions.save(formOf({ program }));
+    const form = formOf({ program });
+    const result = await settle(() => callbacks.actions.save(form), NETWORK_FAILURE);
     if (result.status === "error") {
       control.setErrors(result.fieldErrors);
       return failed(result.error);
@@ -60,7 +62,8 @@ function copyCommand(context: CommandContext, developerId: string, name: string)
   const item = callbacks.item;
   if (!item) return;
   run(async () => {
-    const result = await callbacks.actions.copy(formOf({ id: item.id, developerId }));
+    const form = formOf({ id: item.id, developerId });
+    const result = await settle(() => callbacks.actions.copy(form), NETWORK_FAILURE);
     if (result.status === "error") return failed(result.error);
     succeeded(t("editor.copy.done", { name }));
     callbacks.onCopied(result.payload);
@@ -72,7 +75,7 @@ function removeCommand({ callbacks, run, failed }: CommandContext) {
   if (!item) return;
   run(async () => {
     const fields = { id: item.id, developerId: item.developerId };
-    const result = await callbacks.actions.remove(formOf(fields));
+    const result = await settle(() => callbacks.actions.remove(formOf(fields)), NETWORK_FAILURE);
     if (result.status === "error") return failed(result.error);
     callbacks.onRemoved(item.id);
   });
