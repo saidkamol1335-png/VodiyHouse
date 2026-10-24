@@ -112,3 +112,23 @@ describe("график платежей", () => {
     expect(roundedSchedule([], "USD")).toEqual([]);
   });
 });
+
+describe("график на длинном сроке с мелким платежом (ревью 2.1)", () => {
+  it("600 мес. по ~$24: последний платёж не уходит в минус, сумма — округлённый итог, каждый в пределах шага", () => {
+    const lead = { ...SIFAT_SCHEME, overMaxBehavior: "lead" as const };
+    const calculation = ok(
+      calculate(lead, {
+        price: 20_228.57,
+        priceCurrency: "USD",
+        downPct: 30,
+        months: 600,
+        rate: null,
+      }),
+    );
+    expect(calculation.months).toBe(600);
+    const rows = roundedSchedule(paymentSchedule(calculation), "USD");
+    expect(rows.every((row) => row.payment > 0)).toBe(true);
+    expect(sum(rows.map((row) => row.payment))).toBe(Math.round(calculation.financed));
+    expect(rows.every((row) => Math.abs(row.payment - calculation.firstPayment) <= 1)).toBe(true);
+  });
+});

@@ -11,7 +11,8 @@ export const MONEY_STEP: Readonly<Record<Currency, number>> = { USD: 1, UZS: 100
 /** Сумма, округлённая шагом вывода своей валюты. */
 export function roundMoney(amount: number, currency: Currency): number {
   const step = MONEY_STEP[currency];
-  return Math.round(amount / step) * step;
+  // + 0 превращает −0 (шум float у нулевой переплаты) в 0: Intl печатает −0 как «-0».
+  return Math.round(amount / step) * step + 0;
 }
 
 /** Пересчёт по курсу; null — валюты разные, а курса нет. */

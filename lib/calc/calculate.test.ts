@@ -61,7 +61,9 @@ describe("схема застройщика (PLAN §7)", () => {
   });
 
   it("свой срок 17 мес.: кабинет $2 765, сайт без скидки — взнос $50 000 и $2 941", () => {
-    expect(shown(cabinet(SIFAT_SCHEME, usd(100_000, 50, 17)), 47_000 / 17)).toBe(2765);
+    const cabinetResult = cabinet(SIFAT_SCHEME, usd(100_000, 50, 17));
+    expect(cabinetResult).toMatchObject({ programPrice: 94_000, down: 47_000, months: 17 });
+    expect(shown(cabinetResult, cabinetResult.firstPayment)).toBe(2765);
     const siteResult = site(SIFAT_SCHEME, usd(100_000, 50, 17));
     expect(siteResult.programPrice).toBe(100_000);
     expect(siteResult.down).toBe(50_000);
@@ -175,5 +177,28 @@ describe("числа экранов мокапа", () => {
     const bank = site(SIFAT_IPOTEKA_INSTALLMENT, usd(60 * 620, 20, 24));
     expect(shown(bank, bank.firstPayment)).toBe(17_545_000);
     expect(cabinet(SIFAT_FULL, usd(60 * 620, 100, null)).total).toBeCloseTo(32_736, 6);
+  });
+});
+
+describe("ноль без минуса (ревью 2.1)", () => {
+  it("аннуитет под 0 %: переплата ровно 0; около нуля округление не даёт −0", () => {
+    const zero: TermsProgram = {
+      type: "bank_installment",
+      method: "annuity",
+      minDownPct: 20,
+      terms: [{ months: 13, ratePct: 0 }],
+      fees: [],
+      currency: null,
+    };
+    const result = site(zero, {
+      price: 77_777_777,
+      priceCurrency: "UZS",
+      downPct: 20,
+      months: 13,
+      rate: null,
+    });
+    expect(result.overpayment).toBe(0);
+    expect(Object.is(roundMoney(-1e-9, "UZS"), 0)).toBe(true);
+    expect(Object.is(roundMoney(-0.3, "USD"), 0)).toBe(true);
   });
 });

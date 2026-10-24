@@ -1,6 +1,6 @@
 import { type CalcInput, type Calculation, type ProgramPricing, calculate } from "./calculate";
 import { type Currency, type ExchangeRate, convertMoney, roundMoney } from "./money";
-import { type CalcProgram, isTermsProgram, maxMonthsOf, minDownOf } from "./programs";
+import { type CalcProgram, isTermsProgram, isTiered, maxMonthsOf, minDownOf } from "./programs";
 
 // Сравнение программ застройщика и «Платёж от» карточки ЖК — по правилам мокапа.
 
@@ -38,7 +38,12 @@ export function comparePrograms<P extends CalcProgram>(
   const unavailable: P[] = [];
   for (const program of programs) {
     const months = comparedMonths(program, input.months);
-    const result = calculate(program, { ...input, months }, pricingFor?.(program));
+    // Срок другой программы (ипотека на 180 мес.) схеме не положен: в сравнении она считается на
+    // своём максимуме, даже если сама предлагает «уточнить у застройщика» (lead).
+    const compared = isTiered(program)
+      ? { ...program, overMaxBehavior: "block" as const }
+      : program;
+    const result = calculate(compared, { ...input, months }, pricingFor?.(program));
     if (result.ok) computed.push({ program, calculation: result.calculation });
     else unavailable.push(program);
   }

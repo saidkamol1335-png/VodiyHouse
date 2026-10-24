@@ -1,6 +1,6 @@
 import type { DbErrorLike } from "../authErrors";
 
-// Ошибки действий контента кабинета — застройщики, ЖК, справочники, журнал → коды для
+// Ошибки действий контента кабинета — застройщики, ЖК, справочники, журнал, программы оплаты → коды для
 // messages/ru.json (admin.developers.errors). Отказы базы — по hint 'vh:…' и коду Postgres, не по тексту.
 // Без импорта SDK: модуль подключают и клиентские формы.
 
@@ -29,6 +29,10 @@ export const CONTENT_ERRORS = [
   "developerArchived",
   "galleryFull",
   "contacts",
+  "invalidProgram",
+  "lastProgram",
+  "programActive",
+  "invalidRate",
   "network",
   "notConfigured",
   "unknown",
@@ -52,6 +56,10 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:unit_taken": "unitNumberTaken",
   "vh:whole_list": "wholeList",
   "vh:confirm_name": "confirmName",
+  "vh:invalid_program": "invalidProgram",
+  "vh:last_program": "lastProgram",
+  "vh:program_active": "programActive",
+  "vh:invalid_rate": "invalidRate",
 };
 
 // Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.

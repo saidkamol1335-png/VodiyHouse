@@ -74,6 +74,16 @@ describe("программы оплаты", () => {
     ...patch,
   });
 
+  const markup = (patch: Program = {}): Program => ({
+    developer_id: content.publicDeveloper,
+    type: "installment",
+    method: "markup",
+    min_down_pct: 30,
+    terms: [{ months: 24, rate_pct: 10 }],
+    fees: [{ name: "commission", kind: "pct", value: 1 }],
+    ...patch,
+  });
+
   const save = (actor: string, program: Program) =>
     db.as(user(actor), async (tx) => {
       const { rows } = await tx.query<{ id: string }>(
@@ -194,6 +204,33 @@ describe("программы оплаты", () => {
         "blocks",
       ],
       ["неизвестный тип", () => ({ ...full(), type: "gift" }), "format"],
+      ["банк без метода", () => bank({ method: null }), "method"],
+      [
+        "дробный порог ступени",
+        () => scheme({ tiers: [{ ...SCHEME_TIERS[0], min_down_pct: 33.5 }] }),
+        "tiers",
+      ],
+      ["дробный мин. взнос банка", () => bank({ min_down_pct: 20.5 }), "min_down_pct"],
+      [
+        "фикс. разовое у наценки",
+        () => markup({ fees: [{ name: "appraisal", kind: "fixed", value: 5 }] }),
+        "fees",
+      ],
+      ["кнопки двумерным массивом", () => scheme({ preset_months: [[12, 24]] }), "preset_months"],
+      [
+        "блок дважды",
+        () =>
+          scheme({
+            blocks_scope: "selected",
+            block_ids: [content.publicBlock, content.publicBlock],
+          }),
+        "blocks",
+      ],
+      [
+        "null среди блоков",
+        () => scheme({ blocks_scope: "selected", block_ids: [null] }),
+        "blocks",
+      ],
     ];
 
     it.each(invalid)("%s → поле в detail", async (_, program, field) => {
@@ -210,6 +247,21 @@ describe("программы оплаты", () => {
         "vh:invalid_program",
         "blocks",
       );
+      const archived = await db.admin.query<{ id: string }>(
+        `insert into complexes (developer_id, slug, name, status, archived_at)
+         values ($1, 'old-zhk', '{"ru": "Old", "uz": "Old"}', 'archived', now()) returning id`,
+        [content.publicDeveloper],
+      );
+      const archivedBlock = await db.admin.query<{ id: string }>(
+        "insert into blocks (complex_id, name) values ($1, 'A') returning id",
+        [archived.rows[0]!.id],
+      );
+      await expectHint(
+        save(head, scheme({ blocks_scope: "selected", block_ids: [archivedBlock.rows[0]!.id] })),
+        "vh:invalid_program",
+        "blocks",
+      );
+      expect((await save(head, markup())).length).toBeGreaterThan(0);
       const own = await save(
         head,
         scheme({ blocks_scope: "selected", block_ids: [content.publicBlock] }),
@@ -353,13 +405,14 @@ describe("программы оплаты", () => {
         ).rows[0]!.n,
       );
 
-    it("ЦБ — сервер и руководитель, без записи в журнал; менеджер — нет; вне пределов — отказ", async () => {
+    it("ЦБ: сервер — без журнала, руководитель — с записью; менеджер — нет; вне пределов — отказ", async () => {
       await db.as(service, (tx) =>
         tx.query("select set_cbu_exchange_rate(11808.76, '2026-10-01')"),
       );
       expect(await rate()).toEqual({ usd_uzs: 11808.76, date: "2026-10-01", source: "cbu" });
-      await asHead((tx) => tx.query("select set_cbu_exchange_rate(11900, '2026-10-02')"));
       expect(await settingsEntries()).toBe(0);
+      await asHead((tx) => tx.query("select set_cbu_exchange_rate(11900, '2026-10-02')"));
+      expect(await settingsEntries()).toBe(1);
       await expectHint(
         db.as(user(manager), (tx) => tx.query("select set_cbu_exchange_rate(11900, '2026-10-02')")),
         "vh:forbidden",
@@ -412,6 +465,11 @@ describe("программы оплаты", () => {
         [mine],
       );
       expect(rows[0]).toMatchObject({ channel: "cabinet", snapshot: { tiers: SCHEME_TIERS } });
+      const saved = await db.admin.query<{ rate: unknown }>(
+        "select rate from calculations where id = $1",
+        [mine],
+      );
+      expect(saved.rows[0]!.rate).toEqual((await sitePrograms()).rate);
     });
 
     it("посетитель и видеограф не сохраняют; чужая программа — «не найдена»", async () => {
@@ -421,6 +479,74 @@ describe("программы оплаты", () => {
       );
       await expectHint(saveCalculation(videographer, programId), "vh:forbidden");
       await expectHint(saveCalculation(manager, crypto.randomUUID()), "vh:not_found");
+    });
+  });
+
+  describe("правка карточки (Р2)", () => {
+    const updatedAt = async (id: string) =>
+      (
+        await db.admin.query<{ at: string }>(
+          "select updated_at::text as at from payment_programs where id = $1",
+          [id],
+        )
+      ).rows[0]!.at;
+
+    it("с id — правка той же программы; чужой id — «не найдена»; менеджер — отказ", async () => {
+      const id = await save(head, scheme());
+      const tiers = [{ min_down_pct: 40, discount_pct: 0, min_months: 1, max_months: 24 }];
+      expect(await save(head, scheme({ id, tiers }))).toBe(id);
+      const { rows } = await db.admin.query<{ tiers: unknown }>(
+        "select tiers from payment_programs where id = $1",
+        [id],
+      );
+      expect(rows[0]!.tiers).toEqual(tiers);
+      await expectHint(save(head, scheme({ id: crypto.randomUUID() })), "vh:not_found");
+      await expectHint(save(manager, scheme({ id })), "vh:forbidden");
+    });
+
+    it("«Условия актуальны на» двигает правка условий, а не порядок, тумблер или блоки", async () => {
+      const id = await save(head, scheme());
+      const second = await save(head, full());
+      const before = await updatedAt(id);
+      await setActive(id, true);
+      await asHead((tx) =>
+        tx.query("select reorder_payment_programs($1, $2::uuid[])", [
+          content.publicDeveloper,
+          [second, id],
+        ]),
+      );
+      await save(head, scheme({ id, blocks_scope: "selected", block_ids: [content.publicBlock] }));
+      expect(await updatedAt(id)).toBe(before);
+      await save(
+        head,
+        scheme({
+          id,
+          tiers: [{ ...SCHEME_TIERS[0], max_months: 30 }],
+          blocks_scope: "selected",
+          block_ids: [content.publicBlock],
+        }),
+      );
+      expect(await updatedAt(id)).not.toBe(before);
+    });
+
+    it("ЖК ушёл к другому застройщику — его блоки уходят из программ прежнего", async () => {
+      const { rows } = await db.admin.query<{ id: string }>(
+        `insert into complexes (developer_id, slug, name, status) values ($1, 'moved-zhk', '{"ru": "M", "uz": "M"}', 'draft') returning id`,
+        [content.publicDeveloper],
+      );
+      const block = await db.admin.query<{ id: string }>(
+        "insert into blocks (complex_id, name) values ($1, 'A') returning id",
+        [rows[0]!.id],
+      );
+      const id = await save(
+        head,
+        scheme({ blocks_scope: "selected", block_ids: [content.publicBlock, block.rows[0]!.id] }),
+      );
+      await db.admin.query("update complexes set developer_id = $1 where id = $2", [
+        content.draftDeveloper,
+        rows[0]!.id,
+      ]);
+      expect((await programRow(id))!.block_ids).toEqual([content.publicBlock]);
     });
   });
 

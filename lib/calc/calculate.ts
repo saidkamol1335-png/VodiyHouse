@@ -195,7 +195,9 @@ function payments(method: TermsProgram["method"], financed: number, row: TermRow
   }
   if (method === "annuity") {
     const payment = annuityPayment(financed, ratePct, months);
-    return { firstPayment: payment, lastPayment: payment, extra: payment * months - financed };
+    // Под 0 % переплаты нет; разность float дала бы −0,000001.
+    const extra = ratePct === 0 ? 0 : payment * months - financed;
+    return { firstPayment: payment, lastPayment: payment, extra };
   }
   const { first, last, interest } = differentiatedPayments(financed, ratePct, months);
   return { firstPayment: first, lastPayment: last, extra: interest };

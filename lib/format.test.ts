@@ -169,3 +169,12 @@ describe("relativeStamp — «обновлено …» в списке квар�
     });
   });
 });
+
+describe("коротко около границы шкал (ревью 2.1)", () => {
+  it("999,96 млн — уже «1 млрд», без «-0» у нуля", () => {
+    const plain = (text: string) => text.replace(/s/g, " ");
+    expect(plain(formatPriceShort(999_960_000, "UZS"))).toBe("1 млрд сум");
+    expect(plain(formatPriceShort(999_940_000, "UZS"))).toBe("999,9 млн сум");
+    expect(plain(formatPrice(-1e-9, "UZS"))).toBe("0 сум");
+  });
+});

@@ -256,6 +256,70 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     expect(await count(logged)).toBe(0);
   });
 
+  it("настоящий курс (ручной или ЦБ) снимает пометку demo — demo:remove его не трогает", async () => {
+    await seed();
+    const head = await createStaff(db.admin, "head");
+    const rateRows = "select count(*)::int as n from settings where key = 'exchange.usd_uzs'";
+    await db.as(user(head), (tx) => tx.query("select set_manual_exchange_rate(12000)"));
+    await db.admin.exec(await readDemo("remove.sql"));
+    expect(await count(rateRows)).toBe(1);
+
+    await db.admin.query("delete from settings where key = 'exchange.usd_uzs'");
+    await seed();
+    await db.admin.query("select set_cbu_exchange_rate(11900, '2026-10-02')");
+    await db.admin.exec(await readDemo("remove.sql"));
+    expect(await count(rateRows)).toBe(1);
+    await db.admin.query("delete from settings where key = 'exchange.usd_uzs'");
+  });
+
+  it("снимки DEMO-программ и журнал DEMO-банков уходят, даже если их уже удалили из кабинета", async () => {
+    await seed();
+    const head = await createStaff(db.admin, "head");
+    const asHead = (sql: string, params: unknown[] = []) =>
+      db.as(user(head), (tx) => tx.query(sql, params));
+    const program = (
+      await db.admin.query<{ id: string }>(
+        `select p.id from payment_programs p join developers d on d.id = p.developer_id
+         where d.slug = 'demo-sifat' and p.type = 'full'`,
+      )
+    ).rows[0]!.id;
+    await asHead("select save_calculation($1, null, '{}', '{}')", [program]);
+    await asHead("select set_payment_program_active($1, false)", [program]);
+    await asHead("select delete_payment_program($1)", [program]);
+    const bank = (
+      await db.admin.query<{ id: number }>("select id from banks where slug = 'demo-ipak-yuli'")
+    ).rows[0]!.id;
+    await asHead(`update banks set name = '{"ru": "Ipak", "uz": "Ipak"}' where id = $1`, [bank]);
+    // Банк в программах не удалить (внешний ключ), включённую программу — тоже (Р4).
+    await db.admin.query("update payment_programs set is_active = false where bank_id = $1", [
+      bank,
+    ]);
+    await db.admin.query("delete from payment_programs where bank_id = $1", [bank]);
+    await asHead("delete from banks where id = $1", [bank]);
+    const bankEntries = `select count(*)::int as n from audit_log where entity = 'banks' and entity_id = '${bank}'`;
+    expect(await count(bankEntries)).toBeGreaterThan(0);
+    expect(await count("select count(*)::int as n from calculations")).toBe(1);
+
+    await db.admin.exec(await readDemo("remove.sql"));
+    expect(await count("select count(*)::int as n from calculations")).toBe(0);
+    expect(await count(bankEntries)).toBe(0);
+  });
+
+  it("программа настоящего застройщика с DEMO-банком останавливает удаление с понятной причиной", async () => {
+    await seed();
+    await db.admin.query(
+      `insert into payment_programs (developer_id, bank_id, type, method, min_down_pct, terms, currency)
+       select $1, b.id, 'mortgage', 'annuity', 20, '[{"months": 120, "rate_pct": 18}]', 'UZS'
+       from banks b where b.slug = 'demo-ipoteka'`,
+      [real.publicDeveloper],
+    );
+    await expect(db.admin.exec(await readDemo("remove.sql"))).rejects.toThrow(/DEMO-банки \(1\)/);
+    await db.admin.exec("rollback");
+    await db.admin.query("delete from payment_programs where developer_id = $1", [
+      real.publicDeveloper,
+    ]);
+  });
+
   it("настоящий ЖК у DEMO-застройщика останавливает удаление — ничего не удаляется", async () => {
     await seed();
     await db.admin.query(

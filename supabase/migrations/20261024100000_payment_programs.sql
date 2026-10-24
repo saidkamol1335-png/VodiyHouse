@@ -85,6 +85,7 @@ create table public.payment_programs (
   is_active boolean not null default false,
   sort integer not null default 0,
   created_at timestamptz not null default now(),
+  -- Когда менялись условия (не порядок, тумблер или блоки): «Условия актуальны на» (Р5).
   updated_at timestamptz not null default now()
 );
 
@@ -92,10 +93,6 @@ create index payment_programs_developer_idx on public.payment_programs (develope
 
 comment on table public.payment_programs is
   'Программы оплаты застройщиков (PLAN §6). Скидки — только сотрудникам; сайт — site_payment_programs().';
-
-create trigger payment_programs_set_updated_at
-  before update on public.payment_programs
-  for each row execute function public.set_updated_at();
 
 -- «Условия проверены сегодня» (Р5): дата на сайте — позднее из правки программы и этой отметки.
 alter table public.developers add column programs_checked_at timestamptz;
@@ -122,7 +119,8 @@ as $$
   end
 $$;
 
--- Ступени схемы: 1–8, взнос строго растёт (до 90 %: 100 % — программа «100% оплата»).
+-- Ступени схемы: 1–8, взнос — целые проценты, строго растёт (до 90 %: 100 % — программа
+-- «100% оплата»). Целые — чтобы подсказка «24 мес. — при взносе 30–49 %» была точной.
 create function private.valid_program_tiers(p_tiers jsonb)
 returns boolean
 language plpgsql
@@ -141,7 +139,7 @@ begin
       return false;
     end if;
     if tier - 'min_down_pct' - 'discount_pct' - 'min_months' - 'max_months' <> '{}'::jsonb
-       or not private.json_number_between(tier -> 'min_down_pct', 0, 90)
+       or not private.json_number_between(tier -> 'min_down_pct', 0, 90, true)
        or not private.json_number_between(tier -> 'discount_pct', 0, 50)
        or not private.json_number_between(tier -> 'min_months', 1, 600, true)
        or not private.json_number_between(tier -> 'max_months', 1, 600, true) then
@@ -234,9 +232,9 @@ declare
   bank boolean := p.type in ('bank_installment', 'mortgage');
   plain boolean := p.type = 'full' or scheme;
 begin
-  if not ((p.type = 'full' and p.method is null) or scheme
+  if not coalesce((p.type = 'full' and p.method is null) or scheme
           or (p.type = 'installment' and p.method is not distinct from 'markup')
-          or (bank and p.method in ('annuity', 'differentiated'))) then
+          or (bank and p.method in ('annuity', 'differentiated')), false) then
     return 'method';
   end if;
   if (p.bank_id is null) = bank then return 'bank'; end if;
@@ -244,7 +242,8 @@ begin
   if (p.discount_pct is null) = (p.type = 'full') or p.discount_pct not between 0 and 50 then
     return 'discount_pct';
   end if;
-  if (p.min_down_pct is null) <> plain or p.min_down_pct not between 0 and 90 then
+  if (p.min_down_pct is null) <> plain or p.min_down_pct not between 0 and 90
+     or p.min_down_pct <> trunc(p.min_down_pct) then
     return 'min_down_pct';
   end if;
   if (scheme and not private.valid_program_tiers(p.tiers)) or (not scheme and p.tiers <> '[]') then
@@ -256,12 +255,21 @@ begin
   if (plain and p.fees <> '[]') or (not plain and not private.valid_program_fees(p.fees)) then
     return 'fees';
   end if;
+  -- Фиксированная сумма — «в валюте программы», а у наценки своей валюты нет (валюта блока).
+  if p.method is not distinct from 'markup' and p.fees @> '[{"kind": "fixed"}]' then
+    return 'fees';
+  end if;
   if (not scheme and (p.preset_months <> '{}' or p.allow_custom_months))
+     or coalesce(array_ndims(p.preset_months), 1) > 1
+     or array_position(p.preset_months, null) is not null
      or not p.preset_months <@ '{12, 24, 36, 48}'::smallint[]
      or cardinality(p.preset_months) <> (select count(distinct m) from unnest(p.preset_months) m) then
     return 'preset_months';
   end if;
   if (p.blocks_scope = 'all' and p.block_ids <> '{}') or cardinality(p.block_ids) > 100
+     or coalesce(array_ndims(p.block_ids), 1) > 1
+     -- count(distinct) не считает ни повторы, ни null — оба дают расхождение с cardinality
+     or cardinality(p.block_ids) <> (select count(distinct b) from unnest(p.block_ids) b)
      or exists (
        select 1 from unnest(p.block_ids) as added (id)
        where added.id <> all (p_old_blocks) and not exists (
@@ -285,6 +293,14 @@ begin
   if field is not null then
     raise exception 'Условия программы заполнены неверно'
       using errcode = 'check_violation', hint = 'vh:invalid_program', detail = field;
+  end if;
+  if tg_op = 'UPDATE' and (new.type, new.method, new.bank_id, new.discount_pct, new.min_down_pct,
+      new.tiers, new.terms, new.fees, new.preset_months, new.allow_custom_months,
+      new.over_max_behavior, new.currency, new.conditions)
+    is distinct from (old.type, old.method, old.bank_id, old.discount_pct, old.min_down_pct,
+      old.tiers, old.terms, old.fees, old.preset_months, old.allow_custom_months,
+      old.over_max_behavior, old.currency, old.conditions) then
+    new.updated_at := now();
   end if;
   return new;
 end;
@@ -352,6 +368,29 @@ create trigger blocks_forget_program_block
   after delete on public.blocks
   for each row execute function private.forget_program_block();
 
+create function private.forget_moved_complex_blocks()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  update public.payment_programs p
+    set block_ids = array(
+      select x.id from unnest(p.block_ids) with ordinality as x (id, ord)
+      where x.id not in (select b.id from public.blocks b where b.complex_id = new.id)
+      order by x.ord)
+    where p.developer_id = old.developer_id
+      and p.block_ids && array(select b.id from public.blocks b where b.complex_id = new.id);
+  return null;
+end;
+$$;
+
+create trigger complexes_forget_program_blocks
+  after update of developer_id on public.complexes
+  for each row when (new.developer_id is distinct from old.developer_id)
+  execute function private.forget_moved_complex_blocks();
+
 revoke all on function
   private.json_number_between(jsonb, numeric, numeric, boolean),
   private.valid_program_tiers(jsonb),
@@ -360,7 +399,8 @@ revoke all on function
   private.payment_program_problem(public.payment_programs, uuid[]),
   private.check_payment_program(),
   private.guard_payment_program(),
-  private.forget_program_block()
+  private.forget_program_block(),
+  private.forget_moved_complex_blocks()
 from public;
 grant execute on function
   private.json_number_between(jsonb, numeric, numeric, boolean),
@@ -679,7 +719,8 @@ revoke all on function private.check_exchange_rate(numeric) from public;
 grant execute on function private.check_exchange_rate(numeric) to authenticated, service_role;
 
 -- Курс ЦБ: загрузка по расписанию (service_role), команда (SQL) или «Обновить» руководителя.
--- Ежедневное обновление — не правка сотрудника: в журнал не пишется. Ответ — изменился ли курс.
+-- Ежедневное обновление сервером — не правка сотрудника, в журнал не пишется; руководитель
+-- пишет курс сам — запись в журнале есть. Ответ — изменился ли курс.
 create function public.set_cbu_exchange_rate(p_rate numeric, p_date date)
 returns boolean
 language plpgsql
@@ -699,7 +740,9 @@ begin
   if p_date is null or p_date > (now() at time zone 'Asia/Tashkent')::date + 1 then
     raise exception 'Неверная дата курса' using errcode = 'invalid_parameter_value', hint = 'vh:invalid_rate';
   end if;
-  perform set_config('vodiy.skip_audit', 'on', true);
+  if current_user in ('service_role', 'postgres') then
+    perform set_config('vodiy.skip_audit', 'on', true);
+  end if;
   insert into public.settings (key, value, is_public)
   values ('exchange.usd_uzs', jsonb_build_object('cbu', rate, 'manual', null), true)
   on conflict (key) do update
@@ -730,7 +773,7 @@ begin
   insert into public.settings (key, value, is_public)
   values ('exchange.usd_uzs', jsonb_build_object('cbu', null, 'manual', coalesce(manual, 'null'::jsonb)), true)
   on conflict (key) do update
-    set value = public.settings.value || jsonb_build_object('manual', coalesce(manual, 'null'::jsonb));
+    set value = (public.settings.value - 'demo') || jsonb_build_object('manual', coalesce(manual, 'null'::jsonb));
 end;
 $$;
 

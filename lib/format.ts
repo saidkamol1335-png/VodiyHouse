@@ -166,8 +166,12 @@ export function formatPriceShort(
   currency: Currency,
   locale: Locale = "ru",
 ): string {
-  const scale = SHORT_SCALES.find((item) => Math.abs(amount) >= item.from);
-  if (currency === "USD" || !scale) return formatPrice(amount, currency, locale);
+  const index = SHORT_SCALES.findIndex((item) => Math.abs(amount) >= item.from);
+  if (currency === "USD" || index < 0) return formatPrice(amount, currency, locale);
+  // 999,96 млн с одним знаком — «1 000 млн»: такое пишем следующей шкалой, «1 млрд».
+  const roundsUp =
+    index > 0 && Math.round((Math.abs(amount) / SHORT_SCALES[index]!.from) * 10) >= 10_000;
+  const scale = SHORT_SCALES[roundsUp ? index - 1 : index]!;
   return `${ONE_DECIMAL.format(amount / scale.from)} ${scale[locale]} ${SUM_WORD[locale]}`;
 }
 

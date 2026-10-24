@@ -74,3 +74,18 @@ describe("«Платёж от» карточки ЖК", () => {
     expect(paymentFrom([SIFAT_IPOTEKA_INSTALLMENT], 37_200, "USD", null)).toBeNull();
   });
 });
+
+describe("сравнение: схема со сроком другой программы (ревью 2.1)", () => {
+  it("«уточним у застройщика» (lead) в сравнении не берёт 180 мес. ипотеки — схема на своём максимуме", () => {
+    const lead = { ...SIFAT_SCHEME, overMaxBehavior: "lead" as const };
+    const { rows } = comparePrograms([lead, SIFAT_IPOTEKA_MORTGAGE], {
+      ...input,
+      price: 100_000,
+      downPct: 30,
+      months: 180,
+    });
+    const scheme = rows.find((row) => row.program === lead)!;
+    expect(scheme.calculation.months).toBe(36);
+    expect(scheme.lowestPayment).toBe(false);
+  });
+});

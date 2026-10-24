@@ -78,5 +78,26 @@ export function roundedSchedule(rows: readonly ScheduleRow[], currency: Currency
     .slice(0, -1)
     .map((row) => ({ ...row, payment: roundMoney(row.payment, currency) }));
   const paid = head.reduce((sum, row) => sum + row.payment, 0);
-  return [...head, { ...rows.at(-1)!, payment: total - paid }];
+  const last = rows.at(-1)!;
+  const lastPayment = total - paid;
+  if (lastPayment > 0 && Math.abs(lastPayment - last.payment) <= last.payment / 2) {
+    return [...head, { ...last, payment: lastPayment }];
+  }
+  return cumulativeRounding(rows, currency);
+}
+
+/**
+ * Запасной путь: ошибки округления голов (до полшага на строку) за сотни месяцев больше самого
+ * платежа. Тогда платёж — разность округлённых нарастающих сумм: каждый в пределах шага.
+ */
+function cumulativeRounding(rows: readonly ScheduleRow[], currency: Currency): ScheduleRow[] {
+  let exact = 0;
+  let shown = 0;
+  return rows.map((row) => {
+    exact += row.payment;
+    const next = roundMoney(exact, currency);
+    const payment = next - shown;
+    shown = next;
+    return { ...row, payment };
+  });
 }
