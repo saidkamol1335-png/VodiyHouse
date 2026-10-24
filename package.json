@@ -19,6 +19,7 @@
     "demo:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs seed",
     "demo:remove": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs remove",
     "cloud:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/cloud-check.mjs",
+    "rate:update": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/rate-update.mjs",
     "staff:create-head": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-create-head.mjs",
     "format": "prettier --write .",
     "mockup:serve": "node docs/mockup/tools/serve.mjs",
