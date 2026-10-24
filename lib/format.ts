@@ -238,3 +238,24 @@ export function parsePriceInput(raw: string, max: number = PRICE_MAX): PriceInpu
   const value = Number(digits);
   return value <= 0 || value > max ? { value: null, issue: "outOfRange" } : { value };
 }
+
+/** Вычитаемая сумма: знак минус U+2212 (как «−$3 473» в мокапе r1), а не дефис. */
+export function formatMinus(formatted: string): string {
+  return `−${formatted}`;
+}
+
+/**
+ * Телефон Узбекистана: +998 и 9 цифр (пробелы, скобки, дефисы — как набрали; 9 цифр — без кода
+ * страны). Неверный — null. Формы заявок фазы 3 берут его же.
+ */
+export function phoneDigits(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  const full = digits.length === 9 ? `998${digits}` : digits;
+  return /^998\d{9}$/.test(full) ? full : null;
+}
+
+/** «+998901234567» — для заявки и сообщения менеджеру; неверный номер — null. */
+export function formatPhone(raw: string): string | null {
+  const digits = phoneDigits(raw);
+  return digits ? `+${digits}` : null;
+}

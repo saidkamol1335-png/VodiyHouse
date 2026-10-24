@@ -6,7 +6,8 @@ import type { CalcLocale, CalcT } from "@/components/PaymentCalculator/calcText"
 import type { Calculation } from "@/lib/calc/calculate";
 import type { Currency, ExchangeRate } from "@/lib/calc/money";
 import { formatPrice } from "@/lib/format";
-import { type ScheduleColumn, scheduleColumns, scheduleIn, scheduleTotals } from "./scheduleRows";
+import { scheduleIn, scheduleTotals } from "@/lib/calc/schedule";
+import { type ScheduleColumn, scheduleColumns } from "./scheduleRows";
 
 const FIRST_ROWS = 12;
 

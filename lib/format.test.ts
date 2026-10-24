@@ -4,6 +4,8 @@ import {
   formatDate,
   formatDateTime,
   formatFileSize,
+  formatMinus,
+  formatPhone,
   formatPercent,
   formatPrice,
   formatPriceShort,
@@ -13,6 +15,7 @@ import {
   initialsOf,
   parseMonthsInput,
   parsePriceInput,
+  phoneDigits,
   relativeStamp,
   termParts,
 } from "./format";
@@ -176,5 +179,24 @@ describe("коротко около границы шкал (ревью 2.1)", (
     expect(plain(formatPriceShort(999_960_000, "UZS"))).toBe("1 млрд сум");
     expect(plain(formatPriceShort(999_940_000, "UZS"))).toBe("999,9 млн сум");
     expect(plain(formatPrice(-1e-9, "UZS"))).toBe("0 сум");
+  });
+});
+
+describe("телефон +998 и знак минус (приёмка фазы 2: из компонентов — в lib/format)", () => {
+  it("номер как набрали: пробелы, скобки, дефисы; 9 цифр — без кода страны", () => {
+    expect(phoneDigits("+998 (90) 123-45-67")).toBe("998901234567");
+    expect(phoneDigits("90 123 45 67")).toBe("998901234567");
+    expect(formatPhone("90 123 45 67")).toBe("+998901234567");
+  });
+
+  it("короткий, длинный и чужой код — не телефон", () => {
+    expect(phoneDigits("90 12")).toBeNull();
+    expect(phoneDigits("+7 912 123 45 67")).toBeNull();
+    expect(formatPhone("")).toBeNull();
+  });
+
+  it("вычитаемая сумма — минус U+2212, как в мокапе r1", () => {
+    // Разряды — узкий неразрывный пробел Intl, как во всех ценах.
+    expect(formatMinus(formatPrice(3473, "USD"))).toMatch(/^−\$3\s473$/);
   });
 });

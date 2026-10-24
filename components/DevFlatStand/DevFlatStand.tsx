@@ -60,7 +60,8 @@ export function DevFlatStand({ layouts, open }: DevFlatStandProps) {
     if (open) openers.current.get(open.screen.layout.id)?.focus();
   };
   const openPlan = (id: string) => {
-    setOpened((count) => count + 1);
+    // Другая планировка и так монтируется заново (свой ключ); та же — новым открытием.
+    if (open?.screen.layout.id === id) setOpened((count) => count + 1);
     router.replace(`${pathname}?plan=${encodeURIComponent(id)}`, { scroll: false });
   };
   return (

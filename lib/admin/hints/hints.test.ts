@@ -49,6 +49,14 @@ describe("подсказка «?»: форма", () => {
     expect(
       parseHint(form({ ...filled, "text.ru": "Звоните застройщику: +998 90 123 45 67" })),
     ).toMatchObject({ ok: false, fieldErrors: { text: "contacts" } });
+    // Термин тоже на сайте: телефон и t.me в нём — та же ошибка.
+    expect(
+      parseHint(form({ ...filled, "term.ru": "Рассрочка — +998 90 123 45 67" })),
+    ).toMatchObject({ ok: false, fieldErrors: { term: "contacts" } });
+    expect(parseHint(form({ ...filled, "term.uz": "Ipoteka t.me/sifat_sales" }))).toMatchObject({
+      ok: false,
+      fieldErrors: { term: "contacts" },
+    });
   });
 
   it("чужой slug — не форма подсказки калькулятора", () => {

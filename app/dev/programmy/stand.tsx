@@ -12,7 +12,7 @@ import { demoClientCalc } from "@/lib/admin/calc/demo";
 import { clientCalcFrom } from "@/lib/admin/calc/screen";
 import { cabinetPerson } from "@/lib/admin/person";
 import { DEMO_PROGRAMS_SCREEN } from "@/lib/admin/programs/demo";
-import { programsTabs } from "@/lib/admin/programs/tabs";
+import { CALC_SEGMENT, programsTabs } from "@/lib/admin/programs/tabs";
 import { effectiveRate, type ProgramActions } from "@/lib/admin/programs/types";
 import { readCalcParams } from "@/lib/calc/params";
 import { pickMessages } from "@/lib/i18n/clientMessages";
@@ -75,14 +75,15 @@ export async function ProgramsStandShell({ viewer, base, children }: ShellProps)
   );
 }
 
-type ListProps = { viewer: CabinetViewer; developer?: string | string[] };
+type ListProps = { viewer: CabinetViewer; base: string; developer?: string | string[] };
 
-export function ProgramsListStand({ viewer, developer }: ListProps) {
+export function ProgramsListStand({ viewer, base, developer }: ListProps) {
   return (
     <PaymentPrograms
       screen={DEMO_PROGRAMS_SCREEN}
       actions={viewer.role === "head" ? DEMO_ACTIONS : null}
       initialDeveloper={typeof developer === "string" ? developer : null}
+      calcBase={`${base}/${CALC_SEGMENT}`}
     />
   );
 }

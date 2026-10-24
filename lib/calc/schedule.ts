@@ -1,6 +1,6 @@
 import type { Calculation } from "./calculate";
 import { monthlyRate } from "./formulas";
-import { type Currency, roundMoney } from "./money";
+import { type Currency, convertMoney, type ExchangeRate, roundMoney } from "./money";
 
 // График платежей (PLAN §7 фаза 2). Считается без округления; к выводу платежи округляются шагом
 // валюты, а последний забирает разницу и остаётся кратным шагу.
@@ -100,4 +100,40 @@ function cumulativeRounding(rows: readonly ScheduleRow[], currency: Currency): S
     shown = next;
     return { ...row, payment };
   });
+}
+
+/**
+ * График к выводу (В8 B) в валюте итога (переключатель $ | сум): строки пересчитаны по курсу, затем
+ * округлены шагом этой валюты — последний платёж добирает разницу. Курса нет — в валюте расчёта.
+ */
+export function scheduleIn(
+  calc: Calculation,
+  out: Currency,
+  rate: ExchangeRate | null,
+): { rows: ScheduleRow[]; currency: Currency } {
+  const rows = paymentSchedule(calc);
+  const factor = out === calc.currency ? 1 : convertMoney(1, calc.currency, out, rate);
+  if (factor === null || factor === 1) {
+    return { rows: roundedSchedule(rows, calc.currency), currency: calc.currency };
+  }
+  const converted = rows.map((row) => ({
+    ...row,
+    payment: row.payment * factor,
+    principal: row.principal * factor,
+    interest: row.interest * factor,
+    balance: row.balance * factor,
+  }));
+  return { rows: roundedSchedule(converted, out), currency: out };
+}
+
+/** Строка «Всего»: суммы платежей, долга и процентов; остатка у неё нет. */
+export function scheduleTotals(rows: readonly ScheduleRow[]) {
+  return rows.reduce(
+    (sum, row) => ({
+      payment: sum.payment + row.payment,
+      principal: sum.principal + row.principal,
+      interest: sum.interest + row.interest,
+    }),
+    { payment: 0, principal: 0, interest: 0 },
+  );
 }

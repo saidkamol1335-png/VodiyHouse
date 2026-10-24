@@ -1,5 +1,6 @@
 import { PaymentPrograms } from "@/components/PaymentPrograms";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import {
   copyProgramAction,
   deleteProgramAction,
@@ -43,6 +44,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
       screen={screen}
       actions={viewer.role === "head" ? HEAD_ACTIONS : null}
       initialDeveloper={typeof developer === "string" ? developer : null}
+      calcBase={ADMIN_ROUTES.programsCalc}
     />
   );
 }

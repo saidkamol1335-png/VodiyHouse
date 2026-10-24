@@ -2,6 +2,7 @@
 
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Switch } from "@/components/Switch";
@@ -42,10 +43,19 @@ type ProgramCardProps = {
   tools?: ProgramCardTools;
   /** Превью в редакторе (В1): та же карточка без действий. */
   preview?: boolean;
+  /** Под «Примером»: «Рассчитать» — вход в «Расчёт для клиента» с этой программой. */
+  footer?: ReactNode;
 };
 
 /** Карточка программы (мокап CabProg): знак, название, тумблер, чипы, условия, «Пример». */
-export function ProgramCard({ item, panel, rate, tools, preview = false }: ProgramCardProps) {
+export function ProgramCard({
+  item,
+  panel,
+  rate,
+  tools,
+  preview = false,
+  footer,
+}: ProgramCardProps) {
   const t = useTranslations("admin.programs");
   const example = exampleText(item, panel, rate, t);
   const actions = preview ? undefined : tools;
@@ -70,6 +80,7 @@ export function ProgramCard({ item, panel, rate, tools, preview = false }: Progr
         ))}
       </dl>
       {example ? <p className="program-card__example">{example}</p> : null}
+      {preview ? null : footer}
       {actions ? <CardTools tools={actions} name={programFullName(item, t)} t={t} /> : null}
     </Tag>
   );

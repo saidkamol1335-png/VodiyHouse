@@ -73,7 +73,7 @@
 
 .flat-units__chip:has(input:disabled) {
   cursor: default;
-  opacity: 0.55;
+  opacity: var(--opacity-unavailable);
 }
 
 @media (max-width: 767px) {

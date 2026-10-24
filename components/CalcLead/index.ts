@@ -1,1 +1,1 @@
-export { CalcLead, phoneDigits, type CalcLeadRow } from "./CalcLead";
+export { CalcLead, type CalcLeadRow } from "./CalcLead";

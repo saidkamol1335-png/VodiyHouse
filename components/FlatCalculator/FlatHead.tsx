@@ -67,8 +67,12 @@ export function FlatHead({ id, screen, view, locale, onClose }: FlatHeadProps) {
   );
 }
 
-/** Чертёж планировки из медиа ЖК; чертежа (или облака) нет — места под него нет. */
+/**
+ * Чертёж планировки из медиа ЖК; чертежа (или облака) нет — места под него нет. Путь с «/» — файл
+ * сайта (DEMO стенда), путь базы — всегда папка бакета media.
+ */
 function drawingUrl(drawing: string | null): string | null {
+  if (drawing?.startsWith("/")) return drawing;
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return drawing && base ? mediaPublicUrl(base, drawing) : null;
 }

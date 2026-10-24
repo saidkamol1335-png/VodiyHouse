@@ -131,6 +131,12 @@ function empty(mode: PriceMode, currency: Currency): ResolvedPrice {
   };
 }
 
+/** Валюта, общая для всех блоков застройщика (Р7 B); блоки в разных валютах или их нет — null. */
+function blocksCurrency(stock: CalcStock): Currency | null {
+  const first = stock.blocks[0]?.currency ?? null;
+  return stock.blocks.every((block) => block.currency === first) ? first : null;
+}
+
 /**
  * Стоимость по режиму из адреса; режима нет или экран его не разрешает (?mode=sum у расчёта
  * квартиры) — режим по умолчанию.
@@ -144,7 +150,7 @@ export function resolvePrice(
   const chosen = mode ?? defaultMode(stock, modes);
   if (chosen === "unit") return unitPrice(stock, params);
   if (chosen === "layout") return layoutPrice(stock, params);
-  const currency = params.inCurrency ?? stock.priceHint?.currency ?? "USD";
+  const currency = params.inCurrency ?? stock.priceHint?.currency ?? blocksCurrency(stock) ?? "USD";
   if (chosen === "sum") return { ...empty("sum", currency), price: parseAmountText(params.sum) };
   // Площадь × цена м²: по умолчанию — 60 м² и цена м² подсказки (в её валюте; валюту сменили —
   // поле пустое). Набранное, но пустое или чужое — не подменяем: «Введите стоимость».

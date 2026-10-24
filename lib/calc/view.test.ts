@@ -276,3 +276,29 @@ describe("ссылка на расчёт", () => {
     expect(paymentOf(shared)).toBe(paymentOf(view));
   });
 });
+
+describe("валюта ввода по умолчанию (Р7 B)", () => {
+  it("подсказки цены нет — валюта блоков застройщика, а не $", () => {
+    const uzsOnly: CalcStock = {
+      blocks: STOCK.blocks.map((block) => ({ ...block, currency: "UZS" as const })),
+      layouts: [],
+      units: [],
+      priceHint: null,
+    };
+    const view = calculatorView(
+      SITE_ENGINE,
+      { ...DATA, stock: uzsOnly },
+      params({ mode: "sum" }),
+      PRICE_MODES,
+    );
+    expect(view.price.currency).toBe("UZS");
+    const mixed: CalcStock = {
+      ...uzsOnly,
+      blocks: [uzsOnly.blocks[0]!, { ...uzsOnly.blocks[1]!, currency: "USD" }],
+    };
+    expect(
+      calculatorView(SITE_ENGINE, { ...DATA, stock: mixed }, params({ mode: "sum" }), PRICE_MODES)
+        .price.currency,
+    ).toBe("USD");
+  });
+});

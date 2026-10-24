@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { calculateWithDiscount } from "./cabinet/discounts";
 import { type CalcInput, type Calculation, calculate } from "./calculate";
-import { MARGILAN_IPAK_INSTALLMENT, SIFAT_FULL, SIFAT_SCHEME } from "./fixtures";
+import { MARGILAN_IPAK_INSTALLMENT, MOCKUP_RATE, SIFAT_FULL, SIFAT_SCHEME } from "./fixtures";
 import type { TermsProgram } from "./programs";
-import { paymentSchedule, roundedSchedule } from "./schedule";
+import { paymentSchedule, roundedSchedule, scheduleIn, scheduleTotals } from "./schedule";
 
 // График (PLAN §7): строки без округления; к выводу последний платёж забирает разницу.
 
@@ -130,5 +130,48 @@ describe("график на длинном сроке с мелким плате
     expect(rows.every((row) => row.payment > 0)).toBe(true);
     expect(sum(rows.map((row) => row.payment))).toBe(Math.round(calculation.financed));
     expect(rows.every((row) => Math.abs(row.payment - calculation.firstPayment) <= 1)).toBe(true);
+  });
+});
+
+describe("график к выводу: в валюте итога и строка «Всего» (приёмка фазы 2)", () => {
+  const bank = () =>
+    ok(
+      calculate(MARGILAN_IPAK_INSTALLMENT, {
+        price: 142_100,
+        priceCurrency: "USD",
+        downPct: 25,
+        months: 36,
+        rate: MOCKUP_RATE,
+      }),
+    );
+
+  it("в своей валюте — как roundedSchedule; без курса чужую валюту не выдумывает", () => {
+    const calculation = bank();
+    const own = scheduleIn(calculation, calculation.currency, MOCKUP_RATE);
+    expect(own.rows).toEqual(roundedSchedule(paymentSchedule(calculation), calculation.currency));
+    const other = calculation.currency === "USD" ? "UZS" : "USD";
+    expect(scheduleIn(calculation, other, null).currency).toBe(calculation.currency);
+  });
+
+  it("в другой валюте: по курсу, шагом этой валюты, сумма платежей — пересчитанный итог", () => {
+    const calculation = bank();
+    const other = calculation.currency === "USD" ? "UZS" : "USD";
+    const { rows, currency } = scheduleIn(calculation, other, MOCKUP_RATE);
+    expect(currency).toBe(other);
+    const step = other === "UZS" ? 1000 : 1;
+    expect(rows.every((row) => row.payment % step === 0)).toBe(true);
+    const factor = other === "UZS" ? MOCKUP_RATE.usdUzs : 1 / MOCKUP_RATE.usdUzs;
+    const expected = sum(paymentSchedule(calculation).map((row) => row.payment)) * factor;
+    expect(Math.abs(sum(rows.map((row) => row.payment)) - expected)).toBeLessThanOrEqual(step);
+  });
+
+  it("«Всего» — суммы платежей, долга и процентов по строкам", () => {
+    const rows = scheduleIn(bank(), "USD", MOCKUP_RATE).rows;
+    expect(scheduleTotals(rows)).toEqual({
+      payment: sum(rows.map((row) => row.payment)),
+      principal: sum(rows.map((row) => row.principal)),
+      interest: sum(rows.map((row) => row.interest)),
+    });
+    expect(scheduleTotals([])).toEqual({ payment: 0, principal: 0, interest: 0 });
   });
 });

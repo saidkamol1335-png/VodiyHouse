@@ -54,6 +54,11 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
 test.describe("режимы анимации в кабинете", () => {
   for (const path of ["/admin/vhod", "/dev/glavnaya"]) {
     test(`${path}: без подсказки — 1440 → full, 390 → lite`, async ({ page }, testInfo) => {
+      // Первый заход в dev ещё собирает страницу: кадры длинные, проба честно выбрала бы lite и
+      // запомнила его. Прогрев и сброс запомненного — проверяем определение на собранной странице
+      // (на прод-сборке 1440 → full и без этого, приёмка 2.9).
+      await page.goto(path);
+      await page.evaluate(() => localStorage.removeItem("vh-motion"));
       await page.goto(path);
       const expected = testInfo.project.name === "desktop-1440" ? "full" : "lite";
       await expect(html(page)).toHaveAttribute("data-motion", expected, { timeout: 5000 });

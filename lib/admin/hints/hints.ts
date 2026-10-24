@@ -58,7 +58,7 @@ export type HintParse =
 
 /**
  * Поля формы: slug, term.ru, term.uz, text.ru, text.uz, active ("on"). Оба языка обязательны;
- * контактов застройщика в тексте быть не может (правило ТЗ 1.2) — подсказку видит сайт.
+ * контактов застройщика ни в термине, ни в пояснении (правило ТЗ 1.2) — подсказку видит сайт.
  */
 export function parseHint(formData: FormData): HintParse {
   const slug = readText(formData, "slug");
@@ -69,6 +69,7 @@ export function parseHint(formData: FormData): HintParse {
   const termIssue = bilingualIssue(term, { max: HINT_LIMITS.termMax, required: true });
   const textIssue = bilingualIssue(text, { max: HINT_LIMITS.textMax, required: true });
   if (termIssue) fieldErrors.term = termIssue;
+  else if (bilingualHasContact(term)) fieldErrors.term = "contacts";
   if (textIssue) fieldErrors.text = textIssue;
   else if (bilingualHasContact(text)) fieldErrors.text = "contacts";
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };

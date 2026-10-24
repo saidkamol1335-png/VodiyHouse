@@ -52,3 +52,8 @@ export function schemeOptions(
     ? [...options, { downPct: 100, discountPct: full.discountPct, maxMonths: null }]
     : options;
 }
+
+/** Скидка в деньгах: цена по прайсу минус цена по программе; без скидки — 0. */
+export function discountAmount(calculation: { price: number; programPrice: number }): number {
+  return Math.max(0, calculation.price - calculation.programPrice);
+}

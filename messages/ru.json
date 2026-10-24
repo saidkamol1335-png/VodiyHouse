@@ -1706,7 +1706,9 @@
         "addLabel": "Вид новой программы",
         "noPrograms": "Программ пока нет",
         "addFor": "Программа для {name}",
-        "checkedFor": "Условия проверены сегодня: {name}"
+        "checkedFor": "Условия проверены сегодня: {name}",
+        "calc": "Расчёт для клиента",
+        "calcFor": "Расчёт для клиента: {name}"
       },
       "kinds": {
         "full": "100% оплата",
@@ -1769,7 +1771,9 @@
         "down2": "Ниже: {name}",
         "months": "{count} мес.",
         "years": "{count, plural, one {# год} few {# года} other {# лет}}",
-        "editFor": "Изменить: {name}"
+        "editFor": "Изменить: {name}",
+        "calc": "Рассчитать",
+        "calcFor": "Рассчитать: {name}"
       },
       "editor": {
         "newTitle": "Новая программа: {kind}",

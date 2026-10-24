@@ -8,5 +8,11 @@ type DevManagerProgramsPageProps = { searchParams: Promise<{ developer?: string 
 export default async function DevManagerProgramsPage({
   searchParams,
 }: DevManagerProgramsPageProps) {
-  return <ProgramsListStand viewer={DEV_MANAGER} developer={(await searchParams).developer} />;
+  return (
+    <ProgramsListStand
+      viewer={DEV_MANAGER}
+      base="/dev/menedzher/programmy"
+      developer={(await searchParams).developer}
+    />
+  );
 }

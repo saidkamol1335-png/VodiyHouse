@@ -6,6 +6,7 @@ import { type FormEvent, type Ref, useEffect, useRef, useState, useSyncExternalS
 import { createPortal } from "react-dom";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
+import { formatPhone, phoneDigits } from "@/lib/format";
 
 export type CalcLeadRow = { label: string; value: string };
 
@@ -21,13 +22,6 @@ type Contact = { name: string; phone: string };
 type Errors = Partial<Record<keyof Contact, string>>;
 
 const noSubscription = () => () => {};
-
-/** +998 и 9 цифр; пробелы, скобки и дефисы — как набрали. */
-export function phoneDigits(raw: string): string | null {
-  const digits = raw.replace(/\D/g, "");
-  const full = digits.length === 9 ? `998${digits}` : digits;
-  return /^998\d{9}$/.test(full) ? full : null;
-}
 
 /**
  * «Получить точный расчёт» (решение фазы 2, мокап MobLead): окно с контекстом расчёта, имя и
@@ -150,7 +144,7 @@ function Collected({ rows, contact, ref }: CollectedProps) {
   const all = [
     ...rows,
     { label: t("name"), value: contact.name.trim() },
-    { label: t("phone"), value: `+${phoneDigits(contact.phone)}` },
+    { label: t("phone"), value: formatPhone(contact.phone) ?? contact.phone },
   ];
   return (
     <section ref={ref} className="calc-lead__collected" role="status" tabIndex={-1}>

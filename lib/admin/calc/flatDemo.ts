@@ -13,6 +13,9 @@ const MOCKUP_UNITS: readonly (FlatUnitRecord & { area: number })[] = [
   { id: "00000000-0000-4000-8000-0000000e2011", number: "8", floor: 3, price: 54_930, area: 78 },
 ];
 
+/** Условная DEMO-схема у 2-комн. 64,2 м² (MobFlat): шапка шторки и панели — с чертежом. */
+const DEMO_DRAWINGS: Readonly<Record<number, string>> = { 64.2: "/media/demo/plan-2k-64.svg" };
+
 export type DemoFlatLayout = { id: string; rooms: number; area: number; blockName: string };
 
 function demoLayouts() {
@@ -90,7 +93,12 @@ export function demoFlatCalc(layoutId: string | null): FlatCalcRecord | null {
     developer: { name: site.current.name, checked_at: site.current.checked_at },
     complex: { id: complex.id, name: complex.name },
     block: { id: block.id, name: block.name, currency: block.currency },
-    layout: { ...layout, price_from: offer.priceFrom, available: offer.available, drawing: null },
+    layout: {
+      ...layout,
+      price_from: offer.priceFrom,
+      available: offer.available,
+      drawing: DEMO_DRAWINGS[Number(layout.area)] ?? null,
+    },
     units: offer.units,
     programs: site.current.programs.filter(
       (program) => program.blocks_scope === "all" || program.block_ids.includes(block.id),

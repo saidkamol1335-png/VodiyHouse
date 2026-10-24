@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { BilingualField } from "@/components/BilingualField";
+import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { Button } from "@/components/Button";
 import {
   HINT_LIMITS,
@@ -28,7 +29,7 @@ export function HintForm({ item, result, pending, onSubmit, onCancel }: HintForm
   };
   const prefix = `hint-${item.slug}`;
   return (
-    <form className="hints-editor__form" action={onSubmit} noValidate>
+    <form className="hints-editor__form" onSubmit={submitKeepingForm(onSubmit)} noValidate>
       <input type="hidden" name="slug" value={item.slug} />
       <BilingualField
         id={`${prefix}-term`}

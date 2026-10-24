@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { type KeyboardEvent, type SyntheticEvent, useEffect, useRef } from "react";
+import { type KeyboardEvent, type RefObject, type SyntheticEvent, useEffect, useRef } from "react";
 import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
 import { PaymentCalculator } from "@/components/PaymentCalculator/PaymentCalculator";
 import { SiteActions, ToTotal } from "@/components/SiteCalculator/SiteActions";
@@ -20,6 +20,8 @@ const ownClose = (onClose: () => void) => (event: SyntheticEvent<HTMLDialogEleme
 /** Шторку Escape закрывает сам браузер; панель на месте (show) — нет: закрываем её так же. */
 function closeOnEscape(event: KeyboardEvent<HTMLDialogElement>) {
   if (event.key !== "Escape" || event.currentTarget.matches(":modal")) return;
+  // Нажатие пришло из окна заявки (портал — но по дереву React всплывает сюда): это его Escape.
+  if ((event.target as Element).closest("dialog") !== event.currentTarget) return;
   event.preventDefault();
   event.currentTarget.close();
 }
@@ -57,7 +59,22 @@ function useOpenDialog() {
     else element.show();
     element.querySelector<HTMLElement>(".flat-calc__title")?.focus();
   }, []);
+  useBarHeight(dialog);
   return dialog;
+}
+
+/** Высота липкой строки шторки — в CSS-переменную окна: итог и поля встают под строку. */
+function useBarHeight(dialog: RefObject<HTMLDialogElement | null>) {
+  useEffect(() => {
+    const element = dialog.current;
+    const bar = element?.querySelector<HTMLElement>(".flat-calc__bar");
+    if (!element || !bar || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() =>
+      element.style.setProperty("--flat-calc-bar-h", `${Math.ceil(bar.offsetHeight)}px`),
+    );
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [dialog]);
 }
 
 /**

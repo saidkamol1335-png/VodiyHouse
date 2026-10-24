@@ -33,7 +33,11 @@ export function CalcHeroExamples({ label, examples }: CalcHeroExamplesProps) {
               active ? "calc-hero__example calc-hero__example--active" : "calc-hero__example"
             }
             aria-current={active ? "true" : undefined}
-            onClick={markCalcNavigation}
+            onClick={(event) => {
+              const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+              // Новая вкладка или тот же пример — в этой вкладке перехода нет, адрес пишем как обычно.
+              if (!modified && event.button === 0 && !active) markCalcNavigation();
+            }}
           >
             <b>{example.title}</b>
             <span className="calc-hero__example-note">{example.note}</span>

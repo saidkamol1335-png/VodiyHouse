@@ -5,11 +5,11 @@ import type { CalcExtras } from "@/components/PaymentCalculator/inputParts";
 import type { DecorateRows } from "@/components/PaymentCalculator/outputParts";
 import type { Calculation } from "@/lib/calc/calculate";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";
-import { discountPctOf } from "@/lib/calc/cabinet/discounts";
+import { discountAmount, discountPctOf } from "@/lib/calc/cabinet/discounts";
 import { downOptionDiscountPct } from "@/lib/calc/cabinet/engine";
 import type { ProgramOption } from "@/lib/calc/options";
 import type { CalcProgram } from "@/lib/calc/programs";
-import { formatPercent } from "@/lib/format";
+import { formatMinus, formatPercent } from "@/lib/format";
 
 // Скидки «Расчёта для клиента» (Р1, мокап r1): строки «Цена по прайсу / Скидка за взнос 50% /
 // Цена со скидкой», «→ −6%» у чипов, «скидка 12%» у карточек. Только кабинет: сайт этот модуль
@@ -33,7 +33,7 @@ export function discountDecorator(labels: DiscountT): DecorateRows {
           ? labels("discountFull")
           : labels("discountDown", { pct: formatPercent(calc.downPct) }),
       note: pct,
-      value: `−${money(calc.price - calc.programPrice)}`,
+      value: formatMinus(money(discountAmount(calc))),
       tone: "minus",
     };
     const discounted: TotalRow = {

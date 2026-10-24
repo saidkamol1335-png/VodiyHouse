@@ -21,15 +21,7 @@ type HintsEditorProps = {
  */
 export function HintsEditor({ items, action }: HintsEditorProps) {
   const t = useTranslations("admin.hints");
-  const [editing, setEditing] = useState<string | null>(null);
-  const [result, setResult] = useState<HintActionResult>(HINT_IDLE);
-  const [pending, startTransition] = useTransition();
-  const submit = (formData: FormData) =>
-    startTransition(async () => {
-      const next = await action(formData);
-      setResult(next);
-      if (next.status === "done") setEditing(null);
-    });
+  const { editing, setEditing, result, setResult, pending, submit } = useHintSave(action);
   return (
     <AdminPanel title={t("title")} wide>
       <p className="hints-editor__lead">{t("lead")}</p>
@@ -50,6 +42,7 @@ export function HintsEditor({ items, action }: HintsEditorProps) {
             ) : (
               <HintView
                 item={item}
+                pending={pending}
                 onEdit={() => {
                   setResult(HINT_IDLE);
                   setEditing(item.slug);
@@ -63,7 +56,25 @@ export function HintsEditor({ items, action }: HintsEditorProps) {
   );
 }
 
-function HintView({ item, onEdit }: { item: HintItem; onEdit: () => void }) {
+/** Сохранение одной строки: ответ закрывает только ту строку, которую сохраняли. */
+function useHintSave(action: FormAction<HintActionResult>) {
+  const [editing, setEditing] = useState<string | null>(null);
+  const [result, setResult] = useState<HintActionResult>(HINT_IDLE);
+  const [pending, startTransition] = useTransition();
+  const submit = (formData: FormData) => {
+    const slug = String(formData.get("slug"));
+    startTransition(async () => {
+      const next = await action(formData);
+      setResult(next);
+      if (next.status === "done") setEditing((current) => (current === slug ? null : current));
+    });
+  };
+  return { editing, setEditing, result, setResult, pending, submit };
+}
+
+type HintViewProps = { item: HintItem; pending: boolean; onEdit: () => void };
+
+function HintView({ item, pending, onEdit }: HintViewProps) {
   const t = useTranslations("admin.hints");
   return (
     <>
@@ -85,6 +96,8 @@ function HintView({ item, onEdit }: { item: HintItem; onEdit: () => void }) {
         variant="ghost"
         size="sm"
         onClick={onEdit}
+        // Пока сохраняется другая строка — не открываем новую: её ответ пришёл бы сюда.
+        disabled={pending}
         aria-label={t("editNamed", { term: item.term.ru })}
       >
         {t("edit")}

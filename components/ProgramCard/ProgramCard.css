@@ -127,6 +127,11 @@
   font-size: var(--fs-small);
 }
 
+/* «Рассчитать» — вход в «Расчёт для клиента» с этой программой (Р1 A). */
+.program-card__calc {
+  align-self: flex-start;
+}
+
 .program-card__refusal {
   margin: 0;
   color: var(--bad);

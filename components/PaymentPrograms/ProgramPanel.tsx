@@ -2,13 +2,11 @@
 
 import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { ProgramCard } from "@/components/ProgramCard";
-import type { ProgramsT } from "@/components/ProgramCard/cardText";
+import { programFullName, type ProgramsT } from "@/components/ProgramCard/cardText";
 import { ProgramEditor } from "@/components/ProgramEditor";
 import { draftFromItem, newDraft } from "@/lib/admin/programs/draft";
-import { panelUpdatedAt } from "@/lib/admin/programs/panels";
 import {
   PROGRAM_KINDS,
   type BankOption,
@@ -18,14 +16,11 @@ import {
   type ProgramPanel as Panel,
 } from "@/lib/admin/programs/types";
 import type { ExchangeRate } from "@/lib/calc/money";
-import { formatDate, initialsOf } from "@/lib/format";
 import type { MoveDirection } from "@/lib/ui/useMoveFocus";
-import { useNow } from "@/lib/ui/useNow";
+import { ProgramCalcLink } from "./calcLinks";
+import { PanelHead } from "./PanelHead";
 import { addButtonOf, editButtonOf, type EditingControl, type EditorTarget } from "./useEditing";
 import type { ProgramsState } from "./useProgramsState";
-
-const STALE_DAYS = 60;
-const DAY_MS = 86_400_000;
 
 type ProgramPanelProps = {
   panel: Panel;
@@ -82,51 +77,6 @@ export function ProgramPanel(props: ProgramPanelProps) {
   );
 }
 
-type PanelHeadProps = {
-  panel: Panel;
-  titleId: string;
-  canEdit: boolean;
-  state: ProgramsState;
-  t: ProgramsT;
-};
-
-function PanelHead({ panel, titleId, canEdit, state, t }: PanelHeadProps) {
-  const now = useNow();
-  const updated = panelUpdatedAt(panel);
-  const stale = Boolean(updated && now && now - Date.parse(updated) > STALE_DAYS * DAY_MS);
-  const active = panel.programs.filter((item) => item.isActive).length;
-  const meta = [
-    t("panel.complexes", { count: panel.complexes }),
-    t("panel.active", { active, total: panel.programs.length }),
-    updated ? t("panel.updated", { date: formatDate(new Date(updated)) }) : null,
-  ].filter(Boolean);
-  return (
-    <header className="program-panel__head">
-      <span className="program-panel__mark" aria-hidden="true">
-        {initialsOf(panel.name)}
-      </span>
-      <div className="program-panel__titles">
-        <h2 id={titleId} className="program-panel__title">
-          {panel.name}
-        </h2>
-        <p className="program-panel__meta">{meta.join(" · ")}</p>
-      </div>
-      {stale ? <Badge tone="amber">{t("panel.stale")}</Badge> : null}
-      {canEdit ? (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => state.markChecked(panel)}
-          aria-label={t("panel.checkedFor", { name: panel.name })}
-          className="program-panel__checked"
-        >
-          {t("panel.checked")}
-        </Button>
-      ) : null}
-    </header>
-  );
-}
-
 type PanelItemProps = ProgramPanelProps & {
   itemIndex: number;
   focusMove?: MoveDirection;
@@ -155,7 +105,9 @@ function PanelItem(props: PanelItemProps) {
         },
       }
     : undefined;
-  return <ProgramCard item={item} panel={panel} rate={props.rate} tools={tools} />;
+  const name = programFullName(item, props.t);
+  const footer = <ProgramCalcLink panel={panel} item={item} name={name} t={props.t} />;
+  return <ProgramCard item={item} panel={panel} rate={props.rate} tools={tools} footer={footer} />;
 }
 
 /** Куда фокус после удаления: «Изменить» следующей карточки, иначе предыдущей, иначе «+ Программа». */

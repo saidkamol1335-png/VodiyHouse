@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ActionToast } from "@/components/ActionToast";
 import { FilterPills } from "@/components/FilterPills";
+import { CalcBaseContext } from "./calcLinks";
 import {
   effectiveRate,
   type ProgramActions,
@@ -24,6 +25,8 @@ type PaymentProgramsProps = {
   actions: ProgramActions | null;
   /** Застройщик из адреса (?developer=slug) — фильтр переживает обновление страницы. */
   initialDeveloper?: string | null;
+  /** Адрес вкладки «Расчёт для клиента» — для «Рассчитать» и «Расчёт для клиента» (Р1 A). */
+  calcBase?: string;
 };
 
 /**
@@ -57,7 +60,16 @@ function useDeveloperFilter(
 }
 
 /** Экран «Программы оплаты» (мокап CabProg, шаг 2.4): плашка, фильтр, курс, панели застройщиков. */
-export function PaymentPrograms({ screen, actions, initialDeveloper }: PaymentProgramsProps) {
+/** Экран программ; адрес вкладки расчёта — контекстом для «Рассчитать» в карточках и панелях. */
+export function PaymentPrograms({ calcBase, ...props }: PaymentProgramsProps) {
+  return (
+    <CalcBaseContext.Provider value={calcBase ?? null}>
+      <ProgramsScreen {...props} />
+    </CalcBaseContext.Provider>
+  );
+}
+
+function ProgramsScreen({ screen, actions, initialDeveloper }: PaymentProgramsProps) {
   const t = useTranslations("admin.programs");
   const state = useProgramsState(screen, actions, t);
   const editing = useEditing(t("editor.leave"));

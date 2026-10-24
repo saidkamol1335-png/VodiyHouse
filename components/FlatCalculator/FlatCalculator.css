@@ -39,7 +39,10 @@
   background: var(--bg);
   box-shadow: var(--shadow-3);
   overscroll-behavior: contain;
-  --payment-calculator-top: 16px;
+  /* Липкая строка заголовка сверху: «К расчёту ↓» и фокус ставят итог и поля под неё, а не за неё
+     (высоту строки пишет FlatCalculator — заголовок бывает в одну и в две строки). */
+  --payment-calculator-top: calc(var(--flat-calc-bar-h, 0px) + 16px);
+  scroll-padding-top: var(--payment-calculator-top);
 }
 
 .flat-calc::backdrop {
@@ -96,7 +99,7 @@
   color: var(--fg-heading);
   font-size: var(--fs-kpi);
   font-weight: 500;
-  line-height: 1.1;
+  line-height: var(--lh-figure);
 }
 
 /* Фокус на заголовке ставит само окно при открытии — рамка не нужна, это не элемент управления. */
@@ -130,7 +133,7 @@
   color: var(--fg-heading);
   font-size: var(--fs-kpi);
   font-weight: 600;
-  line-height: 1.1;
+  line-height: var(--lh-figure);
   font-variant-numeric: tabular-nums;
 }
 
@@ -169,9 +172,11 @@
 
   /* Заголовок и «Закрыть» прилипают к верху шторки (MobFlatTerm): закрыть можно с любого места. */
   .flat-calc__bar {
+    /* Первой в колонке — над чертежом, как в MobFlat (шапка здесь растворена, порядок — DOM). */
+    order: -1;
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: var(--z-sticky-actions);
     display: flex;
     grid-area: bar;
     align-items: flex-start;

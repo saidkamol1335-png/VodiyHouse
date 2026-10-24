@@ -5,6 +5,7 @@ import { MOCKUP_RATE, SIFAT_FULL, SIFAT_IPOTEKA_MORTGAGE, SIFAT_SCHEME } from ".
 import { roundMoney } from "../money";
 import {
   calculateWithDiscount,
+  discountAmount,
   compareWithDiscount,
   discountPctOf,
   schemeOptions,
@@ -60,5 +61,12 @@ describe("скидки кабинета", () => {
     );
     expect(reached.length).toBeGreaterThan(0);
     expect(reached.filter((file) => file.startsWith(cabinetDir))).toEqual([]);
+  });
+});
+
+describe("скидка в деньгах для строки «Скидка за взнос»", () => {
+  it("цена по прайсу минус цена по программе; без скидки — 0, не минус", () => {
+    expect(discountAmount({ price: 57_880, programPrice: 54_407.2 })).toBeCloseTo(3472.8);
+    expect(discountAmount({ price: 41_400, programPrice: 41_400 })).toBe(0);
   });
 });
