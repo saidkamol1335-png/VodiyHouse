@@ -26,8 +26,9 @@ export const CRON_JOBS: Record<string, CronJob> = {
   archive: async () => {
     const admin = createSupabaseAdminClient();
     const reminded = await remindArchive(admin);
-    const purged = await purgeArchive(admin);
-    return { reminded, purged };
+    const { purged, postponed } = await purgeArchive(admin);
+    // Отложенные — числом в ответе задачи; какие именно — в логе функции.
+    return { reminded, purged, postponed: postponed.length };
   },
   // События сайта (3.12): старше 400 дней.
   events: async () => {

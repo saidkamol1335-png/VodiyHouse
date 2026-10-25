@@ -44,7 +44,7 @@ describe("пиксели рекламы", () => {
     expect(callMethod).toHaveBeenCalledWith("track", "Lead");
   });
 
-  it("просмотр ЖК до старта пикселей доходит до них; page_view — только Meta (GA4 считает сам)", async () => {
+  it("просмотр страницы и ЖК до старта пикселей доходят до них; GA4 сам просмотры не шлёт", async () => {
     const { startPixels, track } = await load();
     track("page_view");
     track("complex_view", { entity_type: "complex", entity_id: "00000000-0000-4000-8000-000000000001" });
@@ -54,7 +54,8 @@ describe("пиксели рекламы", () => {
     expect(meta).toContainEqual(["track", "ViewContent"]);
     const ga = win().dataLayer!.map((args) => [...(args as unknown[])]);
     expect(ga.some((args) => args[0] === "event" && args[1] === "view_item")).toBe(true);
-    expect(ga.some((args) => args[0] === "event" && args[1] === "page_view")).toBe(false);
+    expect(ga.some((args) => args[0] === "event" && args[1] === "page_view")).toBe(true);
+    expect(ga).toContainEqual(["config", "G-TEST", { send_page_view: false }]);
   });
 
   it("сотрудник с сессией кабинета — пиксели не грузятся", async () => {

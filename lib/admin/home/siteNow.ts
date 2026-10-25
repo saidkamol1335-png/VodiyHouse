@@ -20,15 +20,19 @@ export type SiteNow = { online: number; feed: SiteNowItem[] };
 
 export type SiteNowResult = { status: "done"; now: SiteNow } | { status: "error"; error: string };
 
+/** Параметры с закрытым набором значений; адреса города, застройщика и отделки — любые слова. */
+const FEED_FILTER_KEYS: ReadonlySet<string> = new Set(["komnat", "ot", "do", "srok", "oplata", "sort"]);
+
 /**
- * «komnat 2, cenaDo 45000» — фильтр каталога из адреса события: только параметры, которые сайт
- * понимает сам (filterFromSearch), — чужой текст в ленту кабинета не попадает.
+ * «komnat 2, do 45000» — фильтр каталога из адреса события: только параметры, которые сайт
+ * понимает сам (filterFromSearch), и только с закрытым набором значений — чужой текст (в том
+ * числе «город» вида zvonite-90-123-45-67) в ленту кабинета не попадает.
  */
 export function filterDetail(path: string | null | undefined): string | null {
   const query = path?.split("?")[1];
   if (!query) return null;
   const search = searchFromFilter(filterFromSearch(Object.fromEntries(new URLSearchParams(query))));
-  const text = [...new URLSearchParams(search)].map(([key, value]) => `${key} ${value}`).join(", ");
+  const text = [...new URLSearchParams(search)].filter(([key]) => FEED_FILTER_KEYS.has(key)).map(([key, value]) => `${key} ${value}`).join(", ");
   return text || null;
 }
 

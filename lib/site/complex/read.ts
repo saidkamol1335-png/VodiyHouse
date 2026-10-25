@@ -42,7 +42,7 @@ async function fetchPreviewPage(slug: string): Promise<ComplexPage | null> {
 export type ComplexPageResult = { kind: "page"; page: ComplexPage } | { kind: "missing" } | { kind: "unavailable" };
 
 // Адрес ЖК — как у slug в базе: выдуманный адрес не зовёт базу и не ложится в кэш.
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * missing — такого ЖК на сайте нет (404); unavailable — облака нет (разработка без ключей).

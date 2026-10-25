@@ -8,6 +8,7 @@ describe("лента «Сейчас на сайте»", () => {
   it("фильтр — только понятные каталогу параметры адреса", () => {
     expect(filterDetail("/ru/novostroyki?komnat=2&utm_source=ig&x=Звоните+998901234567")).toBe("komnat 2");
     expect(filterDetail("/ru/novostroyki?x=1")).toBeNull();
+    expect(filterDetail("/ru/novostroyki?gorod=zvonite-90-123-45-67&do=45000")).toBe("do 45000");
     expect(filterDetail(null)).toBeNull();
   });
 

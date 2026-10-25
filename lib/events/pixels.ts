@@ -29,9 +29,12 @@ const META_EVENTS: Partial<Record<SiteEvent["type"], string>> = {
   telegram_click: "Contact",
   favorite: "AddToWishlist",
 };
-// Просмотры страниц GA4 считает сам: первый — при «config», клиентские переходы — по истории
-// браузера («Улучшенная статистика», включена по умолчанию). Свой page_view дал бы двойной счёт.
+// Просмотры страниц GA4 — наши, один на смену страницы: сайт меняет параметры адреса без перехода
+// (фильтр каталога, калькулятор), и «Улучшенная статистика» GA4 по истории браузера считала бы
+// просмотром каждый выбор. У потока GA4 её пункт «Смена страницы по истории браузера» выключить
+// (TODO-заказчик, «Запуск»).
 const GA4_EVENTS: Partial<Record<SiteEvent["type"], string>> = {
+  page_view: "page_view",
   complex_view: "view_item",
   lead_sent: "generate_lead",
   phone_click: "contact",
@@ -74,7 +77,7 @@ function startGa4(win: PixelWindow): void {
     win.dataLayer!.push(arguments);
   };
   win.gtag("js", new Date());
-  win.gtag("config", GA4_ID);
+  win.gtag("config", GA4_ID, { send_page_view: false });
   addScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA4_ID)}`);
 }
 
@@ -91,7 +94,7 @@ export function startPixels(): void {
     const meta = META_EVENTS[event.type];
     if (meta && win.fbq) win.fbq("track", meta);
     const ga = GA4_EVENTS[event.type];
-    if (ga && win.gtag) win.gtag("event", ga, { page_path: event.path });
+    if (ga && win.gtag) win.gtag("event", ga, { page_location: `${window.location.origin}${event.path}`, page_path: event.path });
   });
 }
 

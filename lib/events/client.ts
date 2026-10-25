@@ -51,8 +51,11 @@ const URGENT: ReadonlySet<SiteEvent["type"]> = new Set(["lead_sent", "phone_clic
 const REPEAT_MS = 1000;
 let last: { key: string; at: number } | null = null;
 
+/** Что знает о событии вызывающий; path — адрес, если событие относится не к открытой сейчас странице. */
+type TrackData = Omit<SiteEvent, "type" | "path"> & { path?: string };
+
 /** Действие посетителя: в очередь своих событий и рекламным пикселям. */
-export function track(type: SiteEvent["type"], data: Omit<SiteEvent, "type" | "path"> = {}): void {
+export function track(type: SiteEvent["type"], data: TrackData = {}): void {
   try {
     record(type, data);
   } catch (error) {
@@ -61,10 +64,10 @@ export function track(type: SiteEvent["type"], data: Omit<SiteEvent, "type" | "p
   }
 }
 
-function record(type: SiteEvent["type"], data: Omit<SiteEvent, "type" | "path">): void {
+function record(type: SiteEvent["type"], { path: given, ...data }: TrackData): void {
   if (typeof window === "undefined" || isStaff()) return;
-  const path = `${window.location.pathname}${window.location.search}`.slice(0, 300);
-  const here = context?.pathname === window.location.pathname ? context.entity : {};
+  const path = (given ?? `${window.location.pathname}${window.location.search}`).slice(0, 300);
+  const here = !given && context?.pathname === window.location.pathname ? context.entity : {};
   const event: SiteEvent = { type, path, ...(data.entity_id ? {} : here), ...data };
   const key = JSON.stringify(event);
   if (last && last.key === key && Date.now() - last.at < REPEAT_MS) return;

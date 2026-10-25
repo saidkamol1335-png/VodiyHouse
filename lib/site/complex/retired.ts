@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { CATALOG_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { SLUG } from "./read";
 
 // Адрес ЖК, которого на сайте больше нет (шаг 3.13, PLAN §3а): редирект на каталог, а не 404 (ссылки
 // в рекламе и поиске ведут в каталог). В архиве — временный (ЖК могут восстановить, браузер и поиск
@@ -26,7 +27,8 @@ async function fetchSlugState(slug: string): Promise<SlugState> {
  * редиректа (как readComplexPage — Next оставит прошлую версию или покажет error.tsx).
  */
 export async function complexSlugState(slug: string): Promise<SlugState> {
-  if (!hasSupabaseEnv()) return null;
+  // Адрес не в формате ЖК — его не было никогда: без запроса к базе и записи в кэш.
+  if (!hasSupabaseEnv() || !SLUG.test(slug)) return null;
   try {
     return await fetchSlugState(slug);
   } catch (error) {

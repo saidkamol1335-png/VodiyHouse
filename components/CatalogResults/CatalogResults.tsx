@@ -117,26 +117,26 @@ const FILTER_TRACK_MS = 1500;
 /**
  * Событие «фильтр» — после паузы в выборе: каждая нажатая пилюля не становится отдельным событием.
  * Что выбрано, кабинет читает из адреса события (параметры каталога), текста от браузера нет. Ушли
- * со страницы раньше паузы — событие уходит сразу.
+ * со страницы раньше паузы — событие уходит сразу, с адресом каталога, а не новой страницы.
  */
 function useFilterTracking() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const pending = useRef(false);
+  const pending = useRef<string | null>(null);
+  const send = () => {
+    if (pending.current) track("filter", { path: pending.current });
+    pending.current = null;
+  };
   useEffect(
     () => () => {
       clearTimeout(timer.current);
-      if (pending.current) track("filter");
+      send();
     },
     [],
   );
   return (next: Filter) => {
     clearTimeout(timer.current);
-    pending.current = Boolean(filterText(next));
-    if (!pending.current) return;
-    timer.current = setTimeout(() => {
-      pending.current = false;
-      track("filter");
-    }, FILTER_TRACK_MS);
+    pending.current = filterText(next) ? `${window.location.pathname}${searchFromFilter(next)}` : null;
+    if (pending.current) timer.current = setTimeout(send, FILTER_TRACK_MS);
   };
 }
 

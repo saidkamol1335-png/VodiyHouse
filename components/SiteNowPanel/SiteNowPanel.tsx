@@ -95,8 +95,9 @@ function SiteNowRow({ item }: { item: SiteNowItem }) {
   const t = useTranslations("admin.home.now");
   const tLeads = useTranslations("admin.leads");
   const Icon = ICONS[item.type];
-  // Заявка — подписью типа из «Заявок» («Просмотр», «Расчёт»).
-  const detail = item.type === "lead_sent" && isLeadType(item.detail) ? tLeads(`types.${item.detail}`) : item.detail;
+  // Заявка — подписью типа из «Заявок» («Просмотр», «Расчёт»); незнакомое слово не показываем.
+  const leadType = item.type === "lead_sent" && isLeadType(item.detail) ? tLeads(`types.${item.detail}`) : null;
+  const detail = item.type === "lead_sent" ? leadType : item.detail;
   return (
     <li className="site-now__row">
       <Icon size={16} aria-hidden="true" />

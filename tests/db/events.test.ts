@@ -81,6 +81,7 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
       { type: "share", detail: "telegram" },
       { type: "share", detail: "звоните" },
       { type: "lead_sent", detail: "view" },
+      { type: "lead_sent", detail: "pozvonite_srochno" },
       { type: "favorite", detail: slug },
       { type: "filter", detail: "любой текст", path: "/ru/novostroyki?komnat=2" },
     ], "Отдел продаж");
@@ -88,7 +89,7 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
       "select type, detail, source from events where visitor_id = $1 order by id",
       [visitor],
     );
-    expect(rows.rows.map((row) => row.detail)).toEqual([null, "telegram", null, "view", slug, null]);
+    expect(rows.rows.map((row) => row.detail)).toEqual([null, "telegram", null, "view", null, slug, null]);
     expect(rows.rows.every((row) => row.source === null)).toBe(true);
     const manager = await createStaff(db.admin, "manager");
     const feed = await db.as(user(manager), async (tx) =>

@@ -63,7 +63,8 @@ function rememberAdLanding(request: NextRequest, response: NextResponse): void {
   const { pathname, search, searchParams } = request.nextUrl;
   if (request.method !== "GET" || !COMPLEX_PAGE.test(pathname) || !hasAdParams(searchParams)) return;
   const value = landingValue(pathname, search);
-  if (value) response.cookies.set(LANDING_COOKIE, encodeURIComponent(value), { maxAge: LANDING_MAX_AGE, sameSite: "lax", path: "/" });
+  // Значение кодирует сам Next (encodeURIComponent при записи заголовка) — второй раз не кодируем.
+  if (value) response.cookies.set(LANDING_COOKIE, value, { maxAge: LANDING_MAX_AGE, sameSite: "lax", path: "/" });
 }
 
 // Проверка здесь только оптимистичная (docs: authentication.md, «Optimistic checks with Proxy»):

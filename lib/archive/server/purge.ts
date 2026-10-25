@@ -79,17 +79,25 @@ async function removeFiles(admin: SupabaseClient, item: ArchiveItem): Promise<vo
   }
 }
 
-/** 30 дней в архиве: CSV квартир руководителю, строки (база ещё раз проверит срок), затем файлы. */
-export async function purgeArchive(admin: SupabaseClient): Promise<number> {
+/**
+ * 30 дней в архиве: CSV квартир руководителю, строки (база ещё раз проверит срок), затем файлы.
+ * postponed — CSV не ушёл, удаление ждёт следующей ночи (видно в ответе задачи /api/cron/archive).
+ */
+export async function purgeArchive(admin: SupabaseClient): Promise<{ purged: number; postponed: string[] }> {
   let purged = 0;
+  const postponed: string[] = [];
   for (const item of await items(admin, "archive_due")) {
     const kept = await sendUnits(admin, item, `${archiveTitle(item)} удаляется после 30 дней в архиве. Квартиры — в файле.`);
-    if (!kept) continue;
+    if (!kept) {
+      postponed.push(item.slug);
+      console.error("[archive] удаление отложено: CSV не ушёл", item.slug, item.purge_at);
+      continue;
+    }
     const { data, error } = await admin.rpc("purge_archived", { p_kind: item.kind, p_id: item.id });
     if (error) console.error("[archive] не удалено", item.slug, error.message);
     if (data !== true) continue;
     purged += 1;
     await removeFiles(admin, item);
   }
-  return purged;
+  return { purged, postponed };
 }
