@@ -40,7 +40,7 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
         photos={complex.photos}
         alt={name}
         preload={preload}
-        badges={<span className="catalog-card__class">{t(`class.${complex.class}`)}</span>}
+        badges={complex.class ? <span className="catalog-card__class">{t(`class.${complex.class}`)}</span> : null}
       />
       <div className="catalog-card__body">
         <p className="catalog-card__top">

@@ -10,40 +10,60 @@ import { CatalogGrid } from "@/components/CatalogGrid";
 import { SelectField } from "@/components/SelectField";
 import { getMotionTier } from "@/lib/motion";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
-import { searchFromFilter } from "@/lib/site/catalog/params";
-import type { SiteCatalog } from "@/lib/site/catalog/records";
+import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
+import { CATALOG_PENDING_ATTRIBUTE } from "@/lib/site/catalog/pending";
+import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog } from "@/lib/site/catalog/sort";
 
 type CatalogResultsProps = {
   catalog: SiteCatalog;
-  /** Фильтр из адреса (ссылка менеджера и «Поделиться» открываются сразу на результатах, Ф3). */
-  initialFilter: Filter;
   /** Карточек на «порцию»: «Показать ещё» добавляет столько же. */
   pageSize: number;
 };
 
+
+/** Фильтр из адреса (ссылка менеджера и «Поделиться», Ф3) — один раз после загрузки. */
+function useFilterFromAddress(apply: (filter: Filter) => void) {
+  const applyRef = useRef(apply);
+  useEffect(() => {
+    applyRef.current = apply;
+  });
+  useEffect(() => {
+    const filter = filterFromSearch(Object.fromEntries(new URLSearchParams(window.location.search)));
+    if (JSON.stringify(filter) !== JSON.stringify(NO_FILTER)) applyRef.current(filter);
+    document.documentElement.removeAttribute(CATALOG_PENDING_ATTRIBUTE);
+  }, []);
+}
+
 /** Сколько групп фильтра задано — счётчик на кнопке «Фильтры» телефона. */
 function activeGroups(filter: Filter): number {
-  const keys = (Object.keys(filter) as (keyof Filter)[]).filter((key) => key !== "sort");
-  return keys.filter((key) => JSON.stringify(filter[key]) !== JSON.stringify(NO_FILTER[key])).length;
+  const keys = (Object.keys(filter) as (keyof Filter)[]).filter((key) => key !== "sort" && key !== "priceMax");
+  // Цена «от … до …» — одна группа.
+  const changed = (key: keyof Filter) => JSON.stringify(filter[key]) !== JSON.stringify(NO_FILTER[key]);
+  return keys.filter((key) => (key === "priceMin" ? changed("priceMin") || changed("priceMax") : changed(key))).length;
 }
 
 /**
  * Каталог (Ф3, мокап .cat): фильтр, «Найдено N ЖК», сортировка, карточки порциями и пустой
  * результат. Фильтр живёт в браузере и в адресе — без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, initialFilter, pageSize }: CatalogResultsProps) {
-  const t = useTranslations("catalog");
-  const [filter, setFilter] = useState(initialFilter);
+export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
+  const [filter, setFilter] = useState(NO_FILTER);
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
   const results = useRef<HTMLDivElement>(null);
+  const filtersButton = useRef<HTMLButtonElement>(null);
+  const closeSheet = () => setOpen(false);
+  useFocusBack(open, filtersButton);
   const found = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
-  useSheetLock(open, () => setOpen(false));
+  useSheetLock(open, closeSheet);
+  useFilterFromAddress(setFilter);
   const change = (next: Filter) => {
     setFilter(next);
     setShown(pageSize);
-    window.history.replaceState(window.history.state, "", `${window.location.pathname}${searchFromFilter(next)}`);
+    // null, а не history.state: так Next сверяет свой адрес с нашим (как useCalcParams), и обновление
+    // страницы роутером не вернёт адрес без фильтра.
+    window.history.replaceState(null, "", `${window.location.pathname}${searchFromFilter(next)}`);
   };
   const showResults = () => {
     setOpen(false);
@@ -51,29 +71,56 @@ export function CatalogResults({ catalog, initialFilter, pageSize }: CatalogResu
   };
   return (
     <div className="catalog-results">
-      <CatalogFilter catalog={catalog} filter={filter} onChange={change} found={found.length} open={open} onClose={() => setOpen(false)} onShow={showResults} />
-      <ResultsTop ref={results} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
-      {found.length > 0 ? (
-        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} />
-      ) : (
-        <div className="catalog-results__empty">
-          <h3>{t("filter.nothing")}</h3>
-          <p>{t("filter.nothingHint")}</p>
-        </div>
-      )}
+      <CatalogFilter catalog={catalog} filter={filter} onChange={change} found={found.length} open={open} onClose={closeSheet} onShow={showResults} />
+      {/* Пока открыт экран фильтра телефона, выдача за ним недоступна (диалог). */}
+      <div className="catalog-results__body" inert={open}>
+        <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
+        <ResultsList catalog={catalog} found={found} shown={shown} pageSize={pageSize} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
+      </div>
+    </div>
+  );
+}
+
+type ResultsListProps = {
+  catalog: SiteCatalog;
+  found: readonly CatalogComplex[];
+  shown: number;
+  pageSize: number;
+  onMore: () => void;
+  onReset: () => void;
+};
+
+/** Карточки порциями и «Показать ещё»; пусто — подсказка и «Сбросить фильтры» (на телефоне иначе не сбросить). */
+function ResultsList({ catalog, found, shown, pageSize, onMore, onReset }: ResultsListProps) {
+  const t = useTranslations("catalog.filter");
+  if (found.length === 0) {
+    return (
+      <div className="catalog-results__empty">
+        <h3 className="catalog-results__empty-title">{t("nothing")}</h3>
+        <p className="catalog-results__empty-hint">{t("nothingHint")}</p>
+        <Button variant="outline" size="sm" className="catalog-results__reset" onClick={onReset}>
+          {t("reset")}
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <>
+      <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} />
       {found.length > shown ? (
         <div className="catalog-results__more">
-          <Button variant="outline" onClick={() => setShown(shown + pageSize)}>
-            {t("filter.more", { n: Math.min(pageSize, found.length - shown) })}
+          <Button variant="outline" onClick={onMore}>
+            {t("more", { n: Math.min(pageSize, found.length - shown) })}
           </Button>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
 
 type ResultsTopProps = {
   ref: React.Ref<HTMLDivElement>;
+  filtersRef: React.Ref<HTMLButtonElement>;
   found: number;
   filter: Filter;
   onChange: (next: Filter) => void;
@@ -81,7 +128,7 @@ type ResultsTopProps = {
 };
 
 /** «Найдено N ЖК», «Фильтры» с числом заданных (телефон) и сортировка (мокап .res__top). */
-function ResultsTop({ ref, found, filter, onChange, onOpenFilter }: ResultsTopProps) {
+function ResultsTop({ ref, filtersRef, found, filter, onChange, onOpenFilter }: ResultsTopProps) {
   const t = useTranslations("catalog");
   const groups = activeGroups(filter);
   const sorts = CATALOG_SORTS.map((sort) => ({ value: sort, label: t(`filter.sorts.${sort}`) }));
@@ -91,7 +138,7 @@ function ResultsTop({ ref, found, filter, onChange, onOpenFilter }: ResultsTopPr
         {t("page.found", { n: found })}
       </p>
       <div className="catalog-results__tools">
-        <Button variant="outline" size="sm" className="catalog-results__filters" onClick={onOpenFilter}>
+        <Button ref={filtersRef} variant="outline" size="sm" className="catalog-results__filters" onClick={onOpenFilter}>
           <SlidersHorizontal size={16} strokeWidth={1.9} aria-hidden />
           {t("filter.label")}
           {groups > 0 ? <Badge tone="amber" size="sm">{groups}</Badge> : null}
@@ -100,6 +147,15 @@ function ResultsTop({ ref, found, filter, onChange, onOpenFilter }: ResultsTopPr
       </div>
     </div>
   );
+}
+
+/** Закрыли экран фильтра — фокус на «Фильтры»: после перерисовки, когда выдача уже не inert. */
+function useFocusBack(open: boolean, target: React.RefObject<HTMLButtonElement | null>) {
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (wasOpen.current && !open) target.current?.focus();
+    wasOpen.current = open;
+  }, [open, target]);
 }
 
 /** Фильтр телефона на весь экран: Escape закрывает (прокрутку под ним гасит CSS, как у меню). */

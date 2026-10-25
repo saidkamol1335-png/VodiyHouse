@@ -115,5 +115,7 @@ describe("фильтр каталога", () => {
     expect(run({ sort: "exp" })).toEqual(["c", "b", "a"]);
     expect(run({ sort: "dl" })).toEqual(["c", "a", "b"]);
     expect(matchingPriceUsd(catalog.complexes[1]!, catalog, NO_FILTER)).toBe(60000);
+    // С «ценой от» — не ниже неё: квартир дешевле границы в выдаче нет (мокап matchMin).
+    expect(matchingPriceUsd(catalog.complexes[0]!, catalog, { ...NO_FILTER, priceMin: 45000 })).toBe(45000);
   });
 });

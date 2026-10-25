@@ -6,7 +6,10 @@ import type { CatalogComplex, SiteCatalog } from "./records";
 // Цена ЖК в выдаче — самая низкая среди подходящих под фильтр квартир, в $: сортировать сумы
 // и доллары можно только через курс; без курса и без цены ЖК — в конце списка (Ф6).
 
-/** Цена «от» в $ среди подходящих под фильтр типов комнат; null — неизвестна. */
+/**
+ * Цена «от» в $ среди подходящих под фильтр типов комнат; null — неизвестна. С «ценой от» в
+ * фильтре — не ниже неё (мокап matchMin: дешевле границы квартиры в выдачу не попали).
+ */
 export function matchingPriceUsd(complex: CatalogComplex, catalog: SiteCatalog, filter: CatalogFilter): number | null {
   const developer = catalog.developers.find((entry) => entry.id === complex.developerId);
   let best: number | null = null;
@@ -14,7 +17,8 @@ export function matchingPriceUsd(complex: CatalogComplex, catalog: SiteCatalog, 
     if (!blockMatches(block, developer, filter, catalog.rate)) continue;
     for (const offer of block.offers) {
       if (!offerMatches(offer, block.currency, filter, catalog.rate) || offer.priceFrom === null) continue;
-      const usd = convertMoney(offer.priceFrom, block.currency, "USD", catalog.rate);
+      const converted = convertMoney(offer.priceFrom, block.currency, "USD", catalog.rate);
+      const usd = converted === null ? null : Math.max(converted, filter.priceMin ?? 0);
       if (usd !== null && (best === null || usd < best)) best = usd;
     }
   }

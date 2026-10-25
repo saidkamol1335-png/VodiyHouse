@@ -95,3 +95,12 @@ describe("карточка ЖК", () => {
     expect(cardPrice(complex([]), catalog)).toBeNull();
   });
 });
+
+describe("цена «от» без курса", () => {
+  it("два блока в сумах — самый дешёвый, а не первый", () => {
+    const catalog: SiteCatalog = { rate: null, developers: [developer], complexes: [] };
+    const first = block("s1", { currency: "UZS", offers: [offer(1, 40, 800_000_000)] });
+    const second = block("s2", { currency: "UZS", offers: [offer(1, 40, 500_000_000)] });
+    expect(cardPrice(complex([first, second]), catalog)).toMatchObject({ amount: 500_000_000, currency: "UZS" });
+  });
+});

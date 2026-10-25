@@ -64,14 +64,25 @@ function blockMinPrice(block: CatalogBlock): number | null {
   return prices.length > 0 ? Math.min(...prices) : null;
 }
 
-/** Цена «от» — у самого дешёвого блока (сумы сравниваются через курс, без курса — доллары первыми). */
+type PricedBlock = { block: CatalogBlock; amount: number };
+
+/** Дешевле ли a, чем b: одна валюта — по сумме; разные — через курс; без курса — доллары первыми. */
+function cheaper(a: PricedBlock, b: PricedBlock, rate: SiteCatalog["rate"]): boolean {
+  if (a.block.currency === b.block.currency) return a.amount < b.amount;
+  const usdA = convertMoney(a.amount, a.block.currency, "USD", rate);
+  const usdB = convertMoney(b.amount, b.block.currency, "USD", rate);
+  if (usdA === null || usdB === null) return a.block.currency === "USD";
+  return usdA < usdB;
+}
+
+/** Цена «от» — у самого дешёвого блока, в его валюте (Ф6). */
 export function cardPrice(complex: CatalogComplex, catalog: SiteCatalog): CardPrice | null {
-  let best: { block: CatalogBlock; amount: number; usd: number } | null = null;
+  let best: PricedBlock | null = null;
   for (const block of complex.blocks) {
     const amount = blockMinPrice(block);
     if (amount === null) continue;
-    const usd = convertMoney(amount, block.currency, "USD", catalog.rate) ?? Number.MAX_VALUE;
-    if (!best || usd < best.usd) best = { block, amount, usd };
+    const candidate = { block, amount };
+    if (!best || cheaper(candidate, best, catalog.rate)) best = candidate;
   }
   if (!best) return null;
   const perM2 = best.block.offers.flatMap((offer) => (offer.available && offer.pricePerM2From !== null ? [offer.pricePerM2From] : []));

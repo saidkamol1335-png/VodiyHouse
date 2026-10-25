@@ -47,3 +47,18 @@ describe("HEAD_BOOT_SCRIPT", () => {
     expect(html.getAttribute("data-motion")).toBe("lite");
   });
 });
+
+describe("HEAD_BOOT_SCRIPT · ссылка на каталог с фильтром", () => {
+  it("выдача ждёт фильтр только на /novostroyki с его параметрами", () => {
+    const run = (url: string) => {
+      document.documentElement.removeAttribute("data-catalog-pending");
+      window.history.replaceState(null, "", url);
+      new Function(HEAD_BOOT_SCRIPT)();
+      return document.documentElement.hasAttribute("data-catalog-pending");
+    };
+    expect(run("/ru/novostroyki?komnat=2")).toBe(true);
+    expect(run("/ru/novostroyki")).toBe(false);
+    expect(run("/ru/kalkulyator?komnat=2")).toBe(false);
+    window.history.replaceState(null, "", "/");
+  });
+});

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, type ReactNode, type UIEvent } from "react";
 import { SitePhoto } from "@/components/SitePhoto";
 import type { Locale } from "@/lib/i18n/routing";
+import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
 
 type CardMediaProps = {
@@ -21,26 +22,33 @@ const SIZES = "(max-width: 760px) calc(100vw - 48px), (max-width: 1100px) 45vw, 
 /**
  * Фото карточки (мокап .jc__media): лента с прокруткой по кадрам — палец листает сам, стрелки на
  * десктопе при наведении, точки — какое фото сейчас. Кадр 4:3 по точке фокуса руководителя.
+ * Сначала грузится только обложка: ленивая загрузка в горизонтальной ленте не срабатывает, и все
+ * фото всех карточек отнимали канал у первого экрана (Lighthouse, LCP). Остальные кадры — после
+ * первого наведения, касания, фокуса или прокрутки ленты; до того — их размытые заглушки.
  */
 export function CardMedia({ photos, alt, preload, badges }: CardMediaProps) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
   const track = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
+  const [armed, setArmed] = useState(false);
+  const arm = () => setArmed(true);
   const onScroll = (event: UIEvent<HTMLDivElement>) => {
     const { scrollLeft, clientWidth } = event.currentTarget;
+    setArmed(true);
     setCurrent(Math.round(scrollLeft / Math.max(clientWidth, 1)));
   };
   const go = (step: number) => {
     const node = track.current;
-    if (node) node.scrollBy({ left: step * node.clientWidth, behavior: "smooth" });
+    // Плавно — только в full: lite и reduced-motion листают сразу (CLAUDE.md §3).
+    if (node) node.scrollBy({ left: step * node.clientWidth, behavior: getMotionTier() === "full" ? "smooth" : "auto" });
   };
   return (
-    <div className="catalog-card__media">
+    <div className="catalog-card__media" onPointerEnter={arm} onTouchStart={arm} onFocus={arm}>
       <div ref={track} className="catalog-card__track" onScroll={onScroll}>
         {photos.map((photo, index) => (
           <div key={photo.path} className="catalog-card__slide" aria-hidden={index !== current}>
-            <SitePhoto photo={photo} alt={photo.alt?.[locale] || alt} frame="card" sizes={SIZES} preload={preload && index === 0} className="catalog-card__photo" />
+            <CardSlide photo={photo} alt={photo.alt?.[locale] || alt} loaded={index === 0 || armed} preload={preload && index === 0} />
           </div>
         ))}
       </div>
@@ -62,4 +70,15 @@ export function CardMedia({ photos, alt, preload, badges }: CardMediaProps) {
       ) : null}
     </div>
   );
+}
+
+type CardSlideProps = { photo: CatalogPhoto; alt: string; loaded: boolean; preload: boolean };
+
+/** Кадр ленты: фото — или, пока галерею не трогали, его размытое превью. */
+function CardSlide({ photo, alt, loaded, preload }: CardSlideProps) {
+  if (!loaded) {
+    const style = photo.blur ? { backgroundImage: `url("${photo.blur}")` } : undefined;
+    return <div className="catalog-card__placeholder" style={style} />;
+  }
+  return <SitePhoto photo={photo} alt={alt} frame="card" sizes={SIZES} preload={preload} className="catalog-card__photo" />;
 }

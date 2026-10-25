@@ -41,7 +41,8 @@ function PriceInput({ label, placeholder, value, onChange }: PriceInputProps) {
       onChange={(event) => {
         const digits = event.target.value.replace(/\D/g, "").slice(0, 9);
         setText(digits);
-        onChange(digits ? Number(digits) : null);
+        // 0 — как пусто: «от 0» отсекало бы «цену по запросу», а в адрес такая граница не пишется.
+        onChange(Number(digits) > 0 ? Number(digits) : null);
       }}
     />
   );

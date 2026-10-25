@@ -3,8 +3,8 @@
 import { CatalogCard } from "@/components/CatalogCard";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 
-/** Карточек первого ряда, у которых фото грузится сразу (LCP). */
-const PRELOAD_CARDS = 3;
+/** Заранее грузится обложка первой карточки — LCP; на телефоне виден один ряд из одной карточки. */
+const PRELOAD_CARDS = 1;
 
 /** Сетка карточек (мокап .cards): 3 в ряд на десктопе, 2 на планшете, 1 на телефоне. */
 export function CatalogGrid({ catalog, complexes }: { catalog: SiteCatalog; complexes: readonly CatalogComplex[] }) {

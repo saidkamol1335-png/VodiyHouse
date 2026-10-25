@@ -45,7 +45,8 @@ export type ComplexRecord = {
   id: string;
   slug: string;
   name: LocalizedText;
-  class: "econom" | "comfort" | "business" | "premium";
+  /** Класс не обязателен для публикации — без него на карточке нет плашки. */
+  class: "econom" | "comfort" | "business" | "premium" | null;
   sort: number;
   developer_id: string;
   location: { slug: string; kind: "city" | "district"; name: LocalizedText } | null;

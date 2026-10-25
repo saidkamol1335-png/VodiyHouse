@@ -16,7 +16,8 @@ import {
 type Search = Record<string, string | string[] | undefined>;
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const MAX_PRICE = 100_000_000;
+/** Как у поля цены каталога: до 9 цифр. */
+const MAX_PRICE = 999_999_999;
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value) ?? "";
 const list = (value: string | string[] | undefined) => first(value).split(",").filter(Boolean);

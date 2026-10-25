@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { FilterChips, FilterPills } from "@/components/FilterPills";
 import { SelectField } from "@/components/SelectField";
@@ -38,13 +39,23 @@ function deadlineYears(catalog: SiteCatalog): number[] {
  */
 export function CatalogFilter({ catalog, filter, onChange, found, open, onClose, onShow }: CatalogFilterProps) {
   const t = useTranslations("catalog.filter");
+  const close = useRef<HTMLButtonElement>(null);
+  // Телефон: экран фильтра — диалог; фокус сразу на «Закрыть» (вернёт его CatalogResults).
+  useEffect(() => {
+    if (open) close.current?.focus();
+  }, [open]);
   const set = (patch: Partial<Filter>) => onChange({ ...filter, ...patch });
   const touched = JSON.stringify({ ...filter, sort: NO_FILTER.sort }) !== JSON.stringify(NO_FILTER);
   return (
-    <aside className={open ? "catalog-filter catalog-filter--open" : "catalog-filter"} aria-label={t("label")}>
+    <aside
+      className={open ? "catalog-filter catalog-filter--open" : "catalog-filter"}
+      aria-label={t("label")}
+      role={open ? "dialog" : undefined}
+      aria-modal={open || undefined}
+    >
       <div className="catalog-filter__top">
         <b>{t("label")}</b>
-        <button type="button" className="catalog-filter__close" aria-label={t("close")} onClick={onClose}>
+        <button ref={close} type="button" className="catalog-filter__close" aria-label={t("close")} onClick={onClose}>
           <X size={20} strokeWidth={1.8} aria-hidden />
         </button>
       </div>

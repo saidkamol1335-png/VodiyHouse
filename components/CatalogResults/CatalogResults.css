@@ -1,9 +1,15 @@
 /* Выдача каталога (мокап .cat__res): «Найдено N ЖК» и сортировка, карточки, «Показать ещё»,
    пустой результат пунктиром. Кнопка «Фильтры» — только на телефоне (фильтр там спрятан). */
-.catalog-results {
+.catalog-results,
+.catalog-results__body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+/* Ссылка с фильтром: до его применения выдача скрыта (место сохраняется — без сдвига). */
+[data-catalog-pending] .catalog-results {
+  visibility: hidden;
 }
 
 .catalog-results__top {
@@ -55,13 +61,13 @@
   text-align: center;
 }
 
-.catalog-results__empty h3 {
+.catalog-results__empty-title {
   margin: 0;
   font-size: var(--fs-h3);
 }
 
-.catalog-results__empty p {
-  margin: 8px 0 0;
+.catalog-results__empty-hint {
+  margin: 8px 0 20px;
   color: var(--fg-3);
 }
 
