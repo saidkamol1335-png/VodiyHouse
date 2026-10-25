@@ -455,6 +455,18 @@ describe("кабинет ЖК", () => {
       expect(removed).toHaveLength(1);
     });
 
+    it("«Сохранить» без изменений не двигает «Наличие обновлено» (updated_at планировок)", async () => {
+      const rows = await layoutRows();
+      await db.admin.query("update layouts set updated_at = now() - interval '1 day' where block_id = $1", [blockId]);
+      const stamp = async () =>
+        (await db.admin.query<{ at: string }>("select max(updated_at)::text as at from layouts where block_id = $1", [blockId])).rows[0]!.at;
+      const before = await stamp();
+      await save(rows.map((row) => ({ id: row.id, rooms: row.rooms, area: row.area, drawing_id: row.drawing_id })));
+      expect(await stamp()).toBe(before);
+      await save(rows.map((row, index) => ({ id: row.id, rooms: row.rooms, area: index === 0 ? Number(row.area) + 1 : row.area, drawing_id: row.drawing_id })));
+      expect(await stamp()).not.toBe(before);
+    });
+
     it("планировку с квартирами не удалить", async () => {
       const rows = await layoutRows();
       await db.admin.query(

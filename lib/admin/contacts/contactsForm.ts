@@ -116,24 +116,19 @@ function contactsErrors(input: ContactsInput): ContactsErrors {
   return errors;
 }
 
+/** Набранное в форме как есть — вернуть в поля при любой ошибке (React сбрасывает форму после действия). */
+function typedFields({ phone, telegram, bot, instagram, minutes, hours, freeBadge, freeServices }: ContactsInput): ContactsFields {
+  return { phone: phone.raw, telegram: telegram.raw, bot: bot.raw, instagram: instagram.raw, callbackMinutes: minutes.raw, hours, freeBadge, freeServices };
+}
+
+/** То же для ошибки прав или базы: форма не теряет набранное. */
+export const contactsFieldsFrom = (formData: FormData): ContactsFields => typedFields(readContactsForm(formData));
+
 /** Поля: phone, telegram, bot, instagram, hours.ru|uz, callbackMinutes, freeBadge.ru|uz, freeService0…3.ru|uz. */
 export function parseContacts(formData: FormData): ContactsParse {
   const input = readContactsForm(formData);
   const fieldErrors = contactsErrors(input);
-  if (Object.keys(fieldErrors).length > 0) {
-    const { phone, telegram, bot, instagram, minutes, hours, freeBadge, freeServices } = input;
-    const fields = {
-      phone: phone.raw,
-      telegram: telegram.raw,
-      bot: bot.raw,
-      instagram: instagram.raw,
-      callbackMinutes: minutes.raw,
-      hours,
-      freeBadge,
-      freeServices,
-    };
-    return { ok: false, fieldErrors, fields };
-  }
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors, fields: typedFields(input) };
   return {
     ok: true,
     value: {
