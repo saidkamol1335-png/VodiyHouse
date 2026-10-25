@@ -17,7 +17,7 @@ test.describe("события сайта → «Сейчас на сайте»", 
     const visitor = await browser.newContext({ userAgent: VISITOR_AGENT });
     const site = await visitor.newPage();
     const errors = collectPageErrors(site);
-    await site.goto("/ru/novostroyki/demo-shodlik?utm_source=e2e_events");
+    await site.goto("/ru/novostroyki/demo-shodlik?utm_source=e2e-events.test");
     const heart = site.getByRole("button", { name: "В избранное: ЖК Shodlik" }).first();
     // Избранное — событие «сразу»: пачка уходит по нажатию.
     const sent = site.waitForRequest((request) => request.url().endsWith("/api/e") && request.method() === "POST");
@@ -33,7 +33,7 @@ test.describe("события сайта → «Сейчас на сайте»", 
     await admin.goto("/admin");
     const panel = admin.getByRole("region", { name: "Сейчас на сайте" });
     await expect(panel.getByText("Избранное · ЖК Shodlik").first()).toBeVisible({ timeout: 15_000 });
-    await expect(panel.getByText("e2e_events · компьютер").first()).toBeVisible();
+    await expect(panel.getByText("e2e-events.test · компьютер").first()).toBeVisible();
     await expect(panel).toContainText(/онлайн: [1-9]/i);
     await admin.screenshot({ caret: "initial", path: `test-results/screens/${testInfo.project.name}/s312-site-now.png` });
     await cabinet.close();
