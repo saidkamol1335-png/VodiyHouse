@@ -8,6 +8,27 @@ if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
+// Приёмка 3а (PLAN, 3.14): публичный сайт ещё на 360 и 768 и в WebKit — по запросу, не в каждом
+// прогоне (`npm run e2e:extra`; WebKit — `npx playwright test --project=webkit-390` после
+// `npx playwright install webkit`).
+const SITE_SPECS = /(home|catalog|complex-page|pages|header|footer|leads|events|seo-meta|rule-1-2|site-calc-view)\.spec\.ts/;
+const EXTRA_PROJECTS = [
+  { name: "mobile-360", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Pixel 7"], viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 } },
+  { name: "tablet-768", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1024 }, deviceScaleFactor: 1 } },
+];
+const WEBKIT_PROJECTS = [
+  { name: "webkit-390", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["iPhone 13"], viewport: { width: 390, height: 844 } } },
+];
+// Запуск с --project=mobile-360 / tablet-768 / webkit-390 включает их сам (и на Windows, без «VAR=1 …»);
+// через окружение флаг доходит и до воркеров — они читают этот же файл.
+for (const [flag, names] of [["E2E_EXTRA", EXTRA_PROJECTS], ["E2E_WEBKIT", WEBKIT_PROJECTS]] as const) {
+  if (names.some(({ name }) => process.argv.some((arg) => arg.includes(name)))) process.env[flag] = "1";
+}
+const extraProjects = [
+  ...(process.env.E2E_EXTRA === "1" ? EXTRA_PROJECTS : []),
+  ...(process.env.E2E_WEBKIT === "1" ? WEBKIT_PROJECTS : []),
+];
+
 // Размеры приёмки — CLAUDE.md: 390×844 (телефон) и 1440×900 (десктоп).
 export default defineConfig({
   testDir: "tests/e2e",
@@ -62,6 +83,7 @@ export default defineConfig({
         deviceScaleFactor: 1,
       },
     },
+    ...extraProjects,
   ],
   webServer: {
     command: "npm run dev -- --port 3000",
