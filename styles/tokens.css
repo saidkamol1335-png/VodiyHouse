@@ -81,6 +81,7 @@
   --gutter: 32px;
   --header-h: 68px;
   --control-xs: 30px; /* маленькая кнопка мокапа (.btn--xs) */
+  --control-sm: 36px; /* кнопка мокапа .btn--sm и кружок .ibtn--sm рядом с ней */
   --demo-h: 0px;
   --admin-side-w: 250px;
   --admin-panel-pad: 20px; /* поля панели кабинета; липкие полосы внутри неё выходят на них */

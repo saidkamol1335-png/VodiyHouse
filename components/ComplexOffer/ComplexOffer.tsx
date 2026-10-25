@@ -3,8 +3,10 @@ import { Beam } from "@/components/Beam";
 import { getLocale, getTranslations } from "next-intl/server";
 import { LeadButton } from "@/components/LeadDialog";
 import type { LeadIntent } from "@/components/LeadForm";
+import type { LeadObject } from "@/lib/leads/types";
 import { PhoneButton } from "@/components/PhoneButton";
-import { type SiteContacts, phoneHref, telegramHref } from "@/lib/contacts";
+import { TelegramButton } from "@/components/TelegramButton";
+import { type SiteContacts, phoneHref } from "@/lib/contacts";
 import { formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import type { CardDeadline } from "@/lib/site/catalog/card";
@@ -108,7 +110,9 @@ async function OfferContacts({ contacts, book }: OfferContactsProps) {
         <CalendarCheck size={18} aria-hidden="true" />
         {tLead("view")}
       </LeadButton>
-      {contacts.phone || contacts.telegram ? <OfferLinks contacts={contacts} t={t} telegramText={tContacts("telegram")} /> : null}
+      {contacts.phone || contacts.telegram || contacts.bot ? (
+        <OfferLinks contacts={contacts} t={t} telegramText={tContacts("telegram")} object={book.object ?? {}} />
+      ) : null}
     </div>
   );
 }
@@ -117,9 +121,10 @@ type OfferLinksProps = {
   contacts: SiteContacts;
   t: Awaited<ReturnType<typeof getTranslations<"complex.offer">>>;
   telegramText: string;
+  object: LeadObject;
 };
 
-function OfferLinks({ contacts, t, telegramText }: OfferLinksProps) {
+function OfferLinks({ contacts, t, telegramText, object }: OfferLinksProps) {
   return (
     <div className="complex-offer__links">
       {contacts.phone ? <PhoneButton phone={contacts.phone} className="complex-offer__phone" /> : null}
@@ -128,18 +133,10 @@ function OfferLinks({ contacts, t, telegramText }: OfferLinksProps) {
           {t("call")}
         </a>
       ) : null}
-      {contacts.telegram ? (
-        <a
-          className="complex-offer__button complex-offer__button--telegram"
-          href={telegramHref(contacts.telegram)}
-          target="_blank"
-          rel="noopener"
-          aria-label={t("telegram")}
-        >
-          <Send size={16} strokeWidth={1.9} aria-hidden />
-          <span className="complex-offer__telegram-text">{telegramText}</span>
-        </a>
-      ) : null}
+      <TelegramButton object={object} className="complex-offer__button complex-offer__button--telegram" aria-label={t("telegram")}>
+        <Send size={16} strokeWidth={1.9} aria-hidden />
+        <span className="complex-offer__telegram-text">{telegramText}</span>
+      </TelegramButton>
     </div>
   );
 }

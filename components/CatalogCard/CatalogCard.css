@@ -291,6 +291,28 @@
   margin-top: 6px;
 }
 
+/* Кружок Telegram (мокап .ibtn--sm): Vodiy House — бот или аккаунт, не застройщик (правило 1.2). */
+.catalog-card__telegram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--control-bg);
+  color: var(--fg);
+}
+
+.catalog-card__telegram:hover {
+  border-color: var(--amber-line);
+}
+
+.catalog-card__telegram:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 /* Тень при наведении — сразу, без перехода (анимируем только transform и opacity, CLAUDE.md §3). */
 .catalog-card:hover {
   box-shadow: var(--card-shadow-hover);
@@ -327,6 +349,11 @@
   .catalog-card__phone,
   .catalog-card__callback {
     min-height: 44px;
+  }
+
+  .catalog-card__telegram {
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }
 

@@ -86,7 +86,7 @@ export type LeadRequest = {
 };
 
 export type LeadSubmitResult =
-  | { status: "sent"; number: number; repeat: boolean }
+  | { status: "sent"; number: number; repeat: boolean; id?: string }
   | { status: "error"; error: LeadErrorCode; fields?: LeadFieldErrors };
 
 export type LeadField = "name" | "phone" | "company";

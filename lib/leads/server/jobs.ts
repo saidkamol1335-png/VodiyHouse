@@ -15,4 +15,10 @@ export const CRON_JOBS: Record<string, CronJob> = {
     const alerted = await alertUndelivered(admin);
     return { delivered, alerted };
   },
+  // Коды «Написать в Telegram» (Ф8): неоткрытые — через 2 дня, остальные — через 30.
+  "tg-starts": async () => {
+    const { data, error } = await createSupabaseAdminClient().rpc("cleanup_tg_starts");
+    if (error) throw new Error("tg-starts-cleanup-failed", { cause: error });
+    return { removed: Number(data ?? 0) };
+  },
 };

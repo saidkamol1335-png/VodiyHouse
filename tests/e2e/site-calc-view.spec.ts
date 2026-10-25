@@ -3,7 +3,7 @@ import { collectPageErrors } from "./helpers";
 
 // Шаг 2.6: публичная /kalkulyator — без базы страница с шапкой и «калькулятор заработает…»
 // (какое из двух состояний проверено — видно в отчёте); на сайте нет ни слова о скидках ни в
-// HTML, ни в JS (PLAN §3.13), нет «Получить точный расчёт» (заявки — фаза 3). Стенд — раскладка
+// HTML, ни в JS (PLAN §3.13); с заявками (шаг 3.7) — «Получить точный расчёт» у итога. Стенд — раскладка
 // 390, «К расчёту ↓» в полосе, луч итога в full, смена языка с расчётом; скриншоты s26.
 
 const STAND = "/dev/kalkulyator";
@@ -62,10 +62,10 @@ test.describe("сайт · страница калькулятора", () => {
         });
       } else {
         await expect(page.getByTestId("calc-total")).toBeVisible();
+        await expect(
+          page.getByRole("button", { name: /Получить точный расчёт|Aniq hisob-kitobni olish/ }),
+        ).toHaveCount(1);
       }
-      await expect(
-        page.getByRole("button", { name: /Получить точный расчёт|Aniq hisob-kitob/ }),
-      ).toHaveCount(0);
       if (isPhone(page)) await menu(page, locale).click();
       const nav = page.getByRole("link", { name: locale === "ru" ? "Калькулятор" : "Kalkulyator" });
       await expect(nav.first()).toHaveAttribute("aria-current", "page");

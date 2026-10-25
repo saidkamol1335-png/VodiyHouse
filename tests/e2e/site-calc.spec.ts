@@ -1,11 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
+import { hasCloud } from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.6: /kalkulyator на стенде /dev/kalkulyator (DEMO мокапа через тот же преобразователь
 // ответа базы): шаги 01–04, примеры SiteCalc1 и SiteCalc2, без скидок (PLAN §3.13), окно
-// «Получить точный расчёт» (на сайте — после заявок фазы 3), текст для Telegram со ссылкой.
+// «Получить точный расчёт» (заявка «Расчёт», шаг 3.7), текст для Telegram со ссылкой.
 
 const STAND = "/dev/kalkulyator";
+// Свой адрес посетителя: лимит «5 заявок с адреса за 10 минут» (ТЗ 10.2) — на тест, а не на прогон.
+test.use({ extraHTTPHeaders: { "x-nf-client-connection-ip": `e2e-${crypto.randomUUID()}` } });
 const total = (page: Page) => page.getByTestId("calc-total");
 const head = (page: Page) => total(page).locator(".calc-total__value");
 // Подпись — с начала строки: «Стоимость» не должна совпасть с «Итоговая стоимость».
@@ -67,30 +70,30 @@ test.describe("сайт · калькулятор", () => {
     await expect(page.locator(".calc-down__chip-badge")).toHaveCount(0);
   });
 
-  test("окно «Получить точный расчёт»: проверка полей, что попадёт в заявку, Escape закрывает", async ({
+  test("окно «Получить точный расчёт»: контекст расчёта, проверка полей, заявка «Расчёт» уходит", async ({
     page,
   }) => {
     await open(page);
     await total(page).getByRole("button", { name: "Получить точный расчёт" }).click();
     const dialog = page.getByRole("dialog", { name: "Точный расчёт" });
     await expect(dialog).toBeVisible();
+    await expect(dialog.locator(".lead-dialog__context")).toContainText("Рассрочка от застройщика");
     await dialog.getByRole("button", { name: "Отправить" }).click();
-    await expect(dialog.getByText("Заполните")).toHaveCount(2);
+    await expect(dialog.getByText("Укажите имя")).toBeVisible();
+    await expect(dialog.getByText("Укажите номер телефона")).toBeVisible();
     // Фокус — на первое неверное поле: диктор читает его ошибку.
     await expect(dialog.getByLabel("Имя")).toBeFocused();
-    await dialog.getByLabel("Имя").fill("Азиз");
+    await dialog.getByLabel("Имя").fill("E2E Расчёт");
     await dialog.getByLabel("Телефон").fill("90 12");
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(dialog.getByText("Номер в формате +998 XX XXX XX XX")).toBeVisible();
     await expect(dialog.getByLabel("Телефон")).toBeFocused();
-    await dialog.getByLabel("Телефон").fill("+998 90 123 45 67");
+    await dialog.getByLabel("Телефон").fill(`9${String(Date.now()).slice(-8)}`);
     await dialog.getByRole("button", { name: "Отправить" }).click();
-    await expect(dialog.getByText("Стенд: заявка не отправляется")).toBeVisible();
-    await expect(dialog.locator(".calc-lead__collected")).toBeFocused();
-    // Собранное — снимок на момент «Отправить»: правка поля после него не меняет заявку.
-    await dialog.getByLabel("Телефон").fill("+998 90");
-    await expect(dialog.locator(".calc-lead__rows")).toContainText("+998901234567");
-    await expect(dialog.locator(".calc-lead__rows")).toContainText("Рассрочка от застройщика");
+    // С базой — «Заявка отправлена»; без неё сервер заявок не принимает и честно говорит об этом.
+    await expect(dialog.getByText(hasCloud ? "Заявка отправлена" : "Заявки сейчас не принимаются", { exact: false })).toBeVisible({
+      timeout: 15_000,
+    });
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });

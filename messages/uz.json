@@ -657,7 +657,8 @@
       "partner": "Ariza qoldirish",
       "tg": "Telegramda yozish",
       "quiz": "Tanlovni olish",
-      "promo": "Shu taklifni xohlayman"
+      "promo": "Shu taklifni xohlayman",
+      "telegram": "Telegramda yozish"
     },
     "name": "Ism",
     "phone": "Telefon",
@@ -715,5 +716,17 @@
       "title": "<accent>Batafsil</accent> bilishni xohlaysizmi?",
       "text": "Kontaktlaringizni qoldiring — Vodiy House menejeri loyiha haqida aytib beradi va kvartira tanlaydi."
     }
+  },
+  "bot": {
+    "greeting": "Assalomu alaykum! Bu Vodiy House — Farg‘ona yangi binolaridan xaridor uchun bepul kvartira tanlab beramiz.",
+    "complex": "Sizni {name} TJM qiziqtirmoqda.",
+    "ask": "Pastdagi «Raqamni ulashish» tugmasini bosing — Vodiy House menejeri shu yerda yozadi yoki qo‘ng‘iroq qiladi.",
+    "share": "📱 Raqamni ulashish",
+    "thanks": "Rahmat! #{number} ariza qabul qilindi — Vodiy House menejeri tez orada siz bilan bog‘lanadi.",
+    "repeat": "Rahmat! Raqamingizni oldik — Vodiy House menejeri tez orada siz bilan bog‘lanadi.",
+    "hint": "Menejer siz bilan bog‘lanishi uchun pastdagi «Raqamni ulashish» tugmasini bosing.",
+    "ownContact": "Iltimos, o‘z raqamingizni «Raqamni ulashish» tugmasi orqali yuboring.",
+    "foreignPhone": "Biz O‘zbekiston raqamlarini (+998) qabul qilamiz. Raqamni +998 XX XXX XX XX ko‘rinishida xabar qilib yozing.",
+    "failed": "Arizani qabul qilib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring yoki bizga qo‘ng‘iroq qiling."
   }
 }

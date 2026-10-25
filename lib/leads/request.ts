@@ -118,7 +118,8 @@ function payloadFrom(type: LeadType, raw: Partial<LeadRequest>): Record<string, 
   return {};
 }
 
-function objectFrom(raw: unknown): Pick<LeadPayload, "complex" | "layout" | "unit" | "developer"> {
+/** Объект заявки — только адрес ЖК (slug) и uuid: остальное база найдёт и проверит сама. */
+export function objectFrom(raw: unknown): Pick<LeadPayload, "complex" | "layout" | "unit" | "developer"> {
   if (!isRecord(raw)) return {};
   const pick = (value: unknown, pattern: RegExp) =>
     typeof value === "string" && pattern.test(value) ? value : undefined;

@@ -14,24 +14,29 @@ import { deliverLead } from "./deliver";
 // (submit_lead открыт только серверу: лимит частоты, снимок объекта, повтор за 24 часа). Без
 // секретного ключа сервер заявок не принимает: посетитель видит «позвоните нам», а не ложное «отправлено».
 
-/** Адрес посетителя (Netlify — свой заголовок, иначе прокси) → хэш с секретом: сам адрес не храним. */
-async function clientKey(): Promise<string | null> {
+/** Ключ лимита частоты: хэш с секретом — ни адрес посетителя, ни номер чата не хранятся. */
+export function rateKey(kind: "ip" | "tg", value: string): string {
+  return createHmac("sha256", supabaseSecretKey()).update(`lead-rate:${kind}:${value}`).digest("hex");
+}
+
+/** Адрес посетителя: Netlify — свой заголовок (его ставит край сети), иначе — прокси. */
+export async function visitorKey(): Promise<string | null> {
   const list = await headers();
   const ip =
     list.get("x-nf-client-connection-ip") ??
     list.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     list.get("x-real-ip");
-  if (!ip) return null;
-  return createHmac("sha256", supabaseSecretKey()).update(`lead-rate:${ip}`).digest("hex");
+  return ip ? rateKey("ip", ip) : null;
 }
 
-export async function submitLead(lead: LeadPayload): Promise<LeadSubmitResult> {
+/** Заявка сайта (ключ — адрес посетителя) или бота (ключ — его чат). */
+export async function submitLead(lead: LeadPayload, clientKey?: string | null): Promise<LeadSubmitResult> {
   if (!hasSupabaseAdminEnv()) return { status: "error", error: "unavailable" };
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin.rpc("submit_lead", {
     p_lead: lead,
     p_channels: configuredChannels(),
-    p_client_key: await clientKey(),
+    p_client_key: clientKey === undefined ? await visitorKey() : clientKey,
   });
   if (error) {
     const code = leadDbErrorCode(error);
@@ -41,5 +46,5 @@ export async function submitLead(lead: LeadPayload): Promise<LeadSubmitResult> {
   const saved = data as { id: string; number: number; repeat_of: number | null };
   // Доставка — после ответа посетителю: Telegram и Таблица не задерживают «Заявка отправлена».
   after(() => deliverLead(admin, saved.id));
-  return { status: "sent", number: saved.number, repeat: saved.repeat_of !== null };
+  return { status: "sent", number: saved.number, repeat: saved.repeat_of !== null, id: saved.id };
 }

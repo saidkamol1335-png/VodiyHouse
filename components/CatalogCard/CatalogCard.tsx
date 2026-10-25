@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, MapPin } from "lucide-react";
+import { Check, MapPin, Send } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LeadButton } from "@/components/LeadDialog";
 import type { LeadIntent } from "@/components/LeadForm";
 import { PhoneButton } from "@/components/PhoneButton";
 import { useSiteContacts } from "@/components/SiteContacts";
+import { TelegramButton } from "@/components/TelegramButton";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
@@ -72,12 +73,16 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
   );
 }
 
-/** «Показать телефон» и «Перезвоните мне» (мокап .jc__btns) — над растянутой ссылкой карточки. */
+/** «Показать телефон», «Перезвоните мне» и Telegram (мокап .jc__btns) — над растянутой ссылкой карточки. */
 function CardButtons({ phone, intent }: { phone: string | null; intent: LeadIntent }) {
+  const t = useTranslations("lead.buttons");
   return (
     <div className="catalog-card__buttons">
       {phone ? <PhoneButton phone={phone} className="catalog-card__phone" /> : null}
       <LeadButton intent={intent} size="sm" className="catalog-card__callback" />
+      <TelegramButton object={intent.object ?? {}} className="catalog-card__telegram" aria-label={t("telegram")}>
+        <Send size={16} strokeWidth={1.9} aria-hidden />
+      </TelegramButton>
     </div>
   );
 }

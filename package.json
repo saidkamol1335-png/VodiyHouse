@@ -25,7 +25,8 @@
     "staff:create-head": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-create-head.mjs",
     "format": "prettier --write .",
     "mockup:serve": "node docs/mockup/tools/serve.mjs",
-    "mockup:capture": "node docs/mockup/tools/capture.mjs"
+    "mockup:capture": "node docs/mockup/tools/capture.mjs",
+    "bot:webhook": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/bot-webhook.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

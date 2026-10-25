@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useLeadOpener } from "@/components/LeadDialog";
 import { useSiteContacts } from "@/components/SiteContacts";
-import { phoneHref, telegramHref } from "@/lib/contacts";
+import { TelegramButton } from "@/components/TelegramButton";
+import { phoneHref } from "@/lib/contacts";
 
 /** Панель появляется, когда первый экран (фото и цена) ушёл наверх. */
 const SHOW_AFTER_SCREENS = 0.9;
@@ -40,10 +41,10 @@ type ComplexBarProps = { slug: string; name: string };
 export function ComplexBar({ slug, name }: ComplexBarProps) {
   const t = useTranslations("complex.offer");
   const tLead = useTranslations("lead.buttons");
-  const { phone, telegram } = useSiteContacts();
+  const { phone, telegram, bot } = useSiteContacts();
   const openLead = useLeadOpener();
   const shown = useScrolledPastFirstScreen();
-  if (!phone && !telegram && !openLead) return null;
+  if (!phone && !telegram && !bot && !openLead) return null;
   return (
     <>
       {/* Место под панелью внизу страницы: подвал не прячется под ней. */}
@@ -54,11 +55,9 @@ export function ComplexBar({ slug, name }: ComplexBarProps) {
             <Phone size={20} strokeWidth={1.8} aria-hidden />
           </a>
         ) : null}
-        {telegram ? (
-          <a className="complex-bar__icon" href={telegramHref(telegram)} target="_blank" rel="noopener" aria-label={t("telegram")} tabIndex={shown ? 0 : -1}>
-            <Send size={20} strokeWidth={1.8} aria-hidden />
-          </a>
-        ) : null}
+        <TelegramButton object={{ complex: slug }} className="complex-bar__icon" aria-label={t("telegram")} tabIndex={shown ? 0 : -1}>
+          <Send size={20} strokeWidth={1.8} aria-hidden />
+        </TelegramButton>
         {openLead ? (
           <button
             type="button"

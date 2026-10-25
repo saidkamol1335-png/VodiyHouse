@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import pg from "pg";
+import { dbClientConfig } from "../../lib/supabase/dbClient";
 import { assertE2eProject, E2E_EMAIL, hasCloud } from "./cloud";
 
 // После прогона против облака: удалить всех e2e-…@example.com, в том числе оставшихся от
@@ -17,4 +19,25 @@ export default async function globalTeardown(): Promise<void> {
     if (data.users.length < PAGE_SIZE) break;
   }
   for (const id of doomed) await admin.auth.admin.deleteUser(id);
+  await removeE2eLeads();
+}
+
+/**
+ * Заявки e2e (имя «E2E …», leads.spec.ts) и их снимки расчётов. У сервера прав на таблицу заявок нет
+ * (только функции) — удаляем владельцем базы по SUPABASE_DB_URL; без адреса базы — остаются.
+ */
+async function removeE2eLeads(): Promise<void> {
+  const url = process.env.SUPABASE_DB_URL;
+  if (!url) return;
+  const client = new pg.Client(dbClientConfig(url));
+  await client.connect();
+  try {
+    await client.query(
+      `with doomed as (select id from public.leads where name like 'E2E %')
+       , calc as (delete from public.calculations where lead_id in (select id from doomed))
+       delete from public.leads where id in (select id from doomed)`,
+    );
+  } finally {
+    await client.end();
+  }
 }

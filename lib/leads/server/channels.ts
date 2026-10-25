@@ -8,6 +8,16 @@ import type { LeadChannel } from "../types";
 type Env = Record<string, string | undefined>;
 
 export type TelegramConfig = { token: string; chatId: string; alertChatId: string };
+
+/** Бот «Написать в Telegram» (Ф8): токен и секрет вебхука (заголовок X-Telegram-Bot-Api-Secret-Token). */
+export type BotConfig = { token: string; webhookSecret: string };
+
+export function botConfig(env: Env = process.env): BotConfig | null {
+  const token = env.TELEGRAM_BOT_TOKEN?.trim();
+  const webhookSecret = env.TELEGRAM_WEBHOOK_SECRET?.trim();
+  if (!token || !webhookSecret || webhookSecret.length < 16) return null;
+  return { token, webhookSecret };
+}
 export type SheetConfig = { url: string; secret: string };
 
 /** Telegram-чат менеджеров: бот и номер чата; тревоги — в свой чат руководителя или туда же. */
@@ -53,13 +63,24 @@ function failure(error: unknown): SendResult {
   return { ok: false, error: name === "TimeoutError" ? "timeout" : "network" };
 }
 
+/** Кнопки под полем ввода (reply_markup Bot API): «Поделиться номером» или убрать их. */
+export type TelegramKeyboard =
+  | { keyboard: { text: string; request_contact?: boolean }[][]; resize_keyboard: true; one_time_keyboard: true }
+  | { remove_keyboard: true };
+
 /** Сообщение ботом (Bot API sendMessage); простой текст — разметка Telegram не ломается на «_». */
-export async function sendTelegram(config: TelegramConfig, chatId: string, text: string): Promise<SendResult> {
+export async function sendTelegram(
+  config: TelegramConfig,
+  chatId: string | number,
+  text: string,
+  keyboard?: TelegramKeyboard,
+): Promise<SendResult> {
   try {
     const response = await post(`https://api.telegram.org/bot${config.token}/sendMessage`, {
       chat_id: chatId,
       text,
       link_preview_options: { is_disabled: true },
+      ...(keyboard ? { reply_markup: keyboard } : {}),
     });
     if (response.ok) return { ok: true };
     const body = (await response.json().catch(() => null)) as { description?: string } | null;

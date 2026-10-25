@@ -11,5 +11,7 @@ export async function submitLeadAction(request: unknown): Promise<LeadSubmitResu
   if (!parsed.ok) return { status: "error", error: "invalid", fields: parsed.fields };
   // Бот заполнил скрытое поле: отвечаем как человеку, но ничего не сохраняем.
   if (parsed.trap) return { status: "sent", number: 0, repeat: false };
-  return submitLead(parsed.lead);
+  const result = await submitLead(parsed.lead);
+  // Посетителю — номер для «Заявка отправлена»; id заявки ему не нужен.
+  return result.status === "sent" ? { status: "sent", number: result.number, repeat: result.repeat } : result;
 }
