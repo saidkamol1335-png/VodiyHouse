@@ -11,9 +11,9 @@ describe("индексация: тестовый деплой закрыт (Ф2)
     expect(isIndexingClosed({})).toBe(false);
   });
 
-  it("robots.txt: закрыт — всё запрещено; открыт — без кабинета и стендов", () => {
+  it("robots.txt: закрыт — обход открыт (noindex в заголовке виден); открыт — без кабинета и стендов", () => {
     vi.stubEnv("SITE_NOINDEX", "1");
-    expect(robots()).toEqual({ rules: { userAgent: "*", disallow: "/" } });
+    expect(robots()).toEqual({ rules: { userAgent: "*", allow: "/" } });
     vi.stubEnv("SITE_NOINDEX", "");
     expect(robots()).toEqual({
       rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/dev"] },

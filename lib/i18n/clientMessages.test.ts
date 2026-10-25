@@ -47,7 +47,9 @@ describe("сообщения для браузера", () => {
 
   // Новый раздел сайта с клиентскими текстами без своего провайдера сломал бы страницу — тест раньше.
   it("клиентским модулям оболочки сайта хватает текстов оболочки", () => {
-    const used = [...clientNamespaces(["app/[locale]/layout.tsx", "app/[locale]/page.tsx"])];
+    // Все страницы сайта, кроме калькулятора: у него свой провайдер с CALC_MESSAGES.
+    const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
+    const used = [...clientNamespaces(pages)];
     expect(used.length).toBeGreaterThan(0);
     expect(used.filter((namespace) => namespace !== "*" && !covers(SITE_SHELL_MESSAGES, namespace))).toEqual([]);
   });

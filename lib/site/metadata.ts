@@ -11,11 +11,13 @@ const PRODUCTION_ORIGIN = "https://vodiyhouse.uz";
 type Env = Record<string, string | undefined>;
 
 /**
- * Адрес сайта для абсолютных ссылок (canonical, og:url, og:image): SITE_URL — если задан явно;
- * на Netlify — URL основного адреса сайта (тестовый деплой); иначе — боевой домен.
+ * Адрес сайта для абсолютных ссылок (canonical, og:url, og:image) — вшивается при сборке: SITE_URL —
+ * если задан (на боевом сайте — обязательно: URL Netlify может быть ещё *.netlify.app); на Netlify —
+ * URL основного адреса сайта (тестовый деплой); иначе — боевой домен.
  */
 export function siteOrigin(env: Env = process.env): string {
-  return (env.SITE_URL ?? env.URL ?? PRODUCTION_ORIGIN).replace(/\/+$/, "");
+  // || , а не ??: пустая переменная окружения — как не заданная (new URL("") уронил бы все страницы).
+  return (env.SITE_URL || env.URL || PRODUCTION_ORIGIN).replace(/\/+$/, "");
 }
 
 const OG_LOCALE: Record<Locale, string> = { ru: "ru_RU", uz: "uz_UZ" };

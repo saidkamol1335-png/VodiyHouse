@@ -8,6 +8,7 @@ describe("siteOrigin", () => {
     );
     expect(siteOrigin({ URL: "https://vodiy-test.netlify.app" })).toBe("https://vodiy-test.netlify.app");
     expect(siteOrigin({})).toBe("https://vodiyhouse.uz");
+    expect(siteOrigin({ SITE_URL: "", URL: "" })).toBe("https://vodiyhouse.uz");
   });
 });
 
