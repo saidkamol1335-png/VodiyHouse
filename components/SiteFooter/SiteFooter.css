@@ -144,7 +144,9 @@
  * Показанный в lite (data-revealed="lite") не прячется, когда проба потом включит full; без JS
  * ([data-js] нет) знак виден сразу.
  */
-[data-motion="full"] .site-footer__pixels {
+/* Свечение — когда клетки появились (data-glow ставит PixelLogo): во время появления фильтр
+   перерисовывал бы знак на каждом кадре. */
+[data-motion="full"] .site-footer__pixels[data-glow] {
   filter: var(--footer-pixel-glow);
 }
 
