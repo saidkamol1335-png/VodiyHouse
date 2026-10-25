@@ -182,3 +182,12 @@
     overflow: hidden;
   }
 }
+
+/* Касание на планшете (шире 760 px — фильтр не на весь экран): поля и списки не ниже 44 px. */
+@media (pointer: coarse) {
+  .catalog-filter__select select,
+  .catalog-filter__range,
+  .catalog-filter__price {
+    height: var(--touch-target);
+  }
+}

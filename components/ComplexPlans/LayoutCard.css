@@ -71,7 +71,7 @@
 
 .complex-layout__title {
   margin: 0;
-  font-size: 16.5px;
+  font-size: var(--fs-complex-card-name);
   font-weight: 700;
   letter-spacing: -0.015em;
 }
@@ -228,7 +228,7 @@
   }
 
   .complex-layout__title {
-    font-size: 15.5px;
+    font-size: var(--fs-complex-card-phone);
     font-weight: 750;
   }
 
@@ -237,7 +237,7 @@
   }
 
   .complex-layout__price b {
-    font-size: 17px;
+    font-size: var(--fs-lead);
     font-weight: 800;
   }
 

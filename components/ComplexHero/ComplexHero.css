@@ -137,7 +137,7 @@
   }
 
   .complex-hero__name {
-    font-size: 40px;
+    font-size: var(--fs-complex-name-phone);
   }
 
   .complex-hero__badge {

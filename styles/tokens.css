@@ -34,6 +34,14 @@
   --fs-card-price: 25px; /* «от $31 000» на карточке */
   --fs-footer-promise-phone: 24px; /* обещание подвала на телефоне (мокап .ftr__big) */
   --fs-stat: 34px;
+  /* Страница ЖК (мокап SiteJk / MobJk) */
+  --fs-complex-name-phone: 40px; /* «ЖК Shodlik» на телефоне */
+  --fs-complex-price-phone: 33px; /* «от $30 290» в карточке цены телефона */
+  --fs-complex-stock: 76px; /* «41 в продаже сейчас» */
+  --fs-complex-stock-phone: 48px;
+  --fs-complex-card-name: 16.5px; /* «1-комн. · 42,5 м²» на карточке планировки */
+  --fs-complex-card-phone: 15.5px; /* подписи карточек планировок и наличия на телефоне */
+  --fs-complex-block-phone: 18px; /* название блока на телефоне */
   --fs-h2: clamp(30px, 3.05vw, 46px);
   --fs-login-title: clamp(
     30px,
@@ -100,6 +108,8 @@
   --cols: 6; /* линии колонок фона */
   /* Цель касания: телефон и pointer: coarse (WCAG 2.5.5) — кнопки, чекбоксы, пилюли. */
   --touch-target: 44px;
+  /* Строчная ссылка на касание: (44 − высота строки ~20 px) / 2 сверху и снизу — зона 44 px. */
+  --touch-pad-inline: 12px;
 
   /* ---------- слои (z-index): что поверх чего ---------- */
   --z-sticky-actions: 5; /* липкая полоса «Сохранить» внизу панели */

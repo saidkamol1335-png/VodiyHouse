@@ -38,9 +38,8 @@
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
-  transition:
-    color var(--dur-base) ease-out,
-    opacity var(--dur-base) ease-out;
+  /* Цвет меняется сразу: анимируем только opacity (CLAUDE.md §3). */
+  transition: opacity var(--dur-base) ease-out;
 }
 
 .complex-nav__link:hover,

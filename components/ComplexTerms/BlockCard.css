@@ -232,7 +232,7 @@
   }
 
   .complex-block__name {
-    font-size: 18px;
+    font-size: var(--fs-complex-block-phone);
     font-weight: 750;
   }
 
@@ -280,5 +280,13 @@
     justify-content: center;
     min-height: 48px;
     font-size: var(--fs-body);
+  }
+}
+
+/* Касание: «перенесён с …» (вход в «Историю сроков») — строчный текст рядом со сроком: зону
+   нажатия расширяет вертикальный отступ, высота строки не меняется. */
+@media (pointer: coarse) {
+  .complex-block__history summary {
+    padding-block: var(--touch-pad-inline);
   }
 }

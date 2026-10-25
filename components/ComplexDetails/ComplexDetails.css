@@ -163,3 +163,17 @@
     overflow: hidden;
   }
 }
+
+/* Касание: «Читать далее» и «×» окна темы — цель не меньше 44 px, вид тот же. */
+@media (pointer: coarse) {
+  .complex-details__more {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  .complex-details__close {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}

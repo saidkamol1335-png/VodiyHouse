@@ -32,6 +32,7 @@ function leftText(t: Translator, row: StockRow): string {
 export async function ComplexStock({ page, rows, free, withLayouts }: ComplexStockProps) {
   const t = await getTranslations("complex");
   const locale = (await getLocale()) as Locale;
+  const multiBlock = page.blocks.length > 1;
   const blocks = freeByBlock(page);
   const blocksText =
     blocks.length > 1
@@ -50,16 +51,17 @@ export async function ComplexStock({ page, rows, free, withLayouts }: ComplexSto
           </div>
         </div>
       ) : null}
-      <div className="complex-stock__table" role="table" aria-label={t("stock.title")}>
+      {/* Один блок — колонки «По блокам» нет: она была бы пустой. */}
+      <div className={multiBlock ? "complex-stock__table" : "complex-stock__table complex-stock__table--single"} role="table" aria-label={t("stock.title")}>
         <div className="complex-stock__row complex-stock__row--head" role="row">
           <span role="columnheader">{t("stock.type")}</span>
           <span role="columnheader">{t("stock.area")}</span>
           <span role="columnheader">{t("stock.price")}</span>
-          <span role="columnheader">{t("stock.byBlocks")}</span>
+          {multiBlock ? <span role="columnheader">{t("stock.byBlocks")}</span> : null}
           <span role="columnheader">{t("stock.left")}</span>
         </div>
         {rows.map((row) => (
-          <StockLine key={row.rooms} row={row} t={t} locale={locale} multiBlock={page.blocks.length > 1} linked={withLayouts.has(row.rooms)} />
+          <StockLine key={row.rooms} row={row} t={t} locale={locale} multiBlock={multiBlock} linked={withLayouts.has(row.rooms)} />
         ))}
       </div>
     </div>
@@ -112,9 +114,11 @@ function StockLine({ row, t, locale, multiBlock, linked }: StockLineProps) {
       <span className="complex-stock__price" role="cell">
         {priceText ? t("stock.priceFrom", { price: priceText }) : "—"}
       </span>
-      <span className="complex-stock__by-blocks" role="cell">
-        {multiBlock ? byBlocksText(t, row) : ""}
-      </span>
+      {multiBlock ? (
+        <span className="complex-stock__by-blocks" role="cell">
+          {byBlocksText(t, row)}
+        </span>
+      ) : null}
       <span className="complex-stock__left-cell" role="cell">
         <span className={badgeClass(row)}>{leftText(t, row)}</span>
         {linked ? <ChevronRight className="complex-stock__chevron" size={16} strokeWidth={2} aria-hidden /> : null}

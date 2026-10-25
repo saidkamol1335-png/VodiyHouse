@@ -25,7 +25,7 @@
 
 .complex-stock__number {
   display: block;
-  font-size: 76px;
+  font-size: var(--fs-complex-stock);
   line-height: 1;
   font-weight: 500;
   letter-spacing: -0.05em;
@@ -59,6 +59,13 @@
   padding: 14px 18px;
   border-bottom: 1px dashed var(--dash);
   font-size: var(--fs-control-l);
+}
+
+/* Один блок — без колонки «По блокам» (на телефоне строка своя — две колонки). */
+@media (min-width: 761px) {
+  .complex-stock__table--single .complex-stock__row {
+    grid-template-columns: 1.1fr 1fr 1fr auto;
+  }
 }
 
 .complex-stock__row:last-child {
@@ -164,7 +171,7 @@
   }
 
   .complex-stock__number {
-    font-size: 48px;
+    font-size: var(--fs-complex-stock-phone);
     font-weight: 800;
     letter-spacing: -0.055em;
   }
@@ -200,7 +207,7 @@
   }
 
   .complex-stock__type {
-    font-size: 15.5px;
+    font-size: var(--fs-complex-card-phone);
     font-weight: 750;
   }
 

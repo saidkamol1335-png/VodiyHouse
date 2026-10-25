@@ -419,3 +419,10 @@
     height: var(--touch-target);
   }
 }
+
+/* Касание: «Открыть в Яндекс Картах» не ниже 44 px. */
+@media (pointer: coarse) {
+  .complex-location__open {
+    height: var(--touch-target);
+  }
+}

@@ -213,7 +213,7 @@
 
   .complex-offer__amount {
     margin-top: 6px;
-    font-size: 33px;
+    font-size: var(--fs-complex-price-phone);
     font-weight: 800;
   }
 
