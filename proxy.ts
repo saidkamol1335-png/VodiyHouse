@@ -3,6 +3,7 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { adminGate, hasAuthCookie, isAdminPath, type GateDecision } from "@/lib/admin/gate";
 import { RETURN_COOKIE, RETURN_MAX_AGE_SECONDS, safeReturnPath } from "@/lib/admin/returnPath";
 import { localeOfPath, localeRedirectTarget } from "@/lib/i18n/localeRedirect";
+import { hasAdParams, LANDING_COOKIE, LANDING_MAX_AGE, landingValue } from "@/lib/leads/landing";
 import { ADMIN_ROUTE } from "@/lib/routes";
 import { LOCALE_COOKIE } from "@/lib/i18n/routing";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -50,7 +51,19 @@ async function localeProxy(request: NextRequest) {
   if (locale && request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
     response.cookies.set(LOCALE_COOKIE, locale, { maxAge: ONE_YEAR_SECONDS, sameSite: "lax", path: "/" });
   }
+  rememberAdLanding(request, response);
   return response;
+}
+
+/**
+ * Заход на страницу ЖК с рекламными метками: адрес — в cookie на минуту. Если ЖК уже снят с сайта,
+ * страница ответит редиректом на каталог без параметров, а метки заявка возьмёт отсюда (3.13).
+ */
+function rememberAdLanding(request: NextRequest, response: NextResponse): void {
+  const { pathname, search, searchParams } = request.nextUrl;
+  if (request.method !== "GET" || !COMPLEX_PAGE.test(pathname) || !hasAdParams(searchParams)) return;
+  const value = landingValue(pathname, search);
+  if (value) response.cookies.set(LANDING_COOKIE, encodeURIComponent(value), { maxAge: LANDING_MAX_AGE, sameSite: "lax", path: "/" });
 }
 
 // Проверка здесь только оптимистичная (docs: authentication.md, «Optimistic checks with Proxy»):

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { ComplexBar } from "@/components/ComplexBar";
@@ -21,7 +21,7 @@ import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { readSiteContacts } from "@/lib/site/contacts";
 import type { ComplexPage } from "@/lib/site/complex/model";
 import { readComplexPage } from "@/lib/site/complex/read";
-import { isRetiredComplex } from "@/lib/site/complex/retired";
+import { complexSlugState } from "@/lib/site/complex/retired";
 import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
 import { complexSummary } from "@/lib/site/complex/summary";
 import { pageMetadata } from "@/lib/site/metadata";
@@ -77,11 +77,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
   const [{ slug }, messages, localeRaw] = await Promise.all([params, getMessages(), getLocale()]);
   const locale = (isLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE) as Locale;
   const [result, contacts, t] = await Promise.all([readComplexPage(slug), readSiteContacts(), getTranslations("complex")]);
-  if (result.kind === "missing") {
-    // ЖК в архиве или удалён после него — 308 (постоянный) на каталог (PLAN §3а), чужой адрес — 404.
-    if (await isRetiredComplex(slug)) permanentRedirect(`/${locale}${ROUTES.catalog}`);
-    notFound();
-  }
+  if (result.kind === "missing") return goneOrNotFound(slug, locale);
   if (result.kind === "unavailable") {
     return (
       <>
@@ -117,6 +113,14 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
       </main>
     </NextIntlClientProvider>
   );
+}
+
+/** ЖК в архиве — 307 на каталог (его могут восстановить), удалён — 308 (PLAN §3а), чужой адрес — 404. */
+async function goneOrNotFound(slug: string, locale: Locale): Promise<never> {
+  const state = await complexSlugState(slug);
+  if (state === "archived") redirect(`/${locale}${ROUTES.catalog}`);
+  if (state === "deleted") permanentRedirect(`/${locale}${ROUTES.catalog}`);
+  notFound();
 }
 
 /** Сердце и «Поделиться» в углу галереи (мокап .gal .jc__icons). */

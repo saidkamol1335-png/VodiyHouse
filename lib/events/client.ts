@@ -17,8 +17,12 @@ const queue: SiteEvent[] = [];
 let context: { pathname: string; entity: Pick<SiteEvent, "entity_type" | "entity_id"> } | null = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
 const listeners = new Set<Listener>();
+/** События с открытия вкладки — для пикселей, которые стартуют позже (после первого действия). */
+const history: SiteEvent[] = [];
+const HISTORY_MAX = 20;
 
-const isStaff = () => AUTH_COOKIE.test(document.cookie) || window.location.pathname.startsWith("/dev");
+/** Сотрудник с сессией кабинета или стенд /dev: ни наших событий, ни пикселей. */
+export const isStaff = () => AUTH_COOKIE.test(document.cookie) || window.location.pathname.startsWith("/dev");
 
 /** Источник для ленты: utm_source первого захода или домен, откуда пришли. */
 function sourceLabel(): string | null {
@@ -66,13 +70,19 @@ function record(type: SiteEvent["type"], data: Omit<SiteEvent, "type" | "path">)
   if (last && last.key === key && Date.now() - last.at < REPEAT_MS) return;
   last = { key, at: Date.now() };
   queue.push(event);
+  history.push(event);
+  if (history.length > HISTORY_MAX) history.shift();
   for (const listener of listeners) listener(event);
   if (URGENT.has(type)) flushEvents();
   else timer ??= setTimeout(flushEvents, FLUSH_MS);
 }
 
-/** Подписка рекламных пикселей на события (до загрузки их скриптов события ждут в их очереди). */
+/**
+ * Подписка рекламных пикселей на события: сначала — уже случившиеся на вкладке (просмотр ЖК до
+ * первого действия), потом — новые; до загрузки скриптов пикселей события ждут в их очереди.
+ */
 export function onTrack(listener: Listener): () => void {
+  for (const event of history) listener(event);
   listeners.add(listener);
   return () => listeners.delete(listener);
 }

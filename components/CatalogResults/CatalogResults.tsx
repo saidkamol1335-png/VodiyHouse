@@ -114,14 +114,29 @@ function pickIntent(filter: Filter): LeadIntent {
 
 const FILTER_TRACK_MS = 1500;
 
-/** Событие «фильтр» — после паузы в выборе: каждая нажатая пилюля не становится отдельным событием. */
+/**
+ * Событие «фильтр» — после паузы в выборе: каждая нажатая пилюля не становится отдельным событием.
+ * Что выбрано, кабинет читает из адреса события (параметры каталога), текста от браузера нет. Ушли
+ * со страницы раньше паузы — событие уходит сразу.
+ */
 function useFilterTracking() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  const pending = useRef(false);
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      if (pending.current) track("filter");
+    },
+    [],
+  );
   return (next: Filter) => {
     clearTimeout(timer.current);
-    const text = filterText(next);
-    if (text) timer.current = setTimeout(() => track("filter", { detail: text.slice(0, 120) }), FILTER_TRACK_MS);
+    pending.current = Boolean(filterText(next));
+    if (!pending.current) return;
+    timer.current = setTimeout(() => {
+      pending.current = false;
+      track("filter");
+    }, FILTER_TRACK_MS);
   };
 }
 

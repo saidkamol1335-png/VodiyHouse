@@ -2,12 +2,14 @@ import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 import { hasAuthCookie } from "@/lib/admin/gate";
+import { visitorKey } from "@/lib/leads/server/submit";
 import { EVENT_BATCH_MAX, EVENT_TYPES, type EventBatch, type SiteEvent } from "../types";
 import { deviceOf, isBot } from "../visitor";
 
 // Приёмник событий сайта (шаг 3.12): посетитель без входа — секретным ключом, проверяет база
 // (track_events открыт только серверу). Посетитель — случайный id в cookie на год, сессия — 30 минут
-// без действий; IP не храним. Боты и сотрудники (с cookie сессии кабинета) не записываются.
+// без действий; IP не храним — лимит с адреса считает база по его солёному хэшу (как у заявок): без
+// cookie каждая пачка — новый посетитель. Боты и сотрудники (с cookie сессии кабинета) не записываются.
 
 export const VISITOR_COOKIE = "vh-vid";
 export const SESSION_COOKIE = "vh-sid";
@@ -46,6 +48,7 @@ export async function trackEvents({ userAgent, cookies, body }: TrackRequest): P
   const { error } = await createSupabaseAdminClient().rpc("track_events", {
     p_visitor: visitor,
     p_session: session,
+    p_client_key: await visitorKey(),
     p_device: deviceOf(userAgent),
     p_lang: batch.lang,
     p_source: batch.source,

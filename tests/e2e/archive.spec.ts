@@ -30,4 +30,12 @@ test.describe("архив: старые адреса ЖК", () => {
     const missing = await request.get("/ru/novostroyki/net-takogo-zhk", { maxRedirects: 0 });
     expect(missing.status()).toBe(404);
   });
+
+  test("старая ссылка с рекламы: метки не теряются — адрес захода в cookie на минуту, заявка возьмёт их", async ({ request }) => {
+    const moved = await request.get(`/ru/novostroyki/${RETIRED}?utm_source=instagram&utm_campaign=osen`, { maxRedirects: 0 });
+    expect(moved.status()).toBe(308);
+    const cookie = moved.headers()["set-cookie"] ?? "";
+    expect(decodeURIComponent(cookie)).toContain(`vh-landing=/ru/novostroyki/${RETIRED}?utm_source=instagram&utm_campaign=osen`);
+    expect(cookie).toMatch(/Max-Age=60/i);
+  });
 });

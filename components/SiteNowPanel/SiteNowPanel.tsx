@@ -33,10 +33,16 @@ function useSiteNow(initial: SiteNow | null, read: SiteNowPanelProps["read"]) {
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
+    // Ушли с главной или запрос ещё идёт — не начинать второй и не заводить таймер после ухода.
+    let active = true;
+    let loading = false;
     const load = async () => {
       clearTimeout(timer);
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible" || loading) return;
+      loading = true;
       const result = await read().catch((): SiteNowResult => ({ status: "error", error: "network" }));
+      loading = false;
+      if (!active) return;
       setFailed(result.status === "error");
       if (result.status === "done") setNow(result.now);
       timer = setTimeout(load, REFRESH_MS);
@@ -45,6 +51,7 @@ function useSiteNow(initial: SiteNow | null, read: SiteNowPanelProps["read"]) {
     else timer = setTimeout(load, REFRESH_MS);
     document.addEventListener("visibilitychange", load);
     return () => {
+      active = false;
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", load);
     };

@@ -25,6 +25,9 @@ const cell = (value: string | number | null) => {
   return /[";\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 
+// Excel с русскими настройками читает «28.5» как дату (28 мая): дробные — через запятую.
+const decimal = (value: number | null) => (value === null ? null : String(value).replace(".", ","));
+
 export function archiveUnitsCsv(units: readonly ArchiveUnit[]): string {
   const rows = units.map((unit) =>
     [
@@ -34,9 +37,9 @@ export function archiveUnitsCsv(units: readonly ArchiveUnit[]): string {
       unit.floor,
       unit.number,
       unit.rooms,
-      unit.area,
-      unit.price,
-      unit.price_per_m2,
+      decimal(unit.area),
+      decimal(unit.price),
+      decimal(unit.price_per_m2),
       unit.currency,
       STATUSES[unit.status] ?? unit.status,
     ]

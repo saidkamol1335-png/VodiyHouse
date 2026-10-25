@@ -26,7 +26,7 @@ export function FavoriteButton({ slug, name, className }: FavoriteButtonProps) {
       aria-label={t("favorite", { name })}
       onClick={() => {
         toggleFavorite(slug);
-        if (!on) track("favorite", { detail: name });
+        if (!on) track("favorite", { detail: slug });
       }}
     >
       <Heart size={16} strokeWidth={2} aria-hidden />

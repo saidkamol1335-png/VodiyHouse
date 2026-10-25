@@ -1,4 +1,5 @@
-import { SOURCE_KEYS, type LeadSource } from "./types";
+import { AD_KEYS, LANDING_COOKIE } from "./landing";
+import type { LeadSource } from "./types";
 
 // Источник первого захода (ТЗ 10.3): метки из адреса и откуда пришли — при первом открытии сайта,
 // заявка передаёт их, даже если оставлена позже на другой странице. Хранится в браузере
@@ -6,7 +7,6 @@ import { SOURCE_KEYS, type LeadSource } from "./types";
 // Реши сам: заход без меток не закрепляется навсегда — следующий заход с рекламы его заменит.
 
 const STORAGE_KEY = "vh.source";
-const AD_KEYS = SOURCE_KEYS.filter((key) => key !== "referrer" && key !== "landing");
 
 let memory: LeadSource | null = null;
 
@@ -37,9 +37,24 @@ function readStored(): LeadSource | null {
   }
 }
 
+/** Адрес захода, который proxy сохранил перед редиректом со старого адреса ЖК; читается один раз. */
+function takeLandingHref(href: string): string | null {
+  const match = new RegExp(`(?:^|;\\s*)${LANDING_COOKIE}=([^;]*)`).exec(document.cookie);
+  if (!match) return null;
+  document.cookie = `${LANDING_COOKIE}=; max-age=0; path=/`;
+  try {
+    const landing = new URL(decodeURIComponent(match[1]!), href);
+    return landing.origin === new URL(href).origin ? landing.href : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Первый заход (или первый с рекламы после заходов без меток) — запомнить. */
 export function rememberVisitSource(href: string, referrer: string): void {
-  const visit = sourceOfVisit(href, referrer);
+  const here = sourceOfVisit(href, referrer);
+  const landing = hasAdMarks(here) ? null : takeLandingHref(href);
+  const visit = landing ? sourceOfVisit(landing, referrer) : here;
   const stored = readStored();
   if (stored && (hasAdMarks(stored) || !hasAdMarks(visit))) return;
   memory = visit;
