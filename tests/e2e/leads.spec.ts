@@ -119,7 +119,7 @@ test.describe("кабинет · заявки", () => {
       // Статус пишет действие сервера в базу: в общем прогоне e2e под нагрузкой — дольше 5 с.
       await expect(drawer.locator(".lead-drawer__head .lead-status")).toHaveText("Перезвонили", { timeout: 15_000 });
       await drawer.getByRole("button", { name: "Взять в работу" }).click();
-      await expect(drawer.getByRole("button", { name: /\(вы\)/ })).toHaveAttribute("aria-pressed", "true");
+      await expect(drawer.getByRole("button", { name: /\(вы\)/ })).toHaveAttribute("aria-pressed", "true", { timeout: 15_000 });
       await shot(page, "lead-drawer");
       await page.keyboard.press("Escape");
       await expect(drawer).toBeHidden();
