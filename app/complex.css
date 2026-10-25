@@ -4,8 +4,6 @@
 @import "../components/TermHint/TermHint.css";
 
 @import "../components/ComplexBar/ComplexBar.css";
-@import "../components/ComplexBlocks/BlockCard.css";
-@import "../components/ComplexBlocks/ComplexBlocks.css";
 @import "../components/ComplexDetails/ComplexDetails.css";
 @import "../components/ComplexDeveloper/ComplexDeveloper.css";
 @import "../components/ComplexDocuments/ComplexDocuments.css";
@@ -13,12 +11,14 @@
 @import "../components/ComplexGallery/ComplexGallery.css";
 @import "../components/ComplexGallery/GalleryViewer.css";
 @import "../components/ComplexHero/ComplexHero.css";
-@import "../components/ComplexLayouts/ComplexLayouts.css";
-@import "../components/ComplexLayouts/DrawingZoom.css";
-@import "../components/ComplexLayouts/LayoutCard.css";
 @import "../components/ComplexLocation/ComplexLocation.css";
 @import "../components/ComplexNav/ComplexNav.css";
 @import "../components/ComplexOffer/ComplexOffer.css";
+@import "../components/ComplexPlans/ComplexPlans.css";
+@import "../components/ComplexPlans/DrawingZoom.css";
+@import "../components/ComplexPlans/LayoutCard.css";
 @import "../components/ComplexSection/ComplexSection.css";
 @import "../components/ComplexStock/ComplexStock.css";
+@import "../components/ComplexTerms/BlockCard.css";
+@import "../components/ComplexTerms/ComplexTerms.css";
 @import "../components/ComplexVideos/ComplexVideos.css";

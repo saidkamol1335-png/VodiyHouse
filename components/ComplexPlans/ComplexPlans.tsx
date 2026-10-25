@@ -15,7 +15,7 @@ import { DrawingZoom } from "./DrawingZoom";
 import { LayoutCard } from "./LayoutCard";
 import { LayoutFilters } from "./LayoutFilters";
 
-type ComplexLayoutsProps = {
+type ComplexPlansProps = {
   sectionId: string;
   cards: readonly LayoutCardModel[];
   /** Тексты «?» калькулятора из справочника (шаг 2.8). */
@@ -83,7 +83,7 @@ function useLayoutCalc() {
  * «Планировки» (мокап .plans, ТЗ 7.4): фильтры по блоку и комнатам, карточки, «Рассчитать платёж»
  * открывает расчёт этой квартиры (шаг 2.7) — на 1440 под рядом карточки, на телефоне шторкой.
  */
-export function ComplexLayouts({ sectionId, cards, hints, leadEnabled }: ComplexLayoutsProps) {
+export function ComplexPlans({ sectionId, cards, hints, leadEnabled }: ComplexPlansProps) {
   const t = useTranslations("complex.layouts");
   const [filter, setFilter] = useState<LayoutFilter>(ALL);
   const [zoom, setZoom] = useState<LayoutCardModel | null>(null);
@@ -92,14 +92,14 @@ export function ComplexLayouts({ sectionId, cards, hints, leadEnabled }: Complex
   const options = layoutFilterOptions(cards, filter.blockId);
   const shown = filterLayouts(cards, filter);
   return (
-    <div className="complex-layouts">
+    <div className="complex-plans">
       <LayoutFilters options={options} filter={filter} onChange={setFilter} />
-      <p className="complex-layouts__hint">
+      <p className="complex-plans__hint">
         <Calculator size={16} strokeWidth={1.9} aria-hidden />
         {t("hint")}
       </p>
-      {shown.length === 0 ? <p className="complex-layouts__empty">{t("empty")}</p> : null}
-      <div className="complex-layouts__grid">
+      {shown.length === 0 ? <p className="complex-plans__empty">{t("empty")}</p> : null}
+      <div className="complex-plans__grid">
         {shown.map((card) => (
           <Fragment key={card.layout.id}>
             <LayoutCard
@@ -112,7 +112,7 @@ export function ComplexLayouts({ sectionId, cards, hints, leadEnabled }: Complex
               onZoom={() => setZoom(card)}
             />
             {calc.open?.layoutId === card.layout.id ? (
-              <div className="complex-layouts__calc">
+              <div className="complex-plans__calc">
                 <FlatCalculator key={`${card.layout.id}-${calc.open.round}`} id="complex-flat-calc" screen={calc.open.screen} initialParams={INITIAL_PARAMS} leadEnabled={leadEnabled} onClose={calc.close} hints={hints} />
               </div>
             ) : null}

@@ -1,6 +1,9 @@
 import type { ContentErrorCode } from "../developers/errors";
 import type { StatusResult } from "../developers/types";
 import type { ComplexCreateErrors, ComplexCreateFields } from "./create";
+import type { DetailsErrors } from "./details";
+import type { DocumentsErrors } from "./documents";
+import type { VideoErrors } from "./videos";
 import type { ComplexMainErrors, ComplexMainFields } from "./mainForm";
 import type { ComplexRequirement } from "./readiness";
 
@@ -46,6 +49,20 @@ export type SaveRowsResult =
       rowErrors: Record<string, Partial<Record<string, string>>>;
       broken: ComplexRequirement[];
     };
+
+/**
+ * Вкладки «Видео», «Документы», «Детали» (шаг 3.5): ошибки по строке (ключ строки). Набранное
+ * остаётся в полях — форма отправляется без сброса (submitKeepingForm). broken — всегда пусто:
+ * эти вкладки не условие публикации, но ответ читает тот же ComplexSaveFeedback.
+ */
+export type SaveContentResult<Errors> =
+  | { status: "idle" }
+  | { status: "saved"; at: number }
+  | { status: "error"; error: ContentErrorCode | null; errors: Errors; broken: ComplexRequirement[] };
+
+export type DocumentsResult = SaveContentResult<DocumentsErrors>;
+export type VideosResult = SaveContentResult<VideoErrors>;
+export type DetailsResult = SaveContentResult<DetailsErrors>;
 
 /** Файлы ЖК (фото, чертежи): id — новой строки media_assets или того, что поменяли. */
 export type ComplexMediaResult =

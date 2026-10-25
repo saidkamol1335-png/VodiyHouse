@@ -22,12 +22,12 @@ type SegmentProps<Value> = {
 /** Сегмент фильтра (мокап .seg): «Все» и варианты, выбран один. */
 function Segment<Value>({ modifier, label, options, value, onPick }: SegmentProps<Value>) {
   return (
-    <div className={`complex-layouts__segment complex-layouts__segment--${modifier}`} role="group" aria-label={label}>
+    <div className={`complex-plans__segment complex-plans__segment--${modifier}`} role="group" aria-label={label}>
       {options.map((option) => (
         <button
           key={String(option.value)}
           type="button"
-          className={option.value === value ? "complex-layouts__option complex-layouts__option--active" : "complex-layouts__option"}
+          className={option.value === value ? "complex-plans__option complex-plans__option--active" : "complex-plans__option"}
           aria-pressed={option.value === value}
           onClick={() => onPick(option.value)}
         >
@@ -52,7 +52,7 @@ export function LayoutFilters({ options, filter, onChange }: LayoutFiltersProps)
     ...options.rooms.map((count) => ({ value: count, label: roomsLabel(count) })),
   ];
   return (
-    <div className="complex-layouts__filters">
+    <div className="complex-plans__filters">
       {options.blocks.length > 0 ? (
         <Segment modifier="blocks" label={t("layouts.blocksLabel")} options={blocks} value={filter.blockId} onPick={(blockId) => onChange({ blockId, rooms: null })} />
       ) : null}

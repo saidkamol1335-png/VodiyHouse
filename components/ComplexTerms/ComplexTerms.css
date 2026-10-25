@@ -1,10 +1,10 @@
 /* «Блоки и условия покупки» (мокап .blocks): карточки по две в ряд; на телефоне (MobJk) — вкладки
    «Блок A · Сдан» и одна карточка под ними. */
-.complex-blocks {
+.complex-terms {
   margin-top: 48px;
 }
 
-.complex-blocks__title {
+.complex-terms__title {
   margin: 0 0 16px;
   font-size: var(--fs-h3);
   line-height: var(--lh-snug);
@@ -12,31 +12,31 @@
   letter-spacing: var(--ls-h3);
 }
 
-.complex-blocks__tabs {
+.complex-terms__tabs {
   display: none;
 }
 
-.complex-blocks__grid {
+.complex-terms__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 14px;
 }
 
-.complex-blocks__cell {
+.complex-terms__cell {
   display: flex;
   min-width: 0;
 }
 
 @media (max-width: 760px) {
-  .complex-blocks {
+  .complex-terms {
     margin-top: 28px;
   }
 
-  .complex-blocks__title {
+  .complex-terms__title {
     margin-bottom: 12px;
   }
 
-  .complex-blocks__tabs {
+  .complex-terms__tabs {
     display: flex;
     gap: 4px;
     padding: 3px;
@@ -45,7 +45,7 @@
     background: var(--bg-4);
   }
 
-  .complex-blocks__tab {
+  .complex-terms__tab {
     display: inline-flex;
     flex: 1;
     flex-direction: column;
@@ -64,26 +64,26 @@
     cursor: pointer;
   }
 
-  .complex-blocks__tab small {
+  .complex-terms__tab small {
     color: var(--fg-3);
     font-size: var(--fs-label);
     font-weight: 600;
   }
 
-  .complex-blocks__tab--active {
+  .complex-terms__tab--active {
     background: var(--bg-2);
     color: var(--fg);
     box-shadow: var(--control-shadow);
   }
 
-  .complex-blocks__grid {
+  .complex-terms__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     margin-top: 12px;
   }
 
   /* Вкладки работают только с JS: без него видны все карточки. */
-  [data-js] .complex-blocks__tabs + .complex-blocks__grid .complex-blocks__cell:not([data-active]) {
+  [data-js] .complex-terms__tabs + .complex-terms__grid .complex-terms__cell:not([data-active]) {
     display: none;
   }
 }

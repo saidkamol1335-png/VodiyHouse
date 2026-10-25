@@ -22,7 +22,7 @@ describe("ЖК по ролям (Н2)", () => {
     const manager = complexAccess("manager");
     expect(manager).toEqual({ manage: false, tabs: ["units"] });
     expect(complexTabRedirect("manager", BASE, "units")).toBeNull();
-    for (const key of ["main", "blocks", "layouts", "photos", "log"] as const) {
+    for (const key of ["main", "blocks", "layouts", "photos", "videos", "details", "documents", "log"] as const) {
       expect(complexTabRedirect("manager", BASE, key)).toBe(`${BASE}/kvartiry`);
     }
   });

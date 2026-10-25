@@ -16,12 +16,12 @@ export function BlockTabs({ label, tabs, children }: BlockTabsProps) {
   return (
     <>
       {tabs.length > 1 ? (
-        <div className="complex-blocks__tabs" role="group" aria-label={label}>
+        <div className="complex-terms__tabs" role="group" aria-label={label}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              className={tab.id === active ? "complex-blocks__tab complex-blocks__tab--active" : "complex-blocks__tab"}
+              className={tab.id === active ? "complex-terms__tab complex-terms__tab--active" : "complex-terms__tab"}
               aria-pressed={tab.id === active}
               onClick={() => setActive(tab.id)}
             >
@@ -31,9 +31,9 @@ export function BlockTabs({ label, tabs, children }: BlockTabsProps) {
           ))}
         </div>
       ) : null}
-      <div className="complex-blocks__grid">
+      <div className="complex-terms__grid">
         {cards.map((card, index) => (
-          <div key={tabs[index]?.id ?? index} className="complex-blocks__cell" data-active={tabs[index]?.id === active ? "" : undefined}>
+          <div key={tabs[index]?.id ?? index} className="complex-terms__cell" data-active={tabs[index]?.id === active ? "" : undefined}>
             {card}
           </div>
         ))}

@@ -68,6 +68,7 @@ describe("теги кэша сайта", () => {
 const ACTIONS_DIR = path.join("lib", "admin", "actions");
 const CONTENT_FILES = [
   "complexes.ts",
+  "complexContent.ts",
   "complexMedia.ts",
   "contacts.ts",
   "developers.ts",

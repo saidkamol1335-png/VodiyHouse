@@ -31,6 +31,8 @@
 @import "../components/ComplexBlocksForm/BlockCard.css";
 @import "../components/ComplexBlocksForm/BlockFields.css";
 @import "../components/ComplexCreateForm/ComplexCreateForm.css";
+@import "../components/ComplexDetailsForm/ComplexDetailsForm.css";
+@import "../components/ComplexDocumentsForm/ComplexDocumentsForm.css";
 @import "../components/ComplexLayoutsForm/ComplexLayoutsForm.css";
 @import "../components/ComplexLayoutsForm/LayoutRow.css";
 @import "../components/ComplexList/ComplexList.css";
@@ -38,7 +40,9 @@
 @import "../components/ComplexPhotos/ComplexPhotos.css";
 @import "../components/ComplexPhotos/PhotoPanel.css";
 @import "../components/ComplexReadiness/ComplexReadiness.css";
+@import "../components/ComplexTabForm/ComplexTabForm.css";
 @import "../components/ComplexUnitsTab/ComplexUnitsTab.css";
+@import "../components/ComplexVideosForm/ComplexVideosForm.css";
 @import "../components/ContactsForm/ContactsForm.css";
 @import "../components/DeveloperCreateForm/DeveloperCreateForm.css";
 @import "../components/DeveloperList/DeveloperList.css";

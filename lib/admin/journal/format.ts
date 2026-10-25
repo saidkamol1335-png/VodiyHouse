@@ -72,12 +72,14 @@ const HIDDEN_FIELDS = new Set([
   "path",
   "width",
   "height",
-  // «Что рядом» до фазы 3 не правится.
-  "nearby",
+  // Документ и тема деталей — в заголовке записи (journal_entries), номер справочника не нужен.
+  "document_type_id",
+  "topic_id",
 ]);
-// Ссылка на файл чертежа и список «Что входит в цену»: значения людям не прочитать, но сама
-// правка (деньги и файл на сайте) должна быть в журнале — «изменено» без «было → стало».
-const OPAQUE_FIELDS = new Set(["drawing_id", "price_includes"]);
+// Ссылки на файлы (чертёж, фото темы) и составные списки («Что входит в цену», «Удобство
+// локации»): значения людям не прочитать, но сама правка на сайте должна быть в журнале —
+// «изменено» без «было → стало».
+const OPAQUE_FIELDS = new Set(["drawing_id", "photo_id", "price_includes", "nearby"]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
 // Деньги — с валютой блока из контекста записи: цена квартиры и «цена от» планировки.
 const MONEY_FIELDS: Record<string, ReadonlySet<string>> = {

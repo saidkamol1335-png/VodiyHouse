@@ -1,0 +1,41 @@
+/* Вкладки ЖК «Видео», «Детали», «Документы» (шаг 3.5): пояснение, строки, «Сохранить вкладку» —
+   как у «Планировок» (на телефоне кнопка прилипает к низу). */
+.complex-tab {
+  display: grid;
+  gap: 14px;
+}
+
+.complex-tab__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-tab__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.complex-tab__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+}
+
+@media (max-width: 760px) {
+  .complex-tab__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: var(--z-sticky-actions);
+    margin: 0 calc(-1 * var(--admin-panel-pad));
+    padding: 12px var(--admin-panel-pad) calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass-solid);
+  }
+}

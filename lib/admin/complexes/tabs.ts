@@ -9,6 +9,10 @@ export const COMPLEX_TABS = [
   { key: "layouts", segment: "planirovki" },
   { key: "units", segment: "kvartiry" },
   { key: "photos", segment: "foto" },
+  // Шаг 3.5 (Ф4): разделы страницы ЖК сверх мокапа — в порядке страницы; без данных их не видно.
+  { key: "videos", segment: "video" },
+  { key: "details", segment: "detali" },
+  { key: "documents", segment: "dokumenty" },
   { key: "log", segment: "zhurnal" },
 ] as const;
 

@@ -235,6 +235,31 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     expect((await page("demo-yulduz"))!.blocks[0]!.deadline_history).toEqual([]);
   });
 
+  it("журнал: документ и тема — названием справочника, видео — подписью, перенос — блоком; во всём журнале — с ЖК", async () => {
+    const id = await complexId("demo-yulduz");
+    const entries = async (complex: string | null) =>
+      (
+        await asHead((tx) =>
+          tx.query<{ entity: string; action: string; subject: string }>("select entity, action, subject from journal_entries(null, null, 200, $1)", [complex]),
+        )
+      ).rows.filter((row) => ["complex_documents", "complex_details", "complex_videos", "deadline_changes"].includes(row.entity));
+    const blockName = (await db.admin.query<{ name: string }>("select name from blocks where complex_id = $1 order by sort limit 1", [id])).rows[0]!.name;
+    expect(await entries(id)).toEqual(
+      expect.arrayContaining([
+        { entity: "complex_documents", action: "delete", subject: "Проектная декларация" },
+        // Подпись — нынешняя: второе сохранение её сняло, остался id ролика.
+        { entity: "complex_videos", action: "insert", subject: "aaaaaaaaaaa" },
+        { entity: "complex_videos", action: "update", subject: "bbbbbbbbbbb" },
+        { entity: "complex_details", action: "insert", subject: "О проекте" },
+        { entity: "deadline_changes", action: "delete", subject: `Блок ${blockName}` },
+      ]),
+    );
+    const name = (await db.admin.query<{ name: string }>("select name ->> 'ru' as name from complexes where id = $1", [id])).rows[0]!.name;
+    const everywhere = await entries(null);
+    expect(everywhere.length).toBeGreaterThan(0);
+    expect(everywhere.filter((row) => !row.subject.startsWith(`${name} · `))).toEqual([]);
+  });
+
   it("«Удобство локации»: неверный вид, пустое название или без расстояния — отказ базы", async () => {
     const id = await complexId("demo-yulduz");
     const set = (nearby: unknown) => asHead((tx) => tx.query("update complexes set nearby = $2 where id = $1", [id, JSON.stringify(nearby)]));

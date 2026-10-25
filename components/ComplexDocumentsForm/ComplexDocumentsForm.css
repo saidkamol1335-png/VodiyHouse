@@ -1,0 +1,41 @@
+/* «Документы» (шаг 3.5): строка — название и пояснение для клиента слева, дата проверки справа;
+   на телефоне — друг под другом. */
+.complex-documents-form {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-documents-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 12px 0;
+}
+
+.complex-documents-form__row + .complex-documents-form__row {
+  border-top: 1px dashed var(--line);
+}
+
+.complex-documents-form__text {
+  display: grid;
+  gap: 4px;
+}
+
+.complex-documents-form__name {
+  font-weight: 650;
+}
+
+.complex-documents-form__hint,
+.complex-documents-form__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+@media (max-width: 760px) {
+  .complex-documents-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

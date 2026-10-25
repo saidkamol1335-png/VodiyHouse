@@ -1,10 +1,10 @@
 import { getTranslations } from "next-intl/server";
-import { ComplexBlocks } from "@/components/ComplexBlocks";
+import { ComplexTerms } from "@/components/ComplexTerms";
 import { ComplexDetails } from "@/components/ComplexDetails";
 import { ComplexDeveloper } from "@/components/ComplexDeveloper";
 import { ComplexDocuments } from "@/components/ComplexDocuments";
 import { ComplexFacts } from "@/components/ComplexFacts";
-import { ComplexLayouts } from "@/components/ComplexLayouts";
+import { ComplexPlans } from "@/components/ComplexPlans";
 import { ComplexLocation } from "@/components/ComplexLocation";
 import { ComplexSection } from "@/components/ComplexSection";
 import { ComplexStock } from "@/components/ComplexStock";
@@ -36,14 +36,14 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("about") ? (
         <ComplexSection id={COMPLEX_ANCHORS.about} title={t("about.title")} lead={page.shortDescription?.[locale]} tight>
           <ComplexFacts facts={complexFacts(page, locale)} />
-          <ComplexBlocks page={page} />
+          <ComplexTerms page={page} />
         </ComplexSection>
       ) : null}
       {has("location") ? <LocationSection page={page} name={name} locale={locale} /> : null}
       {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("layouts") ? (
         <ComplexSection id={COMPLEX_ANCHORS.layouts} title={t("layouts.title")}>
-          <ComplexLayouts sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} leadEnabled={LEAD_FORM_ENABLED} />
+          <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} leadEnabled={LEAD_FORM_ENABLED} />
         </ComplexSection>
       ) : null}
       {has("video") ? (
