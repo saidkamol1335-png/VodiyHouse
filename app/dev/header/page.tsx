@@ -14,6 +14,7 @@ const DEMO_CONTACTS: SiteContacts = {
   hours: { ru: "Пн–Сб, 9:00–19:00 (DEMO)", uz: "Du–Sh, 9:00–19:00 (DEMO)" },
   callbackMinutes: 15,
   freeBadge: null,
+  freeServices: [],
 };
 
 // Проверка шапки поверх фото (решение Ш6) и контактов в шапке, меню и подвале. В продакшене страницы нет.

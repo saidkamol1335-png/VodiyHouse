@@ -39,6 +39,17 @@
   opacity: 1;
 }
 
+/* Страница ЖК: на 1440 шапка — стекло с первого экрана, прозрачна она только над фото телефона. */
+@media (min-width: 761px) {
+  .site-header--phone-only {
+    margin-bottom: 0;
+  }
+
+  .site-header--phone-only::before {
+    opacity: 1;
+  }
+}
+
 .site-header__inner {
   display: flex;
   align-items: center;

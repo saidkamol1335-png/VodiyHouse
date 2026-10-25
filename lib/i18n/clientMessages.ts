@@ -57,3 +57,7 @@ export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessag
 /** Каталог (шаг 3.4): свой провайдер заменяет набор целиком — тексты оболочки внутри тоже нужны. */
 export const CATALOG_NAMESPACE = "catalog";
 export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
+/** Страница ЖК (шаг 3.5): свои тексты, калькулятор «Расчёт для этой квартиры» и оболочка. */
+export const COMPLEX_NAMESPACE = "complex";
+export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

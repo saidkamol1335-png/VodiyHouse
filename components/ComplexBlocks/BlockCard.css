@@ -1,0 +1,284 @@
+/* Карточка блока (мокап .blk, .kv, .prg-list): заголовок со статусом, полоса готовности,
+   строки «подпись — значение», способы покупки со знаком банка, низ — «Платёж от» и расчёт. */
+.complex-block {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-block__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.complex-block__name {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 650;
+  letter-spacing: var(--ls-h4);
+}
+
+.complex-block__status {
+  display: inline-flex;
+  align-items: center;
+  height: 25px;
+  padding: 0 10px;
+  border: 1px solid var(--badge-amber-border);
+  border-radius: var(--r-pill);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.complex-block__status--built {
+  border-color: var(--badge-ok-border);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+}
+
+/* Полоса готовности — scaleX вместо ширины: анимируем только transform (CLAUDE.md §3). */
+.complex-block__bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--glass-3);
+}
+
+.complex-block__bar i {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--amber), var(--amber-2));
+  transform-origin: left;
+}
+
+.complex-block__floors {
+  margin: 8px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.complex-block__facts {
+  display: grid;
+  grid-template-columns: minmax(110px, 42%) minmax(0, 1fr);
+  gap: 10px 16px;
+  margin: 0;
+  font-size: var(--fs-control-l);
+}
+
+.complex-block__facts > div {
+  display: contents;
+}
+
+.complex-block__facts dt {
+  padding-top: 3px;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-block__facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.complex-block__history {
+  display: inline;
+  font-weight: 600;
+}
+
+.complex-block__history summary {
+  display: inline;
+  margin-left: 4px;
+  color: var(--fg);
+  font-size: var(--fs-small-l);
+  text-decoration: underline dotted var(--amber-2);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.complex-block__history summary::before {
+  content: "· ";
+}
+
+.complex-block__history summary::-webkit-details-marker {
+  display: none;
+}
+
+.complex-block__history ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-block__label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-block__programs,
+.complex-block__includes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-block__programs li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+}
+
+.complex-block__mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  background: var(--glass-3);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: var(--fs-tiny);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.complex-block__includes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+}
+
+.complex-block__includes b {
+  color: var(--fg);
+  font-weight: 650;
+  text-align: right;
+}
+
+.complex-block__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.complex-block__payment {
+  color: var(--amber-2);
+  font-size: var(--fs-small-l);
+  font-weight: 650;
+}
+
+.complex-block__calc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--control-xs);
+  padding: 6px 15px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-pill);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-size: var(--fs-control);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.complex-block__calc:hover {
+  border-color: var(--amber-line);
+}
+
+/* Телефон (MobJk .blk, .kv): строки «подпись — значение» справа, кнопка расчёта на всю ширину. */
+@media (max-width: 760px) {
+  .complex-block {
+    gap: 12px;
+    padding: 16px;
+    box-shadow: none;
+  }
+
+  .complex-block__name {
+    font-size: 18px;
+    font-weight: 750;
+  }
+
+  .complex-block__facts {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .complex-block__facts > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--line-2);
+  }
+
+  .complex-block__facts dt {
+    flex: none;
+    padding: 0;
+    font-family: var(--font);
+    font-size: var(--fs-small-l);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fg-2);
+  }
+
+  .complex-block__facts dd {
+    font-size: var(--fs-control);
+    text-align: right;
+  }
+
+  .complex-block__mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+
+  .complex-block__foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .complex-block__calc {
+    justify-content: center;
+    min-height: 48px;
+    font-size: var(--fs-body);
+  }
+}

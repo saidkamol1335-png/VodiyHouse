@@ -12,22 +12,31 @@ import {
 // CSS по разделам (шаг 14в): сайт не грузит кабинет, вход — только своё. Компонент, который
 // попадёт на страницу без своего CSS, выглядел бы сломанным только там — тест ловит это сразу.
 
-const BUNDLES = ["globals", "site", "admin", "cabinet", "calc", "dev"] as const;
+const BUNDLES = ["globals", "site", "admin", "cabinet", "calc", "complex", "dev"] as const;
 type Bundle = (typeof BUNDLES)[number];
 
 const siteFiles = routeFiles("app/[locale]");
 const isCalculatorRoute = (file: string) => /[\\/]kalkulyator[\\/]/.test(file);
+const isComplexRoute = (file: string) => /[\\/]novostroyki[\\/]\[slug\][\\/]/.test(file);
 
 /** Какие разделы грузит корень маршрутов — в порядке каскада. */
 const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
   site: {
-    entries: [...siteFiles.filter((file) => !isCalculatorRoute(file)), "app/global-not-found.tsx"],
+    entries: [
+      ...siteFiles.filter((file) => !isCalculatorRoute(file) && !isComplexRoute(file)),
+      "app/global-not-found.tsx",
+    ],
     bundles: ["globals", "site"],
   },
   // /kalkulyator (шаг 2.6) — ещё и блоки калькулятора; остальные страницы сайта их не грузят.
   siteCalculator: {
     entries: siteFiles.filter(isCalculatorRoute),
     bundles: ["globals", "site", "calc"],
+  },
+  // Страница ЖК (шаг 3.5) — блоки страницы и калькулятор «Расчёт для этой квартиры».
+  siteComplex: {
+    entries: siteFiles.filter(isComplexRoute),
+    bundles: ["globals", "site", "calc", "complex"],
   },
   adminRoot: { entries: adminRootFiles(), bundles: ["globals", "admin"] },
   cabinet: {
@@ -40,6 +49,7 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
 const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/layout.tsx": ["globals", "site"],
   "app/[locale]/kalkulyator/layout.tsx": ["calc"],
+  "app/[locale]/novostroyki/[slug]/layout.tsx": ["calc", "complex"],
   "app/global-not-found.tsx": ["globals", "site"],
   "app/admin/layout.tsx": ["globals", "admin"],
   "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],

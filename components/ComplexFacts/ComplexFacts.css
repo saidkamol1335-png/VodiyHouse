@@ -1,0 +1,63 @@
+/* Плашки «О ЖК» (мокап .facts, .fact): 4 в ряд на 1440, 2 — на планшете и телефоне. */
+.complex-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-facts__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-l);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-facts__item svg {
+  color: var(--amber-2);
+}
+
+.complex-facts__label {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-facts__value {
+  font-size: var(--fs-body);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 980px) {
+  .complex-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .complex-facts {
+    gap: 8px;
+  }
+
+  .complex-facts__item {
+    gap: 2px;
+    padding: 12px;
+    border-radius: var(--r-m);
+    box-shadow: none;
+  }
+
+  .complex-facts__item svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: 6px;
+  }
+}

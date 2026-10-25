@@ -135,7 +135,7 @@ describe("вкладка «Основное» (И1–И3)", () => {
         point: "рядом с парком",
         class: "luxury",
         ceilingHeight: "7",
-        permitCheckedAt: "2026-02-31",
+        staffVisitedAt: "2026-02-31",
       }),
     );
     expect(parsed).toMatchObject({
@@ -145,7 +145,7 @@ describe("вкладка «Основное» (И1–И3)", () => {
         point: "pointInvalid",
         class: "choiceInvalid",
         ceilingHeight: "outOfRange",
-        permitCheckedAt: "dateInvalid",
+        staffVisitedAt: "dateInvalid",
       },
     });
   });

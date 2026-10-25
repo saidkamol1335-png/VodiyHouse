@@ -7,9 +7,10 @@ import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
-import type { BilingualIssue } from "@/lib/admin/bilingual";
+import { EMPTY_BILINGUAL, type BilingualIssue } from "@/lib/admin/bilingual";
 import {
   CONTACTS_LIMITS,
+  FREE_SERVICE_FIELDS,
   type ContactsActionResult,
   type ContactsErrors,
   type ContactsFields,
@@ -50,9 +51,29 @@ export function ContactsForm({ fields, action }: ContactsFormProps) {
         </div>
         <BilingualField id="contacts-hours" name="hours" label={t("fields.hours")} uzLabel={t("fields.hoursUz")} maxLength={CONTACTS_LIMITS.hoursMax} defaultValue={values.hours} error={issue("hours")} />
         <BilingualField id="contacts-free" name="freeBadge" label={t("fields.freeBadge")} uzLabel={t("fields.freeBadgeUz")} maxLength={CONTACTS_LIMITS.freeBadgeMax} defaultValue={values.freeBadge} error={issue("freeBadge")} />
+        <FreeServices values={values.freeServices} issue={issue} />
         <ContactsSave state={state} pending={pending} />
       </form>
     </AdminPanel>
+  );
+}
+
+type FreeServicesProps = {
+  values: ContactsFields["freeServices"];
+  issue: (field: keyof ContactsErrors) => string | undefined;
+};
+
+/** Пункты плашки «Для вас бесплатно» на странице ЖК (ТЗ 7.1): до четырёх, RU | UZ. */
+function FreeServices({ values, issue }: FreeServicesProps) {
+  const t = useTranslations("admin.contacts");
+  return (
+    <fieldset className="contacts-form__services">
+      <legend className="contacts-form__legend">{t("fields.freeServices")}</legend>
+      <p className="contacts-form__lead">{t("hints.freeServices")}</p>
+      {FREE_SERVICE_FIELDS.map((name, index) => (
+        <BilingualField key={name} id={`contacts-${name}`} name={name} label={t("fields.freeService", { n: index + 1 })} uzLabel={t("fields.freeServiceUz", { n: index + 1 })} maxLength={CONTACTS_LIMITS.freeServiceMax} defaultValue={values[index] ?? EMPTY_BILINGUAL} error={issue(name)} />
+      ))}
+    </fieldset>
   );
 }
 

@@ -1,0 +1,95 @@
+/* Фото ЖК во весь экран: модальное окно на тёмном фоне, фото целиком, свайп и стрелки. */
+.complex-viewer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--photo-bg);
+  color: var(--over-photo-fg);
+}
+
+.complex-viewer::backdrop {
+  background: var(--photo-bg);
+}
+
+.complex-viewer__track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.complex-viewer__track::-webkit-scrollbar {
+  display: none;
+}
+
+.complex-viewer__slide {
+  position: relative;
+  flex: 0 0 100%;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.complex-viewer__image {
+  object-fit: contain;
+}
+
+.complex-viewer__close,
+.complex-viewer__nav {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--over-photo-line);
+  border-radius: 50%;
+  background: var(--over-photo-glass);
+  color: inherit;
+  cursor: pointer;
+}
+
+.complex-viewer__close {
+  top: 16px;
+  right: 16px;
+}
+
+.complex-viewer__nav {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.complex-viewer__nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.complex-viewer__nav--prev {
+  left: 16px;
+}
+
+.complex-viewer__nav--next {
+  right: 16px;
+}
+
+.complex-viewer__count {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 760px) {
+  .complex-viewer__nav {
+    display: none;
+  }
+}

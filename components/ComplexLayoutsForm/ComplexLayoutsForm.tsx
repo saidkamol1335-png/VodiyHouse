@@ -41,14 +41,7 @@ export function ComplexLayoutsForm(props: ComplexLayoutsFormProps) {
       </AdminPanel>
     );
   }
-  return (
-    <BlockLayoutsForm
-      key={block.blockId}
-      {...props}
-      block={block}
-      onSwitch={(next) => setBlockId(next)}
-    />
-  );
+  return <BlockLayoutsForm key={block.blockId} {...props} block={block} onSwitch={(next) => setBlockId(next)} />;
 }
 
 type BlockFormProps = ComplexLayoutsFormProps & {
@@ -65,21 +58,10 @@ function BlockLayoutsForm(props: BlockFormProps) {
     <AdminPanel title={t("title")} wide>
       {/* Отметка 1.2 — не правка вкладки: вне формы, иначе «Уйти без сохранения?» без правок. */}
       <DrawingRule12 published={published} blockId={block.blockId} drawings={drawings} />
-      <form
-        className="complex-layouts"
-        onSubmit={submitKeepingForm(draft.formAction)}
-        onInput={draft.onInput}
-        noValidate
-      >
+      <form className="complex-layouts" onSubmit={submitKeepingForm(draft.formAction)} onInput={draft.onInput} noValidate>
         <input type="hidden" name="block" value={block.blockId} />
         <input type="hidden" name="layouts" value={JSON.stringify(draft.rows)} />
-        <LayoutsIntro
-          blocks={blocks}
-          block={block}
-          rows={draft.rows}
-          unitsHref={props.unitsHref}
-          onSwitch={draft.switchTo}
-        />
+        <LayoutsIntro blocks={blocks} block={block} rows={draft.rows} unitsHref={props.unitsHref} onSwitch={draft.switchTo} />
         <LayoutRows block={block} blocks={blocks} draft={draft} drawings={drawings} />
         <LayoutsActions draft={draft} uploading={drawings.uploading} />
       </form>
@@ -96,14 +78,7 @@ type DrawingRule12Props = {
 function DrawingRule12({ published, blockId, drawings }: DrawingRule12Props) {
   const t = useTranslations("admin.media");
   if (!published) return <p className="field__meta">{t("rule12Hint")}</p>;
-  return (
-    <Rule12Check
-      id={`rule12-${blockId}`}
-      checked={drawings.rule12}
-      onChange={drawings.setRule12}
-      context="drawing"
-    />
-  );
+  return <Rule12Check id={`rule12-${blockId}`} checked={drawings.rule12} onChange={drawings.setRule12} context="drawing" />;
 }
 
 type LayoutsIntroProps = {
@@ -119,9 +94,7 @@ function LayoutsIntro({ blocks, block, rows, unitsHref, onSwitch }: LayoutsIntro
   const t = useTranslations("admin.complexes.layouts");
   return (
     <>
-      {blocks.length > 1 ? (
-        <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={onSwitch} />
-      ) : null}
+      {blocks.length > 1 ? <BlockSwitch blocks={blocks} current={block.blockId} onSwitch={onSwitch} /> : null}
       <p className="complex-layouts__lead">{t("lead")}</p>
       {/* Плашку «нет в наличии» объясняет видимый текст: title на телефоне не открыть. */}
       {!block.hasUnits && rows.some((row) => !row.available) ? (

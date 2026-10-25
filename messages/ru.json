@@ -601,7 +601,8 @@
         "network": "Нет связи с сервером — попробуйте ещё раз",
         "notConfigured": "Облачная база не подключена — данные появятся после шага 7",
         "unknown": "Не получилось сохранить — попробуйте ещё раз",
-        "timeout": "База не успела ответить — попробуйте ещё раз"
+        "timeout": "База не успела ответить — попробуйте ещё раз",
+        "futureDate": "Дата проверки — не позже сегодняшней"
       },
       "complexesLink": "ЖК застройщика →",
       "publish": {
@@ -985,7 +986,12 @@
         "outOfRange": "Проверьте число",
         "notNumber": "Нужно число",
         "pointInvalid": "Не получилось найти координаты — вставьте «40.3864, 71.7864» или полную ссылку на карту",
-        "dateInvalid": "Проверьте дату"
+        "dateInvalid": "Проверьте дату",
+        "nearbyKind": "Выберите вид места",
+        "nearbyName": "У места нужно название на русском и узбекском",
+        "nearbyNameLong": "Название места — до 60 знаков",
+        "nearbyDistance": "Укажите метры или минуты",
+        "nearbyRange": "Метры — целое число до 50 000, минуты — до 240; мест — до 12"
       },
       "entitySubtitle": "{developer} · {address}",
       "tabs": {
@@ -1082,10 +1088,8 @@
         "landmark": "Ориентир",
         "landmarkUz": "Mo‘ljal",
         "point": "Координаты или ссылка на карту",
-        "permitCheckedAt": "Разрешение проверено",
-        "landCheckedAt": "Земля оформлена",
         "staffVisitedAt": "Визит сотрудника",
-        "checksHint": "Даты — для плашек «Проверено Vodiy House» на странице ЖК. Пусто — не проверено.",
+        "checksHint": "«Разрешение на строительство» и «Земля» в «Проверено Vodiy House» — из вкладки «Документы»: отметьте там проверенные документы с датой. Здесь — когда сотрудник был на объекте; пусто — не был.",
         "locationGroups": {
           "city": "Города",
           "district": "Районы"
@@ -1593,7 +1597,41 @@
       "toDeveloper": "Открыть застройщика →",
       "journalLead": "Кто и когда менял ЖК: основное, блоки, планировки, квартиры, фото и статус.",
       "emptyStock": "ЖК пока нет — их заводит руководитель.",
-      "nothingFoundStock": "Ничего не нашлось. Сбросьте поиск."
+      "nothingFoundStock": "Ничего не нашлось. Сбросьте поиск.",
+      "nearby": {
+        "title": "Удобство локации",
+        "lead": "Места рядом с ЖК для раздела «Расположение» на сайте: школа, детский сад, остановка… Метры — по прямой, минуты — пешком или на машине.",
+        "add": "Добавить место",
+        "kind": "Место {n}",
+        "nameRu": "Название",
+        "nameUz": "Nomi",
+        "namePlaceholder": "Школа №46",
+        "meters": "Метры",
+        "minutes": "Минуты",
+        "mode": "Как добраться",
+        "walk": "пешком",
+        "car": "на машине",
+        "remove": "Убрать место {n}",
+        "kinds": {
+          "school": "Школа",
+          "kindergarten": "Детский сад",
+          "mosque": "Мечеть",
+          "clinic": "Поликлиника",
+          "shop": "Магазин",
+          "cafe": "Кафе",
+          "stop": "Остановка",
+          "park": "Парк",
+          "sport": "Спорт"
+        },
+        "issues": {
+          "nearbyKind": "Выберите вид места",
+          "nearbyName": "Нужно название на русском и узбекском",
+          "nearbyNameLong": "Название — до 60 знаков",
+          "nearbyDistance": "Укажите метры или минуты",
+          "nearbyRange": "Метры — целое число до 50 000, минуты — до 240",
+          "contacts": "В названии контакты — на сайте их быть не может (правило 1.2)"
+        }
+      }
     },
     "meta": {
       "title": "Кабинет · Vodiy House",
@@ -1917,14 +1955,18 @@
         "hours": "Часы работы",
         "hoursUz": "Ish vaqti",
         "freeBadge": "Плашка «Для вас бесплатно»",
-        "freeBadgeUz": "«Siz uchun bepul» belgisi"
+        "freeBadgeUz": "«Siz uchun bepul» belgisi",
+        "freeServices": "Что Vodiy House делает бесплатно (страница ЖК)",
+        "freeService": "Пункт {n}",
+        "freeServiceUz": "{n}-band"
       },
       "hints": {
         "phone": "+998 90 123 45 67 — для «Показать телефон» и «Позвонить»",
         "telegram": "Имя аккаунта: @vodiyhouse или ссылка t.me/…",
         "bot": "Имя бота — кончается на bot",
         "instagram": "Имя аккаунта или ссылка на профиль",
-        "callbackMinutes": "Число минут; пусто — фразы на сайте нет"
+        "callbackMinutes": "Число минут; пусто — фразы на сайте нет",
+        "freeServices": "2–4 пункта под ценой на каждой странице ЖК: «Подбор ЖК под ваш бюджет», «Показ объекта с менеджером»… Только то, что Vodiy House действительно делает. Пусто — плашки нет."
       },
       "issues": {
         "phone": "Номер Узбекистана: +998 и 9 цифр",
@@ -2030,6 +2072,266 @@
       "more": "Показать ещё {n} ЖК",
       "nothing": "По вашему запросу ничего нет",
       "nothingHint": "Измените фильтры или свяжитесь с Vodiy House — менеджер подберёт варианты вручную."
+    }
+  },
+  "complex": {
+    "metaTitle": "ЖК {name} — квартиры, цены и планировки",
+    "metaDescription": "ЖК {name}{place}: наличие квартир, цены застройщика, планировки и расчёт платежа. Подбор, показ и проверка документов — бесплатно.",
+    "metaPlace": " · {place}",
+    "unavailable": "Страница ЖК временно недоступна. Позвоните или напишите нам — расскажем о ЖК и подберём квартиру.",
+    "name": "ЖК {name}",
+    "crumbs": "Навигация",
+    "verified": "Проверено Vodiy House",
+    "landmark": "Ориентир: {mark}",
+    "toCenter": "до центра {n} мин",
+    "class": {
+      "econom": "Эконом",
+      "comfort": "Комфорт",
+      "business": "Бизнес",
+      "premium": "Премиум"
+    },
+    "rooms": {
+      "0": "Студия",
+      "1": "1-комн.",
+      "2": "2-комн.",
+      "3": "3-комн.",
+      "4": "4-комн.",
+      "more": "{n}-комн."
+    },
+    "quarter": "{q} кв. {year}",
+    "gallery": {
+      "label": "Фото ЖК {name}",
+      "photo": "Фото {n} из {total}",
+      "counter": "{n} / {total}",
+      "prev": "Предыдущее фото",
+      "next": "Следующее фото",
+      "thumb": "Показать фото {n}",
+      "open": "Открыть фото крупно",
+      "close": "Закрыть"
+    },
+    "offer": {
+      "inSale": "В продаже",
+      "flats": "{n, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
+      "priceFrom": "от {price}",
+      "perM2From": "от {price}/м²",
+      "priceOnRequest": "Цена по запросу",
+      "monthly": "Платёж в месяц",
+      "monthlyFrom": "от {price}/мес",
+      "deadline": "Срок сдачи",
+      "built": "Сдан",
+      "partBuilt": "Есть сданные · остальные до {q}",
+      "documents": "Документы",
+      "documentsChecked": "{n} проверено",
+      "call": "Позвонить",
+      "telegram": "Написать в Telegram",
+      "freePrice": "Цена как у застройщика — Vodiy House ничего не добавляет.",
+      "freeBadge": "Для вас бесплатно"
+    },
+    "nav": {
+      "label": "Разделы страницы",
+      "about": "О ЖК",
+      "location": "Расположение",
+      "stock": "Наличие",
+      "layouts": "Планировки",
+      "video": "Видеообзор",
+      "details": "Детали проекта",
+      "developer": "Застройщик",
+      "documents": "Документы"
+    },
+    "about": {
+      "title": "О ЖК",
+      "facts": {
+        "class": "Класс",
+        "floors": "Этажность",
+        "houseType": "Тип дома",
+        "ceilings": "Потолки",
+        "finishing": "Отделка",
+        "parking": "Парковка",
+        "toCenter": "До центра",
+        "blocks": "Блоки"
+      },
+      "floorsValue": "{n, plural, one {# этаж} few {# этажа} many {# этажей} other {# этажа}}",
+      "ceilingsValue": "{n} м",
+      "toCenterValue": "{n} мин",
+      "houseType": {
+        "monolith": "Монолит",
+        "brick": "Кирпич",
+        "frame": "Каркас"
+      },
+      "parking": {
+        "underground": "Подземная",
+        "ground": "Наземная",
+        "mixed": "Подземная и наземная"
+      }
+    },
+    "blocks": {
+      "title": "Блоки и условия покупки",
+      "block": "Блок {name}",
+      "built": "Сдан",
+      "building": "Строится",
+      "buildingPct": "Строится · {pct}%",
+      "floors": "{built} из {total} этажей",
+      "deadline": "Срок сдачи",
+      "builtIn": "Сдан · {quarter}",
+      "shifted": "перенесён с {quarter}",
+      "history": "История сроков",
+      "historyItem": "было {from} → стало {to} · {date}",
+      "finishing": "Отделка",
+      "cadastre": "Кадастр",
+      "cadastreDone": "Оформлен",
+      "cadastreInProgress": "Оформляется",
+      "cadastreExpected": "Оформляется, ожидается {quarter}",
+      "cadastreAfter": "После сдачи дома",
+      "inSale": "В продаже",
+      "flats": "{n, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
+      "inStock": "есть",
+      "howToBuy": "Как можно купить",
+      "includes": "Что входит в цену",
+      "included": "входит",
+      "extra": "отдельно",
+      "extraFrom": "отдельно, от {price}",
+      "monthlyFrom": "Платёж от {price}/мес",
+      "calculate": "Рассчитать платёж",
+      "hint": "Что значит «{term}»?",
+      "program": {
+        "full": "100% оплата",
+        "scheme": "Рассрочка от застройщика: взнос от {down}, до {months} мес.",
+        "markup": "Рассрочка от застройщика: взнос от {down}, до {months} мес. · наценка {rate}",
+        "bank": "{bank}: рассрочка через банк, взнос от {down}, до {months} мес. · {rate} годовых",
+        "mortgage": "{bank}: ипотека до {years, plural, one {# года} few {# лет} many {# лет} other {# лет}}, взнос от {down} · {rate} годовых",
+        "mortgageMonths": "{bank}: ипотека до {months} мес., взнос от {down} · {rate} годовых"
+      }
+    },
+    "location": {
+      "title": "Расположение",
+      "lead": "{address} · до центра {n} мин",
+      "question": "Проверьте, удобно ли добираться до {name}",
+      "route": "Проложить маршрут",
+      "openMap": "Открыть в Яндекс Картах",
+      "showMap": "Показать на карте",
+      "mapTitle": "Карта: ЖК {name}",
+      "convenience": "Удобство локации",
+      "center": "Центр города",
+      "byCar": "на машине",
+      "walk": "{n} мин пешком",
+      "car": "{n} мин на машине",
+      "meters": "{n} м",
+      "km": "{n} км",
+      "minutes": "{n} мин",
+      "note": "Расстояния — по прямой, время пешком — примерное.",
+      "landmark": "Ориентир:",
+      "nearbyLabel": "Найти рядом на карте",
+      "kinds": {
+        "school": "Школа",
+        "kindergarten": "Детский сад",
+        "mosque": "Мечеть",
+        "clinic": "Поликлиника",
+        "shop": "Магазин",
+        "cafe": "Кафе",
+        "stop": "Остановка",
+        "park": "Парк",
+        "sport": "Спорт"
+      },
+      "chips": {
+        "school": "Школы",
+        "kindergarten": "Детсады",
+        "mosque": "Мечети",
+        "clinic": "Медицина",
+        "shop": "Магазины",
+        "cafe": "Кафе",
+        "stop": "Остановки"
+      },
+      "search": {
+        "school": "школа",
+        "kindergarten": "детский сад",
+        "mosque": "мечеть",
+        "clinic": "поликлиника",
+        "shop": "магазин",
+        "cafe": "кафе",
+        "stop": "остановка"
+      }
+    },
+    "stock": {
+      "title": "Наличие квартир",
+      "lead": "Как только квартиру бронируют или продают, цифры здесь обновляются.",
+      "updated": "обновлено {date}",
+      "inSale": "в продаже сейчас",
+      "blockFree": "Бл. {name}: {n}",
+      "blockFreeUnknown": "Бл. {name}: есть",
+      "type": "Тип",
+      "area": "Площадь",
+      "price": "Цена",
+      "byBlocks": "По блокам",
+      "left": "Осталось",
+      "leftCount": "осталось {n} шт.",
+      "leftUnknown": "есть в продаже",
+      "leftNone": "нет в наличии",
+      "areaFrom": "от {area}",
+      "priceFrom": "от {price}",
+      "rowSub": "от {area} · от {price}",
+      "toLayouts": "Планировки: {type}"
+    },
+    "layouts": {
+      "title": "Планировки",
+      "blocksLabel": "Блок",
+      "allBlocks": "Все блоки",
+      "block": "Блок {name}",
+      "roomsLabel": "Комнаты",
+      "allRooms": "Все",
+      "hint": "Калькулятор у каждой квартиры: выберите планировку ниже.",
+      "card": "{rooms} · {area}",
+      "meta": "Блок {block}",
+      "metaFloors": "Блок {block} · этажи {from}–{to}",
+      "metaFloor": "Блок {block} · {floor} этаж",
+      "left": "осталось {n}",
+      "inStock": "есть в продаже",
+      "none": "нет в наличии",
+      "priceFrom": "от {price}",
+      "perM2From": "от {price}/м²",
+      "priceOnRequest": "Цена по запросу",
+      "monthlyFrom": "Платёж от {price}/мес",
+      "calculate": "Рассчитать платёж",
+      "calculateShort": "Рассчитать",
+      "loading": "Считаем…",
+      "failed": "Не получилось открыть расчёт. Попробуйте ещё раз.",
+      "zoom": "Открыть чертёж «{title}» крупно",
+      "zoomClose": "Закрыть чертёж",
+      "empty": "Нет планировок с такими параметрами"
+    },
+    "video": {
+      "title": "Видеообзор ЖК",
+      "play": "Смотреть «{title}»",
+      "fallbackTitle": "Видеообзор ЖК {name}",
+      "list": "Другие видео"
+    },
+    "details": {
+      "title": "Детали проекта",
+      "readMore": "Читать далее",
+      "close": "Закрыть",
+      "prev": "Назад",
+      "next": "Вперёд"
+    },
+    "developer": {
+      "title": "О застройщике",
+      "role": "Застройщик",
+      "since": "Застройщик · с {year} года",
+      "complexes": "{n} ЖК",
+      "others": "Другие ЖК застройщика",
+      "otherPrice": "от {price}",
+      "checks": "Проверено Vodiy House",
+      "permit": "Разрешение на строительство проверено",
+      "land": "Земля оформлена",
+      "delivered": "Есть сданные объекты",
+      "visit": "Сотрудник Vodiy House был на объекте",
+      "checkedOn": "Проверено {date}",
+      "countBuilt": "Сдано {n}",
+      "countBuilding": "Строится {n}"
+    },
+    "documents": {
+      "title": "Документы ЖК",
+      "lead": "Показываем только документы, которые проверил Vodiy House. Сканы выдаёт менеджер — это бесплатно.",
+      "checkedOn": "Проверено {date}",
+      "hint": "Что значит «{name}»?"
     }
   }
 }

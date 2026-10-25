@@ -1,0 +1,141 @@
+/* «Планировки» (мокап .plan-filters, .seg, .pchint, .plans): фильтры сегментами, подсказка про
+   калькулятор, сетка карточек; открытый расчёт — строкой на всю ширину под рядом его карточки. */
+.complex-layouts__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.complex-layouts__segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--seg-border);
+  border-radius: var(--r-pill);
+  background: var(--seg-bg);
+}
+
+.complex-layouts__option {
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.complex-layouts__option:hover {
+  color: var(--fg);
+}
+
+.complex-layouts__option--active {
+  background: var(--seg-on-bg);
+  color: var(--fg);
+  box-shadow: var(--seg-on-shadow);
+}
+
+.complex-layouts__hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 0 16px;
+  color: var(--fg-3);
+  font-size: var(--fs-small-l);
+  font-weight: 550;
+}
+
+.complex-layouts__hint svg {
+  color: var(--amber-2);
+}
+
+.complex-layouts__empty {
+  color: var(--fg-2);
+}
+
+.complex-layouts__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(262px, 1fr));
+  grid-auto-flow: row dense;
+  gap: 14px;
+}
+
+/* Расчёт — строка на всю ширину: соседние карточки ряда остаются на месте (dense). */
+.complex-layouts__calc {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .complex-layouts__filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .complex-layouts__segment--blocks {
+    display: flex;
+    gap: 4px;
+    border-color: var(--line);
+    background: var(--bg-4);
+  }
+
+  .complex-layouts__segment--blocks .complex-layouts__option {
+    flex: 1;
+    height: var(--touch-target);
+    font-weight: 650;
+  }
+
+  .complex-layouts__segment--blocks .complex-layouts__option--active {
+    background: var(--bg-2);
+    box-shadow: var(--control-shadow);
+  }
+
+  /* Комнаты — пилюлями лентой (мокап .hs): листаются пальцем. */
+  .complex-layouts__segment--rooms {
+    display: flex;
+    gap: 8px;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 2px var(--gutter) 4px;
+    overflow-x: auto;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    scrollbar-width: none;
+  }
+
+  .complex-layouts__segment--rooms::-webkit-scrollbar {
+    display: none;
+  }
+
+  .complex-layouts__segment--rooms .complex-layouts__option {
+    flex: none;
+    height: var(--touch-target);
+    padding: 0 16px;
+    border: 1px solid var(--line-2);
+    background: var(--bg-2);
+    font-weight: 650;
+  }
+
+  .complex-layouts__segment--rooms .complex-layouts__option--active {
+    border-color: var(--amber);
+    background: var(--chip-on-bg);
+    box-shadow: var(--chip-on-ring);
+  }
+
+  .complex-layouts__hint {
+    margin: 12px 0;
+    font-size: var(--fs-small);
+    line-height: 1.4;
+  }
+
+  .complex-layouts__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}

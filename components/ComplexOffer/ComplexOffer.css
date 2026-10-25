@@ -1,0 +1,296 @@
+/* Карточка цены ЖК (мокап .jki; телефон — .sum): цена слева, три факта через пунктир, связь справа;
+   ниже — плашка «Для вас бесплатно» (на 1440 — янтарная, на телефоне — зелёная пунктиром). */
+.complex-offer {
+  position: relative;
+  padding: 24px 26px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-offer__top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 300px;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Без контактов Vodiy House (до ответа заказчика) — без колонки связи. */
+.complex-offer__top--no-cta {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.complex-offer__live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+/* Точка «в продаже» без пульса: на сайте нет «live» (PLAN §3.22). */
+.complex-offer__live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--live-dot);
+  box-shadow: var(--live-dot-glow);
+}
+
+.complex-offer__amount {
+  margin: 10px 0 0;
+  font-size: var(--fs-stat);
+  line-height: 1.05;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.complex-offer__per-m2 {
+  margin: 4px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 550;
+}
+
+.complex-offer__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-self: stretch;
+  margin: 0;
+}
+
+.complex-offer__fact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 20px;
+  border-left: 1px dashed var(--dash);
+}
+
+.complex-offer__fact dt {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-offer__fact-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--fs-h4);
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.complex-offer__fact-value--accent {
+  color: var(--amber-2);
+}
+
+.complex-offer__fact-value--ok {
+  color: var(--ok);
+}
+
+.complex-offer__cta {
+  display: flex;
+  gap: 8px;
+}
+
+.complex-offer__phone {
+  flex: 1;
+}
+
+.complex-offer__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-pill);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-size: var(--fs-control);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.complex-offer__button:hover {
+  border-color: var(--amber-line);
+}
+
+/* На 1440 «Позвонить» — это «Показать телефон», Telegram — круглая кнопка без подписи (мокап). */
+.complex-offer__button--call,
+.complex-offer__telegram-text {
+  display: none;
+}
+
+.complex-offer__button--telegram {
+  width: 42px;
+  padding: 0;
+}
+
+.complex-offer__free {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--badge-amber-border);
+  border-radius: var(--r-l);
+  background: var(--offer-free-bg);
+}
+
+.complex-offer__free-title {
+  margin: 0;
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.complex-offer__free-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 22px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-offer__free-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.complex-offer__free-list svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--amber-2);
+}
+
+@media (max-width: 1180px) {
+  .complex-offer__top {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .complex-offer__cta {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Телефон (MobJk .sum): строки фактов под ценой, кнопки «Позвонить» и «Telegram» пополам. */
+@media (max-width: 760px) {
+  .complex-offer {
+    margin-top: 16px;
+    padding: 18px 16px 16px;
+    border-radius: var(--r-xl);
+  }
+
+  .complex-offer__top {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .complex-offer__amount {
+    margin-top: 6px;
+    font-size: 33px;
+    font-weight: 800;
+  }
+
+  .complex-offer__per-m2 {
+    font-size: var(--fs-control);
+  }
+
+  .complex-offer__facts {
+    grid-template-columns: minmax(0, 1fr);
+    border-top: 1px solid var(--line);
+  }
+
+  .complex-offer__fact {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .complex-offer__fact dt {
+    flex: none;
+    font-family: var(--font);
+    font-size: var(--fs-control);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--fg-2);
+  }
+
+  .complex-offer__fact-value {
+    justify-content: flex-end;
+    font-size: var(--fs-control-l);
+    font-weight: 750;
+    text-align: right;
+  }
+
+  .complex-offer__cta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 4px;
+  }
+
+  .complex-offer__phone {
+    display: none;
+  }
+
+  .complex-offer__button,
+  .complex-offer__button--call,
+  .complex-offer__telegram-text {
+    display: inline-flex;
+  }
+
+  .complex-offer__button {
+    min-height: 48px;
+    background: var(--bg-2);
+    font-size: var(--fs-body);
+  }
+
+  .complex-offer__button--telegram {
+    width: auto;
+    padding: 0 10px;
+  }
+
+  .complex-offer__free {
+    margin-top: 12px;
+    padding: 14px;
+    border: 1px dashed var(--ok-line);
+    border-radius: var(--r-l);
+    background: var(--ok-soft);
+  }
+
+  .complex-offer__free-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .complex-offer__free-list li {
+    font-size: var(--fs-small-l);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .complex-offer__free-list svg {
+    color: var(--ok);
+  }
+}

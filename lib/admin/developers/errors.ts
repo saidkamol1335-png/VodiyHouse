@@ -33,6 +33,7 @@ export const CONTENT_ERRORS = [
   "lastProgram",
   "programActive",
   "invalidRate",
+  "futureDate",
   "savedReload",
   "network",
   "notConfigured",
@@ -61,6 +62,8 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:last_program": "lastProgram",
   "vh:program_active": "programActive",
   "vh:invalid_rate": "invalidRate",
+  "vh:duplicate": "duplicate",
+  "vh:future_date": "futureDate",
 };
 
 // Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.

@@ -1,0 +1,261 @@
+/* Карточка планировки (мокап .plan; телефон — .pl): чертёж на белом листе 4:3, заголовок с
+   остатком, блок и этажи, цена и «Платёж от», кнопка расчёта на всю ширину. */
+.complex-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-layout--open {
+  border-color: var(--amber);
+  box-shadow: var(--glow-amber);
+}
+
+.complex-layout--none .complex-layout__drawing,
+.complex-layout--none .complex-layout__body {
+  opacity: 0.66;
+}
+
+.complex-layout__drawing {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  background: var(--drawing-bg);
+  cursor: zoom-in;
+}
+
+.complex-layout__image {
+  object-fit: contain;
+}
+
+.complex-layout__zoom {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-2);
+  color: var(--fg-2);
+}
+
+.complex-layout__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 6px 0;
+}
+
+.complex-layout__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.complex-layout__title {
+  margin: 0;
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.complex-layout__left {
+  display: inline-flex;
+  align-items: center;
+  height: 23px;
+  padding: 0 9px;
+  border: 1px solid var(--badge-ok-border);
+  border-radius: var(--r-pill);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+  font-size: var(--fs-label-l);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.complex-layout__left--few {
+  border-color: var(--badge-amber-border);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.complex-layout__left--none {
+  border-style: dashed;
+  border-color: var(--dash);
+  background: none;
+  color: var(--fg-3);
+}
+
+.complex-layout__meta {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.complex-layout__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+}
+
+.complex-layout__price b {
+  font-size: var(--fs-h4);
+  font-weight: 650;
+}
+
+.complex-layout__price span {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 550;
+}
+
+.complex-layout__monthly {
+  margin: 0;
+  color: var(--amber-2);
+  font-size: var(--fs-small-l);
+  font-weight: 650;
+}
+
+.complex-layout__actions {
+  display: grid;
+  gap: 6px;
+  margin-top: auto;
+  padding: 6px 6px 6px;
+}
+
+.complex-layout__calc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--control-xs);
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--on-amber);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  box-shadow: var(--glow-amber);
+  cursor: pointer;
+}
+
+.complex-layout__calc:hover {
+  background: var(--amber-hover);
+}
+
+.complex-layout__calc:disabled {
+  opacity: var(--opacity-busy);
+  cursor: progress;
+}
+
+.complex-layout__calc-short {
+  display: none;
+}
+
+.complex-layout__failed {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-caption);
+}
+
+/* full: карточка приподнимается при наведении, чертёж слегка приближается (мокап .plan:hover). */
+[data-motion="full"] .complex-layout {
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+[data-motion="full"] .complex-layout:hover {
+  transform: translateY(-3px);
+}
+
+[data-motion="full"] .complex-layout__image {
+  transition: transform var(--dur-slower) var(--ease);
+}
+
+[data-motion="full"] .complex-layout__drawing:hover .complex-layout__image {
+  transform: scale(1.05);
+}
+
+/* Телефон (MobJkPlans .pl): чертёж 116 × 116 слева, текст справа, кнопка во всю ширину снизу. */
+@media (max-width: 760px) {
+  .complex-layout {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+    box-shadow: none;
+  }
+
+  .complex-layout__drawing {
+    width: 116px;
+    height: 116px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-m);
+  }
+
+  .complex-layout__zoom {
+    display: flex;
+  }
+
+  .complex-layout__body {
+    gap: 3px;
+    padding: 0;
+  }
+
+  .complex-layout__top {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .complex-layout__title {
+    font-size: 15.5px;
+    font-weight: 750;
+  }
+
+  .complex-layout__price {
+    margin-top: 4px;
+  }
+
+  .complex-layout__price b {
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  .complex-layout__actions {
+    grid-column: 1 / -1;
+    padding: 0;
+  }
+
+  .complex-layout__calc {
+    min-height: var(--touch-target);
+    font-size: var(--fs-control);
+  }
+
+  .complex-layout__calc-full {
+    display: none;
+  }
+
+  .complex-layout__calc-short {
+    display: inline;
+  }
+}

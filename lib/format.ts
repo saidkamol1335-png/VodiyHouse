@@ -39,6 +39,12 @@ export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): st
   return `${formatDate(date, timeZone)} ${time}`;
 }
 
+/** «25.10, 14:05» — «обновлено …» у наличия на странице ЖК (PLAN §3.22: вместо «live»). */
+export function formatDayTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  const { dayMonth, time } = formatsIn(timeZone);
+  return `${dayMonth.format(date)}, ${time.format(date)}`;
+}
+
 /** Когда поменяли — по-человечески, как в мокапе (fRel): тексты в messages, здесь только вид. */
 export type RelativeStamp =
   | { kind: "now" }

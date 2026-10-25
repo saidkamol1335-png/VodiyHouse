@@ -6,9 +6,7 @@ import type { ComplexRequirement } from "@/lib/admin/complexes/readiness";
 import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 
 type SaveState =
-  | { status: "idle" }
-  | { status: "saved"; at: number }
-  | { status: "error"; error: ContentErrorCode | null; broken: readonly ComplexRequirement[] };
+  { status: "idle" } | { status: "saved"; at: number } | { status: "error"; error: ContentErrorCode | null; broken: readonly ComplexRequirement[] };
 
 /** Рядом с «Сохранить вкладку» у ЖК: «Сохранено», отказ сервера или чего лишился бы опубликованный ЖК. */
 export function ComplexSaveFeedback({ state }: { state: SaveState }) {

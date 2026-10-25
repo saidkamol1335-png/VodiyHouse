@@ -1,0 +1,132 @@
+/* Раздел страницы ЖК (мокап .sec, .sec__h): отступ сверху, заголовок слева, справа — пометка или
+   кнопка; якорь навигатора не прячется под шапкой и самим навигатором (scroll-margin). */
+.complex-section {
+  position: relative;
+  padding: 84px 0 12px;
+  scroll-margin-top: calc(var(--header-h) + var(--complex-nav-h));
+}
+
+.complex-section--tight {
+  padding-top: 56px;
+}
+
+.complex-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.complex-section__title {
+  margin: 0;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-heading);
+  font-weight: 600;
+  letter-spacing: var(--ls-h2);
+  color: var(--fg-heading);
+  text-wrap: balance;
+}
+
+.complex-section__lead {
+  max-width: 560px;
+  margin: 10px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* «обновлено 25.10, 14:05» (мокап .live без пульса: на сайте нет «live», PLAN §3.22). */
+.complex-section__stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ok);
+}
+
+.complex-section__stamp i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--live-dot);
+  box-shadow: var(--live-dot-glow);
+}
+
+/* Появление (useReveal): full — подъём на --rise-offset, lite — проявление ≤ 200 мс, none — сразу.
+   Показанное в lite не прячется, когда проба включит full; без JS всё видно сразу. */
+[data-js][data-motion="full"] .complex-section:not([data-revealed]) {
+  opacity: 0.01;
+  transform: translateY(var(--rise-offset));
+}
+
+[data-motion="full"] .complex-section[data-revealed="full"] {
+  animation: complex-section-rise var(--dur-reveal) var(--ease) both;
+}
+
+[data-js][data-motion="lite"] .complex-section:not([data-revealed]) {
+  opacity: 0.01;
+}
+
+[data-motion="lite"] .complex-section {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+@keyframes complex-section-rise {
+  from {
+    opacity: 0.01;
+    transform: translateY(var(--rise-offset));
+  }
+}
+
+@media (max-width: 760px) {
+  .complex-section {
+    padding: 44px 0 0;
+  }
+
+  .complex-section--tight {
+    padding-top: 30px;
+  }
+
+  .complex-section__head {
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .complex-section__lead {
+    margin-top: 12px;
+    font-size: var(--fs-control-l);
+  }
+
+  /* Телефон (мокап .livetag): пометка — зелёной пилюлей под заголовком. */
+  .complex-section__stamp {
+    order: -1;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-pill);
+    background: var(--ok-soft);
+    font-family: var(--font);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .complex-section__head {
+    flex-direction: column;
+  }
+
+  .complex-section__heading {
+    display: contents;
+  }
+
+  .complex-section__title {
+    order: -2;
+  }
+}

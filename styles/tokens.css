@@ -112,6 +112,8 @@
   --z-popover: 50; /* меню пользователя */
   --z-phone-menu: 60;
   --z-grain: 200; /* зерно плёнки — поверх всего, но не ловит касания */
+  --z-complex-nav: 30; /* навигатор страницы ЖК — под шапкой сайта */
+  --complex-nav-h: 52px; /* высота навигатора страницы ЖК: якорь раздела встаёт под ним */
 
   /* ---------- анимации ---------- */
   --ease: cubic-bezier(0.19, 1, 0.22, 1); /* expo-out, основная кривая мокапа */
@@ -322,6 +324,46 @@
   --live-dot: #1fa45a;
   --live-dot-glow: 0 0 8px rgba(31, 164, 90, 0.6);
   --rise-offset: 16px;
+
+  /* ---------- страница ЖК (шаг 3.5) ---------- */
+  /* Тёмная плашка и пилюля навигатора телефона (мокап .avb, .jn .is-on): в тёмной теме — светлая. */
+  --inv: #17140f;
+  --on-inv: #f7f3ec;
+  --inv-3: rgba(247, 243, 236, 0.52);
+  --ok-line: rgba(23, 128, 72, 0.3);
+  /* Плашка «Для вас бесплатно» на 1440 (мокап .free). */
+  --offer-free-bg: linear-gradient(135deg, rgba(248, 155, 13, 0.12), rgba(248, 155, 13, 0.04));
+  /* Карта до нажатия: подложка и улицы заглушки, тени меток и кнопок поверх карты (мокап .omap). */
+  --map-bg: #efeae1;
+  --map-road: rgba(255, 255, 255, 0.75);
+  --map-chip-shadow: 0 2px 10px rgba(23, 20, 15, 0.16);
+  --map-pin-shadow: 0 6px 18px rgba(23, 20, 15, 0.3);
+  /* Цвета мест рядом (мокап .jloc__ic--*): белая иконка на цветном квадрате в обеих темах. */
+  --poi-school: #2a66cc;
+  --poi-kindergarten: #b8306f;
+  --poi-mosque: #0f7a73;
+  --poi-clinic: #c23b2b;
+  --poi-shop: #8a5a00;
+  --poi-cafe: #b86400;
+  --poi-stop: #475266;
+  --poi-park: #2e7d4f;
+  --poi-sport: #6a4bd1;
+  --poi-car: #17140f;
+  /* Фото ЖК: рамки и плашки поверх снимка, миниатюры галереи, затемнение телефона (мокап .gal, .jg). */
+  --over-photo-line: rgba(255, 255, 255, 0.14);
+  --over-photo-glass: rgba(255, 255, 255, 0.1);
+  --over-photo-chip: rgba(11, 10, 9, 0.55);
+  --over-photo-chip-strong: rgba(15, 12, 8, 0.6);
+  --gallery-thumb-line: rgba(255, 255, 255, 0.75);
+  --gallery-thumb-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --gallery-thumb-shadow-on: 0 0 0 1px var(--amber), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --gallery-shade: linear-gradient(
+    180deg,
+    rgba(10, 8, 6, 0.42),
+    rgba(10, 8, 6, 0) 28%,
+    rgba(10, 8, 6, 0) 66%,
+    rgba(10, 8, 6, 0.5)
+  );
 }
 
 /* ---------- тёмная тема: набор телефона (контраст приглушённого текста 5,3:1) ---------- */
@@ -439,6 +481,15 @@
   --live-dot: var(--ok);
   --live-dot-glow: 0 0 10px var(--ok);
 
+  --inv: #f4efe7;
+  --on-inv: #14110e;
+  --inv-3: rgba(20, 17, 14, 0.6);
+  --ok-line: rgba(91, 212, 140, 0.32);
+  --map-bg: #131110;
+  --map-road: rgba(255, 240, 220, 0.06);
+  --map-chip-shadow: 0 0 0 1px var(--line-2), 0 4px 14px rgba(0, 0, 0, 0.5);
+  --poi-car: #3a342d;
+
   --login-card-bg: linear-gradient(180deg, rgba(28, 26, 23, 0.88), rgba(16, 15, 13, 0.92));
   --field-bg: rgba(255, 240, 220, 0.03);
   --field-ring-error: 0 0 0 4px rgba(255, 122, 107, 0.12);
@@ -490,5 +541,6 @@
     --fs-h3: 19px;
     --lh-tight: 1.03;
     --lh-heading: 1.07;
+    --complex-nav-h: 56px; /* пилюли 44 px + поля полосы 6 px (мокап .jn) */
   }
 }

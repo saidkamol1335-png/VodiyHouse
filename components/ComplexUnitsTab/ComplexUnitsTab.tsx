@@ -43,14 +43,7 @@ export function ComplexUnitsTab(props: ComplexUnitsTabProps) {
               <NoBlocks blocksHref={builds ? blocksHref : null} />
             ) : (
               <>
-                {view.blocks.length > 1 ? (
-                  <UnitsBlockSwitch
-                    blocks={view.blocks}
-                    current={view.block.id}
-                    href={tabHref}
-                    query={props.switchQuery}
-                  />
-                ) : null}
+                {view.blocks.length > 1 ? <UnitsBlockSwitch blocks={view.blocks} current={view.block.id} href={tabHref} query={props.switchQuery} /> : null}
                 <BlockUnits {...props} block={view.block} />
               </>
             )}
@@ -105,12 +98,7 @@ function BlockBody({ block, ...props }: ComplexUnitsTabProps & { block: UnitsBlo
   // У руководителя без планировок о них скажет генератор — второй раз не повторяем.
   const availability =
     actions.layoutAvailable && (view.layouts.length > 0 || !actions.create) ? (
-      <UnitsAvailability
-        key={block.id}
-        block={block}
-        layouts={view.layouts}
-        action={actions.layoutAvailable}
-      />
+      <UnitsAvailability key={block.id} block={block} layouts={view.layouts} action={actions.layoutAvailable} />
     ) : null;
   // Своя полоса и у блока без списка: ответ тапа из другого блока и отказ Н7 видны и здесь.
   return (

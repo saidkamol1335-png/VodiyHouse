@@ -23,14 +23,7 @@ type ComplexStatusProps = {
 };
 
 /** Статус ЖК в шапке: капсула 10.2, готовность (И9) и публикация с проверкой правила 1.2 (И8). */
-export function ComplexStatus({
-  complex,
-  action,
-  readiness,
-  files,
-  base,
-  developer,
-}: ComplexStatusProps) {
+export function ComplexStatus({ complex, action, readiness, files, base, developer }: ComplexStatusProps) {
   const t = useTranslations("admin.complexes");
   const showReadiness = complex.status === "draft" || complex.status === "hidden";
   return (
@@ -39,20 +32,12 @@ export function ComplexStatus({
       name={complex.name}
       action={action}
       messages="admin.complexes.status"
-      publishPanel={(panel) => (
-        <PublishCheck
-          {...panel}
-          entityId={complex.id}
-          files={files}
-          messages="admin.complexes.publish"
-        />
-      )}
+      publishPanel={(panel) => <PublishCheck {...panel} entityId={complex.id} files={files} messages="admin.complexes.publish" />}
     >
       {showReadiness ? <ComplexReadiness items={readiness} base={base} /> : null}
       {developer.published || complex.status === "archived" ? null : (
         <FormStatus tone="notice">
-          {t("developerHidden", { name: developer.name })}{" "}
-          <Link href={developer.href}>{t("toDeveloper")}</Link>
+          {t("developerHidden", { name: developer.name })} <Link href={developer.href}>{t("toDeveloper")}</Link>
         </FormStatus>
       )}
     </StatusCapsule>

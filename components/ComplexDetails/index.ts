@@ -1,0 +1,1 @@
+export { ComplexDetails } from "./ComplexDetails";

@@ -1,6 +1,7 @@
 import { bilingualFrom, type BilingualValue } from "../bilingual";
 import type { PublicationStatus } from "../publication";
 import { isPublicationStatus } from "../publicationFilter";
+import { nearbyFrom, type NearbyPlace } from "@/lib/site/complex/nearby";
 
 // ЖК страницы кабинета: поля вкладки «Основное» и статус. Наборы значений — как enum в базе
 // (миграция 20261019170000; подписи — messages admin.complexes.values).
@@ -33,13 +34,12 @@ export type ComplexRecord = {
   minutesToCenter: number | null;
   lat: number | null;
   lng: number | null;
-  permitCheckedAt: string | null;
-  landCheckedAt: string | null;
+  nearby: NearbyPlace[];
   staffVisitedAt: string | null;
 };
 
 export const COMPLEX_COLUMNS =
-  "id, slug, name, status, archived_at, developer_id, short_description, class, house_type, ceiling_height, parking, location_id, address, landmark, minutes_to_center, lat, lng, permit_checked_at, land_checked_at, staff_visited_at, developers (name, status)";
+  "id, slug, name, status, archived_at, developer_id, short_description, class, house_type, ceiling_height, parking, location_id, address, landmark, minutes_to_center, lat, lng, nearby, staff_visited_at, developers (name, status)";
 
 export type ComplexDbRow = {
   id: string;
@@ -59,8 +59,7 @@ export type ComplexDbRow = {
   minutes_to_center: number | null;
   lat: number | string | null;
   lng: number | string | null;
-  permit_checked_at: string | null;
-  land_checked_at: string | null;
+  nearby: unknown;
   staff_visited_at: string | null;
   developers: { name: string; status: string } | null;
 };
@@ -97,8 +96,7 @@ export function complexFrom(row: ComplexDbRow): ComplexRecord {
     minutesToCenter: row.minutes_to_center,
     lat: numberOrNull(row.lat),
     lng: numberOrNull(row.lng),
-    permitCheckedAt: row.permit_checked_at,
-    landCheckedAt: row.land_checked_at,
+    nearby: nearbyFrom(row.nearby),
     staffVisitedAt: row.staff_visited_at,
   };
 }

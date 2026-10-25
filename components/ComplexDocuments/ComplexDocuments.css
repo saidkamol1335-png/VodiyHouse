@@ -1,0 +1,73 @@
+/* «Документы ЖК» (мокап .card + .li): строки через пунктир — ✓, название с «?», дата моно справа. */
+.complex-documents {
+  margin: 0;
+  padding: 4px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--panel-bg);
+  list-style: none;
+}
+
+.complex-documents__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px dashed var(--dash);
+}
+
+.complex-documents__item:first-child {
+  border-top: 0;
+}
+
+.complex-documents__check {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--badge-ok-border);
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.complex-documents__name {
+  flex: 1;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.complex-documents__name b {
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.complex-documents__date {
+  align-self: flex-start;
+  padding-top: 5px;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .complex-documents {
+    padding: 4px 14px;
+  }
+
+  .complex-documents__item {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .complex-documents__date {
+    width: 100%;
+    padding: 0 0 0 38px;
+  }
+}

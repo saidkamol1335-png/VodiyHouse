@@ -1,6 +1,7 @@
 import {
   BOT_PATTERN,
   CALLBACK_MINUTES,
+  FREE_SERVICES_MAX,
   INSTAGRAM_PATTERN,
   PHONE_PATTERN,
   TELEGRAM_PATTERN,
@@ -15,21 +16,43 @@ import type { ContentErrorCode } from "../developers/errors";
 // прячет кнопку на сайте. Номер и имена принимаются в привычной записи («90 123 45 67», «@vodiy»,
 // «t.me/vodiy») и хранятся в одной форме: сайт их только показывает.
 
-export const CONTACTS_LIMITS = { hoursMax: 60, freeBadgeMax: 60 } as const;
+export const CONTACTS_LIMITS = { hoursMax: 60, freeBadgeMax: 60, freeServiceMax: 60 } as const;
+
+/** Поля пунктов плашки «Для вас бесплатно»: freeService0 … freeService3. */
+export const FREE_SERVICE_FIELDS = Array.from(
+  { length: FREE_SERVICES_MAX },
+  (_, index) => `freeService${index}` as const,
+);
+type FreeServiceField = (typeof FREE_SERVICE_FIELDS)[number];
 
 export type ContactsField =
-  "phone" | "telegram" | "bot" | "instagram" | "hours" | "callbackMinutes" | "freeBadge";
+  | "phone"
+  | "telegram"
+  | "bot"
+  | "instagram"
+  | "hours"
+  | "callbackMinutes"
+  | "freeBadge"
+  | FreeServiceField;
 export type ContactsIssue = BilingualIssue | "phone" | "telegram" | "bot" | "instagram" | "minutes";
 export type ContactsErrors = Partial<Record<ContactsField, ContactsIssue>>;
 
 /** Поля формы как набраны — чтобы после отказа ничего не пропало. */
-export type ContactsFields = Record<"phone" | "telegram" | "bot" | "instagram" | "callbackMinutes", string> &
-  Record<"hours" | "freeBadge", LocalizedText>;
+export type ContactsFields = Record<
+  "phone" | "telegram" | "bot" | "instagram" | "callbackMinutes",
+  string
+> &
+  Record<"hours" | "freeBadge", LocalizedText> & { freeServices: LocalizedText[] };
 
 export type ContactsActionResult =
   | { status: "idle" }
   | { status: "saved"; at: number }
-  | { status: "error"; error: ContentErrorCode | null; fieldErrors: ContactsErrors; fields?: ContactsFields };
+  | {
+      status: "error";
+      error: ContentErrorCode | null;
+      fieldErrors: ContactsErrors;
+      fields?: ContactsFields;
+    };
 
 export type ContactsParse =
   | { ok: true; value: SiteContacts }
@@ -51,7 +74,10 @@ const PROFILE_LINK = /^(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me|instagram
  * со «/» — проверка имени их не пропустит, вместо «Instagram @www.facebook.com» на сайте.
  */
 export function normalizeHandle(raw: string): string {
-  const text = raw.trim().replace(/[?#].*$/, "").replace(/\/+$/, "");
+  const text = raw
+    .trim()
+    .replace(/[?#].*$/, "")
+    .replace(/\/+$/, "");
   const profile = PROFILE_LINK.exec(text);
   if (profile) return profile[1]!;
   return /^https?:\/\/|\//i.test(text) ? text : text.replace(/^@/, "");
@@ -87,6 +113,7 @@ function readContactsForm(formData: FormData) {
     minutes: readMinutes(formData),
     hours: readBilingual(formData, "hours"),
     freeBadge: readBilingual(formData, "freeBadge"),
+    freeServices: FREE_SERVICE_FIELDS.map((name) => readBilingual(formData, name)),
   };
 }
 
@@ -103,15 +130,19 @@ function contactsErrors(input: ContactsInput): ContactsErrors {
   const freeBadge = bilingualIssue(input.freeBadge, { max: CONTACTS_LIMITS.freeBadgeMax });
   if (hours) errors.hours = hours;
   if (freeBadge) errors.freeBadge = freeBadge;
+  input.freeServices.forEach((service, index) => {
+    const problem = bilingualIssue(service, { max: CONTACTS_LIMITS.freeServiceMax });
+    if (problem) errors[FREE_SERVICE_FIELDS[index]!] = problem;
+  });
   return errors;
 }
 
-/** Поля: phone, telegram, bot, instagram, hours.ru|uz, callbackMinutes, freeBadge.ru|uz. */
+/** Поля: phone, telegram, bot, instagram, hours.ru|uz, callbackMinutes, freeBadge.ru|uz, freeService0…3.ru|uz. */
 export function parseContacts(formData: FormData): ContactsParse {
   const input = readContactsForm(formData);
   const fieldErrors = contactsErrors(input);
   if (Object.keys(fieldErrors).length > 0) {
-    const { phone, telegram, bot, instagram, minutes, hours, freeBadge } = input;
+    const { phone, telegram, bot, instagram, minutes, hours, freeBadge, freeServices } = input;
     const fields = {
       phone: phone.raw,
       telegram: telegram.raw,
@@ -120,6 +151,7 @@ export function parseContacts(formData: FormData): ContactsParse {
       callbackMinutes: minutes.raw,
       hours,
       freeBadge,
+      freeServices,
     };
     return { ok: false, fieldErrors, fields };
   }
@@ -133,6 +165,8 @@ export function parseContacts(formData: FormData): ContactsParse {
       hours: bilingualOrNull(input.hours),
       callbackMinutes: input.minutes.value,
       freeBadge: bilingualOrNull(input.freeBadge),
+      // Пустые строки пропускаются: пункт 3 без пункта 2 — просто второй пункт.
+      freeServices: input.freeServices.flatMap((service) => bilingualOrNull(service) ?? []),
     },
   };
 }
@@ -147,5 +181,8 @@ export function contactsFields(contacts: SiteContacts): ContactsFields {
     callbackMinutes: contacts.callbackMinutes === null ? "" : String(contacts.callbackMinutes),
     hours: contacts.hours ?? { ru: "", uz: "" },
     freeBadge: contacts.freeBadge ?? { ru: "", uz: "" },
+    freeServices: FREE_SERVICE_FIELDS.map(
+      (_, index) => contacts.freeServices[index] ?? { ru: "", uz: "" },
+    ),
   };
 }

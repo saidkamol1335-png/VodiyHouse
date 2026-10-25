@@ -56,6 +56,11 @@ describe("parseContacts", () => {
         "hours.uz": "Du–Sh, 9:00–19:00",
         "freeBadge.ru": "Для вас бесплатно",
         "freeBadge.uz": "Siz uchun bepul",
+        // Пустой второй пункт пропускается: третий становится вторым.
+        "freeService0.ru": "Подбор ЖК под ваш бюджет",
+        "freeService0.uz": "Byudjetingizga mos TJM tanlash",
+        "freeService2.ru": "Показ объекта с менеджером",
+        "freeService2.uz": "Obyektni menejer bilan ko‘rish",
       }),
     );
     expect(parsed).toEqual({
@@ -68,8 +73,17 @@ describe("parseContacts", () => {
         callbackMinutes: 15,
         hours: { ru: "Пн–Сб, 9:00–19:00", uz: "Du–Sh, 9:00–19:00" },
         freeBadge: { ru: "Для вас бесплатно", uz: "Siz uchun bepul" },
+        freeServices: [
+          { ru: "Подбор ЖК под ваш бюджет", uz: "Byudjetingizga mos TJM tanlash" },
+          { ru: "Показ объекта с менеджером", uz: "Obyektni menejer bilan ko‘rish" },
+        ],
       },
     });
+  });
+
+  it("пункт плашки на одном языке — ошибка у этого пункта", () => {
+    const parsed = parseContacts(form({ "freeService1.ru": "Только по-русски" }));
+    expect(parsed).toMatchObject({ ok: false, fieldErrors: { freeService1: "missingUz" } });
   });
 
   it("неверные поля — ошибки у полей, набранное возвращается как есть", () => {

@@ -8,11 +8,7 @@ import { ChoiceField } from "@/components/ChoiceField";
 import { DrawingTile } from "@/components/DrawingTile";
 import { Field } from "@/components/Field";
 import type { Currency } from "@/lib/admin/complexes/blocks";
-import {
-  ROOM_CHOICES,
-  type LayoutDraft,
-  type LayoutRowErrors,
-} from "@/lib/admin/complexes/layouts";
+import { ROOM_CHOICES, type LayoutDraft, type LayoutRowErrors } from "@/lib/admin/complexes/layouts";
 import { formatPrice } from "@/lib/format";
 
 type LayoutRowProps = {
@@ -46,8 +42,7 @@ export function LayoutRow(props: LayoutRowProps) {
   const t = useTranslations("admin.complexes.layouts");
   const rooms = useTranslations("admin.complexes.rooms");
   const drawing = useDrawingPick(props.onDrawing);
-  const issue = (field: "rooms" | "area" | "priceFrom") =>
-    issues?.[field] ? t(`issues.${issues[field]}`) : undefined;
+  const issue = (field: "rooms" | "area" | "priceFrom") => (issues?.[field] ? t(`issues.${issues[field]}`) : undefined);
   return (
     <li className="layout-row" data-testid="layout-row">
       <RowDrawing {...props} busy={drawing.busy} onPick={drawing.pick} />
@@ -115,13 +110,7 @@ function RowDrawing({ row, uploadLocked, busy, onPick, onChange }: RowDrawingPro
 }
 
 /** «Цена от»: у блока со списком — из квартир (только чтение), иначе — поле. */
-function RowPrice({
-  row,
-  currency,
-  hasUnits,
-  error,
-  onChange,
-}: LayoutRowProps & { error?: string }) {
+function RowPrice({ row, currency, hasUnits, error, onChange }: LayoutRowProps & { error?: string }) {
   const t = useTranslations("admin.complexes.layouts");
   if (hasUnits) return <OfferText row={row} currency={currency} />;
   return (
@@ -158,12 +147,7 @@ function RowEnd({ row, hasUnits, variant, onDuplicate, onRemove }: LayoutRowProp
   return (
     <div className="layout-row__end">
       <RowBadges row={row} hasUnits={hasUnits} variant={variant} />
-      <button
-        type="button"
-        className="layout-row__icon"
-        aria-label={t("duplicate")}
-        onClick={onDuplicate}
-      >
+      <button type="button" className="layout-row__icon" aria-label={t("duplicate")} onClick={onDuplicate}>
         <Copy size={16} aria-hidden="true" />
       </button>
       <button
@@ -180,11 +164,7 @@ function RowEnd({ row, hasUnits, variant, onDuplicate, onRemove }: LayoutRowProp
   );
 }
 
-function RowBadges({
-  row,
-  hasUnits,
-  variant,
-}: Pick<LayoutRowProps, "row" | "hasUnits" | "variant">) {
+function RowBadges({ row, hasUnits, variant }: Pick<LayoutRowProps, "row" | "hasUnits" | "variant">) {
   const t = useTranslations("admin.complexes.layouts");
   const priced = hasUnits ? row.offer?.priceFrom != null : Boolean(row.priceFrom.trim());
   return (

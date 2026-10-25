@@ -1,0 +1,89 @@
+/* «Блоки и условия покупки» (мокап .blocks): карточки по две в ряд; на телефоне (MobJk) — вкладки
+   «Блок A · Сдан» и одна карточка под ними. */
+.complex-blocks {
+  margin-top: 48px;
+}
+
+.complex-blocks__title {
+  margin: 0 0 16px;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  font-weight: 650;
+  letter-spacing: var(--ls-h3);
+}
+
+.complex-blocks__tabs {
+  display: none;
+}
+
+.complex-blocks__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+.complex-blocks__cell {
+  display: flex;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .complex-blocks {
+    margin-top: 28px;
+  }
+
+  .complex-blocks__title {
+    margin-bottom: 12px;
+  }
+
+  .complex-blocks__tabs {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill);
+    background: var(--bg-4);
+  }
+
+  .complex-blocks__tab {
+    display: inline-flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-target);
+    padding: 0 12px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: none;
+    color: var(--fg-2);
+    font-size: var(--fs-control);
+    font-weight: 650;
+    line-height: 1.15;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .complex-blocks__tab small {
+    color: var(--fg-3);
+    font-size: var(--fs-label);
+    font-weight: 600;
+  }
+
+  .complex-blocks__tab--active {
+    background: var(--bg-2);
+    color: var(--fg);
+    box-shadow: var(--control-shadow);
+  }
+
+  .complex-blocks__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  /* Вкладки работают только с JS: без него видны все карточки. */
+  [data-js] .complex-blocks__tabs + .complex-blocks__grid .complex-blocks__cell:not([data-active]) {
+    display: none;
+  }
+}

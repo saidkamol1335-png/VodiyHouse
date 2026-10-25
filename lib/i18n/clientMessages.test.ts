@@ -11,6 +11,7 @@ import {
   CABINET_NAMESPACE,
   CATALOG_MESSAGES,
   CALC_NAMESPACE,
+  COMPLEX_MESSAGES,
   pickMessages,
   SITE_SHELL_MESSAGES,
   siteMessages,
@@ -29,6 +30,8 @@ function clientNamespaces(entries: readonly string[]): Set<string> {
   }
   return namespaces;
 }
+
+const isComplexRoute = (file: string) => /[\\/]novostroyki[\\/]\[slug\][\\/]/.test(file);
 
 const covers = (paths: readonly string[], namespace: string) =>
   paths.some((picked) => namespace === picked || namespace.startsWith(`${picked}.`));
@@ -51,8 +54,11 @@ describe("сообщения для браузера", () => {
     // Все страницы сайта, кроме калькулятора: у него свой провайдер с CALC_MESSAGES. Страница со
     // своим провайдером каталога получает и его тексты.
     const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
+    // Страница ЖК: провайдер с COMPLEX_MESSAGES ставит page.tsx — его получают и разделы рядом.
     const allowedFor = (file: string): readonly string[] =>
-      readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES : SITE_SHELL_MESSAGES;
+      isComplexRoute(file) ? COMPLEX_MESSAGES
+      : readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES
+      : SITE_SHELL_MESSAGES;
     const missing = pages.flatMap((file) =>
       [...clientNamespaces([file])]
         .filter((namespace) => namespace !== "*" && !covers(allowedFor(file), namespace))
@@ -67,14 +73,17 @@ describe("сообщения для браузера", () => {
     const used = [...clientNamespaces(routeFiles("app/[locale]"))];
     expect(used.length).toBeGreaterThan(0);
     expect(used.filter((namespace) => namespace.startsWith(CABINET_NAMESPACE))).toEqual([]);
-    // Тексты калькулятора — только /kalkulyator: у неё свой провайдер с CALC_MESSAGES.
+    // Тексты калькулятора — только /kalkulyator и странице ЖК («Расчёт для этой квартиры»): у них
+    // свои провайдеры с CALC_MESSAGES и COMPLEX_MESSAGES.
     const outside = routeFiles("app/[locale]").filter(
-      (file) => !/[\\/]kalkulyator[\\/]/.test(file),
+      (file) => !/[\\/]kalkulyator[\\/]/.test(file) && !isComplexRoute(file),
     );
     const elsewhere = [...clientNamespaces(outside)];
     expect(elsewhere.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
     const page = readSource("app/[locale]/kalkulyator/page.tsx");
     expect(page).toContain("pickMessages(messages, CALC_MESSAGES)");
+    expect(readSource("app/[locale]/novostroyki/[slug]/page.tsx")).toContain("pickMessages(messages, COMPLEX_MESSAGES)");
+    expect(COMPLEX_MESSAGES).toContain(CALC_NAMESPACE);
   });
 
   it("корню /admin хватает разделов входа: каждый useTranslations вне кабинета ими покрыт", () => {

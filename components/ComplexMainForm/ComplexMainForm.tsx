@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import type { SelectOption } from "@/components/SelectField";
 import type { ComplexMainFields } from "@/lib/admin/complexes/mainForm";
+import { nearbyDrafts } from "@/lib/admin/complexes/nearby";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import type { DeveloperOption, SaveComplexMainResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
@@ -44,12 +45,8 @@ function fieldsOf(complex: ComplexRecord): ComplexMainFields {
     address: complex.address ?? empty,
     landmark: complex.landmark ?? empty,
     minutesToCenter: complex.minutesToCenter?.toString() ?? "",
-    point:
-      complex.lat !== null && complex.lng !== null
-        ? formatCoordinates({ lat: complex.lat, lng: complex.lng })
-        : "",
-    permitCheckedAt: complex.permitCheckedAt ?? "",
-    landCheckedAt: complex.landCheckedAt ?? "",
+    point: complex.lat !== null && complex.lng !== null ? formatCoordinates({ lat: complex.lat, lng: complex.lng }) : "",
+    nearby: nearbyDrafts(complex.nearby),
     staffVisitedAt: complex.staffVisitedAt ?? "",
   };
 }
@@ -57,10 +54,7 @@ function fieldsOf(complex: ComplexRecord): ComplexMainFields {
 /** Вкладка «Основное» (И1): три панели как разделы сайта, одна «Сохранить вкладку». */
 export function ComplexMainForm(props: ComplexMainFormProps) {
   const t = useTranslations("admin.complexes");
-  const [state, formAction, pending] = useActionState(
-    (_previous: SaveComplexMainResult, formData: FormData) => props.action(formData),
-    IDLE,
-  );
+  const [state, formAction, pending] = useActionState((_previous: SaveComplexMainResult, formData: FormData) => props.action(formData), IDLE);
   const guard = useUnsavedGuard(t("unsaved"));
   const { reset } = guard;
   const savedAt = state.status === "saved" ? state.at : null;
@@ -77,12 +71,7 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
   const sections = { ...props, fields, issue };
 
   return (
-    <form
-      className="complex-main"
-      onSubmit={submitKeepingForm(formAction)}
-      onInput={guard.onInput}
-      noValidate
-    >
+    <form className="complex-main" onSubmit={submitKeepingForm(formAction)} onInput={guard.onInput} noValidate>
       <input type="hidden" name="id" value={props.complex.id} />
       <AboutPanel {...sections} />
       <LocationPanel {...sections} />

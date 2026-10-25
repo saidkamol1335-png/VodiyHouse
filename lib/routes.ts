@@ -18,15 +18,27 @@ export const complexRoute = (slug: string) => `${ROUTES.catalog}/${slug}`;
 /** Публичные страницы, которые уже есть в коде. Остальные адреса шапки — разделы фазы 3. */
 const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home, ROUTES.calculator, ROUTES.catalog]);
 
+/** «/novostroyki/demo-shodlik» — страница ЖК (шаг 3.5). */
+const COMPLEX_PAGE = /^\/novostroyki\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 export function isRouteReady(pathname: string | null | undefined): boolean {
-  return typeof pathname === "string" && READY_ROUTES.has(pathname);
+  return (
+    typeof pathname === "string" && (READY_ROUTES.has(pathname) || COMPLEX_PAGE.test(pathname))
+  );
 }
 
 /** Кабинет — без префикса языка. */
 export const ADMIN_ROUTE = "/admin";
 
 export type NavKey =
-  "new" | "specials" | "developers" | "calculator" | "about" | "forDevelopers" | "quiz" | "howToBuy";
+  | "new"
+  | "specials"
+  | "developers"
+  | "calculator"
+  | "about"
+  | "forDevelopers"
+  | "quiz"
+  | "howToBuy";
 
 /**
  * Пункты шапки — порядок мокапа 09.10.2026 (PLAN §7, фаза 3). Запуск 3а — без «Спецпредложений»

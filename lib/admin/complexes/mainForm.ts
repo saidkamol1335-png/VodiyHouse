@@ -9,7 +9,9 @@ import { bilingualHasContact } from "../contactGuard";
 import { readText, readUuid } from "../credentials";
 import { isoDateIssue } from "../developers/mainForm";
 import { isInFerganaRegion, parseCoordinates, type GeoPoint } from "@/lib/geo";
+import { nearbyRecord, type NearbyPlace } from "@/lib/site/complex/nearby";
 import { COMPLEX_NAME_MAX, normalizeComplexName } from "./create";
+import { parseNearby, readNearbyDrafts, type NearbyDraft, type NearbyIssue } from "./nearby";
 import {
   COMPLEX_CLASSES,
   HOUSE_TYPES,
@@ -47,8 +49,8 @@ export type ComplexMainFields = {
   landmark: BilingualValue;
   minutesToCenter: string;
   point: string;
-  permitCheckedAt: string;
-  landCheckedAt: string;
+  /** «Удобство локации» (Ф5) — строки как набраны. */
+  nearby: NearbyDraft[];
   staffVisitedAt: string;
 };
 
@@ -65,8 +67,7 @@ export type ComplexMainInput = {
   landmark: BilingualValue | null;
   minutesToCenter: number | null;
   point: GeoPoint | null;
-  permitCheckedAt: string | null;
-  landCheckedAt: string | null;
+  nearby: NearbyPlace[];
   staffVisitedAt: string | null;
 };
 
@@ -78,7 +79,8 @@ export type ComplexFieldIssue =
   | "outOfRange"
   | "notNumber"
   | "pointInvalid"
-  | "dateInvalid";
+  | "dateInvalid"
+  | NearbyIssue;
 export type ComplexMainErrors = Partial<Record<keyof ComplexMainFields, ComplexFieldIssue>>;
 export type ComplexMainParse =
   | { ok: true; value: ComplexMainInput; fields: ComplexMainFields }
@@ -92,7 +94,8 @@ const TEXT_FIELDS = [
   "minutesToCenter",
   "point",
 ] as const;
-const DATE_FIELDS = ["permitCheckedAt", "landCheckedAt", "staffVisitedAt"] as const;
+// «Разрешение» и «Земля» — из документов ЖК (шаг 3.5): здесь только визит сотрудника.
+const DATE_FIELDS = ["staffVisitedAt"] as const;
 
 function readFields(formData: FormData): ComplexMainFields {
   const plain = (name: string) => (readText(formData, name) ?? "").trim();
@@ -104,6 +107,7 @@ function readFields(formData: FormData): ComplexMainFields {
     shortDescription: readBilingual(formData, "shortDescription"),
     address: readBilingual(formData, "address"),
     landmark: readBilingual(formData, "landmark"),
+    nearby: readNearbyDrafts(readText(formData, "nearby")),
     ...(Object.fromEntries(TEXT_FIELDS.map((field) => [field, plain(field)])) as Record<
       (typeof TEXT_FIELDS)[number],
       string
@@ -174,8 +178,7 @@ function parseValues(fields: ComplexMainFields) {
     landmark: text(fields.landmark, limits.landmarkMax),
     minutesToCenter: numberIn(fields.minutesToCenter, 0, limits.minutesMax, true),
     point: point(fields.point),
-    permitCheckedAt: date(fields.permitCheckedAt),
-    landCheckedAt: date(fields.landCheckedAt),
+    nearby: parseNearby(fields.nearby),
     staffVisitedAt: date(fields.staffVisitedAt),
   };
 }
@@ -214,8 +217,7 @@ export function complexMainRow(input: ComplexMainInput) {
     minutes_to_center: input.minutesToCenter,
     lat: input.point?.lat ?? null,
     lng: input.point?.lng ?? null,
-    permit_checked_at: input.permitCheckedAt,
-    land_checked_at: input.landCheckedAt,
+    nearby: input.nearby.map(nearbyRecord),
     staff_visited_at: input.staffVisitedAt,
   };
 }

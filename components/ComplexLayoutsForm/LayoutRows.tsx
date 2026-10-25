@@ -3,12 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
-import {
-  LAYOUT_LIMITS,
-  newLayoutDraft,
-  type BlockLayouts,
-  type LayoutDraft,
-} from "@/lib/admin/complexes/layouts";
+import { LAYOUT_LIMITS, newLayoutDraft, type BlockLayouts, type LayoutDraft } from "@/lib/admin/complexes/layouts";
 import { layoutVariants } from "@/lib/admin/units/layoutVariants";
 import { EmptyBlock } from "./BlockSwitch";
 import { LayoutRow } from "./LayoutRow";
@@ -23,10 +18,7 @@ type LayoutRowsProps = {
 };
 
 // Сохранённые двойники — «вариант N», как в списках «Квартир» (новые строки id ещё не имеют).
-const savedVariants = (rows: LayoutDraft[]) =>
-  layoutVariants(
-    rows.flatMap((row) => (row.id ? [{ id: row.id, rooms: row.rooms, area: row.area }] : [])),
-  );
+const savedVariants = (rows: LayoutDraft[]) => layoutVariants(rows.flatMap((row) => (row.id ? [{ id: row.id, rooms: row.rooms, area: row.area }] : [])));
 
 /** Строки блока; у пустого — «Скопировать из блока …» с планировками других блоков. */
 export function LayoutRows({ block, blocks, draft, drawings }: LayoutRowsProps) {
@@ -34,12 +26,7 @@ export function LayoutRows({ block, blocks, draft, drawings }: LayoutRowsProps) 
   const variants = savedVariants(draft.rows);
   return (
     <>
-      {draft.rows.length === 0 ? (
-        <EmptyBlock
-          others={others}
-          onCopy={(from) => draft.add(from.layouts.map((row) => newLayoutDraft(row)))}
-        />
-      ) : null}
+      {draft.rows.length === 0 ? <EmptyBlock others={others} onCopy={(from) => draft.add(from.layouts.map((row) => newLayoutDraft(row)))} /> : null}
       <ul className="complex-layouts__rows">
         {draft.rows.map((row) => (
           <LayoutRow
@@ -65,12 +52,7 @@ export function LayoutsActions({ draft, uploading }: { draft: LayoutsDraft; uplo
   const t = useTranslations("admin.complexes");
   return (
     <div className="complex-layouts__actions">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => draft.add()}
-        disabled={draft.rows.length >= LAYOUT_LIMITS.maxRows}
-      >
+      <Button variant="ghost" size="sm" onClick={() => draft.add()} disabled={draft.rows.length >= LAYOUT_LIMITS.maxRows}>
         + {t("layouts.add")}
       </Button>
       <div className="complex-layouts__save">

@@ -45,15 +45,14 @@ join public.developers d on d.slug = p.developer;
 
 insert into public.complexes (
   developer_id, slug, name, class, location_id, address, landmark, minutes_to_center,
-  lat, lng, house_type, ceiling_height, parking,
-  permit_checked_at, land_checked_at, staff_visited_at, status, sort
+  lat, lng, house_type, ceiling_height, parking, staff_visited_at, status, sort
 )
 select
   d.id, c.slug, jsonb_build_object('ru', c.name, 'uz', c.name), c.class::public.complex_class, l.id,
   jsonb_build_object('ru', c.address_ru, 'uz', c.address_uz),
   jsonb_build_object('ru', c.landmark_ru, 'uz', c.landmark_uz),
   c.minutes, c.lat, c.lng, 'monolith', c.ceiling, c.parking::public.parking_type,
-  c.checked_on::date, c.checked_on::date, c.visited_on::date, 'published', c.sort
+  c.visited_on::date, 'published', c.sort
 from (values
   ('demo-sifat', 'demo-shodlik', 'Shodlik', 'comfort',
    'ул. Мустакиллик, 12', 'Mustaqillik ko‘chasi, 12', 'напротив центрального парка', 'markaziy bog‘ ro‘parasida',
@@ -71,6 +70,51 @@ from (values
         minutes, lat, lng, ceiling, parking, checked_on, visited_on, sort)
 join public.developers d on d.slug = c.developer
 join public.locations l on l.slug = 'fergana';
+
+-- Документы ЖК (ТЗ 7.8, шаг 3.5): проверенные — с датой проверки (мокап: «6 проверено · 12.09.2026»);
+-- акт ввода — у ЖК со сданным блоком. «Проверено Vodiy House» на карточке — разрешение и земля.
+insert into public.complex_documents (complex_id, document_type_id, checked_on)
+select c.id, t.id, x.checked_on::date
+from (values
+  ('demo-shodlik', '2026-09-12', true),
+  ('demo-namuna', '2026-09-11', false),
+  ('demo-yulduz', '2026-09-11', false),
+  ('demo-orzu', '2026-09-09', true)
+) as x (slug, checked_on, delivered)
+join public.complexes c on c.slug = x.slug
+join public.document_types t on t.slug <> 'commissioning' or x.delivered;
+
+-- «Удобство локации» (Ф5): ближайшие места карты мокапа (JK_GEO) — метры по прямой, минуты пешком
+-- по 75 м в минуту, как в мокапе.
+update public.complexes c
+set nearby = n.items::jsonb
+from (values
+  ('demo-shodlik', '[{"kind": "school", "name": {"ru": "Школа №46", "uz": "46-maktab"}, "meters": 270, "minutes": 4},
+    {"kind": "kindergarten", "name": {"ru": "Детский сад №11", "uz": "11-bog‘cha"}, "meters": 210, "minutes": 3},
+    {"kind": "mosque", "name": {"ru": "Мечеть «Кукча»", "uz": "«Ko‘kcha» masjidi"}, "meters": 470, "minutes": 6},
+    {"kind": "clinic", "name": {"ru": "Семейная поликлиника №4", "uz": "4-oilaviy poliklinika"}, "meters": 680, "minutes": 9},
+    {"kind": "shop", "name": {"ru": "Мини-маркет", "uz": "Minimarket"}, "meters": 60, "minutes": 1},
+    {"kind": "stop", "name": {"ru": "маршруты 2, 9, 12", "uz": "2, 9, 12 yo‘nalishlar"}, "meters": 60, "minutes": 1}]'),
+  ('demo-namuna', '[{"kind": "school", "name": {"ru": "Школа №14", "uz": "14-maktab"}, "meters": 370, "minutes": 5},
+    {"kind": "kindergarten", "name": {"ru": "Детский сад №49", "uz": "49-bog‘cha"}, "meters": 360, "minutes": 5},
+    {"kind": "mosque", "name": {"ru": "Мечеть «Сохил»", "uz": "«Sohil» masjidi"}, "meters": 250, "minutes": 3},
+    {"kind": "clinic", "name": {"ru": "Семейная поликлиника №7", "uz": "7-oilaviy poliklinika"}, "meters": 760, "minutes": 10},
+    {"kind": "shop", "name": {"ru": "Мини-маркет", "uz": "Minimarket"}, "meters": 180, "minutes": 2},
+    {"kind": "stop", "name": {"ru": "маршруты 4, 7, 27", "uz": "4, 7, 27 yo‘nalishlar"}, "meters": 60, "minutes": 1}]'),
+  ('demo-yulduz', '[{"kind": "school", "name": {"ru": "Школа №18", "uz": "18-maktab"}, "meters": 190, "minutes": 3},
+    {"kind": "kindergarten", "name": {"ru": "Детский сад №12", "uz": "12-bog‘cha"}, "meters": 180, "minutes": 2},
+    {"kind": "mosque", "name": {"ru": "Мечеть «Кукча»", "uz": "«Ko‘kcha» masjidi"}, "meters": 360, "minutes": 5},
+    {"kind": "clinic", "name": {"ru": "Семейная поликлиника №7", "uz": "7-oilaviy poliklinika"}, "meters": 360, "minutes": 5},
+    {"kind": "shop", "name": {"ru": "Мини-маркет", "uz": "Minimarket"}, "meters": 140, "minutes": 2},
+    {"kind": "stop", "name": {"ru": "маршруты 21, 41, 45", "uz": "21, 41, 45 yo‘nalishlar"}, "meters": 60, "minutes": 1}]'),
+  ('demo-orzu', '[{"kind": "school", "name": {"ru": "Школа №37", "uz": "37-maktab"}, "meters": 320, "minutes": 4},
+    {"kind": "kindergarten", "name": {"ru": "Детский сад №36", "uz": "36-bog‘cha"}, "meters": 450, "minutes": 6},
+    {"kind": "mosque", "name": {"ru": "Мечеть «Богишамол»", "uz": "«Bog‘ishamol» masjidi"}, "meters": 390, "minutes": 5},
+    {"kind": "clinic", "name": {"ru": "Семейная поликлиника №2", "uz": "2-oilaviy poliklinika"}, "meters": 730, "minutes": 10},
+    {"kind": "shop", "name": {"ru": "Мини-маркет", "uz": "Minimarket"}, "meters": 80, "minutes": 1},
+    {"kind": "stop", "name": {"ru": "маршруты 15, 33, 45", "uz": "15, 33, 45 yo‘nalishlar"}, "meters": 130, "minutes": 2}]')
+) as n (slug, items)
+where c.slug = n.slug;
 
 -- ─── Блоки: параметры генератора и цена за м² (мокап: blocks, ppm) ───────────────────────
 
@@ -103,6 +147,39 @@ from (values
 ) as b (complex, block, status, progress, floors_total, floors_built, year, quarter, finishing, cadastre, sort)
 join public.complexes c on c.slug = b.complex
 join public.finishings f on f.slug = b.finishing;
+
+-- Перенос срока Shodlik B (мокап: «4 кв. 2027 · перенесён с 2 кв. 2027», ТЗ 7.3в).
+insert into public.deadline_changes (complex_id, block_id, from_year, from_quarter, to_year, to_quarter, changed_on)
+select c.id, b.id, 2027, 2, 2027, 4, '2026-08-20'
+from public.complexes c
+join public.blocks b on b.complex_id = c.id and b.name = 'B'
+where c.slug = 'demo-shodlik';
+
+-- Namuna показывает разделы сверх мокапа (Ф4): «Что входит в цену» и «Детали проекта» — тексты
+-- DEMO; у Shodlik их нет — его страница совпадает с мокапом.
+update public.blocks b
+set price_includes = '[{"item": {"ru": "Отделка white box", "uz": "White box pardoz"}, "included": true},
+  {"item": {"ru": "Остекление балкона", "uz": "Balkon oynasi"}, "included": true},
+  {"item": {"ru": "Место в подземном паркинге", "uz": "Yer osti avtoturargohidagi joy"}, "included": false, "price": 9000},
+  {"item": {"ru": "Кладовая", "uz": "Omborxona"}, "included": false, "price": 2500}]'
+from public.complexes c
+where c.id = b.complex_id and c.slug = 'demo-namuna';
+
+insert into public.complex_details (complex_id, topic_id, text)
+select c.id, t.id, jsonb_build_object('ru', x.ru, 'uz', x.uz)
+from (values
+  ('about',
+   'Namuna — башня бизнес-класса в центре Ферганы, рядом с площадью Мустакиллик. 16 этажей, подземный паркинг и коммерческие помещения на первом этаже. Квартиры — от студий до 4-комнатных, отделка white box: остаётся выбрать покрытия и въезжать.',
+   'Namuna — Farg‘ona markazida, Mustaqillik maydoni yonidagi biznes sinf minorasi. 16 qavat, yer osti avtoturargohi va birinchi qavatda tijorat binolari. Kvartiralar — studiyadan 4 xonaligacha, white box pardoz: qoplamalarni tanlab, ko‘chib kirish qoladi.'),
+  ('quality',
+   'Монолитный каркас, фасад из керамогранита, окна с двухкамерным стеклопакетом. В каждом подъезде — пассажирский и грузовой лифты.',
+   'Monolit karkas, keramogranit fasad, ikki kamerali oynali derazalar. Har bir podyezdda — yo‘lovchi va yuk liftlari.'),
+  ('landscaping',
+   'Закрытый двор без машин: детская и спортивная площадки, места для отдыха, освещение и видеонаблюдение. Машины — в подземном паркинге.',
+   'Mashinasiz yopiq hovli: bolalar va sport maydonchalari, dam olish joylari, yoritish va videokuzatuv. Mashinalar — yer osti avtoturargohida.')
+) as x (topic, ru, uz)
+join public.complexes c on c.slug = 'demo-namuna'
+join public.detail_topics t on t.slug = x.topic;
 
 -- ─── Планировки (мокап: plans) ───────────────────────────────────────────────────────────
 

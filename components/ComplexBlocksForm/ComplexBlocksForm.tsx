@@ -24,23 +24,13 @@ type ComplexBlocksFormProps = {
 type Draft = ReturnType<typeof useBlocksDraft>;
 
 /** Вкладка «Блоки» (И4): карточки-сводки как блоки на сайте, правка на месте, сохранение вкладкой. */
-export function ComplexBlocksForm({
-  complexId,
-  blocks,
-  finishings,
-  action,
-}: ComplexBlocksFormProps) {
+export function ComplexBlocksForm({ complexId, blocks, finishings, action }: ComplexBlocksFormProps) {
   const t = useTranslations("admin.complexes.blocks");
   const draft = useBlocksDraft(blocks, action);
   const [openKey, setOpenKey] = useOpenCard(draft.state);
   return (
     <AdminPanel title={t("title")} wide>
-      <form
-        className="complex-blocks"
-        onSubmit={submitKeepingForm(draft.formAction)}
-        onInput={draft.onInput}
-        noValidate
-      >
+      <form className="complex-blocks" onSubmit={submitKeepingForm(draft.formAction)} onInput={draft.onInput} noValidate>
         <input type="hidden" name="id" value={complexId} />
         <input type="hidden" name="blocks" value={JSON.stringify(draft.rows)} />
         <p className="complex-blocks__lead">{t("lead")}</p>
@@ -53,13 +43,7 @@ export function ComplexBlocksForm({
   );
 }
 
-function RemovedNotices({
-  removed,
-  onRestore,
-}: {
-  removed: Removed[];
-  onRestore: (key: string) => void;
-}) {
+function RemovedNotices({ removed, onRestore }: { removed: Removed[]; onRestore: (key: string) => void }) {
   const t = useTranslations("admin.complexes.blocks");
   return removed.map(({ row }) => (
     <FormStatus key={row.key} tone="notice" className="complex-blocks__removed">
@@ -77,16 +61,7 @@ type BlockCardsProps = Draft & {
   onOpen: (key: string | null) => void;
 };
 
-function BlockCards({
-  rows,
-  rowErrors,
-  finishings,
-  openKey,
-  onOpen,
-  update,
-  move,
-  remove,
-}: BlockCardsProps) {
+function BlockCards({ rows, rowErrors, finishings, openKey, onOpen, update, move, remove }: BlockCardsProps) {
   const [moved, setMoved] = useState<{ key: string; direction: MoveDirection } | null>(null);
   // Та же функция между рендерами: она — зависимость эффекта фокуса в карточке (useMoveFocus).
   const forgetMove = useCallback(() => setMoved(null), []);
@@ -120,12 +95,7 @@ function BlocksActions({ rows, state, pending, onAdd }: Draft & { onAdd: () => v
   const t = useTranslations("admin.complexes.blocks");
   return (
     <div className="complex-blocks__actions">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onAdd}
-        disabled={rows.length >= BLOCK_LIMITS.maxRows}
-      >
+      <Button variant="ghost" size="sm" onClick={onAdd} disabled={rows.length >= BLOCK_LIMITS.maxRows}>
         + {t("add")}
       </Button>
       <div className="complex-blocks__save">

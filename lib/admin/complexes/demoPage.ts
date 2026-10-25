@@ -16,7 +16,7 @@ type DemoFacts = Pick<
   | "minutesToCenter"
   | "lat"
   | "lng"
-  | "permitCheckedAt"
+  | "nearby"
   | "staffVisitedAt"
 >;
 
@@ -31,7 +31,10 @@ const FACTS: Record<string, DemoFacts> = {
     minutesToCenter: 7,
     lat: 40.3842,
     lng: 71.7843,
-    permitCheckedAt: "2026-09-12",
+    nearby: [
+      { kind: "school", name: { ru: "Школа №46", uz: "46-maktab" }, meters: 270, minutes: 4, mode: "walk" },
+      { kind: "stop", name: { ru: "маршруты 2, 9, 12", uz: "2, 9, 12 yo‘nalishlar" }, meters: 60, minutes: 1, mode: "walk" },
+    ],
     staffVisitedAt: "2026-09-20",
   },
   "demo-namuna": {
@@ -44,7 +47,7 @@ const FACTS: Record<string, DemoFacts> = {
     minutesToCenter: 4,
     lat: 40.3889,
     lng: 71.7831,
-    permitCheckedAt: "2026-09-11",
+    nearby: [],
     staffVisitedAt: "2026-09-18",
   },
 };
@@ -59,7 +62,7 @@ const EMPTY_FACTS: DemoFacts = {
   minutesToCenter: null,
   lat: null,
   lng: null,
-  permitCheckedAt: null,
+  nearby: [],
   staffVisitedAt: null,
 };
 
@@ -81,7 +84,6 @@ export function demoComplex(id: string): ComplexRecord | null {
     developerStatus: row.developerStatus,
     shortDescription: null,
     locationId: facts.address ? FERGANA_ID : null,
-    landCheckedAt: facts.permitCheckedAt,
     ...facts,
   };
 }

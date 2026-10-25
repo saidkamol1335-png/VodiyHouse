@@ -6,6 +6,7 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { BilingualField } from "@/components/BilingualField";
 import { ChoiceField } from "@/components/ChoiceField";
 import { Field } from "@/components/Field";
+import { NearbyEditor } from "@/components/NearbyEditor";
 import { PointField } from "@/components/PointField";
 import { SelectField, type SelectOption } from "@/components/SelectField";
 import { COMPLEX_LIMITS, type ComplexMainFields } from "@/lib/admin/complexes/mainForm";
@@ -30,11 +31,7 @@ export type SectionProps = {
 type Translate = ReturnType<typeof useTranslations<"admin.complexes">>;
 
 /** Варианты сегмента из словаря значений ЖК («Эконом · Комфорт · …»). */
-const choiceValues = (
-  t: Translate,
-  group: "class" | "houseType" | "parking",
-  keys: readonly string[],
-) =>
+const choiceValues = (t: Translate, group: "class" | "houseType" | "parking", keys: readonly string[]) =>
   keys.map((key) => ({
     value: key,
     label: t(`values.${group}.${key}` as "values.class.econom"),
@@ -58,8 +55,7 @@ export function AboutPanel(props: SectionProps) {
         <DeveloperClassRow {...props} />
         <HouseRow {...props} />
         <p className="complex-main__floors">
-          {floors ? t("floors", { floors }) : t("floorsEmpty")}{" "}
-          <Link href={blocksHref}>{t("floorsLink")}</Link>
+          {floors ? t("floors", { floors }) : t("floorsEmpty")} <Link href={blocksHref}>{t("floorsLink")}</Link>
         </p>
         <BilingualField
           id="complex-short"
@@ -166,14 +162,9 @@ export function LocationPanel(props: SectionProps) {
           defaultValue={fields.landmark}
           error={issue("landmark")}
         />
-        <PointField
-          id="complex-point"
-          name="point"
-          label={t("fields.point")}
-          defaultValue={fields.point}
-          error={issue("point")}
-        />
+        <PointField id="complex-point" name="point" label={t("fields.point")} defaultValue={fields.point} error={issue("point")} />
       </div>
+      <NearbyEditor initial={fields.nearby} error={issue("nearby")} />
     </AdminPanel>
   );
 }
@@ -210,23 +201,10 @@ function LocationRow({ fields, issue, locations }: SectionProps) {
 
 export function ChecksPanel({ fields, issue }: SectionProps) {
   const t = useTranslations("admin.complexes");
-  const date = (name: "permitCheckedAt" | "landCheckedAt" | "staffVisitedAt") => (
-    <Field
-      className={ROW_FIELD}
-      id={`complex-${name}`}
-      name={name}
-      label={t(`fields.${name}`)}
-      type="date"
-      defaultValue={fields[name]}
-      error={issue(name)}
-    />
-  );
   return (
     <AdminPanel title={t("sections.checks")} wide>
       <div className="complex-main__row complex-main__row--three">
-        {date("permitCheckedAt")}
-        {date("landCheckedAt")}
-        {date("staffVisitedAt")}
+        <Field className={ROW_FIELD} id="complex-staffVisitedAt" name="staffVisitedAt" label={t("fields.staffVisitedAt")} type="date" defaultValue={fields.staffVisitedAt} error={issue("staffVisitedAt")} />
       </div>
       <p className="field__meta">{t("fields.checksHint")}</p>
     </AdminPanel>

@@ -9,12 +9,7 @@ import { PublicationBadge } from "@/components/PublicationBadge";
 import { SearchField } from "@/components/SearchField";
 import { StockBadge } from "@/components/StockBadge";
 import { StockRooms } from "@/components/StockRooms";
-import {
-  complexFilterCounts,
-  filterComplexes,
-  isHiddenByDeveloper,
-  type ComplexListRow,
-} from "@/lib/admin/complexes/list";
+import { complexFilterCounts, filterComplexes, isHiddenByDeveloper, type ComplexListRow } from "@/lib/admin/complexes/list";
 import { complexTabHref, type ComplexAccess } from "@/lib/admin/complexes/tabs";
 import { deletionDate } from "@/lib/admin/developers/publication";
 import { PUBLICATION_FILTERS, type PublicationFilter } from "@/lib/admin/publicationFilter";
@@ -33,29 +28,13 @@ type ComplexListProps = {
 };
 
 /** «ЖК» (в. 5): поиск и пилюли статусов сверху, строки как «Остатки по ЖК» мокапа. */
-export function ComplexList({
-  rows,
-  baseHref,
-  developer = null,
-  initialFilter = "all",
-  access,
-}: ComplexListProps) {
+export function ComplexList({ rows, baseHref, developer = null, initialFilter = "all", access }: ComplexListProps) {
   const developerId = developer?.id ?? null;
   const list = useListFilter(rows, access, developerId, initialFilter);
   return (
-    <section
-      className={access.manage ? "complex-list" : "complex-list complex-list--stock"}
-      aria-labelledby="complex-list-title"
-    >
+    <section className={access.manage ? "complex-list" : "complex-list complex-list--stock"} aria-labelledby="complex-list-title">
       <ListToolbar query={list.query} onQueryChange={list.setQuery}>
-        {access.manage ? (
-          <PublicationPills
-            rows={rows}
-            developerId={developerId}
-            value={list.filter}
-            onChange={list.setPickedFilter}
-          />
-        ) : null}
+        {access.manage ? <PublicationPills rows={rows} developerId={developerId} value={list.filter} onChange={list.setPickedFilter} /> : null}
       </ListToolbar>
       <div className="complex-list__panel">
         <ListHead baseHref={baseHref} developer={developer} count={list.visible.length} />
@@ -67,12 +46,7 @@ export function ComplexList({
 }
 
 /** Поиск и пилюли статусов. Менеджеру архив не нужен вовсе (М1): «пусто» и «ничего не нашлось» — без него. */
-function useListFilter(
-  rows: readonly ComplexListRow[],
-  access: ComplexAccess,
-  developerId: string | null,
-  initialFilter: PublicationFilter,
-) {
+function useListFilter(rows: readonly ComplexListRow[], access: ComplexAccess, developerId: string | null, initialFilter: PublicationFilter) {
   const [query, setQuery] = useState("");
   const [pickedFilter, setPickedFilter] = useState<PublicationFilter>(initialFilter);
   const scoped = access.manage ? rows : rows.filter((row) => row.status !== "archived");
@@ -91,13 +65,7 @@ function ListToolbar({ query, onQueryChange, children }: ListToolbarProps) {
   const t = useTranslations("admin.complexes");
   return (
     <div className="complex-list__toolbar">
-      <SearchField
-        id="complex-search"
-        label={t("searchLabel")}
-        placeholder={t("searchPlaceholder")}
-        value={query}
-        onChange={onQueryChange}
-      />
+      <SearchField id="complex-search" label={t("searchLabel")} placeholder={t("searchPlaceholder")} value={query} onChange={onQueryChange} />
       {children}
     </div>
   );
@@ -158,12 +126,7 @@ function ListRows({ visible, noRows, baseHref, access }: ListRowsProps) {
   return (
     <ul className="complex-list__rows">
       {visible.map((row) => (
-        <ComplexRow
-          key={row.id}
-          row={row}
-          href={complexTabHref(`${baseHref}/${row.id}`, entryTab)}
-          publication={access.manage}
-        />
+        <ComplexRow key={row.id} row={row} href={complexTabHref(`${baseHref}/${row.id}`, entryTab)} publication={access.manage} />
       ))}
     </ul>
   );
@@ -199,9 +162,7 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
         <span className="complex-list__main">
           <span className="complex-list__name">{name}</span>
           <span className="complex-list__meta">{metaLine(row, t)}</span>
-          {publication && isHiddenByDeveloper(row) ? (
-            <span className="complex-list__warning">{t("hiddenByDeveloper")}</span>
-          ) : null}
+          {publication && isHiddenByDeveloper(row) ? <span className="complex-list__warning">{t("hiddenByDeveloper")}</span> : null}
         </span>
         <StockRooms stock={row.stock} className="complex-list__rooms" />
         <span className="complex-list__stock">

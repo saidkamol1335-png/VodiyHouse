@@ -2,12 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect } from "react";
-import {
-  newLayoutDraft,
-  type BlockLayouts,
-  type LayoutDraft,
-  type LayoutRowErrors,
-} from "@/lib/admin/complexes/layouts";
+import { newLayoutDraft, type BlockLayouts, type LayoutDraft, type LayoutRowErrors } from "@/lib/admin/complexes/layouts";
 import type { SaveRowsResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { useDraftRows } from "@/lib/ui/useDraftRows";
@@ -25,10 +20,7 @@ type LayoutsDraftParams = {
 export function useLayoutsDraft({ block, action, onSwitch }: LayoutsDraftParams) {
   const t = useTranslations("admin.complexes.layouts");
   const guard = useUnsavedGuard(t("unsaved"));
-  const [state, formAction, pending] = useActionState(
-    (_previous: SaveRowsResult, formData: FormData) => action(formData),
-    IDLE,
-  );
+  const [state, formAction, pending] = useActionState((_previous: SaveRowsResult, formData: FormData) => action(formData), IDLE);
   const savedAt = state.status === "saved" ? state.at : null;
   const { reset, dirty } = guard;
   const { rows, update, change, remove } = useDraftRows(block.layouts, {
@@ -36,8 +28,7 @@ export function useLayoutsDraft({ block, action, onSwitch }: LayoutsDraftParams)
     savedAt,
     markDirty: guard.onInput,
   });
-  const add = (copies: LayoutDraft[] = [newLayoutDraft()]) =>
-    change((current) => [...current, ...copies]);
+  const add = (copies: LayoutDraft[] = [newLayoutDraft()]) => change((current) => [...current, ...copies]);
   useEffect(() => {
     if (savedAt) reset();
   }, [savedAt, reset]);

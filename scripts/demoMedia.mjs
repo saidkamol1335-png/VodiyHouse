@@ -119,28 +119,80 @@ async function uploadPhotos(complexes) {
   return rows;
 }
 
+// Чертежи планировок мокапа (IMGMAP plan/<ЖК>-<n>, шаг 3.5): n — порядок планировок в сиде (блок,
+// затем планировка) — подписи «1-комн. · 42,5 м²» на чертежах совпадают. Хранятся PNG на белом
+// листе, как чертежи кабинета; у стресс-DEMO чертежей нет.
+const PLAN_SETS = {
+  shodlik: ["b80fffaf0f9ed249866b4634c49bfba2", "3394e9026d59401f326357647df46f61", "dc10f4956102957c5fa8a8cf2a8321cc", "979219668d03f3e667d2d6a3c81e5fe7", "53e82257a70a9f9532230dee948891d5", "78749704750e54c17127972206266ce2", "c54e08513d25eb8550df0990149085a7", "f0ae1cde7d4a09078118a4916e2cf6c2"],
+  namuna: ["cfe37a9e621fc12835b7de887b6c1643", "5e209d1f74ff4bd6b2e6e82610727838", "d799dc37b6484fb516482220435e8ba1", "d465c412f049da95a57f47fb429e7a8d", "d97841127d5d5c04d0c503a5b7d2ee04", "16a0b6042b9f48aeec155730f4ab857e", "f6ee94f78e5462db2881f9f158e1963e"],
+  yulduz: ["8f6741f77a5a4168561f8cbff39505bd", "4f9c8e68060e7142a2f91889e92243b6", "558c13d93e2eaa1c304131eddd757466", "b9ce6591db60c3768d189c7b1d56a9b9"],
+  orzu: ["6ed4908db6b4d1999fab03e61f8e5e3f", "1bd1298c378b8f8a77ddb07b1574a57b", "fc042a24418426dcc496b17c104c1e95", "6cf69bb6facecfeefe50f484ad9ecddf", "9d3c5cfda54721c9f36d0bad659ffe30", "24765b55bbeaf5a869f26b67748dfc36", "6b8b1415a3611aa81ce4a14b5b25fd32"],
+};
+
+async function layoutIdsOf(db, complexId) {
+  const { rows } = await db.query(
+    `select l.id from public.layouts l join public.blocks b on b.id = l.block_id
+     where b.complex_id = $1 order by b.sort, b.name, l.sort`,
+    [complexId],
+  );
+  return rows.map((row) => row.id);
+}
+
+async function uploadDrawings(db, complexes) {
+  const storage = storageClient();
+  const rows = [];
+  for (const { id: complexId, slug } of complexes) {
+    const layouts = await layoutIdsOf(db, complexId);
+    for (const [index, blobId] of (PLAN_SETS[slug.replace(/^demo-/, "")] ?? []).entries()) {
+      if (!layouts[index]) break;
+      const raw = await readFile(path.join(BLOB_DIR, `${blobId}.webp`));
+      const png = await sharp(raw).flatten({ background: "#ffffff" }).png().toBuffer();
+      const { width, height } = await sharp(png).metadata();
+      const objectPath = `complexes/${complexId}/${crypto.randomUUID()}.png`;
+      const { error } = await storage.upload(objectPath, png, { contentType: "image/png" });
+      if (error) throw new Error(`Storage: загрузка ${objectPath}`, { cause: error });
+      rows.push([complexId, layouts[index], objectPath, width, height]);
+    }
+  }
+  return rows;
+}
+
+async function insertMediaRows(db, photos, drawings) {
+  for (const [complexId, objectPath, width, height, blur, sort] of photos) {
+    await db.query(
+      `insert into public.media_assets (complex_id, kind, path, width, height, blur, focus_x, focus_y, sort)
+       values ($1, 'photo', $2, $3, $4, $5, $6, $7, $8)`,
+      // Фокус чуть ниже центра: на рендерах мокапа дом в нижней половине, сверху небо.
+      [complexId, objectPath, width, height, blur, 0.5, 0.55, sort],
+    );
+  }
+  for (const [complexId, layoutId, objectPath, width, height] of drawings) {
+    const { rows } = await db.query(
+      `insert into public.media_assets (complex_id, kind, path, width, height)
+       values ($1, 'drawing', $2, $3, $4) returning id`,
+      [complexId, objectPath, width, height],
+    );
+    await db.query("update public.layouts set drawing_id = $1 where id = $2", [rows[0].id, layoutId]);
+  }
+}
+
 /**
- * Загружает фото DEMO-ЖК и пишет строки media_assets (после seed.sql) одной транзакцией.
+ * Загружает фото и чертежи DEMO-ЖК и пишет строки media_assets (после seed.sql) одной транзакцией.
  * Сбой на середине — файлы остаются в папках DEMO-ЖК, следующий demo:seed их уберёт.
  */
 export async function seedDemoMedia(db) {
-  const rows = await uploadPhotos(await demoComplexIds(db));
+  const complexes = await demoComplexIds(db);
+  const photos = await uploadPhotos(complexes);
+  const drawings = await uploadDrawings(db, complexes);
   await db.query("begin");
   try {
     // DEMO — не действия сотрудников: в журнал не пишется (только в этой транзакции, как seed.sql).
     await db.query("select set_config('vodiy.skip_audit', 'on', true)");
-    for (const [complexId, objectPath, width, height, blur, sort] of rows) {
-      await db.query(
-        `insert into public.media_assets (complex_id, kind, path, width, height, blur, focus_x, focus_y, sort)
-         values ($1, 'photo', $2, $3, $4, $5, $6, $7, $8)`,
-        // Фокус чуть ниже центра: на рендерах мокапа дом в нижней половине, сверху небо.
-        [complexId, objectPath, width, height, blur, 0.5, 0.55, sort],
-      );
-    }
+    await insertMediaRows(db, photos, drawings);
     await db.query("commit");
   } catch (error) {
     await db.query("rollback");
     throw error;
   }
-  return rows.length;
+  return photos.length + drawings.length;
 }

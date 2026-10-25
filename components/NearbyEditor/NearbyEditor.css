@@ -1,0 +1,97 @@
+/* «Удобство локации» в «Основном»: строка места — вид, название RU | UZ, метры, минуты, пешком или
+   на машине и «×»; на телефоне — карточкой в две колонки. */
+.nearby-editor {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px dashed var(--dash);
+}
+
+.nearby-editor__title {
+  padding: 0;
+  font-size: var(--fs-control);
+  font-weight: 700;
+}
+
+.nearby-editor__lead {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.nearby-editor__rows {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nearby-editor__row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr) 90px 90px 130px 44px;
+  align-items: end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-3);
+}
+
+.nearby-editor__remove {
+  display: grid;
+  place-items: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: var(--bg-2);
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.nearby-editor__remove:hover {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.nearby-editor__error {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.nearby-editor__error--row {
+  grid-column: 1 / -1;
+}
+
+.nearby-editor__add {
+  justify-self: start;
+}
+
+@media (max-width: 1180px) {
+  .nearby-editor__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nearby-editor__kind,
+  .nearby-editor__mode {
+    grid-column: span 1;
+  }
+
+  .nearby-editor__remove {
+    justify-self: end;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .nearby-editor__kind {
+    grid-row: 1;
+    grid-column: 1;
+  }
+}

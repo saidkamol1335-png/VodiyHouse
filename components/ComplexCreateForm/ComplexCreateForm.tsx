@@ -48,19 +48,14 @@ type Failed = Extract<CreateComplexResult, { status: "error" }> | null;
 function ComplexCreatePanel(props: ComplexCreateFormProps & { onClose: () => void }) {
   const { action, developers } = props;
   const t = useTranslations("admin");
-  const [state, formAction, pending] = useActionState(
-    (_previous: CreateComplexResult, formData: FormData) => action(formData),
-    IDLE,
-  );
+  const [state, formAction, pending] = useActionState((_previous: CreateComplexResult, formData: FormData) => action(formData), IDLE);
   const failed = state.status === "error" ? state : null;
   if (developers.length === 0) return <NoDevelopers href={props.developersHref} />;
   return (
     <AdminPanel title={t("complexes.create.title")} wide>
       <form className="complex-create" action={formAction} noValidate>
         <CreateFields developers={developers} developerId={props.developerId} failed={failed} />
-        {failed?.error ? (
-          <FormStatus tone="error">{t(`developers.errors.${failed.error}`)}</FormStatus>
-        ) : null}
+        {failed?.error ? <FormStatus tone="error">{t(`developers.errors.${failed.error}`)}</FormStatus> : null}
         <CreateActions pending={pending} onClose={props.onClose} />
       </form>
     </AdminPanel>

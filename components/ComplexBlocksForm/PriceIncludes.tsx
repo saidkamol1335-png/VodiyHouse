@@ -6,13 +6,7 @@ import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
 import { ChoiceField } from "@/components/ChoiceField";
 import { Field } from "@/components/Field";
-import {
-  BLOCK_LIMITS,
-  newPriceInclude,
-  type BlockDraft,
-  type Currency,
-  type PriceInclude,
-} from "@/lib/admin/complexes/blocks";
+import { BLOCK_LIMITS, newPriceInclude, type BlockDraft, type Currency, type PriceInclude } from "@/lib/admin/complexes/blocks";
 
 type PriceIncludesProps = {
   block: BlockDraft;
@@ -25,8 +19,7 @@ export function PriceIncludes({ block, error, onChange }: PriceIncludesProps) {
   const t = useTranslations("admin.complexes.blocks");
   const rows = block.priceIncludes;
   const set = (next: PriceInclude[]) => onChange({ priceIncludes: next });
-  const update = (key: string, patch: Partial<PriceInclude>) =>
-    set(rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+  const update = (key: string, patch: Partial<PriceInclude>) => set(rows.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   return (
     <details className="block-fields__includes" open={rows.length > 0 || Boolean(error)}>
       <summary>{t("fields.includes", { count: rows.length })}</summary>
@@ -41,12 +34,7 @@ export function PriceIncludes({ block, error, onChange }: PriceIncludesProps) {
         />
       ))}
       {error ? <p className="field__error">{error}</p> : null}
-      <Button
-        size="sm"
-        variant="ghost"
-        disabled={rows.length >= BLOCK_LIMITS.includesMax}
-        onClick={() => set([...rows, newPriceInclude()])}
-      >
+      <Button size="sm" variant="ghost" disabled={rows.length >= BLOCK_LIMITS.includesMax} onClick={() => set([...rows, newPriceInclude()])}>
         + {t("fields.includeAdd")}
       </Button>
     </details>
@@ -86,12 +74,7 @@ function IncludeRow({ row, currency, onUpdate, onRemove }: IncludeRowProps) {
           onChange={(event) => onUpdate({ price: event.target.value })}
         />
       )}
-      <button
-        type="button"
-        className="block-fields__include-remove"
-        aria-label={t("fields.includeRemove")}
-        onClick={onRemove}
-      >
+      <button type="button" className="block-fields__include-remove" aria-label={t("fields.includeRemove")} onClick={onRemove}>
         <Trash2 size={16} aria-hidden="true" />
       </button>
     </div>

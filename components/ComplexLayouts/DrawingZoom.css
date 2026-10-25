@@ -1,0 +1,64 @@
+/* Чертёж планировки крупно: белый лист по центру поверх затемнения, «×» в углу. */
+.complex-drawing {
+  width: min(960px, calc(100% - 32px));
+  max-width: none;
+  max-height: calc(100% - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xl);
+  background: var(--drawing-bg);
+  color: var(--fg);
+  box-shadow: var(--shadow-3);
+}
+
+.complex-drawing::backdrop {
+  background: var(--scrim);
+}
+
+.complex-drawing__sheet {
+  position: relative;
+  padding: 20px;
+}
+
+.complex-drawing__title {
+  margin: 0 48px 12px 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.complex-drawing__frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-height: calc(100vh - 140px);
+}
+
+.complex-drawing__image {
+  object-fit: contain;
+}
+
+.complex-drawing__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .complex-drawing {
+    width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .complex-drawing__sheet {
+    padding: 16px 12px;
+  }
+}

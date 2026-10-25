@@ -1,0 +1,230 @@
+/* «Наличие квартир» (мокап .avl; телефон — .avb и .avl__r): слева — всего в продаже, справа —
+   таблица по типам; на телефоне — тёмная плашка с числом и строки со стрелкой к планировкам. */
+.complex-stock {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+}
+
+.complex-stock:not(:has(.complex-stock__total)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.complex-stock__total {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 26px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-stock__number {
+  display: block;
+  font-size: 76px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+}
+
+.complex-stock__caption {
+  margin: 8px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+}
+
+.complex-stock__blocks {
+  margin: 4px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.complex-stock__table {
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-stock__row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr 1.3fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px dashed var(--dash);
+  font-size: var(--fs-control-l);
+}
+
+.complex-stock__row:last-child {
+  border-bottom: 0;
+}
+
+.complex-stock__row--head {
+  padding-block: 11px;
+  background: var(--bg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-stock__row--none {
+  color: var(--fg-3);
+}
+
+.complex-stock__type {
+  font-weight: 700;
+}
+
+.complex-stock__type a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.complex-stock__by-blocks {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.complex-stock__left-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* «осталось 14 шт.» (мокап .left): зелёная плашка, мало — янтарная, нет — без заливки. */
+.complex-stock__left {
+  display: inline-flex;
+  align-items: center;
+  height: 23px;
+  padding: 0 9px;
+  border: 1px solid var(--badge-ok-border);
+  border-radius: var(--r-pill);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+  font-size: var(--fs-label-l);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.complex-stock__left--few {
+  border-color: var(--badge-amber-border);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.complex-stock__left--none {
+  border-style: dashed;
+  border-color: var(--dash);
+  background: none;
+  color: var(--fg-3);
+}
+
+.complex-stock__chevron {
+  display: none;
+  color: var(--fg-3);
+}
+
+.complex-stock__sub {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .complex-stock {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Телефон (MobJkAvail): тёмная плашка «41 в продаже сейчас», строки «1-комн. / от 42,5 м² · от $31 000». */
+@media (max-width: 760px) {
+  .complex-stock {
+    gap: 10px;
+  }
+
+  .complex-stock__total {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border: 0;
+    border-radius: var(--r-l);
+    background: var(--inv);
+    color: var(--on-inv);
+    box-shadow: none;
+  }
+
+  .complex-stock__number {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+  }
+
+  .complex-stock__caption {
+    margin: 0;
+    color: inherit;
+    font-size: var(--fs-control);
+    font-weight: 650;
+  }
+
+  .complex-stock__blocks {
+    margin-top: 2px;
+    color: var(--inv-3);
+  }
+
+  .complex-stock__table {
+    border-radius: var(--r-l);
+    box-shadow: none;
+  }
+
+  .complex-stock__row--head {
+    display: none;
+  }
+
+  .complex-stock__row {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 10px;
+    min-height: 66px;
+    padding: 10px 12px 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .complex-stock__type {
+    font-size: 15.5px;
+    font-weight: 750;
+  }
+
+  /* Вся строка — ссылка на планировки типа (растянутая ссылка названия). */
+  .complex-stock__type a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .complex-stock__area,
+  .complex-stock__price,
+  .complex-stock__by-blocks {
+    display: none;
+  }
+
+  .complex-stock__sub {
+    display: block;
+    color: var(--fg-3);
+    font-size: var(--fs-caption);
+    font-weight: 500;
+  }
+
+  .complex-stock__chevron {
+    display: block;
+  }
+}

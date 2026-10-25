@@ -1,0 +1,171 @@
+/* Первый экран страницы ЖК (мокап .crumbs, .jkh--stack, .jkh__title; телефон — .jt): название и
+   плашки, застройщик, адрес и ориентир; галерея и карточка цены — свои блоки внутри. */
+.complex-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.complex-hero__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 0 0;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-hero__crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.complex-hero__crumbs a:hover {
+  color: var(--fg);
+}
+
+.complex-hero__crumbs b {
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.complex-hero__head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.complex-hero__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.complex-hero__name {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  font-weight: 600;
+  letter-spacing: var(--ls-h1);
+  color: var(--fg-heading);
+  text-wrap: balance;
+}
+
+.complex-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Плашки мокапа (.badge--line, .badge--amber): класс ЖК — пунктиром, проверка — янтарём. */
+.complex-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 25px;
+  padding: 0 10px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-pill);
+  color: var(--badge-line-fg);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.complex-hero__badge--verified {
+  border: 1px solid var(--badge-amber-border);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+}
+
+.complex-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  font-size: var(--fs-control);
+}
+
+.complex-hero__developer,
+.complex-hero__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.complex-hero__developer:hover,
+.complex-hero__mark:hover {
+  color: var(--amber-2);
+}
+
+.complex-hero__address {
+  color: var(--fg-2);
+}
+
+@media (max-width: 760px) {
+  .complex-hero {
+    gap: 0;
+  }
+
+  .complex-hero__crumbs {
+    display: none;
+  }
+
+  /* MobJk: фото во всю ширину под шапкой, потом плашки и название. */
+  .complex-hero__gallery {
+    order: -1;
+    margin-inline: calc(-1 * var(--gutter));
+  }
+
+  .complex-hero__head {
+    gap: 6px;
+    padding-top: 18px;
+  }
+
+  .complex-hero__title {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .complex-hero__name {
+    font-size: 40px;
+  }
+
+  .complex-hero__badge {
+    height: 28px;
+  }
+
+  .complex-hero__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .complex-hero__developer {
+    min-height: var(--touch-target);
+    color: var(--amber-2);
+    font-size: var(--fs-control-l);
+    font-weight: 700;
+  }
+
+  .complex-hero__address {
+    font-size: var(--fs-control-l);
+  }
+
+  .complex-hero__mark {
+    align-items: flex-start;
+    color: var(--fg-3);
+    font-size: var(--fs-small-l);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+}

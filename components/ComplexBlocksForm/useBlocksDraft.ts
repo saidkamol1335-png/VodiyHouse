@@ -70,10 +70,7 @@ export function useOpenCard(state: SaveRowsResult) {
 export function useBlocksDraft(blocks: readonly BlockDraft[], action: FormAction<SaveRowsResult>) {
   const t = useTranslations("admin.complexes.blocks");
   const guard = useUnsavedGuard(t("unsaved"));
-  const [state, formAction, pending] = useActionState(
-    (_previous: SaveRowsResult, formData: FormData) => action(formData),
-    IDLE,
-  );
+  const [state, formAction, pending] = useActionState((_previous: SaveRowsResult, formData: FormData) => action(formData), IDLE);
   const savedAt = state.status === "saved" ? state.at : null;
   const rows = useBlockRows(blocks, { dirty: guard.dirty, savedAt, markDirty: guard.onInput });
   const { reset } = guard;

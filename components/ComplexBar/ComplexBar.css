@@ -1,0 +1,70 @@
+/* Нижняя панель телефона (мокап .bb): стекло, кружок Telegram и «Позвонить» на всю ширину;
+   выезжает снизу после первого экрана. На 1440 её нет. */
+.complex-bar,
+.complex-bar__spacer {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .complex-bar__spacer {
+    display: block;
+    height: 88px;
+  }
+
+  .complex-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-calc-bar);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--glass-filter);
+    backdrop-filter: var(--glass-filter);
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+
+  .complex-bar--shown {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .complex-bar__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border: 1px solid var(--line-2);
+    border-radius: 50%;
+    background: var(--bg-2);
+    color: var(--fg);
+  }
+
+  .complex-bar__call {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    border-radius: var(--r-pill);
+    background: var(--amber);
+    color: var(--on-amber);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--glow-amber);
+  }
+}

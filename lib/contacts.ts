@@ -20,6 +20,11 @@ export type SiteContacts = {
   callbackMinutes: number | null;
   /** Плашка «Для вас бесплатно» (текст — TODO-заказчик). */
   freeBadge: LocalizedText | null;
+  /**
+   * Пункты плашки на странице ЖК (ТЗ 7.1): что Vodiy House делает для покупателя бесплатно — 2–4
+   * пункта, один набор на все ЖК; утверждает заказчик. Пусто — плашки нет.
+   */
+  freeServices: LocalizedText[];
 };
 
 export const NO_CONTACTS: SiteContacts = {
@@ -30,7 +35,11 @@ export const NO_CONTACTS: SiteContacts = {
   hours: null,
   callbackMinutes: null,
   freeBadge: null,
+  freeServices: [],
 };
+
+/** До четырёх пунктов плашки «Для вас бесплатно» — в одну строку карточки цены (мокап .free). */
+export const FREE_SERVICES_MAX = 4;
 
 export const PHONE_PATTERN = /^\+998\d{9}$/;
 // Правила имён Telegram: 5–32 знака, латиница, цифры и «_», с буквы; бот кончается на «bot».
@@ -69,6 +78,9 @@ export function contactsFrom(raw: unknown): SiteContacts {
     hours: localizedFrom(value.hours),
     callbackMinutes: minutesFrom(value.callbackMinutes),
     freeBadge: localizedFrom(value.freeBadge),
+    freeServices: Array.isArray(value.freeServices)
+      ? value.freeServices.flatMap((item) => localizedFrom(item) ?? []).slice(0, FREE_SERVICES_MAX)
+      : [],
   };
 }
 

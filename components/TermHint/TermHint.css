@@ -1,0 +1,46 @@
+/* «?» у термина (мокап .hintbtn): пунктирный кружок 20 px; цель касания — 44 px; пояснение —
+   строкой под термином. */
+.term-hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px dashed var(--dash);
+  border-radius: 50%;
+  background: none;
+  color: var(--fg-2);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  vertical-align: 1px;
+  cursor: pointer;
+}
+
+.term-hint::before {
+  content: "";
+  position: absolute;
+  inset: calc((20px - var(--touch-target)) / 2);
+}
+
+.term-hint:hover,
+.term-hint[aria-expanded="true"] {
+  border-color: var(--amber);
+  color: var(--fg);
+}
+
+.term-hint__text {
+  display: block;
+  margin-top: 4px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  line-height: var(--lh-snug);
+  text-align: left;
+}
+
+.term-hint__text[hidden] {
+  display: none;
+}

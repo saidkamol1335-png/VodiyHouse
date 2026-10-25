@@ -42,8 +42,7 @@ cross join lateral (
 
 insert into public.complexes (
   developer_id, slug, name, class, location_id, address, landmark, minutes_to_center,
-  lat, lng, house_type, ceiling_height, parking,
-  permit_checked_at, land_checked_at, staff_visited_at, status, sort
+  lat, lng, house_type, ceiling_height, parking, staff_visited_at, status, sort
 )
 select
   d.id, c.slug, jsonb_build_object('ru', c.name_ru, 'uz', c.name_uz), c.class::public.complex_class, l.id,
@@ -52,11 +51,18 @@ select
   c.minutes, c.lat, c.lng, 'monolith',
   case when c.slug = 'demo-worst' then null else 3.0 end,
   case when c.slug = 'demo-worst' then null else 'underground' end::public.parking_type,
-  '2026-09-10', '2026-09-10', case when c.slug = 'demo-worst' then null else '2026-09-15'::date end,
+  case when c.slug = 'demo-worst' then null else '2026-09-15'::date end,
   'published', c.sort
 from demo_stress_complex c
 join public.developers d on d.slug = c.developer
 join public.locations l on l.slug = 'fergana';
+
+-- Документы (шаг 3.5): у всех — разрешение и земля («Проверено Vodiy House»), у «лучшего» — все.
+insert into public.complex_documents (complex_id, document_type_id, checked_on)
+select c.id, t.id, '2026-09-10'
+from demo_stress_complex x
+join public.complexes c on c.slug = x.slug
+join public.document_types t on t.slug in ('permit', 'land') or x.slug = 'demo-best';
 
 -- ─── Блоки и планировки ──────────────────────────────────────────────────────────────────
 

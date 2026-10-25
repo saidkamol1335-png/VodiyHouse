@@ -1,0 +1,190 @@
+/* Галерея ЖК (мокап .gal + .jkh--stack 21:9, телефон — .jg 390 × 342): лента со свайпом,
+   стеклянные стрелки, миниатюры слева снизу, счётчик справа снизу. Фото-блок тёмный в обеих темах. */
+.complex-gallery {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--photo-bg);
+}
+
+.complex-gallery__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.complex-gallery__track::-webkit-scrollbar {
+  display: none;
+}
+
+.complex-gallery__slide {
+  flex: 0 0 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  scroll-snap-align: start;
+  cursor: zoom-in;
+}
+
+/* Кадр мокапа: 21:9 на десктопе; точка фокуса — от кадра обложки (SitePhoto). */
+.complex-gallery__photo,
+.complex-gallery__placeholder {
+  display: block;
+  aspect-ratio: 21 / 9;
+}
+
+.complex-gallery__placeholder {
+  background-color: var(--photo-bg);
+  background-position: center;
+  background-size: cover;
+}
+
+/* Затемнение — только на телефоне (мокап .jg__shade): под белыми иконками шапки и счётчиком. */
+.complex-gallery__shade {
+  display: none;
+}
+
+.complex-gallery__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--over-photo-line);
+  border-radius: 50%;
+  background: var(--over-photo-button);
+  color: var(--over-photo-fg);
+  -webkit-backdrop-filter: var(--over-photo-filter);
+  backdrop-filter: var(--over-photo-filter);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.complex-gallery__nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.complex-gallery__nav--prev {
+  left: 14px;
+}
+
+.complex-gallery__nav--next {
+  right: 14px;
+}
+
+.complex-gallery__thumbs {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.complex-gallery__thumb {
+  width: 96px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid var(--gallery-thumb-line);
+  border-radius: 11px;
+  background: var(--photo-bg);
+  box-shadow: var(--gallery-thumb-shadow);
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity var(--dur-base) ease-out;
+}
+
+.complex-gallery__thumb:hover,
+.complex-gallery__thumb--on {
+  opacity: 1;
+}
+
+.complex-gallery__thumb--on {
+  border-color: var(--amber);
+  box-shadow: var(--gallery-thumb-shadow-on);
+}
+
+.complex-gallery__thumb-photo {
+  aspect-ratio: 3 / 2;
+}
+
+.complex-gallery__count {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 25px;
+  padding: 0 10px;
+  border: 1px solid var(--over-photo-line);
+  border-radius: var(--r-pill);
+  background: var(--over-photo-chip);
+  color: var(--over-photo-fg);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  -webkit-backdrop-filter: var(--over-photo-filter);
+  backdrop-filter: var(--over-photo-filter);
+}
+
+/* Значок «фото» — только в счётчике телефона (мокап .jg__cnt). */
+.complex-gallery__count svg {
+  display: none;
+}
+
+/* full: кадр проявляется из лёгкого приближения (мокап .gal__main img.is-on). */
+[data-motion="full"] .complex-gallery__photo .site-photo__image {
+  animation: complex-gallery-in var(--dur-slower) var(--ease) both;
+}
+
+@keyframes complex-gallery-in {
+  from {
+    transform: scale(1.04);
+  }
+}
+
+@media (max-width: 760px) {
+  .complex-gallery {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .complex-gallery__photo,
+  .complex-gallery__placeholder {
+    aspect-ratio: 390 / 342;
+  }
+
+  .complex-gallery__shade {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    background: var(--gallery-shade);
+  }
+
+  .complex-gallery__nav,
+  .complex-gallery__thumbs {
+    display: none;
+  }
+
+  .complex-gallery__count {
+    right: 12px;
+    bottom: 12px;
+    height: 32px;
+    padding: 0 12px;
+    border: 0;
+    background: var(--over-photo-chip-strong);
+    font-size: var(--fs-label);
+  }
+
+  .complex-gallery__count svg {
+    display: block;
+  }
+}

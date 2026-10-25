@@ -26,12 +26,7 @@ export function PhotoPanel(props: PhotoPanelProps) {
   const coverAllowed = canBeCover(photo);
   return (
     <section className="photo-panel" aria-label={t("panel", { index: index + 1 })}>
-      <FocusPreview
-        src={photo.src}
-        size={photo}
-        focus={photo.focus}
-        onFocusChange={props.onFocus}
-      />
+      <FocusPreview src={photo.src} size={photo} focus={photo.focus} onFocusChange={props.onFocus} />
       <div className="photo-panel__actions">
         {index > 0 ? (
           <Button size="sm" disabled={!coverAllowed || moveLocked} onClick={() => onMove(0)}>
@@ -43,11 +38,7 @@ export function PhotoPanel(props: PhotoPanelProps) {
         <MoveArrows {...props} />
         <RemovePhoto onRemove={props.onRemove} />
       </div>
-      {index > 0 && !coverAllowed ? (
-        <p className="field__meta">
-          {t("notCover", { min: MEDIA_LIMITS.complexCoverMinLongSide })}
-        </p>
-      ) : null}
+      {index > 0 && !coverAllowed ? <p className="field__meta">{t("notCover", { min: MEDIA_LIMITS.complexCoverMinLongSide })}</p> : null}
       <p className="field__meta">{t("size", { width: photo.width, height: photo.height })}</p>
     </section>
   );
@@ -57,22 +48,10 @@ function MoveArrows({ index, count, moveLocked, onMove }: PhotoPanelProps) {
   const t = useTranslations("admin.complexes.photos");
   return (
     <>
-      <Button
-        size="sm"
-        variant="ghost"
-        disabled={index === 0 || moveLocked}
-        aria-label={t("left")}
-        onClick={() => onMove(index - 1)}
-      >
+      <Button size="sm" variant="ghost" disabled={index === 0 || moveLocked} aria-label={t("left")} onClick={() => onMove(index - 1)}>
         <ArrowLeft size={16} aria-hidden="true" />
       </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        disabled={index === count - 1 || moveLocked}
-        aria-label={t("right")}
-        onClick={() => onMove(index + 1)}
-      >
+      <Button size="sm" variant="ghost" disabled={index === count - 1 || moveLocked} aria-label={t("right")} onClick={() => onMove(index + 1)}>
         <ArrowRight size={16} aria-hidden="true" />
       </Button>
     </>
@@ -93,11 +72,7 @@ function RemovePhoto({ onRemove }: { onRemove: () => Promise<void> }) {
   return (
     <span className="photo-panel__confirm">
       {t("removeConfirm")}
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={() => void onRemove().then(() => setConfirming(false))}
-      >
+      <Button size="sm" variant="ghost" onClick={() => void onRemove().then(() => setConfirming(false))}>
         {t("removeYes")}
       </Button>
       <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
