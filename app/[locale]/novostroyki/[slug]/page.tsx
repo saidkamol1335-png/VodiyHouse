@@ -9,13 +9,17 @@ import { ComplexNav } from "@/components/ComplexNav";
 import { ComplexOffer } from "@/components/ComplexOffer";
 import { ComplexPreviewBanner } from "@/components/ComplexPreviewBanner";
 import { Container } from "@/components/Container";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ShareButton } from "@/components/ShareButton";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TrackView } from "@/components/SiteAnalytics";
 import { COMPLEX_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
 import { complexRoute, ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { readSiteContacts } from "@/lib/site/contacts";
+import type { ComplexPage } from "@/lib/site/complex/model";
 import { readComplexPage } from "@/lib/site/complex/read";
 import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
 import { complexSummary } from "@/lib/site/complex/summary";
@@ -90,10 +94,11 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
     <NextIntlClientProvider messages={pickMessages(messages, COMPLEX_MESSAGES)}>
       <SiteHeader overPhoto transparentAtTop transparentOnPhoneOnly pageTitle={name} backHref={ROUTES.catalog} />
       <main>
+        <TrackView type="complex_view" entity="complex" id={page.id} />
         <Container>
           <ComplexHero
             page={page}
-            gallery={<ComplexGallery photos={page.photos} name={name} locale={locale} />}
+            gallery={<ComplexGallery photos={page.photos} name={name} locale={locale} tools={<ComplexTools page={page} name={name} locale={locale} />} />}
             offer={<ComplexOffer name={name} slug={page.slug} summary={complexSummary(page)} contacts={contacts} />}
           />
         </Container>
@@ -105,5 +110,16 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
         <ComplexPreviewBanner page={page} />
       </main>
     </NextIntlClientProvider>
+  );
+}
+
+/** Сердце и «Поделиться» в углу галереи (мокап .gal .jc__icons). */
+function ComplexTools({ page, name, locale }: { page: ComplexPage; name: string; locale: Locale }) {
+  const share = { path: `/${locale}${complexRoute(page.slug)}`, title: name, text: page.address?.[locale] ?? "", photo: page.photos[0] ?? null };
+  return (
+    <>
+      <FavoriteButton slug={page.slug} name={name} />
+      <ShareButton share={share} />
+    </>
   );
 }

@@ -5,12 +5,15 @@ import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { HomeLeadCards, HomeStockLive, LatestLeads } from "@/components/HomeLeads";
+import { SiteNowPanel } from "@/components/SiteNowPanel";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { readSiteNowAction } from "@/lib/admin/actions/siteNow";
 import { readSiteStockAction } from "@/lib/admin/actions/siteStock";
 import { greetingOf } from "@/lib/admin/greeting";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson, type CabinetPerson } from "@/lib/admin/person";
 import { readLeadsHome } from "@/lib/admin/server/leads";
+import { readSiteNow } from "@/lib/admin/server/siteNow";
 import { readSiteStock } from "@/lib/admin/server/siteStock";
 import { requireSection } from "@/lib/admin/session";
 import { formatWeekdayDate } from "@/lib/format";
@@ -81,19 +84,23 @@ async function HomeStock() {
   }
   const supabase = await createSupabaseServerClient();
   // Сбой чтения не роняет главную: панель скажет «не прочитались» и прочитает сама.
-  const [initial, leads] = await Promise.all([
+  const [initial, leads, now] = await Promise.all([
     readSiteStock(supabase).catch(() => null),
     readLeadsHome(supabase).catch(() => null),
+    readSiteNow(supabase).catch(() => null),
   ]);
   return (
     <HomeStockLive
       cards={leads ? <HomeLeadCards leads={leads} /> : null}
       latest={
-        leads ? (
-          <LatestLeads rows={leads.latest} />
-        ) : (
-          <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
-        )
+        <div className="home-leads__split">
+          {leads ? (
+            <LatestLeads rows={leads.latest} />
+          ) : (
+            <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
+          )}
+          <SiteNowPanel initial={now} read={readSiteNowAction} siteHref="/" />
+        </div>
       }
       initial={initial}
       read={readSiteStockAction}

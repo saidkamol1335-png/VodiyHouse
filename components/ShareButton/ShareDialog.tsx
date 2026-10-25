@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { SitePhoto } from "@/components/SitePhoto";
 import type { SitePhotoData } from "@/lib/site/photo";
+import { track } from "@/lib/events/client";
 
 export type ShareData = { path: string; title: string; text: string; photo: SitePhotoData | null };
 
@@ -46,7 +47,7 @@ export function ShareDialog({ share, onClose }: ShareDialogProps) {
       </div>
       <SharePreview share={share} />
       <ShareUrl url={url} />
-      <a className="share-dialog__telegram" href={telegram} target="_blank" rel="noopener">
+      <a className="share-dialog__telegram" href={telegram} target="_blank" rel="noopener" data-track="share" data-track-detail="telegram">
         <Send size={16} aria-hidden="true" />
         {t("telegram")}
       </a>
@@ -83,7 +84,10 @@ function ShareUrl({ url }: { url: string }) {
     const copied = navigator.clipboard?.writeText(url);
     if (!copied) return setCopy("failed");
     copied.then(
-      () => setCopy("done"),
+      () => {
+        setCopy("done");
+        track("share", { detail: "copy" });
+      },
       () => setCopy("failed"),
     );
   };

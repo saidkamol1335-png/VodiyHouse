@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState, type UIEvent } from "react";
+import { type ReactNode, useRef, useState, type UIEvent } from "react";
 import { SitePhoto } from "@/components/SitePhoto";
 import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
@@ -13,6 +13,8 @@ type ComplexGalleryProps = {
   /** «ЖК Shodlik» — подпись фото без своего alt. */
   name: string;
   locale: "ru" | "uz";
+  /** Сердце и «Поделиться» в углу фото (мокап .gal .jc__icons). */
+  tools?: ReactNode;
 };
 
 /** Миниатюры поверх фото (мокап .gal__thumbs): больше пяти — уже не помещаются. */
@@ -46,7 +48,7 @@ function useTrack() {
  * «1 / 5», по нажатию — во весь экран. Подписей нет (решение заказчика). Сразу грузится только
  * первое фото (LCP); остальные — после первого касания, наведения или прокрутки ленты.
  */
-export function ComplexGallery({ photos, name, locale }: ComplexGalleryProps) {
+export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryProps) {
   const t = useTranslations("complex.gallery");
   const { track, current, armed, arm, onScroll, goTo } = useTrack();
   const [viewer, setViewer] = useState<number | null>(null);
@@ -62,6 +64,7 @@ export function ComplexGallery({ photos, name, locale }: ComplexGalleryProps) {
       <span className="complex-gallery__shade" aria-hidden="true" />
       {photos.length > 1 ? <GalleryControls photos={photos} current={current} goTo={goTo} /> : null}
       <GalleryCount current={current} total={photos.length} />
+      {tools ? <div className="complex-gallery__tools">{tools}</div> : null}
       {viewer !== null ? (
         <GalleryViewer
           photos={photos}

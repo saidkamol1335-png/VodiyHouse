@@ -2,6 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useState, useTransition } from "react";
+import { track } from "@/lib/events/client";
 import { submitLeadAction } from "@/lib/leads/actions";
 import { fieldErrorsOf } from "@/lib/leads/request";
 import { leadSource } from "@/lib/leads/source";
@@ -73,7 +74,10 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
     };
     startTransition(async () => {
       const result = await submitLeadAction(request).catch(() => NETWORK);
-      if (result.status === "sent") setSent({ number: result.number, repeat: result.repeat });
+      if (result.status === "sent") {
+        setSent({ number: result.number, repeat: result.repeat });
+        if (result.number > 0) track("lead_sent", { detail: intent.type });
+      }
       else {
         setError(result.error);
         setFields(result.fields ?? {});

@@ -426,6 +426,35 @@
         "reload": "Обновить страницу",
         "totalUnassignedSuffix": " · ещё {count, number} без планировки",
         "totalUnassignedCaption": "{count, plural, one {свободная квартира} few {свободные квартиры} many {свободных квартир} other {свободной квартиры}} без планировки — по типам пока не посчитать · в {complexes, plural, one {# ЖК} few {# ЖК} many {# ЖК} other {# ЖК}}"
+      },
+      "now": {
+        "title": "Сейчас на сайте",
+        "online": "онлайн: {count}",
+        "empty": "Пока тихо — действия посетителей появятся здесь, как только кто-то откроет сайт.",
+        "unavailable": "Не прочиталось — попробуем снова через минуту.",
+        "toSite": "Открыть сайт",
+        "types": {
+          "complex_view": "Просмотр ЖК {name}",
+          "phone_click": "Клик «Показать телефон»",
+          "telegram_click": "Telegram",
+          "favorite": "Избранное",
+          "share": "Поделились ссылкой",
+          "filter": "Фильтр: {detail}",
+          "lead_sent": "Заявка"
+        },
+        "withComplex": "{text} · ЖК {name}",
+        "withDetail": "{text} · {detail}",
+        "share": {
+          "telegram": "Telegram",
+          "copy": "скопировали"
+        },
+        "devices": {
+          "mobile": "телефон",
+          "tablet": "планшет",
+          "desktop": "компьютер"
+        },
+        "direct": "Прямой заход",
+        "sub": "{source} · {device}"
       }
     },
     "devOnly": "Режим разработки: ключей Supabase нет — кабинет открыт без входа как «Руководитель». Заполните .env.local, чтобы проверить настоящий вход.",

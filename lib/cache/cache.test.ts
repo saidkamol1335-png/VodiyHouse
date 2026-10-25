@@ -87,6 +87,7 @@ const NO_CONTENT_FILES = [
   "journal.ts",
   // Заявки (шаг 3.7) — только кабинет: на сайте их нет.
   "leads.ts",
+  "siteNow.ts",
   "siteStock.ts",
   "staff.ts",
   "unitsList.ts",

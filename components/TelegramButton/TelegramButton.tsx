@@ -49,7 +49,7 @@ export function TelegramButton({ object, className, children, ...rest }: Telegra
     void openBot(bot, object, locale, fallback);
   };
   return (
-    <a className={className} href={fallback} target="_blank" rel="noopener" onClick={onClick} {...rest}>
+    <a className={className} href={fallback} target="_blank" rel="noopener" onClick={onClick} data-track="telegram_click" {...rest}>
       {children}
     </a>
   );

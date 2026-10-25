@@ -18,14 +18,15 @@ export function PhoneButton({ phone, className }: PhoneButtonProps) {
   const icon = <Phone size={16} strokeWidth={1.9} aria-hidden />;
   if (shown) {
     return (
-      <a className={classes} href={phoneHref(phone)}>
+      // Звонок после «Показать телефон» — уже посчитан нажатием «Показать».
+      <a className={classes} href={phoneHref(phone)} data-track-ignore="">
         {icon}
         {formatPhone(phone)}
       </a>
     );
   }
   return (
-    <button type="button" className={classes} onClick={() => setShown(true)}>
+    <button type="button" className={classes} onClick={() => setShown(true)} data-track="phone_click">
       {icon}
       {t("showPhone")}
     </button>

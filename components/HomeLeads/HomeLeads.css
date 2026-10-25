@@ -6,6 +6,20 @@
   gap: 14px;
 }
 
+/* «Последние заявки» и «Сейчас на сайте» рядом (мокап CabHome: 60 / 40); уже 1080 — столбиком. */
+.home-leads__split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+
+@media (max-width: 1079px) {
+  .home-leads__split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .home-leads__card {
   display: grid;
   gap: 8px;

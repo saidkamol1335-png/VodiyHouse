@@ -2,6 +2,7 @@
 
 import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { track } from "@/lib/events/client";
 import { toggleFavorite, useFavorites } from "@/lib/site/favorites";
 
 type FavoriteButtonProps = {
@@ -22,7 +23,10 @@ export function FavoriteButton({ slug, name, className }: FavoriteButtonProps) {
       className={[on ? "favorite-button favorite-button--on" : "favorite-button", className].filter(Boolean).join(" ")}
       aria-pressed={on}
       aria-label={t(on ? "unfavorite" : "favorite", { name })}
-      onClick={() => toggleFavorite(slug)}
+      onClick={() => {
+        toggleFavorite(slug);
+        if (!on) track("favorite", { detail: name });
+      }}
     >
       <Heart size={16} strokeWidth={2} aria-hidden />
     </button>

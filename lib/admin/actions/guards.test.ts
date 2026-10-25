@@ -70,6 +70,8 @@ describe("Server Actions кабинета", () => {
     const others: Record<string, RegExp> = {
       changePasswordAction: /requireActionViewer\(STAFF_ROLES, \{ allowPasswordChange: true \}\)/,
       readSiteStockAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // «Сейчас на сайте» (шаг 3.12) — на главной у обоих, как остатки.
+      readSiteNowAction: /requireActionViewer\(\["head", "manager"\]\)/,
       readBlockUnitsAction: /requireActionViewer\(\["head", "manager", "videographer"\]\)/,
       setUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       revertUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,

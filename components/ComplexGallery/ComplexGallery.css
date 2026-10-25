@@ -188,3 +188,13 @@
     display: block;
   }
 }
+
+/* Сердце и «Поделиться» (мокап .gal .jc__icons): правый верхний угол фото, над тенью. */
+.complex-gallery__tools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}

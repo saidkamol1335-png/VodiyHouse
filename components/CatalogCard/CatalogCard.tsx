@@ -41,7 +41,7 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
   const floors = Math.max(0, ...complex.blocks.map((block) => block.floorsTotal ?? 0)) || null;
   const finishings = [...new Set(complex.blocks.flatMap((block) => (block.finishing ? [block.finishing.name[locale]] : [])))];
   return (
-    <article className="catalog-card">
+    <article className="catalog-card" data-track-entity={`complex:${complex.id}`}>
       <CardMedia
         photos={complex.photos}
         alt={name}

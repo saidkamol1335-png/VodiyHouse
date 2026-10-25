@@ -21,4 +21,10 @@ export const CRON_JOBS: Record<string, CronJob> = {
     if (error) throw new Error("tg-starts-cleanup-failed", { cause: error });
     return { removed: Number(data ?? 0) };
   },
+  // События сайта (3.12): старше 400 дней.
+  events: async () => {
+    const { data, error } = await createSupabaseAdminClient().rpc("cleanup_events");
+    if (error) throw new Error("events-cleanup-failed", { cause: error });
+    return { removed: Number(data ?? 0) };
+  },
 };

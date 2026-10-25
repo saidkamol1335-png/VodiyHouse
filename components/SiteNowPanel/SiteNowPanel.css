@@ -1,0 +1,124 @@
+/* «Сейчас на сайте» (мокап CabHome .panel .feed): заголовок с «онлайн: N» и зелёной точкой, лента
+   действий — значок, что сделали, откуда и с чего, когда; «Открыть сайт» внизу. */
+
+.site-now {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.site-now__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.site-now__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 650;
+}
+
+.site-now__online {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ok-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.site-now__online i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+[data-motion="full"] .site-now__online i {
+  animation: site-now-pulse var(--dur-ping) ease-in-out infinite;
+}
+
+.site-now__feed {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-now__row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--dash);
+}
+
+.site-now__row svg {
+  margin-top: 3px;
+  color: var(--fg-3);
+}
+
+.site-now__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--fs-small);
+}
+
+.site-now__text b {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-now__text span,
+.site-now__time {
+  color: var(--fg-3);
+  font-size: var(--fs-micro);
+}
+
+.site-now__time {
+  white-space: nowrap;
+}
+
+.site-now__empty {
+  margin: 8px 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.site-now__site {
+  align-self: flex-start;
+  margin-top: 8px;
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-now__site:hover {
+  text-decoration: underline;
+}
+
+.site-now__site:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@keyframes site-now-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

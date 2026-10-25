@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
       // Заявки посетителя без входа и расписание: прав сотрудника нет, проверяет база (submit_lead и
       // очередь доставки открыты только серверу). В браузер модули не попадают (server-only).
       "lib/leads/server/**",
+      // События сайта (3.12): посетитель без входа, track_events открыт только серверу.
+      "lib/events/server/**",
       "lib/supabase/admin.ts",
       "lib/supabase/authForwarding.ts",
       "lib/supabase/env.test.ts",

@@ -16,6 +16,7 @@ import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
 import { CATALOG_PENDING_ATTRIBUTE } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog } from "@/lib/site/catalog/sort";
+import { track } from "@/lib/events/client";
 
 type CatalogResultsProps = {
   catalog: SiteCatalog;
@@ -60,9 +61,11 @@ export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
   const found = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
   useSheetLock(open, closeSheet);
   useFilterFromAddress(setFilter);
+  const trackFilter = useFilterTracking();
   const change = (next: Filter) => {
     setFilter(next);
     setShown(pageSize);
+    trackFilter(next);
     // null, а не history.state: так Next сверяет свой адрес с нашим (как useCalcParams), и обновление
     // страницы роутером не вернёт адрес без фильтра.
     window.history.replaceState(null, "", `${window.location.pathname}${searchFromFilter(next)}`);
@@ -97,10 +100,26 @@ type ResultsListProps = {
  * «Подберём вручную» (ТЗ 10.1): заявка «Подбор» с фильтрами — текстом для менеджера («rooms 2,
  * price_max 60000») и ссылкой на ту же выдачу.
  */
+/** Фильтр текстом: «komnat 2, do 45000» — для заявки «Подбор» и ленты «Сейчас на сайте». */
+function filterText(filter: Filter): string {
+  return [...new URLSearchParams(searchFromFilter(filter))].map(([key, value]) => `${key} ${value}`).join(", ");
+}
+
 function pickIntent(filter: Filter): LeadIntent {
-  const search = searchFromFilter(filter);
-  const text = [...new URLSearchParams(search)].map(([key, value]) => `${key} ${value}`).join(", ");
-  return { type: "pick", filters: { text, link: `${window.location.pathname}${search}` } };
+  return { type: "pick", filters: { text: filterText(filter), link: `${window.location.pathname}${searchFromFilter(filter)}` } };
+}
+
+const FILTER_TRACK_MS = 1500;
+
+/** Событие «фильтр» — после паузы в выборе: каждая нажатая пилюля не становится отдельным событием. */
+function useFilterTracking() {
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return (next: Filter) => {
+    clearTimeout(timer.current);
+    const text = filterText(next);
+    if (text) timer.current = setTimeout(() => track("filter", { detail: text.slice(0, 120) }), FILTER_TRACK_MS);
+  };
 }
 
 /** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
