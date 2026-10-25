@@ -11,6 +11,7 @@ import { isLocale, LOCALES } from "@/lib/i18n/routing";
 import { hiddenNav } from "@/lib/routes";
 import { readCalculatorInMenu } from "@/lib/site/calculator";
 import { readSiteContacts } from "@/lib/site/contacts";
+import { SITE_NAME, siteOrigin } from "@/lib/site/metadata";
 import "../globals.css";
 import "../site.css";
 
@@ -18,12 +19,15 @@ export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
 }
 
+// Только общее для всех страниц: адреса — от домена сайта; canonical, hreflang и Open Graph
+// страница задаёт сама (pageMetadata) — иначе калькулятор наследовал бы hreflang главной.
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
   return {
+    metadataBase: new URL(siteOrigin()),
     title: t("title"),
     description: t("description"),
-    alternates: { languages: { uz: "/uz", ru: "/ru" } },
+    applicationName: SITE_NAME,
   };
 }
 

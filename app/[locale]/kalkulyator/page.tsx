@@ -9,17 +9,24 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { CALC_EXAMPLES, exampleSearch, exampleYears } from "@/lib/calc/examples";
 import { readCalcParams } from "@/lib/calc/params";
 import { CALC_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/routes";
 import { LEAD_FORM_ENABLED } from "@/lib/site/flags";
 import { readSiteCalc } from "@/lib/site/calculator";
 import { readSiteCalcHints } from "@/lib/site/hints";
+import { pageMetadata } from "@/lib/site/metadata";
 
 type Search = Record<string, string | string[] | undefined>;
 type CalculatorPageProps = { searchParams: Promise<Search> };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("calc.page");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("calc.page")]);
+  return pageMetadata({
+    locale: isLocale(locale) ? locale : DEFAULT_LOCALE,
+    path: ROUTES.calculator,
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+  });
 }
 
 /** /kalkulyator (шаг 2.6): шапка страницы статичная, калькулятор — по адресу (?developer=…). */
