@@ -15,6 +15,8 @@
     "test:watch": "vitest",
     "test:db:remote": "node --env-file-if-exists=.env.local scripts/test-db-remote.mjs",
     "e2e": "playwright test",
+    "e2e:1440": "playwright test --project=desktop-1440",
+    "e2e:390": "playwright test --project=mobile-390",
     "db:push": "node --env-file-if-exists=.env.local scripts/db-push.mjs",
     "demo:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs seed",
     "demo:remove": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs remove",

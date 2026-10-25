@@ -33,6 +33,17 @@ export default defineConfig({
     {
       name: "mobile-390",
       dependencies: ["setup"],
+      // Спеки без телефонной раскладки и скриншотов: на 390 они повторяли бы 1440 (CLAUDE.md, 25.10.2026).
+      // Спеке с веткой для телефона или скриншотом — место не здесь.
+      testIgnore: [
+        /auth\.spec\.ts/,
+        /staff\.spec\.ts/,
+        /client-calc\.spec\.ts/,
+        /complexes-kit\.spec\.ts/,
+        /programs\.spec\.ts/,
+        /site-calc\.spec\.ts/,
+        /smoke\.spec\.ts/,
+      ],
       use: {
         ...devices["Pixel 7"],
         viewport: { width: 390, height: 844 },
