@@ -1,0 +1,61 @@
+/* «Порядок в каталоге» (шаг 3.6): место, название и стрелки строкой — как стрелки карточек блоков;
+   цель касания — 44 px. */
+.catalog-order {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catalog-order__lead {
+  margin: 0 0 8px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.catalog-order__row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+}
+
+.catalog-order__row + .catalog-order__row {
+  border-top: 1px dashed var(--line);
+}
+
+.catalog-order__place {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+
+.catalog-order__name {
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-order__move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.catalog-order__move:hover:not(:disabled) {
+  color: var(--fg);
+}
+
+.catalog-order__move:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

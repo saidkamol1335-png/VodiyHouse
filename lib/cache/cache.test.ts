@@ -96,7 +96,7 @@ const WITHOUT_TAG = new Set([
   "saveDeveloperPrivateAction",
 ]);
 const EXPIRES =
-  /\b(expireComplex|expireDeveloper|expireDictionaries|expirePrograms|expireSiteSettings|markComplexStale|markDeveloperStale)\(/;
+  /\b(expireCatalog|expireComplex|expireDeveloper|expireDictionaries|expirePrograms|expireSiteSettings|markComplexStale|markDeveloperStale)\(/;
 
 describe("действия контента сбрасывают кэш сайта", () => {
   const all = readdirSync(ACTIONS_DIR).filter(

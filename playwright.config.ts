@@ -41,6 +41,7 @@ export default defineConfig({
         /client-calc\.spec\.ts/,
         /complexes-kit\.spec\.ts/,
         /complexes-content\.spec\.ts/,
+        /complex-preview\.spec\.ts/,
         /programs\.spec\.ts/,
         /seo-meta\.spec\.ts/,
         /site-calc\.spec\.ts/,

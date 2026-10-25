@@ -3,6 +3,7 @@
 import { parseDetails } from "@/lib/admin/complexes/details";
 import { parseDocuments } from "@/lib/admin/complexes/documents";
 import type {
+  CatalogOrderResult,
   DetailsResult,
   DocumentsResult,
   RemoveDeadlineChangeResult,
@@ -14,7 +15,7 @@ import type { DbErrorLike } from "@/lib/admin/authErrors";
 import { readUuid } from "@/lib/admin/credentials";
 import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
 import { requireActionViewer } from "@/lib/admin/session";
-import { expireComplex } from "@/lib/cache";
+import { expireCatalog, expireComplex } from "@/lib/cache";
 
 // Вкладки «Видео», «Документы», «Детали» (шаг 3.5). Как у остальных вкладок ЖК: первой строкой —
 // руководитель (PLAN §3.11), права ещё раз проверяют функции базы; вкладка сохраняется целиком
@@ -63,6 +64,18 @@ export async function removeDeadlineChangeAction(formData: FormData): Promise<Re
   const { data, error } = await guard.supabase.rpc("remove_deadline_change", { p_change: id });
   if (error) return { status: "error", error: contentDbErrorCode(error) };
   if (typeof data === "string") expireComplex(data);
+  return { status: "done", at: Date.now() };
+}
+
+/** «Порядок в каталоге» (шаг 3.6): все опубликованные ЖК в новом порядке — «Рекомендуемые». */
+export async function reorderComplexesAction(formData: FormData): Promise<CatalogOrderResult> {
+  const guard = await headGuard();
+  if (!guard.ok) return { status: "error", error: guard.code };
+  const ids = formData.getAll("ids").filter((id): id is string => typeof id === "string");
+  if (ids.length === 0) return { status: "error", error: "invalid" };
+  const { error } = await guard.supabase.rpc("reorder_complexes", { p_ids: ids });
+  if (error) return { status: "error", error: contentDbErrorCode(error) };
+  expireCatalog();
   return { status: "done", at: Date.now() };
 }
 

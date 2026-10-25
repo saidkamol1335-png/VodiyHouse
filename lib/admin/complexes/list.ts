@@ -129,3 +129,11 @@ export function complexFilterCounts(
   const scoped = developerId ? rows.filter((row) => row.developerId === developerId) : rows;
   return countByPublicationFilter(scoped.map((row) => row.status));
 }
+
+/**
+ * «Порядок в каталоге» (шаг 3.6): опубликованные ЖК в порядке complex_rows() — это порядок
+ * каталога; тот же набор ждёт reorder_complexes (иначе «список устарел»).
+ */
+export function catalogOrderOf(rows: readonly ComplexListRow[]): { id: string; name: string }[] {
+  return rows.filter((row) => row.status === "published").map((row) => ({ id: row.id, name: row.name.ru }));
+}

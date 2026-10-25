@@ -7,6 +7,7 @@ import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { ComplexStatus } from "@/components/ComplexStatus";
+import { ComplexWizardSteps } from "@/components/ComplexWizard";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { setComplexStatusAction } from "@/lib/admin/actions/complexes";
 import { tabsNeedingAttention } from "@/lib/admin/complexes/readiness";
@@ -66,17 +67,20 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
       person={person}
     />
   );
+  // Черновик — мастер «Новый ЖК»: шаги с номером и «Далее →» (решение фазы 3).
+  const wizard = access.manage && complex.status === "draft";
   return (
     <AdminPage topbar={topbar}>
       {/* Менеджер (Н2): без статуса публикации и готовности, вкладка одна — ленты нет. */}
-      {access.manage ? <ComplexHead complex={complex} /> : null}
+      {access.manage ? <ComplexHead complex={complex} wizard={wizard} /> : null}
       {children}
+      {wizard ? <ComplexWizardSteps base={`${ADMIN_ROUTES.complexes}/${complex.id}`} /> : null}
     </AdminPage>
   );
 }
 
 /** Статус публикации с готовностью (И8, И9) и вкладки — руководителю. */
-async function ComplexHead({ complex }: { complex: ComplexRecord }) {
+async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard: boolean }) {
   const t = await getTranslations("admin.complexes");
   const [readiness, files] = await Promise.all([
     getComplexReadiness(complex.id),
@@ -88,6 +92,7 @@ async function ComplexHead({ complex }: { complex: ComplexRecord }) {
     base,
     (key) => t(`tabs.${key}`),
     unpublished ? tabsNeedingAttention(readiness) : undefined,
+    wizard,
   );
   return (
     <AdminEntityHead

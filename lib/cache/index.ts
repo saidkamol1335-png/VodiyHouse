@@ -27,6 +27,11 @@ export function expireComplex(id: string | null | undefined): void {
   updateTag(CATALOG_TAG);
 }
 
+/** Порядок каталога поменялся (шаг 3.6): каталог и «Другие ЖК застройщика» — под CATALOG_TAG. */
+export function expireCatalog(): void {
+  updateTag(CATALOG_TAG);
+}
+
 /** Застройщик поменялся: его страница, список, а от его статуса — видимость его ЖК в каталоге. */
 export function expireDeveloper(id: string | null | undefined): void {
   if (!id) return;

@@ -5,13 +5,15 @@ import { AdminEntityHead } from "@/components/AdminEntityHead";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminShell } from "@/components/AdminShell";
 import { AdminTopbar } from "@/components/AdminTopbar";
+import { CatalogOrder } from "@/components/CatalogOrder";
 import { ComplexCreateForm } from "@/components/ComplexCreateForm";
 import { ComplexList } from "@/components/ComplexList";
 import { ComplexStatus } from "@/components/ComplexStatus";
+import { ComplexWizardSteps } from "@/components/ComplexWizard";
 import { DEV_VIEWER, type CabinetViewer } from "@/lib/admin/access";
 import { DEMO_COMPLEX_ROWS, DEMO_DEVELOPER_OPTIONS } from "@/lib/admin/complexes/demo";
 import { demoComplex, demoReadiness } from "@/lib/admin/complexes/demoPage";
-import { complexListScope } from "@/lib/admin/complexes/list";
+import { catalogOrderOf, complexListScope } from "@/lib/admin/complexes/list";
 import { tabsNeedingAttention } from "@/lib/admin/complexes/readiness";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import {
@@ -89,6 +91,7 @@ export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
           initialFilter={scope.archived ? "archived" : "all"}
           access={access}
         />
+        {access.manage ? <CatalogOrder complexes={catalogOrderOf(DEMO_COMPLEX_ROWS)} action={null} /> : null}
       </AdminPage>
     </AdminShell>
   );
@@ -123,6 +126,7 @@ export async function ComplexStandLayout({ stand, id, children }: ComplexStandLa
           <StandHead complex={complex} base={`${stand.base}/${complex.id}`} />
         ) : null}
         {children}
+        {access.manage && complex.status === "draft" ? <ComplexWizardSteps base={`${stand.base}/${complex.id}`} /> : null}
       </AdminPage>
     </AdminShell>
   );
@@ -136,6 +140,7 @@ async function StandHead({ complex, base }: { complex: ComplexRecord; base: stri
     base,
     (key) => t(`tabs.${key}`),
     unpublished ? tabsNeedingAttention(readiness) : undefined,
+    complex.status === "draft",
   );
   return (
     <AdminEntityHead

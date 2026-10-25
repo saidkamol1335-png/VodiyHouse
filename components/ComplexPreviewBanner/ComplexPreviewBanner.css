@@ -1,0 +1,44 @@
+/* Пометка предпросмотра сотрудника (шаг 3.6): тёмная пилюля слева внизу — поверх страницы, не
+   сдвигает её; на телефоне — над нижней панелью. */
+.complex-preview {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: var(--z-popover);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 40px);
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--r-pill);
+  background: var(--inv);
+  color: var(--on-inv);
+  font-size: var(--fs-small);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-preview svg {
+  flex: none;
+  color: var(--amber);
+}
+
+.complex-preview__exit {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--inv);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .complex-preview {
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 12px;
+    max-width: calc(100vw - 24px);
+  }
+}

@@ -3,11 +3,13 @@ import { AdminDenied } from "@/components/AdminDenied";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
+import { CatalogOrder } from "@/components/CatalogOrder";
 import { ComplexCreateForm } from "@/components/ComplexCreateForm";
 import { ComplexList } from "@/components/ComplexList";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { reorderComplexesAction } from "@/lib/admin/actions/complexContent";
 import { createComplexAction } from "@/lib/admin/actions/complexes";
-import { complexListScope } from "@/lib/admin/complexes/list";
+import { catalogOrderOf, complexListScope } from "@/lib/admin/complexes/list";
 import { complexAccess, type ComplexAccess } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
@@ -90,6 +92,7 @@ async function HeadComplexes({ scopeId, access }: { scopeId: unknown; access: Co
         initialFilter={scope.archived ? "archived" : "all"}
         access={access}
       />
+      <CatalogOrder complexes={catalogOrderOf(rows)} action={reorderComplexesAction} />
     </>
   );
 }

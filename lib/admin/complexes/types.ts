@@ -60,6 +60,9 @@ export type SaveContentResult<Errors> =
   | { status: "saved"; at: number }
   | { status: "error"; error: ContentErrorCode | null; errors: Errors; broken: ComplexRequirement[] };
 
+/** «Порядок в каталоге» (шаг 3.6): сохраняется сразу, на каждую стрелку. */
+export type CatalogOrderResult = { status: "done"; at: number } | { status: "error"; error: ContentErrorCode };
+
 /** «Убрать из истории» ошибочный перенос срока («Блоки»). */
 export type RemoveDeadlineChangeResult = { status: "done"; at: number } | { status: "error"; error: ContentErrorCode };
 

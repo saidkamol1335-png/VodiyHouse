@@ -260,6 +260,19 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     expect(everywhere.filter((row) => !row.subject.startsWith(`${name} · `))).toEqual([]);
   });
 
+  it("порядок каталога (3.6): руководитель переставляет опубликованные; неполный список и менеджер — отказ", async () => {
+    const published = (await db.admin.query<{ id: string }>("select id from complexes where status = 'published' order by sort, name ->> 'ru'")).rows.map((r) => r.id);
+    expect(published.length).toBeGreaterThan(1);
+    const reorder = (ids: string[], actor = head) => db.as(user(actor), (tx) => tx.query("select reorder_complexes($1)", [ids]));
+    const reversed = [...published].reverse();
+    await reorder(reversed);
+    const catalog = (await db.as(anon, (tx) => tx.query<{ data: { complexes: { id: string }[] } }>("select site_catalog() as data"))).rows[0]!.data;
+    expect(catalog.complexes.map((c) => c.id)).toEqual(reversed);
+    await expectHint(reorder(reversed.slice(1)), "vh:invalid");
+    await expectHint(reorder([...reversed.slice(1), reversed[1]!]), "vh:invalid");
+    await expectHint(reorder(published, manager), "vh:forbidden");
+  });
+
   it("«Удобство локации»: неверный вид, пустое название или без расстояния — отказ базы", async () => {
     const id = await complexId("demo-yulduz");
     const set = (nearby: unknown) => asHead((tx) => tx.query("update complexes set nearby = $2 where id = $1", [id, JSON.stringify(nearby)]));

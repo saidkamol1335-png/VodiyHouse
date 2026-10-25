@@ -625,6 +625,12 @@
       "lead": "Faqat Vodiy House tekshirgan hujjatlarni ko‘rsatamiz. Nusxalarni menejer beradi — bu bepul.",
       "checkedOn": "Tekshirilgan: {date}",
       "hint": "«{name}» nimani anglatadi?"
+    },
+    "preview": {
+      "label": "Oldindan ko‘rish",
+      "published": "e’lon qilingan — tashrif buyuruvchilar shunday ko‘radi",
+      "hidden": "e’lon qilinmagan — tashrif buyuruvchilar sahifani ko‘rmaydi",
+      "exit": "Chiqish"
     }
   }
 }

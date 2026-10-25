@@ -13,10 +13,29 @@ export const COMPLEX_TABS = [
   { key: "videos", segment: "video" },
   { key: "details", segment: "detali" },
   { key: "documents", segment: "dokumenty" },
+  // Шаг 3.6: настоящая страница ЖК в режиме предпросмотра (draftMode) — последний шаг мастера.
+  { key: "preview", segment: "predprosmotr" },
   { key: "log", segment: "zhurnal" },
 ] as const;
 
 export type ComplexTabKey = (typeof COMPLEX_TABS)[number]["key"];
+
+/**
+ * Мастер «Новый ЖК» (решение фазы 3): у черновика вкладки — шаги с номером и «Далее →», после
+ * предпросмотра — «Опубликовать» в шапке. «Журнал» — не шаг.
+ */
+export const WIZARD_STEPS: readonly ComplexTabKey[] = COMPLEX_TABS.map((tab) => tab.key).filter((key) => key !== "log");
+
+export type WizardStep = { segment: string | null; href: string; next: string };
+
+/** Шаги мастера для «Далее →»: адрес вкладки и подпись кнопки, которая ведёт на неё. */
+export function wizardSteps(base: string, next: (key: ComplexTabKey, step: number) => string): WizardStep[] {
+  return WIZARD_STEPS.map((key, index) => ({
+    segment: COMPLEX_TABS.find((tab) => tab.key === key)!.segment,
+    href: complexTabHref(base, key),
+    next: next(key, index + 1),
+  }));
+}
 
 export function complexTabHref(base: string, key: ComplexTabKey): string {
   const tab = COMPLEX_TABS.find((item) => item.key === key)!;
@@ -60,16 +79,23 @@ export function complexTabRedirect(
   return complexTabHref(base, first);
 }
 
-/** attention — на вкладке не хватает данных для публикации (янтарная точка, И9). */
+/**
+ * attention — на вкладке не хватает данных для публикации (янтарная точка, И9); wizard — черновик:
+ * шаги мастера с номером («3. Планировки»).
+ */
 export function complexTabs(
   base: string,
   label: (key: ComplexTabKey) => string,
   attention: ReadonlySet<ComplexTabKey> = new Set(),
+  wizard = false,
 ): AdminTab[] {
-  return COMPLEX_TABS.map((tab) => ({
-    segment: tab.segment,
-    href: complexTabHref(base, tab.key),
-    label: label(tab.key),
-    attention: attention.has(tab.key),
-  }));
+  return COMPLEX_TABS.map((tab) => {
+    const step = wizard ? WIZARD_STEPS.indexOf(tab.key) + 1 : 0;
+    return {
+      segment: tab.segment,
+      href: complexTabHref(base, tab.key),
+      label: step > 0 ? `${step}. ${label(tab.key)}` : label(tab.key),
+      attention: attention.has(tab.key),
+    };
+  });
 }

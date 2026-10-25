@@ -1,8 +1,10 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { draftMode } from "next/headers";
 import { CATALOG_TAG, complexTag, developerTag, DEVELOPERS_TAG, DICTIONARIES_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ComplexPage } from "./model";
 import { complexPageFrom, type ComplexPageRecord } from "./records";
 
@@ -24,13 +26,25 @@ async function fetchComplexPage(slug: string): Promise<ComplexPage | null> {
   return page;
 }
 
+/**
+ * Предпросмотр (шаг 3.6, draftMode): мимо кэша и сессией сотрудника — site_complex отдаёт черновик
+ * только сотруднику. Кука предпросмотра одна черновик не открывает.
+ */
+async function fetchPreviewPage(slug: string): Promise<ComplexPage | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("site_complex", { p_slug: slug });
+  if (error) throw new Error("site-complex-preview-unavailable", { cause: error });
+  return data ? complexPageFrom(data as ComplexPageRecord) : null;
+}
+
 export type ComplexPageResult = { kind: "page"; page: ComplexPage } | { kind: "missing" } | { kind: "unavailable" };
 
 /** missing — такого ЖК на сайте нет (404); unavailable — облака нет или база не ответила. */
 export async function readComplexPage(slug: string): Promise<ComplexPageResult> {
   if (!hasSupabaseEnv()) return { kind: "unavailable" };
   try {
-    const page = await fetchComplexPage(slug);
+    const { isEnabled: preview } = await draftMode();
+    const page = preview ? await fetchPreviewPage(slug) : await fetchComplexPage(slug);
     return page ? { kind: "page", page } : { kind: "missing" };
   } catch (error) {
     console.error("[novostroyki/zhk] страница ЖК недоступна", error);

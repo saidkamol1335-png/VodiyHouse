@@ -72,6 +72,30 @@ test.describe("кабинет · ЖК · видео, детали, докуме�
     await saved(page);
   });
 
+  test("мастер (3.6): у черновика шаги с номером и «Далее →» до предпросмотра; у опубликованного — без номеров", async ({ page }) => {
+    await open(page, `${complexUrl(5)}/foto`);
+    const tabs = page.getByRole("navigation", { name: "Разделы ЖК" }).first();
+    await expect(tabs.getByRole("link", { name: "5. Фото" })).toHaveAttribute("aria-current", "page");
+    await page.getByRole("link", { name: "Далее: 6. Видео" }).click();
+    await expect(page).toHaveURL(/\/video$/);
+    // Черновика Gulzor в облаке нет (на стенде нет и сессии сотрудника) — фрейм получает пустую страницу.
+    await page.route("**/novostroyki/demo-gulzor", (route) => route.fulfill({ contentType: "text/html", body: "" }));
+    await open(page, `${complexUrl(5)}/predprosmotr`);
+    await expect(page.getByText("Опубликовать ЖК — кнопкой «Опубликовать»")).toBeVisible();
+    await open(page, `${SHODLIK}/foto`);
+    await expect(page.getByRole("link", { name: "Фото", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Далее/ })).toHaveCount(0);
+  });
+
+  test("порядок в каталоге (3.6): стрелка переставляет опубликованные ЖК, фокус остаётся на стрелке", async ({ page }) => {
+    await open(page, "/dev/zhk");
+    const order = page.locator(".catalog-order");
+    await expect(order.locator("li").first()).toContainText("Shodlik");
+    await page.getByRole("button", { name: "Ниже: Shodlik" }).click();
+    await expect(order.locator("li").nth(1)).toContainText("Shodlik");
+    await expect(page.getByRole("button", { name: "Ниже: Shodlik" })).toBeFocused();
+  });
+
   test("«Блоки»: новый срок — отметка «это перенос»; история переносов с «Убрать из истории»", async ({ page }) => {
     await open(page, `${SHODLIK}/bloki`);
     const blockB = page.getByTestId("block-card").filter({ has: page.getByText("Блок B", { exact: true }) });

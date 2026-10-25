@@ -7,6 +7,7 @@ import { ComplexGallery } from "@/components/ComplexGallery";
 import { ComplexHero } from "@/components/ComplexHero";
 import { ComplexNav } from "@/components/ComplexNav";
 import { ComplexOffer } from "@/components/ComplexOffer";
+import { ComplexPreviewBanner } from "@/components/ComplexPreviewBanner";
 import { Container } from "@/components/Container";
 import { SiteHeader } from "@/components/SiteHeader";
 import { COMPLEX_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
@@ -101,6 +102,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
           <ComplexSections page={page} sections={sections} name={name} locale={locale} />
         </Container>
         <ComplexBar />
+        <ComplexPreviewBanner page={page} />
       </main>
     </NextIntlClientProvider>
   );
