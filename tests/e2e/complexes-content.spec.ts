@@ -1,0 +1,90 @@
+import { expect, test, type Page } from "@playwright/test";
+import { collectPageErrors } from "./helpers";
+
+// Шаг 3.5: вкладки ЖК «Видео», «Детали», «Документы» и перенос срока в «Блоках» на служебном
+// стенде (/dev/zhk/<id>, DEMO). Проверки форм — настоящие, база — в tests/db/site-complex.test.ts.
+
+const complexUrl = (n: number) => `/dev/zhk/00000000-0000-4000-8000-0000000000c${n}`;
+const SHODLIK = complexUrl(1);
+const NAMUNA = complexUrl(2);
+
+async function open(page: Page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+}
+
+const save = (page: Page) => page.getByRole("button", { name: "Сохранить вкладку" }).click();
+const saved = (page: Page) => expect(page.locator(".form-status").filter({ hasText: "Сохранено" })).toBeVisible();
+
+test.describe("кабинет · ЖК · видео, детали, документы, переносы сроков", () => {
+  let errors: string[];
+
+  test.beforeEach(({ page }) => {
+    errors = collectPageErrors(page);
+  });
+
+  test.afterEach(() => {
+    expect(errors).toEqual([]);
+  });
+
+  test("«Документы»: завтрашняя дата — ошибка у документа; проверенный сегодня — «Сохранено»", async ({ page }) => {
+    await open(page, `${NAMUNA}/dokumenty`);
+    // У Namuna (строится) акта ввода нет — последняя строка пустая.
+    const commissioning = page.getByLabel("Проверен").last();
+    await expect(commissioning).toHaveValue("");
+    await commissioning.fill("2099-01-01");
+    await save(page);
+    await expect(page.getByText("Дата проверки — не позже сегодняшней")).toBeVisible();
+    await commissioning.fill("2026-09-11");
+    await save(page);
+    await saved(page);
+  });
+
+  test("«Видео»: не ролик YouTube — ошибка строки; ссылка youtu.be — «Сохранено»; порядок стрелками", async ({ page }) => {
+    await open(page, `${SHODLIK}/video`);
+    await expect(page.getByText("Видео нет")).toBeVisible();
+    await page.getByRole("button", { name: "+ Добавить видео" }).click();
+    await page.getByLabel("Ссылка на YouTube").fill("https://vimeo.com/123");
+    await save(page);
+    await expect(page.getByText("Не похоже на ссылку на ролик YouTube")).toBeVisible();
+    await page.getByLabel("Ссылка на YouTube").fill("https://youtu.be/dQw4w9WgXcQ?t=5");
+    await page.getByRole("button", { name: "+ Добавить видео" }).click();
+    await page.getByLabel("Ссылка на YouTube").last().fill("https://www.youtube.com/watch?v=aaaaaaaaaaa");
+    await page.getByRole("button", { name: "Выше" }).last().click();
+    await expect(page.getByLabel("Ссылка на YouTube").first()).toHaveValue(/aaaaaaaaaaa/);
+    await save(page);
+    await saved(page);
+  });
+
+  test("«Детали»: половина текста и контакты застройщика — ошибки темы; темы без текста — «пусто»", async ({ page }) => {
+    await open(page, `${NAMUNA}/detali`);
+    const about = page.locator("details").filter({ hasText: "О проекте" });
+    await expect(about).toHaveAttribute("open", "");
+    await expect(page.locator("details").filter({ hasText: "Качество и стиль" })).toContainText("пусто");
+    await about.getByLabel("Matn · UZ").fill("");
+    await save(page);
+    await expect(about).toContainText("Нужен текст на узбекском");
+    await about.getByLabel("Matn · UZ").fill("Biz bilan: t.me/sifat_qurilish");
+    await save(page);
+    await expect(about).toContainText("правило 1.2");
+    await about.getByLabel("Matn · UZ").fill("DEMO: biznes sinf minorasi.");
+    await save(page);
+    await saved(page);
+  });
+
+  test("«Блоки»: новый срок — отметка «это перенос»; история переносов с «Убрать из истории»", async ({ page }) => {
+    await open(page, `${SHODLIK}/bloki`);
+    const blockB = page.getByTestId("block-card").filter({ has: page.getByText("Блок B", { exact: true }) });
+    await blockB.getByRole("button", { name: /Изменить/ }).click();
+    await expect(blockB).toContainText("2 кв. 2027 → 4 кв. 2027 · записан 20.08.2026");
+    await expect(blockB.getByRole("button", { name: "Убрать из истории" })).toBeVisible();
+    const shift = blockB.getByRole("checkbox", { name: /Это перенос срока застройщиком/ });
+    await expect(shift).toHaveCount(0);
+    await blockB.getByLabel("Квартал").selectOption("1");
+    await blockB.getByLabel("Год").selectOption("2028");
+    await expect(shift).toBeChecked();
+    await expect(blockB).toContainText("«перенесён с 4 кв. 2027»");
+    await save(page);
+    await saved(page);
+  });
+});
