@@ -90,7 +90,14 @@ export type CatalogComplex = Omit<ComplexRecord, "developer_id" | "minutes_to_ce
 };
 
 /** Программа застройщика и на какие блоки она (block_ids — только блоки на сайте). */
-export type CatalogProgram = { id: string; program: CalcProgram; blocksScope: "all" | "selected"; blockIds: string[] };
+export type CatalogProgram = {
+  id: string;
+  program: CalcProgram;
+  /** Банк рассрочки через банк и ипотеки — чип оплаты на карточке. */
+  bank: LocalizedText | null;
+  blocksScope: "all" | "selected";
+  blockIds: string[];
+};
 
 export type CatalogDeveloper = { id: string; slug: string; name: string; programs: CatalogProgram[] };
 
@@ -148,6 +155,7 @@ export function catalogFrom(record: SiteCatalogRecord): SiteCatalog {
       programs: developer.programs.map((program) => ({
         id: program.id,
         program: programFromRecord(program),
+        bank: program.bank,
         blocksScope: program.blocks_scope,
         blockIds: program.block_ids,
       })),

@@ -51,8 +51,8 @@ const catalog: SiteCatalog = {
       slug: "sifat",
       name: "Sifat",
       programs: [
-        { id: "p1", program: { type: "full" }, blocksScope: "all", blockIds: [] },
-        { id: "p2", program: { type: "full" }, blocksScope: "selected", blockIds: ["a2"] },
+        { id: "p1", program: { type: "full" }, bank: null, blocksScope: "all", blockIds: [] },
+        { id: "p2", program: { type: "full" }, bank: null, blocksScope: "selected", blockIds: ["a2"] },
       ],
     },
     { id: "d2", slug: "kamalak", name: "Kamalak", programs: [] },
