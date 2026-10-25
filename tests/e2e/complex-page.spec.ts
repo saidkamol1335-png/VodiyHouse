@@ -9,7 +9,7 @@ import { hasCloud } from "./cloud";
 const SHODLIK = "/ru/novostroyki/demo-shodlik";
 
 const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-${name}.png`, fullPage: true });
+  page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-${name}.png`, fullPage: true, caret: "initial" });
 
 /** Ленивые картинки и появление разделов — прокруткой до низа, как читатель. */
 async function scrollThrough(page: Page) {
@@ -54,7 +54,7 @@ test.describe("страница ЖК", () => {
     await expect(calc).toHaveAttribute("open", "");
     await expect(calc.locator(".flat-calc__price")).toContainText(/\$30\s290/);
     expect(await calc.evaluate((dialog) => dialog.matches(":modal"))).toBe(isMobile);
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-calc.png` });
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-calc.png`, caret: "initial" });
     // Повторное нажатие у открытого расчёта — «Свернуть» (мокап pcClose).
     if (!isMobile) {
       await page.locator(".complex-layout__calc").first().click();

@@ -21,7 +21,7 @@ test.describe("каталог /novostroyki", () => {
     await expect(shodlik).toContainText(/1-комн\. от 42,5 м²\s*осталось 14/);
     await expect(shodlik).toContainText(/от \$\d/);
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-catalog-ru.png`, fullPage: true });
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-catalog-ru.png`, fullPage: true, caret: "initial" });
     expect(errors).toEqual([]);
   });
 
@@ -53,7 +53,7 @@ test.describe("каталог /novostroyki", () => {
     const filter = page.locator(".catalog-filter--open");
     await expect(filter).toBeVisible();
     await expect(page.locator("html")).toHaveCSS("overflow", "hidden");
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-filter-open.png` });
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-filter-open.png`, caret: "initial" });
     await expect(page.getByRole("dialog", { name: "Фильтры" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Закрыть фильтры" })).toBeFocused();
     await page.keyboard.press("Escape");
