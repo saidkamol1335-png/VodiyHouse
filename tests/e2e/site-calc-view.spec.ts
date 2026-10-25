@@ -11,6 +11,8 @@ const DISCOUNT = /скидк|chegirma|discount/i;
 const SHOT_TIME = new Date("2026-10-24T09:46:00Z");
 
 const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 768;
+/** Пункты шапки — за кнопкой меню: телефон и планшет (761–1279 px, приёмка 3а — 768). */
+const hasMenuButton = (page: Page) => (page.viewportSize()?.width ?? 0) < 1280;
 const noHorizontalScroll = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
@@ -66,7 +68,7 @@ test.describe("сайт · страница калькулятора", () => {
           page.getByRole("button", { name: /Получить точный расчёт|Aniq hisob-kitobni olish/ }),
         ).toHaveCount(1);
       }
-      if (isPhone(page)) await menu(page, locale).click();
+      if (hasMenuButton(page)) await menu(page, locale).click();
       const nav = page.getByRole("link", { name: locale === "ru" ? "Калькулятор" : "Kalkulyator" });
       await expect(nav.first()).toHaveAttribute("aria-current", "page");
       expect(scripts.length).toBeGreaterThan(0);
@@ -137,14 +139,14 @@ test.describe("сайт · страница калькулятора", () => {
     await page.waitForLoadState("networkidle");
     await expect(page.locator(".site-calculator__empty")).toContainText("Калькулятор заработает");
     await expect(page.getByRole("link", { name: /120 м²/ })).toHaveCount(0);
-    if (isPhone(page)) await menu(page, "ru").click();
+    if (hasMenuButton(page)) await menu(page, "ru").click();
     await expect(page.getByRole("link", { name: "Застройщикам" }).first()).toBeVisible();
     // На телефоне имя пункта — «04 Калькулятор»: ищем по вхождению.
     await expect(page.getByRole("link", { name: "Калькулятор" })).toHaveCount(0);
     await settle(page);
     const dir = `test-results/screens/${testInfo.project.name}`;
     await page.screenshot({ path: `${dir}/s29-no-programs.png`, caret: "initial" });
-    if (isPhone(page)) return;
+    if (hasMenuButton(page)) return;
     // Планшет (761–1279 px): выпадающее меню — тот же список без пункта.
     await page.setViewportSize({ width: 1100, height: 900 });
     await menu(page, "ru").click();

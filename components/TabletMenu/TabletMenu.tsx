@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { isActivePath } from "@/components/HeaderNav";
 import { useNavItems } from "@/components/HiddenNav";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { formatPhone, phoneHref } from "@/lib/contacts";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, usePathname } from "@/lib/i18n/navigation";
 import { MENU_NAV } from "@/lib/routes";
 
 type TabletMenuProps = {
@@ -19,10 +20,17 @@ export function TabletMenu({ id, onNavigate }: TabletMenuProps) {
   const t = useTranslations();
   const items = useNavItems(MENU_NAV);
   const { phone } = useSiteContacts();
+  const pathname = usePathname();
   return (
     <nav id={id} className="tablet-menu" aria-label={t("header.menu")}>
       {items.map(({ key, href }) => (
-        <Link key={key} href={href} className="tablet-menu__link" onClick={onNavigate}>
+        <Link
+          key={key}
+          href={href}
+          className="tablet-menu__link"
+          aria-current={isActivePath(pathname, href) ? "page" : undefined}
+          onClick={onNavigate}
+        >
           {t(`nav.${key}`)}
         </Link>
       ))}

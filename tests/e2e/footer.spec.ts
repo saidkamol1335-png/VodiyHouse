@@ -29,6 +29,8 @@ test.describe("подвал сайта", () => {
     await page.screenshot({
       path: `test-results/screens/${test.info().project.name}/s31-footer-ru.png`,
       fullPage: true,
+      // Без своей каретки Playwright красит caret-color полям до гидрации — ложный «hydration mismatch».
+      caret: "initial",
       style: ".site-header { visibility: hidden; }",
     });
     expect(errors).toEqual([]);
