@@ -81,12 +81,14 @@
   .complex-plans__segment--blocks {
     display: flex;
     gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
     border-color: var(--line);
     background: var(--bg-4);
   }
 
   .complex-plans__segment--blocks .complex-plans__option {
-    flex: 1;
+    flex: 1 0 auto;
     height: var(--touch-target);
     font-weight: 650;
   }

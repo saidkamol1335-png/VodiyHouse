@@ -373,7 +373,7 @@
     "metaPlace": " · {place}",
     "unavailable": "TJM sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — TJM haqida aytib beramiz va kvartira tanlaymiz.",
     "name": "{name} TJM",
-    "crumbs": "Navigatsiya",
+    "crumbs": "Siz shu yerdasiz",
     "verified": "Vodiy House tekshirgan",
     "landmark": "Mo‘ljal: {mark}",
     "toCenter": "markazgacha {n} daq.",
@@ -393,7 +393,7 @@
     },
     "quarter": "{year}-yil {q}-chorak",
     "gallery": {
-      "label": "{name} TJM suratlari",
+      "label": "Suratlar: {name}",
       "photo": "{total} tadan {n}-surat",
       "counter": "{n} / {total}",
       "prev": "Oldingi surat",
@@ -418,7 +418,8 @@
       "call": "Qo‘ng‘iroq",
       "telegram": "Telegramda yozish",
       "freePrice": "Narx quruvchinikidek — Vodiy House hech narsa qo‘shmaydi.",
-      "freeBadge": "Siz uchun bepul"
+      "freeBadge": "Siz uchun bepul",
+      "soldOut": "Bo‘sh kvartiralar yo‘q"
     },
     "nav": {
       "label": "Sahifa bo‘limlari",
@@ -493,7 +494,8 @@
         "bank": "{bank}: bank orqali muddatli to‘lov, {down} dan, {months} oygacha · yillik {rate}",
         "mortgage": "{bank}: {years, plural, one {# yilgacha} other {# yilgacha}} ipoteka, {down} dan · yillik {rate}",
         "mortgageMonths": "{bank}: {months} oygacha ipoteka, {down} dan · yillik {rate}"
-      }
+      },
+      "noFree": "bo‘sh yo‘q"
     },
     "location": {
       "title": "Joylashuv",
@@ -502,7 +504,7 @@
       "route": "Yo‘lni ko‘rsatish",
       "openMap": "Yandex Xaritalarda ochish",
       "showMap": "Xaritada ko‘rsatish",
-      "mapTitle": "Xarita: {name} TJM",
+      "mapTitle": "Xarita: {name}",
       "convenience": "Joylashuv qulayligi",
       "center": "Shahar markazi",
       "byCar": "mashinada",
@@ -589,7 +591,9 @@
       "failed": "Hisobni ochib bo‘lmadi. Yana urinib ko‘ring.",
       "zoom": "«{title}» chizmasini kattalashtirish",
       "zoomClose": "Chizmani yopish",
-      "empty": "Bunday parametrli rejalar yo‘q"
+      "empty": "Bunday parametrli rejalar yo‘q",
+      "collapse": "Yig‘ish",
+      "noneTitle": "Mavjud emas"
     },
     "video": {
       "title": "TJM videosharhi",
@@ -630,7 +634,13 @@
       "label": "Oldindan ko‘rish",
       "published": "e’lon qilingan — tashrif buyuruvchilar shunday ko‘radi",
       "hidden": "e’lon qilinmagan — tashrif buyuruvchilar sahifani ko‘rmaydi",
-      "exit": "Chiqish"
+      "exit": "Chiqish",
+      "developerHidden": "TJM e’lon qilingan, lekin quruvchi — yo‘q: tashrif buyuruvchilar sahifani ko‘rmaydi"
     }
+  },
+  "siteError": {
+    "title": "Sahifa vaqtincha mavjud emas",
+    "text": "Ma’lumotlarni yuklab bo‘lmadi. Bir daqiqadan so‘ng sahifani yangilang — yoki bizga qo‘ng‘iroq qiling, TJM haqida aytib beramiz.",
+    "retry": "Yangilash"
   }
 }

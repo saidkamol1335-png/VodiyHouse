@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatArea, formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
-import { layoutsLink } from "@/lib/site/complex/layoutsLink";
+import { layoutsLinkProps } from "@/lib/site/complex/layoutsLink";
 import type { ComplexPage } from "@/lib/site/complex/model";
 import { freeByBlock, type StockRow } from "@/lib/site/complex/stock";
 
@@ -41,7 +41,7 @@ export async function ComplexStock({ page, rows, free, withLayouts }: ComplexSto
       : null;
   return (
     <div className="complex-stock">
-      {free !== null ? (
+      {free ? (
         <div className="complex-stock__total">
           <b className="complex-stock__number">{free}</b>
           <div>
@@ -98,7 +98,7 @@ function StockLine({ row, t, locale, multiBlock, linked }: StockLineProps) {
     <div className={row.available ? "complex-stock__row" : "complex-stock__row complex-stock__row--none"} role="row">
       <span className="complex-stock__type" role="cell">
         {linked ? (
-          <a href={layoutsLink({ rooms: row.rooms })} aria-label={t("stock.toLayouts", { type })}>
+          <a {...layoutsLinkProps({ rooms: row.rooms })} aria-label={t("stock.toLayouts", { type })}>
             {type}
           </a>
         ) : (

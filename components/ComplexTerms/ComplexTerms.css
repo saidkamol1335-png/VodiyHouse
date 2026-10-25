@@ -36,9 +36,12 @@
     margin-bottom: 12px;
   }
 
+  /* 4–5 блоков (и длинные узбекские подписи) не помещаются — полоса листается пальцем. */
   .complex-terms__tabs {
     display: flex;
     gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
     padding: 3px;
     border: 1px solid var(--line);
     border-radius: var(--r-pill);
@@ -47,7 +50,7 @@
 
   .complex-terms__tab {
     display: inline-flex;
-    flex: 1;
+    flex: 1 0 auto;
     flex-direction: column;
     align-items: center;
     justify-content: center;

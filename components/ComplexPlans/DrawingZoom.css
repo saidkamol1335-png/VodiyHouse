@@ -62,3 +62,8 @@
     padding: 16px 12px;
   }
 }
+
+/* Пока открыт просмотр, страница под ним не прокручивается (как у меню телефона). */
+html:has(.complex-drawing[open]) {
+  overflow: hidden;
+}

@@ -18,7 +18,21 @@ export async function proxy(request: NextRequest) {
   return localeProxy(request);
 }
 
-function localeProxy(request: NextRequest) {
+// Кука предпросмотра (draftMode, шаг 3.6): страница ЖК читает базу сессией руководителя.
+const PREVIEW_COOKIE = "__prerender_bypass";
+
+/**
+ * Предпросмотр: сессию обновляет proxy, как в кабинете. Иначе истёкший токен обновила бы сама
+ * страница, а записать куки она не может — браузер остался бы со старым токеном, и следующий
+ * заход в кабинет отозвал бы сессию («Already Used»).
+ */
+async function previewResponse(request: NextRequest): Promise<NextResponse> {
+  const names = request.cookies.getAll().map(({ name }) => name);
+  if (!hasSupabaseEnv() || !names.includes(PREVIEW_COOKIE) || !hasAuthCookie(names)) return NextResponse.next();
+  return (await refreshAdminSession(request)).response;
+}
+
+async function localeProxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const target = localeRedirectTarget(pathname, request.cookies.get(LOCALE_COOKIE)?.value);
   if (target) {
@@ -26,7 +40,7 @@ function localeProxy(request: NextRequest) {
   }
 
   const locale = localeOfPath(pathname);
-  const response = NextResponse.next();
+  const response = await previewResponse(request);
   if (locale && request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
     response.cookies.set(LOCALE_COOKIE, locale, { maxAge: ONE_YEAR_SECONDS, sameSite: "lax", path: "/" });
   }

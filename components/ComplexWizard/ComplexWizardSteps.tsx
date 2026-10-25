@@ -6,5 +6,5 @@ import { ComplexWizard } from "./ComplexWizard";
 export async function ComplexWizardSteps({ base }: { base: string }) {
   const t = await getTranslations("admin.complexes");
   const steps = wizardSteps(base, (key, step) => t("wizard.next", { step: `${step}. ${t(`tabs.${key}`)}` }));
-  return <ComplexWizard steps={steps} label={t("tabs.label")} lastHint={t("wizard.last")} />;
+  return <ComplexWizard steps={steps} label={t("wizard.label")} lastHint={t("wizard.last")} />;
 }

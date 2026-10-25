@@ -93,3 +93,8 @@
     display: none;
   }
 }
+
+/* Пока открыт просмотр, страница под ним не прокручивается (как у меню телефона). */
+html:has(.complex-viewer[open]) {
+  overflow: hidden;
+}

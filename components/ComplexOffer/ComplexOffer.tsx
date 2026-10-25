@@ -1,4 +1,5 @@
 import { Check, Send } from "lucide-react";
+import { Beam } from "@/components/Beam";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PhoneButton } from "@/components/PhoneButton";
 import { type SiteContacts, phoneHref, telegramHref } from "@/lib/contacts";
@@ -8,6 +9,8 @@ import type { CardDeadline } from "@/lib/site/catalog/card";
 import type { ComplexSummary } from "@/lib/site/complex/summary";
 
 type ComplexOfferProps = {
+  /** «ЖК Shodlik» — подпись карточки для диктора (мокап: aria-label .jki). */
+  name: string;
   summary: ComplexSummary;
   /** Контакты Vodiy House (Ф9) — единственные на сайте (правило ТЗ 1.2). */
   contacts: SiteContacts;
@@ -18,19 +21,18 @@ type ComplexOfferProps = {
  * срок сдачи, проверенные документы, связь с Vodiy House и плашка «Для вас бесплатно». Без скидок
  * (PLAN §3.13); «Записаться на просмотр» — с заявками (шаг 3.7), «Подарок» — со спецпредложениями (3б).
  */
-export async function ComplexOffer({ summary, contacts }: ComplexOfferProps) {
+export async function ComplexOffer({ name, summary, contacts }: ComplexOfferProps) {
   const t = await getTranslations("complex.offer");
   const locale = (await getLocale()) as Locale;
   const { price } = summary;
   const money = (amount: number) => formatPrice(amount, price?.currency ?? "USD", locale);
   return (
-    <section className="complex-offer" aria-label={t("inSale")}>
+    <section className="complex-offer" aria-label={name}>
+      {/* Луч по рамке (мокап .jki.beam): только в full, вне экрана — на паузе. */}
+      <Beam />
       <div className={contacts.phone || contacts.telegram ? "complex-offer__top" : "complex-offer__top complex-offer__top--no-cta"}>
         <div className="complex-offer__price">
-          <p className="complex-offer__live">
-            <i aria-hidden="true" />
-            {summary.free === null ? t("inSale") : `${t("inSale")} · ${t("flats", { n: summary.free })}`}
-          </p>
+          <OfferLive free={summary.free} />
           <p className="complex-offer__amount">{price ? t("priceFrom", { price: money(price.amount) }) : t("priceOnRequest")}</p>
           {price?.perM2 ? <p className="complex-offer__per-m2">{t("perM2From", { price: money(price.perM2) })}</p> : null}
         </div>
@@ -56,6 +58,18 @@ export async function ComplexOffer({ summary, contacts }: ComplexOfferProps) {
       </div>
       <OfferFree contacts={contacts} locale={locale} />
     </section>
+  );
+}
+
+/** «В продаже · 41 квартира»; всё продано или в брони — без зелёной точки «в продаже». */
+async function OfferLive({ free }: { free: number | null }) {
+  const t = await getTranslations("complex.offer");
+  if (free === 0) return <p className="complex-offer__live">{t("soldOut")}</p>;
+  return (
+    <p className="complex-offer__live">
+      <i aria-hidden="true" />
+      {free === null ? t("inSale") : `${t("inSale")} · ${t("flats", { n: free })}`}
+    </p>
   );
 }
 

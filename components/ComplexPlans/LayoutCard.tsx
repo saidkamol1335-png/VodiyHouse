@@ -63,8 +63,9 @@ export function LayoutCard({ card, open, pending, failed, opener, onCalculate, o
         <div className="complex-layout__actions">
           <button ref={opener} type="button" className="complex-layout__calc" aria-expanded={open} disabled={pending} onClick={onCalculate}>
             <Calculator size={15} strokeWidth={2} aria-hidden />
-            <span className="complex-layout__calc-full">{pending ? t("loading") : t("calculate")}</span>
-            <span className="complex-layout__calc-short">{pending ? t("loading") : t("calculateShort")}</span>
+            {/* Открытый расчёт — «Свернуть» (мокап pcClose): повторное нажатие закрывает его. */}
+            <span className="complex-layout__calc-full">{pending ? t("loading") : open ? t("collapse") : t("calculate")}</span>
+            <span className="complex-layout__calc-short">{pending ? t("loading") : open ? t("collapse") : t("calculateShort")}</span>
           </button>
           {failed ? (
             <p className="complex-layout__failed" role="alert">
@@ -102,7 +103,8 @@ function LayoutBody({ card, title }: { card: LayoutCardModel; title: string }) {
             <span>{t("perM2From", { price: money(card.price.perM2) })}</span>
           </>
         ) : (
-          <b>{t("priceOnRequest")}</b>
+          // Всё продано — «Нет в наличии» (мокап plNone), не «по запросу»: узнавать нечего.
+          <b>{card.left.kind === "none" ? t("noneTitle") : t("priceOnRequest")}</b>
         )}
       </p>
       {card.payment ? <p className="complex-layout__monthly">{t("monthlyFrom", { price: money(card.payment) })}</p> : null}

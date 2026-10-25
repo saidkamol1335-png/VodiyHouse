@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { blockCard } from "@/lib/site/complex/blocks";
-import { layoutCards } from "@/lib/site/complex/layouts";
+import { cheapestCalculable, layoutCards } from "@/lib/site/complex/layouts";
 import type { ComplexPage } from "@/lib/site/complex/model";
 import { BlockCard } from "./BlockCard";
 import { BlockTabs } from "./BlockTabs";
@@ -9,7 +9,7 @@ import { BlockTabs } from "./BlockTabs";
 export async function ComplexTerms({ page }: { page: ComplexPage }) {
   const t = await getTranslations("complex.blocks");
   const cards = page.blocks.map((block) => blockCard(page, block));
-  const withLayouts = new Set(layoutCards(page).map((card) => card.layout.blockId));
+  const layouts = layoutCards(page);
   if (cards.length === 0) return null;
   const tabs = cards.map(({ block, status }) => ({
     id: block.id,
@@ -21,7 +21,7 @@ export async function ComplexTerms({ page }: { page: ComplexPage }) {
       <h3 className="complex-terms__title">{t("title")}</h3>
       <BlockTabs label={t("title")} tabs={tabs}>
         {cards.map((card) => (
-          <BlockCard key={card.block.id} card={card} calculable={withLayouts.has(card.block.id)} />
+          <BlockCard key={card.block.id} card={card} calcLayoutId={cheapestCalculable(layouts, card.block.id)} />
         ))}
       </BlockTabs>
     </div>

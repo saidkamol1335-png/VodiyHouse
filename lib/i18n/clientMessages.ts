@@ -48,7 +48,9 @@ export const CALC_MESSAGES = [CALC_NAMESPACE] as const;
  * подвал). Тексты разделов (калькулятор, каталог, страница ЖК, формы) — своим провайдером только
  * своим страницам, как CALC_MESSAGES; заголовки и тексты серверных компонентов в браузер не идут.
  */
-export const SITE_SHELL_MESSAGES = ["nav", "header", "contacts", "footer"] as const;
+// siteError — экран «временно недоступна» (error.tsx страниц сайта): он рисуется без провайдера
+// своей страницы, только с оболочкой.
+export const SITE_SHELL_MESSAGES = ["nav", "header", "contacts", "footer", "siteError"] as const;
 
 export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
   return pickMessages(messages, SITE_SHELL_MESSAGES);

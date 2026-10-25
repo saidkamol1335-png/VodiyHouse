@@ -39,7 +39,7 @@ export type VideoPayload = { youtube_id: string; title: BilingualValue | null };
 
 export type VideosParse =
   | { ok: true; payload: VideoPayload[] }
-  | { ok: false; error: "tooMany" }
+  | { ok: false; error: "tooMany" | "rule12" }
   | { ok: false; error: null; errors: VideoErrors };
 
 export const videoField = (key: string, part: "link" | "title") => `video-${key}-${part}`;
@@ -91,5 +91,9 @@ export function parseVideos(formData: FormData): VideosParse {
     if (Object.keys(rowErrors).length > 0) errors[row.key] = rowErrors;
     else payload.push({ youtube_id: id!, title: bilingualOrNull(row.title) });
   }
-  return Object.keys(errors).length > 0 ? { ok: false, error: null, errors } : { ok: true, payload };
+  if (Object.keys(errors).length > 0) return { ok: false, error: null, errors };
+  // Правило 1.2: плеер показывает канал ролика, превью и концовку — руководитель отмечает, что
+  // контактов застройщика там нет, при каждом сохранении списка с роликами (как у загрузки фото).
+  if (payload.length > 0 && readText(formData, "rule12") !== "on") return { ok: false, error: "rule12" };
+  return { ok: true, payload };
 }

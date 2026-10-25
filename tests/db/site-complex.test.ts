@@ -38,6 +38,7 @@ type Page = {
     id: string;
     slug: string;
     status: string;
+    on_site: boolean;
     nearby: unknown[];
     checked: Record<string, string | null>;
     stock_updated_at: string | null;
@@ -46,7 +47,7 @@ type Page = {
     name: string;
     complexes_built: number;
     complexes_building: number;
-    programs: { type: string }[];
+    programs: { id: string; type: string; block_ids: string[] }[];
   };
   photos: unknown[];
   blocks: Block[];
@@ -134,7 +135,75 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
        select id, 'zhk-draft', '{"ru": "Черновик", "uz": "Qoralama"}' from developers where slug = 'demo-sifat'`,
     );
     expect(await page("zhk-draft")).toBeNull();
-    expect((await page("zhk-draft", user(head)))?.complex.status).toBe("draft");
+    // Предпросмотр — только руководителю, как маршрут /api/predprosmotr (ревью блока C).
+    const videographer = await createStaff(db.admin, "videographer");
+    expect(await page("zhk-draft", user(videographer))).toBeNull();
+    expect(await page("zhk-draft", user(manager))).toBeNull();
+    const draft = (await page("zhk-draft", user(head)))!;
+    expect(draft.complex).toMatchObject({ status: "draft", on_site: false });
+    expect((await page("demo-shodlik"))!.complex.on_site).toBe(true);
+  });
+
+  it("предпросмотр черновика — как будущая страница: программа его блоков и расчёт квартиры; посетителю — нет", async () => {
+    const draftId = await complexId("zhk-draft");
+    const block = (
+      await db.admin.query<{ id: string }>(
+        "insert into blocks (complex_id, name, floors_total, deadline_year, deadline_quarter) values ($1, 'A', 9, 2028, 2) returning id",
+        [draftId],
+      )
+    ).rows[0]!.id;
+    const layout = (
+      await db.admin.query<{ id: string }>("insert into layouts (block_id, rooms, area, price_from) values ($1, 2, 60, 50000) returning id", [block])
+    ).rows[0]!.id;
+    // Копия действующей программы Sifat — только на блок черновика.
+    const program = (
+      await db.admin.query<{ id: string }>(
+        `insert into payment_programs
+         select (jsonb_populate_record(null::payment_programs, to_jsonb(p) || jsonb_build_object(
+           'id', gen_random_uuid(), 'blocks_scope', 'selected', 'block_ids', jsonb_build_array($1::uuid), 'sort', 999))).*
+         from payment_programs p join developers d on d.id = p.developer_id
+         where d.slug = 'demo-sifat' and p.is_active order by p.sort limit 1
+         returning id`,
+        [block],
+      )
+    ).rows[0]!.id;
+    const preview = (await page("zhk-draft", user(head)))!;
+    expect(preview.developer.programs.find((p) => p.id === program)?.block_ids).toEqual([block]);
+    expect((await page("demo-shodlik"))!.developer.programs.map((p) => p.id)).not.toContain(program);
+    const calc = (actor = anon) => db.as(actor, (tx) => tx.query<{ data: { programs: { id: string; block_ids: string[] }[] } | null }>("select site_layout_calc($1) as data", [layout]));
+    expect((await calc()).rows[0]!.data).toBeNull();
+    expect((await calc(user(manager))).rows[0]!.data).toBeNull();
+    const headCalc = (await calc(user(head))).rows[0]!.data!;
+    expect(headCalc.programs.find((p) => p.id === program)?.block_ids).toEqual([block]);
+  });
+
+  it("права новых таблиц: посетитель видит строки только опубликованного ЖК; писать напрямую — только руководителю", async () => {
+    const draftId = await complexId("zhk-draft");
+    const shodlik = await complexId("demo-shodlik");
+    const topic = (await db.admin.query<{ id: number }>("select id from detail_topics order by sort limit 1")).rows[0]!.id;
+    const docType = (await db.admin.query<{ id: number }>("select id from document_types order by sort limit 1")).rows[0]!.id;
+    const block = (await db.admin.query<{ id: string }>("select id from blocks where complex_id = $1 limit 1", [draftId])).rows[0]!.id;
+    const rows: Record<string, (complex: string) => [string, unknown[]]> = {
+      complex_documents: (c) => ["insert into complex_documents (complex_id, document_type_id, checked_on) values ($1, $2, '2026-09-01')", [c, docType]],
+      complex_videos: (c) => ["insert into complex_videos (complex_id, youtube_id, sort) values ($1, 'zzzzzzzzzzz', 10)", [c]],
+      complex_details: (c) => [`insert into complex_details (complex_id, topic_id, text) values ($1, $2, '{"ru": "a", "uz": "b"}')`, [c, topic]],
+      deadline_changes: (c) => ["insert into deadline_changes (complex_id, block_id, from_year, from_quarter, to_year, to_quarter) values ($1, $2, 2027, 1, 2027, 2)", [c, block]],
+    };
+    for (const [table, insert] of Object.entries(rows)) {
+      const [sql, params] = insert(draftId);
+      for (const actor of [manager, await createStaff(db.admin, "videographer")]) {
+        await expect(db.as(user(actor), (tx) => tx.query(sql, params)), `${table}: ${actor}`).rejects.toThrow();
+      }
+      await db.as(user(head), (tx) => tx.query(sql, params));
+      const visible = async (complex: string) =>
+        Number((await db.as(anon, (tx) => tx.query<{ n: string }>(`select count(*) as n from ${table} where complex_id = $1`, [complex]))).rows[0]!.n);
+      expect(await visible(draftId), table).toBe(0);
+      // У Shodlik в сиде есть документы и перенос срока; видео и деталей нет.
+      if (table === "complex_documents" || table === "deadline_changes") expect(await visible(shodlik), table).toBeGreaterThan(0);
+      // Менеджер удалить не может: политика прячет строки — удалено ноль.
+      await db.as(user(manager), (tx) => tx.query(`delete from ${table} where complex_id = $1`, [draftId]));
+      expect(Number((await db.admin.query<{ n: string }>(`select count(*) as n from ${table} where complex_id = $1`, [draftId])).rows[0]!.n), table).toBe(1);
+    }
   });
 
   it("документы: сохраняются целиком, без шума в журнале; будущая дата и менеджер — отказ", async () => {
@@ -255,9 +324,11 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
       ]),
     );
     const name = (await db.admin.query<{ name: string }>("select name ->> 'ru' as name from complexes where id = $1", [id])).rows[0]!.name;
+    // Во всём журнале те же записи — с названием ЖК впереди.
     const everywhere = await entries(null);
-    expect(everywhere.length).toBeGreaterThan(0);
-    expect(everywhere.filter((row) => !row.subject.startsWith(`${name} · `))).toEqual([]);
+    const local = await entries(id);
+    expect(local.length).toBeGreaterThan(0);
+    expect(everywhere).toEqual(expect.arrayContaining(local.map((row) => ({ ...row, subject: `${name} · ${row.subject}` }))));
   });
 
   it("порядок каталога (3.6): руководитель переставляет опубликованные; неполный список и менеджер — отказ", async () => {
@@ -268,8 +339,11 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     await reorder(reversed);
     const catalog = (await db.as(anon, (tx) => tx.query<{ data: { complexes: { id: string }[] } }>("select site_catalog() as data"))).rows[0]!.data;
     expect(catalog.complexes.map((c) => c.id)).toEqual(reversed);
-    await expectHint(reorder(reversed.slice(1)), "vh:invalid");
-    await expectHint(reorder([...reversed.slice(1), reversed[1]!]), "vh:invalid");
+    // Неопубликованные (черновик из теста выше) — за последним опубликованным.
+    const unpublished = (await db.admin.query<{ sort: number }>("select sort from complexes where status <> 'published'")).rows;
+    expect(unpublished.every((row) => row.sort > reversed.length * 10)).toBe(true);
+    await expectHint(reorder(reversed.slice(1)), "vh:stale_list");
+    await expectHint(reorder([...reversed.slice(1), reversed[1]!]), "vh:stale_list");
     await expectHint(reorder(published, manager), "vh:forbidden");
   });
 

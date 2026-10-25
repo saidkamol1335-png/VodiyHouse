@@ -57,7 +57,7 @@ describe("«Видео»", () => {
   ];
 
   it("порядок — как в форме; пустая строка не шлётся; подпись необязательна", () => {
-    const parsed = parseVideos(form([...row("b", `https://youtu.be/${ID}`, "Обзор", "Sharh"), ...row("x", ""), ...row("a", "aaaaaaaaaaa")]));
+    const parsed = parseVideos(form([...row("b", `https://youtu.be/${ID}`, "Обзор", "Sharh"), ...row("x", ""), ...row("a", "aaaaaaaaaaa"), ["rule12", "on"]]));
     expect(parsed).toEqual({
       ok: true,
       payload: [
@@ -76,6 +76,11 @@ describe("«Видео»", () => {
       error: null,
       errors: { b: { link: "duplicate" }, c: { link: "youtube" }, d: { title: "missingUz" }, e: { title: "contacts" } },
     });
+  });
+
+  it("правило 1.2: ролики без отметки «контактов застройщика нет» не сохраняются; пустой список — можно", () => {
+    expect(parseVideos(form(row("a", ID)))).toEqual({ ok: false, error: "rule12" });
+    expect(parseVideos(form(row("x", "")))).toEqual({ ok: true, payload: [] });
   });
 
   it("больше шести — отказ целиком", () => {

@@ -9,6 +9,8 @@ import type { CatalogOrderResult } from "@/lib/admin/complexes/types";
 import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { useMoveFocus, type MoveDirection } from "@/lib/ui/useMoveFocus";
+import { settle } from "@/lib/ui/settle";
+import { useSyncedState } from "@/lib/ui/useSyncedState";
 
 type OrderItem = { id: string; name: string };
 
@@ -21,33 +23,15 @@ type CatalogOrderProps = {
 
 /**
  * «Порядок в каталоге» (шаг 3.6, «Рекомендуемые» — порядок руководителя): стрелками, как блоки и
- * программы оплаты; каждая стрелка сохраняется сразу, отказ возвращает прежний порядок.
+ * программы оплаты; каждая стрелка сохраняется сразу, отказ возвращает прежний порядок. Пока
+ * ответа нет, стрелки ждут: два запроса подряд не разойдутся с тем, что видно. Новый список с
+ * сервера (опубликовали ЖК) заменяет показанный.
  */
 export function CatalogOrder({ complexes, action }: CatalogOrderProps) {
   const t = useTranslations("admin.complexes.catalogOrder");
   const tErrors = useTranslations("admin.developers.errors");
-  const [order, setOrder] = useState<readonly OrderItem[]>(complexes);
-  const [moved, setMoved] = useState<{ id: string; direction: MoveDirection } | null>(null);
-  const [error, setError] = useState<ContentErrorCode | null>(null);
-  const [pending, startTransition] = useTransition();
-  const forgetMove = useCallback(() => setMoved(null), []);
-  if (complexes.length < 2) return null;
-  const move = (index: number, direction: MoveDirection) => {
-    const previous = order;
-    const next = [...order];
-    const target = direction === "up" ? index - 1 : index + 1;
-    [next[index], next[target]] = [next[target]!, next[index]!];
-    setOrder(next);
-    setMoved({ id: next[target]!.id, direction });
-    if (!action) return;
-    startTransition(async () => {
-      const data = new FormData();
-      for (const item of next) data.append("ids", item.id);
-      const result = await action(data);
-      setError(result.status === "error" ? result.error : null);
-      if (result.status === "error") setOrder(previous);
-    });
-  };
+  const { order, moved, error, pending, move, forgetMove } = useCatalogOrder(complexes, action);
+  if (order.length < 2) return null;
   return (
     <AdminPanel title={t("title")} wide>
       <p className="catalog-order__lead">{t("lead")}</p>
@@ -58,6 +42,7 @@ export function CatalogOrder({ complexes, action }: CatalogOrderProps) {
             item={item}
             index={index}
             count={order.length}
+            busy={pending}
             focusMove={moved?.id === item.id ? moved.direction : undefined}
             onMoveFocused={forgetMove}
             onMove={(direction) => move(index, direction)}
@@ -69,8 +54,37 @@ export function CatalogOrder({ complexes, action }: CatalogOrderProps) {
   );
 }
 
+/** Порядок, стрелка с сохранением и откатом, фокус после переноса. */
+function useCatalogOrder(complexes: readonly OrderItem[], action: CatalogOrderProps["action"]) {
+  const [order, setOrder] = useSyncedState<readonly OrderItem[]>(complexes);
+  const [moved, setMoved] = useState<{ id: string; direction: MoveDirection } | null>(null);
+  const [error, setError] = useState<ContentErrorCode | null>(null);
+  const [pending, startTransition] = useTransition();
+  const forgetMove = useCallback(() => setMoved(null), []);
+  const move = (index: number, direction: MoveDirection) => {
+    if (pending) return;
+    const previous = order;
+    const next = [...order];
+    const target = direction === "up" ? index - 1 : index + 1;
+    [next[index], next[target]] = [next[target]!, next[index]!];
+    setOrder(next);
+    setMoved({ id: next[target]!.id, direction });
+    if (!action) return;
+    startTransition(async () => {
+      const data = new FormData();
+      for (const item of next) data.append("ids", item.id);
+      const result = await settle(() => action(data), { status: "error", error: "network" } as const);
+      setError(result.status === "error" ? result.error : null);
+      if (result.status === "error") setOrder(previous);
+    });
+  };
+  return { order, moved, error, pending, move, forgetMove };
+}
+
 type OrderRowProps = {
   item: OrderItem;
+  /** Ждём ответа на прошлую стрелку. */
+  busy: boolean;
   index: number;
   count: number;
   focusMove: MoveDirection | undefined;
@@ -78,17 +92,17 @@ type OrderRowProps = {
   onMove: (direction: MoveDirection) => void;
 };
 
-function OrderRow({ item, index, count, focusMove, onMoveFocused, onMove }: OrderRowProps) {
+function OrderRow({ item, index, count, busy, focusMove, onMoveFocused, onMove }: OrderRowProps) {
   const t = useTranslations("admin.complexes.catalogOrder");
   const [up, down] = useMoveFocus(focusMove, onMoveFocused);
   return (
     <li className="catalog-order__row">
       <span className="catalog-order__place">{index + 1}</span>
       <span className="catalog-order__name">{item.name}</span>
-      <button ref={up} type="button" className="catalog-order__move" aria-label={t("up", { name: item.name })} disabled={index === 0} onClick={() => onMove("up")}>
+      <button ref={up} type="button" className="catalog-order__move" aria-label={t("up", { name: item.name })} disabled={index === 0} aria-disabled={busy || undefined} onClick={() => onMove("up")}>
         <ArrowUp size={16} aria-hidden="true" />
       </button>
-      <button ref={down} type="button" className="catalog-order__move" aria-label={t("down", { name: item.name })} disabled={index === count - 1} onClick={() => onMove("down")}>
+      <button ref={down} type="button" className="catalog-order__move" aria-label={t("down", { name: item.name })} disabled={index === count - 1} aria-disabled={busy || undefined} onClick={() => onMove("down")}>
         <ArrowDown size={16} aria-hidden="true" />
       </button>
     </li>

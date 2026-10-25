@@ -56,6 +56,7 @@ export type LayoutRecord = {
 
 export type PageComplexRecord = Pick<ComplexRecord, "id" | "slug" | "name" | "class" | "location" | "address" | "landmark" | "minutes_to_center" | "checked"> & {
   status: "draft" | "published" | "hidden" | "archived";
+  on_site: boolean;
   short_description: LocalizedText | null;
   house_type: "monolith" | "brick" | "frame" | null;
   ceiling_height: NumberLike | null;
@@ -219,6 +220,7 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
     slug: complex.slug,
     name: complex.name,
     status: complex.status,
+    onSite: complex.on_site === true,
     class: complex.class,
     location: complex.location,
     address: complex.address,

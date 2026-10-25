@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 /** Где появится файл: фото ЖК — сразу, чертёж — после «Сохранить вкладку», застройщика — сразу. */
-export type Rule12Context = "photo" | "drawing" | "developer";
+export type Rule12Context = "photo" | "drawing" | "developer" | "video";
 
 type Rule12CheckProps = {
   id: string;

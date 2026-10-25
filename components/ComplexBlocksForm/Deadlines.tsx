@@ -12,6 +12,7 @@ import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { formatDate } from "@/lib/format";
 import { quarterOf } from "@/lib/quarters";
+import { settle } from "@/lib/ui/settle";
 
 // Перенос срока (ТЗ 7.3в): у сохранённого блока новый срок по умолчанию — перенос застройщиком,
 // на сайте «перенесён с …»; галочку снимают, если исправляли опечатку. Ошибочную запись убирают
@@ -58,7 +59,7 @@ export function DeadlineHistory({ changes, remove }: HistoryProps) {
     startTransition(async () => {
       const data = new FormData();
       data.set("id", id);
-      const result = await remove(data);
+      const result = await settle(() => remove(data), { status: "error", error: "network" } as const);
       setError(result.status === "error" ? result.error : null);
       if (result.status === "done") router.refresh();
     });

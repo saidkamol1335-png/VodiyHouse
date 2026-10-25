@@ -145,9 +145,17 @@
     box-shadow: none;
   }
 
+  /* Окно на весь экран: стиль браузера dialog:modal иначе оставляет поля по бокам. */
   .complex-details__dialog {
     width: 100%;
+    max-width: none;
     max-height: 100%;
+    margin: 0;
     border-radius: 0;
   }
+}
+
+/* Пока открыто окно, страница под ним не прокручивается (как у меню телефона). */
+html:has(.complex-details__dialog[open]) {
+  overflow: hidden;
 }

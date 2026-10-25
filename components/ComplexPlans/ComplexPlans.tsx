@@ -1,19 +1,20 @@
 "use client";
 
 import { Calculator } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { Fragment, useEffect, useRef, useState, useTransition } from "react";
-import { FlatCalculator } from "@/components/FlatCalculator";
-import { flatCalcFrom, type FlatCalcScreen } from "@/lib/calc/flatScreen";
+import { Fragment, useState } from "react";
 import type { CalcHints } from "@/lib/calc/hints";
 import { readCalcParams } from "@/lib/calc/params";
-import { getMotionTier } from "@/lib/motion";
-import { readLayoutCalcAction } from "@/lib/site/complex/actions";
 import { filterLayouts, layoutFilterOptions, type LayoutCard as LayoutCardModel, type LayoutFilter } from "@/lib/site/complex/layouts";
-import { parseLayoutsLink } from "@/lib/site/complex/layoutsLink";
 import { DrawingZoom } from "./DrawingZoom";
 import { LayoutCard } from "./LayoutCard";
 import { LayoutFilters } from "./LayoutFilters";
+import { loadFlatCalculator, useLayoutCalc, useLayoutsTarget } from "./useLayoutCalc";
+
+// Калькулятор — по первому «Рассчитать платёж» (его же useLayoutCalc начинает грузить заранее):
+// на телефоне это ~70 КБ JS, которые иначе разбирались бы при каждом открытии страницы ЖК.
+const FlatCalculator = dynamic(loadFlatCalculator, { ssr: false });
 
 type ComplexPlansProps = {
   sectionId: string;
@@ -26,59 +27,6 @@ type ComplexPlansProps = {
 const ALL: LayoutFilter = { blockId: null, rooms: null };
 const INITIAL_PARAMS = readCalcParams({});
 
-/** Фильтр из якоря «#planirovki?blok=…»: ссылки «Рассчитать платёж» блока и строк «Наличия». */
-function useLinkedFilter(sectionId: string, setFilter: (filter: LayoutFilter) => void) {
-  useEffect(() => {
-    const apply = () => {
-      const filter = parseLayoutsLink(window.location.hash);
-      if (!filter || (filter.blockId === null && filter.rooms === null)) return;
-      setFilter(filter);
-      history.replaceState(null, "", `#${sectionId}`);
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: getMotionTier() === "full" ? "smooth" : "auto" });
-    };
-    apply();
-    window.addEventListener("hashchange", apply);
-    return () => window.removeEventListener("hashchange", apply);
-  }, [sectionId, setFilter]);
-}
-
-type OpenCalc = { layoutId: string; screen: FlatCalcScreen; round: number };
-
-/**
- * Расчёт планировки: данные — по нажатию (site_layout_calc), ошибка — у кнопки этой планировки;
- * закрыли — фокус на «Рассчитать платёж» той планировки, расчёт которой закрыли.
- */
-function useLayoutCalc() {
-  const [open, setOpen] = useState<OpenCalc | null>(null);
-  const [pending, setPending] = useState<string | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
-  const openers = useRef(new Map<string, HTMLButtonElement>());
-  const calculate = (layoutId: string) => {
-    setPending(layoutId);
-    setFailed(null);
-    startTransition(async () => {
-      const record = await readLayoutCalcAction(layoutId);
-      setPending(null);
-      if (!record) return setFailed(layoutId);
-      setOpen((current) => ({
-        layoutId,
-        screen: flatCalcFrom(record),
-        round: (current?.round ?? 0) + 1,
-      }));
-    });
-  };
-  const close = () => {
-    if (open) openers.current.get(open.layoutId)?.focus();
-    setOpen(null);
-  };
-  const opener = (layoutId: string) => (node: HTMLButtonElement | null) => {
-    if (node) openers.current.set(layoutId, node);
-    else openers.current.delete(layoutId);
-  };
-  return { open, pending, failed, calculate, close, opener };
-}
-
 /**
  * «Планировки» (мокап .plans, ТЗ 7.4): фильтры по блоку и комнатам, карточки, «Рассчитать платёж»
  * открывает расчёт этой квартиры (шаг 2.7) — на 1440 под рядом карточки, на телефоне шторкой.
@@ -88,7 +36,7 @@ export function ComplexPlans({ sectionId, cards, hints, leadEnabled }: ComplexPl
   const [filter, setFilter] = useState<LayoutFilter>(ALL);
   const [zoom, setZoom] = useState<LayoutCardModel | null>(null);
   const calc = useLayoutCalc();
-  useLinkedFilter(sectionId, setFilter);
+  useLayoutsTarget(sectionId, setFilter, (layoutId) => calc.open?.layoutId !== layoutId && calc.calculate(layoutId));
   const options = layoutFilterOptions(cards, filter.blockId);
   const shown = filterLayouts(cards, filter);
   return (
@@ -108,7 +56,7 @@ export function ComplexPlans({ sectionId, cards, hints, leadEnabled }: ComplexPl
               pending={calc.pending === card.layout.id}
               failed={calc.failed === card.layout.id}
               opener={calc.opener(card.layout.id)}
-              onCalculate={() => calc.calculate(card.layout.id)}
+              onCalculate={() => calc.toggle(card.layout.id)}
               onZoom={() => setZoom(card)}
             />
             {calc.open?.layoutId === card.layout.id ? (

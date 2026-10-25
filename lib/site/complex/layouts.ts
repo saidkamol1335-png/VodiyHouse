@@ -52,6 +52,13 @@ export function layoutCards(page: ComplexPage): LayoutCard[] {
   });
 }
 
+/** «Рассчитать платёж» блока (мокап openCalcFrom): самая дешёвая планировка блока с расчётом. */
+export function cheapestCalculable(cards: readonly LayoutCard[], blockId: string): string | null {
+  const priced = cards.filter((card) => card.layout.blockId === blockId && card.calculable && card.price);
+  priced.sort((a, b) => a.price!.amount - b.price!.amount);
+  return priced[0]?.layout.id ?? null;
+}
+
 export function filterLayouts(cards: readonly LayoutCard[], filter: LayoutFilter): LayoutCard[] {
   return cards.filter(
     (card) => (filter.blockId === null || card.layout.blockId === filter.blockId) && (filter.rooms === null || card.layout.rooms === filter.rooms),

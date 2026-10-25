@@ -59,9 +59,11 @@
 }
 
 /* Появление (useReveal): full — подъём на --rise-offset, lite — проявление ≤ 200 мс, none — сразу.
-   Показанное в lite не прячется, когда проба включит full; без JS всё видно сразу. */
+   Показанное в lite не прячется, когда проба включит full; без JS всё видно сразу. Ноль, а не 0.01,
+   как у карточки входа: LCP страницы — фото первого экрана, а полупрозрачный текст ниже читается
+   проверкой контраста как серый на сером. */
 [data-js][data-motion="full"] .complex-section:not([data-revealed]) {
-  opacity: 0.01;
+  opacity: 0;
   transform: translateY(var(--rise-offset));
 }
 
@@ -70,7 +72,7 @@
 }
 
 [data-js][data-motion="lite"] .complex-section:not([data-revealed]) {
-  opacity: 0.01;
+  opacity: 0;
 }
 
 [data-motion="lite"] .complex-section {
@@ -79,7 +81,7 @@
 
 @keyframes complex-section-rise {
   from {
-    opacity: 0.01;
+    opacity: 0;
     transform: translateY(var(--rise-offset));
   }
 }

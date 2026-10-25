@@ -6,10 +6,12 @@ import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
 import { ComplexTabForm } from "@/components/ComplexTabForm";
 import { Field } from "@/components/Field";
+import { Rule12Check } from "@/components/Rule12Check";
 import type { VideosResult } from "@/lib/admin/complexes/types";
 import { newVideoDraft, VIDEO_LIMITS, videoField, type VideoDraft, type VideoErrors, type VideoIssue } from "@/lib/admin/complexes/videos";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { useDraftRows } from "@/lib/ui/useDraftRows";
+import { useState } from "react";
 import { useTabSave } from "@/lib/ui/useTabSave";
 
 type ComplexVideosFormProps = {
@@ -51,7 +53,24 @@ export function ComplexVideosForm({ complexId, videos, action }: ComplexVideosFo
           />
         ))}
       </ol>
+      {draft.rows.length > 0 ? <VideosRule12 savedAt={save.savedAt} /> : null}
     </ComplexTabForm>
+  );
+}
+
+/** Отметка правила 1.2 — на одно сохранение: после «Сохранено» снимается, как у загрузки фото. */
+function VideosRule12({ savedAt }: { savedAt: number | null }) {
+  const [checked, setChecked] = useState(false);
+  const [checkedAt, setCheckedAt] = useState(savedAt);
+  if (savedAt !== checkedAt) {
+    setCheckedAt(savedAt);
+    setChecked(false);
+  }
+  return (
+    <>
+      <Rule12Check id="complex-videos-rule12" checked={checked} onChange={setChecked} context="video" />
+      <input type="hidden" name="rule12" value={checked ? "on" : ""} />
+    </>
   );
 }
 

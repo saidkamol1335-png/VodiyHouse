@@ -42,6 +42,8 @@ export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, preload = fals
         fill
         sizes={sizes}
         preload={preload}
+        // preload даёт <link rel=preload>, но не приоритет самой картинки — без него LCP ждёт.
+        fetchPriority={preload ? "high" : undefined}
         style={IMAGE_STYLE}
         placeholder={photo.blur ? "blur" : "empty"}
         blurDataURL={photo.blur ?? undefined}

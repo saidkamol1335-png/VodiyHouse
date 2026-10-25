@@ -59,8 +59,10 @@ export type OtherComplex = {
 
 export type ComplexPage = Omit<
   PageComplexRecord,
-  "short_description" | "house_type" | "ceiling_height" | "minutes_to_center" | "lat" | "lng" | "nearby" | "stock_updated_at"
+  "short_description" | "house_type" | "ceiling_height" | "minutes_to_center" | "lat" | "lng" | "nearby" | "stock_updated_at" | "on_site"
 > & {
+  /** Видит ли страницу посетитель (ЖК и застройщик опубликованы) — для пометки предпросмотра. */
+  onSite: boolean;
   shortDescription: LocalizedText | null;
   houseType: PageComplexRecord["house_type"];
   ceilingHeight: number | null;

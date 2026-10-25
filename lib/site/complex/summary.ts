@@ -1,6 +1,7 @@
 import { cardDeadline, cardPrice, type CardDeadline, type CardPrice } from "@/lib/site/catalog/card";
 import type { CatalogComplex } from "@/lib/site/catalog/records";
 import type { ComplexPage } from "./model";
+import { blockFree } from "./stock";
 
 // Главное за 10 секунд (ТЗ 7.1, мокап .jki): в продаже, цена «от», «Платёж от», срок сдачи,
 // «N проверено»; и плашки «О ЖК» (мокап .facts, ТЗ 7.3б) — пустое поле не выводится.
@@ -34,7 +35,7 @@ export type ComplexSummary = {
 };
 
 export function complexSummary(page: ComplexPage): ComplexSummary {
-  const counts = page.blocks.map((block) => block.free);
+  const counts = page.blocks.map(blockFree);
   return {
     free: counts.length > 0 && counts.every((count) => count !== null) ? counts.reduce<number>((sum, count) => sum + (count ?? 0), 0) : null,
     price: cardPrice(asCatalogComplex(page), page.catalog),

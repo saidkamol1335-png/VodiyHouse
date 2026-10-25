@@ -54,7 +54,8 @@ export async function readDeadlineChanges(supabase: SupabaseClient, complexId: s
     .select("id, block_id, from_year, from_quarter, to_year, to_quarter, changed_on")
     .eq("complex_id", complexId)
     .order("changed_on")
-    .order("id");
+    // Как на сайте (complex_page_blocks): два переноса за день — в порядке записи.
+    .order("created_at");
   if (error) unavailable("deadline-changes", error);
   return ((data ?? []) as DeadlineRow[]).map((row) => ({
     id: row.id,

@@ -189,17 +189,24 @@
   }
 }
 
-/* Телефон (MobJk .sum): строки фактов под ценой, кнопки «Позвонить» и «Telegram» пополам. */
+/* Телефон (MobJk .sum): строки фактов под ценой, плашка «Для вас бесплатно», ниже — кнопки
+   «Позвонить» и «Telegram» пополам (на 1440 плашка — под всей карточкой). */
 @media (max-width: 760px) {
   .complex-offer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 16px;
     padding: 18px 16px 16px;
     border-radius: var(--r-xl);
   }
 
   .complex-offer__top {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    display: contents;
+  }
+
+  .complex-offer__cta {
+    order: 1;
   }
 
   .complex-offer__amount {
@@ -271,7 +278,7 @@
   }
 
   .complex-offer__free {
-    margin-top: 12px;
+    margin-top: 2px;
     padding: 14px;
     border: 1px dashed var(--ok-line);
     border-radius: var(--r-l);

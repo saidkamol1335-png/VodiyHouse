@@ -2,10 +2,14 @@
 
 import { useActionState, useEffect } from "react";
 import type { FormAction } from "@/lib/admin/developers/types";
+import { settle } from "./settle";
 import { submitKeepingForm } from "./submitKeepingForm";
 import { useUnsavedGuard } from "./useUnsavedGuard";
 
 type TabResult = { status: "idle" } | { status: "saved"; at: number } | { status: "error" };
+
+// Обрыв связи или 5xx — ответ «нет связи» у кнопки, а не экран ошибки: набранное остаётся.
+const NETWORK_FAILURE = { status: "error", error: "network", errors: {}, broken: [] } as const;
 
 /**
  * «Сохранить вкладку» у вкладок ЖК на обычных полях («Видео», «Документы», «Детали»): ответ
@@ -14,7 +18,7 @@ type TabResult = { status: "idle" } | { status: "saved"; at: number } | { status
 export function useTabSave<R extends TabResult>(action: FormAction<R>, unsavedMessage: string) {
   const guard = useUnsavedGuard(unsavedMessage);
   const [state, formAction, pending] = useActionState(
-    (_previous: Awaited<R>, formData: FormData) => action(formData),
+    (_previous: Awaited<R>, formData: FormData) => settle(() => action(formData), NETWORK_FAILURE as unknown as Awaited<R>),
     { status: "idle" } as Awaited<R>,
   );
   const savedAt = state.status === "saved" ? state.at : null;

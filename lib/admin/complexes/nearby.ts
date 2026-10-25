@@ -8,14 +8,15 @@ export type NearbyDraft = { key: string; kind: string; nameRu: string; nameUz: s
 
 export type NearbyIssue = "nearbyKind" | "nearbyName" | "nearbyNameLong" | "nearbyDistance" | "nearbyRange" | "contacts";
 
-let draftKeys = 0;
-export const newNearbyKey = () => `nearby-${(draftKeys += 1)}`;
+// Ключ строки: у пришедших с сервера — по номеру (одинаково при SSR и в браузере, иначе id полей
+// расходятся при гидратации), у добавленной кнопкой — случайный.
+const rowKey = (index: number) => `nearby-${index}`;
 
-export const emptyNearbyDraft = (): NearbyDraft => ({ key: newNearbyKey(), kind: "school", nameRu: "", nameUz: "", meters: "", minutes: "", mode: "walk" });
+export const emptyNearbyDraft = (): NearbyDraft => ({ key: crypto.randomUUID(), kind: "school", nameRu: "", nameUz: "", meters: "", minutes: "", mode: "walk" });
 
 export function nearbyDrafts(places: readonly NearbyPlace[]): NearbyDraft[] {
-  return places.map((place) => ({
-    key: newNearbyKey(),
+  return places.map((place, index) => ({
+    key: rowKey(index),
     kind: place.kind,
     nameRu: place.name.ru,
     nameUz: place.name.uz,
@@ -58,25 +59,27 @@ function placeOf(draft: NearbyDraft): NearbyPlace {
   };
 }
 
-const asDraft = (raw: unknown): NearbyDraft | null => {
+const asDraft = (raw: unknown, index: number): NearbyDraft | null => {
   if (!raw || typeof raw !== "object") return null;
   const item = raw as Record<string, unknown>;
   const text = (value: unknown) => (typeof value === "string" ? value : "");
-  return { key: text(item.key) || newNearbyKey(), kind: text(item.kind), nameRu: text(item.nameRu), nameUz: text(item.nameUz), meters: text(item.meters), minutes: text(item.minutes), mode: item.mode === "car" ? "car" : "walk" };
+  return { key: text(item.key) || rowKey(index), kind: text(item.kind), nameRu: text(item.nameRu), nameUz: text(item.nameUz), meters: text(item.meters), minutes: text(item.minutes), mode: item.mode === "car" ? "car" : "walk" };
 };
 
 /** Скрытое поле формы (JSON черновиков) → черновики; испорченное — как пустой список. */
 export function readNearbyDrafts(raw: string | null): NearbyDraft[] {
   try {
     const parsed: unknown = JSON.parse(raw ?? "[]");
-    return Array.isArray(parsed) ? parsed.flatMap((item) => asDraft(item) ?? []) : [];
+    return Array.isArray(parsed) ? parsed.flatMap((item, index) => asDraft(item, index) ?? []) : [];
   } catch {
     return [];
   }
 }
 
 /** Черновики → места для базы; первая ошибка — у поля «Удобство локации» с номером строки. */
-export function parseNearby(drafts: readonly NearbyDraft[]): { value: NearbyPlace[] | null; issue?: NearbyIssue; row?: number } {
+export function parseNearby(all: readonly NearbyDraft[]): { value: NearbyPlace[] | null; issue?: NearbyIssue; row?: number } {
+  // Пустую строку после «Добавить место» не ругаем и не сохраняем — как пустую строку «Видео».
+  const drafts = all.filter((draft) => draft.nameRu.trim() || draft.nameUz.trim() || draft.meters.trim() || draft.minutes.trim());
   if (drafts.length > NEARBY_LIMITS.places) return { value: null, issue: "nearbyRange", row: NEARBY_LIMITS.places + 1 };
   for (const [index, draft] of drafts.entries()) {
     const issue = nearbyDraftIssue(draft);

@@ -55,6 +55,25 @@ test.describe("страница ЖК", () => {
     await expect(calc.locator(".flat-calc__price")).toContainText(/\$30\s290/);
     expect(await calc.evaluate((dialog) => dialog.matches(":modal"))).toBe(isMobile);
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-calc.png` });
+    // Повторное нажатие у открытого расчёта — «Свернуть» (мокап pcClose).
+    if (!isMobile) {
+      await page.locator(".complex-layout__calc").first().click();
+      await expect(calc).toHaveCount(0);
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test("«Рассчитать платёж» у блока открывает расчёт его самой дешёвой планировки; проданная — «Нет в наличии»", async ({ page, isMobile }) => {
+    const errors = collectPageErrors(page);
+    await page.goto(SHODLIK);
+    await page.waitForLoadState("networkidle");
+    // На телефоне блоки — вкладками: открыта первая (Блок A).
+    await page.locator(".complex-block__calc").first().click();
+    const calc = page.locator("dialog.flat-calc");
+    await expect(calc).toHaveAttribute("open", "");
+    await expect(calc.locator(".flat-calc__price")).toContainText(/\$30\s290/);
+    if (isMobile) await page.keyboard.press("Escape");
+    await expect(page.locator(".complex-layout").filter({ hasText: "46,8 м²" })).toContainText("Нет в наличии");
     expect(errors).toEqual([]);
   });
 

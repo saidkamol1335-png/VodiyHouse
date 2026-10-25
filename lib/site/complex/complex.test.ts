@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { layoutsLink, parseLayoutsLink } from "./layoutsLink";
+import { layoutsLinkProps, parseLayoutsLink } from "./layoutsLink";
 import { distanceOf, mapLink, mapWidgetSrc, nearestSchool, routeLink, staticMapSrc } from "./location";
+import type { ComplexPage } from "./model";
 import { nearbyFrom, nearbyRecord } from "./nearby";
+import { blockFree } from "./stock";
 
 // Страница ЖК (шаг 3.5): пограничные случаи без базы — «Удобство локации», ссылки Яндекс Карт
 // (Ф5) и якорь «Планировок» с фильтром. Данные страницы — tests/db/site-complex.test.ts.
@@ -56,12 +58,29 @@ describe("Яндекс Карты без ключа (Ф5)", () => {
 });
 
 describe("якорь «Планировок» с фильтром", () => {
-  it("туда и обратно; чужой якорь — null; студия — 0 комнат", () => {
-    const link = layoutsLink({ blockId: "b-1", rooms: 0 });
-    expect(link).toBe("#planirovki?blok=b-1&komnat=0");
-    expect(parseLayoutsLink(link)).toEqual({ blockId: "b-1", rooms: 0 });
-    expect(parseLayoutsLink("#planirovki")).toEqual({ blockId: null, rooms: null });
-    expect(parseLayoutsLink("#planirovki?komnat=x")).toEqual({ blockId: null, rooms: null });
+  it("ссылка — якорь раздела (без JS — просто к разделу), запрос — в data-layouts; туда и обратно", () => {
+    const props = layoutsLinkProps({ blockId: "b-1", rooms: 0 });
+    expect(props).toEqual({ href: "#planirovki", "data-layouts": "blok=b-1&komnat=0" });
+    expect(parseLayoutsLink(`#planirovki?${props["data-layouts"]}`)).toEqual({ plan: null, blockId: "b-1", rooms: 0 });
+    expect(parseLayoutsLink("#planirovki?plan=l-7")).toEqual({ plan: "l-7", blockId: null, rooms: null });
+    expect(parseLayoutsLink("#planirovki")).toEqual({ plan: null, blockId: null, rooms: null });
+    expect(parseLayoutsLink("#planirovki?komnat=x")).toEqual({ plan: null, blockId: null, rooms: null });
     expect(parseLayoutsLink("#dokumenty")).toBeNull();
+  });
+});
+
+describe("«свободно» у блока (ревью блока C)", () => {
+  const block = (free: number | null, available: boolean[]) =>
+    ({ free, offers: available.map((item, index) => ({ rooms: index + 1, available: item })) }) as unknown as ComplexPage["blocks"][number];
+
+  it("со списком — число из базы, и 0 — тоже число («свободных нет»)", () => {
+    expect(blockFree(block(12, [true]))).toBe(12);
+    expect(blockFree(block(0, [false]))).toBe(0);
+  });
+
+  it("без списка: есть доступный тип — неизвестно сколько (null); ни одного — 0, «в продаже N» не пропадает", () => {
+    expect(blockFree(block(null, [true, false]))).toBeNull();
+    expect(blockFree(block(null, [false, false]))).toBe(0);
+    expect(blockFree(block(null, []))).toBe(0);
   });
 });

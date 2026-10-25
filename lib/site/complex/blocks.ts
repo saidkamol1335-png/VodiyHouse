@@ -92,7 +92,8 @@ export function blockCard(page: ComplexPage, block: ComplexBlock): BlockCard {
   return {
     block,
     status: building ? { kind: "building", pct: block.progressPct } : { kind: "built" },
-    floors: building && block.floorsTotal ? { built: block.floorsBuilt ?? 0, total: block.floorsTotal } : null,
+    // «7 из 12 этажей» — только когда построенные этажи введены: «0 из 12» спорило бы с процентом.
+    floors: building && block.floorsTotal && block.floorsBuilt !== null ? { built: block.floorsBuilt, total: block.floorsTotal } : null,
     shift: shiftOf(block),
     cadastre: cadastreOf(block),
     programs: blockPrograms(page, block.id).map((entry) => programLine(entry, page.developer.name)),

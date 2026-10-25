@@ -34,6 +34,7 @@ export const CONTENT_ERRORS = [
   "programActive",
   "invalidRate",
   "futureDate",
+  "staleList",
   "savedReload",
   "network",
   "notConfigured",
@@ -64,6 +65,7 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:invalid_rate": "invalidRate",
   "vh:duplicate": "duplicate",
   "vh:future_date": "futureDate",
+  "vh:stale_list": "staleList",
 };
 
 // Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.
@@ -82,6 +84,9 @@ const BY_CODE: Record<string, ContentErrorCode> = {
   "23514": "invalid",
   "22P02": "invalid",
   "22023": "invalid",
+  // Неверная дата («2026-02-30», не дата) — данные в обход формы.
+  "22007": "invalid",
+  "22008": "invalid",
   // Ссылка на уже удалённую строку (планировка, отделка) — гонка: «обновите страницу».
   "23503": "notFound",
   // Выход числа за предел колонки — данные в обход формы.

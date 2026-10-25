@@ -52,8 +52,13 @@ test.describe("кабинет · ЖК · видео, детали, докуме�
     await page.getByLabel("Ссылка на YouTube").last().fill("https://www.youtube.com/watch?v=aaaaaaaaaaa");
     await page.getByRole("button", { name: "Выше" }).last().click();
     await expect(page.getByLabel("Ссылка на YouTube").first()).toHaveValue(/aaaaaaaaaaa/);
+    // Правило 1.2: без отметки про канал и превью ролики не сохраняются.
+    await save(page);
+    await expect(page.locator(".form-status").filter({ hasText: "правилу 1.2" })).toBeVisible();
+    await page.getByRole("checkbox", { name: /Правило 1\.2/ }).check();
     await save(page);
     await saved(page);
+    await expect(page.getByRole("checkbox", { name: /Правило 1\.2/ })).not.toBeChecked();
   });
 
   test("«Детали»: половина текста и контакты застройщика — ошибки темы; темы без текста — «пусто»", async ({ page }) => {

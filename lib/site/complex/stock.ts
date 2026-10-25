@@ -60,7 +60,16 @@ export function stockRows(page: ComplexPage): StockRow[] {
   });
 }
 
+/**
+ * Свободно в блоке: без списка квартир число неизвестно (null), но блок без единого доступного
+ * типа — 0: продавать нечего, и общее «в продаже N» из-за него не пропадает.
+ */
+export function blockFree(block: ComplexPage["blocks"][number]): number | null {
+  if (block.free !== null) return block.free;
+  return block.offers.some((offer) => offer.available) ? null : 0;
+}
+
 /** «41 в продаже сейчас · Бл. A: 12 · Бл. B: 29»: свободно по блокам (null — без списка квартир). */
 export function freeByBlock(page: ComplexPage): { name: string; free: number | null }[] {
-  return page.blocks.map((block) => ({ name: block.name, free: block.free }));
+  return page.blocks.map((block) => ({ name: block.name, free: blockFree(block) }));
 }

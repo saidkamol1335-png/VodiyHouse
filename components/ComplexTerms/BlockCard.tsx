@@ -4,7 +4,8 @@ import { TermHint } from "@/components/TermHint";
 import { formatPercent, formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import type { BlockCard as BlockCardModel, ProgramLine } from "@/lib/site/complex/blocks";
-import { layoutsLink } from "@/lib/site/complex/layoutsLink";
+import { layoutsLinkProps } from "@/lib/site/complex/layoutsLink";
+import { blockFree } from "@/lib/site/complex/stock";
 
 type Translator = Awaited<ReturnType<typeof getTranslations<"complex">>>;
 
@@ -35,15 +36,15 @@ export function programText(t: Translator, line: ProgramLine, locale: Locale): s
 
 type BlockCardProps = {
   card: BlockCardModel;
-  /** У блока есть планировки на сайте — «Рассчитать платёж» ведёт к ним. */
-  calculable: boolean;
+  /** Самая дешёвая планировка блока с расчётом — «Рассчитать платёж» открывает её расчёт. */
+  calcLayoutId: string | null;
 };
 
 /**
  * Карточка блока (мокап .blk, ТЗ 7.3в): статус и готовность, срок с переносом и «Историей сроков»,
  * отделка с «?», кадастр, в продаже, способы покупки, «Что входит в цену», «Платёж от».
  */
-export async function BlockCard({ card, calculable }: BlockCardProps) {
+export async function BlockCard({ card, calcLayoutId }: BlockCardProps) {
   const t = await getTranslations("complex");
   const locale = (await getLocale()) as Locale;
   return (
@@ -64,7 +65,7 @@ export async function BlockCard({ card, calculable }: BlockCardProps) {
         </div>
       ) : null}
       <BlockIncludes card={card} t={t} locale={locale} />
-      <BlockFoot card={card} t={t} locale={locale} calculable={calculable} />
+      <BlockFoot card={card} t={t} locale={locale} calcLayoutId={calcLayoutId} />
     </article>
   );
 }
@@ -105,8 +106,9 @@ function cadastreText(t: Translator, cadastre: BlockCardModel["cadastre"]): stri
 }
 
 function inSaleText(t: Translator, block: BlockCardModel["block"]): string | null {
-  if (block.free !== null) return t("blocks.flats", { n: block.free });
-  return block.offers.some((offer) => offer.available) ? t("blocks.inStock") : null;
+  const free = blockFree(block);
+  if (free === 0) return t("blocks.noFree");
+  return free === null ? t("blocks.inStock") : t("blocks.flats", { n: free });
 }
 
 function BlockFacts({ card, t, locale }: PartProps) {
@@ -200,15 +202,15 @@ function BlockIncludes({ card, t, locale }: PartProps) {
   );
 }
 
-/** «Платёж от $603/мес» и «Рассчитать платёж» — к планировкам этого блока. */
-function BlockFoot({ card, t, locale, calculable }: PartProps & { calculable: boolean }) {
+/** «Платёж от $603/мес» и «Рассчитать платёж» — расчёт самой дешёвой планировки блока (мокап). */
+function BlockFoot({ card, t, locale, calcLayoutId }: PartProps & { calcLayoutId: string | null }) {
   const { block, payment } = card;
-  if (!payment && !calculable) return null;
+  if (!payment && !calcLayoutId) return null;
   return (
     <footer className="complex-block__foot">
       {payment ? <span className="complex-block__payment">{t("blocks.monthlyFrom", { price: formatPrice(payment, block.currency, locale) })}</span> : null}
-      {calculable ? (
-        <a className="complex-block__calc" href={layoutsLink({ blockId: block.id })}>
+      {calcLayoutId ? (
+        <a className="complex-block__calc" {...layoutsLinkProps({ plan: calcLayoutId })}>
           <Calculator size={16} strokeWidth={1.9} aria-hidden />
           {t("blocks.calculate")}
         </a>

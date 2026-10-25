@@ -2,7 +2,7 @@
 
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState, type SetStateAction } from "react";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { SelectField } from "@/components/SelectField";
@@ -22,10 +22,17 @@ type NearbyEditorProps = {
  */
 export function NearbyEditor({ initial, error }: NearbyEditorProps) {
   const t = useTranslations("admin.complexes.nearby");
-  const [rows, setRows] = useState<NearbyDraft[]>(() => [...initial]);
+  const [rows, setRowsState] = useState<NearbyDraft[]>(() => [...initial]);
+  const fieldset = useRef<HTMLFieldSetElement>(null);
+  // «Добавить» и «Убрать» не вызывают ввода — сообщаем форме сами: иначе «Уйти без сохранения?»
+  // промолчит, и убранное место останется на сайте.
+  const setRows = (next: SetStateAction<NearbyDraft[]>) => {
+    setRowsState(next);
+    fieldset.current?.dispatchEvent(new Event("input", { bubbles: true }));
+  };
   const update = (key: string, patch: Partial<NearbyDraft>) => setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   return (
-    <fieldset className="nearby-editor">
+    <fieldset ref={fieldset} className="nearby-editor">
       <legend className="nearby-editor__title">{t("title")}</legend>
       <p className="nearby-editor__lead">{t("lead")}</p>
       <input type="hidden" name="nearby" value={JSON.stringify(rows)} />

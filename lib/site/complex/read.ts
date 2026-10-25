@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { draftMode } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import { CATALOG_TAG, complexTag, developerTag, DEVELOPERS_TAG, DICTIONARIES_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
@@ -39,15 +40,25 @@ async function fetchPreviewPage(slug: string): Promise<ComplexPage | null> {
 
 export type ComplexPageResult = { kind: "page"; page: ComplexPage } | { kind: "missing" } | { kind: "unavailable" };
 
-/** missing — такого ЖК на сайте нет (404); unavailable — облака нет или база не ответила. */
+// Адрес ЖК — как у slug в базе: выдуманный адрес не зовёт базу и не ложится в кэш.
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * missing — такого ЖК на сайте нет (404); unavailable — облака нет (разработка без ключей).
+ * Ошибка базы — исключение: перерисовка в кэше не заменит страницу заглушкой с ответом 200,
+ * Next оставит прежнюю версию, а первый показ — error.tsx раздела.
+ */
 export async function readComplexPage(slug: string): Promise<ComplexPageResult> {
   if (!hasSupabaseEnv()) return { kind: "unavailable" };
+  if (!SLUG.test(slug)) return { kind: "missing" };
   try {
     const { isEnabled: preview } = await draftMode();
     const page = preview ? await fetchPreviewPage(slug) : await fetchComplexPage(slug);
     return page ? { kind: "page", page } : { kind: "missing" };
   } catch (error) {
+    // Служебные исключения Next (пререндер, редирект) — дальше без записи в лог.
+    unstable_rethrow(error);
     console.error("[novostroyki/zhk] страница ЖК недоступна", error);
-    return { kind: "unavailable" };
+    throw error;
   }
 }

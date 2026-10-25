@@ -4,10 +4,12 @@ import { CATALOG_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import type { FlatCalcRecord } from "@/lib/calc/flatScreen";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // «Расчёт для этой квартиры» на странице ЖК (шаг 2.7 → 3.5): site_layout_calc(планировка) ролью
 // посетителя, в кэше — свободные квартиры и цены сбрасывает CATALOG_TAG, программы и курс —
-// PROGRAMS_TAG. Страница статичная: расчёт приходит по нажатию «Рассчитать платёж».
+// PROGRAMS_TAG. Страница статичная: расчёт приходит по нажатию «Рассчитать платёж». В предпросмотре
+// (шаг 3.6) — сессией руководителя и мимо кэша: черновик база считает только ему.
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -22,11 +24,18 @@ async function fetchLayoutCalc(layoutId: string): Promise<FlatCalcRecord | null>
   return (data as FlatCalcRecord | null) ?? null;
 }
 
+async function fetchPreviewLayoutCalc(layoutId: string): Promise<FlatCalcRecord | null> {
+  const { data, error } = await (await createSupabaseServerClient()).rpc("site_layout_calc", { p_layout: layoutId });
+  if (error) throw new Error("site-layout-calc-preview-unavailable", { cause: error });
+  return (data as FlatCalcRecord | null) ?? null;
+}
+
 /** null — нет такой планировки на сайте, считать нечего, или база не ответила. */
-export async function readLayoutCalc(layoutId: string): Promise<FlatCalcRecord | null> {
+export async function readLayoutCalc(layoutId: string, preview = false): Promise<FlatCalcRecord | null> {
   if (!UUID.test(layoutId) || !hasSupabaseEnv()) return null;
   try {
-    return await fetchLayoutCalc(layoutId.toLowerCase());
+    const id = layoutId.toLowerCase();
+    return preview ? await fetchPreviewLayoutCalc(id) : await fetchLayoutCalc(id);
   } catch (error) {
     console.error("[novostroyki/zhk] расчёт планировки недоступен", error);
     return null;
