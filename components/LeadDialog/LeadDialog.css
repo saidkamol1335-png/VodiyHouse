@@ -20,7 +20,7 @@
 }
 
 [data-motion="full"] .lead-dialog::backdrop {
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(var(--scrim-blur));
 }
 
 .lead-dialog[open] {
@@ -84,6 +84,29 @@
 .lead-dialog__context svg {
   flex: none;
   color: var(--amber-2);
+}
+
+/* «Открываем форму…» и «Нет связи»: строка внизу экрана, пока окна нет. */
+.lead-dialog__notice {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: var(--z-popover);
+  max-width: calc(100vw - 32px);
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  box-shadow: var(--shadow-3);
+  transform: translateX(-50%);
+}
+
+.lead-dialog__notice--offline {
+  border-color: var(--amber-line);
 }
 
 @media (max-width: 767px) {

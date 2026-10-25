@@ -32,6 +32,9 @@ export type LeadIntent = {
 
 export type LeadContact = { name: string; phone: string; lang: SiteLang; trap: string };
 
+/** «Застройщикам» (3.11): компания обязательна, остальное — по желанию. */
+export type LeadPartner = NonNullable<LeadRequest["partner"]>;
+
 export type LeadSent = { number: number; repeat: boolean };
 
 const NETWORK: LeadSubmitResult = { status: "error", error: "network" };
@@ -44,11 +47,11 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
   const [sent, setSent] = useState<LeadSent | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const submit = (contact: LeadContact, view: ViewChoice | null) => {
-    const invalid = fieldErrorsOf(contact);
+  const submit = (contact: LeadContact, view: ViewChoice | null, partner?: LeadPartner) => {
+    const invalid = fieldErrorsOf({ ...contact, company: partner?.company }, Boolean(partner));
     setFields(invalid);
     setError(null);
-    const first = (["name", "phone"] as const).find((key) => invalid[key]);
+    const first = (["company", "name", "phone"] as const).find((key) => invalid[key]);
     if (first) {
       document.getElementById(`${id}-${first}`)?.focus();
       return;
@@ -63,6 +66,7 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
       pageUrl: `${window.location.pathname}${window.location.search}`,
       source: leadSource(),
       ...(view ? { view } : {}),
+      ...(partner ? { partner } : {}),
       ...(intent.filters ? { filters: intent.filters } : {}),
       ...(intent.calc ? { calc: intent.calc, calcRows: intent.calcRows } : {}),
       trap: contact.trap,

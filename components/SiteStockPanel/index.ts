@@ -1,1 +1,1 @@
-export { SiteStockPanel } from "./SiteStockPanel";
+export { SiteStockPanel, SiteStockView } from "./SiteStockPanel";

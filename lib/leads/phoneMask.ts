@@ -5,7 +5,10 @@ const COUNTRY = "998";
 
 export function maskPhone(raw: string): string {
   let digits = raw.replace(/\D/g, "");
-  if (digits.startsWith(COUNTRY)) digits = digits.slice(COUNTRY.length);
+  // Код страны — после «+» маски или у номера длиннее местного: «99 812 34 56» (оператор 99) —
+  // свои 9 цифр, а не «+998» и обрезок.
+  const withCountry = raw.trim().startsWith(`+${COUNTRY}`) || digits.length > 9;
+  if (withCountry && digits.startsWith(COUNTRY)) digits = digits.slice(COUNTRY.length);
   digits = digits.slice(0, 9);
   if (digits.length === 0) return raw.trim() === "" ? "" : "+998 ";
   const groups = [digits.slice(0, 2), digits.slice(2, 5), digits.slice(5, 7), digits.slice(7, 9)];

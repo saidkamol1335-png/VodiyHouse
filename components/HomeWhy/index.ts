@@ -1,0 +1,1 @@
+export { HomeWhy } from "./HomeWhy";

@@ -11,7 +11,8 @@ import { collectPageErrors } from "./helpers";
 const COMPLEX = "/ru/novostroyki/demo-shodlik";
 const shot = (page: Page, name: string) =>
   page.screenshot({ path: `test-results/screens/${test.info().project.name}/s37-${name}.png`, caret: "initial" });
-const phoneOf = (seed: number) => `9${String(10_000_000 + (seed % 89_999_999)).slice(0, 8)}`;
+/** Местный номер оператора 90 (не «98…»: маска не примет его за код страны). */
+const phoneOf = (seed: number) => `90${String(seed % 10_000_000).padStart(7, "0")}`;
 
 test.use({ extraHTTPHeaders: { "x-nf-client-connection-ip": `e2e-${crypto.randomUUID()}` } });
 
@@ -84,8 +85,8 @@ test.describe("сайт · заявки", () => {
 test("служебные адреса: /api/cron без секрета — 403, /api/telegram без бота — 503, с чужим секретом — 403", async ({ request }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop-1440", "без раскладки — один раз");
   expect((await request.post("/api/cron/leads")).status()).toBe(403);
-  expect((await request.post("/api/cron/leads", { headers: { authorization: "Bearer не-тот-секрет-1234567" } })).status()).toBe(403);
-  const telegram = await request.post("/api/telegram", { headers: { "x-telegram-bot-api-secret-token": "чужой" }, data: {} });
+  expect((await request.post("/api/cron/leads", { headers: { authorization: "Bearer wrong-secret-1234567" } })).status()).toBe(403);
+  const telegram = await request.post("/api/telegram", { headers: { "x-telegram-bot-api-secret-token": "wrong-secret" }, data: {} });
   expect([403, 503]).toContain(telegram.status());
 });
 

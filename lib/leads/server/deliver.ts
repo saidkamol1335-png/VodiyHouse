@@ -40,22 +40,24 @@ async function deliverRecord(admin: SupabaseClient, lead: LeadRecord): Promise<v
   );
 }
 
-/** Сразу после заявки или «Повторить» в кабинете. */
+/** Сразу после заявки или «Повторить» в кабинете. База отдаёт только каналы, которые этот вызов
+ *  забрал (аренда 2 минуты): cron и второе нажатие ту же заявку в это время не отправят. */
 export async function deliverLead(admin: SupabaseClient, leadId: string): Promise<void> {
   const { data, error } = await admin.rpc("lead_for_delivery", { p_lead: leadId });
-  if (error || !data) {
-    console.error("[leads] заявка для доставки не прочиталась", error?.message);
+  if (error) {
+    console.error("[leads] заявка для доставки не прочиталась", error.message);
     return;
   }
-  await deliverRecord(admin, data as LeadRecord);
+  if (data) await deliverRecord(admin, data as LeadRecord);
 }
 
-/** Очередь повторов (cron): заявки, которым пора, — по одной, чтобы не упереться в лимиты Telegram. */
-export async function deliverDue(admin: SupabaseClient, limit = 20): Promise<number> {
+/** Очередь повторов (cron): немного заявок за запуск и все сразу — прогон укладывается в лимит
+ *  функции даже при тайм-аутах каналов, а чат менеджеров не упирается в лимит Telegram на группу. */
+export async function deliverDue(admin: SupabaseClient, limit = 6): Promise<number> {
   const { data, error } = await admin.rpc("lead_deliveries_due", { p_limit: limit });
   if (error) throw new Error("lead-queue-unavailable", { cause: error });
   const due = (data ?? []) as LeadRecord[];
-  for (const lead of due) await deliverRecord(admin, lead);
+  await Promise.all(due.map((lead) => deliverRecord(admin, lead)));
   return due.length;
 }
 

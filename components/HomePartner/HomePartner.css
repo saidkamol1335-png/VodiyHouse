@@ -1,0 +1,67 @@
+/* «Вы застройщик?» (мокап .ptband): полоса с янтарным свечением справа и кнопкой. */
+.home-partner {
+  padding: 0 0 96px;
+}
+
+.home-partner__band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 34px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2xl);
+  background: radial-gradient(600px 240px at 100% 50%, var(--amber-soft), transparent 70%), var(--card-bg);
+}
+
+.home-partner__title {
+  margin: 12px 0 0;
+  font-size: var(--fs-home-band);
+  font-weight: 600;
+  letter-spacing: -0.038em;
+  line-height: 1.08;
+}
+
+.home-partner__text {
+  margin: 8px 0 0;
+  color: var(--fg-2);
+}
+
+.home-partner__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 0 26px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-pill);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-partner__cta:hover {
+  border-color: var(--amber-line);
+}
+
+.home-partner__cta:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .home-partner {
+    padding-bottom: 64px;
+  }
+
+  .home-partner__band {
+    padding: 22px;
+  }
+
+  .home-partner__cta {
+    width: 100%;
+    justify-content: center;
+  }
+}

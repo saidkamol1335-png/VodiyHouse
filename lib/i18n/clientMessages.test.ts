@@ -12,7 +12,10 @@ import {
   CATALOG_MESSAGES,
   CALC_NAMESPACE,
   COMPLEX_MESSAGES,
+  ABOUT_MESSAGES,
+  FAVORITES_MESSAGES,
   LAZY_SITE_MESSAGES,
+  PARTNERS_MESSAGES,
   pickMessages,
   SITE_SHELL_MESSAGES,
   siteMessages,
@@ -56,9 +59,14 @@ describe("сообщения для браузера", () => {
     // своим провайдером каталога получает и его тексты.
     const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
     // Страница ЖК: провайдер с COMPLEX_MESSAGES ставит page.tsx — его получают и разделы рядом.
+    // Главная: каталог внизу — со своим провайдером (HomeCatalog), остальные разделы — серверные.
     const allowedFor = (file: string): readonly string[] =>
       isComplexRoute(file) ? COMPLEX_MESSAGES
       : readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES
+      : readSource(file).includes("pickMessages(messages, FAVORITES_MESSAGES)") ? FAVORITES_MESSAGES
+      : readSource(file).includes("<HomeCatalog") ? CATALOG_MESSAGES
+      : readSource(file).includes("pickMessages(messages, PARTNERS_MESSAGES)") ? PARTNERS_MESSAGES
+      : readSource(file).includes("pickMessages(messages, ABOUT_MESSAGES)") ? ABOUT_MESSAGES
       : SITE_SHELL_MESSAGES;
     // Тексты окна заявки приходят с самим окном (LAZY_SITE_MESSAGES) — их провайдер ставит LeadProvider.
     const missing = pages.flatMap((file) =>

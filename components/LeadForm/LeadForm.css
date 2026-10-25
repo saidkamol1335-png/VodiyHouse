@@ -7,6 +7,15 @@
   gap: 14px;
 }
 
+/* Комментарий застройщика (3.11): то же поле, что .field__input, высотой по строкам. */
+.lead-form__textarea {
+  height: auto;
+  min-height: 96px;
+  padding: 12px 15px;
+  line-height: var(--lh-body);
+  resize: vertical;
+}
+
 .lead-form__two {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -55,7 +64,7 @@
 .lead-form__chip-text {
   display: inline-flex;
   align-items: center;
-  height: 36px;
+  height: var(--control-sm);
   padding: 0 15px;
   border: 1px solid var(--chip-border);
   border-radius: var(--r-pill);

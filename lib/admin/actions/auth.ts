@@ -10,6 +10,7 @@ import type { PasswordState, SignInState } from "@/lib/admin/auth/types";
 import type { PasswordErrorCode } from "@/lib/admin/authErrors";
 import { parsePasswordChange, parseSignIn } from "@/lib/admin/credentials";
 import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
+import { RETURN_COOKIE, safeReturnPath } from "@/lib/admin/returnPath";
 import { passwordDeps, signInDeps } from "@/lib/admin/server/deps";
 import { requireActionViewer, type ActionGuardCode } from "@/lib/admin/session";
 import { hasSupabaseAdminEnv, hasSupabaseEnv } from "@/lib/supabase/env";
@@ -29,7 +30,15 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
   const outcome = await signIn(signInDeps(supabase), parsed.value);
   if (outcome.kind === "error") return { email, error: outcome.code, fieldErrors: {} };
   // Вне try: redirect() бросает NEXT_REDIRECT. replace — «Назад» не вернёт на форму входа.
-  redirect(outcome.to, RedirectType.replace);
+  redirect(await afterSignIn(outcome.to), RedirectType.replace);
+}
+
+/** Пришли по ссылке кабинета (заявка из чата) — туда; смена пароля важнее (адрес — до неё). */
+async function afterSignIn(to: string): Promise<string> {
+  const store = await cookies();
+  const back = safeReturnPath(store.get(RETURN_COOKIE)?.value);
+  if (store.has(RETURN_COOKIE)) store.delete({ name: RETURN_COOKIE, path: ADMIN_ROUTES.home });
+  return back && to !== ADMIN_ROUTES.password ? back : to;
 }
 
 const GUARD_TO_PASSWORD_ERROR = {

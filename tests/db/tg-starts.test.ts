@@ -58,14 +58,23 @@ describe.skipIf(isRemoteTarget)("коды «Написать в Telegram»", () 
     await expectHint(create({}, key), "vh:rate_limited");
   });
 
-  it("очистка: не открытые — через 2 дня, открытые — через 30", async () => {
+  it("очистка: не открытые — через 7 дней (столько их принимает /start), открытые — через 30", async () => {
     const fresh = await create({});
+    const late = await create({});
     const unopened = await create({});
     const opened = await create({});
     await call("select bind_tg_start($1, 404) as v", [opened]);
-    await db.admin.query("update tg_starts set created_at = now() - interval '3 days' where code = any($1)", [[unopened, opened]]);
+    await db.admin.query("update tg_starts set created_at = now() - interval '3 days' where code = $1", [late]);
+    await db.admin.query("update tg_starts set created_at = now() - interval '8 days' where code = any($1)", [[unopened, opened]]);
     await call("select cleanup_tg_starts() as v");
-    const left = (await db.admin.query<{ code: string }>("select code from tg_starts where code = any($1)", [[fresh, unopened, opened]])).rows;
-    expect(left.map((row) => row.code).sort()).toEqual([fresh, opened].sort());
+    const left = (await db.admin.query<{ code: string }>("select code from tg_starts where code = any($1)", [[fresh, late, unopened, opened]])).rows;
+    expect(left.map((row) => row.code).sort()).toEqual([fresh, late, opened].sort());
+    expect(await call("select bind_tg_start($1, 405) as v", [late])).not.toBeNull();
+  });
+
+  it("обновление Telegram — один раз: повтор вебхука не обрабатывается", async () => {
+    expect(await call("select take_tg_update(777001) as v")).toBe(true);
+    expect(await call("select take_tg_update(777001) as v")).toBe(false);
+    await expectDenied(db.as(anon, (tx) => tx.query("select take_tg_update(777002)")));
   });
 });

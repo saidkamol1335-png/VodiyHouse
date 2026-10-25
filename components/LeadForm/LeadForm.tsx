@@ -78,7 +78,7 @@ export function LeadForm({ id, intent, variant = "dialog", afterDone }: LeadForm
 }
 
 /** Фраза согласия под кнопкой (ТЗ 10.2) со ссылкой на /privacy; галочка — если скажет юрист. */
-function LeadConsent() {
+export function LeadConsent() {
   const t = useTranslations("lead");
   return (
     <p className="lead-form__consent">

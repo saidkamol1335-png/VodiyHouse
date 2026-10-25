@@ -25,7 +25,8 @@ export default function DevLayout({ children }: LayoutProps<"/dev">) {
   // Окно заявки — как на сайте (шаг 3.7): кнопки заявок стендов отправляют настоящую заявку.
   return (
     <RootDocument lang={ADMIN_LOCALE}>
-      <LeadProvider>{children}</LeadProvider>
+      {/* Стенды считают запросы своих действий: окно заявки — по нажатию, без предзагрузки. */}
+      <LeadProvider preload={false}>{children}</LeadProvider>
     </RootDocument>
   );
 }

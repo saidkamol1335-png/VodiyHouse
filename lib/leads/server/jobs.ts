@@ -8,14 +8,14 @@ import { alertUndelivered, deliverDue } from "./deliver";
 export type CronJob = () => Promise<Record<string, number>>;
 
 export const CRON_JOBS: Record<string, CronJob> = {
-  // Повтор доставки заявок и тревога «не дошла за 10 минут» (ТЗ 10.4).
+  // Тревога «не дошла за 10 минут» (ТЗ 10.4) — первой: долгая очередь повторов её не задержит.
   leads: async () => {
     const admin = createSupabaseAdminClient();
-    const delivered = await deliverDue(admin);
     const alerted = await alertUndelivered(admin);
+    const delivered = await deliverDue(admin);
     return { delivered, alerted };
   },
-  // Коды «Написать в Telegram» (Ф8): неоткрытые — через 2 дня, остальные — через 30.
+  // Коды «Написать в Telegram» (Ф8): неоткрытые — через 7 дней, остальные — через 30.
   "tg-starts": async () => {
     const { data, error } = await createSupabaseAdminClient().rpc("cleanup_tg_starts");
     if (error) throw new Error("tg-starts-cleanup-failed", { cause: error });

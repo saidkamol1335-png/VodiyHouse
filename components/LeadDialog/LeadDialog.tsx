@@ -2,7 +2,7 @@
 
 import { Tag, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { type MouseEvent, type PointerEvent, useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { LeadForm, type LeadIntent } from "@/components/LeadForm";
 import { useSiteContacts } from "@/components/SiteContacts";
@@ -19,6 +19,31 @@ function useLeadTitle(intent: LeadIntent): string {
   return t(intent.type);
 }
 
+/** Точка за краем окна: target === dialog бывает и у его отступов. */
+function outsideBox(event: PointerEvent<HTMLDialogElement> | MouseEvent<HTMLDialogElement>): boolean {
+  const dialog = event.currentTarget;
+  if (event.target !== dialog) return false;
+  const box = dialog.getBoundingClientRect();
+  return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
+}
+
+/**
+ * Нажатие по фону — закрыть, как .mdl-wrap мокапа: и нажатие, и отпускание — за краем окна.
+ * Выделение текста в поле, отпущенное над фоном, окно не закрывает и введённое не теряет.
+ */
+function useBackdropClose() {
+  const pressedOutside = useRef(false);
+  return {
+    onPointerDown: (event: PointerEvent<HTMLDialogElement>) => {
+      pressedOutside.current = outsideBox(event);
+    },
+    onClick: (event: MouseEvent<HTMLDialogElement>) => {
+      if (pressedOutside.current && outsideBox(event)) event.currentTarget.close();
+      pressedOutside.current = false;
+    },
+  };
+}
+
 /**
  * Окно заявки мокапа (`.mdl`): на 1440 — по центру, на телефоне — шторка снизу. Открывается сразу
  * (провайдер монтирует его по нажатию); Esc, «×» и фон закрывают.
@@ -27,6 +52,7 @@ export function LeadDialog({ intent, onClose }: LeadDialogProps) {
   const t = useTranslations("lead");
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useLeadTitle(intent);
+  const backdrop = useBackdropClose();
   useEffect(() => {
     dialog.current?.showModal();
   }, []);
@@ -36,10 +62,8 @@ export function LeadDialog({ intent, onClose }: LeadDialogProps) {
       className="lead-dialog"
       aria-labelledby="lead-dialog-title"
       onClose={onClose}
-      onClick={(event) => {
-        // Нажатие по фону (сам dialog, а не содержимое) — закрыть, как .mdl-wrap мокапа.
-        if (event.target === dialog.current) dialog.current.close();
-      }}
+      onPointerDown={backdrop.onPointerDown}
+      onClick={backdrop.onClick}
     >
       <div className="lead-dialog__head">
         <h2 id="lead-dialog-title" className="lead-dialog__title">

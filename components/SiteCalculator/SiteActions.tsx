@@ -23,6 +23,17 @@ type SiteActionsProps = {
   lead: LeadObject | null;
 };
 
+/**
+ * О чём заявка — по рассчитанной стоимости, а не по адресу (как ссылка «Поделиться»): квартира
+ * расчёта или планировка режима «по планировке», в том числе выбранная по умолчанию; ЖК база
+ * найдёт по ней.
+ */
+function leadObject(lead: LeadObject, { price }: CalcSnapshot<CalcProgram>["view"]): LeadObject {
+  if (price.mode === "unit" && price.unitId) return { ...lead, unit: price.unitId };
+  if (price.mode === "layout" && price.layoutId) return { ...lead, layout: price.layoutId };
+  return lead;
+}
+
 /** Что попадёт в заявку: программа, стоимость, взнос, срок, платёж — строками итога. */
 function leadRows(snapshot: CalcSnapshot<CalcProgram>): CalcLeadRow[] {
   const { view, total, context } = snapshot;
@@ -54,7 +65,7 @@ function leadCalc({ view, params, context }: CalcSnapshot<CalcProgram>): LeadCal
  * Telegram» — у /kalkulyator и у расчёта квартиры.
  */
 export function SiteActions({ snapshot, source, lead }: SiteActionsProps) {
-  const { view, total, context, params } = snapshot;
+  const { view, total, context } = snapshot;
   const leadContext = total.head ? `${total.eyebrow} · ${total.head.value}` : total.eyebrow;
   return (
     <>
@@ -62,7 +73,7 @@ export function SiteActions({ snapshot, source, lead }: SiteActionsProps) {
         <CalcLead
           context={leadContext}
           rows={leadRows(snapshot)}
-          object={params.unit ? { ...lead, unit: params.unit } : lead}
+          object={leadObject(lead, view)}
           calc={leadCalc(snapshot)}
         />
       ) : null}

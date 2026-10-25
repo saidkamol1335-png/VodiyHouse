@@ -1,0 +1,1 @@
+export { PartnersFormats } from "./PartnersFormats";

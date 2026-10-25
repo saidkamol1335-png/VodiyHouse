@@ -88,7 +88,7 @@ test.describe("сайт · калькулятор", () => {
     await dialog.getByRole("button", { name: "Отправить" }).click();
     await expect(dialog.getByText("Номер в формате +998 XX XXX XX XX")).toBeVisible();
     await expect(dialog.getByLabel("Телефон")).toBeFocused();
-    await dialog.getByLabel("Телефон").fill(`9${String(Date.now()).slice(-8)}`);
+    await dialog.getByLabel("Телефон").fill(`90${String(Date.now()).slice(-7)}`);
     await dialog.getByRole("button", { name: "Отправить" }).click();
     // С базой — «Заявка отправлена»; без неё сервер заявок не принимает и честно говорит об этом.
     await expect(dialog.getByText(hasCloud ? "Заявка отправлена" : "Заявки сейчас не принимаются", { exact: false })).toBeVisible({

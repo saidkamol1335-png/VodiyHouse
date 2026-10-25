@@ -117,6 +117,30 @@ describe.skipIf(isRemoteTarget)("заявки: создание", () => {
     expect((await submit(db, { phone, complex: complex.slug })).repeat_of).toBeNull();
   });
 
+  it("без ЖК повтор — только та же форма: подбор и расчёт по застройщику — разные запросы", async () => {
+    const phone = nextPhone();
+    const pick = await submit(db, { phone, type: "pick" }, "{}");
+    expect((await submit(db, { phone, type: "calc" }, "{}")).repeat_of).toBeNull();
+    expect((await submit(db, { phone, type: "pick" }, "{}")).repeat_of).toBe(pick.number);
+    const developers = (await db.admin.query<{ slug: string }>("select slug from developers where status = 'published' order by slug limit 2")).rows;
+    const other = nextPhone();
+    await submit(db, { phone: other, type: "calc", developer: developers[0]!.slug }, "{}");
+    expect((await submit(db, { phone: other, type: "calc", developer: developers[1]!.slug }, "{}")).repeat_of).toBeNull();
+  });
+
+  it("расчёт «по планировке» без адреса ЖК: ЖК — по планировке того же застройщика", async () => {
+    const developer = await scalar<string>(
+      db,
+      "select d.slug as v from developers d join complexes c on c.developer_id = d.id where c.id = $1",
+      [complex.id],
+    );
+    const lead = await submit(db, { type: "calc", phone: nextPhone(), developer, layout: layout.id }, "{}");
+    const row = (await db.admin.query("select complex_id, layout_id from leads where id = $1", [lead.id])).rows[0];
+    expect(row).toEqual({ complex_id: complex.id, layout_id: layout.id });
+    const stranger = await submit(db, { type: "calc", phone: nextPhone(), developer: "no-such-developer", layout: layout.id }, "{}");
+    expect(await scalar(db, "select complex_id as v from leads where id = $1", [stranger.id])).toBeNull();
+  });
+
   it("лимит частоты: 3 с номера и 5 с адреса за 10 минут", async () => {
     const phone = nextPhone();
     for (let i = 0; i < 3; i++) await submit(db, { phone });
@@ -196,6 +220,9 @@ describe.skipIf(isRemoteTarget)("заявки: доставка и тревог�
   const due = () =>
     db.as(service, async (tx) => (await tx.query<{ v: { id: string; channels: string[] }[] }>("select lead_deliveries_due(50) as v")).rows[0]!.v);
 
+  const forDelivery = (id: string) =>
+    db.as(service, async (tx) => (await tx.query<{ v: { channels: string[] } | null }>("select lead_for_delivery($1) as v", [id])).rows[0]!.v);
+
   it("ждущие каналы — в очереди; отправленный уходит; неудача — повтор позже; 10-я — «не доставлено»", async () => {
     const lead = await submit(db, { phone: nextPhone() });
     expect((await due()).find((item) => item.id === lead.id)?.channels).toEqual(["telegram", "sheet"]);
@@ -213,6 +240,38 @@ describe.skipIf(isRemoteTarget)("заявки: доставка и тревог�
     expect(await scalar(db, "select state::text as v from lead_deliveries where lead_id = $1 and channel = 'sheet'", [lead.id])).toBe(
       "failed",
     );
+  });
+
+  it("очередь забирает каналы: сервер отправил сразу — cron и второй вызов ту же заявку не шлют", async () => {
+    const lead = await submit(db, { phone: nextPhone() });
+    expect((await forDelivery(lead.id))?.channels).toEqual(["telegram", "sheet"]);
+    expect(await forDelivery(lead.id)).toBeNull();
+    expect((await due()).some((item) => item.id === lead.id)).toBe(false);
+    // Итог не записался (сервер упал) — после аренды заявку подхватит cron.
+    await db.admin.query("update lead_deliveries set claimed_until = now() - interval '1 second' where lead_id = $1", [lead.id]);
+    expect((await due()).find((item) => item.id === lead.id)?.channels).toEqual(["telegram", "sheet"]);
+  });
+
+  it("«Повторить» во время отправки не снимает аренду: заявка не уходит второй раз", async () => {
+    const lead = await submit(db, { phone: nextPhone() });
+    for (let i = 0; i < 3; i++) await record(lead.id, "telegram", false);
+    await db.admin.query("update lead_deliveries set next_at = now() - interval '1 second' where lead_id = $1", [lead.id]);
+    expect((await due()).find((item) => item.id === lead.id)?.channels).toEqual(["telegram", "sheet"]);
+    const manager = await createStaff(db.admin, "manager");
+    await db.as(user(manager), (tx) => tx.query("select retry_lead_delivery($1, 'telegram')", [lead.id]));
+    expect(await forDelivery(lead.id)).toBeNull();
+    await record(lead.id, "telegram", true);
+    expect(await scalar(db, "select claimed_until as v from lead_deliveries where lead_id = $1 and channel = 'telegram'", [lead.id])).toBeNull();
+  });
+
+  it("«Повторить» по каналу шлёт только его: у другого канала пауза повтора не нарушается", async () => {
+    const lead = await submit(db, { phone: nextPhone() });
+    await forDelivery(lead.id);
+    await record(lead.id, "telegram", false);
+    for (let i = 0; i < 10; i++) await record(lead.id, "sheet", false);
+    const manager = await createStaff(db.admin, "manager");
+    await db.as(user(manager), (tx) => tx.query("select retry_lead_delivery($1, 'sheet')", [lead.id]));
+    expect((await forDelivery(lead.id))?.channels).toEqual(["sheet"]);
   });
 
   it("не дошла ни в один канал за 10 минут — тревога один раз; без каналов тревоги нет", async () => {
@@ -282,8 +341,9 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
     );
     expect(visible.rows[0]!.n).toBe(0);
     const all = await screen(manager);
-    expect(all.total).toBe(2);
-    expect(all.counts.new).toBe(2);
+    const total = await scalar<number>(db, "select count(*)::int as v from leads");
+    expect(all.total).toBe(total);
+    expect(all.counts.new).toBe(await scalar<number>(db, "select count(*)::int as v from leads where status = 'new'"));
     expect((await screen(head, null, "тим")).rows.map((row) => row.number)).toEqual([a.number]);
     expect((await screen(head, null, "1122")).rows.map((row) => row.number)).toEqual([a.number]);
     expect((await screen(head, null, `#${a.number}`)).rows.map((row) => row.number)).toEqual([a.number]);
@@ -342,8 +402,11 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
     const total = await scalar<number>(db, "select count(*)::int as v from leads");
     expect(home.today).toBe(total);
     expect(home.latest).toHaveLength(Math.min(total, 6));
-    expect(home.work).toBeGreaterThanOrEqual(1);
-    expect(home.meetings).toBe(1);
+    // Сверка с самой таблицей: тест не зависит от того, какие заявки создали соседи по describe.
+    const count = (status: string) => scalar<number>(db, "select count(*)::int as v from leads where status = $1", [status]);
+    expect(home.new).toBe(await count("new"));
+    expect(home.work).toBe(await count("work"));
+    expect(home.meetings).toBe(await count("meeting"));
     await expectHint(db.as(user(videographer), (tx) => tx.query("select leads_home()")), "vh:forbidden");
   });
 });

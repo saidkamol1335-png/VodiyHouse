@@ -1,0 +1,1 @@
+export { HomePartner } from "./HomePartner";

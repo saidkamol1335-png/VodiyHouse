@@ -140,7 +140,7 @@ test.describe("оболочка кабинета /admin", () => {
   // Без ключей кабинет открыт без входа; с ключами — сохранённая сессия руководителя (auth.setup.ts).
   test.use({ storageState: cabinetState("head") });
 
-  test("меню руководителя: Главная, ЖК, Застройщики, Программы оплаты, Настройки и Сайт; Главная активна", async ({
+  test("меню руководителя: Главная, Заявки, ЖК, Застройщики, Программы оплаты, Настройки и Сайт; Главная активна", async ({
     page,
   }, testInfo) => {
     const errors = collectPageErrors(page);
@@ -150,6 +150,7 @@ test.describe("оболочка кабинета /admin", () => {
     const links = nav.getByRole("link");
     await expect(links).toHaveText([
       "Главная",
+      "Заявки",
       "ЖК",
       "Застройщики",
       "Программы оплаты",
@@ -157,12 +158,13 @@ test.describe("оболочка кабинета /admin", () => {
       /сайт/i,
     ]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
-    await expect(links.nth(1)).toHaveAttribute("href", "/admin/zhk");
-    await expect(links.nth(2)).toHaveAttribute("href", "/admin/zastroyshchiki");
-    await expect(links.nth(3)).toHaveAttribute("href", "/admin/programmy");
-    await expect(links.nth(4)).toHaveAttribute("href", "/admin/nastroyki");
+    await expect(links.nth(1)).toHaveAttribute("href", "/admin/zayavki");
+    await expect(links.nth(2)).toHaveAttribute("href", "/admin/zhk");
+    await expect(links.nth(3)).toHaveAttribute("href", "/admin/zastroyshchiki");
+    await expect(links.nth(4)).toHaveAttribute("href", "/admin/programmy");
+    await expect(links.nth(5)).toHaveAttribute("href", "/admin/nastroyki");
     await expect(links.last()).toHaveAttribute("href", "/");
-    for (const hidden of ["Заявки", "Статистика"]) {
+    for (const hidden of ["Видео", "Статистика"]) {
       await expect(nav.getByRole("link", { name: hidden })).toHaveCount(0);
     }
     await expect(

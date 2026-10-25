@@ -68,8 +68,19 @@ export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessag
 
 /** Каталог (шаг 3.4): свой провайдер заменяет набор целиком — тексты оболочки внутри тоже нужны. */
 export const CATALOG_NAMESPACE = "catalog";
-export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
+/** Избранное и «Поделиться» (шаг 3.10): сердце и окно ссылки — на карточках и странице ЖК. */
+export const SHARE_NAMESPACE = "share";
+export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, SHARE_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
+/** «Застройщикам» (шаг 3.11): форма застройщика — тексты окна заявки (lead) в HTML страницы. */
+export const PARTNERS_MESSAGES = [LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
+/** «О нас», «Как купить» (шаг 3.11): кнопка заявки («Записаться на встречу», «Перезвоните мне»). */
+export const ABOUT_MESSAGES = [LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
+
+/** /izbrannoe и /podborka (шаг 3.10): тексты избранного и карточки каталога. */
+export const FAVORITES_MESSAGES = ["favorites", ...CATALOG_MESSAGES] as const;
 
 /** Страница ЖК (шаг 3.5): свои тексты, калькулятор «Расчёт для этой квартиры» и оболочка. */
 export const COMPLEX_NAMESPACE = "complex";
-export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, LEAD_NAMESPACE, SHARE_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

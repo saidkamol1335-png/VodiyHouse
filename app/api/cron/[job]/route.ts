@@ -1,5 +1,5 @@
-import { timingSafeEqual } from "node:crypto";
 import { CRON_JOBS } from "@/lib/leads/server/jobs";
+import { sameSecret } from "@/lib/leads/server/secret";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 
 // Расписание (решение фазы 3): один защищённый адрес /api/cron/<работа>, его дёргает Netlify
@@ -11,8 +11,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 function authorized(request: Request): boolean {
   const secret = process.env.CRON_SECRET ?? "";
   const given = request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
-  if (secret.length < 16 || given.length !== secret.length) return false;
-  return timingSafeEqual(Buffer.from(given), Buffer.from(secret));
+  return secret.length >= 16 && sameSecret(given, secret);
 }
 
 export async function POST(request: Request, { params }: RouteContext<"/api/cron/[job]">) {

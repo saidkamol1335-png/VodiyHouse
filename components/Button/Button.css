@@ -82,6 +82,13 @@
   font-size: var(--fs-small-l);
 }
 
+/* На касание — цель не меньше 44 px (приёмка «телефон»), вид кнопки тот же. */
+@media (pointer: coarse) {
+  .button--sm {
+    height: var(--touch-target);
+  }
+}
+
 .button--block {
   width: 100%;
 }

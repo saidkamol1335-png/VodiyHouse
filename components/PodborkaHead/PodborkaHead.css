@@ -1,0 +1,24 @@
+/* Шапка подборки для получателя: заголовок, пояснение, кнопка заявки. */
+.podborka-head {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.podborka-head__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-h2);
+  font-weight: 650;
+  letter-spacing: var(--ls-h2);
+  line-height: var(--lh-heading);
+}
+
+.podborka-head__lead {
+  max-width: 640px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+}

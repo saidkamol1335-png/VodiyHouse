@@ -1,0 +1,123 @@
+/* «Ждём вас в офисе» (мокап .office): карточка «На карте» — строка «Проверьте, удобно ли…» с
+   «Проложить маршрут» и карта-заглушка с меткой офиса (без скриптов карт на странице). */
+
+.about-office {
+  padding: 72px 0 24px;
+}
+
+.about-office__title {
+  margin-top: 14px;
+}
+
+.about-office__lead {
+  max-width: 520px;
+  margin: 14px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.about-office__card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.about-office__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.about-office__bar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-office__bar svg {
+  color: var(--amber-2);
+}
+
+.about-office__map {
+  position: relative;
+  display: block;
+  height: 360px;
+  overflow: hidden;
+  border-radius: var(--r-l);
+  background:
+    repeating-linear-gradient(28deg, transparent 0 46px, var(--map-road) 46px 52px),
+    repeating-linear-gradient(-62deg, transparent 0 70px, var(--map-road) 70px 78px), var(--map-bg);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.about-office__map:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.about-office__pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translate(-20px, -50%);
+}
+
+.about-office__drop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.about-office__pin-label {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
+  border-radius: var(--r-s);
+  background: var(--bg-2);
+  box-shadow: var(--card-shadow);
+  font-size: var(--fs-small);
+}
+
+.about-office__pin-label small {
+  color: var(--fg-3);
+}
+
+.about-office__open {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .about-office__map {
+    height: 280px;
+  }
+}

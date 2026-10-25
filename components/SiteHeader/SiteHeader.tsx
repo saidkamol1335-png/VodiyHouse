@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, Heart, Menu, Phone, X } from "lucide-react";
+import { useFavorites } from "@/lib/site/favorites";
 import { useTranslations } from "next-intl";
 import type { Ref } from "react";
 import { HeaderNav } from "@/components/HeaderNav";
@@ -92,14 +93,24 @@ type HeaderToolsProps = {
 
 function HeaderTools({ menuOpen, onToggleMenu, ref }: HeaderToolsProps) {
   const t = useTranslations("header");
+  const favorites = useFavorites().length;
   return (
     <div className="site-header__tools">
       <div className="site-header__wide-only">
         <LanguageSwitch />
         <ThemeToggle />
       </div>
-      <IconButton className="site-header__icon" label={t("favorites")} href={ROUTES.favorites}>
+      <IconButton
+        className="site-header__icon"
+        label={favorites > 0 ? t("favoritesCount", { count: favorites }) : t("favorites")}
+        href={ROUTES.favorites}
+      >
         <Heart {...ICON} aria-hidden />
+        {favorites > 0 ? (
+          <span className="site-header__count" aria-hidden="true">
+            {favorites}
+          </span>
+        ) : null}
       </IconButton>
       <HeaderPhone />
       <IconButton

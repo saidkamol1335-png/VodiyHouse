@@ -1,0 +1,1 @@
+export { HomeManifesto } from "./HomeManifesto";

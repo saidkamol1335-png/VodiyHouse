@@ -1,20 +1,40 @@
 /* Публичный сайт: блоки, которых нет в кабинете. Подключает app/[locale]/layout.tsx
    (и global-not-found.tsx). Общее с кабинетом — в globals.css, он грузится раньше. */
 
+@import "../components/AboutCta/AboutCta.css";
+@import "../components/AboutHero/AboutHero.css";
+@import "../components/AboutOffice/AboutOffice.css";
 @import "../components/CatalogCard/CatalogCard.css";
 @import "../components/CatalogFilter/CatalogFilter.css";
 @import "../components/CatalogGrid/CatalogGrid.css";
 @import "../components/CatalogResults/CatalogResults.css";
 @import "../components/Container/Container.css";
 @import "../components/Eyebrow/Eyebrow.css";
+@import "../components/FavoritesView/FavoritesView.css";
+@import "../components/FavoriteButton/FavoriteButton.css";
 @import "../components/HeaderNav/HeaderNav.css";
+@import "../components/HomeCatalog/HomeCatalog.css";
+@import "../components/HomeHero/HomeHero.css";
+@import "../components/HomeManifesto/HomeManifesto.css";
+@import "../components/HomeMarquee/HomeMarquee.css";
+@import "../components/HomePartner/HomePartner.css";
+@import "../components/HomeWhy/HomeWhy.css";
 @import "../components/LeadDialog/LeadDialog.css";
 @import "../components/LeadForm/LeadForm.css";
 @import "../components/Heading/Heading.css";
+@import "../components/PartnersFormats/PartnersFormats.css";
+@import "../components/PartnersHero/PartnersHero.css";
+@import "../components/PartnersRequest/PartnersRequest.css";
 @import "../components/PhoneButton/PhoneButton.css";
+@import "../components/PodborkaHead/PodborkaHead.css";
 @import "../components/PhoneMenu/PhoneMenu.css";
 @import "../components/RollText/RollText.css";
 @import "../components/SiteHeader/SiteHeader.css";
 @import "../components/SitePhoto/SitePhoto.css";
+@import "../components/ShareButton/ShareButton.css";
 @import "../components/SiteFooter/SiteFooter.css";
+@import "../components/Spotlight/Spotlight.css";
+@import "../components/SiteStats/SiteStats.css";
+@import "../components/SiteSteps/SiteSteps.css";
+@import "../components/TextPage/TextPage.css";
 @import "../components/TabletMenu/TabletMenu.css";

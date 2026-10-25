@@ -29,7 +29,7 @@
 const COLUMNS = [
   ["number", "№"], ["created_at", "Дата и время (Ташкент)"], ["type", "Тип"], ["name", "Имя"],
   ["phone", "Телефон"], ["contact_lang", "Язык общения"], ["site_lang", "Язык сайта"],
-  ["subject", "ЖК / блок / планировка"], ["details", "Подробности"], ["page", "Страница"],
+  ["subject", "ЖК / блок / планировка"], ["developer", "Застройщик"], ["details", "Подробности"], ["page", "Страница"],
   ["utm_source", "utm_source"], ["utm_medium", "utm_medium"], ["utm_campaign", "utm_campaign"],
   ["utm_content", "utm_content"], ["utm_term", "utm_term"], ["fbclid", "fbclid"], ["gclid", "gclid"],
   ["referrer", "Откуда пришли"], ["repeat_of", "Повтор заявки №"], ["cabinet", "В кабинете"],
@@ -45,11 +45,15 @@ function doPost(e) {
   }
   const secret = PropertiesService.getScriptProperties().getProperty("SECRET");
   if (!secret || data.secret !== secret) return reply({ ok: false, error: "forbidden" });
+  // Ждём меньше, чем сайт ждёт ответа (8 с): не дождались — сайт повторит позже.
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000);
+  if (!lock.tryLock(5000)) return reply({ ok: false, error: "busy" });
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
     if (sheet.getLastRow() === 0) sheet.appendRow(COLUMNS.map(([, title]) => title));
+    // Повтор той же заявки (ответ не дошёл до сайта) — строка уже есть, второй не будет.
+    const numbers = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues().flat();
+    if (numbers.some((value) => String(value) === String(data.row.number))) return reply({ ok: true });
     // Ячейка, начатая «=», «+», «-», «@», — формула: заявка с сайта ею не станет.
     const safe = (value) => (typeof value === "string" && /^[=+\-@]/.test(value) ? "'" + value : value);
     sheet.appendRow(COLUMNS.map(([key]) => safe(data.row[key] ?? "")));
@@ -59,5 +63,8 @@ function doPost(e) {
   return reply({ ok: true });
 }
 ```
+
+Таблица, подключённая до 26.10.2026, получила новый столбец «Застройщик» (после «ЖК / блок /
+планировка»): вставить код заново и добавить столбец в шапку вручную.
 
 Номер телефона в таблице — с апострофом (`'+998…`): иначе Google Таблицы считают «+998…» формулой.

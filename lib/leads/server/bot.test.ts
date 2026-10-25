@@ -52,6 +52,22 @@ describe("бот «Написать в Telegram»", () => {
     expect(bot.reply.mock.calls.at(-1)?.[1]).toContain("+998");
   });
 
+  it("текст с девятью цифрами («Бюджет 450 000 000») — не номер: подсказка, без заявки", async () => {
+    const bot = deps(null);
+    await handleTelegramUpdate(message({ text: "Бюджет 450 000 000 сум" }), bot.value);
+    expect(bot.submit).not.toHaveBeenCalled();
+    expect(bot.reply.mock.calls.at(-1)?.[2]).toMatchObject({ keyboard: expect.any(Array) });
+  });
+
+  it("сбой базы при чтении перехода — без заявки, просьба повторить", async () => {
+    const bot = deps();
+    bot.rpc.mockImplementationOnce(async () => ({ data: null, error: { message: "timeout" } as never }));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await handleTelegramUpdate(message({ text: "+998 90 123 45 67" }), bot.value);
+    expect(bot.submit).not.toHaveBeenCalled();
+    expect(bot.reply).toHaveBeenCalledTimes(1);
+  });
+
   it("сообщения групп (чат менеджеров) бот не обрабатывает", async () => {
     const bot = deps();
     await handleTelegramUpdate({ message: { chat: { id: -100, type: "supergroup" }, text: "/start" } }, bot.value);

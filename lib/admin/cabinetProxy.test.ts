@@ -50,6 +50,18 @@ describe("proxy: кабинет", () => {
     expect(refresh.calls).toBe(0);
   });
 
+  it("ссылка на заявку без сессии — вход запоминает адрес возврата; главная кабинета — нет", async () => {
+    const proxy = await loadProxy({ nodeEnv: "development", keys: true });
+    const response = await proxy(request("/admin/zayavki/1045"));
+    expect(isRedirectTo(response, "/admin/vhod")).toBe(true);
+    expect(response.cookies.get("vh-return")).toMatchObject({ value: "/admin/zayavki/1045", httpOnly: true, path: "/admin" });
+    expect((await proxy(request("/admin"))).cookies.get("vh-return")).toBeUndefined();
+    // Файл и предзагрузка — не адрес возврата.
+    expect((await proxy(request("/admin/zayavki/csv"))).cookies.get("vh-return")).toBeUndefined();
+    const prefetch = new NextRequest("http://localhost:3000/admin/zhk", { headers: { "next-router-prefetch": "1", rsc: "1" } });
+    expect((await proxy(prefetch)).cookies.get("vh-return")).toBeUndefined();
+  });
+
   it("экран входа и Server Action без cookie — пропуск", async () => {
     const proxy = await loadProxy({ nodeEnv: "development", keys: true });
     expect((await proxy(request("/admin/vhod"))).status).toBe(200);

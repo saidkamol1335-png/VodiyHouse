@@ -43,6 +43,8 @@ export const NO_LEADS_FILTER: LeadsFilter = { status: null, type: null, query: "
 
 /** Сколько строк читает экран; больше — «уточните поиск» (мокап без постраничности). */
 export const LEADS_LIMIT = 200;
+/** Длина поиска: сервер режет до неё же — поле и адрес не расходятся. */
+export const LEADS_QUERY_MAX = 60;
 
 export function leadRowFrom(record: LeadRowRecord): LeadRow {
   const { created_at: createdAt, ...rest } = record;
@@ -65,7 +67,7 @@ export function leadsFilterFrom(search: Record<string, string | string[] | undef
   return {
     status: isStatus(one("status")) ? (one("status") as LeadStatus) : null,
     type: isType(one("type")) ? (one("type") as LeadType) : null,
-    query: (one("q") ?? "").trim().slice(0, 60),
+    query: (one("q") ?? "").trim().slice(0, LEADS_QUERY_MAX),
   };
 }
 

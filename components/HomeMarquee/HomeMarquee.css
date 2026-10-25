@@ -1,0 +1,52 @@
+/* Бегущая строка главной (мокап .marq): контурные слова, первое — курсив золотом; края гаснут. */
+.home-marquee {
+  position: relative;
+  margin-top: 8px;
+  padding: 26px 0;
+  overflow: hidden;
+  border-top: 1px dashed var(--dash);
+  border-bottom: 1px dashed var(--dash);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.home-marquee__track {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+}
+
+[data-motion="full"] .home-marquee__track {
+  animation: home-marquee var(--dur-home-marquee) linear infinite;
+}
+
+.home-marquee__word {
+  color: transparent;
+  font-size: var(--fs-home-marquee);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px var(--home-marquee-stroke);
+}
+
+.home-marquee__word--accent {
+  padding-right: 0.1em;
+  color: var(--gold);
+  font-family: var(--serif);
+  font-style: italic;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 0;
+}
+
+@media (max-width: 760px) {
+  .home-marquee__word {
+    font-size: calc(var(--fs-home-marquee) * 0.55);
+  }
+}
+
+@keyframes home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

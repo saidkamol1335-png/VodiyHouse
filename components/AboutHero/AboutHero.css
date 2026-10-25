@@ -1,0 +1,74 @@
+/* «О Vodiy House» (мокап .ab): тёмная карточка на светлой странице (в тёмной теме — та же),
+   три цифры в рамках-ячейках; число янтарное. */
+
+.about-hero {
+  padding: calc(var(--header-h) + 32px) 0 24px;
+}
+
+.about-hero__card {
+  padding: 44px 44px 40px;
+  border-radius: var(--r-2xl);
+  background: var(--about-card-bg);
+  color: var(--about-card-fg);
+  box-shadow: var(--shadow-3);
+}
+
+.about-hero__card .eyebrow {
+  color: var(--amber);
+}
+
+/* Цвет .heading — общий для сайта; на тёмной карточке — светлый (селектор сильнее порядка импорта). */
+.about-hero__card .about-hero__title {
+  margin: 16px 0 0;
+  color: var(--about-card-fg);
+}
+
+.about-hero__lead {
+  max-width: 600px;
+  margin: 16px 0 0;
+  color: var(--about-card-fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.about-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin: 32px 0 0;
+  border: 1px solid var(--about-card-line);
+  border-radius: var(--r-l);
+}
+
+.about-hero__stat {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  padding: 18px 20px;
+}
+
+.about-hero__stat + .about-hero__stat {
+  border-left: 1px solid var(--about-card-line);
+}
+
+.about-hero__stat dd {
+  margin: 0;
+  color: var(--amber);
+  font-size: var(--fs-h3);
+  font-weight: 650;
+}
+
+.about-hero__stat dt {
+  color: var(--about-card-fg-2);
+  font-size: var(--fs-small);
+}
+
+@media (max-width: 760px) {
+  .about-hero__card {
+    padding: 28px 20px;
+  }
+
+  .about-hero__stat + .about-hero__stat {
+    border-top: 1px solid var(--about-card-line);
+    border-left: 0;
+  }
+}

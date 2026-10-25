@@ -10,6 +10,8 @@ type SearchFieldProps = {
   className?: string;
   /** Микс для самого поля ввода: высота и скругление в контексте владельца. */
   inputClassName?: string;
+  /** Предел длины — тот же, до которого запрос режет сервер. */
+  maxLength?: number;
 };
 
 /** Поиск над списком кабинета: ищет сразу при вводе (ТЗ 8.1), подпись — для экранного диктора. */
@@ -21,6 +23,7 @@ export function SearchField({
   onChange,
   className,
   inputClassName,
+  maxLength,
 }: SearchFieldProps) {
   return (
     <div className={["search-field", className].filter(Boolean).join(" ")}>
@@ -35,6 +38,7 @@ export function SearchField({
         autoComplete="off"
         value={value}
         placeholder={placeholder}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
       />
     </div>

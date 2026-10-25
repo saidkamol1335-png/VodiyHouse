@@ -1,0 +1,1 @@
+export { HomeMarquee } from "./HomeMarquee";

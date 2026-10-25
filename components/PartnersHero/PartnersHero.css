@@ -1,0 +1,40 @@
+/* Первый экран «Застройщикам» (мокап SitePartners .phero): светлый фон с колоннами здания из
+   общего фона страницы, текст слева, цифры под пунктиром. */
+
+.partners-hero {
+  padding: calc(var(--header-h) + 72px) 0 56px;
+  border-bottom: 1px dashed var(--dash);
+}
+
+.partners-hero__title {
+  max-width: 760px;
+  margin-top: 18px;
+}
+
+.partners-hero__lead {
+  max-width: 560px;
+  margin: 20px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+}
+
+.partners-hero__cta {
+  height: 54px;
+  margin-top: 32px;
+  padding: 0 28px;
+}
+
+.partners-hero__stats {
+  margin-top: 48px;
+}
+
+@media (max-width: 760px) {
+  .partners-hero {
+    padding-top: calc(var(--header-h) + 40px);
+  }
+
+  .partners-hero__cta {
+    width: 100%;
+  }
+}

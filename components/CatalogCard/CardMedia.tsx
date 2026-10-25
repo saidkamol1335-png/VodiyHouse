@@ -15,6 +15,8 @@ type CardMediaProps = {
   preload: boolean;
   /** Бейджи слева сверху (класс ЖК). */
   badges: ReactNode;
+  /** Кнопки справа сверху: избранное и «Поделиться» (мокап .jc__icons). */
+  tools?: ReactNode;
 };
 
 const SIZES = "(max-width: 760px) calc(100vw - 48px), (max-width: 1100px) 45vw, 400px";
@@ -26,7 +28,7 @@ const SIZES = "(max-width: 760px) calc(100vw - 48px), (max-width: 1100px) 45vw, 
  * фото всех карточек отнимали канал у первого экрана (Lighthouse, LCP). Остальные кадры — после
  * первого наведения, касания, фокуса или прокрутки ленты; до того — их размытые заглушки.
  */
-export function CardMedia({ photos, alt, preload, badges }: CardMediaProps) {
+export function CardMedia({ photos, alt, preload, badges, tools }: CardMediaProps) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
   const track = useRef<HTMLDivElement>(null);
@@ -53,6 +55,7 @@ export function CardMedia({ photos, alt, preload, badges }: CardMediaProps) {
         ))}
       </div>
       <div className="catalog-card__badges">{badges}</div>
+      {tools ? <div className="catalog-card__tools">{tools}</div> : null}
       {photos.length > 1 ? (
         <>
           <button type="button" className="catalog-card__nav catalog-card__nav--prev" aria-label={t("prevPhoto")} onClick={() => go(-1)} disabled={current === 0}>

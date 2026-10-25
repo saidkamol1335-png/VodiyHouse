@@ -2,9 +2,11 @@
 
 import { Check, MapPin, Send } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { LeadButton } from "@/components/LeadDialog";
 import type { LeadIntent } from "@/components/LeadForm";
 import { PhoneButton } from "@/components/PhoneButton";
+import { ShareButton } from "@/components/ShareButton";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { TelegramButton } from "@/components/TelegramButton";
 import { Link } from "@/lib/i18n/navigation";
@@ -45,6 +47,7 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
         alt={name}
         preload={preload}
         badges={complex.class ? <span className="catalog-card__class">{t(`class.${complex.class}`)}</span> : null}
+        tools={<CardTools complex={complex} name={name} />}
       />
       <div className="catalog-card__body">
         <p className="catalog-card__top">
@@ -70,6 +73,18 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
         </div>
       </div>
     </article>
+  );
+}
+
+/** Сердце и «Поделиться» на фото — над растянутой ссылкой карточки. */
+function CardTools({ complex, name }: { complex: CatalogComplex; name: string }) {
+  const locale = useLocale() as Locale;
+  const address = [complex.location?.name[locale], complex.address?.[locale]].filter(Boolean).join(", ");
+  return (
+    <>
+      <FavoriteButton slug={complex.slug} name={name} />
+      <ShareButton share={{ path: `/${locale}${complexRoute(complex.slug)}`, title: name, text: address, photo: complex.photos[0] ?? null }} />
+    </>
   );
 }
 

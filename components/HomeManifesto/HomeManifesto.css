@@ -1,0 +1,48 @@
+/* «Vodiy House в двух словах» (мокап .words): крупный абзац, акценты — курсив золотом. full — слово
+   за словом с прокруткой (view timeline: каждому слову свой отрезок); где её нет — текст как есть. */
+.home-manifesto {
+  padding: 96px 0;
+}
+
+.home-manifesto__eyebrow {
+  margin: 0;
+}
+
+.home-manifesto__text {
+  max-width: 1060px;
+  margin: 24px 0 0;
+  font-size: var(--fs-home-words);
+  font-weight: 500;
+  letter-spacing: -0.032em;
+  line-height: 1.3;
+}
+
+.home-manifesto__word--accent {
+  color: var(--gold);
+  font-family: var(--serif);
+  font-style: italic;
+}
+
+@supports (animation-timeline: view()) {
+  [data-motion="full"] .home-manifesto__word {
+    animation: home-manifesto-word linear both;
+    animation-range: cover calc(6% + var(--word) * 36%) cover calc(15% + var(--word) * 36%);
+    animation-timeline: view();
+  }
+}
+
+@media (max-width: 760px) {
+  .home-manifesto {
+    padding: 64px 0;
+  }
+
+  .home-manifesto__text {
+    font-size: calc(var(--fs-home-words) * 0.85);
+  }
+}
+
+@keyframes home-manifesto-word {
+  from {
+    opacity: 0.18;
+  }
+}

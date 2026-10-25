@@ -4,8 +4,7 @@ import { Suspense } from "react";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
-import { HomeLeads } from "@/components/HomeLeads";
-import { SiteStockPanel } from "@/components/SiteStockPanel";
+import { HomeLeadCards, HomeStockLive, LatestLeads } from "@/components/HomeLeads";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { readSiteStockAction } from "@/lib/admin/actions/siteStock";
 import { greetingOf } from "@/lib/admin/greeting";
@@ -87,17 +86,18 @@ async function HomeStock() {
     readLeadsHome(supabase).catch(() => null),
   ]);
   return (
-    <>
-      {leads ? (
-        <HomeLeads leads={leads} stock={initial} />
-      ) : (
-        <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
-      )}
-      <SiteStockPanel
-        initial={initial}
-        read={readSiteStockAction}
-        complexesHref={ADMIN_ROUTES.complexes}
-      />
-    </>
+    <HomeStockLive
+      cards={leads ? <HomeLeadCards leads={leads} /> : null}
+      latest={
+        leads ? (
+          <LatestLeads rows={leads.latest} />
+        ) : (
+          <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
+        )
+      }
+      initial={initial}
+      read={readSiteStockAction}
+      complexesHref={ADMIN_ROUTES.complexes}
+    />
   );
 }

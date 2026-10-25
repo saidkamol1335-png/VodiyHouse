@@ -1,0 +1,44 @@
+/* Сердце избранного (мокап .jc__icons .ibtn): кружок на фото; в избранном — янтарное и залитое.
+   Нажатие — сразу, без анимации сердца (§3: только opacity и transform — лёгкий «тук» в full). */
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: 0;
+  border-radius: 50%;
+  background: var(--card-chip-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.favorite-button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.favorite-button--on {
+  color: var(--amber);
+}
+
+.favorite-button--on svg {
+  fill: currentColor;
+}
+
+[data-motion="full"] .favorite-button--on svg {
+  animation: favorite-button-beat var(--dur-base) var(--ease) both;
+}
+
+@media (pointer: coarse) {
+  .favorite-button {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}
+
+@keyframes favorite-button-beat {
+  50% {
+    transform: scale(1.25);
+  }
+}

@@ -12,6 +12,8 @@ type ButtonProps = {
   block?: boolean;
   /** Ссылка без префикса языка: кабинет и переходы на сайт из кабинета. */
   href?: string;
+  /** Ссылка на файл (CSV): обычная <a download> — без предзагрузки и мягкого перехода Next. */
+  download?: boolean;
   type?: "button" | "submit";
   /** Кнопка отправки с name и value: одна форма — несколько действий («Опубликовать», «Скрыть»). */
   name?: string;
@@ -51,6 +53,7 @@ function buttonClasses({
 export function Button({
   children,
   href,
+  download = false,
   type = "button",
   name,
   value,
@@ -65,14 +68,9 @@ export function Button({
   const classes = buttonClasses(look);
   if (href) {
     return (
-      <Link
-        className={classes}
-        href={href}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      >
+      <ButtonLink className={classes} href={href} download={download} aria-label={ariaLabel} aria-describedby={ariaDescribedBy}>
         {children}
-      </Link>
+      </ButtonLink>
     );
   }
   return (
@@ -92,4 +90,14 @@ export function Button({
       {children}
     </button>
   );
+}
+
+type ButtonLinkProps = Pick<ButtonProps, "children" | "download" | "aria-label" | "aria-describedby"> & {
+  className: string;
+  href: string;
+};
+
+/** Ссылка-кнопка: переход Next (Link) или файл — обычная <a download> без предзагрузки. */
+function ButtonLink({ download, ...props }: ButtonLinkProps) {
+  return download ? <a {...props} download /> : <Link {...props} />;
 }

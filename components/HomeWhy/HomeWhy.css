@@ -1,0 +1,245 @@
+/* «Почему через Vodiy House» (мокап .bento, .bn): сетка плиток 1 : 1,4 : 1,4 по 280 px; первая
+   строка — наличие (широкая) и «0%» (оливковая), вторая — документы и услуги лентой (широкая).
+   full — линии документа прорисовываются, лента услуг ползёт; lite и none — без движения. */
+
+.home-why {
+  padding: 96px 0;
+}
+
+.home-why__title {
+  margin-top: 16px;
+}
+
+.home-why__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1.4fr;
+  grid-auto-rows: 280px;
+  gap: 14px;
+  margin-top: 40px;
+}
+
+.home-why__tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-2xl);
+  background: var(--card-bg);
+}
+
+.home-why__tile--wide {
+  grid-column: span 2;
+}
+
+.home-why__tile--olive {
+  border-color: transparent;
+  background: var(--home-bento-olive);
+  color: var(--on-inv);
+}
+
+.home-why__kicker {
+  position: relative;
+  margin: 0;
+  color: var(--amber-2);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.home-why__body {
+  position: relative;
+  max-width: 320px;
+}
+
+/* У широких плиток справа — пример наличия или лента услуг: текст — слева, до половины. */
+.home-why__tile--wide .home-why__body {
+  max-width: 55%;
+}
+
+.home-why__tile-title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.home-why__text {
+  margin: 8px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.home-why__tile--olive .home-why__text {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.home-why__cta {
+  margin-top: 16px;
+}
+
+.home-why__big {
+  position: absolute;
+  right: -8px;
+  bottom: -34px;
+  color: currentColor;
+  font-size: var(--fs-home-big);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  opacity: 0.1;
+}
+
+.home-why__stock {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 214px;
+}
+
+.home-why__stock-name {
+  margin: 0 0 2px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.home-why__stock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 6px 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--glass-2);
+  font-size: var(--fs-caption);
+  font-weight: 650;
+}
+
+.home-why__stock-row span {
+  color: var(--fg-2);
+}
+
+.home-why__stock-left {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--ok-soft);
+  color: var(--ok-strong);
+  font-size: var(--fs-nano);
+}
+
+.home-why__stock-left--few {
+  background: var(--amber-soft);
+  color: var(--amber-2);
+}
+
+.home-why__docs {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+}
+
+.home-why__docs path {
+  fill: none;
+  stroke: var(--amber-2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+[data-motion="full"] .home-why__docs path {
+  animation: home-why-draw var(--dur-slower) var(--ease) both;
+  stroke-dasharray: 200;
+}
+
+.home-why__pills {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  bottom: 0;
+  width: 190px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+.home-why__pills-track {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+[data-motion="full"] .home-why__pills-track {
+  animation: home-why-pills var(--dur-home-marquee) linear infinite;
+}
+
+.home-why__pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  height: 34px;
+  padding: 0 15px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  transform: translateX(var(--pill-shift));
+}
+
+@media (max-width: 980px) {
+  .home-why__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-why {
+    padding: 64px 0;
+  }
+
+  .home-why__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .home-why__tile {
+    min-height: 220px;
+  }
+
+  .home-why__tile--wide {
+    grid-column: auto;
+  }
+
+  .home-why__tile--wide:first-child {
+    min-height: 300px;
+  }
+}
+
+@keyframes home-why-draw {
+  from {
+    stroke-dashoffset: 200;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes home-why-pills {
+  to {
+    transform: translateY(-50%);
+  }
+}

@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { adminGate, hasAuthCookie, isAdminPath, type GateDecision } from "@/lib/admin/gate";
+import { RETURN_COOKIE, RETURN_MAX_AGE_SECONDS, safeReturnPath } from "@/lib/admin/returnPath";
 import { localeOfPath, localeRedirectTarget } from "@/lib/i18n/localeRedirect";
+import { ADMIN_ROUTE } from "@/lib/routes";
 import { LOCALE_COOKIE } from "@/lib/i18n/routing";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { copySessionCookies, refreshAdminSession } from "@/lib/supabase/proxySession";
@@ -74,10 +76,33 @@ async function cabinetProxy(request: NextRequest) {
 
 function gateResponse(request: NextRequest, decision: GateDecision, response: NextResponse) {
   if (decision.kind === "next") return response;
-  return copySessionCookies(response, NextResponse.redirect(new URL(decision.location, request.url)));
+  const redirect = copySessionCookies(response, NextResponse.redirect(new URL(decision.location, request.url)));
+  // Ссылка кабинета без сессии (заявка из чата менеджеров) — после входа вернуться к ней. Только
+  // переход страницы: предзагрузка Link, запросы RSC и файлы (CSV) адрес возврата не меняют.
+  const back = safeReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);
+  if (decision.location === LOGIN_PATH && back && back !== ADMIN_ROUTE && isPageNavigation(request)) {
+    redirect.cookies.set(RETURN_COOKIE, back, {
+      maxAge: RETURN_MAX_AGE_SECONDS,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+      path: ADMIN_ROUTE,
+    });
+  }
+  return redirect;
 }
 
 export const config = {
   // Статика и картинки Next.js мимо proxy.
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
+
+const FILE_ROUTE = /\/csv$/;
+
+function isPageNavigation(request: NextRequest): boolean {
+  const { headers } = request;
+  if (headers.has("rsc") || headers.has("next-router-prefetch") || FILE_ROUTE.test(request.nextUrl.pathname)) return false;
+  // Старые браузеры без Sec-Fetch-* — как переход страницы.
+  const destination = headers.get("sec-fetch-dest");
+  return destination === null || destination === "document";
+}

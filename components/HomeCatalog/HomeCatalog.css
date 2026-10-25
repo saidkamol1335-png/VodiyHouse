@@ -1,0 +1,15 @@
+/* Каталог на главной (мокап .sec--flt): отступ от бегущей строки; якорь — под шапкой. */
+.home-catalog {
+  padding: 96px 0 24px;
+  scroll-margin-top: var(--header-h);
+}
+
+.home-catalog__title {
+  margin: 16px 0 32px;
+}
+
+@media (max-width: 760px) {
+  .home-catalog {
+    padding-top: 64px;
+  }
+}

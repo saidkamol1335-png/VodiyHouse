@@ -19,8 +19,12 @@ type SiteStockPanelProps = {
 
 /** «Остатки по ЖК» (мокап, Г1 B): итог крупно в шапке, строки ЖК на сайте, «live» (Г4 A). */
 export function SiteStockPanel({ initial, read, complexesHref }: SiteStockPanelProps) {
+  return <SiteStockView live={useLiveStock(initial, read)} complexesHref={complexesHref} />;
+}
+
+/** Та же панель над чужим живым чтением: главная делит его с карточкой «Свободно на сайте». */
+export function SiteStockView({ live, complexesHref }: { live: LiveStock; complexesHref: string }) {
   const t = useTranslations("admin.home.stock");
-  const live = useLiveStock(initial, read);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const { stock } = live;
   return (

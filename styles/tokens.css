@@ -161,6 +161,12 @@
   --drawing-bg: #ffffff;
   /* Затемнение под окном (чертёж крупно) — в обеих темах. */
   --scrim: rgba(14, 13, 12, 0.6);
+  --scrim-blur: 6px; /* размытие под окном заявки — только full */
+  /* «О Vodiy House» (мокап SiteAbout .ab): тёмная карточка на светлой странице */
+  --about-card-bg: #17140f;
+  --about-card-fg: #f7f3ec;
+  --about-card-fg-2: rgba(247, 243, 236, 0.68);
+  --about-card-line: rgba(247, 243, 236, 0.14);
 
   --glass: rgba(250, 248, 244, 0.84); /* шапка и панели со стеклом */
   --glass-solid: rgba(250, 248, 244, 0.95); /* то же без blur — режим lite */
@@ -177,6 +183,7 @@
   --gold: #b8650a; /* курсив Cormorant в крупных заголовках */
 
   --ok: #178048;
+  --ok-strong: #136d3d; /* мелкий зелёный текст на --ok-soft — 5,6:1 */
   --ok-soft: rgba(23, 128, 72, 0.1);
   /* тумблер мокапа (.switch): выключен — светлая подложка, включён — --ok со свечением */
   --switch-off-bg: rgba(255, 255, 255, 0.94);
@@ -365,11 +372,40 @@
     rgba(10, 8, 6, 0) 66%,
     rgba(10, 8, 6, 0.5)
   );
+  /* главная (шаг 3.9, мокап .hero, .vf, .marq): фон первого экрана, видоискатель, бегущая строка */
+  --home-hero-shade:
+    linear-gradient(90deg, rgba(244, 241, 235, 0.96) 0%, rgba(244, 241, 235, 0.8) 46%, rgba(244, 241, 235, 0.35) 100%),
+    linear-gradient(0deg, var(--bg) 0%, transparent 34%);
+  --home-vf-frame: rgba(40, 28, 12, 0.41);
+  --home-vf-tick: rgba(40, 28, 12, 0.45);
+  --home-vf-orbit: rgba(40, 28, 12, 0.17);
+  --home-vf-glass: rgba(253, 251, 247, 0.86);
+  --home-vf-go: #b84300; /* 4,9:1 к светлому тексту кнопки (мокап #dc5000 — 3,6:1) */
+  --home-vf-rec: #ff453a;
+  --home-marquee-stroke: rgba(40, 28, 12, 0.22);
+  --home-bento-olive: linear-gradient(160deg, #3b3a24, #24251a);
+  --fs-home-marquee: clamp(48px, 7vw, 104px);
+  --fs-home-words: clamp(24px, 2.6vw, 36px);
+  --fs-home-big: 180px;
+  --fs-home-band: clamp(26px, 2.4vw, 34px);
+  --dur-home-cycle: 20s;
+  --dur-home-marquee: 38s;
+  --dur-home-orbit: 24s;
 }
 
 /* ---------- тёмная тема: набор телефона (контраст приглушённого текста 5,3:1) ---------- */
 [data-theme="dark"],
 [data-theme-island="dark"] {
+  --about-card-bg: #1c1915;
+  --about-card-line: rgba(247, 243, 236, 0.1);
+  --home-hero-shade:
+    linear-gradient(90deg, rgba(11, 10, 9, 0.94) 0%, rgba(11, 10, 9, 0.6) 48%, rgba(11, 10, 9, 0.35) 100%),
+    linear-gradient(0deg, var(--bg) 0%, transparent 34%);
+  --home-vf-frame: rgba(255, 237, 215, 0.35);
+  --home-vf-tick: rgba(255, 237, 215, 0.5);
+  --home-vf-orbit: rgba(255, 237, 215, 0.14);
+  --home-vf-glass: rgba(11, 10, 9, 0.78);
+  --home-marquee-stroke: rgba(255, 237, 215, 0.26);
   color-scheme: dark;
   --bg: #0b0a09;
   --bg-2: #151311;
@@ -402,6 +438,7 @@
   --gold: #f2c27e;
 
   --ok: #5bd48c;
+  --ok-strong: #5bd48c;
   --ok-soft: rgba(91, 212, 140, 0.13);
   --switch-off-bg: rgba(255, 240, 220, 0.14);
   --switch-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);

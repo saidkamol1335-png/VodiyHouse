@@ -1,0 +1,57 @@
+/* /izbrannoe (мокап MobFav): заголовок «В подборке N ЖК», пояснение, «Поделиться подборкой»
+   янтарной кнопкой; карточки — сеткой каталога. */
+.favorites-view {
+  display: grid;
+  gap: 32px;
+}
+
+.favorites-view__head {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.favorites-view__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-h2);
+  font-weight: 650;
+  letter-spacing: var(--ls-h2);
+  line-height: var(--lh-heading);
+}
+
+.favorites-view__lead {
+  max-width: 640px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+}
+
+.favorites-view__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--touch-target);
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--on-amber);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--glow-amber);
+}
+
+.favorites-view__share:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .favorites-view__share {
+    width: 100%;
+    justify-content: center;
+  }
+}

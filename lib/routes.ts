@@ -10,13 +10,23 @@ export const ROUTES = {
   favorites: "/izbrannoe",
   howToBuy: "/kak-kupit",
   privacy: "/privacy",
+  podborka: "/podborka",
 } as const;
 
 /** Страница ЖК — внутри каталога: адрес ЖК не столкнётся с адресами разделов (реши сам, фаза 3). */
 export const complexRoute = (slug: string) => `${ROUTES.catalog}/${slug}`;
 
 /** Публичные страницы, которые уже есть в коде. Остальные адреса шапки — разделы фазы 3. */
-const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home, ROUTES.calculator, ROUTES.catalog]);
+const READY_ROUTES: ReadonlySet<string> = new Set([
+  ROUTES.home,
+  ROUTES.calculator,
+  ROUTES.catalog,
+  ROUTES.favorites,
+  ROUTES.about,
+  ROUTES.forDevelopers,
+  ROUTES.howToBuy,
+  ROUTES.privacy,
+]);
 
 /** Страница ЖК (шаг 3.5): адрес — slug каталога. */
 const COMPLEX_PAGE = /^\/novostroyki\/[a-z0-9]+(?:-[a-z0-9]+)*$/;

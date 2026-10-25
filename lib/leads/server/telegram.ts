@@ -1,9 +1,9 @@
 import "server-only";
-import { timingSafeEqual } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 import { handleTelegramUpdate, type TelegramUpdate } from "./bot";
 import { botConfig, sendTelegram, telegramConfig, type BotConfig } from "./channels";
+import { sameSecret } from "./secret";
 import { rateKey, submitLead, visitorKey } from "./submit";
 
 // Сервер бота «Написать в Telegram» (Ф8): код перехода по нажатию кнопки и вебхук Bot API. Без
@@ -33,11 +33,18 @@ export async function createTgStart(start: TgStartInput): Promise<string | null>
 /** Запрос от Telegram — по секрету вебхука (setWebhook secret_token), сравнение без утечки по времени. */
 export function isTelegramRequest(request: Request, config: BotConfig): boolean {
   const given = request.headers.get("x-telegram-bot-api-secret-token") ?? "";
-  return given.length === config.webhookSecret.length && timingSafeEqual(Buffer.from(given), Buffer.from(config.webhookSecret));
+  return sameSecret(given, config.webhookSecret);
 }
 
 export async function processTelegramUpdate(update: TelegramUpdate, config: BotConfig): Promise<void> {
   const admin = createSupabaseAdminClient();
+  // Telegram повторяет обновление, если не дождался ответа: второй раз — не вторая заявка.
+  if (typeof update.update_id === "number") {
+    const { data, error } = await admin.rpc("take_tg_update", { p_update: update.update_id });
+    // Отметка не записалась — обрабатываем всё равно: возможный дубль (repeat_of) лучше потерянной заявки.
+    if (error) console.error("[bot] отметка обновления не записана", error.message);
+    if (data === false) return;
+  }
   // Заявки бот публикует тем же ботом — его токен и для ответов клиенту.
   const sender = telegramConfig() ?? { token: config.token, chatId: "", alertChatId: "" };
   await handleTelegramUpdate(update, {

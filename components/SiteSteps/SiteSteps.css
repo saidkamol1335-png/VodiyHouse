@@ -1,0 +1,56 @@
+/* Шаги (мокап SitePartners .steps): колонки через пунктирную линию сверху и вертикальные
+   разделители; на телефоне — столбиком. Номер — Cormorant курсивом янтарным. */
+
+.site-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 0;
+  padding: 0;
+  border-top: 1px dashed var(--dash);
+  list-style: none;
+}
+
+.site-steps__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px 24px 8px 0;
+}
+
+.site-steps__item + .site-steps__item {
+  padding-left: 24px;
+  border-left: 1px dashed var(--dash);
+}
+
+.site-steps__number {
+  color: var(--amber-2);
+  font-family: var(--serif);
+  font-size: var(--fs-h2);
+  font-style: italic;
+  line-height: var(--lh-tight);
+}
+
+.site-steps__title {
+  margin: 8px 0 0;
+  font-size: var(--fs-body);
+  font-weight: 650;
+}
+
+.site-steps__text {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+}
+
+@media (max-width: 760px) {
+  .site-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-steps__item + .site-steps__item {
+    padding-left: 0;
+    border-top: 1px dashed var(--dash);
+    border-left: 0;
+  }
+}

@@ -1,0 +1,1 @@
+export { AboutCta } from "./AboutCta";

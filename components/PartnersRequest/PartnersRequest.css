@@ -1,0 +1,72 @@
+/* «Заявка на сотрудничество» (мокап .preq): карточка с лучом, слева текст и контакты, справа форма;
+   на телефоне — столбиком. */
+
+.partners-request {
+  padding: 72px 0 96px;
+  scroll-margin-top: var(--header-h);
+}
+
+.partners-request__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 48px;
+  padding: 40px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.partners-request__text {
+  position: relative;
+}
+
+.partners-request__title {
+  margin-top: 14px;
+}
+
+.partners-request__lead {
+  margin: 16px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.partners-request__contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-small);
+}
+
+.partners-request__contacts li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.partners-request__contacts svg {
+  color: var(--amber-2);
+}
+
+.partners-request__contacts a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.partners-request__contacts a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 980px) {
+  .partners-request__card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    padding: 28px 20px;
+  }
+}

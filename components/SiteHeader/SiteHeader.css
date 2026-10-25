@@ -162,3 +162,22 @@
     backdrop-filter: var(--over-photo-filter);
   }
 }
+
+/* Счётчик избранного на сердце (мокап MobFav: янтарный кружок с числом). */
+.site-header__count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--on-amber);
+  font-size: var(--fs-nano);
+  font-weight: 700;
+  line-height: 1;
+}

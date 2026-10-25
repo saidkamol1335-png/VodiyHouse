@@ -1,0 +1,181 @@
+/* «Поделиться» кружком (мокап .ibtn share) и окно «Поделиться ссылкой» (мокап .mdl, .preview,
+   .urlbox): превью карточкой, адрес в поле с «Скопировать», Telegram — кнопкой во всю ширину. */
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: 0;
+  border-radius: 50%;
+  background: var(--card-chip-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.share-button:focus-visible,
+.share-dialog__close:focus-visible,
+.share-dialog__telegram:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.share-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2xl);
+  background: var(--bg-2);
+  color: var(--fg);
+  box-shadow: var(--shadow-3);
+}
+
+.share-dialog[open] {
+  display: grid;
+  gap: 14px;
+}
+
+.share-dialog::backdrop {
+  background: var(--scrim);
+}
+
+[data-motion="full"] .share-dialog[open],
+[data-motion="lite"] .share-dialog[open] {
+  animation: share-dialog-in var(--dur-fast) var(--ease) both;
+}
+
+.share-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-dialog__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+
+.share-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.share-dialog__label {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.share-dialog__preview {
+  display: grid;
+  gap: 4px;
+  overflow: hidden;
+  padding-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.share-dialog__photo {
+  margin-bottom: 8px;
+}
+
+.share-dialog__domain,
+.share-dialog__preview-title,
+.share-dialog__preview-text {
+  padding: 0 14px;
+}
+
+.share-dialog__domain {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+}
+
+.share-dialog__preview-title {
+  font-size: var(--fs-small);
+}
+
+.share-dialog__preview-text {
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+}
+
+.share-dialog__url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-pill);
+}
+
+.share-dialog__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-caption);
+  outline: none;
+}
+
+.share-dialog__hint {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.share-dialog__telegram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--touch-target);
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-pill);
+  background: var(--control-bg);
+  color: var(--fg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (pointer: coarse) {
+  .share-button {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}
+
+@media (max-width: 767px) {
+  .share-dialog {
+    width: 100%;
+    max-width: none;
+    margin: auto 0 0;
+    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  }
+}
+
+@keyframes share-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}

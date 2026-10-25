@@ -31,7 +31,8 @@
     "themeLight": "Yorug‘",
     "themeDark": "Qorong‘i",
     "themeToDark": "Qorong‘i mavzuni yoqish",
-    "themeToLight": "Yorug‘ mavzuni yoqish"
+    "themeToLight": "Yorug‘ mavzuni yoqish",
+    "favoritesCount": "Saralangan · {count}"
   },
   "contacts": {
     "phone": "Vodiy House telefoni",
@@ -47,7 +48,64 @@
     "eyebrow": "Farg‘ona viloyati yangi uylari",
     "title": "Farg‘ona yangi uylaridagi kvartiralar — ",
     "titleAccent": "quruvchi narxida",
-    "skeleton": "Sayt karkasi · 0-bosqich"
+    "lead": "Vodiy House ishlaydigan barcha TJMlar: quruvchi narxlari, kvartiralar mavjudligi va tekshirilgan hujjatlar. Tanlash va ko‘rsatish — bepul.",
+    "cta": "Kvartira tanlash",
+    "free": {
+      "price": "Narx — quruvchinikidek",
+      "service": "Tanlash va ko‘rsatish — bepul",
+      "docs": "TJM hujjatlari tekshirilgan"
+    },
+    "stats": {
+      "label": "Vodiy House raqamlarda",
+      "complexes": "{count, plural, other {turar-joy majmuasi}}",
+      "developers": "{count, plural, other {quruvchi}}",
+      "flats": "{count, plural, other {kvartira sotuvda}}"
+    },
+    "vf": {
+      "label": "Tanlov",
+      "coords": "40.38°N · 71.78°E",
+      "found": "Hozir topildi",
+      "foundValue": "{complexes} TJM · {flats} kv.",
+      "query": "2 xonali $45 000 gacha",
+      "go": "GO →"
+    },
+    "scroll": "Pastga",
+    "marquee": "Vodiy House · Farg‘ona · Marg‘ilon · Qo‘qon · Quvasoy · Yangi uylar",
+    "catalog": {
+      "eyebrow": "Filtr",
+      "title": "Kvartirani ",
+      "titleAccent": "parametrlar bo‘yicha tanlang"
+    },
+    "manifesto": {
+      "eyebrow": "Vodiy House qisqacha",
+      "text": "Farg‘ona viloyatidagi barcha yangi uylarni bir joyga to‘pladik. <a>Hujjatlar tekshirilgan, muddatlar halol,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
+    },
+    "why": {
+      "eyebrow": "Nega Vodiy House orqali",
+      "title": "Narx o‘sha. ",
+      "titleAccent": "Xizmat — bepul.",
+      "priceKicker": "Ustama",
+      "priceTitle": "Narx — quruvchinikidek",
+      "priceText": "Komissiyani siz emas, quruvchi to‘laydi. Narx sotuv bo‘limidagi bilan bir xil.",
+      "docsKicker": "Tekshiruv",
+      "docsTitle": "Har bir TJM hujjatlari tekshirilgan",
+      "docsText": "Ruxsatnoma, yer, ekspertiza — TJM sahifasida tekshiruv sanasi bilan.",
+      "freeKicker": "Bepul",
+      "freeTitle": "Tanlash, ko‘rsatish va bankda yordam",
+      "freeText": "Menejer birinchi qo‘ng‘iroqdan kalitgacha yoningizda.",
+      "pills": "TJM tanlash · Obyekt ko‘rsatish · Hujjat tekshiruvi · Ipoteka · Muddatli to‘lov · Kadastr · Kalitlar",
+      "stockKicker": "Mavjudlik",
+      "stockTitle": "Har bir TJM qoldiqlari",
+      "stockText": "«3 xonali — 5 ta qoldi» kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
+      "stockCta": "Mavjudlikni ko‘rish",
+      "priceBig": "0%"
+    },
+    "partner": {
+      "eyebrow": "Quruvchilar uchun",
+      "title": "Quruvchimisiz?",
+      "text": "Saytda reklama va Vodiy House rieltorlari bilan birgalikda sotuv.",
+      "cta": "Hamkor bo‘lish"
+    }
   },
   "calc": {
     "page": {
@@ -627,7 +685,9 @@
   "siteError": {
     "title": "Sahifa vaqtincha mavjud emas",
     "text": "Ma’lumotlarni yuklab bo‘lmadi. Bir daqiqadan so‘ng sahifani yangilang — yoki bizga qo‘ng‘iroq qiling, TJM haqida aytib beramiz.",
-    "retry": "Yangilash"
+    "retry": "Yangilash",
+    "leadLoading": "Ariza shakli ochilmoqda…",
+    "leadOffline": "Aloqa yo‘q — shakl ochilmadi. Yana urinib ko‘ring."
   },
   "lead": {
     "titles": {
@@ -715,7 +775,26 @@
     "more": {
       "title": "<accent>Batafsil</accent> bilishni xohlaysizmi?",
       "text": "Kontaktlaringizni qoldiring — Vodiy House menejeri loyiha haqida aytib beradi va kvartira tanlaydi."
-    }
+    },
+    "partner": {
+      "company": "Quruvchi kompaniya",
+      "companyRequired": "Kompaniyani kiriting",
+      "name": "Aloqa uchun shaxs",
+      "city": "Shahar",
+      "format": "Nima qiziqtiradi",
+      "formats": {
+        "sales": "Birgalikdagi sotuv",
+        "ads": "Saytda reklama",
+        "listing": "TJMni joylashtirish"
+      },
+      "projects": "Sotuvdagi TJM va kvartiralar",
+      "projectsPlaceholder": "masalan, 2 TJM, ~180 kvartira",
+      "comment": "Izoh",
+      "commentPlaceholder": "TJM nomi, muddatlar, savollar",
+      "send": "Ariza yuborish"
+    },
+    "donePartner": "Ish kuni davomida javob beramiz.",
+    "nextPartner": "Keyin nima: qo‘ng‘iroq qilamiz, uchrashuvni kelishamiz va hujjatlar hamda obyektni ko‘ramiz."
   },
   "bot": {
     "greeting": "Assalomu alaykum! Bu Vodiy House — Farg‘ona yangi binolaridan xaridor uchun bepul kvartira tanlab beramiz.",
@@ -728,5 +807,218 @@
     "ownContact": "Iltimos, o‘z raqamingizni «Raqamni ulashish» tugmasi orqali yuboring.",
     "foreignPhone": "Biz O‘zbekiston raqamlarini (+998) qabul qilamiz. Raqamni +998 XX XXX XX XX ko‘rinishida xabar qilib yozing.",
     "failed": "Arizani qabul qilib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring yoki bizga qo‘ng‘iroq qiling."
+  },
+  "share": {
+    "title": "Havolani ulashish",
+    "preview": "Messenjerda havola shunday ko‘rinadi",
+    "link": "Havola",
+    "copy": "Nusxalash",
+    "copied": "Havola nusxalandi",
+    "copyFailed": "Havolani maydondan qo‘lda nusxalang.",
+    "telegram": "Telegramga yuborish",
+    "close": "Yopish",
+    "button": "Ulashish: {name}",
+    "favorite": "Saralanganga: {name}",
+    "unfavorite": "Saralangandan olib tashlash: {name}"
+  },
+  "favorites": {
+    "metaTitle": "Saralangan — Vodiy House",
+    "metaDescription": "Yurakcha bilan belgilangan TJMlar. Tanlovni o‘zingizga yoki yaqinlaringizga yuboring.",
+    "eyebrow": "Saralangan",
+    "title": "{count, plural, =0 {Saralangan hozircha bo‘sh} other {Tanlovda # ta TJM}}",
+    "lead": "Yurakcha bilan belgilangan TJMlar. Tanlovni o‘zingizga yoki yaqinlaringizga yuboring — u istalgan telefonda ochiladi.",
+    "empty": "TJM kartochkasidagi yurakchani bosing — u shu yerda paydo bo‘ladi. Tanlovni Telegramga yuborish mumkin.",
+    "toCatalog": "Yangi uylarni ko‘rish",
+    "share": "Tanlovni ulashish",
+    "shareTitle": "Tanlov: {count} ta TJM",
+    "podborka": {
+      "metaTitle": "Tanlov: {count} ta TJM — Vodiy House",
+      "metaDescription": "{names}. Quruvchi narxlari, kvartiralar mavjudligi, tanlash va ko‘rsatish — bepul.",
+      "eyebrow": "Vodiy House tanlovi",
+      "title": "Tanlov: {count} ta TJM",
+      "lead": "Bu TJMlar siz uchun tanlandi. Raqamingizni qoldiring — Vodiy House menejeri batafsil aytib beradi va kvartiralarni ko‘rsatadi.",
+      "empty": "Tanlov bo‘sh yoki undagi TJMlar sotuvdan olingan. Barcha yangi uylarni ko‘ring — yoki raqam qoldiring, qo‘lda tanlab beramiz.",
+      "context": "Tanlov: {names}"
+    }
+  },
+  "partners": {
+    "metaTitle": "Quruvchilarga — Vodiy House",
+    "metaDescription": "TJMni Vodiy House katalogiga joylashtiring, saytda reklama qiling yoki sotuvni rieltorlarimizga topshiring.",
+    "hero": {
+      "eyebrow": "Quruvchilar uchun",
+      "title": "Kvartiralarni ",
+      "titleAccent": "Vodiy House bilan birga soting",
+      "lead": "TJMni katalogga joylashtiring, saytda reklama qiling yoki sotuvni rieltorlarimizga topshiring. Siz natija uchun to‘laysiz — va’da uchun emas.",
+      "cta": "Ariza qoldirish",
+      "statsLabel": "Vodiy House raqamlarda",
+      "complexes": "{count, plural, other {TJM saytda}}",
+      "developers": "{count, plural, other {quruvchi biz bilan}}",
+      "flats": "{count, plural, other {kvartira sotuvda}}"
+    },
+    "formats": {
+      "eyebrow": "Formatlar",
+      "title": "Birga ishlashning ",
+      "titleAccent": "uch yo‘li",
+      "pick": "Tanlash",
+      "sales": {
+        "name": "Birgalikdagi sotuv",
+        "price": "bitim uchun komissiya",
+        "text": "Vodiy House rieltorlari TJMni ko‘rsatadi, mijozni bitimgacha olib boradi va bank bilan yordam beradi.",
+        "points": {
+          "p1": "Mijozlar arizalari — umumiy Telegram-chatda",
+          "p2": "Har oy qurilish videosi",
+          "p3": "Har bir mijoz bo‘yicha hisobot"
+        }
+      },
+      "ads": {
+        "name": "Saytda reklama",
+        "price": "davr uchun to‘lov",
+        "text": "Bosh sahifada maxsus taklif, katalog yuqorisida joy va to‘plamlarda banner.",
+        "points": {
+          "p1": "Bosh sahifadagi «Maxsus takliflar» bloki",
+          "p2": "Katalogda birinchi o‘rin",
+          "p3": "Ko‘rishlar va arizalar bo‘yicha hisobot"
+        }
+      },
+      "listing": {
+        "name": "TJMni joylashtirish",
+        "price": "bepul",
+        "text": "Mavjud kvartiralar, rejalar, hujjatlar va kalkulyatorli TJM sahifasi — hujjatlar tekshirilgandan keyin.",
+        "points": {
+          "p1": "TJM sahifasida mavjud kvartiralar",
+          "p2": "Sizning dasturlaringiz bilan kalkulyator",
+          "p3": "«Vodiy House tekshirgan» belgisi"
+        }
+      }
+    },
+    "steps": {
+      "eyebrow": "Qanday boshlaymiz",
+      "title": "Arizadan birinchi sotuvgacha — ",
+      "titleAccent": "taxminan ikki hafta",
+      "s1": {
+        "title": "Ariza",
+        "text": "Kontaktlaringizni qoldirasiz — ish kuni davomida qo‘ng‘iroq qilamiz"
+      },
+      "s2": {
+        "title": "Uchrashuv va tekshiruv",
+        "text": "Hujjatlar va obyektni ko‘ramiz, format va shartlarni kelishamiz"
+      },
+      "s3": {
+        "title": "Ishga tushirish",
+        "text": "Mavjud kvartiralar, foto, rejalar va to‘lov dasturlarini yuklaymiz"
+      },
+      "s4": {
+        "title": "Sotuv va hisobotlar",
+        "text": "TJMlaringiz bo‘yicha arizalar va statistikani olasiz"
+      }
+    },
+    "request": {
+      "title": "Hamkorlik ",
+      "titleAccent": "uchun ariza",
+      "lead": "Ish kuni davomida javob beramiz. Kontaktlar uchinchi shaxslarga berilmaydi.",
+      "defaultCity": "Farg‘ona"
+    }
+  },
+  "about": {
+    "metaTitle": "Biz haqimizda — Vodiy House",
+    "metaDescription": "Farg‘ona viloyati yangi uylar agentligi: kvartira tanlash, obyektlarni ko‘rsatish va quruvchilar hujjatlarini tekshirish. Xaridor uchun — bepul.",
+    "hero": {
+      "eyebrow": "Kompaniya haqida",
+      "title": "Vodiy House haqida",
+      "lead": "Farg‘ona viloyati yangi uylar agentligi. Kvartira tanlaymiz, obyektlarni ko‘rsatamiz va quruvchilar hujjatlarini tekshiramiz. Xaridor uchun — bepul: bizga quruvchi to‘laydi.",
+      "complexes": "{count, plural, other {turar-joy majmuasi ishda}}",
+      "freeValue": "0 so‘m",
+      "free": "xaridor tanlash va ko‘rsatish uchun to‘laydi",
+      "videoValue": "Har oy",
+      "video": "har bir qurilish haqida video olamiz"
+    },
+    "office": {
+      "eyebrow": "Vodiy House ofisi",
+      "title": "Sizni ",
+      "titleAccent": "ofisda kutamiz",
+      "lead": "{address}. Keling — birga TJM tanlaymiz va muddatli to‘lovni hisoblaymiz.",
+      "check": "Bizgacha borish qulayligini tekshiring",
+      "route": "Yo‘nalish chizish",
+      "open": "Yandex Xaritalarda ochish"
+    },
+    "cta": {
+      "title": "Ofisga keling — barcha loyihalarni bitta uchrashuvda ko‘rsatamiz",
+      "text": "Uchrashuv bepul.",
+      "button": "Uchrashuvga yozilish",
+      "context": "Vodiy House ofisida uchrashuv"
+    }
+  },
+  "howToBuy": {
+    "metaTitle": "Xarid qanday o‘tadi — Vodiy House",
+    "metaDescription": "Birinchi qo‘ng‘iroqdan kalitgacha: tanlash, ko‘rsatish, hujjatlarni tekshirish va muddatli to‘lovda yordam. Xaridor uchun — bepul.",
+    "eyebrow": "Xaridorlarga",
+    "title": "Kvartira xaridi ",
+    "titleAccent": "qanday o‘tadi",
+    "lead": "Birinchi qo‘ng‘iroqdan kalitgacha — Vodiy House menejeri bilan. Tanlash, ko‘rsatish va bank bilan yordam siz uchun bepul: komissiyani quruvchi to‘laydi.",
+    "s1": {
+      "title": "Tanlash",
+      "text": "Nima izlayotganingizni ayting: tuman, xonalar, byudjet va to‘lov usuli. Katalogdan TJM tanlab, to‘plam yuboramiz."
+    },
+    "s2": {
+      "title": "Ko‘rish",
+      "text": "Qurilishni, quruvchining topshirilgan uylarini va kvartiralarni ko‘rsatamiz. Kun va vaqtni siz tanlaysiz."
+    },
+    "s3": {
+      "title": "Hujjatlar va to‘lov",
+      "text": "Qurilish ruxsatnomasi va yer hujjatlarini tekshiramiz, muddatli to‘lov yoki ipotekani hisoblaymiz va bank bilan yordam beramiz."
+    },
+    "s4": {
+      "title": "Shartnoma",
+      "text": "Shartnomani to‘g‘ridan-to‘g‘ri quruvchi bilan tuzasiz — quruvchi narxida."
+    },
+    "s5": {
+      "title": "Kalitlar",
+      "text": "Qurilish muddatlarini kuzatamiz va kvartira topshirilguncha yordam beramiz."
+    },
+    "q1": {
+      "title": "Vodiy House xizmati qancha turadi",
+      "text": "Xaridor uchun — 0 so‘m. Agentlik mukofotini quruvchi to‘laydi, kvartira narxi bundan o‘zgarmaydi."
+    },
+    "q2": {
+      "title": "Qaysi hujjatlarni tekshiramiz",
+      "text": "Qurilish ruxsatnomasi, yer hujjatlari va topshirish muddatlari. Tekshirilgan TJMlar saytda «Vodiy House tekshirgan» belgisi bilan."
+    },
+    "q3": {
+      "title": "Muddatli to‘lov va ipoteka",
+      "text": "Quruvchilar va banklar dasturlari shartlari — saytdagi kalkulyatorda. Kvartirangiz bo‘yicha aniq hisobni menejer yuboradi."
+    },
+    "cta": "Savollar qoldimi? Menejer qo‘ng‘iroq qilib, hammasini aytib beradi."
+  },
+  "privacy": {
+    "metaTitle": "Maxfiylik siyosati — Vodiy House",
+    "metaDescription": "Vodiy House vodiyhouse.uz sayti tashrifchilari ma’lumotlarini qanday qayta ishlaydi.",
+    "eyebrow": "Hujjatlar",
+    "title": "Maxfiylik siyosati",
+    "lead": "Vodiy House vodiyhouse.uz sayti tashrifchilari ma’lumotlarini qanday qayta ishlaydi.",
+    "s1": {
+      "title": "Qanday ma’lumotlarni olamiz",
+      "text": "Ism, telefon raqami va qulay til — ariza qoldirganingizda. Ariza bilan birga — qaysi TJM yoki kvartira haqida savol, sayt sahifasi va siz kelgan reklama belgilari.\n\nVodiy House Telegram-botiga yozsangiz — Telegramdagi ism va nik hamda siz ulashgan raqam."
+    },
+    "s2": {
+      "title": "Nima uchun",
+      "text": "Vodiy House menejeri siz bilan bog‘lanishi, savollarga javob berishi, kvartira tanlashi va ko‘rsatuvni tashkil qilishi uchun. Reklama belgilari — qaysi reklama ishlayotganini bilish uchun."
+    },
+    "s3": {
+      "title": "Kimga beramiz",
+      "text": "Arizani faqat Vodiy House xodimlari ko‘radi. Kontaktlaringiz roziligingizsiz quruvchilarga va uchinchi shaxslarga berilmaydi."
+    },
+    "s4": {
+      "title": "Brauzerda nima saqlanadi",
+      "text": "Tanlangan TJMlar, sayt tili va mavzusi, birinchi tashrif belgilari — brauzeringiz xotirasida. Ularni brauzer sozlamalarida o‘chirish mumkin."
+    },
+    "s5": {
+      "title": "Qancha saqlaymiz",
+      "text": "Arizalar siz bilan ishlash uchun kerak bo‘lguncha saqlanadi. Ma’lumotlaringizni so‘rov bo‘yicha o‘chirish mumkin."
+    },
+    "s6": {
+      "title": "Qanday bog‘lanish mumkin",
+      "text": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — Vodiy House telefoni yoki Telegrami orqali: kontaktlar sahifa pastida."
+    },
+    "edition": "Tahrir: 25.10.2026"
   }
 }
