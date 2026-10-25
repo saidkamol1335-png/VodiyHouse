@@ -198,3 +198,14 @@
   display: flex;
   gap: 8px;
 }
+
+/* Телефон: шапка лежит поверх фото с кнопками справа сверху — сердце и «Поделиться» уходят в левый
+   нижний угол, напротив счётчика (в мокапе MobJk их нет — реши сам). */
+@media (max-width: 760px) {
+  .complex-gallery__tools {
+    top: auto;
+    right: auto;
+    bottom: 12px;
+    left: 12px;
+  }
+}
