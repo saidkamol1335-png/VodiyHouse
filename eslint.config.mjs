@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "lib/admin/server/**",
+      // Заявки посетителя без входа и расписание: прав сотрудника нет, проверяет база (submit_lead и
+      // очередь доставки открыты только серверу). В браузер модули не попадают (server-only).
+      "lib/leads/server/**",
       "lib/supabase/admin.ts",
       "lib/supabase/authForwarding.ts",
       "lib/supabase/env.test.ts",

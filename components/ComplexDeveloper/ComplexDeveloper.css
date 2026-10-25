@@ -76,6 +76,14 @@
   line-height: var(--lh-body);
 }
 
+/* «Получить консультацию» (мокап .devc .row.mt20): к Vodiy House, не к застройщику (правило 1.2). */
+.complex-developer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
 .complex-developer__label {
   margin: 0;
   font-family: var(--mono);

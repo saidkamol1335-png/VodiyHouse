@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { ComplexTerms } from "@/components/ComplexTerms";
 import { ComplexDetails } from "@/components/ComplexDetails";
@@ -9,6 +10,8 @@ import { ComplexLocation } from "@/components/ComplexLocation";
 import { ComplexSection } from "@/components/ComplexSection";
 import { ComplexStock } from "@/components/ComplexStock";
 import { ComplexVideos } from "@/components/ComplexVideos";
+import { LeadButton } from "@/components/LeadDialog";
+import { LeadMore } from "@/components/LeadMore";
 import { formatDayTime } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import { LEAD_FORM_ENABLED } from "@/lib/site/flags";
@@ -43,7 +46,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("layouts") ? (
         <ComplexSection id={COMPLEX_ANCHORS.layouts} title={t("layouts.title")}>
-          <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} leadEnabled={LEAD_FORM_ENABLED} />
+          <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} complexSlug={page.slug} complexName={name} leadEnabled={LEAD_FORM_ENABLED} />
         </ComplexSection>
       ) : null}
       {has("video") ? (
@@ -57,14 +60,27 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
         </ComplexSection>
       ) : null}
       <ComplexSection id={COMPLEX_ANCHORS.developer} title={t("developer.title")}>
-        <ComplexDeveloper page={page} />
+        <ComplexDeveloper page={page} consult={{ type: "consult", object: { complex: page.slug }, context: page.developer.name }} />
       </ComplexSection>
-      {has("documents") ? (
-        <ComplexSection id={COMPLEX_ANCHORS.documents} title={t("documents.title")} lead={t("documents.lead")}>
-          <ComplexDocuments documents={page.documents} />
-        </ComplexSection>
-      ) : null}
+      {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
+      <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
     </>
+  );
+}
+
+/** «Документы ЖК» и у заголовка — «Запросить сканы документов» (мокап .sec__h, заявка 10.1). */
+async function DocumentsSection({ page, name }: { page: ComplexPage; name: string }) {
+  const [t, tLead] = await Promise.all([getTranslations("complex.documents"), getTranslations("lead.buttons")]);
+  const request = (
+    <LeadButton intent={{ type: "documents", object: { complex: page.slug }, context: name }} variant="outline" size="sm">
+      <FileText size={16} aria-hidden="true" />
+      {tLead("documents")}
+    </LeadButton>
+  );
+  return (
+    <ComplexSection id={COMPLEX_ANCHORS.documents} title={t("title")} lead={t("lead")} action={request}>
+      <ComplexDocuments documents={page.documents} />
+    </ComplexSection>
   );
 }
 

@@ -71,6 +71,14 @@
   color: var(--fg-3);
 }
 
+/* «Подберём вручную» и «Сбросить» рядом по центру (мокап .empty-res .row). */
+.catalog-results__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
 .catalog-results__more {
   display: flex;
   justify-content: center;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { LeadProvider } from "@/components/LeadDialog";
 import { RootDocument } from "@/components/RootDocument";
 import { ADMIN_LOCALE } from "@/lib/i18n/routing";
 import "../globals.css";
@@ -21,5 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
 // фазы 1). Свои devOnlyStand / devOnly у стендов и действий остаются вторым рубежом.
 export default function DevLayout({ children }: LayoutProps<"/dev">) {
   if (process.env.NODE_ENV === "production") notFound();
-  return <RootDocument lang={ADMIN_LOCALE}>{children}</RootDocument>;
+  // Окно заявки — как на сайте (шаг 3.7): кнопки заявок стендов отправляют настоящую заявку.
+  return (
+    <RootDocument lang={ADMIN_LOCALE}>
+      <LeadProvider>{children}</LeadProvider>
+    </RootDocument>
+  );
 }

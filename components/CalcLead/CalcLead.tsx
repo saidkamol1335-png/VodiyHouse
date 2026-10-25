@@ -1,162 +1,37 @@
 "use client";
 
-import { Clock, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type FormEvent, type Ref, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
 import { Button } from "@/components/Button";
-import { Field } from "@/components/Field";
-import { formatPhone, phoneDigits } from "@/lib/format";
+import { useLeadOpener } from "@/components/LeadDialog";
+import type { LeadCalc, LeadObject } from "@/lib/leads/types";
 
 export type CalcLeadRow = { label: string; value: string };
 
 type CalcLeadProps = {
-  id: string;
-  /** «Ipoteka Bank · Рассрочка через банк · 39 617 000 сум/мес» — над полями, как «ЖК Shodlik». */
+  /** «Ipoteka Bank · Рассрочка через банк · 39 617 000 сум/мес» — плашка над полями окна. */
   context: string;
-  /** Что попадёт в заявку: программа, стоимость, взнос, срок, платёж. */
+  /** Что увидит менеджер: программа, стоимость, взнос, срок, платёж. */
   rows: readonly CalcLeadRow[];
+  /** О чём расчёт: застройщик (/kalkulyator) или ЖК, планировка и квартира (расчёт квартиры). */
+  object: LeadObject;
+  /** Снимок расчёта (Р4): база сохранит его с заявкой — условия и курс возьмёт сама. */
+  calc: LeadCalc | null;
 };
 
-type Contact = { name: string; phone: string };
-type Errors = Partial<Record<keyof Contact, string>>;
-
-const noSubscription = () => () => {};
-
 /**
- * «Получить точный расчёт» (решение фазы 2, мокап MobLead): окно с контекстом расчёта, имя и
- * телефон. Отправка заявок — фаза 3; до неё кнопку видят только стенды, и окно показывает, что
- * соберётся в заявку.
+ * «Получить точный расчёт» (решение фазы 2, мокап MobLead, ТЗ 10.1): общее окно заявки сайта с
+ * контекстом расчёта; заявка «Расчёт» уходит со строками расчёта и его снимком.
  */
-export function CalcLead({ id, context, rows }: CalcLeadProps) {
-  const t = useTranslations("calc.lead");
-  const dialog = useRef<HTMLDialogElement>(null);
-  // Окно — в body, а не в итоге: тёмная панель итога на телефоне (Р9) переопределяет токены
-  // цветов, и окно внутри неё наследовало бы прозрачный фон. На сервере document нет.
-  const inBrowser = useSyncExternalStore(
-    noSubscription,
-    () => true,
-    () => false,
-  );
-  const leadWindow = (
-    <dialog ref={dialog} className="calc-lead" aria-labelledby={`${id}-title`}>
-      <div className="calc-lead__head">
-        <h2 id={`${id}-title`} className="calc-lead__title">
-          {t("title")}
-        </h2>
-        <button
-          type="button"
-          className="calc-lead__close"
-          aria-label={t("close")}
-          onClick={() => dialog.current?.close()}
-        >
-          <X size={18} aria-hidden="true" />
-        </button>
-      </div>
-      <p className="calc-lead__context">{context}</p>
-      <LeadForm id={id} rows={rows} />
-    </dialog>
-  );
+export function CalcLead({ context, rows, object, calc }: CalcLeadProps) {
+  const t = useTranslations("lead.buttons");
+  const open = useLeadOpener();
+  if (!open) return null;
   return (
-    <>
-      <Button block onClick={() => dialog.current?.showModal()}>
-        {t("open")}
-      </Button>
-      {inBrowser ? createPortal(leadWindow, document.body) : null}
-    </>
-  );
-}
-
-function contactErrors(contact: Contact, t: (key: "required" | "phoneInvalid") => string): Errors {
-  const errors: Errors = {};
-  if (!contact.name.trim()) errors.name = t("required");
-  if (!phoneDigits(contact.phone))
-    errors.phone = contact.phone.trim() ? t("phoneInvalid") : t("required");
-  return errors;
-}
-
-/**
- * Проверка и «отправка»: ошибка — фокус на первое неверное поле (диктор читает её через
- * aria-describedby); верно — снимок контакта на момент «Отправить» и фокус на собранное.
- */
-function useLeadForm(id: string) {
-  const t = useTranslations("calc.lead");
-  const [contact, setContact] = useState<Contact>({ name: "", phone: "" });
-  const [errors, setErrors] = useState<Errors>({});
-  const [sent, setSent] = useState<Contact | null>(null);
-  const collected = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (sent) collected.current?.focus();
-  }, [sent]);
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    const next = contactErrors(contact, t);
-    setErrors(next);
-    const invalid = (["name", "phone"] as const).find((key) => next[key]);
-    setSent(invalid ? null : { ...contact });
-    if (invalid) document.getElementById(`${id}-${invalid}`)?.focus();
-  };
-  return { t, contact, setContact, errors, sent, collected, submit };
-}
-
-/** Имя и телефон: «Заполните» под пустым, телефон — +998 и 9 цифр; верно — что соберётся в заявку. */
-function LeadForm({ id, rows }: { id: string; rows: readonly CalcLeadRow[] }) {
-  const { t, contact, setContact, errors, sent, collected, submit } = useLeadForm(id);
-  return (
-    <>
-      <form className="calc-lead__form" noValidate onSubmit={submit}>
-        <Field
-          id={`${id}-name`}
-          label={t("name")}
-          autoComplete="name"
-          value={contact.name}
-          error={errors.name}
-          onChange={(event) => setContact({ ...contact, name: event.target.value })}
-        />
-        <Field
-          id={`${id}-phone`}
-          label={t("phone")}
-          type="tel"
-          autoComplete="tel"
-          placeholder={t("phonePlaceholder")}
-          value={contact.phone}
-          error={errors.phone}
-          onChange={(event) => setContact({ ...contact, phone: event.target.value })}
-        />
-        <Button type="submit" block>
-          {t("submit")}
-        </Button>
-        <p className="calc-lead__note">{t("consent")}</p>
-      </form>
-      <p className="calc-lead__next">
-        <Clock size={16} aria-hidden="true" />
-        {t("next")}
-      </p>
-      {sent ? <Collected ref={collected} rows={rows} contact={sent} /> : null}
-    </>
-  );
-}
-
-type CollectedProps = { rows: readonly CalcLeadRow[]; contact: Contact; ref: Ref<HTMLElement> };
-
-function Collected({ rows, contact, ref }: CollectedProps) {
-  const t = useTranslations("calc.lead");
-  const all = [
-    ...rows,
-    { label: t("name"), value: contact.name.trim() },
-    { label: t("phone"), value: formatPhone(contact.phone) ?? contact.phone },
-  ];
-  return (
-    <section ref={ref} className="calc-lead__collected" role="status" tabIndex={-1}>
-      <p className="calc-lead__stand">{t("stand")}</p>
-      <dl className="calc-lead__rows">
-        {all.map((row) => (
-          <div key={row.label} className="calc-lead__row">
-            <dt>{row.label}</dt>
-            <dd>{row.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
+    <Button
+      block
+      onClick={() => open({ type: "calc", object, context, calcRows: [...rows], ...(calc ? { calc } : {}) })}
+    >
+      {t("calc")}
+    </Button>
   );
 }

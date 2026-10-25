@@ -12,6 +12,7 @@ import {
   staffAuthErrorCode,
   staffDbErrorCode,
 } from "./authErrors";
+import { leadDbErrorCode } from "@/lib/leads/errors";
 import { CONTENT_ERRORS, contentDbErrorCode } from "./developers/errors";
 
 const api = (code: string, status = 400) => new AuthApiError("текст Supabase", status, code);
@@ -80,7 +81,8 @@ describe("у каждого кода есть текст в messages/ru.json", (
 });
 
 // Новая миграция с новым отказом без сопоставления показала бы «Не получилось сохранить».
-describe("каждый hint vh:… из миграций знает кабинет", () => {
+// Отказы заявок с сайта (лимит частоты) знает форма сайта — leadDbErrorCode.
+describe("каждый hint vh:… из миграций знает кабинет или форма заявки", () => {
   const dir = path.join("supabase", "migrations");
   const hints = new Set(
     readdirSync(dir)
@@ -92,7 +94,8 @@ describe("каждый hint vh:… из миграций знает кабине
   it.each([...hints].sort())("%s", (hint) => {
     const known =
       contentDbErrorCode({ code: "XX000", hint }) !== "unknown" ||
-      staffDbErrorCode({ code: "XX000", hint }) !== "unknown";
+      staffDbErrorCode({ code: "XX000", hint }) !== "unknown" ||
+      leadDbErrorCode({ code: "XX000", hint }) !== "unknown";
     expect(known).toBe(true);
   });
 });

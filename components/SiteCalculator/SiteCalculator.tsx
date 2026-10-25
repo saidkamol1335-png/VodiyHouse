@@ -63,7 +63,7 @@ export function SiteCalculator({ screen, initialParams, leadEnabled, hints }: Si
               developerName: current.name,
               actualAt: current.checkedAt,
             }}
-            leadEnabled={leadEnabled}
+            lead={leadEnabled ? { developer: current.slug } : null}
           />
         )}
         renderStickyAction={() => <ToTotal />}

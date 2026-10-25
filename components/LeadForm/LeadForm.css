@@ -1,0 +1,200 @@
+/* Форма заявки (мокап: .form, .form__two, .opts, .chip, .consent, .done, .next): в окне и в
+   разделе страницы. Чипы — радиокнопки под видом .chip; анимации — только opacity и transform (§3). */
+
+.lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lead-form__two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lead-form__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.lead-form__label {
+  padding: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.lead-form__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lead-form__chip {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Сама радиокнопка — поверх чипа, прозрачная: клик, фокус и диктор — её, вид — чипа. */
+.lead-form__radio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.lead-form__chip-text {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 15px;
+  border: 1px solid var(--chip-border);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-size: var(--fs-small);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.lead-form__chip:hover .lead-form__chip-text {
+  border-color: var(--line-3);
+  color: var(--fg);
+}
+
+.lead-form__radio:checked + .lead-form__chip-text {
+  border-color: var(--chip-on-border);
+  background: var(--chip-on-bg);
+  box-shadow: var(--chip-on-ring);
+  color: var(--fg);
+}
+
+.lead-form__radio:focus-visible + .lead-form__chip-text {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.lead-form__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.lead-form--inline .lead-form__submit {
+  align-self: flex-start;
+}
+
+.lead-form__consent {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+
+.lead-form__privacy {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.lead-form__done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 4px;
+  text-align: center;
+}
+
+/* Фокус ставится сюда после отправки, чтобы диктор прочёл ответ, — рамка не нужна. */
+.lead-form__done:focus {
+  outline: none;
+}
+
+.lead-form__done-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.lead-form__done-icon svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 2.4;
+}
+
+[data-motion="full"] .lead-form__done-icon,
+[data-motion="lite"] .lead-form__done-icon {
+  animation: lead-form-pop var(--dur-base) var(--ease) both;
+}
+
+.lead-form__done-title {
+  font-size: var(--fs-h3);
+}
+
+.lead-form__done-number {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+}
+
+.lead-form__done-text {
+  margin: 0;
+  color: var(--fg-2);
+}
+
+.lead-form__next {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-align: left;
+}
+
+.lead-form__next svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--amber-2);
+}
+
+@media (max-width: 767px) {
+  .lead-form__two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (pointer: coarse) {
+  .lead-form__chip-text {
+    height: var(--touch-target);
+  }
+}
+
+@keyframes lead-form-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}

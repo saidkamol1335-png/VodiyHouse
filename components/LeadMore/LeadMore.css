@@ -1,0 +1,34 @@
+/* «Хотите узнать больше?» (мокап: .sec > .card.card--pad.beam > .grid2): карточка с лучом, текст
+   слева, форма справа; на телефоне — столбиком. */
+
+.lead-more {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  margin-top: 96px;
+  padding: 32px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.lead-more__title {
+  margin-top: 12px;
+}
+
+.lead-more__lead {
+  margin: 12px 0 0;
+  color: var(--fg-2);
+  line-height: var(--lh-body);
+}
+
+@media (max-width: 760px) {
+  .lead-more {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    margin-top: 56px;
+    padding: 22px 16px;
+  }
+}

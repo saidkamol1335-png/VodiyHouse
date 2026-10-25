@@ -21,6 +21,10 @@ type ComplexPlansProps = {
   cards: readonly LayoutCardModel[];
   /** Тексты «?» калькулятора из справочника (шаг 2.8). */
   hints: CalcHints;
+  /** Адрес ЖК — заявки «Узнать о наличии» и «Получить точный расчёт» знают, о каком ЖК. */
+  complexSlug: string;
+  /** «ЖК Shodlik» — плашка контекста в окне заявки. */
+  complexName: string;
   leadEnabled: boolean;
 };
 
@@ -31,7 +35,7 @@ const INITIAL_PARAMS = readCalcParams({});
  * «Планировки» (мокап .plans, ТЗ 7.4): фильтры по блоку и комнатам, карточки, «Рассчитать платёж»
  * открывает расчёт этой квартиры (шаг 2.7) — на 1440 под рядом карточки, на телефоне шторкой.
  */
-export function ComplexPlans({ sectionId, cards, hints, leadEnabled }: ComplexPlansProps) {
+export function ComplexPlans({ sectionId, cards, hints, complexSlug, complexName, leadEnabled }: ComplexPlansProps) {
   const t = useTranslations("complex.layouts");
   const [filter, setFilter] = useState<LayoutFilter>(ALL);
   const [zoom, setZoom] = useState<LayoutCardModel | null>(null);
@@ -58,10 +62,11 @@ export function ComplexPlans({ sectionId, cards, hints, leadEnabled }: ComplexPl
               opener={calc.opener(card.layout.id)}
               onCalculate={() => calc.toggle(card.layout.id)}
               onZoom={() => setZoom(card)}
+              ask={{ type: "layout", object: { complex: complexSlug, layout: card.layout.id }, context: complexName }}
             />
             {calc.open?.layoutId === card.layout.id ? (
               <div className="complex-plans__calc">
-                <FlatCalculator key={`${card.layout.id}-${calc.open.round}`} id="complex-flat-calc" screen={calc.open.screen} initialParams={INITIAL_PARAMS} leadEnabled={leadEnabled} onClose={calc.close} hints={hints} />
+                <FlatCalculator key={`${card.layout.id}-${calc.open.round}`} id="complex-flat-calc" screen={calc.open.screen} initialParams={INITIAL_PARAMS} lead={leadEnabled ? { complex: complexSlug, layout: card.layout.id } : null} onClose={calc.close} hints={hints} />
               </div>
             ) : null}
           </Fragment>

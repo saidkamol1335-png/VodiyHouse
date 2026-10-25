@@ -13,13 +13,14 @@ import { searchWith } from "@/components/PaymentCalculator/useCalcParams";
 import type { CalcProgram } from "@/lib/calc/programs";
 import { shareParams } from "@/lib/calc/view";
 import { formatPercent } from "@/lib/format";
+import type { LeadCalc, LeadObject } from "@/lib/leads/types";
 
 type SiteActionsProps = {
   snapshot: CalcSnapshot<CalcProgram>;
   /** Застройщик и наличие для строки «где» в тексте Telegram (страница или квартира). */
   source: Omit<TelegramSource, "link">;
-  /** «Получить точный расчёт» — до заявок фазы 3 только на стенде (решение фазы 2). */
-  leadEnabled: boolean;
+  /** О чём заявка «Получить точный расчёт»; null — кнопки нет. */
+  lead: LeadObject | null;
 };
 
 /** Что попадёт в заявку: программа, стоимость, взнос, срок, платёж — строками итога. */
@@ -38,17 +39,32 @@ function leadRows(snapshot: CalcSnapshot<CalcProgram>): CalcLeadRow[] {
   ];
 }
 
+/** Снимок для базы (как «Скопировать для Telegram» кабинета): параметры, стоимость и итог. */
+function leadCalc({ view, params, context }: CalcSnapshot<CalcProgram>): LeadCalc | null {
+  if (!view.selected || !view.result?.ok) return null;
+  return {
+    program: view.selected.id,
+    input: { params, price: view.price, language: context.locale },
+    result: view.result.calculation as unknown as Record<string, unknown>,
+  };
+}
+
 /**
  * Кнопки итога сайта (мокапы SiteCalc, SiteJkCalc1): «Получить точный расчёт» и «Скопировать для
  * Telegram» — у /kalkulyator и у расчёта квартиры.
  */
-export function SiteActions({ snapshot, source, leadEnabled }: SiteActionsProps) {
-  const { view, total, context } = snapshot;
+export function SiteActions({ snapshot, source, lead }: SiteActionsProps) {
+  const { view, total, context, params } = snapshot;
   const leadContext = total.head ? `${total.eyebrow} · ${total.head.value}` : total.eyebrow;
   return (
     <>
-      {leadEnabled && view.selected ? (
-        <CalcLead id="site-calc-lead" context={leadContext} rows={leadRows(snapshot)} />
+      {lead && view.selected ? (
+        <CalcLead
+          context={leadContext}
+          rows={leadRows(snapshot)}
+          object={params.unit ? { ...lead, unit: params.unit } : lead}
+          calc={leadCalc(snapshot)}
+        />
       ) : null}
       <SiteTelegramCopy
         message={calcTelegramText(view, source, context)}
@@ -76,7 +92,7 @@ type SiteTelegramCopyProps = {
   withLink: () => string | null;
 };
 
-/** Текст в буфер; буфер недоступен — текст в поле, чтобы скопировать руками. Снимка нет (заявка — фаза 3). */
+/** Текст в буфер; буфер недоступен — текст в поле, чтобы скопировать руками. */
 function SiteTelegramCopy({ message, withLink }: SiteTelegramCopyProps) {
   const t = useTranslations("calc");
   const [saved, setStatus] = useState<Status>(null);

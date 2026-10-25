@@ -12,6 +12,7 @@ import {
   CATALOG_MESSAGES,
   CALC_NAMESPACE,
   COMPLEX_MESSAGES,
+  LAZY_SITE_MESSAGES,
   pickMessages,
   SITE_SHELL_MESSAGES,
   siteMessages,
@@ -59,9 +60,10 @@ describe("сообщения для браузера", () => {
       isComplexRoute(file) ? COMPLEX_MESSAGES
       : readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES
       : SITE_SHELL_MESSAGES;
+    // Тексты окна заявки приходят с самим окном (LAZY_SITE_MESSAGES) — их провайдер ставит LeadProvider.
     const missing = pages.flatMap((file) =>
       [...clientNamespaces([file])]
-        .filter((namespace) => namespace !== "*" && !covers(allowedFor(file), namespace))
+        .filter((namespace) => namespace !== "*" && !covers([...allowedFor(file), ...LAZY_SITE_MESSAGES], namespace))
         .map((namespace) => `${file}: ${namespace}`),
     );
     expect(clientNamespaces(pages).size).toBeGreaterThan(0);

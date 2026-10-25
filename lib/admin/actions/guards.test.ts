@@ -76,6 +76,11 @@ describe("Server Actions кабинета", () => {
       setLayoutAvailableAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Расчёт для клиента» считают оба (PLAN §3б): снимок при «Скопировать для Telegram».
       saveCalculationAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // Заявки ведут руководитель и менеджер (PLAN §5, шаг 3.7): карточка, статус, ответственный, повтор.
+      loadLeadCardAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      setLeadStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      assignLeadAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\]\)/,
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {

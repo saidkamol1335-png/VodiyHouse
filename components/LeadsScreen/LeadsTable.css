@@ -1,0 +1,189 @@
+/* Таблица заявок (мокап CabLeads): шапка моно капсом, строки-зебра (--row-alt), номер моно; вся
+   строка — нажатие на карточку. Уже 720 px — карточки по сетке областей. */
+
+.leads-table {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+  container: leads-table / inline-size;
+}
+
+.leads-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.leads-table__th {
+  padding: 14px 12px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.leads-table__th--number {
+  width: 76px;
+}
+
+.leads-table__th--when {
+  width: 128px;
+}
+
+.leads-table__th--type {
+  width: 132px;
+}
+
+.leads-table__th--complex {
+  width: 120px;
+}
+
+.leads-table__th--status {
+  width: 168px;
+}
+
+.leads-table__th--manager {
+  width: 104px;
+}
+
+.leads-table__th--delivery {
+  width: 128px;
+}
+
+.leads-table__row {
+  cursor: pointer;
+}
+
+.leads-table__row:nth-child(even) {
+  background: var(--row-alt);
+}
+
+.leads-table__row:hover,
+.leads-table__row--selected {
+  background: var(--amber-soft);
+}
+
+.leads-table__cell {
+  padding: 14px 12px;
+  font-size: var(--fs-small);
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.leads-table__open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.leads-table__open:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.leads-table__cell--when,
+.leads-table__cell--source {
+  color: var(--fg-2);
+}
+
+.leads-table__name {
+  display: block;
+  font-weight: 700;
+}
+
+.leads-table__phone {
+  display: block;
+  color: var(--fg-3);
+  white-space: nowrap;
+}
+
+.leads-table__repeat {
+  display: block;
+  color: var(--amber-2);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  text-transform: uppercase;
+}
+
+/* 720–1079: без «Источника» и «Менеджера» — они есть в карточке заявки. */
+@container leads-table (max-width: 1079px) {
+  .leads-table__th--source,
+  .leads-table__th--manager,
+  .leads-table__cell--source,
+  .leads-table__cell--manager {
+    display: none;
+  }
+}
+
+@container leads-table (max-width: 719px) {
+  .leads-table__table,
+  .leads-table__table > tbody {
+    display: block;
+  }
+
+  .leads-table__head {
+    display: none;
+  }
+
+  .leads-table__row {
+    display: grid;
+    grid-template-areas:
+      "number when"
+      "client client"
+      "type complex"
+      "status delivery";
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    padding: 14px 16px;
+    border-bottom: 1px dashed var(--dash);
+  }
+
+  .leads-table__cell {
+    padding: 0;
+  }
+
+  .leads-table__cell--number {
+    grid-area: number;
+  }
+
+  .leads-table__cell--when {
+    grid-area: when;
+    text-align: right;
+  }
+
+  .leads-table__cell--client {
+    grid-area: client;
+  }
+
+  .leads-table__cell--type {
+    grid-area: type;
+  }
+
+  .leads-table__cell--complex {
+    grid-area: complex;
+    text-align: right;
+  }
+
+  .leads-table__cell--status {
+    grid-area: status;
+  }
+
+  .leads-table__cell--delivery {
+    grid-area: delivery;
+    text-align: right;
+  }
+
+  .leads-table__open {
+    min-height: var(--touch-target);
+  }
+}

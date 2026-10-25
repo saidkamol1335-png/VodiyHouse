@@ -16,11 +16,6 @@
   gap: 28px;
 }
 
-/* Без контактов Vodiy House (до ответа заказчика) — без колонки связи. */
-.complex-offer__top--no-cta {
-  grid-template-columns: auto minmax(0, 1fr);
-}
-
 .complex-offer__live {
   display: flex;
   align-items: center;
@@ -101,7 +96,14 @@
   color: var(--ok);
 }
 
+/* Справа: «Записаться на просмотр» во всю ширину, под ней телефон и Telegram (мокап .jki__cta). */
 .complex-offer__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.complex-offer__links {
   display: flex;
   gap: 8px;
 }
@@ -251,9 +253,12 @@
   }
 
   .complex-offer__cta {
+    margin-top: 4px;
+  }
+
+  .complex-offer__links {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin-top: 4px;
   }
 
   .complex-offer__phone {

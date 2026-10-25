@@ -8,7 +8,8 @@ const dotted = (iso: string) => iso.split("-").reverse().join(".");
 
 /**
  * «Документы ЖК» (мокап .li, ТЗ 7.8): только проверенные — ✓, название, «?» с пояснением «что это
- * значит для вас», дата проверки. Сканы на сайт не загружаются; «Запросить сканы» — с заявками (3.7).
+ * значит для вас», дата проверки. Сканы на сайт не загружаются — «Запросить сканы документов» у
+ * заголовка раздела (заявка 10.1).
  */
 export async function ComplexDocuments({ documents }: { documents: ComplexPage["documents"] }) {
   const t = await getTranslations("complex.documents");

@@ -7,6 +7,8 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { CatalogFilter } from "@/components/CatalogFilter";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { useLeadOpener } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
 import { SelectField } from "@/components/SelectField";
 import { getMotionTier } from "@/lib/motion";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
@@ -75,7 +77,7 @@ export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
       {/* Пока открыт экран фильтра телефона, выдача за ним недоступна (диалог). */}
       <div className="catalog-results__body" inert={open}>
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
-        <ResultsList catalog={catalog} found={found} shown={shown} pageSize={pageSize} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
+        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
       </div>
     </div>
   );
@@ -84,23 +86,37 @@ export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
 type ResultsListProps = {
   catalog: SiteCatalog;
   found: readonly CatalogComplex[];
+  filter: Filter;
   shown: number;
   pageSize: number;
   onMore: () => void;
   onReset: () => void;
 };
 
-/** Карточки порциями и «Показать ещё»; пусто — подсказка и «Сбросить фильтры» (на телефоне иначе не сбросить). */
-function ResultsList({ catalog, found, shown, pageSize, onMore, onReset }: ResultsListProps) {
+/**
+ * «Подберём вручную» (ТЗ 10.1): заявка «Подбор» с фильтрами — текстом для менеджера («rooms 2,
+ * price_max 60000») и ссылкой на ту же выдачу.
+ */
+function pickIntent(filter: Filter): LeadIntent {
+  const search = searchFromFilter(filter);
+  const text = [...new URLSearchParams(search)].map(([key, value]) => `${key} ${value}`).join(", ");
+  return { type: "pick", filters: { text, link: `${window.location.pathname}${search}` } };
+}
+
+/** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
+function ResultsList({ catalog, found, filter, shown, pageSize, onMore, onReset }: ResultsListProps) {
   const t = useTranslations("catalog.filter");
   if (found.length === 0) {
     return (
       <div className="catalog-results__empty">
         <h3 className="catalog-results__empty-title">{t("nothing")}</h3>
         <p className="catalog-results__empty-hint">{t("nothingHint")}</p>
-        <Button variant="outline" size="sm" className="catalog-results__reset" onClick={onReset}>
-          {t("reset")}
-        </Button>
+        <div className="catalog-results__empty-actions">
+          <PickButton filter={filter} />
+          <Button variant="outline" size="sm" onClick={onReset}>
+            {t("reset")}
+          </Button>
+        </div>
       </div>
     );
   }
@@ -172,4 +188,16 @@ function useSheetLock(open: boolean, close: () => void) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+}
+
+/** Окно заявки открывается с фильтрами на момент нажатия (адрес страницы — только в браузере). */
+function PickButton({ filter }: { filter: Filter }) {
+  const open = useLeadOpener();
+  const t = useTranslations("lead.buttons");
+  if (!open) return null;
+  return (
+    <Button size="sm" onClick={() => open(pickIntent(filter))}>
+      {t("pick")}
+    </Button>
+  );
 }

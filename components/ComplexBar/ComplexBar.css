@@ -1,5 +1,5 @@
-/* Нижняя панель телефона (мокап .bb): стекло, кружок Telegram и «Позвонить» на всю ширину;
-   выезжает снизу после первого экрана. На 1440 её нет. */
+/* Нижняя панель телефона (мокап .bb): стекло, кружки «Позвонить» и Telegram, «Записаться на
+   просмотр» на остальную ширину; выезжает снизу после первого экрана. На 1440 её нет. */
 .complex-bar,
 .complex-bar__spacer {
   display: none;
@@ -52,7 +52,7 @@
     color: var(--fg);
   }
 
-  .complex-bar__call {
+  .complex-bar__book {
     display: inline-flex;
     flex: 1;
     align-items: center;
@@ -61,10 +61,18 @@
     min-height: 52px;
     border-radius: var(--r-pill);
     background: var(--amber);
+    border: 0;
     color: var(--on-amber);
+    font: inherit;
     font-size: var(--fs-body);
     font-weight: 700;
-    text-decoration: none;
+    cursor: pointer;
     box-shadow: var(--glow-amber);
+  }
+
+  .complex-bar__book:focus-visible,
+  .complex-bar__icon:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
   }
 }

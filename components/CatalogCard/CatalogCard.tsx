@@ -2,6 +2,8 @@
 
 import { Check, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { LeadButton } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
 import { PhoneButton } from "@/components/PhoneButton";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { Link } from "@/lib/i18n/navigation";
@@ -22,7 +24,8 @@ type CatalogCardProps = {
 /**
  * Карточка ЖК каталога (мокап .jc): фото, застройщик и «Проверено Vodiy House», название — ссылка
  * на всю карточку, адрес и ориентир, срок, этажность и отделка, типы с остатком, способы оплаты,
- * цена «от» в валюте блока (Ф6) и «Платёж от». Без скидок (PLAN §3.13). Связь — только Vodiy House.
+ * цена «от» в валюте блока (Ф6) и «Платёж от», «Показать телефон» и «Перезвоните мне» (ТЗ 10.1).
+ * Без скидок (PLAN §3.13). Связь — только Vodiy House.
  */
 export function CatalogCard({ complex, catalog, preload = false }: CatalogCardProps) {
   const t = useTranslations("catalog.card");
@@ -62,10 +65,20 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
         <CardPayChips pays={cardPays(complex, developer)} />
         <div className="catalog-card__bottom">
           <CardPriceRow price={cardPrice(complex, catalog)} />
-          {phone ? <PhoneButton phone={phone} className="catalog-card__phone" /> : null}
+          <CardButtons phone={phone} intent={{ type: "callback", object: { complex: complex.slug }, context: name }} />
         </div>
       </div>
     </article>
+  );
+}
+
+/** «Показать телефон» и «Перезвоните мне» (мокап .jc__btns) — над растянутой ссылкой карточки. */
+function CardButtons({ phone, intent }: { phone: string | null; intent: LeadIntent }) {
+  return (
+    <div className="catalog-card__buttons">
+      {phone ? <PhoneButton phone={phone} className="catalog-card__phone" /> : null}
+      <LeadButton intent={intent} size="sm" className="catalog-card__callback" />
+    </div>
   );
 }
 

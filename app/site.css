@@ -8,6 +8,8 @@
 @import "../components/Container/Container.css";
 @import "../components/Eyebrow/Eyebrow.css";
 @import "../components/HeaderNav/HeaderNav.css";
+@import "../components/LeadDialog/LeadDialog.css";
+@import "../components/LeadForm/LeadForm.css";
 @import "../components/Heading/Heading.css";
 @import "../components/PhoneButton/PhoneButton.css";
 @import "../components/PhoneMenu/PhoneMenu.css";

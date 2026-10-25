@@ -1,6 +1,8 @@
-import { Check, Send } from "lucide-react";
+import { CalendarCheck, Check, Send } from "lucide-react";
 import { Beam } from "@/components/Beam";
 import { getLocale, getTranslations } from "next-intl/server";
+import { LeadButton } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
 import { PhoneButton } from "@/components/PhoneButton";
 import { type SiteContacts, phoneHref, telegramHref } from "@/lib/contacts";
 import { formatPrice } from "@/lib/format";
@@ -11,6 +13,8 @@ import type { ComplexSummary } from "@/lib/site/complex/summary";
 type ComplexOfferProps = {
   /** «ЖК Shodlik» — подпись карточки для диктора (мокап: aria-label .jki). */
   name: string;
+  /** Адрес ЖК — заявка «Записаться на просмотр» знает, о каком ЖК (база проверит сама). */
+  slug: string;
   summary: ComplexSummary;
   /** Контакты Vodiy House (Ф9) — единственные на сайте (правило ТЗ 1.2). */
   contacts: SiteContacts;
@@ -18,10 +22,10 @@ type ComplexOfferProps = {
 
 /**
  * Главное за 10 секунд (ТЗ 7.1, мокап .jki; телефон — .sum): в продаже, цена «от» и за м², платёж,
- * срок сдачи, проверенные документы, связь с Vodiy House и плашка «Для вас бесплатно». Без скидок
- * (PLAN §3.13); «Записаться на просмотр» — с заявками (шаг 3.7), «Подарок» — со спецпредложениями (3б).
+ * срок сдачи, проверенные документы, «Записаться на просмотр» (форма 10.1), связь с Vodiy House и
+ * плашка «Для вас бесплатно». Без скидок (PLAN §3.13); «Подарок» — со спецпредложениями (3б).
  */
-export async function ComplexOffer({ name, summary, contacts }: ComplexOfferProps) {
+export async function ComplexOffer({ name, slug, summary, contacts }: ComplexOfferProps) {
   const t = await getTranslations("complex.offer");
   const locale = (await getLocale()) as Locale;
   const { price } = summary;
@@ -30,7 +34,7 @@ export async function ComplexOffer({ name, summary, contacts }: ComplexOfferProp
     <section className="complex-offer" aria-label={name}>
       {/* Луч по рамке (мокап .jki.beam): только в full, вне экрана — на паузе. */}
       <Beam />
-      <div className={contacts.phone || contacts.telegram ? "complex-offer__top" : "complex-offer__top complex-offer__top--no-cta"}>
+      <div className="complex-offer__top">
         <div className="complex-offer__price">
           <OfferLive free={summary.free} />
           <p className="complex-offer__amount">{price ? t("priceFrom", { price: money(price.amount) }) : t("priceOnRequest")}</p>
@@ -54,7 +58,7 @@ export async function ComplexOffer({ name, summary, contacts }: ComplexOfferProp
             </div>
           ) : null}
         </dl>
-        <OfferContacts contacts={contacts} />
+        <OfferContacts contacts={contacts} book={{ type: "view", object: { complex: slug }, context: name }} />
       </div>
       <OfferFree contacts={contacts} locale={locale} />
     </section>
@@ -86,12 +90,38 @@ async function OfferDeadline({ deadline }: { deadline: CardDeadline }) {
   );
 }
 
-/** «Показать телефон» и Telegram Vodiy House; на телефоне — «Позвонить» и «Telegram» (мокап .two). */
-async function OfferContacts({ contacts }: { contacts: SiteContacts }) {
-  const [t, tContacts] = await Promise.all([getTranslations("complex.offer"), getTranslations("contacts")]);
-  if (!contacts.phone && !contacts.telegram) return null;
+type OfferContactsProps = { contacts: SiteContacts; book: LeadIntent };
+
+/**
+ * «Записаться на просмотр» во всю ширину, под ней «Показать телефон» и Telegram Vodiy House; на
+ * телефоне — «Позвонить» и «Telegram» пополам (мокап .jki__cta, .sum__cta).
+ */
+async function OfferContacts({ contacts, book }: OfferContactsProps) {
+  const [t, tContacts, tLead] = await Promise.all([
+    getTranslations("complex.offer"),
+    getTranslations("contacts"),
+    getTranslations("lead.buttons"),
+  ]);
   return (
     <div className="complex-offer__cta">
+      <LeadButton intent={book} block className="complex-offer__book">
+        <CalendarCheck size={18} aria-hidden="true" />
+        {tLead("view")}
+      </LeadButton>
+      {contacts.phone || contacts.telegram ? <OfferLinks contacts={contacts} t={t} telegramText={tContacts("telegram")} /> : null}
+    </div>
+  );
+}
+
+type OfferLinksProps = {
+  contacts: SiteContacts;
+  t: Awaited<ReturnType<typeof getTranslations<"complex.offer">>>;
+  telegramText: string;
+};
+
+function OfferLinks({ contacts, t, telegramText }: OfferLinksProps) {
+  return (
+    <div className="complex-offer__links">
       {contacts.phone ? <PhoneButton phone={contacts.phone} className="complex-offer__phone" /> : null}
       {contacts.phone ? (
         <a className="complex-offer__button complex-offer__button--call" href={phoneHref(contacts.phone)}>
@@ -107,7 +137,7 @@ async function OfferContacts({ contacts }: { contacts: SiteContacts }) {
           aria-label={t("telegram")}
         >
           <Send size={16} strokeWidth={1.9} aria-hidden />
-          <span className="complex-offer__telegram-text">{tContacts("telegram")}</span>
+          <span className="complex-offer__telegram-text">{telegramText}</span>
         </a>
       ) : null}
     </div>

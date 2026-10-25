@@ -111,38 +111,38 @@ security definer
 set search_path = ''
 as $$
 declare
-  subject jsonb;
-  lead public.leads%rowtype;
-  previous record;
+  v_subject jsonb;
+  v_lead public.leads%rowtype;
+  v_previous record;
 begin
   if jsonb_typeof(p_lead) is distinct from 'object'
      or not (p_lead ->> 'type' = any (enum_range(null::public.lead_type)::text[])) then
     raise exception 'Заявка не распознана' using errcode = 'invalid_parameter_value', hint = 'vh:invalid';
   end if;
   perform private.check_lead_rate(p_lead ->> 'phone', p_client_key);
-  subject := private.lead_subject(p_lead);
-  select l.id, l.number into previous
+  v_subject := private.lead_subject(p_lead);
+  select l.id, l.number into v_previous
     from public.leads l
     where l.phone = p_lead ->> 'phone' and l.created_at > now() - interval '24 hours'
-      and l.complex_id is not distinct from (subject ->> 'complex_id')::uuid
+      and l.complex_id is not distinct from (v_subject ->> 'complex_id')::uuid
     order by l.created_at
     limit 1;
   insert into public.leads (type, name, phone, contact_lang, site_lang, developer_id, complex_id, block_id,
                             layout_id, unit_id, subject, page_url, source, payload, repeat_of, client_key)
   values ((p_lead ->> 'type')::public.lead_type, btrim(p_lead ->> 'name'), p_lead ->> 'phone',
           p_lead ->> 'contact_lang', p_lead ->> 'site_lang',
-          (subject ->> 'developer_id')::uuid, (subject ->> 'complex_id')::uuid, (subject ->> 'block_id')::uuid,
-          (subject ->> 'layout_id')::uuid, (subject ->> 'unit_id')::uuid,
-          subject - array['complex_id', 'developer_id', 'block_id', 'layout_id', 'unit_id'],
+          (v_subject ->> 'developer_id')::uuid, (v_subject ->> 'complex_id')::uuid, (v_subject ->> 'block_id')::uuid,
+          (v_subject ->> 'layout_id')::uuid, (v_subject ->> 'unit_id')::uuid,
+          v_subject - array['complex_id', 'developer_id', 'block_id', 'layout_id', 'unit_id'],
           p_lead ->> 'page_url', coalesce(p_lead -> 'source', '{}'), coalesce(p_lead -> 'payload', '{}'),
-          previous.id, p_client_key)
-  returning * into lead;
+          v_previous.id, p_client_key)
+  returning * into v_lead;
   if jsonb_typeof(p_lead -> 'calc') = 'object' then
-    perform private.save_lead_calculation(lead.id, p_lead -> 'calc', subject);
+    perform private.save_lead_calculation(v_lead.id, p_lead -> 'calc', v_subject);
   end if;
   insert into public.lead_deliveries (lead_id, channel)
-    select lead.id, channel from unnest(coalesce(p_channels, '{}')) as x (channel) group by channel;
-  return jsonb_build_object('id', lead.id, 'number', lead.number, 'repeat_of', previous.number);
+    select v_lead.id, channel from unnest(coalesce(p_channels, '{}')) as x (channel) group by channel;
+  return jsonb_build_object('id', v_lead.id, 'number', v_lead.number, 'repeat_of', v_previous.number);
 exception
   when check_violation or not_null_violation or invalid_text_representation then
     raise exception 'Заявка не прошла проверку' using errcode = 'invalid_parameter_value', hint = 'vh:invalid';

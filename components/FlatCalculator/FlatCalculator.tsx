@@ -8,6 +8,7 @@ import { SiteActions, ToTotal } from "@/components/SiteCalculator/SiteActions";
 import type { FlatCalcScreen } from "@/lib/calc/flatScreen";
 import type { CalcHints } from "@/lib/calc/hints";
 import { SITE_ENGINE } from "@/lib/calc/options";
+import type { LeadObject } from "@/lib/leads/types";
 import { type CalcParams, writeCalcParams } from "@/lib/calc/params";
 import { FlatHead } from "./FlatHead";
 import { FlatUnits } from "./FlatUnits";
@@ -39,8 +40,8 @@ type FlatCalculatorProps = {
   id: string;
   screen: FlatCalcScreen;
   initialParams: CalcParams;
-  /** «Получить точный расчёт» — до заявок фазы 3 только на стенде (решение фазы 2). */
-  leadEnabled: boolean;
+  /** ЖК и планировка заявки «Получить точный расчёт»; null — кнопки нет. */
+  lead: LeadObject | null;
   onClose: () => void;
   /** Тексты «?» из справочника hints (шаг 2.8). */
   hints?: CalcHints;
@@ -86,7 +87,7 @@ export function FlatCalculator({
   id,
   screen,
   initialParams,
-  leadEnabled,
+  lead,
   onClose,
   hints,
 }: FlatCalculatorProps) {
@@ -119,7 +120,7 @@ export function FlatCalculator({
           <FlatUnits id={id} stock={screen.data.stock} price={view.price} onChange={update} />
         )}
         renderActions={(snapshot) => (
-          <SiteActions snapshot={snapshot} source={sourceOf(screen)} leadEnabled={leadEnabled} />
+          <SiteActions snapshot={snapshot} source={sourceOf(screen)} lead={lead} />
         )}
         renderStickyAction={() => <ToTotal scope={dialog} />}
       />

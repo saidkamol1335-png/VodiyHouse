@@ -94,14 +94,14 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
           <ComplexHero
             page={page}
             gallery={<ComplexGallery photos={page.photos} name={name} locale={locale} />}
-            offer={<ComplexOffer name={name} summary={complexSummary(page)} contacts={contacts} />}
+            offer={<ComplexOffer name={name} slug={page.slug} summary={complexSummary(page)} contacts={contacts} />}
           />
         </Container>
         <ComplexNav label={t("nav.label")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`) }))} />
         <Container>
           <ComplexSections page={page} sections={sections} name={name} locale={locale} />
         </Container>
-        <ComplexBar />
+        <ComplexBar slug={page.slug} name={name} />
         <ComplexPreviewBanner page={page} />
       </main>
     </NextIntlClientProvider>

@@ -87,7 +87,7 @@ export function DevFlatStand({ layouts, open }: DevFlatStandProps) {
           id="flat-calc"
           screen={open.screen}
           initialParams={open.params}
-          leadEnabled
+          lead={{ layout: open.screen.layout.id }}
           onClose={close}
           hints={CALC_HINT_DRAFTS}
         />

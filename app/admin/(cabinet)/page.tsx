@@ -4,12 +4,14 @@ import { Suspense } from "react";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
+import { HomeLeads } from "@/components/HomeLeads";
 import { SiteStockPanel } from "@/components/SiteStockPanel";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { readSiteStockAction } from "@/lib/admin/actions/siteStock";
 import { greetingOf } from "@/lib/admin/greeting";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson, type CabinetPerson } from "@/lib/admin/person";
+import { readLeadsHome } from "@/lib/admin/server/leads";
 import { readSiteStock } from "@/lib/admin/server/siteStock";
 import { requireSection } from "@/lib/admin/session";
 import { formatWeekdayDate } from "@/lib/format";
@@ -67,7 +69,10 @@ export default async function AdminHomePage() {
   );
 }
 
-/** «Остатки по ЖК» (шаг 13): первые цифры — здесь, дальше панель перечитывает их сама (Г4 A). */
+/**
+ * Карточки и «Последние заявки» (шаг 3.7, Г1 B), ниже — «Остатки по ЖК» (шаг 13): первые цифры —
+ * здесь, дальше панель остатков перечитывает их сама (Г4 A).
+ */
 async function HomeStock() {
   const t = await getTranslations("admin");
   if (isCabinetOpenWithoutLogin || !hasSupabaseEnv()) {
@@ -77,12 +82,22 @@ async function HomeStock() {
   }
   const supabase = await createSupabaseServerClient();
   // Сбой чтения не роняет главную: панель скажет «не прочитались» и прочитает сама.
-  const initial = await readSiteStock(supabase).catch(() => null);
+  const [initial, leads] = await Promise.all([
+    readSiteStock(supabase).catch(() => null),
+    readLeadsHome(supabase).catch(() => null),
+  ]);
   return (
-    <SiteStockPanel
-      initial={initial}
-      read={readSiteStockAction}
-      complexesHref={ADMIN_ROUTES.complexes}
-    />
+    <>
+      {leads ? (
+        <HomeLeads leads={leads} stock={initial} />
+      ) : (
+        <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
+      )}
+      <SiteStockPanel
+        initial={initial}
+        read={readSiteStockAction}
+        complexesHref={ADMIN_ROUTES.complexes}
+      />
+    </>
   );
 }

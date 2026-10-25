@@ -1,0 +1,131 @@
+/* Главная кабинета (Г1 B, мокап CabHome): ряд карточек с цифрами и «Последние заявки». */
+
+.home-leads__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.home-leads__card {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.home-leads__card:hover {
+  border-color: var(--amber-line);
+}
+
+.home-leads__card:focus-visible,
+.home-leads__row:focus-visible,
+.home-leads__all:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.home-leads__card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.home-leads__card-title svg {
+  color: var(--amber-2);
+}
+
+.home-leads__card-value {
+  font-size: var(--fs-kpi);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+}
+
+.home-leads__card-sub {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.home-leads__card-sub--ok {
+  color: var(--ok);
+}
+
+.home-leads__latest {
+  padding: var(--admin-panel-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.home-leads__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.home-leads__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 650;
+}
+
+.home-leads__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.home-leads__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.home-leads__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-leads__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px dashed var(--dash);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.home-leads__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--fs-small);
+}
+
+.home-leads__text span {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+@media (pointer: coarse) {
+  .home-leads__row {
+    min-height: var(--touch-target);
+  }
+}

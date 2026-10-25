@@ -226,20 +226,6 @@
     },
     "months": "{count} oy",
     "years": "{count} yil",
-    "lead": {
-      "open": "Aniq hisob-kitob olish",
-      "title": "Aniq hisob-kitob",
-      "close": "Yopish",
-      "name": "Ism",
-      "phone": "Telefon",
-      "phonePlaceholder": "+998 XX XXX XX XX",
-      "submit": "Yuborish",
-      "consent": "«Yuborish» tugmasini bosib, shaxsiy ma’lumotlarni qayta ishlashga rozilik bildirasiz.",
-      "next": "Keyin nima: Vodiy House menejeri qo‘ng‘iroq qiladi, shartlarni quruvchi bilan tekshiradi va aniq hisob-kitobni yuboradi.",
-      "required": "To‘ldiring",
-      "phoneInvalid": "Raqam +998 XX XXX XX XX ko‘rinishida",
-      "stand": "Stend: ariza yuborilmaydi — unga nima kirishi quyida"
-    },
     "flat": {
       "eyebrow": "Shu kvartira uchun hisob-kitob",
       "title": "{rooms} · {area} m²",
@@ -642,5 +628,92 @@
     "title": "Sahifa vaqtincha mavjud emas",
     "text": "Ma’lumotlarni yuklab bo‘lmadi. Bir daqiqadan so‘ng sahifani yangilang — yoki bizga qo‘ng‘iroq qiling, TJM haqida aytib beramiz.",
     "retry": "Yangilash"
+  },
+  "lead": {
+    "titles": {
+      "callback": "{minutes} daqiqada qo‘ng‘iroq qilamiz",
+      "callbackPlain": "Qo‘ng‘iroq qiling",
+      "view": "Ko‘rishga yozilish",
+      "documents": "TJM hujjatlari nusxalari",
+      "consult": "Quruvchi bo‘yicha maslahat",
+      "calc": "Aniq hisob-kitob",
+      "layout": "Mavjudligini bilish",
+      "pick": "Qo‘lda tanlab beramiz",
+      "complex": "TJM bo‘yicha ariza",
+      "partner": "Quruvchi arizasi",
+      "promo": "Maxsus taklif",
+      "tg": "Telegramda yozish",
+      "quiz": "1 daqiqada tanlash"
+    },
+    "buttons": {
+      "view": "Ko‘rishga yozilish",
+      "callback": "Qo‘ng‘iroq qiling",
+      "layout": "Mavjudligini bilish",
+      "documents": "Hujjatlar nusxasini so‘rash",
+      "consult": "Maslahat olish",
+      "pick": "Qo‘lda tanlab beramiz",
+      "calc": "Aniq hisob-kitobni olish",
+      "complex": "Ariza qoldirish",
+      "partner": "Ariza qoldirish",
+      "tg": "Telegramda yozish",
+      "quiz": "Tanlovni olish",
+      "promo": "Shu taklifni xohlayman"
+    },
+    "name": "Ism",
+    "phone": "Telefon",
+    "phonePlaceholder": "+998 XX XXX XX XX",
+    "lang": "Qulay muloqot tili",
+    "langs": {
+      "ru": "Rus tili",
+      "uz": "O‘zbek tili"
+    },
+    "what": "Nimani ko‘rish",
+    "targets": {
+      "complex": "Shu TJM",
+      "delivered": "Quruvchining topshirilgan obyekti",
+      "office": "Vodiy House ofisi"
+    },
+    "day": "Qulay kun",
+    "days": {
+      "today": "Bugun",
+      "tomorrow": "Ertaga",
+      "weekend": "Dam olish kunlari"
+    },
+    "time": "Qulay vaqt — ixtiyoriy",
+    "times": {
+      "morning": "Ertalab",
+      "afternoon": "Kunduzi",
+      "evening": "Kechqurun"
+    },
+    "send": "Yuborish",
+    "sending": "Yuborilmoqda…",
+    "consent": "«Yuborish» tugmasini bosib, <privacy>shaxsiy ma’lumotlarni qayta ishlashga</privacy> rozilik bildirasiz.",
+    "trap": "Bu maydonni to‘ldirmang",
+    "fieldErrors": {
+      "name": "Ismingizni kiriting",
+      "phone": "Raqam +998 XX XXX XX XX formatida",
+      "phoneRequired": "Telefon raqamini kiriting",
+      "company": "Kompaniyani kiriting"
+    },
+    "errors": {
+      "invalid": "Ism va telefon raqamini tekshiring.",
+      "rateLimited": "Juda ko‘p ariza ketma-ket yuborildi. 10 daqiqadan keyin urinib ko‘ring yoki bizga qo‘ng‘iroq qiling.",
+      "unavailable": "Hozir arizalar qabul qilinmayapti. Bizga qo‘ng‘iroq qiling yoki Telegramda yozing.",
+      "network": "Aloqa yo‘q. Internetni tekshirib, qayta yuboring.",
+      "unknown": "Yuborib bo‘lmadi. Qayta urinib ko‘ring."
+    },
+    "next": "Keyin: menejer qo‘ng‘iroq qilib, tafsilotlarni aniqlaydi va ko‘rish uchun qulay vaqt taklif qiladi.",
+    "nextMinutes": "Keyin: menejer {minutes} daqiqa ichida qo‘ng‘iroq qiladi, savollarga javob beradi va ko‘rish uchun qulay vaqt taklif qiladi.",
+    "nextView": "Keyin: menejer qo‘ng‘iroq qilib, vaqtni tasdiqlaydi.",
+    "done": "Ariza yuborildi",
+    "doneNumber": "Ariza raqami #{number}",
+    "doneCall": "Vodiy House menejeri ish vaqtida {minutes} daqiqa ichida qo‘ng‘iroq qiladi.",
+    "doneCallPlain": "Vodiy House menejeri ish vaqtida qo‘ng‘iroq qiladi.",
+    "doneRepeat": "Arizangizni oldik — menejer siz yana murojaat qilganingizni ko‘radi.",
+    "close": "Yopish",
+    "more": {
+      "title": "<accent>Batafsil</accent> bilishni xohlaysizmi?",
+      "text": "Kontaktlaringizni qoldiring — Vodiy House menejeri loyiha haqida aytib beradi va kvartira tanlaydi."
+    }
   }
 }

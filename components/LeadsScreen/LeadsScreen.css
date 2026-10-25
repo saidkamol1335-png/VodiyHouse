@@ -1,0 +1,73 @@
+/* «Заявки» (мокап CabLeads): зелёная плашка правила 1.2, пилюли статусов, тип, поиск и CSV в ряд,
+   таблица-зебра в рамке; уже 720 px (контейнер) — карточки. */
+
+.leads-screen {
+  display: grid;
+  gap: 18px;
+  container: leads-screen / inline-size;
+}
+
+.leads-screen__rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--ok-line);
+  border-radius: var(--r-l);
+  background: var(--ok-soft);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.leads-screen__rule svg {
+  flex: none;
+  color: var(--ok);
+}
+
+.leads-screen__filters {
+  display: grid;
+  gap: 12px;
+}
+
+.leads-screen__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.leads-screen__type {
+  width: 250px;
+}
+
+.leads-screen__search {
+  width: 220px;
+}
+
+.leads-screen__empty,
+.leads-screen__limit {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-m);
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.leads-screen__limit {
+  border: 0;
+  padding: 0;
+}
+
+@container leads-screen (max-width: 719px) {
+  .leads-screen__search {
+    order: -1;
+    width: 100%;
+  }
+
+  .leads-screen__type {
+    flex: 1;
+    width: auto;
+  }
+}

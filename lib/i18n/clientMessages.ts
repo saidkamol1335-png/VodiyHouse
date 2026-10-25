@@ -41,7 +41,9 @@ export function pickMessages(
  * CALC_MESSAGES (фаза 2: /kalkulyator, расчёт квартиры), а не HTML каждой страницы сайта.
  */
 export const CALC_NAMESPACE = "calc";
-export const CALC_MESSAGES = [CALC_NAMESPACE] as const;
+/** Подписи кнопок заявок (шаг 3.7): «Перезвоните мне», «Получить точный расчёт»… — разделам с кнопками. */
+export const LEAD_BUTTON_MESSAGES = "lead.buttons";
+export const CALC_MESSAGES = [CALC_NAMESPACE, LEAD_BUTTON_MESSAGES] as const;
 
 /**
  * Сайт (фаза 3, «сообщения по разделам»): каждой странице — только тексты оболочки (шапка, меню,
@@ -52,14 +54,22 @@ export const CALC_MESSAGES = [CALC_NAMESPACE] as const;
 // своей страницы, только с оболочкой.
 export const SITE_SHELL_MESSAGES = ["nav", "header", "contacts", "footer", "siteError"] as const;
 
+/**
+ * Окно заявки (шаг 3.7): его тексты (~3 тыс. знаков) приходят вместе с кодом окна при первом
+ * нажатии (leadMessagesAction), а не в HTML каждой страницы. Форма в разделе страницы («Хотите
+ * узнать больше?» на странице ЖК) получает их провайдером своей страницы.
+ */
+export const LEAD_NAMESPACE = "lead";
+export const LAZY_SITE_MESSAGES = [LEAD_NAMESPACE] as const;
+
 export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
   return pickMessages(messages, SITE_SHELL_MESSAGES);
 }
 
 /** Каталог (шаг 3.4): свой провайдер заменяет набор целиком — тексты оболочки внутри тоже нужны. */
 export const CATALOG_NAMESPACE = "catalog";
-export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
 
 /** Страница ЖК (шаг 3.5): свои тексты, калькулятор «Расчёт для этой квартиры» и оболочка. */
 export const COMPLEX_NAMESPACE = "complex";
-export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

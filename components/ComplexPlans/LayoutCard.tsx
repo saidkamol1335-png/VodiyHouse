@@ -4,6 +4,8 @@ import { Calculator, Maximize2 } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import type { Ref } from "react";
+import { LeadButton } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
 import { formatArea, formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
@@ -17,6 +19,8 @@ type LayoutCardProps = {
   opener: Ref<HTMLButtonElement>;
   onCalculate: () => void;
   onZoom: () => void;
+  /** «Узнать о наличии» (ТЗ 10.1): заявка по этой планировке. */
+  ask: LeadIntent;
 };
 
 export const drawingSrc = (path: string) => mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", path);
@@ -40,10 +44,10 @@ function leftBadge(card: LayoutCardModel) {
 
 /**
  * Карточка планировки (мокап .plan; телефон — .pl): чертёж (нажатие — крупно), «1-комн. · 42,5 м²»
- * и остаток, блок и этажи, цена «от» и за м², «Платёж от», «Рассчитать платёж». «Узнать о
- * наличии» — с заявками (шаг 3.7).
+ * и остаток, блок и этажи, цена «от» и за м², «Платёж от», «Рассчитать платёж» и «Узнать о
+ * наличии» (мокап .plan__btns).
  */
-export function LayoutCard({ card, open, pending, failed, opener, onCalculate, onZoom }: LayoutCardProps) {
+export function LayoutCard({ card, open, pending, failed, opener, onCalculate, onZoom, ask }: LayoutCardProps) {
   const t = useTranslations("complex.layouts");
   const title = useLayoutTitle()(card);
   const { layout } = card;
@@ -59,21 +63,22 @@ export function LayoutCard({ card, open, pending, failed, opener, onCalculate, o
         </span>
       </button>
       <LayoutBody card={card} title={title} />
-      {card.calculable ? (
-        <div className="complex-layout__actions">
+      <div className="complex-layout__actions">
+        {card.calculable ? (
           <button ref={opener} type="button" className="complex-layout__calc" aria-expanded={open} disabled={pending} onClick={onCalculate}>
             <Calculator size={15} strokeWidth={2} aria-hidden />
             {/* Открытый расчёт — «Свернуть» (мокап pcClose): повторное нажатие закрывает его. */}
             <span className="complex-layout__calc-full">{pending ? t("loading") : open ? t("collapse") : t("calculate")}</span>
             <span className="complex-layout__calc-short">{pending ? t("loading") : open ? t("collapse") : t("calculateShort")}</span>
           </button>
-          {failed ? (
-            <p className="complex-layout__failed" role="alert">
-              {t("failed")}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+        ) : null}
+        <LeadButton intent={{ ...ask, context: `${ask.context} · ${title}` }} variant="ghost" size="sm" className="complex-layout__ask" />
+        {failed ? (
+          <p className="complex-layout__failed" role="alert">
+            {t("failed")}
+          </p>
+        ) : null}
+      </div>
     </article>
   );
 }

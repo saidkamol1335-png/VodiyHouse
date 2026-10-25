@@ -1,0 +1,41 @@
+/* Доставка заявки по каналам (мокап CabLeads: моно-плашки «TG», «Таблица»). */
+.lead-delivery {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lead-delivery__mark {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  font-weight: 600;
+  letter-spacing: var(--ls-mono);
+  white-space: nowrap;
+}
+
+.lead-delivery__mark--sent {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.lead-delivery__mark--pending {
+  background: var(--amber-soft);
+  color: var(--amber-2);
+}
+
+.lead-delivery__mark--failed {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.lead-delivery__mark--off {
+  border-color: var(--line-2);
+  border-style: dashed;
+  color: var(--fg-3);
+}

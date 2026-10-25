@@ -38,7 +38,7 @@ export type AdminNavItem = {
 // (программы оплаты); видеограф — только видео; остальное — руководитель.
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "home", href: ADMIN_ROUTES.home, roles: ["head", "manager"], ready: true },
-  { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: false },
+  { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: true },
   { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: true },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
   {

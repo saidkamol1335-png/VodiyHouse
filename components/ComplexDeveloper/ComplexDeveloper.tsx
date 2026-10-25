@@ -1,5 +1,7 @@
-import { Check } from "lucide-react";
+import { Check, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { LeadButton } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
 import { SitePhoto } from "@/components/SitePhoto";
 import { formatPrice, initialsOf } from "@/lib/format";
 import { Link } from "@/lib/i18n/navigation";
@@ -26,10 +28,11 @@ const dotted = (iso: string) => iso.slice(0, 10).split("-").reverse().join(".");
 /**
  * «О застройщике» (мокап .devc, ТЗ 7.9): знак, название, «с N года», «Сдано · Строится» по ЖК на
  * сайте, о компании, другие ЖК застройщика; справа — проверки Vodiy House с датами. Контактов
- * застройщика нет (правило ТЗ 1.2); «Подробнее о застройщике» — со страницами застройщиков (3б).
+ * застройщика нет (правило ТЗ 1.2) — «Получить консультацию» ведёт к Vodiy House; «Подробнее о
+ * застройщике» — со страницами застройщиков (3б).
  */
-export async function ComplexDeveloper({ page }: { page: ComplexPage }) {
-  const t = await getTranslations("complex.developer");
+export async function ComplexDeveloper({ page, consult }: { page: ComplexPage; consult: LeadIntent }) {
+  const [t, tLead] = await Promise.all([getTranslations("complex.developer"), getTranslations("lead.buttons")]);
   const locale = (await getLocale()) as Locale;
   const { developer } = page;
   const checks = checksOf(page);
@@ -61,6 +64,12 @@ export async function ComplexDeveloper({ page }: { page: ComplexPage }) {
           </p>
         ) : null}
         {developer.about ? <p className="complex-developer__about">{developer.about[locale]}</p> : null}
+        <div className="complex-developer__actions">
+          <LeadButton intent={consult} variant="ghost" size="sm">
+            <Phone size={16} aria-hidden="true" />
+            {tLead("consult")}
+          </LeadButton>
+        </div>
         <OtherComplexes page={page} locale={locale} />
       </div>
       <DeveloperChecks checks={checks} />

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { locale as rootLocale } from "next/root-params";
 import { getMessages, getTranslations } from "next-intl/server";
 import { HiddenNavProvider } from "@/components/HiddenNav";
+import { LeadProvider } from "@/components/LeadDialog";
 import { RootDocument } from "@/components/RootDocument";
 import { SiteContactsProvider } from "@/components/SiteContacts";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -43,8 +44,10 @@ export default async function SiteLayout({ children }: LayoutProps<"/[locale]">)
     <RootDocument lang={locale} withColumns messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>
         <HiddenNavProvider hidden={hiddenNav({ calculator })}>
-          {children}
-          <SiteFooter />
+          <LeadProvider>
+            {children}
+            <SiteFooter />
+          </LeadProvider>
         </HiddenNavProvider>
       </SiteContactsProvider>
     </RootDocument>

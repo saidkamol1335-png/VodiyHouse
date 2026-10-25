@@ -1,0 +1,105 @@
+/* Окно заявки (мокап .mdl, MobLead): на 1440 — по центру, на телефоне — шторка снизу; контекст —
+   янтарная плашка (.ctx). Фон — scrim без blur в lite; появление — opacity и сдвиг (§3). */
+
+.lead-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  /* Preflight Tailwind обнуляет margin, а по центру окно ставит именно margin: auto. */
+  margin: auto;
+  padding: 24px 26px 26px;
+  overflow-y: auto;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2xl);
+  background: var(--bg-2);
+  color: var(--fg);
+  box-shadow: var(--shadow-3);
+}
+
+.lead-dialog::backdrop {
+  background: var(--scrim);
+}
+
+[data-motion="full"] .lead-dialog::backdrop {
+  backdrop-filter: blur(6px);
+}
+
+.lead-dialog[open] {
+  display: grid;
+  gap: 18px;
+}
+
+[data-motion="full"] .lead-dialog[open],
+[data-motion="lite"] .lead-dialog[open] {
+  animation: lead-dialog-in var(--dur-fast) var(--ease) both;
+}
+
+.lead-dialog__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lead-dialog__title {
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: var(--ls-h3);
+  line-height: var(--lh-heading);
+}
+
+.lead-dialog__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.lead-dialog__close:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.lead-dialog__context {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-m);
+  background: var(--amber-soft);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+.lead-dialog__context svg {
+  flex: none;
+  color: var(--amber-2);
+}
+
+@media (max-width: 767px) {
+  .lead-dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 92dvh;
+    margin: auto 0 0;
+    padding: 22px 18px 24px;
+    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  }
+}
+
+@keyframes lead-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
