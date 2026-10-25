@@ -1,0 +1,82 @@
+/* Выдача каталога (мокап .cat__res): «Найдено N ЖК» и сортировка, карточки, «Показать ещё»,
+   пустой результат пунктиром. Кнопка «Фильтры» — только на телефоне (фильтр там спрятан). */
+.catalog-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.catalog-results__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.catalog-results__count {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  letter-spacing: var(--ls-h3);
+}
+
+.catalog-results__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.catalog-results__filters {
+  display: none;
+}
+
+.catalog-results__sort .field__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.catalog-results__sort select {
+  height: 34px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-small-l);
+}
+
+.catalog-results__empty {
+  padding: 48px 24px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-card);
+  text-align: center;
+}
+
+.catalog-results__empty h3 {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+
+.catalog-results__empty p {
+  margin: 8px 0 0;
+  color: var(--fg-3);
+}
+
+.catalog-results__more {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
+  .catalog-results__filters {
+    display: inline-flex;
+  }
+
+  .catalog-results__filters,
+  .catalog-results__sort select {
+    min-height: 44px;
+  }
+}

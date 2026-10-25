@@ -1,0 +1,184 @@
+/* Фильтр каталога (мокап .flt): поверхность карточки, две строки разделов, на телефоне — экран
+   целиком с шапкой и кнопкой «Показать N ЖК» внизу. */
+.catalog-filter {
+  padding: 16px 20px 18px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.catalog-filter__top {
+  display: none;
+}
+
+.catalog-filter__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 22px;
+}
+
+.catalog-filter__row--second {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--dash);
+}
+
+.catalog-filter__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.catalog-filter__title,
+.catalog-filter__select .field__label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.catalog-filter__section--price {
+  flex: 0 1 224px;
+}
+
+.catalog-filter__section--select {
+  flex: 0 1 196px;
+}
+
+.catalog-filter__select {
+  gap: 8px;
+}
+
+.catalog-filter__select select {
+  height: 34px;
+  min-width: 176px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-small-l);
+}
+
+.catalog-filter__range {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--control-bg);
+  transition: border-color var(--dur-fast) ease-out;
+}
+
+.catalog-filter__range:focus-within {
+  border-color: var(--amber);
+}
+
+.catalog-filter__price {
+  min-width: 0;
+  height: 32px;
+  flex: 1;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-small-l);
+  outline: none;
+}
+
+.catalog-filter__price + .catalog-filter__price {
+  border-left: 1px dashed var(--dash);
+}
+
+.catalog-filter__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+@media (max-width: 760px) {
+  .catalog-filter {
+    display: none;
+  }
+
+  .catalog-filter--open {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    display: block;
+    overflow: auto;
+    padding: 0 16px 96px;
+    border: 0;
+    border-radius: 0;
+    background: var(--bg);
+    box-shadow: none;
+  }
+
+  .catalog-filter--open .catalog-filter__top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--dash);
+    background: var(--bg);
+  }
+
+  .catalog-filter__close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+  }
+
+  .catalog-filter__row,
+  .catalog-filter__row--second {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .catalog-filter__section {
+    gap: 10px;
+    padding: 15px 0;
+    border-bottom: 1px dashed var(--dash);
+  }
+
+  .catalog-filter__select select,
+  .catalog-filter__range,
+  .catalog-filter__price {
+    width: 100%;
+    height: 44px;
+  }
+
+  .catalog-filter__actions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: stretch;
+    padding: 12px 16px;
+    border-top: 1px dashed var(--dash);
+    background: var(--bg);
+  }
+
+  .catalog-filter__show {
+    flex: 1;
+  }
+
+  html:has(.catalog-filter--open) {
+    overflow: hidden;
+  }
+}

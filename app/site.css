@@ -2,7 +2,9 @@
    (и global-not-found.tsx). Общее с кабинетом — в globals.css, он грузится раньше. */
 
 @import "../components/CatalogCard/CatalogCard.css";
+@import "../components/CatalogFilter/CatalogFilter.css";
 @import "../components/CatalogGrid/CatalogGrid.css";
+@import "../components/CatalogResults/CatalogResults.css";
 @import "../components/Container/Container.css";
 @import "../components/Eyebrow/Eyebrow.css";
 @import "../components/HeaderNav/HeaderNav.css";

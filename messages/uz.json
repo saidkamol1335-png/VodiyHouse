@@ -329,6 +329,42 @@
       "metaDescription": "Farg‘ona va viloyatdagi barcha yangi uylar: quruvchi narxlari, bo‘sh kvartiralar, muddatli to‘lov va ipoteka. Xaridor uchun — bepul.",
       "found": "{n} ta TJM topildi",
       "unavailable": "Katalog tez orada paydo bo‘ladi. Kvartirani qo‘lda tanlab beramiz — Vodiy House bilan bog‘laning."
+    },
+    "filter": {
+      "label": "Filtrlar",
+      "rooms": "Xonalar",
+      "price": "Kvartira narxi, $",
+      "priceFrom": "dan",
+      "priceTo": "gacha",
+      "location": "Shahar va tuman",
+      "locationAll": "Butun viloyat",
+      "payment": "To‘lov usuli",
+      "payments": {
+        "full": "100% to‘lov",
+        "inst": "Muddatli to‘lov",
+        "bank": "Bank orqali",
+        "mort": "Ipoteka"
+      },
+      "deadline": "Topshirish muddati",
+      "deadlineAny": "Istalgan",
+      "deadlineBuilt": "Topshirilgan",
+      "deadlineUpTo": "{year} gacha",
+      "developer": "Quruvchi",
+      "developerAll": "Barcha quruvchilar",
+      "finishing": "Pardozlash",
+      "reset": "Tozalash",
+      "show": "{n, plural, =0 {Hech narsa topilmadi} other {# ta TJMni ko‘rsatish}}",
+      "close": "Filtrlarni yopish",
+      "sort": "Saralash",
+      "sorts": {
+        "rec": "Tavsiya etilgan",
+        "cheap": "Avval arzonlari",
+        "exp": "Avval qimmatlari",
+        "dl": "Topshirish muddati bo‘yicha"
+      },
+      "more": "Yana {n} ta TJMni ko‘rsatish",
+      "nothing": "So‘rovingiz bo‘yicha hech narsa topilmadi",
+      "nothingHint": "Filtrlarni o‘zgartiring yoki Vodiy House bilan bog‘laning — menejer variantlarni qo‘lda tanlab beradi."
     }
   }
 }

@@ -1,23 +1,18 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { CatalogCard } from "@/components/CatalogCard";
+import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 
-/** Карточек на первом экране, у которых фото грузится сразу (LCP): ряд на десктопе. */
+/** Карточек первого ряда, у которых фото грузится сразу (LCP). */
 const PRELOAD_CARDS = 3;
 
 /** Сетка карточек (мокап .cards): 3 в ряд на десктопе, 2 на планшете, 1 на телефоне. */
-export function CatalogGrid({ catalog }: { catalog: SiteCatalog }) {
-  const t = useTranslations("catalog.page");
+export function CatalogGrid({ catalog, complexes }: { catalog: SiteCatalog; complexes: readonly CatalogComplex[] }) {
   return (
-    <>
-      <p className="catalog-grid__count">{t("found", { n: catalog.complexes.length })}</p>
-      <div className="catalog-grid">
-        {catalog.complexes.map((complex, index) => (
-          <CatalogCard key={complex.id} complex={complex} catalog={catalog} preload={index < PRELOAD_CARDS} />
-        ))}
-      </div>
-    </>
+    <div className="catalog-grid">
+      {complexes.map((complex, index) => (
+        <CatalogCard key={complex.id} complex={complex} catalog={catalog} preload={index < PRELOAD_CARDS} />
+      ))}
+    </div>
   );
 }

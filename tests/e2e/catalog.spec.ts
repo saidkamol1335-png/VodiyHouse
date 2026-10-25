@@ -25,6 +25,35 @@ test.describe("каталог /novostroyki", () => {
     expect(errors).toEqual([]);
   });
 
+  test("фильтр: комнаты и цена в адресе, ссылка открывается на результатах, пусто — подсказка", async ({ page, isMobile }) => {
+    await page.goto("/ru/novostroyki");
+    if (isMobile) await page.getByRole("button", { name: "Фильтры" }).click();
+    const filter = page.getByRole("complementary", { name: "Фильтры" });
+    await filter.getByRole("group", { name: "Комнаты" }).getByRole("button", { name: "4+" }).click();
+    await expect(page).toHaveURL(/komnat=4/);
+    // 4-комн. в DEMO — только у Namuna и Yulduz.
+    await expect(filter.getByRole("button", { name: "Показать 2 ЖК" })).toBeVisible();
+    await filter.getByRole("button", { name: "Показать 2 ЖК" }).click();
+    await expect(page.locator(".catalog-card")).toHaveCount(2);
+    await expect(page.getByText("Найдено 2 ЖК")).toBeVisible();
+    await page.goto("/ru/novostroyki?do=1000");
+    await expect(page.getByText("По вашему запросу ничего нет")).toBeVisible();
+    await page.goto("/ru/novostroyki?sort=exp");
+    await expect(page.locator(".catalog-card").first()).toContainText("ЖК Yulduz");
+  });
+
+  test("телефон: фильтр на весь экран, Escape закрывает", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "только телефон");
+    await page.goto("/ru/novostroyki");
+    await page.getByRole("button", { name: "Фильтры" }).click();
+    const filter = page.locator(".catalog-filter--open");
+    await expect(filter).toBeVisible();
+    await expect(page.locator("html")).toHaveCSS("overflow", "hidden");
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-filter-open.png` });
+    await page.keyboard.press("Escape");
+    await expect(filter).toHaveCount(0);
+  });
+
   test("UZ: названия и подписи на узбекском", async ({ page }) => {
     await page.goto("/uz/novostroyki");
     await expect(page.locator(".catalog-card").filter({ hasText: "Shodlik TJM" })).toContainText("ta qoldi");
