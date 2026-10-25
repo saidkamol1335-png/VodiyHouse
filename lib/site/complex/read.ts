@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cacheLife, cacheTag } from "next/cache";
 import { draftMode } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
@@ -46,9 +47,10 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /**
  * missing — такого ЖК на сайте нет (404); unavailable — облака нет (разработка без ключей).
  * Ошибка базы — исключение: перерисовка в кэше не заменит страницу заглушкой с ответом 200,
- * Next оставит прежнюю версию, а первый показ — error.tsx раздела.
+ * Next оставит прежнюю версию, а первый показ — error.tsx раздела. React cache — один запрос на
+ * метаданные и страницу (в предпросмотре чтение идёт мимо 'use cache').
  */
-export async function readComplexPage(slug: string): Promise<ComplexPageResult> {
+export const readComplexPage = cache(async (slug: string): Promise<ComplexPageResult> => {
   if (!hasSupabaseEnv()) return { kind: "unavailable" };
   if (!SLUG.test(slug)) return { kind: "missing" };
   try {
@@ -61,4 +63,4 @@ export async function readComplexPage(slug: string): Promise<ComplexPageResult> 
     console.error("[novostroyki/zhk] страница ЖК недоступна", error);
     throw error;
   }
-}
+});

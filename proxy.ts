@@ -26,8 +26,12 @@ const PREVIEW_COOKIE = "__prerender_bypass";
  * страница, а записать куки она не может — браузер остался бы со старым токеном, и следующий
  * заход в кабинет отозвал бы сессию («Already Used»).
  */
+// Только страница ЖК (и её Server Action — POST на тот же адрес) читает базу сессией в предпросмотре.
+const COMPLEX_PAGE = /^\/(?:uz|ru)\/novostroyki\/[a-z0-9-]+$/;
+
 async function previewResponse(request: NextRequest): Promise<NextResponse> {
   const names = request.cookies.getAll().map(({ name }) => name);
+  if (!COMPLEX_PAGE.test(request.nextUrl.pathname)) return NextResponse.next();
   if (!hasSupabaseEnv() || !names.includes(PREVIEW_COOKIE) || !hasAuthCookie(names)) return NextResponse.next();
   return (await refreshAdminSession(request)).response;
 }

@@ -62,7 +62,8 @@ export function ComplexVideosForm({ complexId, videos, action }: ComplexVideosFo
 function VideosRule12({ savedAt }: { savedAt: number | null }) {
   const [checked, setChecked] = useState(false);
   const [checkedAt, setCheckedAt] = useState(savedAt);
-  if (savedAt !== checkedAt) {
+  // Только новое «Сохранено» снимает отметку; ошибка сохранения её оставляет.
+  if (savedAt !== null && savedAt !== checkedAt) {
     setCheckedAt(savedAt);
     setChecked(false);
   }

@@ -49,7 +49,7 @@ export function LayoutCard({ card, open, pending, failed, opener, onCalculate, o
   const { layout } = card;
   const modifier = open ? " complex-layout--open" : card.left.kind === "none" ? " complex-layout--none" : "";
   return (
-    <article className={`complex-layout${modifier}`}>
+    <article className={`complex-layout${modifier}`} data-layout-id={layout.id}>
       <button type="button" className="complex-layout__drawing" aria-label={t("zoom", { title })} onClick={onZoom}>
         {layout.drawing ? (
           <Image src={drawingSrc(layout.drawing.path)} alt={title} fill sizes="(max-width: 760px) 116px, 300px" className="complex-layout__image" />

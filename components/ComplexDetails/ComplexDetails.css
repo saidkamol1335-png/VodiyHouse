@@ -149,13 +149,17 @@
   .complex-details__dialog {
     width: 100%;
     max-width: none;
+    height: 100%;
     max-height: 100%;
     margin: 0;
     border-radius: 0;
   }
 }
 
-/* Пока открыто окно, страница под ним не прокручивается (как у меню телефона). */
-html:has(.complex-details__dialog[open]) {
-  overflow: hidden;
+/* Пока открыто окно, страница под ним не прокручивается — на телефоне, как у меню
+   (на 1440 пропавшая полоса прокрутки сдвинула бы страницу за подложкой). */
+@media (max-width: 760px) {
+  html:has(.complex-details__dialog[open]) {
+    overflow: hidden;
+  }
 }

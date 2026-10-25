@@ -84,12 +84,14 @@ function BlockHead({ card, t }: PartProps) {
           {status.kind === "built" ? t("blocks.built") : status.pct === null ? t("blocks.building") : t("blocks.buildingPct", { pct: status.pct })}
         </span>
       </header>
-      {floors ? (
+      {/* Полоса — по проценту или этажам (мокап: у каждого строящегося); подпись этажей — только
+          когда построенные этажи введены. */}
+      {status.kind === "building" && (status.pct !== null || floors) ? (
         <div className="complex-block__progress">
           <span className="complex-block__bar" aria-hidden="true">
             <i style={{ transform: `scaleX(${pct / 100})` }} />
           </span>
-          <p className="complex-block__floors">{t("blocks.floors", floors)}</p>
+          {floors ? <p className="complex-block__floors">{t("blocks.floors", floors)}</p> : null}
         </div>
       ) : null}
     </>

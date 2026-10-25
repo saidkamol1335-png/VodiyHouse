@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, draftMode } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { hasAuthCookie } from "@/lib/admin/gate";
 import { isCabinetOpenWithoutLogin, STAFF_ROLES } from "@/lib/admin/access";
@@ -71,5 +71,7 @@ export async function signOutAction(): Promise<void> {
       for (const { name } of store.getAll()) if (hasAuthCookie([name])) store.delete({ name, path: "/" });
     }
   }
+  // Предпросмотр ЖК (шаг 3.6) — тоже этого сотрудника: на общем компьютере следующий не увидит пометку.
+  (await draftMode()).disable();
   redirect(ADMIN_ROUTES.login, RedirectType.replace);
 }

@@ -26,9 +26,10 @@ export function useLayoutCalc() {
   const calculate = (layoutId: string) => {
     setPending(layoutId);
     setFailed(null);
-    void loadFlatCalculator();
     startTransition(async () => {
-      const record = await readLayoutCalcAction(layoutId).catch(() => null);
+      // Ждём и данные, и код калькулятора: «Считаем…» держится, пока оба не пришли; не загрузился
+      // чанк (связь, новый деплой) — ошибка у кнопки, а не экран ошибки вместо страницы.
+      const [record] = await Promise.all([readLayoutCalcAction(layoutId), loadFlatCalculator()]).catch(() => [null]);
       setPending(null);
       if (!record) return setFailed(layoutId);
       setOpen((current) => ({ layoutId, screen: flatCalcFrom(record), round: (current?.round ?? 0) + 1 }));
@@ -46,8 +47,13 @@ export function useLayoutCalc() {
   return { open, pending, failed, calculate, close, toggle, opener };
 }
 
-const scrollToSection = (id: string) =>
-  document.getElementById(id)?.scrollIntoView({ behavior: getMotionTier() === "full" ? "smooth" : "auto" });
+/** К карточке планировки, расчёт которой открываем (там и ошибка расчёта), иначе — к разделу. */
+const scrollToTarget = (sectionId: string, plan: string | null) =>
+  // plan — из адреса: экранируем, кривой «#planirovki?plan=…» не ломает селектор.
+  ((plan ? document.querySelector(`[data-layout-id="${CSS.escape(plan)}"]`) : null) ?? document.getElementById(sectionId))?.scrollIntoView({
+    behavior: getMotionTier() === "full" ? "smooth" : "auto",
+    block: plan ? "center" : "start",
+  });
 
 /**
  * Переходы к «Планировкам»: ссылка с data-layouts (карточка блока, строка «Наличия») или запрос в
@@ -63,7 +69,8 @@ export function useLayoutsTarget(sectionId: string, setFilter: (filter: LayoutFi
       if (!target || (target.plan === null && target.blockId === null && target.rooms === null)) return;
       setFilter({ blockId: target.plan ? null : target.blockId, rooms: target.plan ? null : target.rooms });
       if (target.plan) openPlanRef.current(target.plan);
-      scrollToSection(sectionId);
+      // После перерисовки с новым фильтром — карточка уже на месте.
+      requestAnimationFrame(() => scrollToTarget(sectionId, target.plan));
     };
     const fromHash = () => {
       const target = parseLayoutsLink(window.location.hash);
@@ -73,7 +80,8 @@ export function useLayoutsTarget(sectionId: string, setFilter: (filter: LayoutFi
     };
     const onClick = (event: MouseEvent) => {
       const link = (event.target as Element | null)?.closest?.("a[data-layouts]");
-      if (!link) return;
+      // Ctrl/Cmd/Shift-клик — новая вкладка браузера, его не перехватываем.
+      if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       apply(parseLayoutsLink(`#${sectionId}?${link.getAttribute("data-layouts") ?? ""}`));
     };

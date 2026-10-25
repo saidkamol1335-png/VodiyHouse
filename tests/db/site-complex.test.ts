@@ -175,6 +175,16 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     expect((await calc(user(manager))).rows[0]!.data).toBeNull();
     const headCalc = (await calc(user(head))).rows[0]!.data!;
     expect(headCalc.programs.find((p) => p.id === program)?.block_ids).toEqual([block]);
+    // Программа на блок Shodlik и блок черновика: посетителю — только блок на сайте, руководителю
+    // в предпросмотре черновика — и его блок.
+    const shodlikBlock = (
+      await db.admin.query<{ id: string }>("select b.id from blocks b join complexes c on c.id = b.complex_id where c.slug = 'demo-shodlik' order by b.sort limit 1")
+    ).rows[0]!.id;
+    await db.admin.query("update payment_programs set block_ids = array[$2::uuid, $3::uuid] where id = $1", [program, shodlikBlock, block]);
+    const visitor = (await page("demo-shodlik"))!.developer.programs.find((p) => p.id === program);
+    expect(visitor?.block_ids).toEqual([shodlikBlock]);
+    const previewed = (await page("zhk-draft", user(head)))!.developer.programs.find((p) => p.id === program);
+    expect([...(previewed?.block_ids ?? [])].sort()).toEqual([shodlikBlock, block].sort());
   });
 
   it("права новых таблиц: посетитель видит строки только опубликованного ЖК; писать напрямую — только руководителю", async () => {
@@ -342,6 +352,10 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     // Неопубликованные (черновик из теста выше) — за последним опубликованным.
     const unpublished = (await db.admin.query<{ sort: number }>("select sort from complexes where status <> 'published'")).rows;
     expect(unpublished.every((row) => row.sort > reversed.length * 10)).toBe(true);
+    // Неопубликованный вне номеров опубликованных — не трогается (в журнале нет ложного «Порядок»).
+    await db.admin.query("update complexes set sort = 9000 where slug = 'zhk-draft'");
+    await reorder(published);
+    expect((await db.admin.query<{ sort: number }>("select sort from complexes where slug = 'zhk-draft'")).rows[0]!.sort).toBe(9000);
     await expectHint(reorder(reversed.slice(1)), "vh:stale_list");
     await expectHint(reorder([...reversed.slice(1), reversed[1]!]), "vh:stale_list");
     await expectHint(reorder(published, manager), "vh:forbidden");
