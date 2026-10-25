@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { blockPaymentFrom } from "@/lib/site/catalog/payment";
 import { catalogFrom, type SiteCatalogRecord } from "@/lib/site/catalog/records";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
@@ -58,6 +59,20 @@ describe.skipIf(isRemoteTarget)("каталог сайта: site_catalog()", () 
     expect(shodlik.blocks[0]!.deadline).toEqual({ year: 2025, quarter: 3 });
     expect(data.developers.flatMap((d) => d.programs).length).toBeGreaterThan(0);
     expect(data.rate?.usdUzs).toBeGreaterThan(0);
+  });
+
+  it("«Платёж от» блока — по его программам; без рассрочек застройщика — не из чего считать", async () => {
+    const data = catalogFrom((await catalog()) as unknown as SiteCatalogRecord);
+    const orzu = data.complexes.find((c) => c.slug === "demo-orzu")!;
+    const shodlikA = data.complexes.find((c) => c.slug === "demo-shodlik")!.blocks[0]!;
+    const shodlikPrice = Math.min(...shodlikA.offers.map((o) => o.priceFrom ?? Infinity));
+    const payment = blockPaymentFrom(data, data.complexes[0]!.developerId, shodlikA);
+    expect(payment).toBeGreaterThan(0);
+    expect(payment).toBeLessThan(shodlikPrice);
+    // Orzu 1: схема Kamalak — только на Orzu 2, но рассрочка через банк — на все блоки.
+    expect(blockPaymentFrom(data, orzu.developerId, orzu.blocks.find((b) => b.name === "1")!)).toBeGreaterThan(0);
+    const withoutPrograms = { ...data, developers: data.developers.map((d) => ({ ...d, programs: [] })) };
+    expect(blockPaymentFrom(withoutPrograms, orzu.developerId, orzu.blocks[0]!)).toBeNull();
   });
 
   it("без полей скидки и сотрудников", async () => {
