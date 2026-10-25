@@ -5,7 +5,7 @@ import { expect } from "vitest";
 import type { StaffRole } from "@/lib/admin/access";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
-const MIGRATIONS_DIR = path.join(ROOT, "supabase", "migrations");
+export const MIGRATIONS_DIR = path.join(ROOT, "supabase", "migrations");
 const SHIM_FILE = path.join(import.meta.dirname, "supabase-shim.sql");
 
 /** Кто выполняет запрос: как в облаке, роль Postgres и claims JWT задают RLS. */

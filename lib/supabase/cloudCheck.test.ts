@@ -127,8 +127,12 @@ describe("настройки Auth", () => {
 describe("база", () => {
   const local = ["20261018221850", "20261020120000"];
 
+  const pushed = { applied: local, local, edited: [] };
+
   it("до db:push — ✗ миграции, DEMO и руководитель не проверяются", () => {
-    expect(checkDatabase({ applied: [], local, demoComplexes: null, activeHeads: null })).toEqual([
+    expect(
+      checkDatabase({ applied: [], local, edited: [], demoComplexes: null, activeHeads: null }),
+    ).toEqual([
       expect.objectContaining({
         status: "fail",
         text: "миграции: в облаке 0 из 2",
@@ -138,14 +142,30 @@ describe("база", () => {
   });
 
   it("после db:push — следующий шаг подсказывается по порядку", () => {
-    const lines = checkDatabase({ applied: local, local, demoComplexes: 0, activeHeads: 0 });
+    const lines = checkDatabase({ ...pushed, demoComplexes: 0, activeHeads: 0 });
     expect(lines.map((line) => line.hint)).toEqual([
       undefined,
       "npm run demo:seed",
       expect.stringContaining("staff:create-head"),
     ]);
-    expect(
-      statuses(checkDatabase({ applied: local, local, demoComplexes: 4, activeHeads: 1 })),
-    ).toEqual(["ok", "ok", "ok"]);
+    expect(statuses(checkDatabase({ ...pushed, demoComplexes: 4, activeHeads: 1 }))).toEqual([
+      "ok",
+      "ok",
+      "ok",
+    ]);
+  });
+
+  it("применённую миграцию изменили в файле — ✗, хотя все версии в облаке есть (2.9б)", () => {
+    const lines = checkDatabase({
+      ...pushed,
+      edited: ["20261020120000"],
+      demoComplexes: 4,
+      activeHeads: 1,
+    });
+    expect(statuses(lines)).toEqual(["ok", "fail", "ok", "ok"]);
+    expect(lines[1]).toMatchObject({
+      text: "миграции изменены после применения: 20261020120000",
+      hint: expect.stringContaining("новым файлом миграции"),
+    });
   });
 });

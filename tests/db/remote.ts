@@ -4,9 +4,20 @@
 // не остаётся. Внутри транзакции контент облака временно убирается, чтобы подсчёты были как
 // на чистой базе (справочники — как в миграциях).
 
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import pg from "pg";
 import { dbClientConfig } from "../../lib/supabase/dbClient";
-import { claimsOf, migrationFiles, PG_ROLE, type Actor, type Db, type TestDb } from "./harness";
+import { editedMigrations, type AppliedMigration } from "../../lib/supabase/migrationDrift";
+import {
+  claimsOf,
+  migrationFiles,
+  MIGRATIONS_DIR,
+  PG_ROLE,
+  type Actor,
+  type Db,
+  type TestDb,
+} from "./harness";
 
 const SANDBOX_CLEANUP = `
   delete from public.complexes;
@@ -16,16 +27,21 @@ const SANDBOX_CLEANUP = `
   delete from public.profiles;
   delete from public.audit_log;
 `;
+// Имя сессии в pg_stat_activity: так видно, что замки держит тестовый прогон.
+const APPLICATION_NAME = "vh-test-db-remote";
+const LOCK_NOT_AVAILABLE = "55P03";
 
 export async function createRemoteTestDb(): Promise<TestDb> {
   const connectionString = process.env.SUPABASE_DB_URL;
   if (!connectionString) throw new Error("Нет SUPABASE_DB_URL в .env.local — см. .env.example.");
 
-  const client = new pg.Client({ ...dbClientConfig(connectionString), types: { getTypeParser } });
+  const client = new pg.Client({
+    ...dbClientConfig(connectionString),
+    types: { getTypeParser },
+    application_name: APPLICATION_NAME,
+  });
   await client.connect();
-  await assertMigrationsApplied(client);
-  await client.query("begin");
-  await client.query(SANDBOX_CLEANUP);
+  const { ownTimeout, timeouts } = await openSandbox(client);
 
   // Тесты ждут и ошибок владельца (check, unique): без точки сохранения такая ошибка прервала бы
   // транзакцию всего файла, как и у as() ниже.
@@ -84,12 +100,6 @@ export async function createRemoteTestDb(): Promise<TestDb> {
 
   // Каждая служебная команда — отдельным запросом: медленнее, но откат после ошибки проходит
   // наверняка, иначе транзакция файла остаётся прерванной и следующие тесты падают не по своей вине.
-  // SET ROLE не применяет statement_timeout роли (у authenticated в Supabase — 8 с), а PostgREST
-  // применяет на каждом запросе: без этого тест 5000 квартир прошёл бы там, где кабинет упадёт.
-  const ownTimeout = (
-    await client.query<{ value: string }>("select current_setting('statement_timeout') as value")
-  ).rows[0]!.value;
-  const timeouts = await roleTimeouts(client);
   let savepoints = 0;
   const as = async <T>(actor: Actor, run: (db: Db) => Promise<T>): Promise<T> => {
     exclusive(asBusy || queryBusy);
@@ -158,14 +168,81 @@ async function roleTimeouts(client: pg.Client): Promise<Map<string, string>> {
   return new Map(rows.map((row) => [row.role, row.value]));
 }
 
+/**
+ * Транзакция файла и очистка песочницы. При сбое соединение закрывается: иначе прерванная
+ * транзакция пережила бы файл и держала замки удалённых строк, а следующие файлы ждали бы их до
+ * statement_timeout владельца (2 мин) и падали сами (2.9б: пять файлов подряд).
+ */
+async function openSandbox(
+  client: pg.Client,
+): Promise<{ ownTimeout: string; timeouts: Map<string, string> }> {
+  try {
+    await assertMigrationsApplied(client);
+    // SET ROLE не применяет statement_timeout роли (у authenticated в Supabase — 8 с), а PostgREST
+    // применяет на каждом запросе: без этого тест 5000 квартир прошёл бы там, где кабинет упадёт.
+    const ownTimeout = (
+      await client.query<{ value: string }>("select current_setting('statement_timeout') as value")
+    ).rows[0]!.value;
+    const timeouts = await roleTimeouts(client);
+    await client.query("begin");
+    await cleanSandbox(client);
+    return { ownTimeout, timeouts };
+  } catch (error) {
+    await client.query("rollback").catch(() => undefined);
+    await client.end().catch(() => undefined);
+    throw error;
+  }
+}
+
+/** Замки очистка ждёт не дольше 30 с и называет, чья транзакция их держит. */
+async function cleanSandbox(client: pg.Client): Promise<void> {
+  const previous = (
+    await client.query<{ value: string }>("select current_setting('lock_timeout') as value")
+  ).rows[0]!.value;
+  await client.query("select set_config('lock_timeout', '30s', true)");
+  try {
+    await client.query(SANDBOX_CLEANUP);
+  } catch (error) {
+    if ((error as { code?: string }).code !== LOCK_NOT_AVAILABLE) throw error;
+    await client.query("rollback");
+    throw new Error(`Очистку облака держит другая транзакция: ${await lockHolders(client)}`, {
+      cause: error,
+    });
+  }
+  await client.query("select set_config('lock_timeout', $1, true)", [previous]);
+}
+
+async function lockHolders(client: pg.Client): Promise<string> {
+  const { rows } = await client.query<{ pid: number; app: string; state: string; since: string }>(
+    `select pid, application_name as app, state, to_char(xact_start, 'DD.MM HH24:MI:SS') as since
+     from pg_stat_activity
+     where datname = current_database() and pid <> pg_backend_pid() and xact_start is not null`,
+  );
+  if (rows.length === 0) return "её уже нет — запустите прогон заново.";
+  const list = rows.map(
+    (row) => `pid ${row.pid} (${row.app || "без имени"}, ${row.state}, с ${row.since})`,
+  );
+  return `${list.join("; ")}. Оборванный прогон отпустит замки сам, когда сервер закроет его соединение.`;
+}
+
 async function assertMigrationsApplied(client: pg.Client): Promise<void> {
-  const local = (await migrationFiles()).map((file) => file.split("_")[0]!);
-  const { rows } = await client.query<{ version: string }>(
-    "select version from supabase_migrations.schema_migrations",
+  const files = new Map<string, string>();
+  for (const file of await migrationFiles()) {
+    files.set(file.split("_")[0]!, await readFile(path.join(MIGRATIONS_DIR, file), "utf8"));
+  }
+  const { rows } = await client.query<AppliedMigration>(
+    "select version, statements from supabase_migrations.schema_migrations",
   );
   const applied = new Set(rows.map((row) => row.version));
-  const missing = local.filter((version) => !applied.has(version));
+  const missing = [...files.keys()].filter((version) => !applied.has(version));
   if (missing.length > 0) {
     throw new Error(`В облаке нет миграций ${missing.join(", ")} — выполни npm run db:push.`);
+  }
+  // Применённую миграцию правили: облако живёт со старой версией, и тесты проверяли бы не то.
+  const edited = editedMigrations(rows, files);
+  if (edited.length > 0) {
+    throw new Error(
+      `Миграции ${edited.join(", ")} изменены после применения в облаке — исправление новым файлом миграции.`,
+    );
   }
 }

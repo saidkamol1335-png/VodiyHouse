@@ -6,7 +6,7 @@
 //   PowerShell: $env:SUPABASE_ACCESS_TOKEN = "sbp_…"; npm run cloud:check
 // Код выхода 1 — есть ✗.
 
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import pg from "pg";
@@ -20,6 +20,7 @@ import {
   projectRefFromUrl,
 } from "../lib/supabase/cloudCheck.ts";
 import { dbClientConfig } from "../lib/supabase/dbClient.ts";
+import { editedMigrations } from "../lib/supabase/migrationDrift.ts";
 
 const TIMEOUT_MS = 10_000;
 const MIGRATIONS_DIR = path.join(import.meta.dirname, "..", "supabase", "migrations");
@@ -97,9 +98,10 @@ async function countOrNull(client, sql) {
 }
 
 async function databaseLines(connectionString) {
-  const local = (await readdir(MIGRATIONS_DIR))
-    .filter((file) => file.endsWith(".sql"))
-    .map((file) => file.split("_")[0]);
+  const files = new Map();
+  for (const file of (await readdir(MIGRATIONS_DIR)).filter((name) => name.endsWith(".sql"))) {
+    files.set(file.split("_")[0], await readFile(path.join(MIGRATIONS_DIR, file), "utf8"));
+  }
   const client = new pg.Client({
     ...dbClientConfig(connectionString),
     connectionTimeoutMillis: TIMEOUT_MS,
@@ -116,10 +118,10 @@ async function databaseLines(connectionString) {
     ];
   }
   try {
-    const applied = await client
-      .query("select version from supabase_migrations.schema_migrations")
+    const migrations = await client
+      .query("select version, statements from supabase_migrations.schema_migrations")
       .then(
-        ({ rows }) => rows.map((row) => row.version),
+        ({ rows }) => rows,
         () => [],
       );
     const demoComplexes = await countOrNull(
@@ -130,7 +132,13 @@ async function databaseLines(connectionString) {
       client,
       "select count(*)::int as count from public.profiles where role = 'head' and is_active",
     );
-    return checkDatabase({ applied, local, demoComplexes, activeHeads });
+    return checkDatabase({
+      applied: migrations.map((row) => row.version),
+      local: [...files.keys()],
+      edited: editedMigrations(migrations, files),
+      demoComplexes,
+      activeHeads,
+    });
   } finally {
     await client.end();
   }

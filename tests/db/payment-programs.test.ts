@@ -506,6 +506,12 @@ describe("программы оплаты", () => {
 
     it("«Условия актуальны на» двигает правка условий, а не порядок, тумблер или блоки", async () => {
       const id = await save(head, scheme());
+      // Облачный прогон — одна транзакция на файл, now() в ней стоит: без сдвига назад правка
+      // условий поставила бы то же время, что и создание.
+      await db.admin.query(
+        "update payment_programs set updated_at = updated_at - interval '1 day' where id = $1",
+        [id],
+      );
       const second = await save(head, full());
       const before = await updatedAt(id);
       await setActive(id, true);

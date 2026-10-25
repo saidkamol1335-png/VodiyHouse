@@ -9,6 +9,7 @@ import {
   createTestDb,
   expectDenied,
   expectHint,
+  isRemoteTarget,
   user,
   type TestDb,
 } from "./harness";
@@ -25,6 +26,14 @@ import {
   unitEntries,
   unitsOf,
 } from "./units-fixtures";
+
+/**
+ * Предел пакетных путей на 5000 квартир по часам теста. В облаке часы меряют сеть машины, с которой
+ * идёт прогон (2.9б: генератор — 41 с по часам при 313 мс на сервере по pg_stat_statements), а
+ * сервер ограничивает сам: обвязка ставит statement_timeout роли (8 с) на каждый as(), выполнение
+ * дольше упало бы с кодом 57014.
+ */
+const WALL_LIMIT_MS = isRemoteTarget ? Number.POSITIVE_INFINITY : 15_000;
 
 // Шаг 12.1: права функций квартир, генератор, «+ Квартира», правка строки, удаление (Н4, Н6).
 const WRITE_FUNCTIONS: Record<string, string> = {
@@ -216,7 +225,7 @@ describe("квартиры в кабинете: права, генератор, 
         created: 5000,
         unassigned: 5000,
       });
-      expect(performance.now() - started).toBeLessThan(15_000);
+      expect(performance.now() - started).toBeLessThan(WALL_LIMIT_MS);
       const journal = await unitEntries(db.admin, tooBig);
       expect(journal).toHaveLength(1);
       expect(journal[0]?.changes.summary).toEqual({
@@ -236,7 +245,7 @@ describe("квартиры в кабинете: права, генератор, 
       const timed = async <T>(run: () => Promise<T>): Promise<T> => {
         const at = performance.now();
         const result = await run();
-        expect(performance.now() - at).toBeLessThan(15_000);
+        expect(performance.now() - at).toBeLessThan(WALL_LIMIT_MS);
         return result;
       };
       const listed = await timed(() =>

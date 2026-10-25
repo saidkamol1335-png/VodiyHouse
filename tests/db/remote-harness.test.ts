@@ -1,5 +1,7 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { migrationFiles, user } from "./harness";
+import { migrationFiles, MIGRATIONS_DIR, user } from "./harness";
 
 // Облачный харнесс (remote.ts) без облака: поддельный pg.Client выполняет запросы строго по очереди,
 // как настоящий, а точки сохранения ведёт как Postgres — release снимает и все более поздние.
@@ -11,12 +13,15 @@ const fake = vi.hoisted(() => {
     log: string[] = [];
     stack: string[] = [];
     aborted = false;
+    ended = false;
     private queue: Promise<unknown> = Promise.resolve();
     constructor() {
       FakeClient.last = this;
     }
     async connect() {}
-    async end() {}
+    async end() {
+      this.ended = true;
+    }
     query(sql: string) {
       const run = this.queue.then(async () => {
         await new Promise((resolve) => setTimeout(resolve, 1));
@@ -29,6 +34,9 @@ const fake = vi.hoisted(() => {
     private async execute(sql: string) {
       const savepoint = /^(savepoint|release savepoint|rollback to savepoint) (\w+)$/.exec(sql);
       if (savepoint) this.moveSavepoints(savepoint[1]!, savepoint[2]!);
+      if (sql.includes("delete from public.complexes") && fake.cleanupError)
+        throw fake.cleanupError;
+      if (sql.includes("pg_stat_activity")) return { rows: [fake.holder] };
       if (sql.includes("schema_migrations")) return { rows: await fake.versions() };
       if (sql.includes("current_setting")) return { rows: [{ value: "0" }] };
       if (sql.includes("fail")) throw new Error("ожидаемая ошибка запроса");
@@ -44,7 +52,17 @@ const fake = vi.hoisted(() => {
       this.stack.length = kind === "release savepoint" ? at : at + 1;
     }
   }
-  return { FakeClient, versions: async () => [] as { version: string }[] };
+  return {
+    FakeClient,
+    versions: async () => [] as { version: string; statements: string[] }[],
+    cleanupError: null as (Error & { code?: string }) | null,
+    holder: {
+      pid: 42,
+      app: "vh-test-db-remote",
+      state: "idle in transaction",
+      since: "24.10 22:10:00",
+    },
+  };
 });
 
 vi.mock("pg", () => ({ default: { Client: fake.FakeClient } }));
@@ -52,11 +70,24 @@ vi.mock("pg", () => ({ default: { Client: fake.FakeClient } }));
 const { createRemoteTestDb } = await import("./remote");
 const GUARD = /только по одному/;
 
+/** Все миграции «применены в облаке» с текстом файлов; у первой можно подменить текст. */
+const appliedMigrations = async (firstText?: string) =>
+  Promise.all(
+    (await migrationFiles()).map(async (file, at) => ({
+      version: file.split("_")[0]!,
+      statements: [
+        at === 0 && firstText !== undefined
+          ? firstText
+          : await readFile(path.join(MIGRATIONS_DIR, file), "utf8"),
+      ],
+    })),
+  );
+
 describe("облачный харнесс: запросы к базе — по одному", () => {
   beforeEach(() => {
     vi.stubEnv("SUPABASE_DB_URL", "postgresql://postgres.test:pw@localhost:5432/postgres");
-    fake.versions = async () =>
-      (await migrationFiles()).map((file) => ({ version: file.split("_")[0]! }));
+    fake.versions = () => appliedMigrations();
+    fake.cleanupError = null;
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -100,5 +131,42 @@ describe("облачный харнесс: запросы к базе — по �
     await expect(db.as(user("u1"), (tx) => tx.query("select fail"))).rejects.toThrow("ожидаемая");
     await db.admin.query("select 'после'");
     expect(fake.FakeClient.last.aborted).toBe(false);
+  });
+});
+
+// 2.9б: сбой подготовки не оставляет соединение с прерванной транзакцией (оно держало бы замки
+// удалённых строк, и следующие файлы падали бы по statement_timeout); правка применённой
+// миграции — отказ до транзакции файла.
+describe("облачный харнесс: подготовка файла", () => {
+  beforeEach(() => {
+    vi.stubEnv("SUPABASE_DB_URL", "postgresql://postgres.test:pw@localhost:5432/postgres");
+    fake.versions = () => appliedMigrations();
+    fake.cleanupError = null;
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("применённую миграцию изменили — отказ до begin, соединение закрыто", async () => {
+    fake.versions = () => appliedMigrations("select 1");
+    await expect(createRemoteTestDb()).rejects.toThrow(/изменены после применения/);
+    expect(fake.FakeClient.last.log).not.toContain("begin");
+    expect(fake.FakeClient.last.ended).toBe(true);
+  });
+
+  it("замок держит другая транзакция — она названа, откат, соединение закрыто", async () => {
+    fake.cleanupError = Object.assign(new Error("lock timeout"), { code: "55P03" });
+    await expect(createRemoteTestDb()).rejects.toThrow(
+      /держит другая транзакция: pid 42 \(vh-test-db-remote, idle in transaction/,
+    );
+    expect(fake.FakeClient.last.log).toContain("rollback");
+    expect(fake.FakeClient.last.ended).toBe(true);
+  });
+
+  it("другой сбой очистки (statement_timeout) — та же ошибка, откат, соединение закрыто", async () => {
+    fake.cleanupError = Object.assign(new Error("canceling statement due to statement timeout"), {
+      code: "57014",
+    });
+    await expect(createRemoteTestDb()).rejects.toThrow(/statement timeout/);
+    expect(fake.FakeClient.last.log).toContain("rollback");
+    expect(fake.FakeClient.last.ended).toBe(true);
   });
 });

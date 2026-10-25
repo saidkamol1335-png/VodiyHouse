@@ -198,6 +198,6 @@ test.describe("сайт · страница калькулятора", () => {
     await page.evaluate(() => localStorage.setItem("vh-theme", "light"));
     await page.goto("/ru/kalkulyator");
     await page.waitForLoadState("networkidle");
-    await page.screenshot({ path: `${dir}/s26-public-empty.png`, caret: "initial" });
+    await page.screenshot({ path: `${dir}/s26-public.png`, caret: "initial" });
   });
 });

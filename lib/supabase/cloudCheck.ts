@@ -197,6 +197,8 @@ export function manualAuthConfig(): CheckLine[] {
 export type DatabaseState = {
   applied: string[];
   local: string[];
+  /** Применённые миграции, чей файл изменили потом (lib/supabase/migrationDrift.ts). */
+  edited: string[];
   demoComplexes: number | null;
   activeHeads: number | null;
 };
@@ -212,6 +214,13 @@ export function checkDatabase(state: DatabaseState): CheckLine[] {
           "npm run db:push",
         ),
   ];
+  if (state.edited.length > 0)
+    lines.push(
+      fail(
+        `миграции изменены после применения: ${state.edited.join(", ")}`,
+        "применённую не правим — исправление новым файлом миграции",
+      ),
+    );
   if (state.demoComplexes === null || state.activeHeads === null) return lines;
   lines.push(
     state.demoComplexes > 0
