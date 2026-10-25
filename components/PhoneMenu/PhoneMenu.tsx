@@ -37,7 +37,7 @@ function ContactRow({ icon, label, value, href }: ContactRowProps) {
   return href ? <a className="phone-menu__contact" href={href}>{content}</a> : <div className="phone-menu__contact">{content}</div>;
 }
 
-/** Меню телефона на весь экран (решение Ш5): 01–07, контакты Vodiy House, язык, тема. */
+/** Меню телефона на весь экран (решение Ш5): пункты 01–0N, контакты Vodiy House, язык, тема. */
 export function PhoneMenu({ id, onClose }: PhoneMenuProps) {
   const t = useTranslations();
   // Любая ссылка внутри меню уводит со страницы — меню закрываем.
