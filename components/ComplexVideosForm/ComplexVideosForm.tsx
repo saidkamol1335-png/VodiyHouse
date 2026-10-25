@@ -89,7 +89,8 @@ function VideoRow({ row, index, last, errors, onMove, onRemove }: VideoRowProps)
   const t = useTranslations("admin.complexes.videos");
   const issue = (code: VideoIssue | undefined) => (code ? t(`issues.${code}`) : undefined);
   return (
-    <li className="complex-videos-form__row">
+    // Группа «Видео N»: поля строк подписаны одинаково, диктор назовёт строку.
+    <li className="complex-videos-form__row" role="group" aria-label={t("row", { n: index + 1 })}>
       <input type="hidden" name="videoKey" value={row.key} />
       <span className="complex-videos-form__number">{index === 0 ? t("main") : index + 1}</span>
       <div className="complex-videos-form__fields">
@@ -114,10 +115,11 @@ function VideoRow({ row, index, last, errors, onMove, onRemove }: VideoRowProps)
         />
       </div>
       <div className="complex-videos-form__tools">
-        <button type="button" className="complex-videos-form__tool" aria-label={t("up")} disabled={index === 0} onClick={() => onMove(-1)}>
+        {/* aria-disabled, а не disabled: строка переехала наверх — фокус остаётся на кнопке, не уходит в body. */}
+        <button type="button" className="complex-videos-form__tool" aria-label={t("up")} aria-disabled={index === 0} onClick={() => index > 0 && onMove(-1)}>
           <ArrowUp size={16} aria-hidden="true" />
         </button>
-        <button type="button" className="complex-videos-form__tool" aria-label={t("down")} disabled={last} onClick={() => onMove(1)}>
+        <button type="button" className="complex-videos-form__tool" aria-label={t("down")} aria-disabled={last} onClick={() => !last && onMove(1)}>
           <ArrowDown size={16} aria-hidden="true" />
         </button>
         <button type="button" className="complex-videos-form__tool" aria-label={t("remove")} onClick={onRemove}>

@@ -29,13 +29,15 @@ test.describe("кабинет · ЖК · видео, детали, докуме�
 
   test("«Документы»: завтрашняя дата — ошибка у документа; проверенный сегодня — «Сохранено»", async ({ page }) => {
     await open(page, `${NAMUNA}/dokumenty`);
-    // У Namuna (строится) акта ввода нет — последняя строка пустая.
+    // У Namuna (строится) акта ввода нет — последняя строка; тест в конце снова её очищает.
     const commissioning = page.getByLabel("Проверен").last();
-    await expect(commissioning).toHaveValue("");
     await commissioning.fill("2099-01-01");
     await save(page);
     await expect(page.getByText("Дата проверки — не позже сегодняшней")).toBeVisible();
     await commissioning.fill("2026-09-11");
+    await save(page);
+    await saved(page);
+    await commissioning.fill("");
     await save(page);
     await saved(page);
   });

@@ -33,10 +33,13 @@ export function ComplexDocumentsForm({ complexId, documents, action }: ComplexDo
         {documents.map((document) => {
           const issue = errors[document.typeId];
           return (
-            <li key={document.typeId} className="complex-documents-form__row">
+            // Группа с именем документа: поля строк подписаны одинаково («Проверен»), диктор назовёт строку.
+            <li key={document.typeId} className="complex-documents-form__row" role="group" aria-labelledby={`complex-document-name-${document.typeId}`}>
               <input type="hidden" name="documentType" value={document.typeId} />
               <div className="complex-documents-form__text">
-                <span className="complex-documents-form__name">{document.name.ru}</span>
+                <span className="complex-documents-form__name" id={`complex-document-name-${document.typeId}`}>
+                  {document.name.ru}
+                </span>
                 <span className="complex-documents-form__hint">{document.hint?.ru ?? t("documents.noHint")}</span>
               </div>
               <Field

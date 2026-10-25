@@ -63,7 +63,8 @@ function NearbyRow({ row, index, onChange, onRemove }: NearbyRowProps) {
   const untouched = !row.nameRu && !row.nameUz && !row.meters && !row.minutes;
   const id = `nearby-${row.key}`;
   return (
-    <li className="nearby-editor__row">
+    // Группа «Место N»: поля строк подписаны одинаково, диктор назовёт строку.
+    <li className="nearby-editor__row" role="group" aria-label={t("row", { n: index + 1 })}>
       <SelectField className="nearby-editor__kind" id={`${id}-kind`} label={t("kind", { n: index + 1 })} options={NEARBY_KINDS.map((kind) => ({ value: kind, label: t(`kinds.${kind}`) }))} value={row.kind} onChange={(event) => onChange({ kind: event.target.value })} />
       <Field className="nearby-editor__name" id={`${id}-ru`} label={t("nameRu")} placeholder={t("namePlaceholder")} maxLength={NEARBY_LIMITS.nameMax} value={row.nameRu} onChange={(event) => onChange({ nameRu: event.target.value })} />
       <Field className="nearby-editor__name" id={`${id}-uz`} label={t("nameUz")} maxLength={NEARBY_LIMITS.nameMax} value={row.nameUz} onChange={(event) => onChange({ nameUz: event.target.value })} />

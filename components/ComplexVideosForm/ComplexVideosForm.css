@@ -51,8 +51,9 @@
   cursor: pointer;
 }
 
-.complex-videos-form__tool:disabled {
-  opacity: 0.4;
+/* Крайняя «Выше» / «Ниже» — aria-disabled: фокус после перемещения строки не теряется. */
+.complex-videos-form__tool[aria-disabled="true"] {
+  opacity: var(--opacity-unavailable);
   cursor: default;
 }
 
