@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { catalogFrom, type SiteCatalogRecord } from "@/lib/site/catalog/records";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 // Шаг 3.3: каталог сайта — site_catalog() ролью посетителя на DEMO-сиде. Опубликованные ЖК
@@ -45,6 +46,15 @@ describe.skipIf(isRemoteTarget)("каталог сайта: site_catalog()", () 
     expect(blockB!.offers.map((o) => o.free)).toEqual([10, 16, 3]);
     expect(blockA!.offers.every((o) => o.available && (o.price_from ?? 0) > 0)).toBe(true);
     expect(blockA).toMatchObject({ currency: "USD", floors_total: 12, finishing: { slug: "rough" } });
+  });
+
+  it("ответ проходит преобразователь сайта: числа — числами, программы — программами lib/calc", async () => {
+    const data = catalogFrom((await catalog()) as unknown as SiteCatalogRecord);
+    const shodlik = data.complexes.find((c) => c.slug === "demo-shodlik")!;
+    expect(typeof shodlik.blocks[0]!.offers[0]!.priceFrom).toBe("number");
+    expect(shodlik.blocks[0]!.deadline).toEqual({ year: 2025, quarter: 3 });
+    expect(data.developers.flatMap((d) => d.programs).length).toBeGreaterThan(0);
+    expect(data.rate?.usdUzs).toBeGreaterThan(0);
   });
 
   it("без полей скидки и сотрудников", async () => {
