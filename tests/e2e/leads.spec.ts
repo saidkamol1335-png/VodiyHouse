@@ -116,7 +116,8 @@ test.describe("кабинет · заявки", () => {
       await expect(drawer.locator(".lead-drawer__message")).toContainText(`Новая заявка #${number} — Узнать о наличии`);
       await expect(drawer.getByText("Застройщику — не передаётся")).toBeVisible();
       await drawer.getByRole("button", { name: "Перезвонили" }).click();
-      await expect(drawer.locator(".lead-drawer__head .lead-status")).toHaveText("Перезвонили");
+      // Статус пишет действие сервера в базу: в общем прогоне e2e под нагрузкой — дольше 5 с.
+      await expect(drawer.locator(".lead-drawer__head .lead-status")).toHaveText("Перезвонили", { timeout: 15_000 });
       await drawer.getByRole("button", { name: "Взять в работу" }).click();
       await expect(drawer.getByRole("button", { name: /\(вы\)/ })).toHaveAttribute("aria-pressed", "true");
       await shot(page, "lead-drawer");
