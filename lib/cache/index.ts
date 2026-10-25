@@ -55,6 +55,13 @@ export function expireDictionaries(): void {
   updateTag(DICTIONARIES_TAG);
 }
 
+/** Настройки сайта (контакты Vodiy House, Ф9) — в оболочке каждой страницы, поэтому свой узкий тег. */
+export const SITE_SETTINGS_TAG = "site-settings";
+
+export function expireSiteSettings(): void {
+  updateTag(SITE_SETTINGS_TAG);
+}
+
 /**
  * Программы оплаты и курс (фаза 2): калькулятор сайта — 'use cache' + cacheTag(PROGRAMS_TAG);
  * «Платёж от» на карточках ЖК — ещё CATALOG_TAG; программы на странице застройщика — его тег.

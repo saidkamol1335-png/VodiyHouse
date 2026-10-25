@@ -3,7 +3,7 @@
 import { Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { phoneHref } from "@/lib/contacts";
+import { formatPhone, phoneHref } from "@/lib/contacts";
 
 type PhoneButtonProps = {
   phone: string;
@@ -20,7 +20,7 @@ export function PhoneButton({ phone, className }: PhoneButtonProps) {
     return (
       <a className={classes} href={phoneHref(phone)}>
         {icon}
-        {phone}
+        {formatPhone(phone)}
       </a>
     );
   }

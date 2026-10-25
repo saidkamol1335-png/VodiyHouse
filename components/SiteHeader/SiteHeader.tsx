@@ -9,9 +9,10 @@ import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Logo } from "@/components/Logo";
 import { PhoneButton } from "@/components/PhoneButton";
 import { PhoneMenu } from "@/components/PhoneMenu";
+import { useSiteContacts } from "@/components/SiteContacts";
 import { TabletMenu } from "@/components/TabletMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { phoneHref, VODIY_HOUSE_PHONE } from "@/lib/contacts";
+import { phoneHref } from "@/lib/contacts";
 import { ROUTES } from "@/lib/routes";
 import { useMenu, useScrolledPast } from "./useHeaderState";
 
@@ -112,14 +113,15 @@ function HeaderTools({ menuOpen, onToggleMenu, ref }: HeaderToolsProps) {
   );
 }
 
-/** Телефон Vodiy House (правило ТЗ 1.2) — только когда он известен (TODO-заказчик). */
+/** Телефон Vodiy House (правило ТЗ 1.2) — только когда он введён в «Настройки → Контакты». */
 function HeaderPhone() {
   const t = useTranslations("header");
-  if (!VODIY_HOUSE_PHONE) return null;
+  const { phone } = useSiteContacts();
+  if (!phone) return null;
   return (
     <>
-      <PhoneButton phone={VODIY_HOUSE_PHONE} className="site-header__phone" />
-      <IconButton className="site-header__icon site-header__call" label={t("call")} href={phoneHref(VODIY_HOUSE_PHONE)} external>
+      <PhoneButton phone={phone} className="site-header__phone" />
+      <IconButton className="site-header__icon site-header__call" label={t("call")} href={phoneHref(phone)} external>
         <Phone {...ICON} aria-hidden />
       </IconButton>
     </>

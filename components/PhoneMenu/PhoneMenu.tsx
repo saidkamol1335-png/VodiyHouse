@@ -1,13 +1,14 @@
 "use client";
 
-import { ArrowRight, ChevronRight, MapPin, Phone, Send, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { ArrowRight, AtSign, ChevronRight, Clock, MapPin, Phone, Send, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import NextLink from "next/link";
 import { useEffect, useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { LogoMark } from "@/components/Logo";
 import { ThemeSegmented } from "@/components/ThemeToggle";
-import { phoneHref, telegramHref, VODIY_HOUSE_PHONE, VODIY_HOUSE_TELEGRAM } from "@/lib/contacts";
+import { useSiteContacts } from "@/components/SiteContacts";
+import { formatPhone, instagramHref, phoneHref, telegramHref } from "@/lib/contacts";
 import { isActivePath } from "@/components/HeaderNav";
 import { useNavItems } from "@/components/HiddenNav";
 import { Link, usePathname } from "@/lib/i18n/navigation";
@@ -104,13 +105,17 @@ function PhoneMenuNav() {
   );
 }
 
-/** Только контакты Vodiy House (правило ТЗ 1.2); телефона и Telegram пока нет — строк нет. */
+/** Только контакты Vodiy House (правило ТЗ 1.2); не введённых в «Настройки → Контакты» — строк нет. */
 function PhoneMenuContacts() {
   const t = useTranslations("contacts");
+  const locale = useLocale() as "ru" | "uz";
+  const { phone, telegram, instagram, hours } = useSiteContacts();
   return (
     <div className="phone-menu__contacts">
-      {VODIY_HOUSE_PHONE ? <ContactRow icon={<Phone {...ICON} aria-hidden />} label={t("phone")} value={VODIY_HOUSE_PHONE} href={phoneHref(VODIY_HOUSE_PHONE)} /> : null}
-      {VODIY_HOUSE_TELEGRAM ? <ContactRow icon={<Send {...ICON} aria-hidden />} label={t("telegram")} value={`@${VODIY_HOUSE_TELEGRAM}`} href={telegramHref(VODIY_HOUSE_TELEGRAM)} /> : null}
+      {phone ? <ContactRow icon={<Phone {...ICON} aria-hidden />} label={t("phone")} value={formatPhone(phone)} href={phoneHref(phone)} /> : null}
+      {telegram ? <ContactRow icon={<Send {...ICON} aria-hidden />} label={t("telegram")} value={`@${telegram}`} href={telegramHref(telegram)} /> : null}
+      {instagram ? <ContactRow icon={<AtSign {...ICON} aria-hidden />} label={t("instagram")} value={`@${instagram}`} href={instagramHref(instagram)} /> : null}
+      {hours ? <ContactRow icon={<Clock {...ICON} aria-hidden />} label={t("hours")} value={hours[locale]} /> : null}
       <ContactRow icon={<MapPin {...ICON} aria-hidden />} label={t("officeLabel")} value={t("office")} />
     </div>
   );

@@ -98,10 +98,11 @@ describe("доступ к разделам", () => {
     expect(landingPath("videographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 
-  it("вкладки настроек (Д6): Сотрудники · Справочники · Журнал — отдельные адреса", () => {
+  it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Журнал — отдельные адреса", () => {
     expect(readySettingsTabs().map((tab) => [tab.key, tab.href, tab.segment])).toEqual([
       ["staff", "/admin/nastroyki", null],
       ["dictionaries", "/admin/nastroyki/spravochniki", "spravochniki"],
+      ["contacts", "/admin/nastroyki/kontakty", "kontakty"],
       ["journal", "/admin/nastroyki/zhurnal", "zhurnal"],
     ]);
   });

@@ -18,6 +18,7 @@ export const ADMIN_ROUTES = {
   stats: `${ADMIN_ROUTE}/statistika`,
   settings: `${ADMIN_ROUTE}/nastroyki`,
   dictionaries: `${ADMIN_ROUTE}/nastroyki/spravochniki`,
+  contacts: `${ADMIN_ROUTE}/nastroyki/kontakty`,
   journal: `${ADMIN_ROUTE}/nastroyki/zhurnal`,
 } as const;
 
@@ -106,7 +107,7 @@ export function landingPath(role: StaffRole, items: readonly AdminNavItem[] = AD
   return visibleNav(role, items)[0]?.href ?? ADMIN_ROUTES.home;
 }
 
-export type SettingsTabKey = "staff" | "dictionaries" | "journal";
+export type SettingsTabKey = "staff" | "dictionaries" | "contacts" | "journal";
 
 export type SettingsTab = {
   key: SettingsTabKey;
@@ -119,6 +120,7 @@ export type SettingsTab = {
 export const SETTINGS_TABS: readonly SettingsTab[] = [
   { key: "staff", segment: null, href: ADMIN_ROUTES.settings, ready: true },
   { key: "dictionaries", segment: "spravochniki", href: ADMIN_ROUTES.dictionaries, ready: true },
+  { key: "contacts", segment: "kontakty", href: ADMIN_ROUTES.contacts, ready: true },
   { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true },
 ];
 

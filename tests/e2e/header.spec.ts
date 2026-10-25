@@ -50,6 +50,13 @@ test.describe("шапка · десктоп 1440", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "uz");
   });
 
+  test("Ф9: «Показать телефон» — номер из «Настройки → Контакты», второй клик звонит", async ({ page }) => {
+    await page.goto("/dev/header");
+    await page.getByRole("button", { name: "Показать телефон" }).click();
+    const phone = page.getByRole("link", { name: "+998 90 000 00 00" });
+    await expect(phone).toHaveAttribute("href", "tel:+998900000000");
+  });
+
   test("☾ переключает тему", async ({ page }) => {
     await page.goto("/ru");
     await page.getByRole("button", { name: "Включить тёмную тему" }).click();
@@ -98,6 +105,18 @@ test.describe("шапка · телефон 390", () => {
     await menu.getByRole("button", { name: "Закрыть меню" }).click();
     await expect(menu).toHaveCount(0);
     await expect(page.locator("html")).not.toHaveCSS("overflow", "hidden");
+  });
+
+  test("Ф9: в меню — телефон, Telegram, Instagram и часы из «Настройки → Контакты»", async ({ page }) => {
+    await page.goto("/dev/header");
+    await expect(page.getByRole("link", { name: "Позвонить" })).toHaveAttribute("href", "tel:+998900000000");
+    await page.getByRole("button", { name: "Открыть меню" }).click();
+    const contacts = page.getByRole("dialog", { name: "Меню" }).locator(".phone-menu__contacts");
+    await expect(contacts.getByRole("link", { name: /\+998 90 000 00 00/ })).toHaveAttribute("href", "tel:+998900000000");
+    await expect(contacts.getByRole("link", { name: /@vodiyhouse_demo/ })).toHaveAttribute("href", "https://t.me/vodiyhouse_demo");
+    await expect(contacts.getByRole("link", { name: /@vodiyhouse\.demo/ })).toHaveAttribute("href", "https://www.instagram.com/vodiyhouse.demo/");
+    await expect(contacts).toContainText("Пн–Сб, 9:00–19:00 (DEMO)");
+    await shot(page, "390-menu-contacts");
   });
 
   test("Ш6: поверх фото → после прокрутки стекло и название страницы", async ({ page }) => {

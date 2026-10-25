@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useNavItems } from "@/components/HiddenNav";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { useSiteContacts } from "@/components/SiteContacts";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { phoneHref, VODIY_HOUSE_PHONE } from "@/lib/contacts";
+import { formatPhone, phoneHref } from "@/lib/contacts";
 import { Link } from "@/lib/i18n/navigation";
 import { MENU_NAV } from "@/lib/routes";
 
@@ -17,6 +18,7 @@ type TabletMenuProps = {
 export function TabletMenu({ id, onNavigate }: TabletMenuProps) {
   const t = useTranslations();
   const items = useNavItems(MENU_NAV);
+  const { phone } = useSiteContacts();
   return (
     <nav id={id} className="tablet-menu" aria-label={t("header.menu")}>
       {items.map(({ key, href }) => (
@@ -24,9 +26,9 @@ export function TabletMenu({ id, onNavigate }: TabletMenuProps) {
           {t(`nav.${key}`)}
         </Link>
       ))}
-      {VODIY_HOUSE_PHONE ? (
-        <a className="tablet-menu__link" href={phoneHref(VODIY_HOUSE_PHONE)}>
-          {VODIY_HOUSE_PHONE}
+      {phone ? (
+        <a className="tablet-menu__link" href={phoneHref(phone)}>
+          {formatPhone(phone)}
         </a>
       ) : null}
       <div className="tablet-menu__tools">
