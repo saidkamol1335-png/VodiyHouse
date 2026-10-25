@@ -1,0 +1,11 @@
+/* Шапка экранов 404 и ошибки: высота и линия — как у SiteHeader, без меню. */
+.site-bare-header {
+  border-bottom: 1px dashed var(--dash);
+  background: var(--bg);
+}
+
+.site-bare-header__inner {
+  display: flex;
+  align-items: center;
+  height: var(--header-h);
+}
