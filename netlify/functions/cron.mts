@@ -15,9 +15,12 @@ export default async function cron(): Promise<void> {
   const secret = process.env.CRON_SECRET;
   if (!site || !secret) return;
   await run(site, secret, "leads");
-  if (new Date().getUTCMinutes() < 5) {
+  const now = new Date();
+  if (now.getUTCMinutes() < 5) {
     await run(site, secret, "tg-starts");
     await run(site, secret, "events");
+    // Архив — раз в сутки, в 03:00 по Ташкенту (22:00 UTC): ночью, когда сайтом не пользуются.
+    if (now.getUTCHours() === 22) await run(site, secret, "archive");
   }
 }
 

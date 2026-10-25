@@ -101,3 +101,27 @@ export async function sendSheetRow(config: SheetConfig, row: Record<string, stri
     return failure(error);
   }
 }
+
+/** Файл ботом (Bot API sendDocument): CSV квартир руководителю перед удалением ЖК из архива. */
+export async function sendTelegramDocument(
+  config: TelegramConfig,
+  chatId: string | number,
+  file: { name: string; content: string },
+  caption: string,
+): Promise<SendResult> {
+  const form = new FormData();
+  form.set("chat_id", String(chatId));
+  form.set("caption", caption.slice(0, 1024));
+  form.set("document", new Blob([file.content], { type: "text/csv" }), file.name);
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${config.token}/sendDocument`, {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      cache: "no-store",
+    });
+    return response.ok ? { ok: true } : { ok: false, error: `telegram ${response.status}` };
+  } catch (error) {
+    return failure(error);
+  }
+}

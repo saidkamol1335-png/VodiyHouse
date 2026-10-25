@@ -18,6 +18,8 @@ const eslintConfig = defineConfig([
       "lib/leads/server/**",
       // События сайта (3.12): посетитель без входа, track_events открыт только серверу.
       "lib/events/server/**",
+      // Окончательное удаление архива (3.13): расписание без сотрудника, функции открыты только серверу.
+      "lib/archive/server/**",
       "lib/supabase/admin.ts",
       "lib/supabase/authForwarding.ts",
       "lib/supabase/env.test.ts",
