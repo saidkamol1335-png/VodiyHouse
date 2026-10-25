@@ -4,6 +4,14 @@ import { isIndexingClosed, NOINDEX_HEADER } from "./lib/site/indexing";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
+// Фото ЖК и застройщиков — публичный бакет media проекта Supabase (lib/media/path.ts). Без ключей
+// облака адреса нет — и фото с сайта тоже нет.
+function supabaseMediaPattern(): { protocol: "https"; hostname: string; pathname: string }[] {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return [];
+  return [{ protocol: "https", hostname: new URL(url).hostname, pathname: "/storage/v1/object/public/media/**" }];
+}
+
 const nextConfig: NextConfig = {
   // Статичная оболочка страницы + потоковые динамические части (PLAN 3а: страницы ЖК статичные).
   cacheComponents: true,
@@ -13,6 +21,11 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   // В разработке Next.js пишет в терминал аргументы Server Actions — а это пароли входа и сотрудников.
   logging: { serverFunctions: false },
+  // next/image: WebP / AVIF под размер экрана (на Netlify — Image CDN), фото — только из своего бакета.
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: supabaseMediaPattern(),
+  },
   async headers() {
     return [
       // Тестовый деплой (Ф2) — noindex на каждом ответе, и страницах, и картинках.

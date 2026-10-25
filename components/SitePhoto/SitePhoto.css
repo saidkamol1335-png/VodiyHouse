@@ -1,0 +1,23 @@
+/* Фото сайта: кадр мокапа (--photo-ratio) и место кадра по точке фокуса (--photo-position). */
+.site-photo {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--photo-ratio);
+  border-radius: inherit;
+  background: var(--bg-4);
+}
+
+.site-photo__image {
+  object-fit: cover;
+  object-position: var(--photo-position);
+}
+
+@media (max-width: 760px) {
+  .site-photo {
+    aspect-ratio: var(--photo-ratio-phone, var(--photo-ratio));
+  }
+
+  .site-photo__image {
+    object-position: var(--photo-position-phone, var(--photo-position));
+  }
+}
