@@ -11,12 +11,14 @@ describe("индексация: тестовый деплой закрыт (Ф2)
     expect(isIndexingClosed({})).toBe(false);
   });
 
-  it("robots.txt: закрыт — обход открыт (noindex в заголовке виден); открыт — без кабинета и стендов", () => {
+  it("robots.txt: закрыт — обход открыт (noindex в заголовке виден); открыт — без кабинета и стендов, с картой сайта", () => {
     vi.stubEnv("SITE_NOINDEX", "1");
     expect(robots()).toEqual({ rules: { userAgent: "*", allow: "/" } });
     vi.stubEnv("SITE_NOINDEX", "");
+    vi.stubEnv("SITE_URL", "https://vodiyhouse.uz");
     expect(robots()).toEqual({
       rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/dev"] },
+      sitemap: "https://vodiyhouse.uz/sitemap.xml",
     });
   });
 });

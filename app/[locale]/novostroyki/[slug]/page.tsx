@@ -26,6 +26,7 @@ import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
 import { complexSummary } from "@/lib/site/complex/summary";
 import { pageMetadata } from "@/lib/site/metadata";
 import { ComplexSections } from "./sections";
+import { complexDescription, ComplexJsonLd } from "./seo";
 
 // Адрес ЖК читается сразу, вне <Suspense>: неизвестный адрес отвечает настоящим 404, а новый ЖК
 // рендерится при первом заходе и дальше отдаётся из кэша (у известных — сборка); навигация в
@@ -49,12 +50,11 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/novostro
   const { page } = result;
   const name = page.name[locale];
   const cover = page.photos[0];
-  const place = page.location?.name[locale];
   return pageMetadata({
     locale,
     path: complexRoute(page.slug),
     title: t("metaTitle", { name }),
-    description: t("metaDescription", { name, place: place ? t("metaPlace", { place }) : "" }),
+    description: complexDescription(t, page, locale),
     image: cover
       ? {
           url: mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", cover.path),
@@ -100,6 +100,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
       <SiteHeader overPhoto transparentAtTop transparentOnPhoneOnly pageTitle={name} backHref={ROUTES.catalog} />
       <main>
         <TrackView type="complex_view" entity="complex" id={page.id} />
+        {page.status === "published" ? <ComplexJsonLd page={page} locale={locale} /> : null}
         <Container>
           <ComplexHero
             page={page}

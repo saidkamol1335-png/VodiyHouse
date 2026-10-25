@@ -415,8 +415,9 @@
   },
   "complex": {
     "metaTitle": "{name} TJM — kvartiralar, narxlar va rejalar",
-    "metaDescription": "{name} TJM{place}: kvartiralar mavjudligi, quruvchi narxlari, rejalar va to‘lov hisobi. Tanlash, ko‘rsatish va hujjatlarni tekshirish — bepul.",
+    "metaDescription": "{name} TJM{place}{price}: kvartiralar mavjudligi, quruvchi narxlari, rejalar va to‘lov hisobi. Tanlash, ko‘rsatish va hujjatlarni tekshirish — bepul.",
     "metaPlace": " · {place}",
+    "metaPrice": " — kvartiralar {price} dan",
     "unavailable": "TJM sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — TJM haqida aytib beramiz va kvartira tanlaymiz.",
     "name": "{name} TJM",
     "crumbs": "Siz shu yerdasiz",
