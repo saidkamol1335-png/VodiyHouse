@@ -17,8 +17,9 @@ const ORDER: readonly Locale[] = ["ru", "uz"];
 /**
  * Та же страница на другом языке; выбор запоминает proxy.ts в cookie. Параметры адреса (расчёт
  * /kalkulyator, фильтры) переходят вместе с языком — их читаем в момент нажатия: страница меняет
- * их сама (history.replaceState), а шапка на сервере их не знает. С параметрами — обычный переход
- * страницы: смена языка пересобирает корневой layout, и клиентский переход ругается на его скрипт.
+ * их сама (history.replaceState), а шапка на сервере их не знает. Другой язык — всегда обычный
+ * переход страницы: смена языка пересобирает корневой layout, и клиентский переход ругается на
+ * его скрипт темы («Encountered a script tag…»).
  */
 export function LanguageSwitch({ variant = "short", onNavigate }: LanguageSwitchProps) {
   const t = useTranslations("header");
@@ -40,7 +41,7 @@ export function LanguageSwitch({ variant = "short", onNavigate }: LanguageSwitch
             const search = window.location.search;
             // Новая вкладка (Ctrl, Cmd, Shift, средняя кнопка) — как у обычной ссылки.
             const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-            if (!search || modified || event.button !== 0) return;
+            if (modified || event.button !== 0 || (locale === current && !search)) return;
             // Свой язык при параметрах — никуда не уходим: переход сбросил бы расчёт.
             event.preventDefault();
             if (locale !== current) {

@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { CATALOG_TAG, DEVELOPERS_TAG, DICTIONARIES_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
@@ -19,13 +20,18 @@ async function fetchSiteCatalog(): Promise<SiteCatalog> {
   return catalogFrom(data as SiteCatalogRecord);
 }
 
-/** null — облака нет или база не ответила: страница показывает «каталог скоро» с контактами VH. */
+/**
+ * null — облака нет: страница показывает «каталог скоро» с контактами VH. База не ответила —
+ * исключение (как у страницы ЖК): при обновлении кэша Next оставит прежнюю страницу, а не положит
+ * туда заглушку на час; первый показ — error.tsx «временно недоступно» с повтором.
+ */
 export async function readSiteCatalog(): Promise<SiteCatalog | null> {
   if (!hasSupabaseEnv()) return null;
   try {
     return await fetchSiteCatalog();
   } catch (error) {
+    unstable_rethrow(error);
     console.error("[novostroyki] каталог недоступен", error);
-    return null;
+    throw error;
   }
 }

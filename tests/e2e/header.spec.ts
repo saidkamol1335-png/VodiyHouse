@@ -46,11 +46,13 @@ test.describe("шапка · десктоп 1440", () => {
     await expect(page.locator(".header-nav__link").nth(2).locator(".roll-text__char > span").first()).toHaveCSS("transform", "none");
   });
 
-  test("Ш3: RU → UZ — та же страница на другом языке", async ({ page }) => {
-    await page.goto("/ru");
+  test("Ш3: RU → UZ — та же страница на другом языке; консоль чистая (переход — загрузкой страницы)", async ({ page }) => {
+    const errors = collectPageErrors(page);
+    await page.goto("/ru/o-nas");
     await page.getByRole("group", { name: "Язык" }).getByRole("link", { name: "UZ" }).click();
-    await expect(page).toHaveURL(/\/uz$/);
+    await expect(page).toHaveURL(/\/uz\/o-nas$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "uz");
+    expect(errors).toEqual([]);
   });
 
   test("Ф9: «Показать телефон» — номер из «Настройки → Контакты», второй клик звонит", async ({ page }) => {

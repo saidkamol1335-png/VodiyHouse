@@ -37,7 +37,8 @@ export const instant = false;
 const FALLBACK_SLUG = "zhk";
 
 export async function generateStaticParams() {
-  const catalog = await readSiteCatalog();
+  // База не ответила при сборке — страницы ЖК соберутся при первом заходе, сборка не падает.
+  const catalog = await readSiteCatalog().catch(() => null);
   const slugs = (catalog?.complexes ?? []).map((complex) => ({ slug: complex.slug }));
   return slugs.length > 0 ? slugs : [{ slug: FALLBACK_SLUG }];
 }

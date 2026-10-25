@@ -6,10 +6,11 @@ import { Container } from "@/components/Container";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ROUTES } from "@/lib/routes";
 
-// База не ответила (lib/site/complex/read.ts бросает исключение): посетитель видит «временно
-// недоступна» с повтором, а в кэше остаётся прежняя страница — заглушку Next туда не кладёт.
-// Шапка с телефоном и «назад» — как у страницы: тексты и контакты уже есть в оболочке [locale].
-export default function ComplexPageError({ retry }: { error: unknown; retry: () => void }) {
+// База не ответила (каталог — lib/site/catalog/read.ts, страница ЖК — lib/site/complex/read.ts
+// бросают исключение): посетитель видит «временно недоступна» с повтором, а в кэше остаётся
+// прежняя страница — заглушку Next туда не кладёт. Шапка с телефоном и «назад» в каталог — тексты
+// и контакты уже есть в оболочке [locale].
+export default function SitePageError({ retry }: { error: unknown; retry: () => void }) {
   const t = useTranslations("siteError");
   return (
     <>
