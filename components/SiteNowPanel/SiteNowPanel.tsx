@@ -4,7 +4,7 @@ import { Eye, Heart, Inbox, Phone, Send, Share2, SlidersHorizontal } from "lucid
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LeadWhen } from "@/components/LeadWhen";
-import type { SiteNow, SiteNowItem, SiteNowResult } from "@/lib/admin/home/siteNow";
+import { OTHER_SOURCE, type SiteNow, type SiteNowItem, type SiteNowResult } from "@/lib/admin/home/siteNow";
 import { LEAD_TYPES, type LeadType } from "@/lib/leads/types";
 
 const isLeadType = (value: string | null): value is LeadType => (LEAD_TYPES as readonly (string | null)[]).includes(value);
@@ -103,7 +103,7 @@ function SiteNowRow({ item }: { item: SiteNowItem }) {
       <Icon size={16} aria-hidden="true" />
       <span className="site-now__text">
         <b>{itemText({ ...item, detail }, t)}</b>
-        <span>{t("sub", { source: item.source ?? t("direct"), device: t(`devices.${item.device}`) })}</span>
+        <span>{t("sub", { source: sourceText(item.source, t), device: t(`devices.${item.device}`) })}</span>
       </span>
       <span className="site-now__time">
         <LeadWhen at={item.at} />
@@ -113,6 +113,12 @@ function SiteNowRow({ item }: { item: SiteNowItem }) {
 }
 
 type NowT = ReturnType<typeof useTranslations<"admin.home.now">>;
+
+/** «instagram», «google.com» — как есть; без метки — «Прямой заход»; чужая метка — «Метка рекламы». */
+function sourceText(source: string | null, t: NowT): string {
+  if (!source) return t("direct");
+  return source === OTHER_SOURCE ? t("otherSource") : source;
+}
 
 /** «Просмотр ЖК Shodlik», «Избранное · ЖК Bahor», «Поделились ссылкой · Telegram», «Фильтр: …». */
 function itemText(item: SiteNowItem, t: NowT): string {

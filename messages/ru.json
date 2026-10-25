@@ -456,6 +456,7 @@
           "desktop": "компьютер"
         },
         "direct": "Прямой заход",
+        "otherSource": "Метка рекламы",
         "sub": "{source} · {device}"
       }
     },

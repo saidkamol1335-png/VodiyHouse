@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterDetail, siteNowFrom } from "./siteNow";
+import { feedSource, filterDetail, OTHER_SOURCE, siteNowFrom } from "./siteNow";
 
 // «Сейчас на сайте» (3.12, ревью блока F): фильтр в ленте — из параметров каталога в адресе события,
 // чужой текст из браузера не показывается.
@@ -19,5 +19,12 @@ describe("лента «Сейчас на сайте»", () => {
     });
     expect(now.online).toBe(2);
     expect(now.feed[0]!.detail).toBe("komnat 1,2");
+  });
+
+  it("источник: домен и известная метка — как есть, чужая метка — «Метка рекламы»", () => {
+    expect(feedSource("instagram")).toBe("instagram");
+    expect(feedSource("google.com")).toBe("google.com");
+    expect(feedSource(null)).toBeNull();
+    expect(feedSource("Zvonite_998901234567")).toBe(OTHER_SOURCE);
   });
 });

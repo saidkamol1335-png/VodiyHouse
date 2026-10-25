@@ -36,11 +36,33 @@ export function filterDetail(path: string | null | undefined): string | null {
   return text || null;
 }
 
+/** Чужая метка — подпись «Метка рекламы» ставит SiteNowPanel по этому значению (в адресе его не написать). */
+export const OTHER_SOURCE = "\u0000other";
+
+/** Метки utm_source, которые реклама и соцсети ставят сами. */
+const KNOWN_SOURCES: ReadonlySet<string> = new Set([
+  "instagram", "facebook", "fb", "ig", "telegram", "tg", "google", "yandex", "youtube", "tiktok", "olx", "email", "sms",
+]);
+const DOMAIN = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
+
+/**
+ * Источник в ленте: домен, откуда пришли, или известная метка — как есть; любая другая метка (её
+ * пишет кто угодно в адресе ссылки) — «Метка рекламы», а не чужой текст в кабинете.
+ */
+export function feedSource(source: string | null | undefined): string | null {
+  if (!source) return null;
+  return DOMAIN.test(source) || KNOWN_SOURCES.has(source.toLowerCase()) ? source : OTHER_SOURCE;
+}
+
 export function siteNowFrom(raw: unknown): SiteNow {
   const value = (raw ?? {}) as Partial<SiteNow>;
   const feed = Array.isArray(value.feed) ? value.feed : [];
   return {
     online: Number(value.online ?? 0),
-    feed: feed.map((item) => (item.type === "filter" ? { ...item, detail: filterDetail(item.path) } : item)),
+    feed: feed.map((item) => ({
+      ...item,
+      source: feedSource(item.source),
+      ...(item.type === "filter" ? { detail: filterDetail(item.path) } : {}),
+    })),
   };
 }
