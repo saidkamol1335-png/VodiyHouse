@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ArrowRight, RotateCcw, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
@@ -68,11 +68,13 @@ export function CatalogFilter({ catalog, filter, onChange, found, open, onClose,
         <div className="catalog-filter__actions">
           {touched ? (
             <Button variant="ghost" size="sm" onClick={() => onChange({ ...NO_FILTER, sort: filter.sort })}>
+              <RotateCcw size={15} aria-hidden="true" />
               {t("reset")}
             </Button>
           ) : null}
           <Button size="sm" className="catalog-filter__show" onClick={onShow} disabled={found === 0}>
             {t("show", { n: found })}
+            <ArrowRight size={15} aria-hidden="true" />
           </Button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { Play } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
+import { useFocusWhen } from "@/lib/ui/useFocusWhen";
 import type { LocalizedText } from "@/lib/contacts";
 import type { Locale } from "@/lib/i18n/routing";
 
@@ -30,23 +31,7 @@ export function ComplexVideos({ videos, name }: ComplexVideosProps) {
   return (
     <div className={videos.length > 1 ? "complex-videos" : "complex-videos complex-videos--single"}>
       <div className="complex-videos__main">
-        {playing ? (
-          <iframe
-            className="complex-videos__player"
-            src={playerOf(main.youtubeId)}
-            title={titleOf(main)}
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            allowFullScreen
-          />
-        ) : (
-          <button type="button" className="complex-videos__poster" aria-label={t("play", { title: titleOf(main) })} onClick={() => setPlaying(true)}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета */}
-            <img src={posterOf(main.youtubeId)} alt="" loading="lazy" decoding="async" />
-            <span className="complex-videos__play" aria-hidden="true">
-              <Play size={26} fill="currentColor" />
-            </span>
-          </button>
-        )}
+        <VideoPlayer youtubeId={main.youtubeId} title={titleOf(main)} playing={playing} onPlay={() => setPlaying(true)} />
         <p className="complex-videos__title">{titleOf(main)}</p>
       </div>
       {videos.length > 1 ? (
@@ -62,6 +47,35 @@ export function ComplexVideos({ videos, name }: ComplexVideosProps) {
         />
       ) : null}
     </div>
+  );
+}
+
+type VideoPlayerProps = { youtubeId: string; title: string; playing: boolean; onPlay: () => void };
+
+/** Обложка с «Смотреть» → плеер YouTube на её месте (фокус переходит на плеер). */
+function VideoPlayer({ youtubeId, title, playing, onPlay }: VideoPlayerProps) {
+  const t = useTranslations("complex.video");
+  const player = useFocusWhen<HTMLIFrameElement>(playing);
+  if (playing) {
+    return (
+      <iframe
+        ref={player}
+        className="complex-videos__player"
+        src={playerOf(youtubeId)}
+        title={title}
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowFullScreen
+      />
+    );
+  }
+  return (
+    <button type="button" className="complex-videos__poster" aria-label={t("play", { title })} onClick={onPlay}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета */}
+      <img src={posterOf(youtubeId)} alt="" loading="lazy" decoding="async" />
+      <span className="complex-videos__play" aria-hidden="true">
+        <Play size={26} fill="currentColor" />
+      </span>
+    </button>
   );
 }
 

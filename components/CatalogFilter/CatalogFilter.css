@@ -110,7 +110,7 @@
   .catalog-filter--open {
     position: fixed;
     inset: 0;
-    z-index: 85;
+    z-index: var(--z-filter-sheet);
     display: block;
     overflow: auto;
     padding: 0 16px 96px;

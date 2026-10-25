@@ -73,6 +73,8 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
           onClose={(index) => {
             setViewer(null);
             goTo(index);
+            // Окно вернуло бы фокус на кадр, с которого открыли, — а он уже скрыт (aria-hidden).
+            requestAnimationFrame(() => track.current?.querySelectorAll<HTMLButtonElement>(".complex-gallery__slide")[index]?.focus({ preventScroll: true }));
           }}
         />
       ) : null}

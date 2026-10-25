@@ -3,6 +3,7 @@
 import { Building2, Map as MapIcon, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useFocusWhen } from "@/lib/ui/useFocusWhen";
 import { mapLink, mapWidgetSrc, staticMapSrc, type GeoPoint, type MapLocale } from "@/lib/site/complex/location";
 
 type LocationMapProps = {
@@ -20,11 +21,12 @@ type LocationMapProps = {
 export function LocationMap({ point, name, address, locale }: LocationMapProps) {
   const t = useTranslations("complex.location");
   const [live, setLive] = useState(false);
+  const frame = useFocusWhen<HTMLIFrameElement>(live);
   const image = staticMapSrc(point, locale, process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY);
   return (
     <div className="complex-location__map">
       {live ? (
-        <iframe className="complex-location__frame" src={mapWidgetSrc(point, locale)} title={t("mapTitle", { name })} allowFullScreen />
+        <iframe ref={frame} className="complex-location__frame" src={mapWidgetSrc(point, locale)} title={t("mapTitle", { name })} allowFullScreen />
       ) : (
         <button type="button" className="complex-location__preview" onClick={() => setLive(true)} aria-label={t("showMap")}>
           {image ? (
