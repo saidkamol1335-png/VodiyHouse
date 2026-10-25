@@ -8,26 +8,29 @@ import { useSiteContacts } from "@/components/SiteContacts";
 import { TelegramButton } from "@/components/TelegramButton";
 import { phoneHref } from "@/lib/contacts";
 
-/** Панель появляется, когда первый экран (фото и цена) ушёл наверх. */
+/** Запасной порог, если карточки цены на странице нет: первый экран ушёл наверх. */
 const SHOW_AFTER_SCREENS = 0.9;
+/** Высота шапки (токен --header-h): кнопки карточки цены «ушли», когда скрылись под ней (мокап .bb). */
+const headerHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 0;
 
-function useScrolledPastFirstScreen() {
+/** Панель появляется, когда кнопки карточки цены ушли под шапку (мокап MobJk), — не раньше. */
+function useScrolledPastOffer() {
   const [shown, setShown] = useState(false);
   useEffect(() => {
-    let frame = 0;
-    const check = () => {
-      frame = 0;
-      setShown(window.scrollY > window.innerHeight * SHOW_AFTER_SCREENS);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(check);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    check();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
+    const cta = document.querySelector(".complex-offer__cta");
+    if (!cta) {
+      const check = () => setShown(window.scrollY > window.innerHeight * SHOW_AFTER_SCREENS);
+      window.addEventListener("scroll", check, { passive: true });
+      check();
+      return () => window.removeEventListener("scroll", check);
+    }
+    const header = headerHeight();
+    const observer = new IntersectionObserver(
+      ([entry]) => setShown(Boolean(entry && !entry.isIntersecting && entry.boundingClientRect.bottom <= header)),
+      { rootMargin: `-${header}px 0px 0px 0px` },
+    );
+    observer.observe(cta);
+    return () => observer.disconnect();
   }, []);
   return shown;
 }
@@ -43,7 +46,7 @@ export function ComplexBar({ slug, name }: ComplexBarProps) {
   const tLead = useTranslations("lead.buttons");
   const { phone, telegram, bot } = useSiteContacts();
   const openLead = useLeadOpener();
-  const shown = useScrolledPastFirstScreen();
+  const shown = useScrolledPastOffer();
   if (!phone && !telegram && !bot && !openLead) return null;
   return (
     <>
