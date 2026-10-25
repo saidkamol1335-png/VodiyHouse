@@ -13,7 +13,11 @@ type BlockSwitchProps = {
 export function BlockSwitch({ blocks, current, onSwitch }: BlockSwitchProps) {
   const t = useTranslations("admin.complexes.layouts");
   return (
-    <div className="segmented segmented--lg complex-layouts__switch" role="group" aria-label={t("switch")}>
+    <div
+      className="segmented segmented--lg complex-layouts__switch"
+      role="group"
+      aria-label={t("switch")}
+    >
       {blocks.map((item) => (
         <button
           key={item.blockId}
@@ -30,7 +34,13 @@ export function BlockSwitch({ blocks, current, onSwitch }: BlockSwitchProps) {
   );
 }
 
-export function EmptyBlock({ others, onCopy }: { others: readonly BlockLayouts[]; onCopy: (from: BlockLayouts) => void }) {
+export function EmptyBlock({
+  others,
+  onCopy,
+}: {
+  others: readonly BlockLayouts[];
+  onCopy: (from: BlockLayouts) => void;
+}) {
   const t = useTranslations("admin.complexes.layouts");
   return (
     <div className="complex-layouts__empty">

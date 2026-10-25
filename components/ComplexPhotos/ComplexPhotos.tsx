@@ -6,7 +6,11 @@ import { AdminPanel } from "@/components/AdminPanel";
 import { FormStatus } from "@/components/FormStatus";
 import { Rule12Check } from "@/components/Rule12Check";
 import { PHOTO_LIMITS, type PhotoActions, type PhotoItem } from "@/lib/admin/complexes/photos";
-import { usePhotoGallery, type GalleryError, type PhotoGallery } from "@/lib/admin/complexes/usePhotoGallery";
+import {
+  usePhotoGallery,
+  type GalleryError,
+  type PhotoGallery,
+} from "@/lib/admin/complexes/usePhotoGallery";
 import { MEDIA_LIMITS } from "@/lib/media";
 import { PhotoGrid } from "./PhotoGrid";
 import { PhotoPanel } from "./PhotoPanel";
@@ -39,7 +43,13 @@ export function ComplexPhotos({ complexId, published, photos, actions }: Complex
         ) : (
           <p className="field__meta">{t("media.rule12Hint")}</p>
         )}
-        <PhotoGrid gallery={gallery} selected={selected} locked={published && !rule12} onSelect={setSelected} onFiles={upload} />
+        <PhotoGrid
+          gallery={gallery}
+          selected={selected}
+          locked={published && !rule12}
+          onSelect={setSelected}
+          onFiles={upload}
+        />
         <GalleryProblem error={gallery.error} />
         <SelectedPanel gallery={gallery} selected={selected} onRemoved={() => setSelected(null)} />
       </div>
@@ -49,7 +59,11 @@ export function ComplexPhotos({ complexId, published, photos, actions }: Complex
 
 function GalleryLead({ count }: { count: number }) {
   const t = useTranslations("admin.complexes.photos");
-  return <p className="complex-photos__lead">{t("count", { count, min: PHOTO_LIMITS.minForPublish, max: PHOTO_LIMITS.max })}</p>;
+  return (
+    <p className="complex-photos__lead">
+      {t("count", { count, min: PHOTO_LIMITS.minForPublish, max: PHOTO_LIMITS.max })}
+    </p>
+  );
 }
 
 type SelectedPanelProps = {

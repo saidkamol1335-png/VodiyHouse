@@ -48,13 +48,24 @@ function summaryOf(block: BlockDraft, finishings: readonly SelectOption[], t: Tr
       : block.floorsTotal
         ? t("summary.floors", { total: block.floorsTotal })
         : null;
-  const parts = [deadlineText(block, t) ?? t("summary.noDeadline"), finishing, floors, t(`values.${block.currency}`)];
+  const parts = [
+    deadlineText(block, t) ?? t("summary.noDeadline"),
+    finishing,
+    floors,
+    t(`values.${block.currency}`),
+  ];
   return parts.filter(Boolean).join(" · ");
 }
 
 function StatusBadge({ block, t }: { block: BlockDraft; t: Translate }) {
   if (block.buildStatus === "delivered") return <Badge tone="ok">{t("values.delivered")}</Badge>;
-  return <Badge tone="amber">{block.progressPct ? t("summary.buildingPct", { pct: block.progressPct }) : t("values.building")}</Badge>;
+  return (
+    <Badge tone="amber">
+      {block.progressPct
+        ? t("summary.buildingPct", { pct: block.progressPct })
+        : t("values.building")}
+    </Badge>
+  );
 }
 
 /** Карточка блока (И4): сводка, стрелки порядка, «Изменить» раскрывает поля на месте. */
@@ -127,12 +138,22 @@ function ProgressBar({ block }: { block: BlockDraft }) {
   if (block.buildStatus !== "building" || !(progress > 0)) return null;
   return (
     <span className="block-card__bar" aria-hidden="true">
-      <span className="block-card__bar-fill" style={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }} />
+      <span
+        className="block-card__bar-fill"
+        style={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }}
+      />
     </span>
   );
 }
 
-function BlockBody({ block, issues, finishings, onChange, onRemove, title }: BlockCardProps & { title: string }) {
+function BlockBody({
+  block,
+  issues,
+  finishings,
+  onChange,
+  onRemove,
+  title,
+}: BlockCardProps & { title: string }) {
   const t = useTranslations("admin.complexes.blocks");
   const [confirming, setConfirming] = useState(false);
   return (

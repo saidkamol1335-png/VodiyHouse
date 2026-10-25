@@ -69,20 +69,42 @@ type PhotoTileProps = {
   onDrop: (event: DragEvent) => void;
 };
 
-function PhotoTile({ photo, index, selected, draggable, onSelect, onDragStart, onDrop }: PhotoTileProps) {
+function PhotoTile({
+  photo,
+  index,
+  selected,
+  draggable,
+  onSelect,
+  onDragStart,
+  onDrop,
+}: PhotoTileProps) {
   const t = useTranslations("admin.complexes.photos");
   return (
     <li
-      className={selected ? "complex-photos__tile complex-photos__tile--selected" : "complex-photos__tile"}
+      className={
+        selected ? "complex-photos__tile complex-photos__tile--selected" : "complex-photos__tile"
+      }
       draggable={draggable}
       onDragStart={onDragStart}
       onDragOver={(event) => event.preventDefault()}
       onDrop={onDrop}
       data-testid="photo-tile"
     >
-      <button type="button" className="complex-photos__open" aria-label={t("open", { index: index + 1 })} aria-pressed={selected} onClick={onSelect}>
+      <button
+        type="button"
+        className="complex-photos__open"
+        aria-label={t("open", { index: index + 1 })}
+        aria-pressed={selected}
+        onClick={onSelect}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element -- превью из бакета в кабинете; next/image — на сайте */}
-        <img src={photo.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: objectPosition(photo, TILE_RATIO, photo.focus) }} />
+        <img
+          src={photo.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          style={{ objectPosition: objectPosition(photo, TILE_RATIO, photo.focus) }}
+        />
       </button>
       {index === 0 ? <span className="complex-photos__cover">{t("cover")}</span> : null}
     </li>
@@ -116,7 +138,11 @@ function AddTile({ locked, onFiles }: { locked: boolean; onFiles: (files: File[]
 
 function PendingTile({ item, onDismiss }: { item: PendingPhoto; onDismiss: () => void }) {
   const t = useTranslations("admin");
-  const message = item.issue ? t(`media.issues.${item.issue.code}`, item.issue) : item.error ? t(`developers.errors.${item.error}`) : t("media.uploadFailed");
+  const message = item.issue
+    ? t(`media.issues.${item.issue.code}`, item.issue)
+    : item.error
+      ? t(`developers.errors.${item.error}`)
+      : t("media.uploadFailed");
   // Ошибка — на всю строку сетки: в плитке 100×75 (390) причина и «Убрать» не помещаются.
   const className = item.failed
     ? "complex-photos__tile complex-photos__tile--pending complex-photos__tile--failed"

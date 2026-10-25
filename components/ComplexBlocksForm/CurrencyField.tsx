@@ -17,7 +17,9 @@ type CurrencyFieldProps = {
  * «отдельно». Есть хоть одна — смена валюты спрашивает: числа не пересчитываются (курс — фаза 2).
  */
 const hasPrices = (block: BlockDraft) =>
-  block.pricedLayouts > 0 || block.units > 0 || block.priceIncludes.some((row) => !row.included && row.price.trim() !== "");
+  block.pricedLayouts > 0 ||
+  block.units > 0 ||
+  block.priceIncludes.some((row) => !row.included && row.price.trim() !== "");
 
 export function CurrencyField({ block, options, onChange }: CurrencyFieldProps) {
   const t = useTranslations("admin.complexes.blocks");

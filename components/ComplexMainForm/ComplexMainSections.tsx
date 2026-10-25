@@ -31,7 +31,11 @@ export type SectionProps = {
 type Translate = ReturnType<typeof useTranslations<"admin.complexes">>;
 
 /** Варианты сегмента из словаря значений ЖК («Эконом · Комфорт · …»). */
-const choiceValues = (t: Translate, group: "class" | "houseType" | "parking", keys: readonly string[]) =>
+const choiceValues = (
+  t: Translate,
+  group: "class" | "houseType" | "parking",
+  keys: readonly string[],
+) =>
   keys.map((key) => ({
     value: key,
     label: t(`values.${group}.${key}` as "values.class.econom"),
@@ -55,7 +59,8 @@ export function AboutPanel(props: SectionProps) {
         <DeveloperClassRow {...props} />
         <HouseRow {...props} />
         <p className="complex-main__floors">
-          {floors ? t("floors", { floors }) : t("floorsEmpty")} <Link href={blocksHref}>{t("floorsLink")}</Link>
+          {floors ? t("floors", { floors }) : t("floorsEmpty")}{" "}
+          <Link href={blocksHref}>{t("floorsLink")}</Link>
         </p>
         <BilingualField
           id="complex-short"
@@ -162,7 +167,13 @@ export function LocationPanel(props: SectionProps) {
           defaultValue={fields.landmark}
           error={issue("landmark")}
         />
-        <PointField id="complex-point" name="point" label={t("fields.point")} defaultValue={fields.point} error={issue("point")} />
+        <PointField
+          id="complex-point"
+          name="point"
+          label={t("fields.point")}
+          defaultValue={fields.point}
+          error={issue("point")}
+        />
       </div>
       <NearbyEditor initial={fields.nearby} error={issue("nearby")} />
     </AdminPanel>
@@ -204,7 +215,15 @@ export function ChecksPanel({ fields, issue }: SectionProps) {
   return (
     <AdminPanel title={t("sections.checks")} wide>
       <div className="complex-main__row complex-main__row--three">
-        <Field className={ROW_FIELD} id="complex-staffVisitedAt" name="staffVisitedAt" label={t("fields.staffVisitedAt")} type="date" defaultValue={fields.staffVisitedAt} error={issue("staffVisitedAt")} />
+        <Field
+          className={ROW_FIELD}
+          id="complex-staffVisitedAt"
+          name="staffVisitedAt"
+          label={t("fields.staffVisitedAt")}
+          type="date"
+          defaultValue={fields.staffVisitedAt}
+          error={issue("staffVisitedAt")}
+        />
       </div>
       <p className="field__meta">{t("fields.checksHint")}</p>
     </AdminPanel>

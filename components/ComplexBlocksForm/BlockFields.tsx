@@ -5,7 +5,14 @@ import { ChoiceField } from "@/components/ChoiceField";
 import { Field } from "@/components/Field";
 import { QuarterSelect } from "@/components/QuarterSelect";
 import { SelectField, type SelectOption } from "@/components/SelectField";
-import { BLOCK_LIMITS, BUILD_STATUSES, CADASTRE_STATUSES, CURRENCIES, type BlockDraft, type BlockRowErrors } from "@/lib/admin/complexes/blocks";
+import {
+  BLOCK_LIMITS,
+  BUILD_STATUSES,
+  CADASTRE_STATUSES,
+  CURRENCIES,
+  type BlockDraft,
+  type BlockRowErrors,
+} from "@/lib/admin/complexes/blocks";
 import { CurrencyField } from "./CurrencyField";
 import { PriceIncludes } from "./PriceIncludes";
 
@@ -39,7 +46,8 @@ function useBlockFieldKit(block: BlockDraft, issues: RowProps["issues"]) {
   const t = useTranslations("admin.complexes.blocks");
   const issue = (field: string) => (issues?.[field] ? t(`issues.${issues[field]}`) : undefined);
   const id = (field: string) => `block-${block.key}-${field}`;
-  const options = <T extends string>(values: readonly T[]) => values.map((value) => ({ value, label: t(`values.${value}` as "values.USD") }));
+  const options = <T extends string>(values: readonly T[]) =>
+    values.map((value) => ({ value, label: t(`values.${value}` as "values.USD") }));
   return { t, issue, id, options };
 }
 

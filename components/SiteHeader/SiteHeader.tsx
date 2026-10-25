@@ -32,12 +32,7 @@ type SiteHeaderProps = {
 const ICON = { size: 20, strokeWidth: 1.7 } as const;
 const MENU_ID = "site-menu";
 
-function headerClasses(
-  solid: boolean,
-  transparentAtTop: boolean,
-  overPhoto: boolean,
-  phoneOnly: boolean,
-): string {
+function headerClasses(solid: boolean, transparentAtTop: boolean, overPhoto: boolean, phoneOnly: boolean): string {
   const classes = ["site-header"];
   if (solid) classes.push("site-header--solid");
   if (transparentAtTop) classes.push("site-header--transparent");
@@ -46,13 +41,7 @@ function headerClasses(
   return classes.join(" ");
 }
 
-export function SiteHeader({
-  transparentAtTop = false,
-  overPhoto = false,
-  transparentOnPhoneOnly = false,
-  pageTitle,
-  backHref,
-}: SiteHeaderProps) {
+export function SiteHeader({ transparentAtTop = false, overPhoto = false, transparentOnPhoneOnly = false, pageTitle, backHref }: SiteHeaderProps) {
   const { sentinel, scrolled } = useScrolledPast();
   const { open: menuOpen, close: closeMenu, toggle: toggleMenu, toggleButton } = useMenu();
   const solid = scrolled || !transparentAtTop || menuOpen;
@@ -61,11 +50,7 @@ export function SiteHeader({
       <div ref={sentinel} className="site-header__sentinel" aria-hidden="true" />
       <header className={headerClasses(solid, transparentAtTop, overPhoto, transparentOnPhoneOnly)}>
         <div className="site-header__inner">
-          <HeaderBrand
-            backHref={backHref}
-            pageTitle={pageTitle}
-            showTitle={Boolean(pageTitle) && scrolled}
-          />
+          <HeaderBrand backHref={backHref} pageTitle={pageTitle} showTitle={Boolean(pageTitle) && scrolled} />
           <HeaderNav />
           <HeaderTools ref={toggleButton} menuOpen={menuOpen} onToggleMenu={toggleMenu} />
         </div>
@@ -84,22 +69,13 @@ function HeaderBrand({ backHref, pageTitle, showTitle }: HeaderBrandProps) {
   return (
     <>
       {backHref ? (
-        <IconButton
-          className="site-header__icon site-header__back"
-          label={t("back")}
-          href={backHref}
-        >
+        <IconButton className="site-header__icon site-header__back" label={t("back")} href={backHref}>
           <ChevronLeft {...ICON} aria-hidden />
         </IconButton>
       ) : null}
       <Logo hideText={showTitle} className="site-header__logo" />
       {pageTitle ? (
-        <span
-          className={
-            showTitle ? "site-header__title site-header__title--visible" : "site-header__title"
-          }
-          aria-hidden={!showTitle}
-        >
+        <span className={showTitle ? "site-header__title site-header__title--visible" : "site-header__title"} aria-hidden={!showTitle}>
           {pageTitle}
         </span>
       ) : null}
@@ -148,12 +124,7 @@ function HeaderPhone() {
   return (
     <>
       <PhoneButton phone={phone} className="site-header__phone" />
-      <IconButton
-        className="site-header__icon site-header__call"
-        label={t("call")}
-        href={phoneHref(phone)}
-        external
-      >
+      <IconButton className="site-header__icon site-header__call" label={t("call")} href={phoneHref(phone)} external>
         <Phone {...ICON} aria-hidden />
       </IconButton>
     </>

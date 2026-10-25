@@ -42,7 +42,9 @@ export function useDrawingUpload({ complexId, attach, published, onUploaded }: D
       setRule12(false);
       return null;
     } catch (error) {
-      return error instanceof UploadRefused ? t(`developers.errors.${error.code}`) : t("media.uploadFailed");
+      return error instanceof UploadRefused
+        ? t(`developers.errors.${error.code}`)
+        : t("media.uploadFailed");
     }
   };
   const upload = async (key: string, file: File | undefined): Promise<string | null> => {
