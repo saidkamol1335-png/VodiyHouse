@@ -2,7 +2,13 @@
 
 import { parseDetails } from "@/lib/admin/complexes/details";
 import { parseDocuments } from "@/lib/admin/complexes/documents";
-import type { DetailsResult, DocumentsResult, SaveContentResult, VideosResult } from "@/lib/admin/complexes/types";
+import type {
+  DetailsResult,
+  DocumentsResult,
+  RemoveDeadlineChangeResult,
+  SaveContentResult,
+  VideosResult,
+} from "@/lib/admin/complexes/types";
 import { parseVideos } from "@/lib/admin/complexes/videos";
 import type { DbErrorLike } from "@/lib/admin/authErrors";
 import { readUuid } from "@/lib/admin/credentials";
@@ -46,6 +52,18 @@ export async function saveComplexVideosAction(formData: FormData): Promise<Video
   const { error } = await guard.supabase.rpc("save_complex_videos", { p_complex: id, p_videos: parsed.payload });
   if (!error) expireComplex(id);
   return answer(error);
+}
+
+/** «Убрать из истории» на «Блоках»: ошибочная запись о переносе срока (исправляли опечатку). */
+export async function removeDeadlineChangeAction(formData: FormData): Promise<RemoveDeadlineChangeResult> {
+  const guard = await headGuard();
+  if (!guard.ok) return { status: "error", error: guard.code };
+  const id = readUuid(formData);
+  if (!id) return { status: "error", error: "notFound" };
+  const { data, error } = await guard.supabase.rpc("remove_deadline_change", { p_change: id });
+  if (error) return { status: "error", error: contentDbErrorCode(error) };
+  if (typeof data === "string") expireComplex(data);
+  return { status: "done", at: Date.now() };
 }
 
 /** «Сохранить вкладку» на «Деталях»: тексты тем с фото из галереи. */

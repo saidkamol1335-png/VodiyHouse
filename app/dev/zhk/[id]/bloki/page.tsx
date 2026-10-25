@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { ComplexBlocksForm } from "@/components/ComplexBlocksForm";
 import { DEMO_FINISHING_OPTIONS, demoBlocks } from "@/lib/admin/complexes/demoBlocks";
 import { demoComplex } from "@/lib/admin/complexes/demoPage";
+import { demoDeadlineChanges } from "@/lib/admin/complexes/demoContent";
 import { demoSaveComplexBlocksAction } from "../../actions";
+import { demoRemoveDeadlineChangeAction } from "../../contentActions";
 
 // Адрес с [id] известен только на запросе: страница ждёт его на сервере, как разделы кабинета
 // (docs: instant-navigation) — иначе меню и вкладки (usePathname) вне <Suspense> падают.
@@ -23,6 +25,8 @@ export default async function DevComplexBlocksPage({
       blocks={demoBlocks(complex.id)}
       finishings={DEMO_FINISHING_OPTIONS}
       action={demoSaveComplexBlocksAction}
+      deadlineChanges={demoDeadlineChanges(complex.id)}
+      removeDeadlineChange={demoRemoveDeadlineChangeAction}
     />
   );
 }

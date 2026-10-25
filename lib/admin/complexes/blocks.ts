@@ -36,6 +36,10 @@ export type BlockDraft = {
   floorsBuilt: string;
   /** Срок сдачи — последний день квартала (как у QuarterSelect); в базе — год и квартал. */
   deadline: string | null;
+  /** Только чтение: срок из базы — новый срок может оказаться переносом (ТЗ 7.3в). */
+  savedDeadline: string | null;
+  /** Новый срок — перенос застройщиком: на сайте «перенесён с …» (снимают для исправления опечатки). */
+  deadlineShift: boolean;
   finishingId: string;
   cadastre: CadastreStatus | "";
   cadastreExpectedOn: string | null;
@@ -71,6 +75,8 @@ export type BlockPayload = {
   floors_built: number | null;
   deadline_year: number | null;
   deadline_quarter: QuarterNumber | null;
+  /** База пишет историю, только если срок сохранённого блока и правда изменился. */
+  deadline_shift: boolean;
   finishing_id: number | null;
   cadastre: CadastreStatus | null;
   cadastre_expected_on: string | null;
@@ -93,6 +99,8 @@ export function newBlockDraft(): BlockDraft {
     floorsTotal: "",
     floorsBuilt: "",
     deadline: null,
+    savedDeadline: null,
+    deadlineShift: true,
     finishingId: "",
     cadastre: "",
     cadastreExpectedOn: null,
@@ -143,7 +151,21 @@ function includesFrom(raw: unknown): PriceInclude[] {
 
 /** Строки из базы — в карточки формы (key = id). */
 export function blockDraftsFrom(records: readonly BlockRecord[]): BlockDraft[] {
-  return records.map((record) => ({
+  return records.map((record) =>
+    draftFrom(
+      record,
+      record.deadline_year && record.deadline_quarter
+        ? quarterEndDate({
+            year: record.deadline_year,
+            quarter: record.deadline_quarter as QuarterNumber,
+          })
+        : null,
+    ),
+  );
+}
+
+function draftFrom(record: BlockRecord, deadline: string | null): BlockDraft {
+  return {
     key: record.id,
     id: record.id,
     name: record.name,
@@ -151,13 +173,9 @@ export function blockDraftsFrom(records: readonly BlockRecord[]): BlockDraft[] {
     progressPct: numberText(record.progress_pct),
     floorsTotal: numberText(record.floors_total),
     floorsBuilt: numberText(record.floors_built),
-    deadline:
-      record.deadline_year && record.deadline_quarter
-        ? quarterEndDate({
-            year: record.deadline_year,
-            quarter: record.deadline_quarter as QuarterNumber,
-          })
-        : null,
+    deadline,
+    savedDeadline: deadline,
+    deadlineShift: true,
     finishingId: numberText(record.finishing_id),
     cadastre: oneOf(CADASTRE_STATUSES, record.cadastre) ? record.cadastre : "",
     cadastreExpectedOn: record.cadastre_expected_on,
@@ -165,5 +183,5 @@ export function blockDraftsFrom(records: readonly BlockRecord[]): BlockDraft[] {
     priceIncludes: includesFrom(record.price_includes),
     units: record.units,
     pricedLayouts: record.priced_layouts,
-  }));
+  };
 }

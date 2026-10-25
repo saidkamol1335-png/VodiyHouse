@@ -90,6 +90,7 @@ export function blockPayload(
       floors_built: delivered ? null : built.value,
       deadline_year: deadline?.year ?? null,
       deadline_quarter: deadline?.quarter ?? null,
+      deadline_shift: row.id !== null && row.deadlineShift,
       finishing_id: row.finishingId ? Number(row.finishingId) : null,
       cadastre: row.cadastre || null,
       cadastre_expected_on: row.cadastre === "in_progress" ? row.cadastreExpectedOn : null,
@@ -139,6 +140,8 @@ function asDraft(raw: unknown): BlockDraft | null {
     floorsTotal: text(row.floorsTotal),
     floorsBuilt: text(row.floorsBuilt),
     deadline: text(row.deadline) || null,
+    // Без отметки — перенос (как карточка по умолчанию): снять её — осознанное «это опечатка».
+    deadlineShift: row.deadlineShift !== false,
     finishingId: /^\d{0,5}$/.test(text(row.finishingId)) ? text(row.finishingId) : "",
     cadastre: row.cadastre as CadastreStatus | "",
     cadastreExpectedOn: text(row.cadastreExpectedOn) || null,

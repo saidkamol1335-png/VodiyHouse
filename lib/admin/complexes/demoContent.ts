@@ -1,4 +1,5 @@
 import { SEED_DICTIONARIES } from "../dictionaries/seed";
+import type { DeadlineChange } from "./deadlines";
 import { DEMO_COMPLEX_ROWS } from "./demo";
 import { detailRows, type DetailRow } from "./details";
 import { documentRows, type DocumentRow } from "./documents";
@@ -39,4 +40,18 @@ export function demoDetails(id: string): DetailRow[] {
 
 export function demoVideos(): VideoDraft[] {
   return [];
+}
+
+/** Перенос срока Shodlik B, как в сиде: 2 кв. 2027 → 4 кв. 2027, записан 20.08.2026. */
+export function demoDeadlineChanges(id: string): DeadlineChange[] {
+  if (slugOf(id) !== "demo-shodlik") return [];
+  return [
+    {
+      id: "00000000-0000-4000-8000-0000000000d1",
+      blockId: "00000000-0000-4000-8000-0000000000b2",
+      from: { year: 2027, quarter: 2 },
+      to: { year: 2027, quarter: 4 },
+      changedOn: "2026-08-20",
+    },
+  ];
 }

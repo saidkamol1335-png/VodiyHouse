@@ -60,6 +60,9 @@ export type SaveContentResult<Errors> =
   | { status: "saved"; at: number }
   | { status: "error"; error: ContentErrorCode | null; errors: Errors; broken: ComplexRequirement[] };
 
+/** «Убрать из истории» ошибочный перенос срока («Блоки»). */
+export type RemoveDeadlineChangeResult = { status: "done"; at: number } | { status: "error"; error: ContentErrorCode };
+
 export type DocumentsResult = SaveContentResult<DocumentsErrors>;
 export type VideosResult = SaveContentResult<VideoErrors>;
 export type DetailsResult = SaveContentResult<DetailsErrors>;

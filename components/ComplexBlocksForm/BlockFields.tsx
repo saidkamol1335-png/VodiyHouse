@@ -14,6 +14,7 @@ import {
   type BlockRowErrors,
 } from "@/lib/admin/complexes/blocks";
 import { CurrencyField } from "./CurrencyField";
+import { DeadlineShiftCheck } from "./Deadlines";
 import { PriceIncludes } from "./PriceIncludes";
 
 type BlockFieldsProps = {
@@ -35,6 +36,7 @@ export function BlockFields(props: BlockFieldsProps) {
     <div className="block-fields">
       <BlockBasicsRow {...props} />
       <BlockProgressRow {...props} />
+      <DeadlineShiftCheck block={props.block} onChange={props.onChange} />
       <BlockCadastreRow {...props} />
       <PriceIncludes block={props.block} error={issue("priceIncludes")} onChange={props.onChange} />
     </div>

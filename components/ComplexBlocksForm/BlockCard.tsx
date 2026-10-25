@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import type { SelectOption } from "@/components/SelectField";
@@ -28,6 +28,8 @@ type BlockCardProps = {
   onChange: (patch: Partial<BlockDraft>) => void;
   onMove: (direction: MoveDirection) => void;
   onRemove: () => void;
+  /** Переносы срока этого блока (сохранённого) и «Убрать из истории». */
+  history: ReactNode;
 };
 
 type Translate = ReturnType<typeof useTranslations<"admin.complexes.blocks">>;
@@ -153,12 +155,14 @@ function BlockBody({
   onChange,
   onRemove,
   title,
+  history,
 }: BlockCardProps & { title: string }) {
   const t = useTranslations("admin.complexes.blocks");
   const [confirming, setConfirming] = useState(false);
   return (
     <div className="block-card__body">
       <BlockFields block={block} issues={issues} finishings={finishings} onChange={onChange} />
+      {history}
       <div className="block-card__remove">
         {block.units > 0 ? (
           <p className="field__meta">{t("hasUnits", { count: block.units })}</p>

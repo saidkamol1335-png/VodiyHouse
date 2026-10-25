@@ -14,7 +14,6 @@ export type DeadlineChange = {
 };
 
 /** Срок в черновике блока отличается от сохранённого — новый срок может быть переносом. */
-export function deadlineMoved(saved: Quarter | null, draft: { year: number | null; quarter: number | null }): boolean {
-  if (!saved || draft.year === null || draft.quarter === null) return false;
-  return saved.year !== draft.year || saved.quarter !== draft.quarter;
+export function deadlineMoved(block: { savedDeadline: string | null; deadline: string | null }): boolean {
+  return block.savedDeadline !== null && block.deadline !== null && block.savedDeadline !== block.deadline;
 }

@@ -1,0 +1,56 @@
+/* Перенос срока (ТЗ 7.3в): отметка под сроком — янтарной рамкой, как подтверждения кабинета;
+   история переносов блока — строками с «Убрать из истории». */
+.deadline-shift {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--amber-line);
+  border-radius: var(--r-m);
+  background: var(--amber-soft);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  cursor: pointer;
+}
+
+.deadline-shift input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--amber);
+}
+
+.deadline-history {
+  display: grid;
+  gap: 8px;
+}
+
+.deadline-history__title {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.deadline-history__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deadline-history__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 6px 0;
+  font-size: var(--fs-small);
+}
+
+.deadline-history__item + .deadline-history__item {
+  border-top: 1px dashed var(--line);
+}

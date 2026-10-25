@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { BLOCK_LIMITS, blockDraftsFrom, newBlockDraft, type BlockDraft } from "./blocks";
 import { parseBlocks } from "./blocksParse";
+import { deadlineMoved } from "./deadlines";
 import {
   LAYOUT_LIMITS,
   newLayoutDraft,
@@ -193,6 +194,18 @@ describe("«Блоки» (И4)", () => {
       pricedLayouts: 2,
     });
     expect(draft!.priceIncludes[0]).toMatchObject({ included: false, price: "1500" });
+    expect(draft).toMatchObject({ savedDeadline: "2027-12-31", deadlineShift: true });
+  });
+
+  it("перенос срока (ТЗ 7.3в): у сохранённого блока — по отметке, у нового — никогда", () => {
+    const saved = { id: "00000000-0000-4000-8000-0000000000b1", savedDeadline: "2027-06-30", deadline: "2027-12-31" };
+    expect(deadlineMoved(block(saved))).toBe(true);
+    expect(deadlineMoved(block({ ...saved, deadline: "2027-06-30" }))).toBe(false);
+    expect(deadlineMoved(block({ savedDeadline: null, deadline: "2027-12-31" }))).toBe(false);
+    const parsed = parseBlocks(
+      formWith("blocks", [block(saved), block({ ...saved, id: "00000000-0000-4000-8000-0000000000b2", name: "B", deadlineShift: false }), block({ name: "C" })]),
+    );
+    expect(parsed.ok && parsed.payload.map((row) => row.deadline_shift)).toEqual([true, false, false]);
   });
 });
 

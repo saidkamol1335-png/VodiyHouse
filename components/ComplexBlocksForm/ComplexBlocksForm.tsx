@@ -1,17 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import { FormStatus } from "@/components/FormStatus";
 import type { SelectOption } from "@/components/SelectField";
 import { BLOCK_LIMITS, type BlockDraft, type BlockRowErrors } from "@/lib/admin/complexes/blocks";
-import type { SaveRowsResult } from "@/lib/admin/complexes/types";
+import type { DeadlineChange } from "@/lib/admin/complexes/deadlines";
+import type { RemoveDeadlineChangeResult, SaveRowsResult } from "@/lib/admin/complexes/types";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { BlockCard, type MoveDirection } from "./BlockCard";
+import { DeadlineHistory } from "./Deadlines";
 import { useBlocksDraft, useOpenCard, type Removed } from "./useBlocksDraft";
 
 type ComplexBlocksFormProps = {
@@ -19,6 +21,9 @@ type ComplexBlocksFormProps = {
   blocks: readonly BlockDraft[];
   finishings: readonly SelectOption[];
   action: FormAction<SaveRowsResult>;
+  /** Переносы сроков ЖК (ТЗ 7.3в) — у карточки своего блока. */
+  deadlineChanges: readonly DeadlineChange[];
+  removeDeadlineChange: FormAction<RemoveDeadlineChangeResult> | null;
 };
 
 type Draft = ReturnType<typeof useBlocksDraft>;
@@ -29,10 +34,15 @@ export function ComplexBlocksForm({
   blocks,
   finishings,
   action,
+  deadlineChanges,
+  removeDeadlineChange,
 }: ComplexBlocksFormProps) {
   const t = useTranslations("admin.complexes.blocks");
   const draft = useBlocksDraft(blocks, action);
   const [openKey, setOpenKey] = useOpenCard(draft.state);
+  const history = (block: BlockDraft) => (
+    <DeadlineHistory changes={deadlineChanges.filter((change) => change.blockId === block.id)} remove={removeDeadlineChange} />
+  );
   return (
     <AdminPanel title={t("title")} wide>
       <form
@@ -46,7 +56,7 @@ export function ComplexBlocksForm({
         <p className="complex-blocks__lead">{t("lead")}</p>
         {draft.rows.length === 0 ? <p className="complex-blocks__empty">{t("empty")}</p> : null}
         <RemovedNotices removed={draft.removed} onRestore={draft.restore} />
-        <BlockCards {...draft} finishings={finishings} openKey={openKey} onOpen={setOpenKey} />
+        <BlockCards {...draft} finishings={finishings} openKey={openKey} onOpen={setOpenKey} history={history} />
         <BlocksActions {...draft} onAdd={() => setOpenKey(draft.add())} />
       </form>
     </AdminPanel>
@@ -75,6 +85,7 @@ type BlockCardsProps = Draft & {
   finishings: readonly SelectOption[];
   openKey: string | null;
   onOpen: (key: string | null) => void;
+  history: (block: BlockDraft) => ReactNode;
 };
 
 function BlockCards({
@@ -86,6 +97,7 @@ function BlockCards({
   update,
   move,
   remove,
+  history,
 }: BlockCardsProps) {
   const [moved, setMoved] = useState<{ key: string; direction: MoveDirection } | null>(null);
   // Та же функция между рендерами: она — зависимость эффекта фокуса в карточке (useMoveFocus).
@@ -110,6 +122,7 @@ function BlockCards({
             move(index, direction === "up" ? index - 1 : index + 1);
           }}
           onRemove={() => remove(row.key)}
+          history={history(row)}
         />
       ))}
     </ul>
