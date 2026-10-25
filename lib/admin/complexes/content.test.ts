@@ -163,6 +163,10 @@ describe("«Детали»", () => {
     expect(parsed).toEqual({ ok: false, errors: { 1: "missingUz", 2: "tooLong", 3: "contacts" } });
   });
 
+  it("фото у темы без текста — ошибка у темы, а не молча пропало", () => {
+    expect(parseDetails(form([...topic(1, "", "", PHOTO)]))).toEqual({ ok: false, errors: { 1: "photoWithoutText" } });
+  });
+
   it("строки — по справочнику; выключенная тема — только если у ЖК есть текст", () => {
     const rows = detailRows([item(1), item(2, false), item(3, false)], [{ topic_id: 2, text: { ru: "a", uz: "b" }, photo_id: null }]);
     expect(rows.map((row) => [row.topicId, row.text.ru])).toEqual([

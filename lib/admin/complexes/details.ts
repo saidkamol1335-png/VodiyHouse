@@ -16,7 +16,7 @@ export type DetailRow = {
   photoId: string | null;
 };
 
-export type DetailIssue = BilingualIssue | "contacts";
+export type DetailIssue = BilingualIssue | "contacts" | "photoWithoutText";
 /** Ошибки по теме (topicId). */
 export type DetailsErrors = Record<string, DetailIssue>;
 export type DetailPayload = { topic_id: number; text: BilingualValue; photo_id: string | null };
@@ -51,10 +51,15 @@ export function parseDetails(formData: FormData): DetailsParse {
   const payload: DetailPayload[] = [];
   for (const topicId of topicIds) {
     const text = readBilingual(formData, detailField(topicId, "text"));
-    if (!text.ru && !text.uz) continue;
+    const photo = readUuid(formData, detailField(topicId, "photo"));
+    if (!text.ru && !text.uz) {
+      // Пустая тема не сохраняется — выбранное к ней фото пропало бы молча.
+      if (photo) errors[topicId] = "photoWithoutText";
+      continue;
+    }
     const issue = detailIssue(text);
     if (issue) errors[topicId] = issue;
-    else payload.push({ topic_id: topicId, text, photo_id: readUuid(formData, detailField(topicId, "photo")) });
+    else payload.push({ topic_id: topicId, text, photo_id: photo });
   }
   return Object.keys(errors).length > 0 ? { ok: false, errors } : { ok: true, payload };
 }
