@@ -115,7 +115,7 @@ function PlaceAndPayment({ catalog, filter, set }: SectionProps & { catalog: Sit
   return (
     <>
       <div className="catalog-filter__section catalog-filter__section--select">
-        <SelectField id="catalog-location" label={t("location")} className="catalog-filter__select" value={filter.locations[0] ?? ""} placeholder={t("locationAll")} options={[...locations].map(([value, label]) => ({ value, label }))} onChange={(event) => set({ locations: event.target.value ? [event.target.value] : [] })} />
+        <SelectField id="catalog-location" label={t("location")} className="catalog-filter__select" labelClassName="catalog-filter__title" value={filter.locations[0] ?? ""} placeholder={t("locationAll")} options={[...locations].map(([value, label]) => ({ value, label }))} onChange={(event) => set({ locations: event.target.value ? [event.target.value] : [] })} />
       </div>
       <Section title={t("payment")}>
         <FilterChips label={t("payment")} chips={PAYMENT_KINDS.map((kind) => ({ key: kind, label: t(`payments.${kind}`) }))} value={filter.payments} onChange={(payments) => set({ payments })} />
@@ -141,7 +141,7 @@ function DeadlineAndMore({ catalog, filter, set }: SectionProps & { catalog: Sit
         <FilterPills label={t("deadline")} pills={pills} value={String(filter.deadline)} onChange={(key) => set({ deadline: toDeadline(key) })} />
       </Section>
       <div className="catalog-filter__section catalog-filter__section--select">
-        <SelectField id="catalog-developer" label={t("developer")} className="catalog-filter__select" value={filter.developers[0] ?? ""} placeholder={t("developerAll")} options={catalog.developers.map((d) => ({ value: d.slug, label: d.name }))} onChange={(event) => set({ developers: event.target.value ? [event.target.value] : [] })} />
+        <SelectField id="catalog-developer" label={t("developer")} className="catalog-filter__select" labelClassName="catalog-filter__title" value={filter.developers[0] ?? ""} placeholder={t("developerAll")} options={catalog.developers.map((d) => ({ value: d.slug, label: d.name }))} onChange={(event) => set({ developers: event.target.value ? [event.target.value] : [] })} />
       </div>
       <Section title={t("finishing")}>
         <FilterChips label={t("finishing")} chips={[...finishings].map(([key, label]) => ({ key, label }))} value={filter.finishings} onChange={(finishings) => set({ finishings })} />

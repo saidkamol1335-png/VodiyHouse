@@ -116,7 +116,7 @@ function CardPlace({ complex }: { complex: CatalogComplex }) {
       {address ? <p className="catalog-card__address">{address}</p> : null}
       {parts.length > 0 ? (
         <p className="catalog-card__landmark">
-          <MapPin size={14} strokeWidth={1.9} aria-hidden />
+          <MapPin className="catalog-card__landmark-icon" size={14} strokeWidth={1.9} aria-hidden />
           <span>{parts.join(" · ")}</span>
         </p>
       ) : null}

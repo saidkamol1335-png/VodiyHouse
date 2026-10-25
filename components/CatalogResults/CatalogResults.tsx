@@ -157,7 +157,7 @@ function ResultsTop({ ref, filtersRef, found, filter, onChange, onOpenFilter }: 
           {t("filter.label")}
           {groups > 0 ? <Badge tone="amber" size="sm">{groups}</Badge> : null}
         </Button>
-        <SelectField id="catalog-sort" label={t("filter.sort")} className="catalog-results__sort" value={filter.sort} options={sorts} onChange={(event) => onChange({ ...filter, sort: event.target.value as CatalogSort })} />
+        <SelectField id="catalog-sort" label={t("filter.sort")} className="catalog-results__sort" labelHidden value={filter.sort} options={sorts} onChange={(event) => onChange({ ...filter, sort: event.target.value as CatalogSort })} />
       </div>
     </div>
   );

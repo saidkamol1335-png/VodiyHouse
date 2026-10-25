@@ -213,7 +213,7 @@
   font-weight: 500;
 }
 
-.catalog-card__landmark svg {
+.catalog-card__landmark-icon {
   flex: none;
   margin-top: 2px;
   color: var(--amber-2);
@@ -226,7 +226,7 @@
   font-size: var(--fs-small);
 }
 
-.catalog-card__facts b {
+.catalog-card__fact-value {
   color: var(--fg);
 }
 

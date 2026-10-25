@@ -26,7 +26,7 @@ export function CardFacts({ deadline, floors, finishings }: { deadline: CardDead
     <p className="catalog-card__facts">
       {deadlineText ? (
         <span>
-          {t("deadline")}: <b>{deadlineText}</b>
+          {t("deadline")}: <b className="catalog-card__fact-value">{deadlineText}</b>
         </span>
       ) : null}
       {floors ? <span>{t("floors", { n: floors })}</span> : null}

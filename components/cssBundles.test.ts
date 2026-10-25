@@ -49,7 +49,8 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
 const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/layout.tsx": ["globals", "site"],
   "app/[locale]/kalkulyator/layout.tsx": ["calc"],
-  "app/[locale]/novostroyki/[slug]/layout.tsx": ["calc", "complex"],
+  // calc страницы ЖК — с чанком калькулятора по «Рассчитать платёж» (useLayoutCalc.ts), не в layout.
+  "app/[locale]/novostroyki/[slug]/layout.tsx": ["complex"],
   "app/global-not-found.tsx": ["globals", "site"],
   "app/admin/layout.tsx": ["globals", "admin"],
   "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],

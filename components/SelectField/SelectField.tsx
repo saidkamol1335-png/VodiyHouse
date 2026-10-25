@@ -38,6 +38,8 @@ type SelectFieldProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "className
   className?: string;
   /** Подпись только для диктора: фильтр над списком («Все типы» мокапа CabLeads). */
   labelHidden?: boolean;
+  /** Микс подписи с элементом блока-владельца (вид подписи фильтра каталога). */
+  labelClassName?: string;
 };
 
 /** Список выбора в виде поля мокапа: подпись моно-шрифтом, 48 px, своя стрелка. */
@@ -50,6 +52,7 @@ export function SelectField({
   hint,
   className,
   labelHidden = false,
+  labelClassName,
   ...select
 }: SelectFieldProps) {
   const errorId = `${id}-error`;
@@ -58,7 +61,7 @@ export function SelectField({
   const describedBy = [showHint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
   return (
     <div className={["field", className].filter(Boolean).join(" ")}>
-      <label className={labelHidden ? "sr-only" : "field__label"} htmlFor={id}>
+      <label className={labelHidden ? "sr-only" : ["field__label", labelClassName].filter(Boolean).join(" ")} htmlFor={id}>
         {label}
       </label>
       <span className="select-field">
