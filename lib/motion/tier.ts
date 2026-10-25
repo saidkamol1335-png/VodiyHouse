@@ -2,7 +2,7 @@
 // Старт всегда в lite (так рендерит сервер), скрипт в <head> подставляет сохранённый режим,
 // а detectMotionTier уточняет его после первого рендера.
 
-import { probeAverageFrameMs, tierFromFrameMs } from "./fpsProbe";
+import { probeAverageFrameMs, tierFromFrameMs, waitForQuietPage } from "./fpsProbe";
 import { decideFromSignals, readSignals, type MotionTier } from "./signals";
 
 export const MOTION_ATTRIBUTE = "data-motion";
@@ -54,6 +54,7 @@ export async function detectMotionTier(win: Window = window): Promise<MotionTier
   const saved = readSavedTier(win);
   if (saved) return saved;
 
+  await waitForQuietPage(win);
   const tier = tierFromFrameMs(await probeAverageFrameMs());
   saveTier(win, tier);
   return tier;

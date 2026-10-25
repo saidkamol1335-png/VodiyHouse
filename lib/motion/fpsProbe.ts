@@ -7,6 +7,30 @@ export const PROBE_DURATION_MS = 300;
 export const SLOW_FRAME_MS = 20;
 /** В фоновой вкладке rAF не тикает — не ждём бесконечно. */
 const PROBE_TIMEOUT_MS = 1000;
+/** Простоя может не быть вовсе (анимация фона) — дольше не ждём. */
+const IDLE_TIMEOUT_MS = 1000;
+
+/**
+ * Ждёт `load` и первый простой: проба в разгар загрузки (декод фона входа, гидратация) мерила
+ * загрузку, а не устройство, — мощный десктоп получал и запоминал lite (motion-theme, 25.10.2026).
+ */
+export function waitForQuietPage(win: Window): Promise<void> {
+  const doc = win.document as Document | undefined;
+  const loaded =
+    !doc || doc.readyState === "complete"
+      ? Promise.resolve()
+      : new Promise<void>((resolve) => win.addEventListener("load", () => resolve(), { once: true }));
+  return loaded.then(
+    () =>
+      new Promise<void>((resolve) => {
+        if (typeof win.requestIdleCallback === "function") {
+          win.requestIdleCallback(() => resolve(), { timeout: IDLE_TIMEOUT_MS });
+        } else {
+          setTimeout(resolve, 0);
+        }
+      }),
+  );
+}
 
 export function averageFrameMs(timestamps: readonly number[]): number {
   if (timestamps.length < 2) return Number.POSITIVE_INFINITY;
