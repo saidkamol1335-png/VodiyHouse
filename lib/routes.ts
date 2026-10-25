@@ -38,5 +38,12 @@ export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
 export const hiddenNav = ({ calculator }: { calculator: boolean }): NavKey[] =>
   calculator ? [] : ["calculator"];
 
+/** Подвал, «Каталог»: в 3а — новостройки, калькулятор и «О нас»; спецпредложения, подбор и застройщики — 3б. */
+export const FOOTER_NAV: readonly { key: NavKey; href: string }[] = [
+  { key: "new", href: ROUTES.catalog },
+  { key: "calculator", href: ROUTES.calculator },
+  { key: "about", href: ROUTES.about },
+];
+
 /** Меню планшета и телефона: пункты шапки; «Подбор за 1 минуту» (решение Ш5) — с квизом в 3б. */
 export const MENU_NAV: readonly { key: NavKey; href: string }[] = [...HEADER_NAV];

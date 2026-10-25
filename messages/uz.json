@@ -270,5 +270,15 @@
       "discountFull": "100% to‘lov uchun chegirma",
       "discountedPrice": "Chegirmali narx"
     }
+  },
+  "footer": {
+    "promise": "Yangi uydan kvartirani <accent>bepul</accent> tanlab beramiz.",
+    "tagline": "Farg‘ona viloyati yangi uylar agentligi. Xaridor uchun — bepul: komissiyani quruvchi to‘laydi.",
+    "catalog": "Katalog",
+    "contacts": "Aloqa",
+    "becomePartner": "Hamkor bo‘lish",
+    "copyUrl": "Nusxalash",
+    "copied": "Nusxalandi",
+    "copyFailed": "Nusxalanmadi"
   }
 }

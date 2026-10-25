@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DevHeaderStage } from "@/components/DevHeaderStage";
 import { SiteContactsProvider } from "@/components/SiteContacts";
+import { SiteFooter } from "@/components/SiteFooter";
 import type { SiteContacts } from "@/lib/contacts";
 
 // DEMO: контакты для проверки шапки и меню с введёнными «Настройки → Контакты» (Ф9). Настоящих
@@ -15,12 +16,13 @@ const DEMO_CONTACTS: SiteContacts = {
   freeBadge: null,
 };
 
-// Проверка шапки поверх фото (решение Ш6) и контактов в ней. В продакшене страницы нет.
+// Проверка шапки поверх фото (решение Ш6) и контактов в шапке, меню и подвале. В продакшене страницы нет.
 export default function DevHeaderPage() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
     <SiteContactsProvider contacts={DEMO_CONTACTS}>
       <DevHeaderStage />
+      <SiteFooter />
     </SiteContactsProvider>
   );
 }

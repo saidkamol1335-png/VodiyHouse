@@ -56,7 +56,7 @@ test.describe("шапка · десктоп 1440", () => {
   test("Ф9: «Показать телефон» — номер из «Настройки → Контакты», второй клик звонит", async ({ page }) => {
     await page.goto("/dev/header");
     await page.getByRole("button", { name: "Показать телефон" }).click();
-    const phone = page.getByRole("link", { name: "+998 90 000 00 00" });
+    const phone = page.getByRole("banner").getByRole("link", { name: "+998 90 000 00 00" });
     await expect(phone).toHaveAttribute("href", "tel:+998900000000");
   });
 

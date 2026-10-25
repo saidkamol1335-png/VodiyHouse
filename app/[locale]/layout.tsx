@@ -5,6 +5,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { HiddenNavProvider } from "@/components/HiddenNav";
 import { RootDocument } from "@/components/RootDocument";
 import { SiteContactsProvider } from "@/components/SiteContacts";
+import { SiteFooter } from "@/components/SiteFooter";
 import { siteMessages } from "@/lib/i18n/clientMessages";
 import { isLocale, LOCALES } from "@/lib/i18n/routing";
 import { hiddenNav } from "@/lib/routes";
@@ -37,7 +38,10 @@ export default async function SiteLayout({ children }: LayoutProps<"/[locale]">)
   return (
     <RootDocument lang={locale} withColumns messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>
-        <HiddenNavProvider hidden={hiddenNav({ calculator })}>{children}</HiddenNavProvider>
+        <HiddenNavProvider hidden={hiddenNav({ calculator })}>
+          {children}
+          <SiteFooter />
+        </HiddenNavProvider>
       </SiteContactsProvider>
     </RootDocument>
   );

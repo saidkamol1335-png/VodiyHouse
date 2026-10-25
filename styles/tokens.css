@@ -29,6 +29,7 @@
   --fs-h3: 20px;
   --fs-menu: 25px; /* пункты меню телефона */
   --fs-kpi: 30px;
+  --fs-footer-promise-phone: 24px; /* обещание подвала на телефоне (мокап .ftr__big) */
   --fs-stat: 34px;
   --fs-h2: clamp(30px, 3.05vw, 46px);
   --fs-login-title: clamp(
@@ -116,6 +117,7 @@
   --dur-roll: 550ms; /* перекат букв в меню шапки */
   --roll-stagger: 18ms;
   --stagger: 40ms; /* появление пунктов списка по очереди */
+  --pixel-stagger: 22ms; /* клетки пиксельного знака подвала, по диагонали (мокап) */
   --dim-siblings: 0.45; /* соседние пункты меню при наведении */
   --opacity-disabled: 0.55; /* кнопка, пока идёт отправка формы */
   --opacity-busy: 0.6; /* подпись, которая вот-вот обновится (фильтр догоняет ввод) */
@@ -227,6 +229,8 @@
   --seg-on-bg: #ffffff;
   --seg-on-shadow: 0 0 0 1px rgba(240, 160, 48, 0.9) inset, 0 2px 8px rgba(248, 155, 13, 0.2);
   --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.19));
+  --footer-pixel-glow: drop-shadow(0 0 6px rgba(248, 155, 13, 0.19)); /* пиксельный логотип подвала, только full */
+  --footer-glow: radial-gradient(800px 300px at 80% 0%, rgba(248, 155, 13, 0.07), transparent 70%);
   /* иконки шапки поверх фото (телефон) */
   --over-photo-fg: #ffffff;
   --over-photo-button: rgba(15, 12, 8, 0.26);
@@ -381,6 +385,7 @@
   --seg-on-bg: rgba(248, 155, 13, 0.12);
   --seg-on-shadow: 0 0 0 1px #f89b0d inset, 0 0 18px rgba(248, 155, 13, 0.35);
   --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.35));
+  --footer-pixel-glow: drop-shadow(0 0 6px rgba(248, 155, 13, 0.35));
 
   --admin-side-bg: #0e0d0c;
   --admin-nav-fg: var(--fg-2);
