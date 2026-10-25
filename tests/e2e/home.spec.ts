@@ -28,7 +28,7 @@ test.describe("главная, избранное, подборка", () => {
     await page.goto("/ru/novostroyki");
     await page.getByRole("button", { name: "В избранное: ЖК Shodlik" }).click();
     await page.getByRole("button", { name: "В избранное: ЖК Orzu" }).click();
-    await expect(page.getByRole("button", { name: "Убрать из избранного: ЖК Shodlik" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "В избранное: ЖК Shodlik" })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("link", { name: "Избранное · 2" })).toBeVisible();
     await page.goto("/ru/izbrannoe");
     await expect(page.getByRole("heading", { name: "В подборке 2 ЖК" })).toBeVisible();

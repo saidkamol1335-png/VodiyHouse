@@ -40,6 +40,25 @@ export type LeadSent = { number: number; repeat: boolean };
 
 const NETWORK: LeadSubmitResult = { status: "error", error: "network" };
 
+/** Что уходит на сервер: тип и объект формы, контакт, страница, метки первого захода, данные по типу. */
+function requestOf(intent: LeadIntent, contact: LeadContact, siteLang: SiteLang, view: ViewChoice | null, partner?: LeadPartner): LeadRequest {
+  return {
+    type: intent.type,
+    name: contact.name,
+    phone: contact.phone,
+    contactLang: contact.lang,
+    siteLang,
+    object: intent.object ?? {},
+    pageUrl: `${window.location.pathname}${window.location.search}`,
+    source: leadSource(),
+    ...(view ? { view } : {}),
+    ...(partner ? { partner } : {}),
+    ...(intent.filters ? { filters: intent.filters } : {}),
+    ...(intent.calc ? { calc: intent.calc, calcRows: intent.calcRows } : {}),
+    trap: contact.trap,
+  };
+}
+
 /** Проверка как на сервере → отправка → «отправлено» или ошибка; ошибки полей — фокус на первое. */
 export function useLeadSubmit(id: string, intent: LeadIntent) {
   const locale = useLocale() as SiteLang;
@@ -57,32 +76,23 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
       document.getElementById(`${id}-${first}`)?.focus();
       return;
     }
-    const request: LeadRequest = {
-      type: intent.type,
-      name: contact.name,
-      phone: contact.phone,
-      contactLang: contact.lang,
-      siteLang: locale,
-      object: intent.object ?? {},
-      pageUrl: `${window.location.pathname}${window.location.search}`,
-      source: leadSource(),
-      ...(view ? { view } : {}),
-      ...(partner ? { partner } : {}),
-      ...(intent.filters ? { filters: intent.filters } : {}),
-      ...(intent.calc ? { calc: intent.calc, calcRows: intent.calcRows } : {}),
-      trap: contact.trap,
-    };
+    const request = requestOf(intent, contact, locale, view, partner);
     startTransition(async () => {
       const result = await submitLeadAction(request).catch(() => NETWORK);
       if (result.status === "sent") {
         setSent({ number: result.number, repeat: result.repeat });
         if (result.number > 0) track("lead_sent", { detail: intent.type });
-      }
-      else {
+      } else {
         setError(result.error);
         setFields(result.fields ?? {});
       }
     });
   };
-  return { submit, fields, error, sent, pending };
+  /** «Отправить ещё одну» (застройщик): снова пустая форма. */
+  const reset = () => {
+    setSent(null);
+    setFields({});
+    setError(null);
+  };
+  return { submit, fields, error, sent, pending, reset };
 }

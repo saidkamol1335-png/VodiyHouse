@@ -36,25 +36,25 @@ export function homeStats(catalog: SiteCatalog): HomeStats {
 /** Пример запроса видоискателя (мокап vfQuery): «2-комн. до $45 000». */
 export const HERO_QUERY: CatalogFilter = { ...NO_FILTER, rooms: [2], priceMax: 45_000 };
 
-export type HeroFound = { complexes: number; flats: number; search: string };
+export type HeroFound = { complexes: number; flats: number; partial: boolean; search: string };
 
-/** «Найдено сейчас: 1 ЖК · 9 кв.» — по фильтру каталога; квартиры — свободные подходящего типа. */
+/**
+ * «Найдено сейчас: 1 ЖК · 9 кв.» — по фильтру каталога; квартиры — свободные подходящего типа.
+ * partial — у части подходящих типов наличие без списка квартир: число тогда «не меньше».
+ */
 export function heroFound(catalog: SiteCatalog, filter: CatalogFilter = HERO_QUERY): HeroFound {
   const found = filterCatalog(catalog, filter);
-  const flats = found.reduce(
-    (sum, complex) =>
-      sum +
-      complex.blocks.reduce(
-        (blockSum, block) =>
-          blockSum +
-          block.offers
-            .filter((offer) => offerMatches(offer, block.currency, filter, catalog.rate))
-            .reduce((offerSum, offer) => offerSum + (offer.free ?? 0), 0),
-        0,
-      ),
-    0,
-  );
-  return { complexes: found.length, flats, search: searchFromFilter(filter) };
+  let flats = 0;
+  let partial = false;
+  for (const complex of found) {
+    for (const block of complex.blocks) {
+      for (const offer of block.offers.filter((item) => offerMatches(item, block.currency, filter, catalog.rate))) {
+        if (offer.free === null) partial ||= offer.available;
+        else flats += offer.free;
+      }
+    }
+  }
+  return { complexes: found.length, flats, partial, search: searchFromFilter(filter) };
 }
 
 /** «Остатки по каждому ЖК» (мокап .avmini): первый ЖК ленты и его типы с числом свободных. */

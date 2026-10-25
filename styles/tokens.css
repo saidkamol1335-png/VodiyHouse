@@ -162,6 +162,7 @@
   /* Затемнение под окном (чертёж крупно) — в обеих темах. */
   --scrim: rgba(14, 13, 12, 0.6);
   --scrim-blur: 6px; /* размытие под окном заявки — только full */
+  --favorites-loading-h: 480px; /* /izbrannoe до чтения избранного: заголовок и ряд карточек */
   /* «О Vodiy House» (мокап SiteAbout .ab): тёмная карточка на светлой странице */
   --about-card-bg: #17140f;
   --about-card-fg: #f7f3ec;
@@ -381,9 +382,14 @@
   --home-vf-orbit: rgba(40, 28, 12, 0.17);
   --home-vf-glass: rgba(253, 251, 247, 0.86);
   --home-vf-go: #b84300; /* 4,9:1 к светлому тексту кнопки (мокап #dc5000 — 3,6:1) */
+  --home-vf-go-fg: #f7f3ec; /* светлый в обеих темах: --on-inv в тёмной — тёмный */
   --home-vf-rec: #ff453a;
   --home-marquee-stroke: rgba(40, 28, 12, 0.22);
   --home-bento-olive: linear-gradient(160deg, #3b3a24, #24251a);
+  /* Текст оливковой плитки — светлый в обеих темах (мокап .bn--olive): 11:1 и 7:1 к фону. */
+  --home-bento-olive-fg: #fdfbf7;
+  --home-bento-olive-kicker: #ffb547;
+  --home-why-pills-h: 132px; /* лента услуг на телефоне — полосой над текстом плитки */
   --fs-home-marquee: clamp(48px, 7vw, 104px);
   --fs-home-words: clamp(24px, 2.6vw, 36px);
   --fs-home-big: 180px;

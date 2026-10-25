@@ -23,6 +23,18 @@ describe("parseLeadRequest", () => {
     });
   });
 
+  it("застройщик: комментарий сохраняет строки, лишние пробелы и пустые строки — убираются", () => {
+    const parsed = parseLeadRequest({
+      ...base,
+      type: "partner",
+      partner: { company: " ООО  Строй ", city: "Фергана", format: "", projects: "", comment: "ЖК Shodlik —  120 кв.\r\n\n\n\nВопрос   по рекламе  " },
+    });
+    expect(parsed).toMatchObject({
+      ok: true,
+      lead: { payload: { partner: { company: "ООО Строй", comment: "ЖК Shodlik — 120 кв.\n\nВопрос по рекламе" } } },
+    });
+  });
+
   it("чужой тип — отказ; объект — только slug и uuid; страница — только путь сайта", () => {
     expect(parseLeadRequest({ ...base, type: "complaint" }).ok).toBe(false);
     const parsed = parseLeadRequest({

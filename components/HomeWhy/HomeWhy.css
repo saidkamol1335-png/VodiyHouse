@@ -36,7 +36,12 @@
 .home-why__tile--olive {
   border-color: transparent;
   background: var(--home-bento-olive);
-  color: var(--on-inv);
+  color: var(--home-bento-olive-fg);
+}
+
+/* Мокап: .bn--olive .eyebrow — светлый янтарь на оливковом в обеих темах. */
+.home-why__tile--olive .home-why__kicker {
+  color: var(--home-bento-olive-kicker);
 }
 
 .home-why__kicker {
@@ -225,6 +230,30 @@
 
   .home-why__tile--wide:first-child {
     min-height: 300px;
+  }
+
+  /* Мокап (.avmini на телефоне): пример наличия — в потоке над текстом, а не поверх него. */
+  .home-why__stock {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  .home-why__tile--wide .home-why__body {
+    max-width: none;
+  }
+
+  /* Лента услуг — тоже в потоке, полосой над текстом: иначе ползёт поверх заголовка. */
+  .home-why__pills {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: var(--home-why-pills-h);
+    margin-bottom: 14px;
   }
 }
 

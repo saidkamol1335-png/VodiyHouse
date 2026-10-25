@@ -187,7 +187,8 @@
 [data-motion="full"] .home-hero__vf-photo {
   opacity: 0;
   animation: home-hero-cycle var(--dur-home-cycle) linear infinite;
-  animation-delay: calc(var(--vf-index) * var(--dur-home-cycle) / 5);
+  /* Первое место стартует уже видимым (−5 % круга): после пробы full фото не гаснет и не мигает. */
+  animation-delay: calc(var(--vf-index) * var(--dur-home-cycle) / 5 - var(--dur-home-cycle) * 0.05);
 }
 
 .home-hero__vf-frame {
@@ -300,7 +301,7 @@
   padding: 0 14px;
   border-radius: var(--r-pill);
   background: var(--home-vf-go);
-  color: var(--on-inv);
+  color: var(--home-vf-go-fg);
   font-family: var(--mono);
   font-size: var(--fs-nano);
   letter-spacing: var(--ls-label);
@@ -367,13 +368,14 @@
   }
 }
 
+/* С текущего масштаба: страница стартует в lite (scale 1), full включается после пробы — без рывка. */
 @keyframes home-hero-zoom {
   from {
-    transform: scale(1.08);
+    transform: scale(1);
   }
 
   to {
-    transform: scale(1.02);
+    transform: scale(1.06);
   }
 }
 

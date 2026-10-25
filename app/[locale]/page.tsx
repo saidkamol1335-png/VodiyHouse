@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { locale as rootLocale } from "next/root-params";
 import { getTranslations } from "next-intl/server";
+import { Container } from "@/components/Container";
 import { HomeCatalog } from "@/components/HomeCatalog";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeManifesto } from "@/components/HomeManifesto";
@@ -48,15 +49,30 @@ export default async function HomePage() {
     <>
       <SiteHeader transparentAtTop />
       <main>
-        {catalog ? (
-          <HomeHero stats={homeStats(catalog)} found={heroFound(catalog)} photos={coversOf(catalog, locale)} catalogId={CATALOG_ID} />
-        ) : null}
+        <HomeHero
+          stats={catalog ? homeStats(catalog) : null}
+          found={catalog ? heroFound(catalog) : null}
+          photos={coversOf(catalog, locale)}
+          catalogId={CATALOG_ID}
+        />
         <HomeMarquee />
-        {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} /> : null}
+        {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} /> : <CatalogUnavailable id={CATALOG_ID} />}
         <HomeManifesto />
         <HomeWhy sample={catalog ? availabilitySample(catalog) : null} />
         <HomePartner />
       </main>
     </>
+  );
+}
+
+/** Каталог не прочитался (база не ответила): вместо ленты — короткое «временно недоступен», как /novostroyki. */
+async function CatalogUnavailable({ id }: { id: string }) {
+  const t = await getTranslations("catalog.page");
+  return (
+    <Container>
+      <p id={id} className="py-16 text-muted-foreground">
+        {t("unavailable")}
+      </p>
+    </Container>
   );
 }

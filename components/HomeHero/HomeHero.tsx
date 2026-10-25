@@ -4,6 +4,7 @@ import { Button } from "@/components/Button";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { SitePhoto } from "@/components/SitePhoto";
+import { HeroSlides } from "./HeroSlides";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/routes";
@@ -11,8 +12,9 @@ import type { CatalogPhoto } from "@/lib/site/catalog/records";
 import type { HeroFound, HomeStats } from "@/lib/site/home/stats";
 
 type HomeHeroProps = {
-  stats: HomeStats;
-  found: HeroFound;
+  /** null — каталог не прочитался: первый экран без цифр и видоискателя, но с заголовком и CTA. */
+  stats: HomeStats | null;
+  found: HeroFound | null;
   /** Обложки ЖК каталога: первая — фон первого экрана (LCP), до пяти — в видоискателе. */
   photos: readonly { photo: CatalogPhoto; name: string }[];
   /** Якорь ленты каталога ниже на странице. */
@@ -57,9 +59,9 @@ export async function HomeHero({ stats, found, photos, catalogId }: HomeHeroProp
               </li>
             ))}
           </ul>
-          <HeroStats stats={stats} />
+          {stats ? <HeroStats stats={stats} /> : null}
         </div>
-        <HeroViewfinder found={found} photos={viewfinderSlots(photos)} />
+        {found ? <HeroViewfinder found={found} photos={viewfinderSlots(photos)} /> : null}
       </div>
       <a href={`#${catalogId}`} className="home-hero__scroll">
         <ChevronDown size={16} aria-hidden="true" />
@@ -116,17 +118,13 @@ async function HeroViewfinder({ found, photos }: ViewfinderProps) {
         <span aria-hidden="true">{t("coords")}</span>
       </p>
       <div className="home-hero__vf-media" aria-hidden="true">
-        {photos.map((item, index) => (
-          <div key={index} className="home-hero__vf-photo" style={{ ["--vf-index" as string]: index }}>
-            <SitePhoto photo={item.photo} alt="" frame="phone" sizes="(max-width: 760px) 300px, 420px" />
-          </div>
-        ))}
+        <HeroSlides photos={photos} />
       </div>
       <span className="home-hero__vf-frame" aria-hidden="true" />
       <span className="home-hero__vf-orbit" aria-hidden="true" />
       <p className="home-hero__vf-found">
         <small>{t("found")}</small>
-        {t("foundValue", { complexes: found.complexes, flats: found.flats })}
+        {t(found.partial ? (found.flats > 0 ? "foundPartial" : "foundSome") : "foundValue", { complexes: found.complexes, flats: found.flats })}
       </p>
       <Link href={`${ROUTES.catalog}${found.search}`} className="home-hero__vf-chat">
         <span className="home-hero__vf-query">{t("query")}</span>

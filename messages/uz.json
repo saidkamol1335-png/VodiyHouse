@@ -67,7 +67,9 @@
       "found": "Hozir topildi",
       "foundValue": "{complexes} TJM · {flats} kv.",
       "query": "2 xonali $45 000 gacha",
-      "go": "GO →"
+      "go": "GO →",
+      "foundSome": "{complexes} TJM · kvartiralar bor",
+      "foundPartial": "{complexes} TJM · {flats}+ kv."
     },
     "scroll": "Pastga",
     "marquee": "Vodiy House · Farg‘ona · Marg‘ilon · Qo‘qon · Quvasoy · Yangi uylar",
@@ -791,7 +793,8 @@
       "projectsPlaceholder": "masalan, 2 TJM, ~180 kvartira",
       "comment": "Izoh",
       "commentPlaceholder": "TJM nomi, muddatlar, savollar",
-      "send": "Ariza yuborish"
+      "send": "Ariza yuborish",
+      "again": "Yana bitta yuborish"
     },
     "donePartner": "Ish kuni davomida javob beramiz.",
     "nextPartner": "Keyin nima: qo‘ng‘iroq qilamiz, uchrashuvni kelishamiz va hujjatlar hamda obyektni ko‘ramiz."
@@ -818,8 +821,7 @@
     "telegram": "Telegramga yuborish",
     "close": "Yopish",
     "button": "Ulashish: {name}",
-    "favorite": "Saralanganga: {name}",
-    "unfavorite": "Saralangandan olib tashlash: {name}"
+    "favorite": "Saralanganga: {name}"
   },
   "favorites": {
     "metaTitle": "Saralangan — Vodiy House",
@@ -838,7 +840,9 @@
       "title": "Tanlov: {count} ta TJM",
       "lead": "Bu TJMlar siz uchun tanlandi. Raqamingizni qoldiring — Vodiy House menejeri batafsil aytib beradi va kvartiralarni ko‘rsatadi.",
       "empty": "Tanlov bo‘sh yoki undagi TJMlar sotuvdan olingan. Barcha yangi uylarni ko‘ring — yoki raqam qoldiring, qo‘lda tanlab beramiz.",
-      "context": "Tanlov: {names}"
+      "context": "Tanlov: {names}",
+      "metaEmpty": "Vodiy House TJM to‘plami: quruvchi narxlari, mavjud kvartiralar, tanlash va ko‘rsatish — bepul.",
+      "toCatalog": "Yangi uylarni ko‘rish"
     }
   },
   "partners": {
@@ -865,18 +869,18 @@
         "price": "bitim uchun komissiya",
         "text": "Vodiy House rieltorlari TJMni ko‘rsatadi, mijozni bitimgacha olib boradi va bank bilan yordam beradi.",
         "points": {
-          "p1": "Mijozlar arizalari — umumiy Telegram-chatda",
+          "p1": "Menejer TJMlaringiz bo‘yicha ko‘rsatuvlar va bitimlar hisobotini yuboradi",
           "p2": "Har oy qurilish videosi",
-          "p3": "Har bir mijoz bo‘yicha hisobot"
+          "p3": "Mijozga bank va hujjatlar bilan yordam beramiz"
         }
       },
       "ads": {
         "name": "Saytda reklama",
         "price": "davr uchun to‘lov",
-        "text": "Bosh sahifada maxsus taklif, katalog yuqorisida joy va to‘plamlarda banner.",
+        "text": "TJMingizning «Reklama» belgili reklama kartochkasi — bosh sahifada va katalogda.",
         "points": {
-          "p1": "Bosh sahifadagi «Maxsus takliflar» bloki",
-          "p2": "Katalogda birinchi o‘rin",
+          "p1": "Sizning ma’lumotlaringizdan kartochka: foto, narx «dan», to‘lov",
+          "p2": "Xaridor uchun halol «Reklama» belgisi",
           "p3": "Ko‘rishlar va arizalar bo‘yicha hisobot"
         }
       },
@@ -889,7 +893,8 @@
           "p2": "Sizning dasturlaringiz bilan kalkulyator",
           "p3": "«Vodiy House tekshirgan» belgisi"
         }
-      }
+      },
+      "picked": "Tanlandi"
     },
     "steps": {
       "eyebrow": "Qanday boshlaymiz",
@@ -909,7 +914,7 @@
       },
       "s4": {
         "title": "Sotuv va hisobotlar",
-        "text": "TJMlaringiz bo‘yicha arizalar va statistikani olasiz"
+        "text": "Menejer TJMlaringiz bo‘yicha ko‘rsatuvlar va bitimlar hisobotini yuboradi"
       }
     },
     "request": {

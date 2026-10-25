@@ -36,7 +36,10 @@ async function heroStats() {
   return [
     { key: "complexes", value: number.format(stats.complexes), caption: t("complexes", { count: stats.complexes }) },
     { key: "developers", value: number.format(stats.developers), caption: t("developers", { count: stats.developers }) },
-    { key: "flats", value: `${number.format(stats.flats)}${stats.partial ? "+" : ""}`, caption: t("flats", { count: stats.flats }) },
+    // Нет квартир с числом (наличие без списка) — ячейки нет: «0+ квартир» ничего не говорит.
+    ...(stats.flats > 0
+      ? [{ key: "flats", value: `${number.format(stats.flats)}${stats.partial ? "+" : ""}`, caption: t("flats", { count: stats.flats }) }]
+      : []),
   ];
 }
 

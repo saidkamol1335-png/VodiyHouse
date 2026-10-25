@@ -22,6 +22,8 @@ type CatalogResultsProps = {
   catalog: SiteCatalog;
   /** Карточек на «порцию»: «Показать ещё» добавляет столько же. */
   pageSize: number;
+  /** false — каталог ниже первого экрана (главная): первую обложку не грузить заранее. */
+  preloadFirst?: boolean;
 };
 
 
@@ -50,7 +52,7 @@ function activeGroups(filter: Filter): number {
  * Каталог (Ф3, мокап .cat): фильтр, «Найдено N ЖК», сортировка, карточки порциями и пустой
  * результат. Фильтр живёт в браузере и в адресе — без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true }: CatalogResultsProps) {
   const [filter, setFilter] = useState(NO_FILTER);
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
@@ -80,7 +82,7 @@ export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
       {/* Пока открыт экран фильтра телефона, выдача за ним недоступна (диалог). */}
       <div className="catalog-results__body" inert={open}>
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
-        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
+        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
       </div>
     </div>
   );
@@ -88,6 +90,7 @@ export function CatalogResults({ catalog, pageSize }: CatalogResultsProps) {
 
 type ResultsListProps = {
   catalog: SiteCatalog;
+  preloadFirst: boolean;
   found: readonly CatalogComplex[];
   filter: Filter;
   shown: number;
@@ -123,7 +126,7 @@ function useFilterTracking() {
 }
 
 /** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
-function ResultsList({ catalog, found, filter, shown, pageSize, onMore, onReset }: ResultsListProps) {
+function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, onMore, onReset }: ResultsListProps) {
   const t = useTranslations("catalog.filter");
   if (found.length === 0) {
     return (
@@ -141,7 +144,7 @@ function ResultsList({ catalog, found, filter, shown, pageSize, onMore, onReset 
   }
   return (
     <>
-      <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} />
+      <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} />
       {found.length > shown ? (
         <div className="catalog-results__more">
           <Button variant="outline" onClick={onMore}>

@@ -25,7 +25,7 @@ export async function HomeCatalog({ id, catalog, pageSize }: HomeCatalogProps) {
           </Heading>
         </div>
         <NextIntlClientProvider messages={pickMessages(messages, CATALOG_MESSAGES)}>
-          <CatalogResults catalog={catalog} pageSize={pageSize} />
+          <CatalogResults catalog={catalog} pageSize={pageSize} preloadFirst={false} />
         </NextIntlClientProvider>
       </Container>
     </section>

@@ -41,7 +41,7 @@ export default async function HowToBuyPage() {
           </NextIntlClientProvider>
         }
       >
-        <SiteSteps steps={steps} />
+        <SiteSteps steps={steps} level={2} layout="list" />
       </TextPage>
     </>
   );

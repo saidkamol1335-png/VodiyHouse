@@ -22,7 +22,8 @@ export function FavoriteButton({ slug, name, className }: FavoriteButtonProps) {
       type="button"
       className={[on ? "favorite-button favorite-button--on" : "favorite-button", className].filter(Boolean).join(" ")}
       aria-pressed={on}
-      aria-label={t(on ? "unfavorite" : "favorite", { name })}
+      // Подпись постоянная, состояние — aria-pressed: «В избранное: ЖК Shodlik, нажата».
+      aria-label={t("favorite", { name })}
       onClick={() => {
         toggleFavorite(slug);
         if (!on) track("favorite", { detail: name });

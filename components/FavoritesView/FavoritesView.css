@@ -5,6 +5,11 @@
   gap: 32px;
 }
 
+/* До чтения избранного из браузера — место под заголовок и строку карточек, без «пусто» (CLS). */
+.favorites-view--loading {
+  min-height: var(--favorites-loading-h);
+}
+
 .favorites-view__head {
   display: grid;
   justify-items: start;

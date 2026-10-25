@@ -32,21 +32,32 @@ type PartnerFields = {
 type TextKey = Exclude<keyof PartnerFields, "format">;
 type FieldsProps = { fields: PartnerFields; onChange: (patch: Partial<PartnerFields>) => void };
 
-/** «Выбрать» у формата — адрес #zayavka-<формат>: форма берёт формат, прокручивается и ставит фокус. */
+const formatOf = (hash: string) => PARTNER_FORMATS.find((value) => hash === `#${PARTNER_ANCHOR}-${value}`);
+
+/**
+ * «Выбрать» у формата — ссылка #zayavka-<формат>: форма берёт формат, прокручивается и ставит фокус.
+ * По каждому нажатию (повторное «Выбрать» адрес не меняет) и при заходе по такой ссылке.
+ */
 function useFormatFromHash(onFormat: (format: PartnerFormat) => void) {
   const form = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    const read = () => {
-      const hash = window.location.hash;
-      const format = PARTNER_FORMATS.find((value) => hash === `#${PARTNER_ANCHOR}-${value}`);
-      if (!format) return;
+    const apply = (format: PartnerFormat | undefined) => {
+      if (!format) return false;
       onFormat(format);
       form.current?.scrollIntoView({ block: "center" });
       document.getElementById(id("company"))?.focus({ preventScroll: true });
+      return true;
     };
-    read();
-    window.addEventListener("hashchange", read);
-    return () => window.removeEventListener("hashchange", read);
+    const onClick = (event: MouseEvent) => {
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>(`a[href^="#${PARTNER_ANCHOR}-"]`) : null;
+      if (link && apply(formatOf(link.hash))) {
+        event.preventDefault();
+        window.history.replaceState(null, "", link.hash);
+      }
+    };
+    apply(formatOf(window.location.hash));
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, [onFormat]);
   return form;
 }
@@ -57,7 +68,7 @@ function usePartnerForm(defaultCity: string) {
   const locale = useLocale() as SiteLang;
   const empty = { company: "", name: "", phone: "", format: null, projects: "", comment: "", trap: "" };
   const [fields, setFields] = useState<PartnerFields>({ ...empty, city: defaultCity });
-  const { submit, fields: errors, error, sent, pending } = useLeadSubmit(FORM_ID, INTENT);
+  const { submit, fields: errors, error, sent, pending, reset } = useLeadSubmit(FORM_ID, INTENT);
   const onChange = useCallback(
     (patch: Partial<PartnerFields>) => setFields((current) => ({ ...current, ...patch })),
     [],
@@ -70,7 +81,11 @@ function usePartnerForm(defaultCity: string) {
     const format = fields.format ? t(`formats.${fields.format}`) : "";
     submit({ name, phone, lang: locale, trap }, null, { company, city, format, projects, comment });
   };
-  return { fields, onChange, form, onSubmit, errors, error, sent, pending };
+  const again = () => {
+    reset();
+    setFields((current) => ({ ...empty, city: current.city }));
+  };
+  return { fields, onChange, form, onSubmit, errors, error, sent, pending, again };
 }
 
 /**
@@ -79,13 +94,20 @@ function usePartnerForm(defaultCity: string) {
  */
 export function PartnerForm({ defaultCity }: { defaultCity: string }) {
   const t = useTranslations("lead");
-  const { fields, onChange, form, onSubmit, errors, error, sent, pending } = usePartnerForm(defaultCity);
+  const { fields, onChange, form, onSubmit, errors, error, sent, pending, again } = usePartnerForm(defaultCity);
   const done = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (sent) done.current?.focus();
   }, [sent]);
   if (sent) {
-    return <LeadDone ref={done} type="partner" number={sent.number} repeat={sent.repeat} />;
+    return (
+      <div className="lead-form">
+        <LeadDone ref={done} type="partner" number={sent.number} repeat={sent.repeat} />
+        <Button variant="outline" onClick={again}>
+          {t("partner.again")}
+        </Button>
+      </div>
+    );
   }
   return (
     <form ref={form} className="lead-form" noValidate onSubmit={onSubmit} aria-busy={pending}>

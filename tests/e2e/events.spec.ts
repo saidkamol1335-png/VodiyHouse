@@ -19,12 +19,12 @@ test.describe("события сайта → «Сейчас на сайте»", 
     const errors = collectPageErrors(site);
     await site.goto("/ru/novostroyki/demo-shodlik?utm_source=e2e_events");
     const heart = site.getByRole("button", { name: "В избранное: ЖК Shodlik" }).first();
-    await heart.click();
-    await expect(site.getByRole("button", { name: "Убрать из избранного: ЖК Shodlik" }).first()).toBeVisible();
-    // Уход со страницы — пачка уходит sendBeacon'ом.
+    // Избранное — событие «сразу»: пачка уходит по нажатию.
     const sent = site.waitForRequest((request) => request.url().endsWith("/api/e") && request.method() === "POST");
-    await site.goto("/ru");
+    await heart.click();
+    await expect(heart).toHaveAttribute("aria-pressed", "true");
     await sent;
+    await site.goto("/ru");
     expect(errors).toEqual([]);
     await visitor.close();
 

@@ -7,11 +7,18 @@ import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 const PRELOAD_CARDS = 1;
 
 /** Сетка карточек (мокап .cards): 3 в ряд на десктопе, 2 на планшете, 1 на телефоне. */
-export function CatalogGrid({ catalog, complexes }: { catalog: SiteCatalog; complexes: readonly CatalogComplex[] }) {
+type CatalogGridProps = {
+  catalog: SiteCatalog;
+  complexes: readonly CatalogComplex[];
+  /** false — сетка ниже первого экрана (главная): обложка не спорит за канал с фото обложки. */
+  preloadFirst?: boolean;
+};
+
+export function CatalogGrid({ catalog, complexes, preloadFirst = true }: CatalogGridProps) {
   return (
     <div className="catalog-grid">
       {complexes.map((complex, index) => (
-        <CatalogCard key={complex.id} complex={complex} catalog={catalog} preload={index < PRELOAD_CARDS} />
+        <CatalogCard key={complex.id} complex={complex} catalog={catalog} preload={preloadFirst && index < PRELOAD_CARDS} />
       ))}
     </div>
   );

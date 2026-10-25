@@ -62,6 +62,18 @@ export function useFavorites(): readonly string[] {
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }
 
+/** То же, но до чтения хранилища — null: /izbrannoe не мигает «пусто» перед списком. */
+export function useStoredFavorites(): readonly string[] | null {
+  return useSyncExternalStore<readonly string[] | null>(subscribe, read, () => null);
+}
+
+/** ЖК сняли с сайта или сменили адрес — убрать из избранного: счётчик в шапке = список на странице. */
+export function keepFavorites(valid: ReadonlySet<string>): void {
+  const current = read();
+  const next = current.filter((slug) => valid.has(slug));
+  if (next.length !== current.length) write(next);
+}
+
 /** Сердце: добавить или убрать; новые — в начало, не больше 30. */
 export function toggleFavorite(slug: string): void {
   if (!SLUG.test(slug)) return;

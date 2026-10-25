@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import { SitePhoto } from "@/components/SitePhoto";
 import type { SitePhotoData } from "@/lib/site/photo";
 import { track } from "@/lib/events/client";
+import { useBackdropClose } from "@/lib/ui/useBackdropClose";
 
 export type ShareData = { path: string; title: string; text: string; photo: SitePhotoData | null };
 
@@ -22,6 +23,7 @@ const COPIED_MS = 2_000;
 export function ShareDialog({ share, onClose }: ShareDialogProps) {
   const t = useTranslations("share");
   const dialog = useRef<HTMLDialogElement>(null);
+  const backdrop = useBackdropClose();
   const url = `${window.location.origin}${share.path}`;
   useEffect(() => {
     dialog.current?.showModal();
@@ -33,9 +35,8 @@ export function ShareDialog({ share, onClose }: ShareDialogProps) {
       className="share-dialog"
       aria-labelledby="share-dialog-title"
       onClose={onClose}
-      onClick={(event) => {
-        if (event.target === dialog.current) dialog.current.close();
-      }}
+      onPointerDown={backdrop.onPointerDown}
+      onClick={backdrop.onClick}
     >
       <div className="share-dialog__head">
         <h2 id="share-dialog-title" className="share-dialog__title">
@@ -100,7 +101,10 @@ function ShareUrl({ url }: { url: string }) {
           {copy === "done" ? t("copied") : t("copy")}
         </Button>
       </div>
-      {copy === "failed" ? <p className="share-dialog__hint">{t("copyFailed")}</p> : null}
+      {/* Итог «Скопировать» — и диктору: кнопка меняет подпись молча. */}
+      <p className={copy === "failed" ? "share-dialog__hint" : "sr-only"} role="status">
+        {copy === "failed" ? t("copyFailed") : copy === "done" ? t("copied") : ""}
+      </p>
     </>
   );
 }

@@ -85,7 +85,7 @@ async function StockTile({ sample }: HomeWhyProps) {
       ) : null}
       <Tile kicker={t("stockKicker")} title={t("stockTitle")} text={t("stockText")}>
         {sample ? (
-          <Button variant="outline" size="sm" href={complexRoute(sample.complex.slug)} className="home-why__cta">
+          <Button variant="outline" size="sm" href={`/${locale}${complexRoute(sample.complex.slug)}`} className="home-why__cta">
             <House size={16} aria-hidden="true" />
             {t("stockCta")}
           </Button>

@@ -2,7 +2,8 @@
 
 import { Tag, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type MouseEvent, type PointerEvent, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useBackdropClose } from "@/lib/ui/useBackdropClose";
 import { Button } from "@/components/Button";
 import { LeadForm, type LeadIntent } from "@/components/LeadForm";
 import { useSiteContacts } from "@/components/SiteContacts";
@@ -17,31 +18,6 @@ function useLeadTitle(intent: LeadIntent): string {
     return callbackMinutes ? t("callback", { minutes: callbackMinutes }) : t("callbackPlain");
   }
   return t(intent.type);
-}
-
-/** Точка за краем окна: target === dialog бывает и у его отступов. */
-function outsideBox(event: PointerEvent<HTMLDialogElement> | MouseEvent<HTMLDialogElement>): boolean {
-  const dialog = event.currentTarget;
-  if (event.target !== dialog) return false;
-  const box = dialog.getBoundingClientRect();
-  return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
-}
-
-/**
- * Нажатие по фону — закрыть, как .mdl-wrap мокапа: и нажатие, и отпускание — за краем окна.
- * Выделение текста в поле, отпущенное над фоном, окно не закрывает и введённое не теряет.
- */
-function useBackdropClose() {
-  const pressedOutside = useRef(false);
-  return {
-    onPointerDown: (event: PointerEvent<HTMLDialogElement>) => {
-      pressedOutside.current = outsideBox(event);
-    },
-    onClick: (event: MouseEvent<HTMLDialogElement>) => {
-      if (pressedOutside.current && outsideBox(event)) event.currentTarget.close();
-      pressedOutside.current = false;
-    },
-  };
 }
 
 /**

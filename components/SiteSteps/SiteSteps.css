@@ -1,13 +1,17 @@
-/* Шаги (мокап SitePartners .steps): колонки через пунктирную линию сверху и вертикальные
-   разделители; на телефоне — столбиком. Номер — Cormorant курсивом янтарным. */
+/* Шаги (мокап SitePartners .steps): в ряд — колонок столько, сколько шагов, между ними пунктир;
+   уже 981 px и в узкой колонке текста (list) — столбиком с пунктиром сверху. Номер — Cormorant
+   курсивом янтарным. */
 
 .site-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin: 0;
   padding: 0;
   border-top: 1px dashed var(--dash);
   list-style: none;
+}
+
+.site-steps--row {
+  grid-template-columns: repeat(var(--site-steps), minmax(0, 1fr));
 }
 
 .site-steps__item {
@@ -17,9 +21,17 @@
   padding: 28px 24px 8px 0;
 }
 
-.site-steps__item + .site-steps__item {
+.site-steps--row .site-steps__item + .site-steps__item {
   padding-left: 24px;
   border-left: 1px dashed var(--dash);
+}
+
+.site-steps--list .site-steps__item + .site-steps__item {
+  border-top: 1px dashed var(--dash);
+}
+
+.site-steps--list .site-steps__item {
+  padding: 20px 0;
 }
 
 .site-steps__number {
@@ -43,12 +55,12 @@
   line-height: var(--lh-body);
 }
 
-@media (max-width: 760px) {
-  .site-steps {
+@media (max-width: 980px) {
+  .site-steps--row {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .site-steps__item + .site-steps__item {
+  .site-steps--row .site-steps__item + .site-steps__item {
     padding-left: 0;
     border-top: 1px dashed var(--dash);
     border-left: 0;

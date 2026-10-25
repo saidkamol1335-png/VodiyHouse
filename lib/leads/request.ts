@@ -46,6 +46,18 @@ export type ParsedLead = { ok: true; lead: LeadPayload; trap: boolean } | { ok: 
 const text = (value: unknown, max: number): string =>
   typeof value === "string" ? value.replace(/\s+/g, " ").trim().slice(0, max) : "";
 
+/** Комментарий застройщика: строки сохраняются (их читают в Telegram и кабинете), пустых подряд — не больше одной. */
+const multiline = (value: unknown, max: number): string =>
+  typeof value === "string"
+    ? value
+        .replace(/\r\n?/g, "\n")
+        .replace(/[^\S\n]+/g, " ")
+        .replace(/ *\n */g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+        .slice(0, max)
+    : "";
+
 const oneOf = <T extends string>(value: unknown, options: readonly T[]): T | null =>
   typeof value === "string" && (options as readonly string[]).includes(value) ? (value as T) : null;
 
@@ -110,7 +122,7 @@ function payloadFrom(type: LeadType, raw: Partial<LeadRequest>): Record<string, 
         city: text(partner.city, NAME_MAX),
         format: text(partner.format, NAME_MAX),
         projects: text(partner.projects, NAME_MAX),
-        comment: text(partner.comment, COMMENT_MAX),
+        comment: multiline(partner.comment, COMMENT_MAX),
       },
     };
   }

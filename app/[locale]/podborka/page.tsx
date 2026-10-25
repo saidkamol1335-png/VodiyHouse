@@ -27,11 +27,13 @@ export async function generateMetadata({ searchParams }: PodborkaProps): Promise
   const lang = (isLocale(locale) ? locale : DEFAULT_LOCALE) as Locale;
   const complexes = complexesOf(catalog, podborkaSlugs(search.zhk));
   const cover = complexes[0]?.photos[0];
+  const names = complexes.map((complex) => complex.name[lang]).join(", ");
   return pageMetadata({
     locale: lang,
-    path: "/podborka",
+    // Адрес превью — с этими ЖК: мессенджеры, которые перечитывают og:url, соберут ту же подборку.
+    path: complexes.length > 0 ? `/podborka?zhk=${complexes.map((complex) => complex.slug).join(",")}` : "/podborka",
     title: t("metaTitle", { count: complexes.length }),
-    description: t("metaDescription", { names: complexes.map((complex) => complex.name[lang]).join(", ") }),
+    description: names ? t("metaDescription", { names }) : t("metaEmpty"),
     // Превью в Telegram — фото первого ЖК подборки (Ф7 A).
     image: cover
       ? { url: mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", cover.path), width: cover.width, height: cover.height, alt: t("title", { count: complexes.length }) }
