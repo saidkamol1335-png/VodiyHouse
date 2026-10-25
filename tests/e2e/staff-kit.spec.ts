@@ -61,7 +61,7 @@ test.describe("«Сотрудники» — список", () => {
       await page.waitForLoadState("networkidle");
       await page.evaluate(() => document.fonts.ready);
       const folder = `test-results/screens/${testInfo.project.name}`;
-      await page.screenshot({ path: `${folder}/staff-list-${theme}.png`, fullPage: true });
+      await page.screenshot({ caret: "initial", path: `${folder}/staff-list-${theme}.png`, fullPage: true });
     });
   }
 });
@@ -169,17 +169,17 @@ test.describe("«Сотрудники» — действия", () => {
     await page.getByRole("button", { name: "Создать и показать пароль" }).click();
     await expect(page.locator(".staff-create .field__error").first()).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${folder}/staff-create-errors.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `${folder}/staff-create-errors.png`, fullPage: true });
 
     await page.getByLabel("Имя и фамилия").fill("Азиз Рахимов");
     await page.getByLabel("Email для входа").fill("aziz.new@example.com");
     await page.getByRole("button", { name: "Создать и показать пароль" }).click();
     await expect(page.locator(".staff-password")).toBeVisible();
-    await page.screenshot({ path: `${folder}/staff-password.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `${folder}/staff-password.png`, fullPage: true });
 
     await page.locator(".staff-password").getByRole("button", { name: "Готово" }).click();
     await row(page, "Дилноза Юсупова").getByRole("button", { name: "Отключить" }).click();
     await expect(row(page, "Дилноза Юсупова").locator(".staff-actions__confirm")).toBeVisible();
-    await page.screenshot({ path: `${folder}/staff-confirm.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `${folder}/staff-confirm.png`, fullPage: true });
   });
 });

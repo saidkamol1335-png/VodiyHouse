@@ -75,7 +75,7 @@ test.describe("первая смена пароля", () => {
       await expect(fieldErrors(page)).toHaveCount(1);
       await page.evaluate(() => document.fonts.ready);
       const folder = `test-results/screens/${testInfo.project.name}`;
-      await page.screenshot({ path: `${folder}/password-change-${theme}.png`, fullPage: true });
+      await page.screenshot({ caret: "initial", path: `${folder}/password-change-${theme}.png`, fullPage: true });
     });
   }
 });

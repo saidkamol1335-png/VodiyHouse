@@ -614,23 +614,23 @@ test.describe("кабинет · ЖК · список квартир", () => {
     await page.clock.setFixedTime(new Date("2026-10-21T09:46:00Z"));
     await open(page);
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${dir}/s12-list.png`, fullPage: false });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-list.png`, fullPage: false });
     await statusButtons(page, "свободна").first().click();
     await page.locator(".unit-status-picker").getByRole("button", { name: "бронь" }).click();
     await statusButtons(page, "продана").nth(2).click();
     await expect(bar(page)).not.toContainText("Сохраняем");
-    await page.screenshot({ path: `${dir}/s12-status.png`, fullPage: false });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-status.png`, fullPage: false });
     if (isMobile(page)) {
       await open(page);
       await openFilters(page);
-      await page.screenshot({ path: `${dir}/s12-list-filters.png`, fullPage: false });
+      await page.screenshot({ caret: "initial", path: `${dir}/s12-list-filters.png`, fullPage: false });
     }
     // Ключ — как у приложения (THEME_STORAGE_KEY), атрибут — чтобы не перезагружать страницу.
     await page.evaluate(() => {
       localStorage.setItem("vh-theme", "dark");
       document.documentElement.dataset.theme = "dark";
     });
-    await page.screenshot({ path: `${dir}/s12-list-dark.png`, fullPage: false });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-list-dark.png`, fullPage: false });
   });
 
   // Ноутбук 1366 и 1280 — таблица: «Планировке» остаётся место, строка не рвётся по буквам
@@ -660,6 +660,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
       }
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({
+      caret: "initial",
         path: `test-results/screens/${testInfo.project.name}/s12-list-${width}.png`,
       });
     });

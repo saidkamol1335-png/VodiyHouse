@@ -459,19 +459,19 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await step(page, "Цена");
     await bulk(page).getByText("за м²", { exact: true }).click();
     await bulk(page).getByLabel("Цена за м², $").fill("650");
-    await page.screenshot({ path: `${dir}/s12-bulk-price.png` });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-bulk-price.png` });
     await bulk(page).getByRole("button", { name: "Снять выделение" }).click();
     await rowOf(page, "3")
       .getByRole("button", { name: /Статус и правка/ })
       .click();
     await page.getByRole("button", { name: "Изменить квартиру" }).click();
-    await page.screenshot({ path: `${dir}/s12-edit.png` });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-edit.png` });
     await page.getByRole("button", { name: "Отмена" }).click();
     await page.getByRole("button", { name: "+ Квартира" }).click();
     await page.getByRole("form", { name: "Новая квартира" }).scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `${dir}/s12-add.png` });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-add.png` });
     await page.getByRole("button", { name: "Удалить список блока" }).click();
     await page.getByLabel("Введите название блока: A").scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `${dir}/s12-remove-list.png` });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-remove-list.png` });
   });
 });

@@ -3,7 +3,7 @@ import { collectPageErrors } from "./helpers";
 
 // Шапка по решениям Ш1–Ш6 (docs/design-decisions.md). Скриншоты — test-results/screens/header/.
 const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `test-results/screens/header/${name}.png` });
+  page.screenshot({ caret: "initial", path: `test-results/screens/header/${name}.png` });
 
 test.describe("шапка · десктоп 1440", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "только десктоп");

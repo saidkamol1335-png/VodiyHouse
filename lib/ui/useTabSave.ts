@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import type { FormAction } from "@/lib/admin/developers/types";
 import { settle } from "./settle";
 import { submitKeepingForm } from "./submitKeepingForm";
@@ -23,8 +23,16 @@ export function useTabSave<R extends TabResult>(action: FormAction<R>, unsavedMe
   );
   const savedAt = state.status === "saved" ? state.at : null;
   const { reset } = guard;
+  // Правка во время сохранения в него не попала: после «Сохранено» она остаётся несохранённой,
+  // и «Уйти без сохранения?» должно сработать.
+  const editedDuringSave = useRef(false);
   useEffect(() => {
-    if (savedAt) reset();
+    if (savedAt && !editedDuringSave.current) reset();
+    editedDuringSave.current = false;
   }, [savedAt, reset]);
-  return { state, pending, savedAt, dirty: guard.dirty, onSubmit: submitKeepingForm(formAction), onInput: guard.onInput };
+  const onInput = () => {
+    if (pending) editedDuringSave.current = true;
+    guard.onInput();
+  };
+  return { state, pending, savedAt, dirty: guard.dirty, onSubmit: submitKeepingForm(formAction), onInput };
 }

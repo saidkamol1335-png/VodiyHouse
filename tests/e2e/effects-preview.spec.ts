@@ -38,6 +38,7 @@ test.describe("базовые эффекты", () => {
       await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.35);
       await page.waitForTimeout(500);
       await page.locator(".effects-preview__cards").screenshot({
+      caret: "initial",
         path: `test-results/screens/effects/spotlight-${motion}.png`,
       });
     }

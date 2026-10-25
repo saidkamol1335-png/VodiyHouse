@@ -118,6 +118,7 @@ test.describe("подготовка фото перед загрузкой", () 
       .click({ position: { x: box.width * 0.2, y: box.height * 0.25 } });
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({
+      caret: "initial",
       path: `test-results/screens/${testInfo.project.name}/dev-media.png`,
       fullPage: true,
     });

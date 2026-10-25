@@ -431,7 +431,7 @@ test.describe("кабинет · главная · остатки по ЖК", ()
       const suffix = theme === "dark" ? "-dark" : "";
       // Раскрытие и уход наведения — без середины перехода на снимке.
       const shoot = (name: string) =>
-        page.screenshot({ path: `${dir}/${name}.png`, fullPage: true, animations: "disabled" });
+        page.screenshot({ caret: "initial", path: `${dir}/${name}.png`, fullPage: true, animations: "disabled" });
       await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
       await page.clock.setFixedTime(new Date("2026-10-22T09:46:00Z"));
       await open(page);
@@ -462,11 +462,11 @@ test.describe("кабинет · главная · остатки по ЖК", ()
       await open(page, `${HEAD}?demo=fail`);
       await page.clock.runFor(185_000);
       await expect(live(page)).toHaveClass(/live-status--stale/);
-      await page.screenshot({ path: `${dir}/s13-home-stale${suffix}.png` });
+      await page.screenshot({ caret: "initial", path: `${dir}/s13-home-stale${suffix}.png` });
       await open(page, `${HEAD}?demo=change&motion=full`);
       await page.clock.runFor(65_000);
       await expect(badge(page, "Shodlik")).toHaveClass(/--flash/);
-      await page.screenshot({ path: `${dir}/s13-home-flash${suffix}.png` });
+      await page.screenshot({ caret: "initial", path: `${dir}/s13-home-flash${suffix}.png` });
     });
   }
 });

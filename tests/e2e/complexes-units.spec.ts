@@ -254,12 +254,12 @@ test.describe("кабинет · ЖК · квартиры", () => {
     await position(page, 1).getByLabel("Планировка").selectOption({ label: "Студия · 34,2 м²" });
     await position(page, 1).getByRole("button", { name: "+ Уточнить для подъезда" }).click();
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${dir}/s12-generator.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-generator.png`, fullPage: true });
 
     await open(page, SHODLIK);
     await page.getByRole("button", { name: /Стояки ·/ }).click();
     await position(page, 2).getByRole("button", { name: "+ Разделить по этажам" }).click();
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${dir}/s12-risers.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `${dir}/s12-risers.png`, fullPage: true });
   });
 });

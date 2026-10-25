@@ -29,6 +29,6 @@ test.describe("кабинет · контакты Vodiy House", () => {
     await expect(page.locator("#contacts-hours-error")).toHaveText("Нужен текст на узбекском");
     await expect(page.getByLabel("Общий телефон")).toHaveValue("+7 900 123 45 67");
     await expect(page.getByLabel("Общий телефон")).toHaveAttribute("aria-invalid", "true");
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s31-contacts-errors.png`, fullPage: true });
+    await page.screenshot({ caret: "initial", path: `test-results/screens/${test.info().project.name}/s31-contacts-errors.png`, fullPage: true });
   });
 });

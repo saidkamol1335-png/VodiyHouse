@@ -35,7 +35,7 @@ test.describe("события сайта → «Сейчас на сайте»", 
     await expect(panel.getByText("Избранное · ЖК Shodlik").first()).toBeVisible({ timeout: 15_000 });
     await expect(panel.getByText("e2e_events · компьютер").first()).toBeVisible();
     await expect(panel).toContainText(/онлайн: [1-9]/i);
-    await admin.screenshot({ path: `test-results/screens/${testInfo.project.name}/s312-site-now.png` });
+    await admin.screenshot({ caret: "initial", path: `test-results/screens/${testInfo.project.name}/s312-site-now.png` });
     await cabinet.close();
   });
 
