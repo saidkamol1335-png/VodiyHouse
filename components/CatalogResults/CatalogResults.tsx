@@ -8,7 +8,6 @@ import { Button } from "@/components/Button";
 import { CatalogFilter } from "@/components/CatalogFilter";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { useLeadOpener } from "@/components/LeadDialog";
-import type { LeadIntent } from "@/components/LeadForm";
 import { SelectField } from "@/components/SelectField";
 import { getMotionTier } from "@/lib/motion";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
@@ -16,7 +15,7 @@ import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
 import { CATALOG_PENDING_ATTRIBUTE } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog } from "@/lib/site/catalog/sort";
-import { track } from "@/lib/events/client";
+import { pickIntent, useFilterTracking, useFocusOnMore } from "./results";
 
 type CatalogResultsProps = {
   catalog: SiteCatalog;
@@ -99,50 +98,10 @@ type ResultsListProps = {
   onReset: () => void;
 };
 
-/**
- * «Подберём вручную» (ТЗ 10.1): заявка «Подбор» с фильтрами — текстом для менеджера («rooms 2,
- * price_max 60000») и ссылкой на ту же выдачу.
- */
-/** Фильтр текстом: «komnat 2, do 45000» — для заявки «Подбор» и ленты «Сейчас на сайте». */
-function filterText(filter: Filter): string {
-  return [...new URLSearchParams(searchFromFilter(filter))].map(([key, value]) => `${key} ${value}`).join(", ");
-}
-
-function pickIntent(filter: Filter): LeadIntent {
-  return { type: "pick", filters: { text: filterText(filter), link: `${window.location.pathname}${searchFromFilter(filter)}` } };
-}
-
-const FILTER_TRACK_MS = 1500;
-
-/**
- * Событие «фильтр» — после паузы в выборе: каждая нажатая пилюля не становится отдельным событием.
- * Что выбрано, кабинет читает из адреса события (параметры каталога), текста от браузера нет. Ушли
- * со страницы раньше паузы — событие уходит сразу, с адресом каталога, а не новой страницы.
- */
-function useFilterTracking() {
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const pending = useRef<string | null>(null);
-  const send = () => {
-    if (pending.current) track("filter", { path: pending.current });
-    pending.current = null;
-  };
-  useEffect(
-    () => () => {
-      clearTimeout(timer.current);
-      send();
-    },
-    [],
-  );
-  return (next: Filter) => {
-    clearTimeout(timer.current);
-    pending.current = filterText(next) ? `${window.location.pathname}${searchFromFilter(next)}` : null;
-    if (pending.current) timer.current = setTimeout(send, FILTER_TRACK_MS);
-  };
-}
-
 /** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
 function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, onMore, onReset }: ResultsListProps) {
   const t = useTranslations("catalog.filter");
+  const { list, more } = useFocusOnMore(shown, onMore);
   if (found.length === 0) {
     return (
       <div className="catalog-results__empty">
@@ -159,10 +118,12 @@ function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, on
   }
   return (
     <>
-      <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} />
+      <div ref={list}>
+        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} />
+      </div>
       {found.length > shown ? (
         <div className="catalog-results__more">
-          <Button variant="outline" onClick={onMore}>
+          <Button variant="outline" onClick={more}>
             {t("more", { n: Math.min(pageSize, found.length - shown) })}
           </Button>
         </div>

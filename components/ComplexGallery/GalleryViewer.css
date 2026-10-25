@@ -66,9 +66,14 @@
   transform: translateY(-50%);
 }
 
-.complex-viewer__nav:disabled {
+/* Крайняя стрелка — aria-disabled: фокус остаётся на ней (приглушённой), мышью не видна. */
+.complex-viewer__nav[aria-disabled="true"] {
   opacity: 0;
-  pointer-events: none;
+  cursor: default;
+}
+
+.complex-viewer__nav[aria-disabled="true"]:focus-visible {
+  opacity: var(--opacity-unavailable);
 }
 
 .complex-viewer__nav--prev {

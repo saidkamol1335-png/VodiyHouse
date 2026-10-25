@@ -29,9 +29,15 @@ export function localizedPath(locale: Locale, path: string): string {
 
 export type PageImage = { url: string; width: number; height: number; alt: string };
 
+/**
+ * Версия картинки превью: Telegram и Facebook кэшируют превью по адресу — после смены её дизайна
+ * поднять номер, иначе ссылки покажут старую.
+ */
+const PREVIEW_VERSION = 1;
+
 /** Картинка превью сайта — app/[locale]/opengraph-image.tsx (1200 × 630). */
 export function defaultImage(locale: Locale): PageImage {
-  return { url: `/${locale}/opengraph-image`, width: 1200, height: 630, alt: SITE_NAME };
+  return { url: `/${locale}/opengraph-image?v=${PREVIEW_VERSION}`, width: 1200, height: 630, alt: SITE_NAME };
 }
 
 export type PageMetaInput = {

@@ -134,6 +134,13 @@ function photoFrom(record: PhotoRecord): CatalogPhoto {
   return { ...rest, focus: { x: Number(focus_x), y: Number(focus_y) } };
 }
 
+/**
+ * Размытое превью — только у обложки и следующего кадра (первое листание): остальные кадры карточки
+ * грузятся после первого касания галереи. Каталог уходит в браузер целиком, а превью — ~500 байт на
+ * фото: с 30 ЖК по 5 фото это ~75 КБ лишнего на каждой странице с каталогом.
+ */
+const BLUR_PHOTOS = 2;
+
 function complexFrom(record: ComplexRecord): CatalogComplex {
   const { developer_id, minutes_to_center, created_at, photos, blocks, ...rest } = record;
   return {
@@ -141,7 +148,7 @@ function complexFrom(record: ComplexRecord): CatalogComplex {
     developerId: developer_id,
     minutesToCenter: minutes_to_center,
     createdAt: created_at,
-    photos: photos.map(photoFrom),
+    photos: photos.map((photo, index) => ({ ...photoFrom(photo), ...(index < BLUR_PHOTOS ? {} : { blur: null }) })),
     blocks: blocks.map(blockFrom),
   };
 }

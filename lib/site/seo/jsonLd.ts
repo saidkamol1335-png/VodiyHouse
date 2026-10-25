@@ -1,7 +1,7 @@
 import type { Currency } from "@/lib/calc/money";
 import type { SiteContacts } from "@/lib/contacts";
 import type { Locale } from "@/lib/i18n/routing";
-import { SITE_NAME } from "@/lib/site/metadata";
+import { defaultImage, SITE_NAME } from "@/lib/site/metadata";
 
 // schema.org для поиска (шаг 3.14): агентство — на главной, ЖК с ценой «от» и крошками — на странице
 // ЖК. Контакты — только Vodiy House (правило ТЗ 1.2): у ЖК нет ни телефона, ни сайта застройщика.
@@ -25,7 +25,7 @@ export function agencyLd(input: { origin: string; locale: Locale; office: string
     name: SITE_NAME,
     url: `${origin}/${locale}`,
     logo: `${origin}/icon.svg`,
-    image: `${origin}/${locale}/opengraph-image`,
+    image: `${origin}${defaultImage(locale).url}`,
     address: { "@type": "PostalAddress", streetAddress: office, addressLocality: CITY[locale], addressRegion: REGION[locale], addressCountry: "UZ" },
     areaServed: { "@type": "AdministrativeArea", name: REGION[locale] },
     ...(contacts.phone ? { telephone: contacts.phone } : {}),

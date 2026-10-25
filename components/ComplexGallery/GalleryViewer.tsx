@@ -84,10 +84,10 @@ function ViewerArrows({ current, total, goTo }: { current: number; total: number
   const t = useTranslations("complex.gallery");
   return (
     <>
-      <button type="button" className="complex-viewer__nav complex-viewer__nav--prev" aria-label={t("prev")} onClick={() => goTo(current - 1)} disabled={current === 0}>
+      <button type="button" className="complex-viewer__nav complex-viewer__nav--prev" aria-label={t("prev")} onClick={() => current > 0 && goTo(current - 1)} aria-disabled={current === 0}>
         <ChevronLeft size={22} aria-hidden />
       </button>
-      <button type="button" className="complex-viewer__nav complex-viewer__nav--next" aria-label={t("next")} onClick={() => goTo(current + 1)} disabled={current >= total - 1}>
+      <button type="button" className="complex-viewer__nav complex-viewer__nav--next" aria-label={t("next")} onClick={() => current < total - 1 && goTo(current + 1)} aria-disabled={current >= total - 1}>
         <ChevronRight size={22} aria-hidden />
       </button>
     </>

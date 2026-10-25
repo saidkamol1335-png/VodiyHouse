@@ -129,8 +129,8 @@ function GalleryControls({ photos, current, goTo }: GalleryControlsProps) {
         type="button"
         className="complex-gallery__nav complex-gallery__nav--prev"
         aria-label={t("prev")}
-        onClick={() => goTo(current - 1)}
-        disabled={current === 0}
+        onClick={() => current > 0 && goTo(current - 1)}
+        aria-disabled={current === 0}
       >
         <ChevronLeft size={18} strokeWidth={2} aria-hidden />
       </button>
@@ -138,8 +138,8 @@ function GalleryControls({ photos, current, goTo }: GalleryControlsProps) {
         type="button"
         className="complex-gallery__nav complex-gallery__nav--next"
         aria-label={t("next")}
-        onClick={() => goTo(current + 1)}
-        disabled={current >= photos.length - 1}
+        onClick={() => current < photos.length - 1 && goTo(current + 1)}
+        aria-disabled={current >= photos.length - 1}
       >
         <ChevronRight size={18} strokeWidth={2} aria-hidden />
       </button>

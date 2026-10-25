@@ -9,8 +9,12 @@ import { parseLayoutsLink, type LayoutsTarget } from "@/lib/site/complex/layouts
 
 type OpenCalc = { layoutId: string; screen: FlatCalcScreen; round: number };
 
-/** Калькулятор квартиры — отдельным чанком: страница ЖК не тянет его, пока расчёт не нужен. */
-export const loadFlatCalculator = () => import("@/components/FlatCalculator").then((module) => module.FlatCalculator);
+/**
+ * Калькулятор квартиры — отдельным чанком вместе со своими стилями (app/calc.css): страница ЖК не
+ * тянет ни код, ни ~8 КБ стилей до первого «Рассчитать платёж» — стили не блокируют первый экран.
+ */
+export const loadFlatCalculator = () =>
+  Promise.all([import("@/components/FlatCalculator"), import("@/app/calc.css")]).then(([module]) => module.FlatCalculator);
 
 /**
  * Расчёт планировки: данные — по нажатию (site_layout_calc), ошибка и сбой сети — у кнопки этой

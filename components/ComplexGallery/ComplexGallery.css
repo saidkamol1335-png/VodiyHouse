@@ -65,9 +65,15 @@
   cursor: pointer;
 }
 
-.complex-gallery__nav:disabled {
+/* Крайняя стрелка — aria-disabled, а не disabled: фокус с клавиатуры остаётся на ней (видна
+   приглушённой), мышью — прячется, как в мокапе. */
+.complex-gallery__nav[aria-disabled="true"] {
   opacity: 0;
-  pointer-events: none;
+  cursor: default;
+}
+
+.complex-gallery__nav[aria-disabled="true"]:focus-visible {
+  opacity: var(--opacity-unavailable);
 }
 
 .complex-gallery__nav--prev {

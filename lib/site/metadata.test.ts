@@ -21,7 +21,7 @@ describe("pageMetadata", () => {
     });
     expect(meta.openGraph).toMatchObject({ url: "/ru/kalkulyator", locale: "ru_RU", alternateLocale: ["uz_UZ"] });
     // Своя секция openGraph затирает картинку раздела — картинка сайта стоит явно.
-    expect(meta.openGraph).toMatchObject({ images: [{ url: "/ru/opengraph-image", width: 1200, height: 630 }] });
+    expect(meta.openGraph).toMatchObject({ images: [{ url: "/ru/opengraph-image?v=1", width: 1200, height: 630 }] });
     expect(meta.robots).toBeUndefined();
   });
 

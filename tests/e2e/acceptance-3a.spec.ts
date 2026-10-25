@@ -30,6 +30,8 @@ test.describe("приёмка 3а · ТЗ 17.1", () => {
   test("навигатор ЖК: переход к разделу без перезагрузки, раздел подсвечен", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru/novostroyki/demo-shodlik");
+    // Навигатор прокручивает своим обработчиком — нажатие до гидратации было бы обычной ссылкой.
+    await page.waitForLoadState("networkidle");
     await page.evaluate(() => Object.assign(window, { e2eSamePage: true }));
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
     await nav.getByRole("link", { name: "Документы" }).click();

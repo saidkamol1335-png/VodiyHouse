@@ -101,7 +101,8 @@
   right: 10px;
 }
 
-.catalog-card__media:hover .catalog-card__nav:not(:disabled),
+/* Крайняя стрелка — aria-disabled, а не disabled: фокус с клавиатуры не уходит в body. */
+.catalog-card__media:hover .catalog-card__nav:not([aria-disabled="true"]),
 .catalog-card__nav:focus-visible {
   opacity: 1;
 }

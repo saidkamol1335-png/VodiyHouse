@@ -58,10 +58,10 @@ export function CardMedia({ photos, alt, preload, badges, tools }: CardMediaProp
       {tools ? <div className="catalog-card__tools">{tools}</div> : null}
       {photos.length > 1 ? (
         <>
-          <button type="button" className="catalog-card__nav catalog-card__nav--prev" aria-label={t("prevPhoto")} onClick={() => go(-1)} disabled={current === 0}>
+          <button type="button" className="catalog-card__nav catalog-card__nav--prev" aria-label={t("prevPhoto")} onClick={() => go(-1)} aria-disabled={current === 0}>
             <ChevronLeft size={18} strokeWidth={2} aria-hidden />
           </button>
-          <button type="button" className="catalog-card__nav catalog-card__nav--next" aria-label={t("nextPhoto")} onClick={() => go(1)} disabled={current >= photos.length - 1}>
+          <button type="button" className="catalog-card__nav catalog-card__nav--next" aria-label={t("nextPhoto")} onClick={() => go(1)} aria-disabled={current >= photos.length - 1}>
             <ChevronRight size={18} strokeWidth={2} aria-hidden />
           </button>
           <div className="catalog-card__dots" role="img" aria-label={t("photo", { n: current + 1, total: photos.length })}>
