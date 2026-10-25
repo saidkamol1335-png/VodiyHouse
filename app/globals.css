@@ -47,6 +47,7 @@
 /* Компоненты (БЭМ) — по одному файлу на блок. Здесь — только общие для сайта и кабинета;
    остальные — в файлах разделов (site.css, admin.css, cabinet.css, dev.css), их подключают
    корневые layout. Новый блок — в файл того раздела, где он показывается. */
+@import "../components/Badge/Badge.css";
 @import "../components/BackgroundColumns/BackgroundColumns.css";
 @import "../components/Beam/Beam.css";
 @import "../components/Button/Button.css";

@@ -53,3 +53,7 @@ export const SITE_SHELL_MESSAGES = ["nav", "header", "contacts", "footer"] as co
 export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
   return pickMessages(messages, SITE_SHELL_MESSAGES);
 }
+
+/** Каталог (шаг 3.4): свой провайдер заменяет набор целиком — тексты оболочки внутри тоже нужны. */
+export const CATALOG_NAMESPACE = "catalog";
+export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

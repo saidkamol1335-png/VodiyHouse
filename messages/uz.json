@@ -281,5 +281,54 @@
     "copyUrl": "Nusxalash",
     "copied": "Nusxalandi",
     "copyFailed": "Nusxalanmadi"
+  },
+  "catalog": {
+    "card": {
+      "name": "{name} TJM",
+      "class": {
+        "econom": "Ekonom",
+        "comfort": "Komfort",
+        "business": "Biznes",
+        "premium": "Premium"
+      },
+      "verified": "Vodiy House tekshirgan",
+      "landmark": "Mo‘ljal: {mark}",
+      "toCenter": "markazgacha {n} daq.",
+      "deadline": "Topshirish",
+      "built": "Topshirilgan",
+      "quarter": "{year}-yil {q}-chorak",
+      "partBuilt": "Topshirilganlari bor · qolganlari {q} gacha",
+      "floors": "{n} qavat",
+      "rooms": {
+        "0": "Studiya",
+        "1": "1 xonali",
+        "2": "2 xonali",
+        "3": "3 xonali",
+        "4": "4 xonali",
+        "more": "{n} xonali"
+      },
+      "typeFrom": "{rooms} {area} dan",
+      "left": "{n} ta qoldi",
+      "leftUnknown": "sotuvda bor",
+      "leftNone": "mavjud emas",
+      "payFull": "100% to‘lov",
+      "installmentUpTo": "{n} oygacha muddatli to‘lov",
+      "priceFrom": "{price} dan",
+      "perM2From": "{price}/m² dan",
+      "priceOnRequest": "Narxi so‘rov bo‘yicha",
+      "monthlyFrom": "To‘lov oyiga {price} dan",
+      "photo": "{total} tadan {n}-surat",
+      "prevPhoto": "Oldingi surat",
+      "nextPhoto": "Keyingi surat"
+    },
+    "page": {
+      "eyebrow": "Loyihalar",
+      "title": "Barcha ",
+      "titleAccent": "yangi uylar",
+      "metaTitle": "Farg‘ona viloyati yangi uylari — TJM katalogi · Vodiy House",
+      "metaDescription": "Farg‘ona va viloyatdagi barcha yangi uylar: quruvchi narxlari, bo‘sh kvartiralar, muddatli to‘lov va ipoteka. Xaridor uchun — bepul.",
+      "found": "{n} ta TJM topildi",
+      "unavailable": "Katalog tez orada paydo bo‘ladi. Kvartirani qo‘lda tanlab beramiz — Vodiy House bilan bog‘laning."
+    }
   }
 }

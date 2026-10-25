@@ -29,6 +29,9 @@
   --fs-h3: 20px;
   --fs-menu: 25px; /* пункты меню телефона */
   --fs-kpi: 30px;
+  --fs-card-name: 21px; /* название ЖК на карточке */
+  --fs-card-name-phone: 20px;
+  --fs-card-price: 25px; /* «от $31 000» на карточке */
   --fs-footer-promise-phone: 24px; /* обещание подвала на телефоне (мокап .ftr__big) */
   --fs-stat: 34px;
   --fs-h2: clamp(30px, 3.05vw, 46px);
@@ -58,6 +61,7 @@
   --ls-admin-title: -0.03em; /* заголовок страницы кабинета (--fs-admin-title) */
   --ls-panel-title: -0.015em; /* заголовок панели и списка кабинета (--fs-h4 / 700) */
   --ls-h4: -0.012em;
+  --ls-card-name: -0.028em;
   --ls-footer-promise: -0.035em; /* обещание подвала (мокап .ftr__big) */
   --fs-brand: 17px; /* «Vodiy House» (дизайн-решение: логотип 17 px / 700) */
   --fs-segment-s: 12px; /* маленький сегмент (строка таблицы) */
@@ -70,6 +74,7 @@
   --r-xl: 24px;
   --r-2xl: 28px;
   --r-pill: 999px;
+  --r-card: 22px; /* карточка ЖК каталога (мокап .jc) */
 
   /* ---------- раскладка ---------- */
   --container: 1280px;
@@ -283,6 +288,14 @@
   --admin-strip-h: 57px;
   --admin-content-pad: 30px;
   --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.216));
+  /* карточка ЖК каталога (мокап .t-light .jc) */
+  --card-bg: #ffffff;
+  --card-border: rgba(40, 28, 12, 0.09);
+  --card-shadow: 0 1px 2px rgba(40, 28, 12, 0.04), 0 10px 28px rgba(40, 28, 12, 0.05);
+  --card-shadow-hover: 0 2px 4px rgba(40, 28, 12, 0.05), 0 22px 44px rgba(40, 28, 12, 0.11);
+  --card-chip-bg: rgba(255, 255, 255, 0.92);
+  --card-dot: rgba(255, 255, 255, 0.5);
+  --card-dot-on: #ffffff;
 
   /* ---------- экран входа (К1) ---------- */
   --login-card-w: 440px;
@@ -417,6 +430,11 @@
   --chip-on-border: var(--amber);
   --chip-on-ring: 0 0 0 1px rgba(248, 155, 13, 0.25) inset, 0 0 22px rgba(248, 155, 13, 0.3);
   --panel-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.04), rgba(255, 240, 220, 0.012));
+  --card-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.045), rgba(255, 240, 220, 0.012));
+  --card-border: var(--line);
+  --card-shadow: none;
+  --card-shadow-hover: 0 22px 44px rgba(0, 0, 0, 0.35);
+  --card-chip-bg: rgba(15, 12, 8, 0.62);
   --live-dot: var(--ok);
   --live-dot-glow: 0 0 10px var(--ok);
 

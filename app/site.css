@@ -1,6 +1,8 @@
 /* Публичный сайт: блоки, которых нет в кабинете. Подключает app/[locale]/layout.tsx
    (и global-not-found.tsx). Общее с кабинетом — в globals.css, он грузится раньше. */
 
+@import "../components/CatalogCard/CatalogCard.css";
+@import "../components/CatalogGrid/CatalogGrid.css";
 @import "../components/Container/Container.css";
 @import "../components/Eyebrow/Eyebrow.css";
 @import "../components/HeaderNav/HeaderNav.css";

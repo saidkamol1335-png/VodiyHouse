@@ -209,9 +209,11 @@ export function formatAmount(amount: number): string {
   return DECIMAL.format(amount);
 }
 
-/** «42,5 м²» — площадь планировки (как подпись базы в журнале). */
-export function formatArea(area: number): string {
-  return `${DECIMAL.format(area)} м²`;
+const SQUARE_METRE: Readonly<Record<Locale, string>> = { ru: "м²", uz: "m²" };
+
+/** «42,5 м²» — площадь планировки (как подпись базы в журнале); на /uz — «42,5 m²». */
+export function formatArea(area: number, locale: Locale = "ru"): string {
+  return `${DECIMAL.format(area)} ${SQUARE_METRE[locale]}`;
 }
 
 /** «$620/м²», «4 100 000 сум/м²» — цена за м² квартиры (Н3). */

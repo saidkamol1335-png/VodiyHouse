@@ -1946,5 +1946,54 @@
     "copyUrl": "Скопировать",
     "copied": "Скопировано",
     "copyFailed": "Не скопировалось"
+  },
+  "catalog": {
+    "card": {
+      "name": "ЖК {name}",
+      "class": {
+        "econom": "Эконом",
+        "comfort": "Комфорт",
+        "business": "Бизнес",
+        "premium": "Премиум"
+      },
+      "verified": "Проверено Vodiy House",
+      "landmark": "Ориентир: {mark}",
+      "toCenter": "до центра {n} мин",
+      "deadline": "Сдача",
+      "built": "Сдан",
+      "quarter": "{q} кв. {year}",
+      "partBuilt": "Есть сданные · остальные до {q}",
+      "floors": "{n, plural, one {# этаж} few {# этажа} many {# этажей} other {# этажа}}",
+      "rooms": {
+        "0": "Студия",
+        "1": "1-комн.",
+        "2": "2-комн.",
+        "3": "3-комн.",
+        "4": "4-комн.",
+        "more": "{n}-комн."
+      },
+      "typeFrom": "{rooms} от {area}",
+      "left": "осталось {n}",
+      "leftUnknown": "есть в продаже",
+      "leftNone": "нет в наличии",
+      "payFull": "100% оплата",
+      "installmentUpTo": "Рассрочка до {n} мес.",
+      "priceFrom": "от {price}",
+      "perM2From": "от {price}/м²",
+      "priceOnRequest": "Цена по запросу",
+      "monthlyFrom": "Платёж от {price}/мес",
+      "photo": "Фото {n} из {total}",
+      "prevPhoto": "Предыдущее фото",
+      "nextPhoto": "Следующее фото"
+    },
+    "page": {
+      "eyebrow": "Проекты",
+      "title": "Все ",
+      "titleAccent": "новостройки",
+      "metaTitle": "Новостройки Ферганской области — каталог ЖК · Vodiy House",
+      "metaDescription": "Все новостройки Ферганы и области: цены от застройщика, наличие квартир, рассрочка и ипотека. Для покупателя — бесплатно.",
+      "found": "{n, plural, one {Найден # ЖК} few {Найдено # ЖК} many {Найдено # ЖК} other {Найдено # ЖК}}",
+      "unavailable": "Каталог скоро появится. Подберём квартиру вручную — свяжитесь с Vodiy House."
+    }
   }
 }

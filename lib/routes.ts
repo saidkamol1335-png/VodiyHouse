@@ -12,8 +12,11 @@ export const ROUTES = {
   privacy: "/privacy",
 } as const;
 
+/** Страница ЖК — внутри каталога: адрес ЖК не столкнётся с адресами разделов (реши сам, фаза 3). */
+export const complexRoute = (slug: string) => `${ROUTES.catalog}/${slug}`;
+
 /** Публичные страницы, которые уже есть в коде. Остальные адреса шапки — разделы фазы 3. */
-const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home, ROUTES.calculator]);
+const READY_ROUTES: ReadonlySet<string> = new Set([ROUTES.home, ROUTES.calculator, ROUTES.catalog]);
 
 export function isRouteReady(pathname: string | null | undefined): boolean {
   return typeof pathname === "string" && READY_ROUTES.has(pathname);

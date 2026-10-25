@@ -1,0 +1,316 @@
+/* Карточка ЖК каталога (мокап .jc): белая поверхность, фото 4:3 со скруглением, тело с пунктирными
+   строками типов; цена и кнопка прижаты к низу — карточки в ряду одной высоты. */
+.catalog-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.catalog-card__media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-m);
+  background: var(--bg-4);
+}
+
+.catalog-card__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.catalog-card__track::-webkit-scrollbar {
+  display: none;
+}
+
+.catalog-card__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.catalog-card__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 70%;
+}
+
+.catalog-card__class {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--card-chip-bg);
+  color: var(--fg);
+  font-size: var(--fs-caption);
+  font-weight: 650;
+}
+
+.catalog-card__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card-chip-bg);
+  color: var(--fg);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity var(--dur-base) ease-out;
+  cursor: pointer;
+}
+
+.catalog-card__nav--prev {
+  left: 10px;
+}
+
+.catalog-card__nav--next {
+  right: 10px;
+}
+
+.catalog-card__media:hover .catalog-card__nav:not(:disabled),
+.catalog-card__nav:focus-visible {
+  opacity: 1;
+}
+
+.catalog-card__dots {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.catalog-card__dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--card-dot);
+  transition: width var(--dur-base) var(--ease);
+}
+
+.catalog-card__dot--on {
+  width: 16px;
+  border-radius: 4px;
+  background: var(--card-dot-on);
+}
+
+.catalog-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 8px 8px;
+}
+
+.catalog-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+}
+
+.catalog-card__developer {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.catalog-card__verified {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: var(--on-amber);
+}
+
+.catalog-card__name {
+  margin: 0;
+  font-size: var(--fs-card-name);
+  font-weight: 650;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-card-name);
+}
+
+.catalog-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Вся карточка — ссылка на ЖК; стрелки фото и «Показать телефон» лежат поверх. */
+.catalog-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+}
+
+.catalog-card__link:focus-visible {
+  outline: none;
+}
+
+.catalog-card__link:focus-visible::after {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.catalog-card__address,
+.catalog-card__landmark,
+.catalog-card__facts {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+}
+
+.catalog-card__landmark {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.catalog-card__landmark svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--amber-2);
+}
+
+.catalog-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: var(--fs-small);
+}
+
+.catalog-card__facts b {
+  color: var(--fg);
+}
+
+.catalog-card__types {
+  display: flex;
+  flex-direction: column;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px dashed var(--dash);
+}
+
+.catalog-card__type {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--dash);
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+}
+
+.catalog-card__pays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 0;
+}
+
+.catalog-card__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.catalog-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+}
+
+.catalog-card__amount {
+  font-size: var(--fs-card-price);
+  font-weight: 650;
+  letter-spacing: var(--ls-h2);
+}
+
+.catalog-card__per-m2 {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 550;
+}
+
+.catalog-card__monthly {
+  margin: 0;
+  color: var(--amber-2);
+  font-size: var(--fs-small-l);
+  font-weight: 650;
+}
+
+.catalog-card__phone {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+[data-motion="full"] .catalog-card {
+  transition:
+    transform var(--dur-slow) var(--ease),
+    box-shadow var(--dur-slow) var(--ease);
+}
+
+[data-motion="full"] .catalog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+[data-motion="lite"] .catalog-card {
+  transition: box-shadow var(--dur-fast) ease-out;
+}
+
+[data-motion="lite"] .catalog-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+@media (max-width: 760px) {
+  .catalog-card__name {
+    font-size: var(--fs-card-name-phone);
+  }
+
+  .catalog-card__nav {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .catalog-card__phone {
+    min-height: 44px;
+  }
+}
+

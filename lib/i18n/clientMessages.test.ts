@@ -9,6 +9,7 @@ import {
 import {
   ADMIN_ROOT_MESSAGES,
   CABINET_NAMESPACE,
+  CATALOG_MESSAGES,
   CALC_NAMESPACE,
   pickMessages,
   SITE_SHELL_MESSAGES,
@@ -47,11 +48,18 @@ describe("сообщения для браузера", () => {
 
   // Новый раздел сайта с клиентскими текстами без своего провайдера сломал бы страницу — тест раньше.
   it("клиентским модулям оболочки сайта хватает текстов оболочки", () => {
-    // Все страницы сайта, кроме калькулятора: у него свой провайдер с CALC_MESSAGES.
+    // Все страницы сайта, кроме калькулятора: у него свой провайдер с CALC_MESSAGES. Страница со
+    // своим провайдером каталога получает и его тексты.
     const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
-    const used = [...clientNamespaces(pages)];
-    expect(used.length).toBeGreaterThan(0);
-    expect(used.filter((namespace) => namespace !== "*" && !covers(SITE_SHELL_MESSAGES, namespace))).toEqual([]);
+    const allowedFor = (file: string): readonly string[] =>
+      readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES : SITE_SHELL_MESSAGES;
+    const missing = pages.flatMap((file) =>
+      [...clientNamespaces([file])]
+        .filter((namespace) => namespace !== "*" && !covers(allowedFor(file), namespace))
+        .map((namespace) => `${file}: ${namespace}`),
+    );
+    expect(clientNamespaces(pages).size).toBeGreaterThan(0);
+    expect(missing).toEqual([]);
   });
 
   // «*» на сайте допустим (меню берут подписи из разных разделов): кабинета в его сообщениях нет.

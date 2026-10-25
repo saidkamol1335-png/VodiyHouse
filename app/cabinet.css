@@ -5,7 +5,6 @@
    владельца при той же специфичности побеждает, потому что грузится позже, а не по алфавиту. */
 @import "../components/AdminTabs/AdminTabs.css";
 @import "../components/Avatar/Avatar.css";
-@import "../components/Badge/Badge.css";
 @import "../components/BilingualField/BilingualField.css";
 @import "../components/ChoiceField/ChoiceField.css";
 @import "../components/PointField/PointField.css";
