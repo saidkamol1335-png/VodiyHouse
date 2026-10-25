@@ -43,10 +43,13 @@ export function pickMessages(
 export const CALC_NAMESPACE = "calc";
 export const CALC_MESSAGES = [CALC_NAMESPACE] as const;
 
-/** Сайт: все разделы, кроме текстов кабинета и калькулятора. */
+/**
+ * Сайт (фаза 3, «сообщения по разделам»): каждой странице — только тексты оболочки (шапка, меню,
+ * подвал). Тексты разделов (калькулятор, каталог, страница ЖК, формы) — своим провайдером только
+ * своим страницам, как CALC_MESSAGES; заголовки и тексты серверных компонентов в браузер не идут.
+ */
+export const SITE_SHELL_MESSAGES = ["nav", "header", "contacts", "footer"] as const;
+
 export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessages {
-  const paths = Object.keys(messages).filter(
-    (key) => key !== CABINET_NAMESPACE && key !== CALC_NAMESPACE,
-  );
-  return pickMessages(messages, paths);
+  return pickMessages(messages, SITE_SHELL_MESSAGES);
 }

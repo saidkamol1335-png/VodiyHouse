@@ -11,6 +11,7 @@ import {
   CABINET_NAMESPACE,
   CALC_NAMESPACE,
   pickMessages,
+  SITE_SHELL_MESSAGES,
   siteMessages,
 } from "./clientMessages";
 
@@ -38,13 +39,17 @@ describe("сообщения для браузера", () => {
     expect(() => pickMessages(messages, ["a.x"])).toThrow("a.x");
   });
 
-  it("сайт получает всё, кроме текстов кабинета и калькулятора (у него свой провайдер)", () => {
+  it("каждая страница сайта получает только тексты оболочки", () => {
     const picked = siteMessages(ru);
-    const shared = Object.keys(ru).filter(
-      (key) => key !== CABINET_NAMESPACE && key !== CALC_NAMESPACE,
-    );
-    expect(Object.keys(picked)).toEqual(shared);
-    expect(JSON.stringify(picked).length).toBeLessThan(JSON.stringify(ru).length / 10);
+    expect(Object.keys(picked)).toEqual([...SITE_SHELL_MESSAGES]);
+    expect(JSON.stringify(picked).length).toBeLessThan(JSON.stringify(ru).length / 50);
+  });
+
+  // Новый раздел сайта с клиентскими текстами без своего провайдера сломал бы страницу — тест раньше.
+  it("клиентским модулям оболочки сайта хватает текстов оболочки", () => {
+    const used = [...clientNamespaces(["app/[locale]/layout.tsx", "app/[locale]/page.tsx"])];
+    expect(used.length).toBeGreaterThan(0);
+    expect(used.filter((namespace) => namespace !== "*" && !covers(SITE_SHELL_MESSAGES, namespace))).toEqual([]);
   });
 
   // «*» на сайте допустим (меню берут подписи из разных разделов): кабинета в его сообщениях нет.
