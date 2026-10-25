@@ -14,6 +14,7 @@ test.describe("подвал сайта", () => {
     await root.scrollIntoViewIfNeeded();
     await expect(root.getByRole("link", { name: "Новостройки" })).toHaveAttribute("href", "/ru/novostroyki");
     await expect(root.getByRole("link", { name: "О нас" })).toHaveAttribute("href", "/ru/o-nas");
+    await expect(root.getByRole("link", { name: "Как купить" })).toHaveAttribute("href", "/ru/kak-kupit");
     await expect(root.getByRole("link", { name: "Стать партнёром" })).toHaveAttribute("href", "/ru/dlya-zastroyshchikov");
     await expect(root.getByRole("link", { name: "Вход для сотрудников" })).toHaveAttribute("href", "/admin");
     await expect(root.getByRole("link", { name: "Политика конфиденциальности" })).toHaveAttribute("href", "/ru/privacy");
@@ -60,6 +61,17 @@ test.describe("подвал сайта", () => {
   });
 });
 
+test.describe("подвал · без JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("знак виден сразу: прятать до появления можно только когда скрипты работают", async ({ page }) => {
+    await page.goto("/ru");
+    const pixels = footer(page).locator(".site-footer__pixels");
+    await expect(pixels).toHaveCSS("opacity", "1");
+    await expect(pixels.locator(".site-footer__pixel").first()).toHaveCSS("opacity", "1");
+  });
+});
+
 test.describe("подвал · копирование адреса", () => {
   test.skip(({ isMobile }) => isMobile, "буфер обмена — в десктопном Chromium");
   test.use({ permissions: ["clipboard-read", "clipboard-write"] });
@@ -68,6 +80,8 @@ test.describe("подвал · копирование адреса", () => {
     await page.goto("/uz");
     await footer(page).getByRole("button", { name: "Nusxalash" }).click();
     await expect(footer(page).getByRole("button", { name: "Nusxalandi" })).toBeVisible();
+    // Подпись возвращается: второе нажатие снова слышно диктору.
+    await expect(footer(page).getByRole("button", { name: "Nusxalash" })).toBeVisible({ timeout: 5000 });
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`${baseURL}/uz`);
   });
 });

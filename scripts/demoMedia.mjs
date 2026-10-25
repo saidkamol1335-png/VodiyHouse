@@ -1,7 +1,8 @@
 // Фото DEMO-ЖК в Storage (фаза 3, шаг 3.1): рендеры мокапа (docs/mockup/source/_blob) → JPEG в
 // бакет media + строки media_assets. Без чужих водяных знаков: рендеры мокапа — свои. Мокап даёт
 // 1200 × 900 — меньше порога загрузки кабинета (1600 px), растягивать их бессмысленно; настоящие фото
-// пройдут проверку кабинета. Удаление — по папкам DEMO-ЖК: строки уходят каскадом с ЖК в remove.sql.
+// пройдут проверку кабинета. Удаление — по папкам DEMO-ЖК и застройщиков после remove.sql (строки
+// уходят каскадом с ЖК): если его проверки остановят удаление, фото DEMO останутся на месте.
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -75,12 +76,24 @@ async function preparePhoto(blobId, ratio) {
   return { jpeg, width, height, blur: `data:image/jpeg;base64,${tiny.toString("base64")}` };
 }
 
-/** Удаляет файлы в папках DEMO-ЖК (до remove.sql: после него id ЖК уже не узнать). */
-export async function removeDemoMedia(db) {
+/**
+ * Папки DEMO в бакете: ЖК (фото сида) и застройщики (логотип и фон, если их грузили в кабинете).
+ * Узнать их можно только до remove.sql — после него id DEMO уже нет.
+ */
+export async function demoMediaFolders(db) {
+  const { rows } = await db.query(
+    `select 'complexes/' || id as folder from public.complexes where slug like 'demo-%'
+     union all
+     select 'developers/' || id from public.developers where slug like 'demo-%'`,
+  );
+  return rows.map((row) => row.folder);
+}
+
+/** Удаляет файлы папок — после remove.sql: откатился он (проверки DEMO) — файлы целы. */
+export async function removeMediaFolders(folders) {
   const storage = storageClient();
   let removed = 0;
-  for (const { id } of await demoComplexIds(db)) {
-    const folder = `complexes/${id}`;
+  for (const folder of folders) {
     const { data, error } = await storage.list(folder, { limit: 1000 });
     if (error) throw new Error(`Storage: список ${folder}`, { cause: error });
     if (!data.length) continue;
@@ -91,27 +104,43 @@ export async function removeDemoMedia(db) {
   return removed;
 }
 
-/** Загружает фото DEMO-ЖК и пишет строки media_assets (после seed.sql). */
-export async function seedDemoMedia(db) {
+async function uploadPhotos(complexes) {
   const storage = storageClient();
-  const complexes = await demoComplexIds(db);
-  // DEMO — не действия сотрудников: в журнал не пишется (до конца подключения скрипта).
-  await db.query("select set_config('vodiy.skip_audit', 'on', false)");
-  let uploaded = 0;
+  const rows = [];
   for (const { id: complexId, slug } of complexes) {
     for (const [sort, [blobId, ratio]] of photoPlan(slug).entries()) {
       const { jpeg, width, height, blur } = await preparePhoto(blobId, ratio);
       const objectPath = `complexes/${complexId}/${crypto.randomUUID()}.jpg`;
       const { error } = await storage.upload(objectPath, jpeg, { contentType: "image/jpeg" });
       if (error) throw new Error(`Storage: загрузка ${objectPath}`, { cause: error });
+      rows.push([complexId, objectPath, width, height, blur, sort]);
+    }
+  }
+  return rows;
+}
+
+/**
+ * Загружает фото DEMO-ЖК и пишет строки media_assets (после seed.sql) одной транзакцией.
+ * Сбой на середине — файлы остаются в папках DEMO-ЖК, следующий demo:seed их уберёт.
+ */
+export async function seedDemoMedia(db) {
+  const rows = await uploadPhotos(await demoComplexIds(db));
+  await db.query("begin");
+  try {
+    // DEMO — не действия сотрудников: в журнал не пишется (только в этой транзакции, как seed.sql).
+    await db.query("select set_config('vodiy.skip_audit', 'on', true)");
+    for (const [complexId, objectPath, width, height, blur, sort] of rows) {
       await db.query(
         `insert into public.media_assets (complex_id, kind, path, width, height, blur, focus_x, focus_y, sort)
          values ($1, 'photo', $2, $3, $4, $5, $6, $7, $8)`,
         // Фокус чуть ниже центра: на рендерах мокапа дом в нижней половине, сверху небо.
         [complexId, objectPath, width, height, blur, 0.5, 0.55, sort],
       );
-      uploaded += 1;
     }
+    await db.query("commit");
+  } catch (error) {
+    await db.query("rollback");
+    throw error;
   }
-  return uploaded;
+  return rows.length;
 }

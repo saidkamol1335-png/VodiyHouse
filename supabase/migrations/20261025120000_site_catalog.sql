@@ -27,6 +27,8 @@ $$;
 
 -- Комнаты блока: свободно N (null — блок без списка квартир, число неизвестно, PLAN §3.1),
 -- площадь, цена и цена за м² «от» — по доступным планировкам; тип без доступных — available false.
+-- price_to — самая дорогая свободная (у блока без списка — «цена от» планировки): фильтр «цена от»
+-- каталога пропускает тип, если хоть одна квартира не дешевле.
 create function private.catalog_offers(p_block uuid)
 returns jsonb
 language sql
@@ -35,7 +37,8 @@ set search_path = ''
 as $$
   select coalesce(jsonb_agg(jsonb_build_object(
       'rooms', o.rooms, 'available', o.available, 'free', o.free_count,
-      'area_from', o.area_from, 'price_from', o.price_from, 'price_per_m2_from', o.ppm_from)
+      'area_from', o.area_from, 'price_from', o.price_from, 'price_to', o.price_to,
+      'price_per_m2_from', o.ppm_from)
     order by o.rooms), '[]'::jsonb)
   from (
     select
@@ -47,8 +50,14 @@ as $$
       end as free_count,
       min(l.area) filter (where l.available) as area_from,
       min(l.price_from) filter (where l.available) as price_from,
+      max(coalesce(top.max_price, l.price_from)) filter (where l.available) as price_to,
       min(l.price_from / l.area) filter (where l.available and l.price_from is not null) as ppm_from
     from private.layout_offers l
+    cross join lateral (
+      select max(coalesce(u.price, u.price_per_m2 * l.area)) as max_price
+      from public.units u
+      where u.layout_id = l.layout_id and u.status = 'free'
+    ) top
     where l.block_id = p_block
     group by l.rooms
   ) o

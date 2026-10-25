@@ -7,11 +7,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import pg from "pg";
 import { dbClientConfig } from "../lib/supabase/dbClient.ts";
-import { removeDemoMedia, seedDemoMedia } from "./demoMedia.mjs";
+import { demoMediaFolders, removeMediaFolders, seedDemoMedia } from "./demoMedia.mjs";
 
 const DEMO_DIR = path.join(import.meta.dirname, "..", "supabase", "demo");
-// Сид всегда начинается с удаления: повторный запуск даёт чистый DEMO, а не дубли. Фото DEMO-ЖК
-// (scripts/demoMedia.mjs): файлы удаляются до remove.sql (после него id ЖК не узнать), грузятся после seed.sql.
+// Сид всегда начинается с удаления: повторный запуск даёт чистый DEMO, а не дубли. Фото DEMO
+// (scripts/demoMedia.mjs): папки узнаём до remove.sql, файлы удаляем после SQL (откатилось — целы),
+// новые грузим после seed.sql.
 // `demo:seed -- stress` — плюс «худший», «лучший» и 30 ЖК для нагрузки (stress.sql, приёмка 3а).
 const STEPS = {
   seed: ["remove.sql", "seed.sql"],
@@ -34,10 +35,11 @@ if (!connectionString) {
 const client = new pg.Client(dbClientConfig(connectionString));
 await client.connect();
 try {
-  const removedFiles = await removeDemoMedia(client);
+  const folders = await demoMediaFolders(client);
   for (const file of STEPS[action]) {
     await client.query(await readFile(path.join(DEMO_DIR, file), "utf8"));
   }
+  const removedFiles = await removeMediaFolders(folders);
   const uploaded = action === "remove" ? 0 : await seedDemoMedia(client);
   console.log(`Фото DEMO в Storage: удалено ${removedFiles}, загружено ${uploaded}.`);
   const { rows } = await client.query(

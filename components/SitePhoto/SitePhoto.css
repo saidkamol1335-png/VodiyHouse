@@ -1,5 +1,7 @@
-/* Фото сайта: кадр мокапа (--photo-ratio) и место кадра по точке фокуса (--photo-position). */
+/* Фото сайта: кадр мокапа (--photo-ratio) и место кадра по точке фокуса (--photo-position).
+   --photo-pos читает сам Image (object-position и размытая заглушка) — на телефоне своя пара. */
 .site-photo {
+  --photo-pos: var(--photo-position);
   position: relative;
   overflow: hidden;
   aspect-ratio: var(--photo-ratio);
@@ -7,17 +9,9 @@
   background: var(--bg-4);
 }
 
-.site-photo__image {
-  object-fit: cover;
-  object-position: var(--photo-position);
-}
-
 @media (max-width: 760px) {
   .site-photo {
+    --photo-pos: var(--photo-position-phone, var(--photo-position));
     aspect-ratio: var(--photo-ratio-phone, var(--photo-ratio));
-  }
-
-  .site-photo__image {
-    object-position: var(--photo-position-phone, var(--photo-position));
   }
 }

@@ -25,5 +25,8 @@ describe("SitePhoto", () => {
     expect(frame.style.getPropertyValue("--photo-ratio-phone")).toBe(String(4 / 5));
     // Фото шире карточки: кадр по вертикали весь, фокус сверху — место 50% по горизонтали.
     expect(frame.style.getPropertyValue("--photo-position")).toMatch(/^50% /);
+    // Кадр — и у самого фото: по нему Next строит размытую заглушку.
+    expect(image.style.objectFit).toBe("cover");
+    expect(image.style.objectPosition).toBe("var(--photo-pos)");
   });
 });

@@ -38,7 +38,8 @@ export function SiteFooter() {
               {t("footer.becomePartner")}
             </Link>
             {/* Кабинет — без префикса языка, поэтому обычный Link Next.js. */}
-            <NextLink href={ADMIN_ROUTE} className="site-footer__link">
+            {/* Без предзагрузки: /admin посетителю отвечает переходом на вход. */}
+            <NextLink href={ADMIN_ROUTE} prefetch={false} className="site-footer__link">
               {t("contacts.staffLogin")}
             </NextLink>
           </FooterColumn>

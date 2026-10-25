@@ -26,7 +26,7 @@
   font-size: var(--fs-kpi);
   font-weight: 600;
   line-height: var(--lh-figure);
-  letter-spacing: var(--ls-h2);
+  letter-spacing: var(--ls-footer-promise);
 }
 
 .site-footer__accent {
@@ -34,14 +34,16 @@
   font-style: italic;
   font-weight: 500;
   font-size: 1.16em;
+  line-height: 0.9;
+  letter-spacing: var(--ls-h4);
   color: var(--gold);
 }
 
 .site-footer__tagline {
   max-width: 420px;
   margin: 12px 0 0;
-  color: var(--fg-3);
-  font-size: var(--fs-small);
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
   line-height: var(--lh-body);
 }
 
@@ -60,6 +62,7 @@
 .site-footer__url {
   font-family: var(--mono);
   font-size: var(--fs-label-l);
+  font-weight: 500;
   letter-spacing: var(--ls-mono);
   text-transform: uppercase;
 }
@@ -68,15 +71,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 32px;
-  padding: 0 12px;
+  min-height: var(--control-xs);
+  padding: 0 11px;
   border: 1px solid var(--control-border);
   border-radius: var(--r-pill);
   background: var(--control-bg);
   color: var(--fg);
   font-size: var(--fs-caption);
-  font-weight: 600;
+  font-weight: 650;
   cursor: pointer;
+  transition: border-color var(--dur-fast) ease-out;
+}
+
+.site-footer__copy-button:hover {
+  border-color: var(--amber-line);
 }
 
 .site-footer__title {
@@ -102,8 +110,7 @@
   text-decoration: none;
 }
 
-.site-footer__link:hover,
-.site-footer__copy-button:hover {
+.site-footer__link:hover {
   color: var(--fg);
 }
 
@@ -122,6 +129,7 @@
 .site-footer__bottom {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-top: 48px;
@@ -133,13 +141,14 @@
 
 /*
  * Появление знака (useReveal): full — клетки по диагонали, lite — знак целиком ≤ 200 мс, none — сразу.
- * Показанный в lite (data-revealed="lite") не прячется, когда проба потом включит full.
+ * Показанный в lite (data-revealed="lite") не прячется, когда проба потом включит full; без JS
+ * ([data-js] нет) знак виден сразу.
  */
 [data-motion="full"] .site-footer__pixels {
   filter: var(--footer-pixel-glow);
 }
 
-[data-motion="full"] .site-footer__pixels:not([data-revealed]) .site-footer__pixel {
+[data-js][data-motion="full"] .site-footer__pixels:not([data-revealed]) .site-footer__pixel {
   opacity: 0;
 }
 
@@ -154,7 +163,7 @@
   transition: opacity var(--dur-fast) ease-out;
 }
 
-[data-motion="lite"] .site-footer__pixels:not([data-revealed]) {
+[data-js][data-motion="lite"] .site-footer__pixels:not([data-revealed]) {
   opacity: 0;
 }
 

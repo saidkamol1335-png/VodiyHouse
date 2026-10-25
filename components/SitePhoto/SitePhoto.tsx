@@ -15,7 +15,7 @@ type SitePhotoProps = {
   /** Ширина фото на экране для выбора размера: «(max-width: 760px) 100vw, 400px». */
   sizes: string;
   /** Первый экран (обложка, первые карточки) — грузится сразу: это LCP. */
-  priority?: boolean;
+  preload?: boolean;
   /** Микс с элементом блока-владельца по БЭМ (скругление, место в сетке). */
   className?: string;
 };
@@ -24,7 +24,11 @@ type SitePhotoProps = {
  * Фото сайта (PLAN 3а): next/image (WebP / AVIF и размеры под экран), кадр по точке фокуса,
  * размытая заглушка, пока грузится. Файлы — публичный бакет media Supabase.
  */
-export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, priority = false, className }: SitePhotoProps) {
+// Кадр — и в самом Image: по нему Next строит размытую заглушку (иначе она растянута и по центру,
+// а фото потом прыгает к точке фокуса). Переменная --photo-pos меняется на телефоне в CSS.
+const IMAGE_STYLE: CSSProperties = { objectFit: "cover", objectPosition: "var(--photo-pos)" };
+
+export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, preload = false, className }: SitePhotoProps) {
   const src = mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", photo.path);
   return (
     <div
@@ -37,7 +41,8 @@ export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, priority = fal
         alt={alt}
         fill
         sizes={sizes}
-        priority={priority}
+        preload={preload}
+        style={IMAGE_STYLE}
         placeholder={photo.blur ? "blur" : "empty"}
         blurDataURL={photo.blur ?? undefined}
       />

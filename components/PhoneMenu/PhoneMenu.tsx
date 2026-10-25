@@ -12,6 +12,7 @@ import { formatPhone, instagramHref, phoneHref, telegramHref } from "@/lib/conta
 import { isActivePath } from "@/components/HeaderNav";
 import { useNavItems } from "@/components/HiddenNav";
 import { Link, usePathname } from "@/lib/i18n/navigation";
+import type { Locale } from "@/lib/i18n/routing";
 import { ADMIN_ROUTE, MENU_NAV, ROUTES } from "@/lib/routes";
 
 type PhoneMenuProps = {
@@ -56,7 +57,7 @@ export function PhoneMenu({ id, onClose }: PhoneMenuProps) {
         </div>
         <div className="phone-menu__footer">
           {/* Кабинет — без префикса языка, поэтому обычный Link Next.js. */}
-          <NextLink href={ADMIN_ROUTE}>{t("contacts.staffLogin")}</NextLink>
+          <NextLink href={ADMIN_ROUTE} prefetch={false}>{t("contacts.staffLogin")}</NextLink>
           <Link href={ROUTES.privacy}>{t("contacts.privacy")}</Link>
         </div>
       </div>
@@ -108,7 +109,7 @@ function PhoneMenuNav() {
 /** Только контакты Vodiy House (правило ТЗ 1.2); не введённых в «Настройки → Контакты» — строк нет. */
 function PhoneMenuContacts() {
   const t = useTranslations("contacts");
-  const locale = useLocale() as "ru" | "uz";
+  const locale = useLocale() as Locale;
   const { phone, telegram, instagram, hours } = useSiteContacts();
   return (
     <div className="phone-menu__contacts">

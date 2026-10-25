@@ -58,6 +58,7 @@
   --ls-admin-title: -0.03em; /* заголовок страницы кабинета (--fs-admin-title) */
   --ls-panel-title: -0.015em; /* заголовок панели и списка кабинета (--fs-h4 / 700) */
   --ls-h4: -0.012em;
+  --ls-footer-promise: -0.035em; /* обещание подвала (мокап .ftr__big) */
   --fs-brand: 17px; /* «Vodiy House» (дизайн-решение: логотип 17 px / 700) */
   --fs-segment-s: 12px; /* маленький сегмент (строка таблицы) */
 
@@ -74,6 +75,7 @@
   --container: 1280px;
   --gutter: 32px;
   --header-h: 68px;
+  --control-xs: 30px; /* маленькая кнопка мокапа (.btn--xs) */
   --demo-h: 0px;
   --admin-side-w: 250px;
   --admin-panel-pad: 20px; /* поля панели кабинета; липкие полосы внутри неё выходят на них */

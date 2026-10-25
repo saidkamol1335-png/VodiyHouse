@@ -27,6 +27,16 @@ describe("normalizeHandle", () => {
     expect(normalizeHandle("https://t.me/vodiyhouse")).toBe("vodiyhouse");
     expect(normalizeHandle("https://www.instagram.com/vodiy.house/?hl=ru")).toBe("vodiy.house");
   });
+
+  it("чужая ссылка и путь глубже профиля не превращаются в имя — проверка их отклонит", () => {
+    const parsed = parseContacts(
+      form({ instagram: "https://www.facebook.com/vodiyhouse", telegram: "m.instagram.com/vodiy" }),
+    );
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) return;
+    expect(parsed.fieldErrors).toEqual({ instagram: "instagram", telegram: "telegram" });
+    expect(normalizeHandle("instagram.com/stories/vodiy/1")).toBe("stories/vodiy/1");
+  });
 });
 
 describe("parseContacts", () => {

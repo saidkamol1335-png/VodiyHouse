@@ -8,6 +8,7 @@ export const ROUTES = {
   forDevelopers: "/dlya-zastroyshchikov",
   quiz: "/podbor",
   favorites: "/izbrannoe",
+  howToBuy: "/kak-kupit",
   privacy: "/privacy",
 } as const;
 
@@ -21,7 +22,8 @@ export function isRouteReady(pathname: string | null | undefined): boolean {
 /** Кабинет — без префикса языка. */
 export const ADMIN_ROUTE = "/admin";
 
-export type NavKey = "new" | "specials" | "developers" | "calculator" | "about" | "forDevelopers" | "quiz";
+export type NavKey =
+  "new" | "specials" | "developers" | "calculator" | "about" | "forDevelopers" | "quiz" | "howToBuy";
 
 /**
  * Пункты шапки — порядок мокапа 09.10.2026 (PLAN §7, фаза 3). Запуск 3а — без «Спецпредложений»
@@ -38,11 +40,15 @@ export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
 export const hiddenNav = ({ calculator }: { calculator: boolean }): NavKey[] =>
   calculator ? [] : ["calculator"];
 
-/** Подвал, «Каталог»: в 3а — новостройки, калькулятор и «О нас»; спецпредложения, подбор и застройщики — 3б. */
+/**
+ * Подвал, «Каталог»: в 3а — новостройки, калькулятор, «О нас» и «Как купить» (блока о покупке на
+ * главной нет — решение фазы 3); спецпредложения, подбор и застройщики — 3б.
+ */
 export const FOOTER_NAV: readonly { key: NavKey; href: string }[] = [
   { key: "new", href: ROUTES.catalog },
   { key: "calculator", href: ROUTES.calculator },
   { key: "about", href: ROUTES.about },
+  { key: "howToBuy", href: ROUTES.howToBuy },
 ];
 
 /** Меню планшета и телефона: пункты шапки; «Подбор за 1 минуту» (решение Ш5) — с квизом в 3б. */

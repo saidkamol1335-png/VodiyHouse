@@ -15,6 +15,7 @@ export type OfferRecord = {
   free: number | null;
   area_from: NumberLike | null;
   price_from: NumberLike | null;
+  price_to: NumberLike | null;
   price_per_m2_from: NumberLike | null;
 };
 
@@ -66,6 +67,8 @@ export type CatalogOffer = {
   free: number | null;
   areaFrom: number | null;
   priceFrom: number | null;
+  /** Самая дорогая свободная квартира типа — для фильтра «цена от». */
+  priceTo: number | null;
   pricePerM2From: number | null;
 };
 
@@ -102,6 +105,7 @@ function offerFrom(record: OfferRecord): CatalogOffer {
     free: record.free,
     areaFrom: toNumber(record.area_from),
     priceFrom: toNumber(record.price_from),
+    priceTo: toNumber(record.price_to),
     pricePerM2From: toNumber(record.price_per_m2_from),
   };
 }

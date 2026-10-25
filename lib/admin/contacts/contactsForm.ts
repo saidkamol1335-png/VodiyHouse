@@ -43,14 +43,18 @@ export function normalizePhone(raw: string): string {
   return digits;
 }
 
-/** «@vodiy», «t.me/vodiy», «https://www.instagram.com/vodiy/» → «vodiy». */
+const PROFILE_LINK = /^(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me|instagram\.com)\/(.+)$/i;
+
+/**
+ * «@vodiy», «t.me/vodiy», «https://www.instagram.com/vodiy/?hl=ru» → «vodiy». Чужая ссылка
+ * (facebook.com/…, m.instagram.com/…) и путь глубже профиля («instagram.com/stories/…») остаются
+ * со «/» — проверка имени их не пропустит, вместо «Instagram @www.facebook.com» на сайте.
+ */
 export function normalizeHandle(raw: string): string {
-  return raw
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/^(?:www\.)?(?:t\.me|telegram\.me|instagram\.com)\//i, "")
-    .replace(/^@/, "")
-    .replace(/[/?#].*$/, "");
+  const text = raw.trim().replace(/[?#].*$/, "").replace(/\/+$/, "");
+  const profile = PROFILE_LINK.exec(text);
+  if (profile) return profile[1]!;
+  return /^https?:\/\/|\//i.test(text) ? text : text.replace(/^@/, "");
 }
 
 function readHandle(formData: FormData, name: string, pattern: RegExp) {

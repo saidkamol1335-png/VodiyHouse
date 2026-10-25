@@ -2,21 +2,22 @@
 
 import { Copy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavItems } from "@/components/HiddenNav";
+import { RollText } from "@/components/RollText";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { formatPhone, instagramHref, phoneHref, telegramHref } from "@/lib/contacts";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
 import { FOOTER_NAV } from "@/lib/routes";
 
-/** «Каталог»: скрытые сейчас пункты (нет застройщиков с программами — «Калькулятор») — мимо. */
+/** «Каталог» (мокап .ftr__l .rh — перекат букв, как в шапке): скрытые сейчас пункты — мимо. */
 export function FooterCatalog() {
   const t = useTranslations("nav");
   const items = useNavItems(FOOTER_NAV);
   return items.map(({ key, href }) => (
-    <Link key={key} href={href} className="site-footer__link">
-      {t(key)}
+    <Link key={key} href={href} className="site-footer__link roll-trigger">
+      <RollText text={t(key)} />
     </Link>
   ));
 }
@@ -40,12 +41,23 @@ export function FooterContacts() {
 type CopyState = "idle" | "copied" | "failed";
 
 const LABEL = { idle: "copyUrl", copied: "copied", failed: "copyFailed" } as const satisfies Record<CopyState, string>;
+/** Через столько подпись кнопки возвращается к «Скопировать» — второе нажатие снова слышно диктору. */
+const COPY_STATUS_MS = 2500;
+const URL_ID = "site-footer-url";
 
-/** «vodiyhouse.uz/ru · Скопировать»: адрес — домен сайта на языке страницы, где бы он ни был открыт. */
+/**
+ * «vodiyhouse.uz/ru · Скопировать»: в буфер — адрес текущего домена на языке страницы (до запуска
+ * vodiyhouse.uz не открывается, на тестовом деплое ссылка ведёт на него же).
+ */
 export function FooterCopyUrl() {
   const t = useTranslations("footer");
   const locale = useLocale();
   const [state, setState] = useState<CopyState>("idle");
+  useEffect(() => {
+    if (state === "idle") return;
+    const timer = setTimeout(() => setState("idle"), COPY_STATUS_MS);
+    return () => clearTimeout(timer);
+  }, [state]);
   const copy = async () => {
     const url = `${window.location.origin}/${locale}`;
     const copied = await navigator.clipboard?.writeText(url).then(
@@ -56,8 +68,8 @@ export function FooterCopyUrl() {
   };
   return (
     <div className="site-footer__copy">
-      <span className="site-footer__url">vodiyhouse.uz/{locale}</span>
-      <button type="button" className="site-footer__copy-button" onClick={copy}>
+      <span id={URL_ID} className="site-footer__url">vodiyhouse.uz/{locale}</span>
+      <button type="button" className="site-footer__copy-button" onClick={copy} aria-describedby={URL_ID}>
         <Copy size={14} strokeWidth={1.9} aria-hidden />
         {t(LABEL[state])}
       </button>

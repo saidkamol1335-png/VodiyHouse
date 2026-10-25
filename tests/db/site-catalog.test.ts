@@ -10,7 +10,7 @@ import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 const DEMO_DIR = path.resolve(import.meta.dirname, "../../supabase/demo");
 
-type Offer = { rooms: number; available: boolean; free: number | null; price_from: number | null };
+type Offer = { rooms: number; available: boolean; free: number | null; price_from: number | null; price_to: number | null };
 type Block = { name: string; currency: string; floors_total: number; finishing: { slug: string }; offers: Offer[] };
 type Complex = { slug: string; developer_id: string; blocks: Block[]; photos: unknown[]; checked: Record<string, string | null> };
 type Catalog = {
@@ -45,6 +45,9 @@ describe.skipIf(isRemoteTarget)("каталог сайта: site_catalog()", () 
     expect(blockA!.offers.map((o) => [o.rooms, o.free])).toEqual([[1, 4], [2, 6], [3, 2]]);
     expect(blockB!.offers.map((o) => o.free)).toEqual([10, 16, 3]);
     expect(blockA!.offers.every((o) => o.available && (o.price_from ?? 0) > 0)).toBe(true);
+    expect(blockA!.offers.every((o) => (o.price_to ?? 0) >= (o.price_from ?? 0))).toBe(true);
+    // Цена растёт с этажом (формула сида): у типа с несколькими свободными «до» дороже «от».
+    expect(blockA!.offers.some((o) => (o.price_to ?? 0) > (o.price_from ?? 0))).toBe(true);
     expect(blockA).toMatchObject({ currency: "USD", floors_total: 12, finishing: { slug: "rough" } });
   });
 
