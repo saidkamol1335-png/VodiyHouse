@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { isIndexingClosed, NOINDEX_HEADER } from "./lib/site/indexing";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
@@ -14,6 +15,8 @@ const nextConfig: NextConfig = {
   logging: { serverFunctions: false },
   async headers() {
     return [
+      // Тестовый деплой (Ф2) — noindex на каждом ответе, и страницах, и картинках.
+      ...(isIndexingClosed() ? [{ source: "/:path*", headers: [NOINDEX_HEADER] }] : []),
       {
         // Кабинет не открывается во фрейме чужого сайта (кликджекинг) и не отдаёт адрес наружу.
         source: "/admin/:path*",

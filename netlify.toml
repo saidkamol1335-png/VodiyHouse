@@ -1,0 +1,9 @@
+# Netlify (тестовый деплой — решение фазы 3, Ф2; переезд к заказчику — шаг «Запуск»).
+# Адаптер Next.js (OpenNext) Netlify подключает сам; переменные окружения — в настройках сайта
+# Netlify, не здесь (.env.example: что нужно и откуда).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
