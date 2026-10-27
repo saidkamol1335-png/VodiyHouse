@@ -78,26 +78,26 @@ language plpgsql
 set search_path = ''
 as $$
 declare
-  snapshot jsonb;
-  program_id uuid := private.uuid_or_null(p_calc ->> 'program');
+  v_snapshot jsonb;
+  v_program uuid := private.uuid_or_null(p_calc ->> 'program');
 begin
   if jsonb_typeof(p_calc -> 'input') is distinct from 'object'
      or jsonb_typeof(p_calc -> 'result') is distinct from 'object'
      or length((p_calc -> 'input')::text) > 10000 or length((p_calc -> 'result')::text) > 20000 then
     return;
   end if;
-  select to_jsonb(p) || jsonb_build_object('bank', b.name) into snapshot
+  select to_jsonb(p) || jsonb_build_object('bank', b.name) into v_snapshot
     from public.payment_programs p
     join public.developers d on d.id = p.developer_id and d.status = 'published'
     left join public.banks b on b.id = p.bank_id
-    where p.id = program_id and p.is_active
+    where p.id = v_program and p.is_active
       and (p_subject ->> 'developer_id' is null or p.developer_id = (p_subject ->> 'developer_id')::uuid);
-  if snapshot is null then
+  if v_snapshot is null then
     return;
   end if;
   insert into public.calculations (channel, program_id, unit_id, lead_id, input, result, program_snapshot, rate)
-  values ('site', program_id, (p_subject ->> 'unit_id')::uuid, p_lead, p_calc -> 'input', p_calc -> 'result',
-          snapshot, private.exchange_rate());
+  values ('site', v_program, (p_subject ->> 'unit_id')::uuid, p_lead, p_calc -> 'input', p_calc -> 'result',
+          v_snapshot, private.exchange_rate());
 end;
 $$;
 
@@ -141,7 +141,7 @@ begin
     perform private.save_lead_calculation(v_lead.id, p_lead -> 'calc', v_subject);
   end if;
   insert into public.lead_deliveries (lead_id, channel)
-    select v_lead.id, channel from unnest(coalesce(p_channels, '{}')) as x (channel) group by channel;
+    select v_lead.id, x.channel from unnest(coalesce(p_channels, '{}')) as x (channel) group by x.channel;
   return jsonb_build_object('id', v_lead.id, 'number', v_lead.number, 'repeat_of', v_previous.number);
 exception
   when check_violation or not_null_violation or invalid_text_representation then

@@ -72,7 +72,8 @@ alter table public.leads enable row level security;
 alter table public.lead_deliveries enable row level security;
 revoke all on public.leads, public.lead_deliveries from anon, authenticated, service_role;
 grant select on public.leads, public.lead_deliveries to authenticated;
--- Сервер (сайт, cron, бот) таблиц не читает и не пишет: только функциями security definer.
+-- Сервер (форма, cron, бот) прав на таблицы не получает: только функции с service_role
+-- (20261026090100_leads_functions.sql, 20261026090200_leads_delivery.sql).
 
 create policy "leads: руководитель и менеджер"
   on public.leads for select to authenticated
