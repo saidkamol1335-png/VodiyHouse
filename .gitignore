@@ -30,3 +30,6 @@ npm-debug.log*
 
 # Скриншоты мокапа пересобираются docs/mockup/tools/capture.mjs (~40 МБ, 83 файла)
 docs/mockup/screens/
+
+# Local Netlify folder
+.netlify

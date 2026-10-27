@@ -80,6 +80,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    // Netlify CLI: сборка деплоя и установленные плагины — сгенерированный и чужой код.
+    ".netlify/**",
     // Выгрузка холста мокапа — чужой код, не наш.
     "docs/mockup/source/**",
   ]),

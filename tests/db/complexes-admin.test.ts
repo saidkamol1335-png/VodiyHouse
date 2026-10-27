@@ -455,16 +455,17 @@ describe("кабинет ЖК", () => {
       expect(removed).toHaveLength(1);
     });
 
-    it("«Сохранить» без изменений не двигает «Наличие обновлено» (updated_at планировок)", async () => {
+    // updated_at ставит триггер — now(), время начала транзакции, а test:db:remote держит весь файл
+    // в одной транзакции: время между сохранениями не сдвигается. Тронута ли строка — видно по её версии (ctid).
+    it("«Сохранить» без изменений не двигает «Наличие обновлено» (строки планировок не трогает)", async () => {
       const rows = await layoutRows();
-      await db.admin.query("update layouts set updated_at = now() - interval '1 day' where block_id = $1", [blockId]);
-      const stamp = async () =>
-        (await db.admin.query<{ at: string }>("select max(updated_at)::text as at from layouts where block_id = $1", [blockId])).rows[0]!.at;
-      const before = await stamp();
+      const versions = async () =>
+        (await db.admin.query<{ at: string }>("select string_agg(ctid::text, ',' order by id) as at from layouts where block_id = $1", [blockId])).rows[0]!.at;
+      const before = await versions();
       await save(rows.map((row) => ({ id: row.id, rooms: row.rooms, area: row.area, drawing_id: row.drawing_id })));
-      expect(await stamp()).toBe(before);
+      expect(await versions()).toBe(before);
       await save(rows.map((row, index) => ({ id: row.id, rooms: row.rooms, area: index === 0 ? Number(row.area) + 1 : row.area, drawing_id: row.drawing_id })));
-      expect(await stamp()).not.toBe(before);
+      expect(await versions()).not.toBe(before);
     });
 
     it("планировку с квартирами не удалить", async () => {
