@@ -82,7 +82,7 @@ describe("Server Actions кабинета", () => {
       loadLeadCardAction: /requireActionViewer\(\["head", "manager"\]\)/,
       setLeadStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       assignLeadAction: /requireActionViewer\(\["head", "manager"\]\)/,
-      retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\], \{ fresh: true \}\)/,
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {
@@ -103,5 +103,19 @@ describe("Server Actions кабинета", () => {
   it("headGuard сам спрашивает Auth заново (fresh) и пускает только руководителя", () => {
     const source = readSource("staff.ts");
     expect(source).toMatch(/requireActionViewer\(\["head"\], \{ fresh: true \}\)/);
+  });
+
+  // Правило session.ts: перед работой секретным ключом сессию проверяет сам Auth — подпись токена
+  // не видит отозванную сессию. Смена пароля — исключение: до секретного ключа Auth и так проверяет
+  // временный пароль и меняет пароль по токену сотрудника.
+  it("действия с секретным ключом спрашивают Auth заново (fresh)", () => {
+    const SECRET_KEY = /deliverLeadNow|createSupabaseAdminClient|hasSupabaseAdminEnv/;
+    const AUTH_CHECKED = new Set(["changePasswordAction"]);
+    for (const file of files) {
+      for (const { name, body } of exportedFunctions(readSource(file))) {
+        if (WITHOUT_SESSION.has(name) || AUTH_CHECKED.has(name) || !SECRET_KEY.test(body)) continue;
+        expect(/const guard = await ([^;]+);/.exec(body)?.[1], `${file}: ${name}`).toContain("fresh: true");
+      }
+    }
   });
 });

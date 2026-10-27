@@ -10,16 +10,33 @@ const EXTENSIONS = [".tsx", ".ts", "/index.ts", "/index.tsx"];
 const IMPORT =
   /(?:import|export)\s[^"']*?from\s+["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)/g;
 
-export const readSource = (file: string) => readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+// Файлы за прогон не меняются, а тесты обходят граф заново для каждой страницы: без кэша сотни
+// синхронных чтений на Windows при занятых ядрах (весь npm test) не укладывались в 5 с тайм-аута.
+const sources = new Map<string, string>();
+const resolved = new Map<string, string | null>();
+
+export function readSource(file: string): string {
+  let source = sources.get(file);
+  if (source === undefined) {
+    source = readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+    sources.set(file, source);
+  }
+  return source;
+}
+
+function resolveBase(base: string): string | null {
+  if (existsSync(base) && statSync(base).isFile()) return /\.tsx?$/.test(base) ? base : null;
+  for (const extension of EXTENSIONS) if (existsSync(base + extension)) return base + extension;
+  return null;
+}
 
 function resolveImport(from: string, specifier: string): string | null {
   let base: string;
   if (specifier.startsWith("@/")) base = path.join(ROOT, specifier.slice(2));
   else if (specifier.startsWith(".")) base = path.resolve(path.dirname(from), specifier);
   else return null;
-  if (existsSync(base) && statSync(base).isFile()) return /\.tsx?$/.test(base) ? base : null;
-  for (const extension of EXTENSIONS) if (existsSync(base + extension)) return base + extension;
-  return null;
+  if (!resolved.has(base)) resolved.set(base, resolveBase(base));
+  return resolved.get(base)!;
 }
 
 function importsOf(file: string, source: string): string[] {

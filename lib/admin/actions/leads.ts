@@ -44,9 +44,12 @@ export async function assignLeadAction(number: number, leadId: string, userId: s
   return withCard(guard, number, (supabase) => supabase.rpc("assign_lead", { p_lead: leadId, p_user: userId }));
 }
 
-/** «Повторить»: канал снова в очереди с нуля попыток и отправляется сразу после ответа. */
+/**
+ * «Повторить»: канал снова в очереди с нуля попыток и отправляется сразу после ответа — секретным
+ * ключом, поэтому сессию проверяет сам Auth (fresh): отозванный токен с верной подписью не пройдёт.
+ */
 export async function retryLeadDeliveryAction(number: number, leadId: string, channel: LeadChannel): Promise<LeadActionResult> {
-  const guard = await requireActionViewer(["head", "manager"]);
+  const guard = await requireActionViewer(["head", "manager"], { fresh: true });
   if (!UUID.test(leadId) || !LEAD_CHANNELS.includes(channel)) return { status: "error", error: "invalid" };
   const result = await withCard(guard, number, (supabase) =>
     supabase.rpc("retry_lead_delivery", { p_lead: leadId, p_channel: channel }),
