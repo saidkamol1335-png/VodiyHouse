@@ -17,6 +17,8 @@ import {
   DEVELOPERS_MESSAGES,
   FAVORITES_MESSAGES,
   LAZY_SITE_MESSAGES,
+  LEAD_CONTACT_MESSAGES,
+  LEAD_NAMESPACE,
   PARTNERS_MESSAGES,
   pickMessages,
   QUIZ_MESSAGES,
@@ -85,7 +87,10 @@ describe("сообщения для браузера", () => {
     // Тексты окна заявки приходят с самим окном (LAZY_SITE_MESSAGES) — их провайдер ставит LeadProvider.
     const missing = pages.flatMap((file) =>
       [...clientNamespaces([file])]
-        .filter((namespace) => namespace !== "*" && !covers([...allowedFor(file), ...LAZY_SITE_MESSAGES], namespace))
+        .filter(
+          (namespace) =>
+            namespace !== "*" && !covers([...allowedFor(file), ...LAZY_SITE_MESSAGES], namespace),
+        )
         .map((namespace) => `${file}: ${namespace}`),
     );
     expect(clientNamespaces(pages).size).toBeGreaterThan(0);
@@ -106,8 +111,64 @@ describe("сообщения для браузера", () => {
     expect(elsewhere.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
     const page = readSource("app/[locale]/kalkulyator/page.tsx");
     expect(page).toContain("pickMessages(messages, CALC_MESSAGES)");
-    expect(readSource("app/[locale]/novostroyki/[slug]/page.tsx")).toContain("pickMessages(messages, COMPLEX_MESSAGES)");
+    expect(readSource("app/[locale]/novostroyki/[slug]/page.tsx")).toContain(
+      "pickMessages(messages, COMPLEX_MESSAGES)",
+    );
     expect(COMPLEX_MESSAGES).toContain(CALC_NAMESPACE);
+  });
+
+  // Квизу — не весь `lead`, а контакты (LEAD_CONTACT_MESSAGES): новый ключ в квизе или в полях
+  // контактов без строки в наборе дал бы на главной и /podbor ошибку next-intl вместо текста.
+  it("квизу хватает LEAD_CONTACT_MESSAGES: ключи lead квиза и полей контактов ими покрыты", () => {
+    expect(() => pickMessages(ru, QUIZ_MESSAGES)).not.toThrow();
+    expect(QUIZ_MESSAGES).not.toContain(LEAD_NAMESPACE);
+    // Ключи вызовов `name("…")`, `name.rich("…")`, `` name(`errors.${…}`) `` (до первой подстановки).
+    const keysOf = (source: string, name: string) =>
+      [...source.matchAll(new RegExp(`\\b${name}(?:\\.rich)?\\(\\s*["'\`]([^"'\`$]+)`, "g"))].map(
+        (match) => `${LEAD_NAMESPACE}.${match[1]!.replace(/\.$/, "")}`,
+      );
+    const leadVariable = (source: string) =>
+      /const (\w+) = useTranslations\("lead"\)/.exec(source)?.[1];
+    // Граф импортов идёт через index.ts LeadForm (там и окно, и форма застройщика), поэтому смотрим
+    // на то, что квиз берёт оттуда по именам: поля контактов (с ловушкой), согласие и отправку.
+    const quizFiles = reachableClientModules(["components/Quiz/QuizSection.tsx"]).filter((file) =>
+      /[\\/]Quiz[\\/]/.test(file),
+    );
+    const fromLeadForm = quizFiles.flatMap((file) =>
+      [
+        ...readSource(file).matchAll(
+          /import (?:type )?\{([^}]*)\} from "@\/components\/LeadForm"/g,
+        ),
+      ].flatMap((match) =>
+        match[1]!
+          .split(",")
+          .map((name) => name.replace(/^\s*type\s+/, "").trim())
+          .filter(Boolean),
+      ),
+    );
+    expect(new Set(fromLeadForm)).toEqual(
+      new Set(["ContactFields", "LeadConsent", "LeadContact", "useLeadSubmit"]),
+    );
+    expect(readSource("components/LeadForm/useLeadSubmit.ts")).not.toContain("useTranslations");
+    const quizKeys = quizFiles
+      .filter((file) => readSource(file).includes('useTranslations("lead")'))
+      .flatMap((file) => keysOf(readSource(file), leadVariable(readSource(file))!));
+    // Из LeadForm.tsx — только тела полей контактов, ловушки и согласия.
+    const formSource = readSource("components/LeadForm/LeadForm.tsx");
+    const bodyOf = (fn: string) => {
+      const start = formSource.indexOf(`export function ${fn}(`);
+      expect(start).toBeGreaterThanOrEqual(0);
+      const end = formSource.slice(start + 1).search(/\n(?:export )?(?:function|type) /);
+      return formSource.slice(start, end < 0 ? undefined : start + 1 + end);
+    };
+    const contactKeys = ["ContactFields", "TrapField", "LeadConsent"].flatMap((fn) =>
+      keysOf(bodyOf(fn), "t"),
+    );
+    expect(quizKeys.length).toBeGreaterThan(0);
+    expect(contactKeys).toEqual(expect.arrayContaining(["lead.name", "lead.trap", "lead.consent"]));
+    expect(
+      [...quizKeys, ...contactKeys].filter((key) => !covers(LEAD_CONTACT_MESSAGES, key)),
+    ).toEqual([]);
   });
 
   it("корню /admin хватает разделов входа: каждый useTranslations вне кабинета ими покрыт", () => {

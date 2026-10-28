@@ -72,15 +72,45 @@ export const CATALOG_NAMESPACE = "catalog";
 export const SHARE_NAMESPACE = "share";
 /** Подборки витрины над выдачей (3.16б): ряд карточек и плашка «Подборка применена» — в каталоге. */
 export const COLLECTIONS_MESSAGES = "showcase.collections";
-export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, SHARE_NAMESPACE, COLLECTIONS_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
+export const CATALOG_MESSAGES = [
+  CATALOG_NAMESPACE,
+  LEAD_BUTTON_MESSAGES,
+  SHARE_NAMESPACE,
+  COLLECTIONS_MESSAGES,
+  ...SITE_SHELL_MESSAGES,
+] as const;
 
 /** «Предложения от застройщиков» на главной (3.16б): карточка рекламы и спецпредложения с кнопкой заявки. */
 export const SHOWCASE_NAMESPACE = "showcase";
-export const SHOWCASE_MESSAGES = [SHOWCASE_NAMESPACE, LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
+export const SHOWCASE_MESSAGES = [
+  SHOWCASE_NAMESPACE,
+  LEAD_BUTTON_MESSAGES,
+  ...SITE_SHELL_MESSAGES,
+] as const;
+
+/**
+ * Контакты заявки без окна (3.17): имя, телефон, ловушка, согласие, ошибки и номер заявки — то, что
+ * читают ContactFields, TrapField, LeadConsent и квиз; весь `lead` (~3,7 тыс. знаков) не нужен.
+ */
+export const LEAD_CONTACT_MESSAGES = [
+  "lead.name",
+  "lead.phone",
+  "lead.phonePlaceholder",
+  "lead.fieldErrors",
+  "lead.trap",
+  "lead.consent",
+  "lead.errors",
+  "lead.sending",
+  "lead.doneNumber",
+] as const;
 
 /** Квиз «Подбор за 1 минуту» (3.17): вопросы, живой счётчик и контакты с текстами заявки — главная и /podbor. */
 export const QUIZ_NAMESPACE = "quiz";
-export const QUIZ_MESSAGES = [QUIZ_NAMESPACE, LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const QUIZ_MESSAGES = [
+  QUIZ_NAMESPACE,
+  ...LEAD_CONTACT_MESSAGES,
+  ...SITE_SHELL_MESSAGES,
+] as const;
 
 /** «Застройщикам» (шаг 3.11): форма застройщика — тексты окна заявки (lead) в HTML страницы. */
 export const PARTNERS_MESSAGES = [LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
@@ -93,7 +123,13 @@ export const FAVORITES_MESSAGES = ["favorites", ...CATALOG_MESSAGES] as const;
 
 /** Страница ЖК (шаг 3.5): свои тексты, калькулятор «Расчёт для этой квартиры» и оболочка. */
 export const COMPLEX_NAMESPACE = "complex";
-export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, LEAD_NAMESPACE, SHARE_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const COMPLEX_MESSAGES = [
+  COMPLEX_NAMESPACE,
+  CALC_NAMESPACE,
+  LEAD_NAMESPACE,
+  SHARE_NAMESPACE,
+  ...SITE_SHELL_MESSAGES,
+] as const;
 
 /** Застройщики (шаг 3.15): список — поиск на месте; страница — вкладки объектов и карточки каталога. */
 export const DEVELOPERS_NAMESPACE = "developers";
