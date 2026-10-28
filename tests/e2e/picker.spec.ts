@@ -1,12 +1,12 @@
 import pg from "pg";
 import { dbClientConfig } from "../../lib/supabase/dbClient";
-import { hasCloud, NO_CLOUD } from "./cloud";
+import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Фаза 4 (4.5–4.6): «Выбрать квартиру» на фасаде у DEMO Shodlik (фасад и планы подъездов — DEMO
-// из demo:seed). Путь фасад → этаж → квартира → расчёт → заявка на 1440 и 390; смена статуса в базе
-// видна на открытом плане за секунды. Заявка e2e — имя «E2E …», её удаляет global-teardown.
+// из demo:seed). Путь фасад → этаж → квартира → расчёт → заявка на 1440 и 390; бронь, поставленная менеджером
+// в кабинете, видна на открытом плане за секунды. Заявка e2e — имя «E2E …», её удаляет global-teardown.
 
 const SHODLIK = "/ru/novostroyki/demo-shodlik";
 const shot = (page: Page, name: string) =>
@@ -79,14 +79,14 @@ test.describe("сайт · выбрать квартиру на фасаде", (
     await expect(section.locator(".complex-picker__flat")).toHaveCount(0);
   });
 
-  test("смена статуса в базе видна на открытом плане за секунды", async ({ page }, testInfo) => {
+  test("менеджер ставит бронь в кабинете — открытый план на сайте показывает её за секунды", async ({ page, browser }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440" || !process.env.SUPABASE_DB_URL, "один раз: статус меняется в общей базе");
-    // Раздел перечитывает статусы раз в 15 с: ждём до 25 с.
-    test.setTimeout(60_000);
+    // Раздел перечитывает статусы раз в 15 с: ждём до 25 с; кабинет грузит список квартир лениво.
+    test.setTimeout(120_000);
     const unit = await withDb(async (client) =>
       (
-        await client.query<{ id: string; number: string; floor: number; entrance: number }>(
-          `select u.id, u.number, u.floor, u.entrance from units u join blocks b on b.id = u.block_id
+        await client.query<{ id: string; number: string; floor: number; entrance: number; complex_id: string }>(
+          `select u.id, u.number, u.floor, u.entrance, c.id as complex_id from units u join blocks b on b.id = u.block_id
            join complexes c on c.id = b.complex_id
            where c.slug = 'demo-shodlik' and b.name = 'A' and u.status = 'free' order by u.floor desc, u.entrance limit 1`,
         )
@@ -107,11 +107,26 @@ test.describe("сайт · выбрать квартиру на фасаде", (
         await client.query("update units set status = $1 where id = $2", [status, unit.id]);
         await client.query("commit");
       });
-    await setStatus("reserved");
+    // Кабинет менеджера: «Квартиры» Shodlik, блок A — первый; статус квартиры — «бронь».
+    const cabinet = await browser.newContext({ storageState: cabinetState("manager") });
+    const admin = await cabinet.newPage();
+    const number = new RegExp(`^${unit.number}$`);
     try {
+      await admin.goto(`/admin/zhk/${unit.complex_id}/kvartiry`);
+      const row = admin.locator(".units-row").filter({ has: admin.locator(".units-row__number", { hasText: number }) });
+      await expect(admin.locator(".units-row").first()).toBeVisible({ timeout: 30_000 });
+      await row.getByRole("button", { name: `Кв. ${unit.number}, свободна. Сменить статус` }).click();
+      await admin.getByRole("group", { name: new RegExp(`^Статус кв\\. ${unit.number}`) }).getByRole("button", { name: "бронь" }).click();
+      await expect(admin.locator(".units-undo")).toContainText(`Кв. ${unit.number}: свободна → бронь`);
       await expect(tile).toHaveClass(/complex-picker__unit--reserved/, { timeout: 25_000 });
+      // «Отменить» живёт 5 с — сайт ждём дольше; обратно — тем же выбором статуса, сайт видит и это.
+      await row.getByRole("button", { name: `Кв. ${unit.number}, бронь. Сменить статус` }).click();
+      await admin.getByRole("group", { name: new RegExp(`^Статус кв\. ${unit.number}`) }).getByRole("button", { name: "свободна" }).click();
+      await expect(tile).toHaveClass(/complex-picker__unit--free/, { timeout: 25_000 });
     } finally {
+      // Страховка: квартира DEMO снова свободна, даже если тест упал посередине.
       await setStatus("free");
+      await cabinet.close();
     }
   });
 });
