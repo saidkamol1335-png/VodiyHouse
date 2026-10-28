@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { alertText, sheetRow, sourceLine, telegramText, type LeadRecord } from "./message";
 
@@ -44,6 +46,16 @@ describe("сообщение заявки", () => {
     expect(sourceLine({ fbclid: "x" })).toBe("facebook / fbclid");
     expect(sourceLine({ referrer: "t.me" })).toBe("t.me");
     expect(sourceLine({})).toBe("прямой заход");
+  });
+
+  // Приёмник Apps Script (docs/leads-sheet.md) пишет столбцы по своему COLUMNS: поля, которого там
+  // нет, в Таблице не будет.
+  it("строка Таблицы: ключи совпадают со столбцами приёмника в docs/leads-sheet.md", () => {
+    const doc = readFileSync(path.resolve(import.meta.dirname, "../../docs/leads-sheet.md"), "utf8").replace(/\r\n/g, "\n");
+    const columns = /const COLUMNS = \[([\s\S]*?)\n\];/.exec(doc)?.[1] ?? "";
+    const keys = [...columns.matchAll(/\["([a-z_]+)",/g)].map((match) => match[1]);
+    expect(keys.length).toBeGreaterThan(0);
+    expect(Object.keys(sheetRow(lead, links)).sort()).toEqual([...keys].sort());
   });
 
   it("строка Таблицы: поля ТЗ 10.3, utm_content отдельным столбцом", () => {

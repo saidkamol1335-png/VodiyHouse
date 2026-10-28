@@ -60,13 +60,22 @@ function doPost(e) {
   if (!lock.tryLock(5000)) return reply({ ok: false, error: "busy" });
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-    if (sheet.getLastRow() === 0) sheet.appendRow(COLUMNS.map(([, title]) => title));
+    // Шапка: недостающие столбцы (новые поля сайта) дописываются справа со своей подписью — шапку
+    // руками не править; значения пишутся по подписи столбца, а не по месту.
+    const header = sheet.getLastRow() === 0 ? [] : sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+    const missing = COLUMNS.filter(([, title]) => !header.includes(title)).map(([, title]) => title);
+    if (missing.length > 0) {
+      sheet.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
+      header.push(...missing);
+    }
     // Повтор той же заявки (ответ не дошёл до сайта) — строка уже есть, второй не будет.
-    const numbers = sheet.getRange(1, 1, sheet.getLastRow(), 1).getValues().flat();
+    const numberColumn = header.indexOf(COLUMNS[0][1]) + 1;
+    const numbers = sheet.getLastRow() > 1 ? sheet.getRange(2, numberColumn, sheet.getLastRow() - 1, 1).getValues().flat() : [];
     if (numbers.some((value) => String(value) === String(data.row.number))) return reply({ ok: true });
     // Ячейка, начатая «=», «+», «-», «@», — формула: заявка с сайта ею не станет.
     const safe = (value) => (typeof value === "string" && /^[=+\-@]/.test(value) ? "'" + value : value);
-    sheet.appendRow(COLUMNS.map(([key]) => safe(data.row[key] ?? "")));
+    const keyOf = Object.fromEntries(COLUMNS.map(([key, title]) => [title, key]));
+    sheet.appendRow(header.map((title) => (keyOf[title] ? safe(data.row[keyOf[title]] ?? "") : "")));
   } finally {
     lock.releaseLock();
   }
@@ -74,7 +83,10 @@ function doPost(e) {
 }
 ```
 
-Таблица, подключённая до 26.10.2026, получила новый столбец «Застройщик» (после «ЖК / блок /
-планировка»): вставить код заново и добавить столбец в шапку вручную.
+Новое поле сайта — строка в `COLUMNS` (ключ из `sheetRow` в `lib/leads/message.ts` и подпись):
+после замены кода приёмник сам допишет столбец в шапку справа. Свои столбцы в таблице (заметки
+менеджера) не мешают — значения пишутся по подписи столбца. Юнит в `lib/leads/message.test.ts`
+сверяет ключи `sheetRow` со столбцами этого кода. Код, вставленный до 29.10.2026, писал по месту
+столбца: заменить его этим (тестовая таблица — тоже).
 
 Номер телефона в таблице — с апострофом (`'+998…`): иначе Google Таблицы считают «+998…» формулой.
