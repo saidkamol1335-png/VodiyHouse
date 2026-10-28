@@ -22,7 +22,7 @@ export function LeadButton({ intent, children, variant = "primary", size, block,
   const open = useLeadOpener();
   if (!open) return null;
   return (
-    <Button variant={variant} size={size} block={block} className={className} onClick={() => open(intent)}>
+    <Button variant={variant} size={size} block={block} className={className} onClick={(event) => open(intent, event.currentTarget)}>
       {children ?? t(intent.type)}
     </Button>
   );

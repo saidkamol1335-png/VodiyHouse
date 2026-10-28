@@ -17,7 +17,8 @@ const LeadDialog = dynamic(loadDialog, { ssr: false });
 const FIRST_ACTIONS = ["scroll", "pointerdown", "keydown", "touchstart"] as const;
 const NOTICE_MS = 4000;
 
-type LeadOpener = (intent: LeadIntent) => void;
+/** from — кнопка, открывшая окно: Safari при нажатии фокус на кнопку не ставит, activeElement — body. */
+type LeadOpener = (intent: LeadIntent, from?: HTMLElement) => void;
 
 const LeadContext = createContext<LeadOpener | null>(null);
 
@@ -92,8 +93,8 @@ export function LeadProvider({ children, preload = true }: LeadProviderProps) {
     return () => window.clearTimeout(id);
   }, [offline]);
   const openLead = useCallback<LeadOpener>(
-    (intent) => {
-      opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    (intent, from) => {
+      opener.current = from ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
       setOffline(false);
       setOpen((current) => ({ intent, key: (current?.key ?? 0) + 1 }));
       void lead.load().then((loaded) => {

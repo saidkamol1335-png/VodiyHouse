@@ -126,6 +126,8 @@ test.describe("кабинет · заявки", () => {
       await page.keyboard.press("Escape");
       await expect(drawer).toBeHidden();
       await expect(row).toContainText("Перезвонили");
+      // Закрытие шторки меняет адрес (router.replace без n=): WebKit заканчивает его позже — goto ждёт.
+      await expect(page).not.toHaveURL(/[?&]n=/);
       await page.goto("/admin");
       await expect(page.locator(".home-leads__row", { hasText: `#${number}` })).toBeVisible();
       await shot(page, "home");
@@ -135,8 +137,13 @@ test.describe("кабинет · заявки", () => {
     test("фильтры в адресе: статус и поиск по номеру; CSV — та же выборка", async ({ page, request }) => {
       await page.goto("/admin/zayavki?status=new");
       await expect(page.getByRole("button", { name: /^Новая/ })).toHaveAttribute("aria-pressed", "true");
-      await page.getByLabel("Поиск по заявкам").fill("E2E");
-      await expect(page).toHaveURL(/q=E2E/);
+      // WebKit: ввод раньше, чем поле ожило, React не видит — повторяем набор, пока адрес не сменится.
+      const search = page.getByLabel("Поиск по заявкам");
+      await expect(async () => {
+        await search.fill("");
+        await search.fill("E2E");
+        await expect(page).toHaveURL(/q=E2E/, { timeout: 2_000 });
+      }).toPass({ timeout: 15_000 });
       const csv = await request.get("/admin/zayavki/csv?q=E2E", {
         headers: { cookie: (await page.context().cookies()).map((c) => `${c.name}=${c.value}`).join("; ") },
       });

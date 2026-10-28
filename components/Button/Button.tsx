@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode, Ref } from "react";
+import type { MouseEvent, ReactNode, Ref } from "react";
 
 type ButtonProps = {
   children: ReactNode;
@@ -18,7 +18,7 @@ type ButtonProps = {
   /** Кнопка отправки с name и value: одна форма — несколько действий («Опубликовать», «Скрыть»). */
   name?: string;
   value?: string;
-  onClick?: () => void;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   /** Форма отправляется: кнопка недоступна и помечена aria-busy. */
   pending?: boolean;

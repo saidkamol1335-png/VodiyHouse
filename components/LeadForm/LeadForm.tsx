@@ -107,11 +107,29 @@ type ContactFieldsProps = {
   errors: LeadFieldErrors;
 };
 
+/**
+ * Набранное до гидратации (медленный телефон, форма в разделе страницы): React событий не видел,
+ * и первая же перерисовка стёрла бы имя — один раз после гидратации забираем значения из полей.
+ */
+function useTypedBeforeHydration(id: string, contact: LeadContact, onChange: (contact: LeadContact) => void) {
+  useEffect(() => {
+    const typed = (field: "name" | "phone") =>
+      (document.getElementById(`${id}-${field}`) as HTMLInputElement | null)?.value ?? "";
+    const name = typed("name");
+    const phone = typed("phone");
+    if ((name && name !== contact.name) || (phone && phone !== contact.phone)) {
+      onChange({ ...contact, name: name || contact.name, phone: phone ? maskPhone(phone) : contact.phone });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- только при гидратации
+  }, []);
+}
+
 /** Имя и телефон рядом (`.form__two`, на телефоне — столбиком) и скрытая ловушка для ботов; квиз (3.17) собирает контакты ими же. */
 export function ContactFields({ id, contact, onChange, onEdit, errors }: ContactFieldsProps) {
   const t = useTranslations("lead");
   const phoneError =
     errors.phone === "required" ? t("fieldErrors.phoneRequired") : errors.phone ? t("fieldErrors.phone") : undefined;
+  useTypedBeforeHydration(id, contact, onChange);
   return (
     <div className="lead-form__two">
       <Field
