@@ -149,6 +149,8 @@ test.describe("менеджер и видеограф", () => {
 test.describe("первый вход и выход", () => {
   test("новичок: /admin → /admin/parol; ошибки; свой пароль → Главная; выход и вход новым", async ({ page }, testInfo) => {
     desktopOnly(testInfo.project.name);
+    // Два входа и смена пароля — три действия сервера: в общем прогоне не укладываются в 30 с.
+    test.setTimeout(60_000);
     const { newcomer } = e2eStaff();
     await signIn(page, newcomer.email, newcomer.password);
     await expect(page).toHaveURL(/\/admin\/parol$/);
@@ -178,6 +180,6 @@ test.describe("первый вход и выход", () => {
     await expect(page).toHaveURL(/\/admin\/vhod/);
     await expect(page.locator(".admin-shell")).toHaveCount(0);
     await signIn(page, newcomer.email, "e2e-новый-пароль");
-    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
   });
 });
