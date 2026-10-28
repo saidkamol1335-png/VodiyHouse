@@ -47,7 +47,7 @@ export function QuizLive({ match, locale, compact = false }: QuizLiveProps) {
             const price = match.prices.get(complex.id) ?? null;
             return (
               <Link key={complex.id} href={complexRoute(complex.slug)} className="quiz__thumb">
-                {complex.photos[0] ? <SitePhoto photo={complex.photos[0]} alt="" frame="card" sizes="34px" className="quiz__thumb-photo" /> : <span className="quiz__thumb-photo" />}
+                {complex.photos[0] ? <SitePhoto photo={complex.photos[0]} alt="" frame="card" sizes="(max-width: 760px) 48px, 34px" className="quiz__thumb-photo" /> : <span className="quiz__thumb-photo" />}
                 <span>
                   <b>{complex.name[locale]}</b>
                   {price !== null ? <small>{t("priceFrom", { price: formatPrice(price, "USD") })}</small> : null}

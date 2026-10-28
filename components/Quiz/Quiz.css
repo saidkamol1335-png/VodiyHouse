@@ -520,7 +520,7 @@
 
   .quiz__thumb {
     padding: 0;
-    margin-left: -10px;
+    margin-left: -8px;
     border: 2px solid var(--bg-3);
     border-radius: 12px;
     background: none;

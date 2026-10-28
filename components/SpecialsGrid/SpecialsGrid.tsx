@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, type UIEvent } from "react";
+import { useRef, useState, type UIEvent } from "react";
 import type { SpecialView } from "@/lib/site/showcase/model";
 import { SpecialCard } from "./SpecialCard";
 
@@ -12,12 +12,18 @@ import { SpecialCard } from "./SpecialCard";
 export function SpecialsGrid({ specials }: { specials: readonly SpecialView[] }) {
   const t = useTranslations("showcase.special");
   const [current, setCurrent] = useState(0);
+  const frame = useRef(0);
+  // Прокрутка шлёт события чаще кадра — текущий кадр считаем не чаще одного раза за кадр.
   const onScroll = (event: UIEvent<HTMLUListElement>) => {
     const node = event.currentTarget;
-    const item = node.firstElementChild;
-    const gap = parseFloat(getComputedStyle(node).columnGap) || 0;
-    const width = item instanceof HTMLElement ? item.offsetWidth + gap : node.clientWidth;
-    setCurrent(Math.min(specials.length - 1, Math.round(node.scrollLeft / Math.max(width, 1))));
+    if (frame.current) return;
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0;
+      const item = node.firstElementChild;
+      const gap = parseFloat(getComputedStyle(node).columnGap) || 0;
+      const width = item instanceof HTMLElement ? item.offsetWidth + gap : node.clientWidth;
+      setCurrent(Math.min(specials.length - 1, Math.round(node.scrollLeft / Math.max(width, 1))));
+    });
   };
   return (
     <div className="specials">

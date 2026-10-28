@@ -64,7 +64,7 @@
 
 .developer-objects__tab--on .developer-objects__count {
   background: var(--amber);
-  color: #fff;
+  color: var(--over-photo-fg);
 }
 
 .developer-objects__empty {

@@ -83,6 +83,9 @@ async function readCovers(supabase: SupabaseClient, kind: ShowcaseKind, ids: str
   return new Map(((data ?? []) as unknown as Record<string, string>[]).map((row) => [row[column]!, row.path!]));
 }
 
+const hasFilter = (filter: unknown): boolean =>
+  typeof filter === "object" && filter !== null && !Array.isArray(filter) && Object.keys(filter).length > 0;
+
 function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): ShowcaseListRow {
   const complexCount = row.complex_ids?.length ?? 0;
   return {
@@ -91,7 +94,8 @@ function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): Showca
     title: bilingualFrom(row.title).ru,
     developerName: row.developers?.name ?? null,
     complexCount,
-    byFilter: kind !== "special" && complexCount === 0,
+    // Подборка вручную или реклама «по ЖК», у которых ЖК удалили (массив опустел), — не «по фильтру».
+    byFilter: kind === "collection" ? row.mode === "filter" : kind === "ad" ? hasFilter(row.filter) : false,
     validFrom: row.valid_from ?? null,
     validTo: row.valid_to ?? null,
     isActive: row.is_active,
