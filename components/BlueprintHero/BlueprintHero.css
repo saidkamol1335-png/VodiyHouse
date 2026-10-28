@@ -132,13 +132,13 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(9, 9, 11, 0.75) 0%, rgba(9, 9, 11, 0) 20%),
-    linear-gradient(0deg, var(--hero-bg) 0%, rgba(9, 9, 11, 0.6) 16%, rgba(9, 9, 11, 0) 40%),
+    linear-gradient(180deg, rgb(var(--hero-bg-rgb) / 0.75) 0%, rgb(var(--hero-bg-rgb) / 0) 20%),
+    linear-gradient(0deg, var(--hero-bg) 0%, rgb(var(--hero-bg-rgb) / 0.6) 16%, rgb(var(--hero-bg-rgb) / 0) 40%),
     linear-gradient(
       90deg,
-      rgba(9, 9, 11, calc(0.8 * var(--hero-intro) + 0.18)) 0%,
-      rgba(9, 9, 11, calc(0.5 * var(--hero-intro))) 42%,
-      rgba(9, 9, 11, 0) 70%
+      rgb(var(--hero-bg-rgb) / calc(0.8 * var(--hero-intro) + 0.18)) 0%,
+      rgb(var(--hero-bg-rgb) / calc(0.5 * var(--hero-intro))) 42%,
+      rgb(var(--hero-bg-rgb) / 0) 70%
     );
   pointer-events: none;
 }
@@ -148,7 +148,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(110% 85% at 0% 100%, rgba(9, 9, 11, 0.88) 0%, rgba(9, 9, 11, 0.45) 38%, rgba(9, 9, 11, 0) 64%);
+  background: radial-gradient(110% 85% at 0% 100%, rgb(var(--hero-bg-rgb) / 0.88) 0%, rgb(var(--hero-bg-rgb) / 0.45) 38%, rgb(var(--hero-bg-rgb) / 0) 64%);
   opacity: var(--hero-finale);
 }
 
@@ -701,8 +701,8 @@
 @media (max-width: 1023px) {
   .blueprint-hero__shade {
     background:
-      linear-gradient(180deg, rgba(9, 9, 11, 0.8) 0%, rgba(9, 9, 11, 0) 24%),
-      linear-gradient(0deg, var(--hero-bg) 0%, rgba(9, 9, 11, 0.92) 30%, rgba(9, 9, 11, 0.4) 58%, rgba(9, 9, 11, 0) 76%);
+      linear-gradient(180deg, rgb(var(--hero-bg-rgb) / 0.8) 0%, rgb(var(--hero-bg-rgb) / 0) 24%),
+      linear-gradient(0deg, var(--hero-bg) 0%, rgb(var(--hero-bg-rgb) / 0.92) 30%, rgb(var(--hero-bg-rgb) / 0.4) 58%, rgb(var(--hero-bg-rgb) / 0) 76%);
   }
 
   .blueprint-hero__content {

@@ -213,6 +213,41 @@ describe("фасад и планы этажей: права, правила и �
     });
   });
 
+  describe("полировка фазы 4 (20261029030000)", () => {
+    afterEach(() => db.admin.query("delete from floor_plans"));
+
+    it("этажность блока не опускается ниже его плана этажа", async () => {
+      await asHead((tx) => savePlan(tx, null, 1, 2, 12));
+      await expectHint(asHead((tx) => tx.query("update blocks set floors_total = 10 where id = $1", [ids.publicBlock])), "vh:floors_below_plans");
+      await asHead((tx) => tx.query("update blocks set floors_total = 12 where id = $1", [ids.publicBlock]));
+      await asHead((tx) => tx.query("update blocks set floors_total = 16 where id = $1", [ids.publicBlock]));
+    });
+
+    it("журнал: картинки плана нет отдельной записью; контуры — числом «было → стало»", async () => {
+      const plan = await asHead(async (tx) => {
+        const created = await savePlan(tx, null, 1, 2, 4);
+        await call(tx, "public.set_floor_plan_contours($1, $2::jsonb)", [created.id, contours(1, 1, 2)]);
+        return created;
+      });
+      const media = await db.admin.query<{ n: number }>(
+        "select count(*)::int as n from audit_log a where a.entity = 'media_assets' and a.changes ->> 'kind' = 'floor_plan'",
+      );
+      expect(media.rows[0]!.n).toBe(0);
+      const update = await db.admin.query<{ contours: unknown }>(
+        "select changes -> 'contours' as contours from audit_log where entity = 'floor_plans' and entity_id = $1 and action = 'update'",
+        [plan.id],
+      );
+      expect(update.rows.map((row) => row.contours)).toEqual([[0, 2]]);
+    });
+
+    it("дата переноса срока по умолчанию — ташкентская", async () => {
+      const column = await db.admin.query<{ column_default: string }>(
+        "select column_default from information_schema.columns where table_name = 'deadline_changes' and column_name = 'changed_on'",
+      );
+      expect(column.rows[0]!.column_default).toBe("private.tashkent_today()");
+    });
+  });
+
   describe("сайт", () => {
     it("site_complex_picker: фасад, контуры и планы опубликованного ЖК; черновик посетителю — null", async () => {
       await asHead(async (tx) => {

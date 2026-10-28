@@ -79,7 +79,8 @@ const HIDDEN_FIELDS = new Set([
 // Ссылки на файлы (чертёж, фото темы) и составные списки («Что входит в цену», «Удобство
 // локации»): значения людям не прочитать, но сама правка на сайте должна быть в журнале —
 // «изменено» без «было → стало».
-const OPAQUE_FIELDS = new Set(["drawing_id", "photo_id", "price_includes", "nearby"]);
+// Фаза 4: контур блока на фасаде и картинка плана этажа — тоже «изменено» без точек и id.
+const OPAQUE_FIELDS = new Set(["drawing_id", "photo_id", "price_includes", "nearby", "facade_contour", "image_id"]);
 const PUBLICATION_ENTITIES = new Set(["developers", "complexes"]);
 // Деньги — с валютой блока из контекста записи: цена квартиры и «цена от» планировки.
 const MONEY_FIELDS: Record<string, ReadonlySet<string>> = {
