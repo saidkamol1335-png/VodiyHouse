@@ -66,8 +66,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--fg);
-  color: var(--bg);
+  background: var(--mark-bg, var(--fg));
+  color: var(--developer-mark-fg);
   font-family: var(--mono);
   font-size: var(--fs-small);
   font-weight: 700;

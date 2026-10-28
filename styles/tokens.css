@@ -327,6 +327,14 @@
   --s-sold-t: #9e3a2e;
   /* «Выбрать квартиру» (фаза 4, мокап .vis / .fplan): подложка плана этажа, рамка фасада; подписи
      поверх фото — тёмное стекло в обеих темах (фото-блоки мокапа тёмные всегда). */
+  /* Монограммы застройщиков без логотипа (мокап SiteDevs): плитка цветом застройщика, буквы белые;
+     одинаковые в обеих темах. */
+  --developer-mark-1: #1e3a5f;
+  --developer-mark-2: #4a2a7a;
+  --developer-mark-3: #0f5a4a;
+  --developer-mark-4: #9b2c3c;
+  --developer-mark-5: #7a4a0e;
+  --developer-mark-fg: #ffffff;
   --picker-plan-bg: #fbf9f5;
   --picker-frame-bg: #efeae2;
   --picker-glass: rgba(17, 14, 10, 0.72);

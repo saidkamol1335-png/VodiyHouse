@@ -62,3 +62,13 @@ export function searchDevelopers<T extends { name: string }>(rows: readonly T[],
   const needle = fold(query);
   return needle ? rows.filter((row) => fold(row.name).includes(needle)) : [...rows];
 }
+
+/** Цветов монограмм (мокап SiteDevs): --developer-mark-1…5 в styles/tokens.css. */
+export const MARK_TONES = 5;
+
+/** Цвет монограммы застройщика без логотипа — от названия: у одного застройщика всегда один. */
+export function markTone(name: string): number {
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
+  return (hash % MARK_TONES) + 1;
+}

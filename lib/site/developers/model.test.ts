@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
-import { developerChecks, developerComplexes, developerCounts, developerCover, searchDevelopers } from "./model";
+import { developerChecks, developerComplexes, developerCounts, developerCover, MARK_TONES, markTone, searchDevelopers } from "./model";
 import type { DeveloperPage, DeveloperSummary } from "./records";
 
 // Страница застройщика (шаг 3.15): вкладки «Все · Сдано · Строится» по ТЗ 8.6, «Проверено Vodiy
@@ -85,5 +85,14 @@ describe("фон и поиск", () => {
     expect(searchDevelopers(rows, "farg'ona")).toHaveLength(1);
     expect(searchDevelopers(rows, "  ")).toHaveLength(2);
     expect(searchDevelopers(rows, "zzz")).toEqual([]);
+  });
+});
+
+describe("монограмма застройщика", () => {
+  it("цвет — от названия, один из пяти, у одного названия всегда один", () => {
+    const tones = ["Farg‘ona Sifat Qurilish", "Marg‘ilon Invest", "Kamalak Development"].map(markTone);
+    expect(tones.every((tone) => tone >= 1 && tone <= MARK_TONES)).toBe(true);
+    expect(markTone("Farg‘ona Sifat Qurilish")).toBe(tones[0]);
+    expect(new Set(tones).size).toBe(3);
   });
 });

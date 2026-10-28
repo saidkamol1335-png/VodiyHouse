@@ -2,13 +2,13 @@
 
 import { ArrowRight, Check, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { type CSSProperties, useId, useState } from "react";
 import { SitePhoto } from "@/components/SitePhoto";
 import { initialsOf } from "@/lib/format";
 import { Link } from "@/lib/i18n/navigation";
 import { developerRoute } from "@/lib/routes";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
-import { searchDevelopers } from "@/lib/site/developers/model";
+import { markTone, searchDevelopers } from "@/lib/site/developers/model";
 
 export type DeveloperRow = {
   slug: string;
@@ -21,12 +21,16 @@ export type DeveloperRow = {
   verified: boolean;
 };
 
-/** Знак без логотипа — монограмма названия (мокап SiteDevs). */
+/** Знак без логотипа — монограмма названия на цветной плитке (мокап SiteDevs: цвет у каждого свой). */
 export function DeveloperMark({ name, logo, className }: { name: string; logo: CatalogPhoto | null; className: string }) {
   return logo ? (
     <SitePhoto photo={logo} alt="" frame="card" sizes="56px" className={className} />
   ) : (
-    <span className={`${className} ${className}--mark`} aria-hidden="true">
+    <span
+      className={`${className} ${className}--mark`}
+      style={{ "--mark-bg": `var(--developer-mark-${markTone(name)})` } as CSSProperties}
+      aria-hidden="true"
+    >
       {initialsOf(name.replace(/[‘’']/g, ""))}
     </span>
   );
