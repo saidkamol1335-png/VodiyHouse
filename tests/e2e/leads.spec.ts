@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors } from "./helpers";
 

@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Request } from "@playwright/test";
+import { expect, test, type Page, type Request } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 12.5: массовая панель, правка строки, «+ Квартира», «Удалить список блока» на стенде

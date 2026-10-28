@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import pg from "pg";
 import { dbClientConfig } from "../../lib/supabase/dbClient";
 import { hasCloud, NO_CLOUD } from "./cloud";

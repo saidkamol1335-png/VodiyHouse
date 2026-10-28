@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 12.3: вкладка «Квартиры» на стенде /dev/zhk (DEMO): у Namuna блок «1» без списка —

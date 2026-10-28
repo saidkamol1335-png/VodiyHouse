@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.6: публичная /kalkulyator — без базы страница с шапкой и «калькулятор заработает…»

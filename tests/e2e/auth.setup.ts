@@ -1,5 +1,5 @@
 import { mkdirSync } from "node:fs";
-import { test as setup } from "@playwright/test";
+import { test as setup } from "./fixtures";
 import { cabinetState, e2eStaff, hasCloud, NO_CLOUD, signIn } from "./cloud";
 
 // Сессии руководителя, менеджера и видеографа для тестов кабинета против облака — 3 входа на прогон.

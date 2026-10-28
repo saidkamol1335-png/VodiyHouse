@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // «Настройки → Сотрудники» (шаг 8, С1–С5) на стенде /dev/staff: DEMO мокапа, Supabase подменён.

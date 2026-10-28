@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 12.6: менеджер (Н2, Н7) на стенде /dev/menedzher/zhk — те же компоненты и те же правила

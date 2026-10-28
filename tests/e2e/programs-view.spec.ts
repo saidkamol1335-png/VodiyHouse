@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.4: менеджер читает «Программы оплаты» (PLAN §5) на /dev/menedzher/programmy; раскладка

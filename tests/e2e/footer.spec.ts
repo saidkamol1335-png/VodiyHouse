@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Подвал по мокапу (.ftr): колонки 3а, контакты только Vodiy House (правило 1.2), знак появляется

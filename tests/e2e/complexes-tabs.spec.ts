@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors, imageFile } from "./helpers";
 
 // Шаг 11 фазы 1: вкладки ЖК на служебном стенде (/dev/zhk/<id>, DEMO мокапа) — «Блоки» (И4),

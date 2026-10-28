@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Базовые эффекты по решениям дизайн-интервью 19.10.2026 (docs/design-decisions.md).
 test.describe("базовые эффекты", () => {

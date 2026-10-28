@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шапка по решениям Ш1–Ш6 (docs/design-decisions.md). Скриншоты — test-results/screens/header/.

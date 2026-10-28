@@ -41,6 +41,8 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
   engine: CalcEngine<P>;
   data: CalcData<P>;
   initialParams: CalcParams;
+  /** initialParams прочитаны сервером из адреса: после «Назад» → «Вперёд» адрес главнее. */
+  initialFromUrl?: boolean;
   modes: readonly PriceMode[];
   developerName: string;
   /** Отметка «Условия проверены» застройщика: «актуальны на» — позднее из неё и правки программы (Р5). */
@@ -75,9 +77,9 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
 export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculatorProps<P>) {
   const t = useTranslations("calc");
   const locale = useLocale() as CalcLocale;
-  const { params, update } = useCalcParams(
-    pinProgramBlock(props.data, props.initialParams, props.modes),
-  );
+  const pin = (candidate: CalcParams) => pinProgramBlock(props.data, candidate, props.modes);
+  const fromUrl = props.initialFromUrl ?? false;
+  const { params, update } = useCalcParams(props.initialParams, { pin, fromUrl });
   const view = calculatorView(props.engine, props.data, params, props.modes);
   const context: TotalContext = { out: view.outCurrency, rate: props.data.rate, t, locale };
   const snapshot: CalcSnapshot<P> = {

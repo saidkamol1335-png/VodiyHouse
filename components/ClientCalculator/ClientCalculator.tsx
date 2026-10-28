@@ -59,6 +59,7 @@ export function ClientCalculator({
         // Новый адрес с сервера (пример, пилюля застройщика) — расчёт начинается с него заново.
         key={`${current.id}?${writeCalcParams(initialParams)}`}
         id="client-calc"
+        initialFromUrl
         surface="framed"
         engine={CABINET_ENGINE}
         data={current.data}

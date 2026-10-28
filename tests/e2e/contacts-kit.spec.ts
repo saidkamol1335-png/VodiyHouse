@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // «Настройки → Контакты» (Ф9) на стенде: пустая форма, как до ответа заказчика; действие — настоящие

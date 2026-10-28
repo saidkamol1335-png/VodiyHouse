@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 10.2 фазы 1: «Настройки → Справочники» (Д6) и «Журнал» на служебных стендах. Значения

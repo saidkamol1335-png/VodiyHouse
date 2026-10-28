@@ -35,6 +35,7 @@ export function SiteCalculator({ screen, initialParams, leadEnabled, hints }: Si
         // Новый адрес с сервера (пример, пилюля застройщика) — расчёт начинается с него заново.
         key={`${current.id}?${writeCalcParams(initialParams)}`}
         id="site-calc"
+        initialFromUrl
         engine={SITE_ENGINE}
         data={current.data}
         initialParams={initialParams}

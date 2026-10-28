@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors } from "./helpers";
 

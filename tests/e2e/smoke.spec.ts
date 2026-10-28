@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { collectPageErrors, PUBLIC_PAGES } from "./helpers";
 
 test.describe("каркас открывается", () => {

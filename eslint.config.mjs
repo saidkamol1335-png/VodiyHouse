@@ -3,13 +3,25 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 
+// Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета. patterns, а не
+// paths: ловят и относительный импорт (../supabase/admin), и сам ключ из env.
+const secretImportPatterns = [
+  {
+    group: ["**/supabase/admin", "**/supabase/admin.ts"],
+    message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
+  },
+  {
+    group: ["**/supabase/env", "**/supabase/env.ts", "./env"],
+    importNames: ["supabaseSecretKey"],
+    message: "Секретный ключ читают только lib/supabase/admin.ts и authForwarding.ts.",
+  },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   prettier,
   {
-    // Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета. patterns, а не
-    // paths: ловят и относительный импорт (../supabase/admin), и сам ключ из env.
     files: ["**/*.{ts,tsx}"],
     ignores: [
       "lib/admin/server/**",
@@ -25,20 +37,26 @@ const eslintConfig = defineConfig([
       "lib/supabase/env.test.ts",
     ],
     rules: {
+      "no-restricted-imports": ["error", { patterns: secretImportPatterns }],
+    },
+  },
+  {
+    // e2e переходят по страницам только общим `test` (tests/e2e/fixtures.ts): он ждёт, пока React
+    // оживёт, иначе клик на dev-сервере под нагрузкой уходит в пустоту.
+    files: ["tests/e2e/**/*.ts"],
+    ignores: ["tests/e2e/fixtures.ts"],
+    rules: {
       "no-restricted-imports": [
         "error",
         {
-          patterns: [
+          paths: [
             {
-              group: ["**/supabase/admin", "**/supabase/admin.ts"],
-              message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
-            },
-            {
-              group: ["**/supabase/env", "**/supabase/env.ts", "./env"],
-              importNames: ["supabaseSecretKey"],
-              message: "Секретный ключ читают только lib/supabase/admin.ts и authForwarding.ts.",
+              name: "@playwright/test",
+              importNames: ["test"],
+              message: "Переходы e2e ждут оживления страницы: import { test } from './fixtures'.",
             },
           ],
+          patterns: secretImportPatterns,
         },
       ],
     },

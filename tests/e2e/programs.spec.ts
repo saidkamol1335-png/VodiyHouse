@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.4 фазы 2: «Программы оплаты» руководителя на стенде /dev/programmy (DEMO мокапа CabProg) —

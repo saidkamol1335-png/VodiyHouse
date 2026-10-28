@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors, imageFile } from "./helpers";
 
 // Шаг 10.2 фазы 1: «Застройщики» на служебном стенде (/dev/zastroyshchiki, DEMO мокапа) —

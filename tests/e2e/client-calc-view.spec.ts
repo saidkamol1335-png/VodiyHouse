@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.5: вкладки раздела, менеджер, раскладка 390 и липкая полоса (В7 B), скриншоты s25 для

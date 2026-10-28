@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.7: «Расчёт для этой квартиры» на стенде /dev/raschet-kvartiry (DEMO мокапа через тот же

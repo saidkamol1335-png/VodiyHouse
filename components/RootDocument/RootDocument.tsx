@@ -3,6 +3,7 @@ import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import { BackgroundColumns } from "@/components/BackgroundColumns";
 import { FilmGrain } from "@/components/FilmGrain";
 import { HEAD_BOOT_SCRIPT } from "@/lib/boot/headScript";
+import { HydrationMark } from "@/lib/boot/HydrationMark";
 import { fontVariables } from "@/lib/fonts";
 import { MotionController } from "@/lib/motion";
 
@@ -40,6 +41,7 @@ export function RootDocument({ lang, children, withColumns = false, messages }: 
         </div>
         <FilmGrain />
         <MotionController />
+        <HydrationMark />
       </body>
     </html>
   );

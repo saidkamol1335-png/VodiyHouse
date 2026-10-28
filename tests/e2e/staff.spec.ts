@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD, signIn, submitSignIn } from "./cloud";
 
 // «Настройки → Сотрудники» против облака (шаг 8): руководитель — сохранённая сессия,

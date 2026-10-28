@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors, imageFile, type ImageSpec } from "./helpers";
 
 // Шаг 9 фазы 1: подготовка фото в браузере перед загрузкой (/dev/media). Приёмка фазы:

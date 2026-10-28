@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.8: подсказки «?» к терминам калькулятора (ТЗ 4.4, мокап .hintbtn) — по нажатию под

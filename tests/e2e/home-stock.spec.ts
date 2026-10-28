@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Request } from "@playwright/test";
+import { expect, test, type Page, type Request } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 13: главная кабинета «Остатки по ЖК» на стендах /dev/glavnaya (руководитель) и

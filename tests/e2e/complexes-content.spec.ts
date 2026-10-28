@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 3.5: вкладки ЖК «Видео», «Детали», «Документы» и перенос срока в «Блоках» на служебном

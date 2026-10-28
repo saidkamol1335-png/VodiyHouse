@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { DEMO_TEMPORARY_PASSWORD } from "../../app/dev/parol/demo";
 import { hasCloud } from "./cloud";
 import { collectPageErrors } from "./helpers";

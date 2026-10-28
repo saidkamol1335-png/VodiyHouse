@@ -1,4 +1,4 @@
-import { expect, test, type Page, type Request } from "@playwright/test";
+import { expect, test, type Page, type Request } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 12.4: список квартир блока на стенде /dev/zhk (DEMO Shodlik: блок A — 88 квартир, свободных

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { cabinetState, e2eStaff, hasCloud, NO_CLOUD, signIn } from "./cloud";
 import { collectPageErrors } from "./helpers";
 

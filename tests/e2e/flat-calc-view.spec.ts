@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 2.7: раскладка «Расчёта для этой квартиры» — без горизонтальной прокрутки, итог без луча

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const html = (page: import("@playwright/test").Page) => page.locator("html");
 
@@ -93,12 +93,17 @@ test.describe("тема", () => {
     await expect(html(page)).toHaveAttribute("data-theme", "light");
   });
 
-  test("сохранённая тёмная ставится до гидрации — без мигания", async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem("vh-theme", "dark"));
-    // Блокируем JS-чанки приложения: работать может только скрипт в <head>.
-    await page.route("**/_next/static/chunks/**", (route) => route.abort());
-    await page.goto("/uz");
-    await expect(html(page)).toHaveAttribute("data-theme", "dark");
+  test.describe("без скриптов приложения", () => {
+    // Чанки заблокированы — страница нарочно не оживёт: общий переход (fixtures.ts) её не ждёт.
+    test.use({ hydration: false });
+
+    test("сохранённая тёмная ставится до гидрации — без мигания", async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem("vh-theme", "dark"));
+      // Блокируем JS-чанки приложения: работать может только скрипт в <head>.
+      await page.route("**/_next/static/chunks/**", (route) => route.abort());
+      await page.goto("/uz");
+      await expect(html(page)).toHaveAttribute("data-theme", "dark");
+    });
   });
 
   test("кнопка на /dev/preview переключает тему и запоминает выбор", async ({ page }) => {

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 11 фазы 1: «ЖК» на служебном стенде (/dev/zhk, DEMO мокапа) — список (в. 5), создание,

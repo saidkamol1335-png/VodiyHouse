@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Приёмка фазы 1 (PLAN §7) без облака: «руководитель с телефона создаёт ЖК с блоками,
