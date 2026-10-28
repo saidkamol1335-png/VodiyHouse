@@ -1,5 +1,3 @@
-"use client";
-
 import { Car } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/lib/i18n/routing";
