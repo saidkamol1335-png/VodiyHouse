@@ -30,6 +30,18 @@ describe("путь файла в бакете", () => {
     expect(first.startsWith(`${mediaFolder(owner)}/`)).toBe(true);
   });
 
+  it("обложка витрины — в папке спецпредложения, подборки или рекламы (3.16а)", () => {
+    expect(mediaPath({ type: "special", id: COMPLEX_ID }, "image/jpeg", FILE_ID)).toBe(
+      `specials/${COMPLEX_ID}/${FILE_ID}.jpg`,
+    );
+    expect(mediaPath({ type: "collection", id: COMPLEX_ID }, "image/jpeg", FILE_ID)).toBe(
+      `collections/${COMPLEX_ID}/${FILE_ID}.jpg`,
+    );
+    expect(mediaPath({ type: "ad", id: COMPLEX_ID }, "image/jpeg", FILE_ID)).toMatch(
+      MEDIA_PATH_PATTERN,
+    );
+  });
+
   it("логотип и фон — у застройщика, остальное — у ЖК", () => {
     const owners = Object.fromEntries(MEDIA_KINDS.map((kind) => [kind, ownerTypeOf(kind)]));
     expect(owners).toEqual({

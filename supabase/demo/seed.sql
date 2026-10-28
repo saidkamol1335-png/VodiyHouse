@@ -367,4 +367,74 @@ values (
 )
 on conflict (key) do nothing;
 
+-- ─── Витрина (3.16а): спецпредложения, реклама, подборки мокапа ─────────────────────────
+-- Периоды — от дня сида: три спецпредложения идут, «Старт продаж» ждёт своего дня; одна реклама
+-- идёт, вторая ждёт и пересекается с первой (в кабинете — предупреждение, Г1 A). Своих фото нет —
+-- сайт берёт обложку первого ЖК. Удаление — каскадом с DEMO-застройщиками, подборки — по «demo-».
+
+insert into public.specials (developer_id, kind, badge, title, text, complex_ids, valid_from, valid_to, is_active, sort)
+select
+  d.id, s.kind::public.special_kind,
+  jsonb_build_object('ru', s.badge_ru, 'uz', s.badge_uz),
+  jsonb_build_object('ru', s.title_ru, 'uz', s.title_uz),
+  jsonb_build_object('ru', s.text_ru, 'uz', s.text_uz),
+  array(select c.id from public.complexes c where c.slug = any (s.complexes) order by array_position(s.complexes, c.slug)),
+  current_date + s.from_days, current_date + s.to_days, true, s.sort
+from (values
+  ('demo-sifat', 'gift', 'Подарок', 'Sovg‘a',
+   'Кухонный гарнитур в подарок', 'Oshxona mebeli sovg‘a',
+   'При покупке квартиры в блоке B до конца месяца — кухонный гарнитур от застройщика.',
+   'Oy oxirigacha B blokdan kvartira xarid qilganda — quruvchidan oshxona mebeli.',
+   array['demo-shodlik'], -10, 20, 10),
+  ('demo-margilan-invest', 'installment', 'Рассрочка 24 мес.', '24 oy muddatli',
+   'Рассрочка на 24 месяца без наценки', '24 oyga ustama narxsiz muddatli to‘lov',
+   'Первый взнос от 30%, остаток — равными частями до сдачи дома.',
+   'Boshlang‘ich to‘lov 30% dan, qolgani — uy topshirilgunga qadar teng ulushlarda.',
+   array['demo-namuna', 'demo-yulduz'], -3, 45, 20),
+  ('demo-kamalak', 'bank', 'Через банк', 'Bank orqali',
+   'Первый взнос от 20% через банк-партнёр', 'Hamkor bank orqali 20% dan boshlang‘ich to‘lov',
+   'Оформление в офисе Vodiy House, решение банка — за два дня.',
+   'Rasmiylashtirish Vodiy House ofisida, bank qarori — ikki kunda.',
+   array['demo-orzu'], -1, 30, 30),
+  ('demo-margilan-invest', 'sales_start', 'Старт продаж', 'Savdo boshlanishi',
+   'Старт продаж второй очереди Yulduz', 'Yulduz ikkinchi navbati savdosi boshlanadi',
+   'Стартовые цены на квартиры с видом на центр — первым покупателям.',
+   'Markazga qaragan kvartiralarga boshlang‘ich narxlar — ilk xaridorlarga.',
+   array['demo-yulduz'], 5, 40, 40)
+) as s (developer, kind, badge_ru, badge_uz, title_ru, title_uz, text_ru, text_uz, complexes, from_days, to_days, sort)
+join public.developers d on d.slug = s.developer;
+
+insert into public.ads (developer_id, title, text, complex_ids, filter, valid_from, valid_to, is_active, sort)
+select
+  d.id,
+  jsonb_build_object('ru', a.title_ru, 'uz', a.title_uz),
+  jsonb_build_object('ru', a.text_ru, 'uz', a.text_uz),
+  array(select c.id from public.complexes c where c.slug = any (a.complexes) order by array_position(a.complexes, c.slug)),
+  a.filter::jsonb, current_date + a.from_days, current_date + a.to_days, true, a.sort
+from (values
+  ('demo-sifat',
+   'Готовые 2-комнатные квартиры в рассрочку', 'Tayyor 2 xonali kvartiralar muddatli to‘lovga',
+   'Сданные дома — можно въезжать сразу.', 'Topshirilgan uylar — darhol ko‘chib o‘tish mumkin.',
+   array[]::text[], '{"komnat": "2", "srok": "built"}', -5, 25, 10),
+  ('demo-kamalak',
+   'Orzu: квартиры с отделкой white box', 'Orzu: white box pardozli kvartiralar',
+   'Сдан первый блок, второй — в 2027 году.', 'Birinchi blok topshirildi, ikkinchisi — 2027 yilda.',
+   array['demo-orzu'], '{}', 10, 40, 20)
+) as a (developer, title_ru, title_uz, text_ru, text_uz, complexes, filter, from_days, to_days, sort)
+join public.developers d on d.slug = a.developer;
+
+-- Подборки мокапа (08.10.2026): четыре по фильтру, «Центр Ферганы» — вручную.
+insert into public.collections (slug, title, mode, complex_ids, filter, sort, is_active)
+select
+  k.slug, jsonb_build_object('ru', k.title_ru, 'uz', k.title_uz), k.mode,
+  array(select c.id from public.complexes c where c.slug = any (k.complexes) order by array_position(k.complexes, c.slug)),
+  k.filter::jsonb, k.sort, true
+from (values
+  ('demo-sdannye-doma', 'Сданные дома', 'Topshirilgan uylar', 'filter', array[]::text[], '{"srok": "built"}', 10),
+  ('demo-rassrochka-cherez-bank', 'Рассрочка через банк', 'Bank orqali muddatli to‘lov', 'filter', array[]::text[], '{"oplata": "bank"}', 20),
+  ('demo-do-45000', 'До $45 000', '$45 000 gacha', 'filter', array[]::text[], '{"do": "45000"}', 30),
+  ('demo-tsentr-fergany', 'Центр Ферганы', 'Farg‘ona markazi', 'manual', array['demo-namuna', 'demo-yulduz'], '{}', 40),
+  ('demo-studii-i-1-komnatnye', 'Студии и 1-комнатные', 'Studiya va 1 xonali', 'filter', array[]::text[], '{"komnat": "0,1"}', 50)
+) as k (slug, title_ru, title_uz, mode, complexes, filter, sort);
+
 commit;

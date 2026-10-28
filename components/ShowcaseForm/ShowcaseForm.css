@@ -1,0 +1,217 @@
+/* Формы «Витрины» (3.16а): ряды полей, отметки ЖК, чипы и условия фильтра, обложка, удаление. */
+.showcase-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.showcase-form__row {
+  display: grid;
+  gap: 12px;
+}
+
+.showcase-form__row--two {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.showcase-form__row--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Адрес подборки на сайте — моно-строкой, как адрес застройщика. */
+.showcase-form__slug {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  overflow-wrap: anywhere;
+}
+
+.showcase-form__complexes,
+.showcase-form__chipset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.showcase-form__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Отметка ЖК — карточка с чекбоксом: цель касания 44 px, выбранная — янтарная рамка. */
+.showcase-form__complex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--panel-bg);
+  cursor: pointer;
+}
+
+.showcase-form__complex:has(input:checked) {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber);
+}
+
+.showcase-form__complex input,
+.showcase-form__chip input {
+  accent-color: var(--amber);
+}
+
+.showcase-form__complex-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.showcase-form__complex-dev {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.showcase-form__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.showcase-form__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  font-size: var(--fs-small-l);
+  cursor: pointer;
+}
+
+.showcase-form__chip:has(input:checked) {
+  border-color: var(--amber);
+  background: var(--chip-on-bg);
+}
+
+/* Условия фильтра — в пунктирной рамке, внизу адрес каталога, который они дают. */
+.showcase-form__filter {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-l);
+}
+
+.showcase-form__filter-title {
+  margin: 0;
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.showcase-form__query {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-mono);
+  overflow-wrap: anywhere;
+}
+
+/* Тумблер «На сайте» — на одной линии с полем порядка. */
+.showcase-form__active {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding-top: 22px;
+}
+
+/* «← К списку», ответ сервера и кнопка — в одной строке, кнопка справа. */
+.showcase-form__save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.showcase-form__back {
+  margin-right: auto;
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.showcase-form__back:hover {
+  text-decoration: underline;
+}
+
+.showcase-form__cover {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+}
+
+.showcase-form__delete {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.showcase-form__delete-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--bad);
+  border-radius: var(--r-l);
+}
+
+.showcase-form__delete-lead {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.showcase-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 760px) {
+  .showcase-form__row--two,
+  .showcase-form__row--three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .showcase-form__active {
+    padding-top: 0;
+  }
+
+  .showcase-form__submit {
+    width: 100%;
+  }
+
+  .showcase-form__back {
+    width: 100%;
+  }
+}

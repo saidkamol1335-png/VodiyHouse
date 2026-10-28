@@ -65,6 +65,7 @@ export default defineConfig({
         /complex-preview\.spec\.ts/,
         /programs\.spec\.ts/,
         /seo-meta\.spec\.ts/,
+        /showcase\.spec\.ts/,
         /site-calc\.spec\.ts/,
         /smoke\.spec\.ts/,
       ],

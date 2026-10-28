@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-/** Где появится файл: фото ЖК — сразу, чертёж — после «Сохранить вкладку», застройщика — сразу. */
-export type Rule12Context = "photo" | "drawing" | "developer" | "video";
+/** Где появится файл: фото ЖК — сразу, чертёж — после «Сохранить вкладку», застройщика и витрины — сразу. */
+export type Rule12Context = "photo" | "drawing" | "developer" | "video" | "showcase";
 
 type Rule12CheckProps = {
   id: string;

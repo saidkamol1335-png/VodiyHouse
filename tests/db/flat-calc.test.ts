@@ -91,7 +91,7 @@ describe.skipIf(isRemoteTarget)("расчёт квартиры: данные д�
       `with drawing as (
          insert into media_assets (complex_id, kind, path, width, height)
          select b.complex_id, 'drawing',
-                private.media_folder(b.complex_id, null) || '/plan-test.png', 800, 600
+                private.media_owner_folder(b.complex_id, null, null, null, null) || '/plan-test.png', 800, 600
            from layouts l join blocks b on b.id = l.block_id where l.id = $1
          returning id, path)
        update layouts set drawing_id = (select id from drawing) where id = $1

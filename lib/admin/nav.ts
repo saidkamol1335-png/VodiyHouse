@@ -2,7 +2,15 @@ import { ADMIN_ROUTE } from "@/lib/routes";
 import type { StaffRole } from "./access";
 
 export type AdminNavKey =
-  "home" | "leads" | "complexes" | "developers" | "programs" | "video" | "stats" | "settings";
+  | "home"
+  | "leads"
+  | "complexes"
+  | "developers"
+  | "showcase"
+  | "programs"
+  | "video"
+  | "stats"
+  | "settings";
 
 /** Адреса кабинета латиницей, как у публичных страниц (ТЗ 3). */
 export const ADMIN_ROUTES = {
@@ -12,6 +20,10 @@ export const ADMIN_ROUTES = {
   leads: `${ADMIN_ROUTE}/zayavki`,
   complexes: `${ADMIN_ROUTE}/zhk`,
   developers: `${ADMIN_ROUTE}/zastroyshchiki`,
+  showcase: `${ADMIN_ROUTE}/vitrina`,
+  showcaseSpecials: `${ADMIN_ROUTE}/vitrina/spetspredlozheniya`,
+  showcaseCollections: `${ADMIN_ROUTE}/vitrina/podborki`,
+  showcaseAds: `${ADMIN_ROUTE}/vitrina/reklama`,
   programs: `${ADMIN_ROUTE}/programmy`,
   programsCalc: `${ADMIN_ROUTE}/programmy/raschet`,
   video: `${ADMIN_ROUTE}/video`,
@@ -41,6 +53,8 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: true },
   { key: "complexes", href: ADMIN_ROUTES.complexes, roles: ["head", "manager"], ready: true },
   { key: "developers", href: ADMIN_ROUTES.developers, roles: ["head"], ready: true },
+  // «Витрина» (3.16а): спецпредложения, подборки, реклама — только руководитель (PLAN п. 11).
+  { key: "showcase", href: ADMIN_ROUTES.showcase, roles: ["head"], ready: true },
   {
     key: "programs",
     href: ADMIN_ROUTES.programs,
@@ -126,4 +140,42 @@ export const SETTINGS_TABS: readonly SettingsTab[] = [
 
 export function readySettingsTabs(tabs: readonly SettingsTab[] = SETTINGS_TABS): SettingsTab[] {
   return tabs.filter((tab) => tab.ready);
+}
+
+export type ShowcaseTabKey = "specials" | "collections" | "ads";
+
+/**
+ * Вкладки «Витрины» (3.16а) — отдельные адреса, как у «Настроек». У каждой свой сегмент, чтобы
+ * вкладка оставалась активной и на странице записи; сам /admin/vitrina ведёт на первую.
+ */
+export const SHOWCASE_TABS: readonly { key: ShowcaseTabKey; segment: string; href: string }[] = [
+  { key: "specials", segment: "spetspredlozheniya", href: ADMIN_ROUTES.showcaseSpecials },
+  { key: "collections", segment: "podborki", href: ADMIN_ROUTES.showcaseCollections },
+  { key: "ads", segment: "reklama", href: ADMIN_ROUTES.showcaseAds },
+];
+
+/** Адрес новой записи витрины: форма без id, после сохранения — переход на страницу записи. */
+export const NEW_SHOWCASE_ID = "novoe";
+
+const SHOWCASE_ITEM_BASE = {
+  special: ADMIN_ROUTES.showcaseSpecials,
+  collection: ADMIN_ROUTES.showcaseCollections,
+  ad: ADMIN_ROUTES.showcaseAds,
+} as const;
+
+/** Страница записи витрины; base — корень раздела (кабинет или служебный стенд /dev/vitrina). */
+export function showcaseItemHref(
+  kind: keyof typeof SHOWCASE_ITEM_BASE,
+  id: string,
+  base: string = ADMIN_ROUTES.showcase,
+): string {
+  return `${SHOWCASE_ITEM_BASE[kind].replace(ADMIN_ROUTES.showcase, base)}/${id}`;
+}
+
+/** Список вкладки, к которой относится запись. */
+export function showcaseListHref(
+  kind: keyof typeof SHOWCASE_ITEM_BASE,
+  base: string = ADMIN_ROUTES.showcase,
+): string {
+  return SHOWCASE_ITEM_BASE[kind].replace(ADMIN_ROUTES.showcase, base);
 }

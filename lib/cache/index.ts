@@ -79,6 +79,22 @@ export function expirePrograms(developerId?: string | null): void {
   if (developerId) updateTag(developerTag(developerId));
 }
 
+/**
+ * «Витрина» (3.16а): подборки, реклама и спецпредложения главной — 'use cache' + cacheTag(SHOWCASE_TAG);
+ * бейдж спецпредложения на карточке ЖК и «Подарок» на странице ЖК — ещё CATALOG_TAG.
+ */
+export const SHOWCASE_TAG = "showcase";
+
+export function expireShowcase(): void {
+  updateTag(SHOWCASE_TAG);
+  updateTag(CATALOG_TAG);
+}
+
+/** Точка фокуса обложки витрины — косметика, как у ЖК и застройщика. */
+export function markShowcaseStale(): void {
+  revalidateTag(SHOWCASE_TAG, "max");
+}
+
 /** Курс ЦБ по расписанию: не Server Action, updateTag там нельзя — те же теги истекают сразу. */
 export function expireRateNow(): void {
   revalidateTag(PROGRAMS_TAG, { expire: 0 });

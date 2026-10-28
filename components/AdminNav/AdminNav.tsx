@@ -9,6 +9,7 @@ import {
   Inbox,
   Landmark,
   Settings,
+  Sparkles,
   Video,
   type LucideIcon,
 } from "lucide-react";
@@ -39,6 +40,7 @@ const ICONS: Record<AdminNavKey, LucideIcon> = {
   leads: Inbox,
   complexes: BuildingComplex,
   developers: BriefcaseBusiness,
+  showcase: Sparkles,
   programs: Landmark,
   video: Video,
   stats: ChartColumn,

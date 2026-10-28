@@ -5,16 +5,24 @@ import type { MediaKind } from "./rules";
 
 export const MEDIA_BUCKET = "media";
 
-export type MediaOwner = { type: "complex"; id: string } | { type: "developer"; id: string };
+/** Владелец файла: ЖК, застройщик или запись витрины (3.16а) — у каждого своя папка. */
+export type MediaOwnerType = "complex" | "developer" | "special" | "collection" | "ad";
+export type MediaOwner = { type: MediaOwnerType; id: string };
 
 export type StoredImageType = "image/jpeg" | "image/png";
 
-const FOLDERS = { complex: "complexes", developer: "developers" } as const;
+const FOLDERS: Record<MediaOwnerType, string> = {
+  complex: "complexes",
+  developer: "developers",
+  special: "specials",
+  collection: "collections",
+  ad: "ads",
+};
 
 export const MEDIA_PATH_PATTERN =
-  /^(complexes|developers)\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png)$/;
+  /^(complexes|developers|specials|collections|ads)\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png)$/;
 
-/** Логотип и фон — у застройщика, остальное — у ЖК (как check в media_assets). */
+/** Логотип и фон — у застройщика, остальное — у ЖК (как check в media_assets); обложки витрины — по владельцу. */
 export function ownerTypeOf(kind: MediaKind): MediaOwner["type"] {
   return kind === "logo" || kind === "cover" ? "developer" : "complex";
 }

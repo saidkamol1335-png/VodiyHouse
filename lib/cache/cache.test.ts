@@ -76,6 +76,9 @@ const CONTENT_FILES = [
   "dictionaries.ts",
   "hints.ts",
   "programs.ts",
+  // «Витрина» (3.16а): спецпредложения, подборки, реклама и их обложки — на главной и карточках.
+  "showcase.ts",
+  "showcaseMedia.ts",
   "units.ts",
   "unitsMass.ts",
   "unitsStatus.ts",
@@ -99,7 +102,7 @@ const WITHOUT_TAG = new Set([
   "saveDeveloperPrivateAction",
 ]);
 const EXPIRES =
-  /\b(expireCatalog|expireComplex|expireDeveloper|expireDictionaries|expirePrograms|expireSiteSettings|markComplexStale|markDeveloperStale)\(/;
+  /\b(expireCatalog|expireComplex|expireDeveloper|expireDictionaries|expirePrograms|expireShowcase|expireSiteSettings|markComplexStale|markDeveloperStale|markShowcaseStale)\(/;
 
 describe("действия контента сбрасывают кэш сайта", () => {
   const all = readdirSync(ACTIONS_DIR).filter(

@@ -58,6 +58,15 @@ where complex_id in (select id from public.complexes where slug like 'demo-%')
 delete from public.calculations
 where program_snapshot ->> 'developer_id' in (select id::text from public.developers where slug like 'demo-%');
 
+-- Витрина (3.16а): подборки DEMO — по адресу «demo-…» и их журнал (у удалённых адрес остался в
+-- записи); спецпредложения и реклама уходят каскадом с DEMO-застройщиками, их журнал — по
+-- developer_id выше.
+delete from public.audit_log
+where entity = 'collections'
+  and (entity_id in (select id::text from public.collections where slug like 'demo-%')
+    or changes ->> 'slug' like 'demo-%');
+delete from public.collections where slug like 'demo-%';
+
 delete from public.complexes where slug like 'demo-%';
 delete from public.developers where slug like 'demo-%';
 
