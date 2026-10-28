@@ -1,6 +1,7 @@
 "use client";
 
-import { type MouseEvent, type PointerEvent, useRef, useState } from "react";
+import { type KeyboardEvent, type MouseEvent, type PointerEvent, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CONTOUR_POINTS, percentPoint, type Point } from "@/lib/admin/facade/contours";
 import type { FacadeImage } from "@/lib/admin/facade/types";
 
@@ -24,10 +25,15 @@ const toPoints = (points: readonly Point[]) => points.map(([x, y]) => `${x},${y}
  */
 export function ContourEditor({ image, alt, others, value, onChange }: ContourEditorProps) {
   const { surface, add, move, stop, setDragging } = useContourDrag(value, onChange);
+  const t = useTranslations("admin.complexes.facade");
   return (
     <div
       ref={surface}
       className="facade-editor"
+      role="application"
+      tabIndex={0}
+      aria-label={t("editorKeys")}
+      onKeyDown={(event) => keyboardEdit(event, value, onChange)}
       style={{ aspectRatio: `${image.width} / ${image.height}` }}
       onClick={add}
       onPointerMove={move}
@@ -103,4 +109,24 @@ function useContourDrag(value: Point[], onChange: (points: Point[]) => void) {
     onChange(next);
   };
   return { surface, add, move, stop, setDragging };
+}
+
+const STEP = { small: 1, large: 5 };
+const MOVES: Record<string, Point> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+const clampPercent = (value: number) => Math.round(Math.min(100, Math.max(0, value)) * 100) / 100;
+
+/**
+ * С клавиатуры: «Ввод» — новый угол в центре, стрелки — последний угол на 1 % (с Shift — на 5 %),
+ * Backspace / Delete — убрать его. Мышь и палец — щелчок и перетаскивание.
+ */
+function keyboardEdit(event: KeyboardEvent<HTMLDivElement>, value: Point[], onChange: (points: Point[]) => void) {
+  const move = MOVES[event.key];
+  if (event.key === "Enter" && value.length < CONTOUR_POINTS.max) onChange([...value, [50, 50]]);
+  else if ((event.key === "Backspace" || event.key === "Delete") && value.length > 0) onChange(value.slice(0, -1));
+  else if (move && value.length > 0) {
+    const step = event.shiftKey ? STEP.large : STEP.small;
+    const [x, y] = value.at(-1)!;
+    onChange([...value.slice(0, -1), [clampPercent(x + move[0] * step), clampPercent(y + move[1] * step)]]);
+  } else return;
+  event.preventDefault();
 }

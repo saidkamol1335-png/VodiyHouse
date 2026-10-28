@@ -72,6 +72,13 @@ test.describe("кабинет · фасад и планы этажей", () => {
     const editor = contours.locator(".facade-editor");
     // Редактор появляется только после того, как страница перечитала данные (router.refresh).
     await expect(editor).toBeVisible({ timeout: 30_000 });
+    // С клавиатуры: Ввод — угол в центре, стрелка двигает его, Backspace убирает.
+    await editor.focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Shift+ArrowRight");
+    await expect(contours.getByText("1 точка")).toBeVisible();
+    await page.keyboard.press("Backspace");
+    await expect(contours.getByText("0 точек")).toBeVisible();
     await drawTriangle(page, editor, [[20, 20], [60, 20], [40, 70]]);
     await expect(contours.getByText("3 точки")).toBeVisible();
     await contours.getByRole("button", { name: "Сохранить контур" }).click();
