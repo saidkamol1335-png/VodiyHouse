@@ -72,11 +72,11 @@ describe("parseLeadRequest", () => {
   });
 
   it("квиз: ответы словами, ссылка — только путь сайта, счётчики — целые от нуля; у других типов квиза нет", () => {
-    const quiz = { answers: "  2-комн. · до $45 000  ", link: "https://evil.example/ru/novostroyki", complexes: 2, flats: -3 };
+    const quiz = { answers: "  2-комн. · до $45 000  ", link: "https://evil.example/ru/novostroyki", complexes: 2, flats: -3, partial: "yes" };
     const own = parseLeadRequest({ ...base, type: "quiz", quiz });
-    expect(own.ok && own.lead.payload).toEqual({ quiz: { answers: "2-комн. · до $45 000", link: null, complexes: 2, flats: 0 } });
-    const linked = parseLeadRequest({ ...base, type: "quiz", quiz: { ...quiz, link: "/ru/novostroyki?komnat=2&do=45000", flats: 7.5 } });
-    expect(linked.ok && linked.lead.payload).toMatchObject({ quiz: { link: "/ru/novostroyki?komnat=2&do=45000", flats: 0 } });
+    expect(own.ok && own.lead.payload).toEqual({ quiz: { answers: "2-комн. · до $45 000", link: null, complexes: 2, flats: 0, partial: false } });
+    const linked = parseLeadRequest({ ...base, type: "quiz", quiz: { ...quiz, link: "/ru/novostroyki?komnat=2&do=45000", flats: 7.5, partial: true } });
+    expect(linked.ok && linked.lead.payload).toMatchObject({ quiz: { link: "/ru/novostroyki?komnat=2&do=45000", flats: 0, partial: true } });
     const other = parseLeadRequest({ ...base, quiz });
     expect(other.ok && other.lead.payload).not.toHaveProperty("quiz");
   });

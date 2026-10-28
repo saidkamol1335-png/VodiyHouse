@@ -139,7 +139,16 @@ function payloadFrom(type: LeadType, raw: Partial<LeadRequest>): Record<string, 
   }
   if (type === "quiz" && isRecord(raw.quiz)) {
     const quiz = raw.quiz;
-    return { quiz: { answers: text(quiz.answers, TEXT_MAX), link: pagePathFrom(quiz.link), complexes: count(quiz.complexes), flats: count(quiz.flats) } };
+    return {
+      quiz: {
+        answers: text(quiz.answers, TEXT_MAX),
+        link: pagePathFrom(quiz.link),
+        complexes: count(quiz.complexes),
+        flats: count(quiz.flats),
+        // У части типов наличие без числа — клиент видел «N+», менеджеру пишем «не меньше N».
+        partial: quiz.partial === true,
+      },
+    };
   }
   return {};
 }

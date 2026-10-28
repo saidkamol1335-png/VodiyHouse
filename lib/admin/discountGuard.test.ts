@@ -9,6 +9,23 @@ describe("запрет «скидка» в текстах витрины (PLAN �
     expect(mentionsDiscount("Discount for early buyers")).toBe(true);
   });
 
+  it("«−N%» — тоже скидка: минус, тире или дефис перед числом с процентом (ревью блока G)", () => {
+    expect(mentionsDiscount("−10% до конца месяца")).toBe(true);
+    expect(mentionsDiscount("Акция -15 % на 2-комнатные")).toBe(true);
+    expect(mentionsDiscount("Narx –5%")).toBe(true);
+    expect(mentionsDiscount("Цена —10% до пятницы")).toBe(true);
+    expect(mentionsDiscount("-15\u00a0% при 100% оплате")).toBe(true);
+    expect(mentionsDiscount("Skidka 20%")).toBe(true);
+  });
+
+  it("диапазоны и проценты без знака — не скидка", () => {
+    expect(mentionsDiscount("Первый взнос 30% — остальное в рассрочку")).toBe(false);
+    expect(mentionsDiscount("0% рассрочка на 12 месяцев")).toBe(false);
+    expect(mentionsDiscount("Первый взнос 10–30%")).toBe(false);
+    expect(mentionsDiscount("Boshlang‘ich to‘lov 20-30%")).toBe(false);
+    expect(mentionsDiscount("Ставка 1-2% в месяц")).toBe(false);
+  });
+
   it("рассрочка, подарок и старт продаж проходят", () => {
     expect(mentionsDiscount("Рассрочка на 24 месяца без наценки")).toBe(false);
     expect(mentionsDiscount("Кухонный гарнитур в подарок")).toBe(false);

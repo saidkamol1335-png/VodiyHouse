@@ -5,13 +5,14 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { useSiteContacts } from "@/components/SiteContacts";
-import { ROUTES } from "@/lib/routes";
 import type { QuizMatch } from "@/lib/site/quiz/model";
 
 type QuizDoneProps = {
   number: number;
   match: QuizMatch | null;
+  /** Каталог с ответами анкеты и каталог целиком — оба с языком страницы. */
   link: string;
+  allHref: string;
   onRestart: () => void;
 };
 
@@ -20,7 +21,7 @@ type QuizDoneProps = {
  * (N — «Настройки → Контакты», без него — без срока), «Показать N ЖК» → каталог с фильтром
  * (ничего не подошло — все новостройки), «Пройти заново».
  */
-export function QuizDone({ number, match, link, onRestart }: QuizDoneProps) {
+export function QuizDone({ number, match, link, allHref, onRestart }: QuizDoneProps) {
   const t = useTranslations("quiz");
   const tl = useTranslations("lead");
   const { callbackMinutes } = useSiteContacts();
@@ -38,7 +39,7 @@ export function QuizDone({ number, match, link, onRestart }: QuizDoneProps) {
       {number > 0 ? <p className="quiz__done-number">{tl("doneNumber", { number })}</p> : null}
       <p className="quiz__done-text">{text}</p>
       <div className="quiz__done-actions">
-        <Button href={total > 0 ? link : ROUTES.catalog}>
+        <Button href={total > 0 ? link : allHref}>
           {total > 0 ? t("show", { count: total }) : t("showAll")}
           <ArrowRight size={16} aria-hidden="true" />
         </Button>

@@ -1,4 +1,5 @@
-import { blockMatches, NO_FILTER, offerMatches, type CatalogFilter, type PaymentKind } from "@/lib/site/catalog/filter";
+import { NO_FILTER, type CatalogFilter, type PaymentKind } from "@/lib/site/catalog/filter";
+import { countMatchingFlats } from "@/lib/site/catalog/flats";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog, matchingPriceUsd } from "@/lib/site/catalog/sort";
 
@@ -37,7 +38,6 @@ export function toggleRoom(rooms: readonly QuizRoom[], room: QuizRoom): QuizRoom
   return rooms.includes(room) ? rooms.filter((value) => value !== room) : [...rooms, room].sort((a, b) => a - b);
 }
 
-/** Срок въезда → срок сдачи: «сразу» — сданные; «в течение года» — до следующего года; «через 1–2 года» — до +2. */
 /** Срок: «сразу» — сданные, «в течение года» — до следующего года, «через 1–2 года» — ещё на год позже.
  *  Дата читается только когда она нужна: при первом рендере ответа нет, и prerender не трогает часы. */
 export function deadlineOf(when: QuizWhen | null, now?: Date): CatalogFilter["deadline"] {
@@ -70,19 +70,7 @@ export type QuizMatch = {
 
 export function quizMatches(catalog: SiteCatalog, filter: CatalogFilter): QuizMatch {
   const complexes = filterCatalog(catalog, { ...filter, sort: "cheap" });
-  let flats = 0;
-  let partial = false;
-  for (const complex of complexes) {
-    const developer = catalog.developers.find((entry) => entry.id === complex.developerId);
-    for (const block of complex.blocks) {
-      if (!blockMatches(block, developer, filter, catalog.rate)) continue;
-      for (const offer of block.offers) {
-        if (!offerMatches(offer, block.currency, filter, catalog.rate)) continue;
-        if (offer.free === null) partial ||= offer.available;
-        else flats += offer.free;
-      }
-    }
-  }
+  const { flats, partial } = countMatchingFlats(complexes, catalog, filter);
   const prices = new Map(complexes.map((complex) => [complex.id, matchingPriceUsd(complex, catalog, filter)]));
   return { complexes, flats, partial, prices };
 }

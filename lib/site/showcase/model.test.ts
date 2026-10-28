@@ -133,6 +133,15 @@ describe("подборки", () => {
     expect(collectionCount(catalog, manual)).toEqual({ complexes: 2, flats: 5, partial: true });
   });
 
+  it("частично сданный ЖК в «Сданных домах»: квартиры только сданных блоков — срок у блока (ревью блока G)", () => {
+    const mixed = complex("d", "d1", [
+      block("d1", { buildStatus: "delivered", deadline: null, offers: [offer(2, 36_000, 2)] }),
+      block("d2", { offers: [offer(2, 30_000, 4)] }),
+    ]);
+    const count = collectionCount({ ...catalog, complexes: [...catalog.complexes, mixed] }, built);
+    expect(count).toEqual({ complexes: 3, flats: 9, partial: false });
+  });
+
   it("выдача с подборкой: вручную — только её ЖК внутри фильтра посетителя", () => {
     expect(collectionResults(catalog, manual, { ...NO_FILTER, rooms: [1] }).map((c) => c.slug)).toEqual(["a"]);
     expect(collectionResults(catalog, built, { ...NO_FILTER, deadline: "built", sort: "cheap" }).map((c) => c.slug)).toEqual(["c", "b"]);

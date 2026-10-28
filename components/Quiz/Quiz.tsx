@@ -53,8 +53,8 @@ function QuizIntro({ id, match, locale, variant }: QuizIntroProps) {
   );
 }
 
-/** Ширина шкалы: шаг из пяти плюс чуть-чуть с самого начала (мокап pStyle); после отправки — вся. */
-const barWidth = (step: number, sent: boolean) => (sent ? 100 : (step / QUIZ_STEPS) * 100 + 4);
+/** Заполнение шкалы: шаг из пяти плюс чуть-чуть с самого начала (мокап pStyle); после отправки — вся. */
+const barScale = (step: number, sent: boolean) => (sent ? 1 : step / QUIZ_STEPS + 0.04);
 
 /** Шапка карточки: «Вопрос N из 5» (после отправки — «Подборка готова»), время и шкала. */
 function QuizProgress({ step, sent }: { step: number; sent: boolean }) {
@@ -66,7 +66,7 @@ function QuizProgress({ step, sent }: { step: number; sent: boolean }) {
         <span className="quiz__time">{t("time")}</span>
       </div>
       <div className="quiz__bar" aria-hidden="true">
-        <i style={{ width: `${barWidth(step, sent)}%` }} />
+        <i style={{ transform: `scaleX(${barScale(step, sent)})` }} />
       </div>
     </>
   );
@@ -84,7 +84,13 @@ export function Quiz({ id, catalog, variant }: QuizProps) {
   const labels = answerLabels(quiz.answers, t);
   const lead = useLeadSubmit(`${id}-lead`, {
     type: "quiz",
-    quiz: { answers: labels.join(" · "), link: quiz.link, complexes: quiz.match?.complexes.length ?? 0, flats: quiz.match?.flats ?? 0 },
+    quiz: {
+      answers: labels.join(" · "),
+      link: quiz.link,
+      complexes: quiz.match?.complexes.length ?? 0,
+      flats: quiz.match?.flats ?? 0,
+      partial: quiz.match?.partial ?? false,
+    },
   });
   const sent = lead.sent;
   // На /podbor вопрос — h2 под заголовком страницы, в разделе главной — h3 под заголовком раздела.
@@ -94,13 +100,13 @@ export function Quiz({ id, catalog, variant }: QuizProps) {
     quiz.restart();
   };
   return (
-    <div className={`quiz quiz--${variant}`} data-step={quiz.step} data-sent={sent ? "" : undefined}>
+    <div className={`quiz quiz--${variant}`}>
       <QuizIntro id={id} match={quiz.match} locale={locale} variant={variant} />
       <div className="quiz__card">
         <Beam className="quiz__beam" />
         <QuizProgress step={quiz.step} sent={Boolean(sent)} />
         {sent ? (
-          <QuizDone number={sent.number} match={quiz.match} link={quiz.link} onRestart={restart} />
+          <QuizDone number={sent.number} match={quiz.match} link={quiz.link} allHref={quiz.catalogHref} onRestart={restart} />
         ) : quiz.step < CONTACT_STEP ? (
           <QuizQuestion quiz={quiz} level={level} />
         ) : (

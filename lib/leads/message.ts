@@ -45,7 +45,7 @@ export type LeadPayloadRecord = {
   /** «Хочу это условие» (3.16б): название спецпредложения или рекламы. */
   promo?: { title: string };
   /** Квиз (3.17): ответы словами, сколько ЖК и квартир подошло, ссылка на них. */
-  quiz?: { answers: string; link: string | null; complexes: number; flats: number };
+  quiz?: { answers: string; link: string | null; complexes: number; flats: number; partial?: boolean };
 };
 
 const t = createTranslator({ locale: "ru", messages: ru, namespace: "admin.leads" });
@@ -89,9 +89,9 @@ export function payloadLines(payload: LeadPayloadRecord, site = ""): string[] {
   for (const row of payload.rows ?? []) lines.push(`${row.label}: ${row.value}`);
   if (payload.promo?.title) lines.push(t("message.promo", { title: payload.promo.title }));
   if (payload.quiz) {
-    const { answers, link, complexes, flats } = payload.quiz;
+    const { answers, link, complexes, flats, partial } = payload.quiz;
     lines.push(t("message.quiz", { answers: answers || t("message.quizNoAnswers") }));
-    lines.push(t("message.quizFound", { complexes, flats }));
+    lines.push(t(partial ? "message.quizFoundPartial" : "message.quizFound", { complexes, flats }));
     if (link) lines.push(t("message.quizLink", { url: `${site}${link}` }));
   }
   if (payload.telegram) lines.push(t("message.telegram", { nick: payload.telegram }));

@@ -1,7 +1,8 @@
 import type { LocalizedText } from "@/lib/contacts";
 import { complexRoute, ROUTES } from "@/lib/routes";
 import { cardPrice, cheapest, type CardPrice } from "@/lib/site/catalog/card";
-import { NO_FILTER, offerMatches, type CatalogFilter } from "@/lib/site/catalog/filter";
+import { NO_FILTER, type CatalogFilter } from "@/lib/site/catalog/filter";
+import { countMatchingFlats } from "@/lib/site/catalog/flats";
 import { searchFromFilter } from "@/lib/site/catalog/params";
 import { COLLECTION_PARAM } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
@@ -68,20 +69,9 @@ export function collectionBySlug(collections: readonly ShowcaseCollection[], slu
   return (slug && collections.find((collection) => collection.slug === slug)) || null;
 }
 
-/** Свободные квартиры подходящих типов; partial — у части наличие без списка (число «не меньше»). */
+/** Свободные квартиры подходящих типов в подходящих блоках (как у квиза); partial — наличие без числа («не меньше»). */
 function countFlats(complexes: readonly CatalogComplex[], catalog: SiteCatalog, filter: CatalogFilter): Omit<ShowcaseCount, "complexes"> {
-  let flats = 0;
-  let partial = false;
-  for (const complex of complexes) {
-    for (const block of complex.blocks) {
-      for (const offer of block.offers) {
-        if (!offerMatches(offer, block.currency, filter, catalog.rate)) continue;
-        if (offer.free === null) partial ||= offer.available;
-        else flats += offer.free;
-      }
-    }
-  }
-  return { flats, partial };
+  return countMatchingFlats(complexes, catalog, filter);
 }
 
 /** «{n} ЖК · {f} квартир в продаже» на карточке подборки. */

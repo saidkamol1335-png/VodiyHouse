@@ -490,6 +490,13 @@
 [data-theme-island="dark"] {
   --about-card-bg: #1c1915;
   --about-card-line: rgba(247, 243, 236, 0.1);
+  /* Квиз (3.17): карточка и варианты на тёмном фоне (ревью блока G) */
+  --quiz-glow: radial-gradient(700px 360px at 0% 0%, rgba(248, 155, 13, 0.08), transparent 70%);
+  --quiz-card-bg: linear-gradient(180deg, #1c1915, #151311);
+  --quiz-option-bg: rgba(255, 240, 220, 0.045);
+  --quiz-option-hover: rgba(255, 240, 220, 0.09);
+  --quiz-bar-bg: rgba(255, 240, 220, 0.1);
+  --quiz-thumb-bg: rgba(255, 240, 220, 0.06);
   --home-marquee-stroke: rgba(255, 237, 215, 0.26);
   color-scheme: dark;
   --bg: #0b0a09;

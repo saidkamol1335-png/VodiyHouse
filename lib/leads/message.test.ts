@@ -63,7 +63,7 @@ describe("сообщение заявки", () => {
       ...lead,
       type: "quiz",
       page_url: "/ru/podbor",
-      payload: { quiz: { answers: "2-комн. · до $45 000 · рассрочка", link: "/ru/novostroyki?komnat=2&do=45000&oplata=inst", complexes: 2, flats: 7 } },
+      payload: { quiz: { answers: "2-комн. · до $45 000 · рассрочка", link: "/ru/novostroyki?komnat=2&do=45000&oplata=inst", complexes: 2, flats: 7, partial: false } },
     };
     const text = telegramText(quiz, links);
     expect(text).toContain("Ответы: 2-комн. · до $45 000 · рассрочка");
@@ -74,6 +74,9 @@ describe("сообщение заявки", () => {
     expect(empty).toContain("Ответы: без ответов");
     expect(empty).toContain("Подходит: 0 ЖК · 0 квартир");
     expect(empty).not.toContain("Подходящие ЖК");
+    // Наличие без числа у части типов: клиент видел «3+», менеджеру — «не меньше 3».
+    const partial = telegramText({ ...quiz, payload: { quiz: { answers: "студия", link: null, complexes: 1, flats: 3, partial: true } } }, links);
+    expect(partial).toContain("Подходит: 1 ЖК · не меньше 3 квартир");
   });
 
   it("тревога: сколько заявок не дошло и ссылки на них", () => {

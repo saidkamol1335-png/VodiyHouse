@@ -118,6 +118,12 @@ describe("витрина: права, правила и DEMO", () => {
       await expect(insertSpecial(user(head), { title: "Скидка 15% при 100% оплате" })).rejects.toThrow(
         /violates check constraint/,
       );
+      // «−N%» — тоже скидка (ревью блока G, миграция 20261028230000); «взнос 30%» проходит.
+      await expect(insertSpecial(user(head), { title: "−10% на все квартиры" })).rejects.toThrow(/violates check constraint/);
+      await expect(insertSpecial(user(head), { title: "Первый взнос 10–30%, остальное в рассрочку" })).resolves.toBeTruthy();
+      await expect(insertSpecial(user(head), { title: "Цена —10% до пятницы" })).rejects.toThrow(/violates check constraint/);
+      // Удачная вставка не должна жить дальше теста: DEMO-подсчёт ниже ждёт свои четыре.
+      await db.admin.query("delete from specials where title ->> 'ru' like 'Первый взнос 10–30%%'");
       await expect(
         asHead((tx) =>
           tx.query("insert into collections (slug, title, mode, filter) values ('chegirma', $1, 'filter', '{\"srok\": \"built\"}')", [
