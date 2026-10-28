@@ -166,7 +166,8 @@ test.describe("первый вход и выход", () => {
     await fill(newcomer.password, newcomer.password, newcomer.password);
     await expect(page.locator(".password-change-form .field__error")).toHaveText(["Совпадает с временным — придумайте другой"]);
     await fill(newcomer.password, "e2e-новый-пароль", "e2e-новый-пароль");
-    await expect(page).toHaveURL(/\/admin$/);
+    // Смена пароля и вход — действие сервера: в общем прогоне под нагрузкой дольше 5 с.
+    await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
     // Настоящая запись кабинета в истории — чтобы «Назад» после выхода было куда нажать.
     await page.goto("/admin");
     await expect(page.locator(".admin-shell")).toHaveCount(1);
