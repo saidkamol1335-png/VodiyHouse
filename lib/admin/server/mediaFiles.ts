@@ -20,3 +20,26 @@ export async function removeMediaFiles(supabase: SupabaseClient, paths: unknown)
     console.error("media-remove-failed", { paths: list, error });
   }
 }
+
+/**
+ * Картинки планов этажей у блоков, которых не будет после «Сохранить вкладку» на «Блоках» (фаза 4):
+ * строки уйдут каскадом с блоком, и путь потом не найти — собираем до сохранения, удаляем после.
+ */
+export async function floorPlanFilesOfGoneBlocks(
+  supabase: SupabaseClient,
+  complexId: string,
+  keptBlockIds: readonly string[],
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("floor_plans")
+    .select("block_id, image:media_assets!floor_plans_image_id_fkey(path)")
+    .eq("complex_id", complexId);
+  if (error) {
+    console.error("floor-plan-files-unavailable", { complexId, error: error.message });
+    return [];
+  }
+  const kept = new Set(keptBlockIds);
+  return (data as unknown as { block_id: string; image: { path: string } | null }[])
+    .filter((row) => !kept.has(row.block_id) && row.image)
+    .map((row) => row.image!.path);
+}

@@ -1,6 +1,7 @@
 import type { LocalizedText } from "@/lib/contacts";
 import type { Currency } from "@/lib/calc/money";
 import type { CatalogBlock, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
+import type { ComplexPicker } from "@/lib/site/picker/records";
 import type { NearbyPlace } from "./nearby";
 import type { PageBlockRecord, PageComplexRecord, PriceIncludeRecord } from "./records";
 
@@ -80,4 +81,6 @@ export type ComplexPage = Omit<
   others: OtherComplex[];
   /** Курс и программы застройщика в виде каталога — для «Платёж от» и цены «от» (card.ts). */
   catalog: SiteCatalog;
+  /** «Выбрать квартиру» (фаза 4): фасад, контуры и планы этажей; null — раздела нет. */
+  picker: ComplexPicker | null;
 };

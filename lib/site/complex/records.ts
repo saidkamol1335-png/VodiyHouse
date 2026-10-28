@@ -253,5 +253,7 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
       })),
     })),
     catalog,
+    // Фасад и планы — отдельным RPC (site_complex_picker), их кладёт read.ts.
+    picker: null,
   };
 }

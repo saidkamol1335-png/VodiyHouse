@@ -8,6 +8,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
+import { insertPickerRows, uploadPicker } from "./demoPicker.mjs";
 
 const BLOB_DIR = path.join(import.meta.dirname, "..", "docs", "mockup", "source", "_blob");
 const BUCKET = "media";
@@ -177,22 +178,24 @@ async function insertMediaRows(db, photos, drawings) {
 }
 
 /**
- * Загружает фото и чертежи DEMO-ЖК и пишет строки media_assets (после seed.sql) одной транзакцией.
+ * Загружает фото, чертежи, фасады и планы этажей DEMO-ЖК и пишет строки (после seed.sql) одной транзакцией.
  * Сбой на середине — файлы остаются в папках DEMO-ЖК, следующий demo:seed их уберёт.
  */
 export async function seedDemoMedia(db) {
   const complexes = await demoComplexIds(db);
   const photos = await uploadPhotos(complexes);
   const drawings = await uploadDrawings(db, complexes);
+  const picker = await uploadPicker(db, storageClient(), complexes);
   await db.query("begin");
   try {
     // DEMO — не действия сотрудников: в журнал не пишется (только в этой транзакции, как seed.sql).
     await db.query("select set_config('vodiy.skip_audit', 'on', true)");
     await insertMediaRows(db, photos, drawings);
+    await insertPickerRows(db, picker);
     await db.query("commit");
   } catch (error) {
     await db.query("rollback");
     throw error;
   }
-  return photos.length + drawings.length;
+  return photos.length + drawings.length + picker.reduce((sum, item) => sum + 1 + item.plans.length, 0);
 }

@@ -26,7 +26,7 @@ import { archiveConfirmed, canMove } from "@/lib/admin/developers/publication";
 import { isPublicationStatus } from "@/lib/admin/publicationFilter";
 import type { PublicationStatus } from "@/lib/admin/publication";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import { removeMediaFiles } from "@/lib/admin/server/mediaFiles";
+import { floorPlanFilesOfGoneBlocks, removeMediaFiles } from "@/lib/admin/server/mediaFiles";
 import { requireActionViewer } from "@/lib/admin/session";
 import { expireComplex } from "@/lib/cache";
 import { contentSlug } from "@/lib/slug";
@@ -206,13 +206,15 @@ export async function saveComplexBlocksAction(formData: FormData): Promise<SaveR
   if (!parsed.ok)
     return parsed.error ? fail(parsed.error) : fail(null, { rowErrors: parsed.rowErrors });
 
+  const kept = parsed.payload.flatMap((block) => (block.id ? [block.id] : []));
+  const planFiles = await floorPlanFilesOfGoneBlocks(guard.supabase, id, kept);
   const { data, error } = await guard.supabase.rpc("save_complex_blocks", {
     p_complex: id,
     p_blocks: parsed.payload,
   });
   if (error) return fail(contentDbErrorCode(error), { broken: brokenOf(error) });
-  // Чертежи удалённых блоков: строк уже нет — файлы убираем из бакета.
-  await removeMediaFiles(guard.supabase, data);
+  // Чертежи и планы этажей удалённых блоков: строк уже нет — файлы убираем из бакета.
+  await removeMediaFiles(guard.supabase, [...(data as string[]), ...planFiles]);
   expireComplex(id);
   return { status: "saved", at: Date.now() };
 }

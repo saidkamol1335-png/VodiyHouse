@@ -50,6 +50,7 @@ describe("путь файла в бакете", () => {
       facade: "complex",
       logo: "developer",
       cover: "developer",
+      floor_plan: "complex",
     });
   });
 });

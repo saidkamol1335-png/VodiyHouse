@@ -2,8 +2,8 @@
 // отклоняет слабые и тяжёлые исходники и уменьшает остальное до одного файла ≤ 3200 px.
 // Размеры и AVIF/WebP для сайта делает next/image по запросу.
 
-/** Виды файлов — как enum media_kind в базе. Фото ЖК, чертёж, фасад; логотип и фон застройщика. */
-export const MEDIA_KINDS = ["photo", "drawing", "facade", "logo", "cover"] as const;
+/** Виды файлов — как enum media_kind в базе. Фото ЖК, чертёж, фасад, план этажа; логотип и фон застройщика. */
+export const MEDIA_KINDS = ["photo", "drawing", "facade", "logo", "cover", "floor_plan"] as const;
 
 export type MediaKind = (typeof MEDIA_KINDS)[number];
 
@@ -38,6 +38,8 @@ export const MEDIA_KIND_RULES: Record<MediaKind, KindRule> = {
   cover: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg", opaque: true },
   facade: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg", opaque: true },
   drawing: { minLongSide: 1200, maxLongSide: 3200, output: "image/png", opaque: true },
+  // План этажа (фаза 4) — тот же лист, что чертёж: PNG на белом, контуры квартир рисуются по нему.
+  floor_plan: { minLongSide: 1200, maxLongSide: 3200, output: "image/png", opaque: true },
   logo: { minLongSide: 400, maxLongSide: 1600, output: "image/png", opaque: false },
 };
 

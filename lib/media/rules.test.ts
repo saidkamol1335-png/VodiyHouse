@@ -42,11 +42,11 @@ describe("правила фото · разрешение (PLAN 3а)", () => {
     }
   });
 
-  it("пороги по длинной стороне: галерея 1600, обложка и фасад 2400, чертёж 1200, логотип 400", () => {
+  it("пороги по длинной стороне: галерея 1600, обложка и фасад 2400, чертёж и план этажа 1200, логотип 400", () => {
     const minimums = Object.fromEntries(
       MEDIA_KINDS.map((kind) => [kind, MEDIA_KIND_RULES[kind].minLongSide]),
     );
-    expect(minimums).toEqual({ photo: 1600, cover: 2400, facade: 2400, drawing: 1200, logo: 400 });
+    expect(minimums).toEqual({ photo: 1600, cover: 2400, facade: 2400, drawing: 1200, logo: 400, floor_plan: 1200 });
   });
 
   it("вертикальное фото считается по длинной стороне", () => {
@@ -59,11 +59,11 @@ describe("правила фото · разрешение (PLAN 3а)", () => {
     expect(canBeComplexCover({ width: 1600, height: 2400 })).toBe(true);
   });
 
-  it("предел уменьшения не меньше порога; логотип и чертёж — PNG, фото — JPEG; прозрачен только логотип", () => {
+  it("предел уменьшения не меньше порога; логотип, чертёж и план этажа — PNG, фото — JPEG; прозрачен только логотип", () => {
     for (const kind of MEDIA_KINDS) {
       const rule = MEDIA_KIND_RULES[kind];
       expect(rule.maxLongSide).toBeGreaterThanOrEqual(rule.minLongSide);
-      expect(rule.output).toBe(kind === "logo" || kind === "drawing" ? "image/png" : "image/jpeg");
+      expect(rule.output).toBe(kind === "logo" || kind === "drawing" || kind === "floor_plan" ? "image/png" : "image/jpeg");
       // Чертёж — белый лист: подписи площадей не теряются на тёмном фоне сайта.
       expect(rule.opaque).toBe(kind !== "logo");
     }
