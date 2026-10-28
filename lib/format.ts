@@ -28,15 +28,19 @@ export function formatDate(date: Date, timeZone: string = APP_TIME_ZONE): string
   }).format(date);
 }
 
-/** «20.10.2026 14:05» — дата и время (последний вход сотрудника). */
-export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
-  const time = new Intl.DateTimeFormat("ru-RU", {
+/** «14:05» — время (CSV заявок: дата и время — разными столбцами). */
+export function formatTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("ru-RU", {
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
     timeZone,
   }).format(date);
-  return `${formatDate(date, timeZone)} ${time}`;
+}
+
+/** «20.10.2026 14:05» — дата и время (последний вход сотрудника). */
+export function formatDateTime(date: Date, timeZone: string = APP_TIME_ZONE): string {
+  return `${formatDate(date, timeZone)} ${formatTime(date, timeZone)}`;
 }
 
 /** «25.10, 14:05» — «обновлено …» у наличия на странице ЖК (PLAN §3.22: вместо «live»). */

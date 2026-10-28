@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leadsCsv } from "./csv";
+import { leadsCsv, leadsCsvFilename } from "./csv";
 import type { LeadRow } from "./screen";
 
 // Выгрузка «Заявок»: телефон без видимого апострофа, защита от формул у свободного текста,
@@ -40,5 +40,14 @@ describe("leadsCsv", () => {
   it("выборка больше потолка — последняя строка «файл неполный»; без пометки — нет", () => {
     expect(lines(leadsCsv([row(), row({ number: 1046 })], 2)).at(-1)).toContain("Файл неполный");
     expect(lines(leadsCsv([row(), row({ number: 1046 })]))).toHaveLength(3);
+  });
+});
+
+describe("leadsCsv: дата и время", () => {
+  it("дата и время — разными столбцами по Ташкенту; имя файла — с датой выгрузки", () => {
+    const [head, line] = lines(leadsCsv([row()]));
+    expect(head?.startsWith("№;Дата;Время;Клиент;")).toBe(true);
+    expect(line?.startsWith("1045;25.10.2026;14:30;")).toBe(true);
+    expect(leadsCsvFilename(new Date("2026-10-28T20:30:00Z"))).toBe("vodiyhouse-zayavki-2026-10-29.csv");
   });
 });

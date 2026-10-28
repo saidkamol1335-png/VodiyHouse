@@ -70,7 +70,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 export function fieldErrorsOf(input: { name: string; phone: string; company?: string }, needsCompany = false): LeadFieldErrors {
   const errors: LeadFieldErrors = {};
   if (!input.name.trim()) errors.name = "required";
-  if (!input.phone.trim()) errors.phone = "required";
+  // Нетронутое «+998 » маски — поле пустое («Заполните»), а не номер с ошибкой формата.
+  const digits = input.phone.replace(/\D/g, "");
+  if (!digits || digits === "998") errors.phone = "required";
   else if (!formatPhone(input.phone)) errors.phone = "phone";
   if (needsCompany && !input.company?.trim()) errors.company = "required";
   return errors;

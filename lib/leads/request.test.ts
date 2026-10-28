@@ -17,6 +17,8 @@ describe("parseLeadRequest", () => {
       fields: { name: "required", phone: "phone" },
     });
     expect(parseLeadRequest({ ...base, phone: "" })).toEqual({ ok: false, fields: { phone: "required" } });
+    // Нетронутое «+998 » из маски — «Заполните», а не «номер в формате…».
+    expect(parseLeadRequest({ ...base, phone: "+998 " })).toEqual({ ok: false, fields: { phone: "required" } });
     expect(parseLeadRequest({ ...base, type: "partner", partner: { company: "" } })).toEqual({
       ok: false,
       fields: { company: "required" },

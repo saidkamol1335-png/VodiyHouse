@@ -5,8 +5,12 @@ import type { LeadSource } from "./types";
 // заявка передаёт их, даже если оставлена позже на другой странице. Хранится в браузере
 // посетителя; хранилище недоступно (приватный режим) — помним до закрытия вкладки.
 // Реши сам: заход без меток не закрепляется навсегда — следующий заход с рекламы его заменит.
+// Реши сам (28.10.2026): метки живут 90 дней — заход через три месяца уже не тот же путь с рекламы.
 
 const STORAGE_KEY = "vh.source";
+const SOURCE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+type StoredSource = { source: LeadSource; at: number };
 
 let memory: LeadSource | null = null;
 
@@ -31,7 +35,11 @@ export function sourceOfVisit(href: string, referrer: string): LeadSource {
 function readStored(): LeadSource | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as LeadSource) : memory;
+    if (!raw) return memory;
+    const stored = JSON.parse(raw) as Partial<StoredSource>;
+    // Старая запись без даты и просроченная — как будто ничего не запомнено.
+    if (!stored.source || typeof stored.at !== "number" || Date.now() - stored.at > SOURCE_TTL_MS) return memory;
+    return stored.source;
   } catch {
     return memory;
   }
@@ -59,7 +67,7 @@ export function rememberVisitSource(href: string, referrer: string): void {
   if (stored && (hasAdMarks(stored) || !hasAdMarks(visit))) return;
   memory = visit;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(visit));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ source: visit, at: Date.now() } satisfies StoredSource));
   } catch {
     // Хранилище закрыто — остаётся память вкладки.
   }

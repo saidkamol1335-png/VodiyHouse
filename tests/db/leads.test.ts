@@ -203,6 +203,25 @@ describe.skipIf(isRemoteTarget)("заявки: создание", () => {
     expect(row.complex_id).toBeNull();
     expect(row.subject.slug).toBe("test-lead-complex");
   });
+
+  it("заявка по ЖК-черновику: ссылки на ЖК нет (черновик посетителю не виден), заявка принята", async () => {
+    const draft = await db.admin.query<{ id: string; slug: string }>(
+      `insert into complexes (developer_id, slug, name, status)
+       select developer_id, 'test-lead-draft', '{"ru":"Черновик","uz":"Qoralama"}', 'draft' from complexes where id = $1
+       returning id, slug`,
+      [complex.id],
+    );
+    const lead = await submit(db, { phone: nextPhone(), complex: draft.rows[0]!.slug }, "{}");
+    const row = (
+      await db.admin.query<{ complex_id: string | null; subject: { complex?: unknown } }>(
+        "select complex_id, subject from leads where id = $1",
+        [lead.id],
+      )
+    ).rows[0]!;
+    expect(row.complex_id).toBeNull();
+    expect(row.subject.complex ?? null).toBeNull();
+    await db.admin.query("delete from complexes where id = $1", [draft.rows[0]!.id]);
+  });
 });
 
 describe.skipIf(isRemoteTarget)("заявки: доставка и тревога", () => {

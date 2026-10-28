@@ -1,4 +1,4 @@
-import { leadsCsv } from "@/lib/admin/leads/csv";
+import { leadsCsv, leadsCsvFilename } from "@/lib/admin/leads/csv";
 import { leadsFilterFrom } from "@/lib/admin/leads/screen";
 import { readLeadsScreen } from "@/lib/admin/server/leads";
 import { requireActionViewer } from "@/lib/admin/session";
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   return new Response(leadsCsv(screen.rows.slice(0, LIMIT), screen.rows.length > LIMIT ? LIMIT : undefined), {
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": 'attachment; filename="vodiyhouse-zayavki.csv"',
+      "content-disposition": `attachment; filename="${leadsCsvFilename()}"`,
       "cache-control": "no-store",
     },
   });

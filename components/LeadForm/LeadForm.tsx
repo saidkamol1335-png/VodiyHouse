@@ -12,9 +12,11 @@ import {
   VIEW_DAYS,
   VIEW_TARGETS,
   VIEW_TIMES,
+  type LeadField,
   type LeadFieldErrors,
   type SiteLang,
   type ViewChoice,
+  type ViewTarget,
 } from "@/lib/leads/types";
 import { ROUTES } from "@/lib/routes";
 import { LeadChoices } from "./LeadChoices";
@@ -37,8 +39,11 @@ export function LeadForm({ id, intent, variant = "dialog", afterDone }: LeadForm
   const t = useTranslations("lead");
   const locale = useLocale() as SiteLang;
   const [contact, setContact] = useState<LeadContact>({ name: "", phone: "", lang: locale, trap: "" });
-  const [view, setView] = useState<ViewChoice>({ target: intent.viewTarget ?? "complex", day: "tomorrow", time: null });
-  const { submit, fields, error, sent, pending } = useLeadSubmit(id, intent);
+  // «Этот ЖК» — когда заявка о ЖК (страница ЖК, карточка каталога); «О нас» и прочие без ЖК — без него.
+  const hasComplex = Boolean(intent.object?.complex || intent.object?.layout || intent.object?.unit);
+  const targets: readonly ViewTarget[] = hasComplex ? VIEW_TARGETS : VIEW_TARGETS.filter((target) => target !== "complex");
+  const [view, setView] = useState<ViewChoice>({ target: intent.viewTarget ?? targets[0]!, day: "tomorrow", time: null });
+  const { submit, fields, edited, error, sent, pending } = useLeadSubmit(id, intent);
   const done = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (sent) done.current?.focus();
@@ -58,8 +63,8 @@ export function LeadForm({ id, intent, variant = "dialog", afterDone }: LeadForm
   };
   return (
     <form className={`lead-form lead-form--${variant}`} noValidate onSubmit={onSubmit} aria-busy={pending}>
-      <ContactFields id={id} contact={contact} onChange={setContact} errors={fields} />
-      {intent.type === "view" ? <ViewFields id={id} view={view} onChange={setView} /> : null}
+      <ContactFields id={id} contact={contact} onChange={setContact} onEdit={edited} errors={fields} />
+      {intent.type === "view" ? <ViewFields id={id} view={view} targets={targets} onChange={setView} /> : null}
       <LeadChoices
         name={`${id}-lang`}
         legend={t("lang")}
@@ -97,11 +102,13 @@ type ContactFieldsProps = {
   id: string;
   contact: LeadContact;
   onChange: (contact: LeadContact) => void;
+  /** Правка поля снимает его ошибку. */
+  onEdit: (field: LeadField) => void;
   errors: LeadFieldErrors;
 };
 
 /** Имя и телефон рядом (`.form__two`, на телефоне — столбиком) и скрытая ловушка для ботов. */
-function ContactFields({ id, contact, onChange, errors }: ContactFieldsProps) {
+function ContactFields({ id, contact, onChange, onEdit, errors }: ContactFieldsProps) {
   const t = useTranslations("lead");
   const phoneError =
     errors.phone === "required" ? t("fieldErrors.phoneRequired") : errors.phone ? t("fieldErrors.phone") : undefined;
@@ -113,7 +120,10 @@ function ContactFields({ id, contact, onChange, errors }: ContactFieldsProps) {
         autoComplete="name"
         value={contact.name}
         error={errors.name ? t("fieldErrors.name") : undefined}
-        onChange={(event) => onChange({ ...contact, name: event.target.value })}
+        onChange={(event) => {
+          onEdit("name");
+          onChange({ ...contact, name: event.target.value });
+        }}
       />
       <Field
         id={`${id}-phone`}
@@ -127,33 +137,49 @@ function ContactFields({ id, contact, onChange, errors }: ContactFieldsProps) {
         onFocus={() => {
           if (!contact.phone) onChange({ ...contact, phone: "+998 " });
         }}
-        onChange={(event) => onChange({ ...contact, phone: maskPhone(event.target.value) })}
+        onChange={(event) => {
+          onEdit("phone");
+          onChange({ ...contact, phone: maskPhone(event.target.value) });
+        }}
       />
-      {/* Ловушка (ТЗ 10.2): человек её не видит и не может в неё попасть с клавиатуры. */}
-      <input
-        className="lead-form__trap"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-label={t("trap")}
-        value={contact.trap}
-        onChange={(event) => onChange({ ...contact, trap: event.target.value })}
-      />
+      <TrapField value={contact.trap} onChange={(trap) => onChange({ ...contact, trap })} />
     </div>
   );
 }
 
-type ViewFieldsProps = { id: string; view: ViewChoice; onChange: (view: ViewChoice) => void };
+/** Ловушка для ботов (ТЗ 10.2): человек её не видит, диктор не читает, с клавиатуры в неё не попасть. */
+export function TrapField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const t = useTranslations("lead");
+  return (
+    <input
+      className="lead-form__trap"
+      name="website"
+      tabIndex={-1}
+      aria-hidden="true"
+      autoComplete="off"
+      aria-label={t("trap")}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
+type ViewFieldsProps = {
+  id: string;
+  view: ViewChoice;
+  targets: readonly ViewTarget[];
+  onChange: (view: ViewChoice) => void;
+};
 
 /** «Записаться на просмотр» (ТЗ 10.1): что посмотреть, удобный день и — по желанию — время. */
-function ViewFields({ id, view, onChange }: ViewFieldsProps) {
+function ViewFields({ id, view, targets, onChange }: ViewFieldsProps) {
   const t = useTranslations("lead");
   return (
     <>
       <LeadChoices
         name={`${id}-target`}
         legend={t("what")}
-        options={VIEW_TARGETS.map((value) => ({ value, label: t(`targets.${value}`) }))}
+        options={targets.map((value) => ({ value, label: t(`targets.${value}`) }))}
         value={view.target}
         onChange={(target) => onChange({ ...view, target: target ?? view.target })}
       />

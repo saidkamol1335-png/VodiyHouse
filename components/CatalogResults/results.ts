@@ -1,25 +1,48 @@
 "use client";
 
+import type { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import type { LeadIntent } from "@/components/LeadForm";
 import { track } from "@/lib/events/client";
-import type { CatalogFilter as Filter } from "@/lib/site/catalog/filter";
+import type { FilterLabels } from "@/lib/site/catalog/describe";
+import { PAYMENT_KINDS, type CatalogFilter as Filter, type PaymentKind } from "@/lib/site/catalog/filter";
 import { searchFromFilter } from "@/lib/site/catalog/params";
 
 // Каталог (шаги 3.4, 3.12): заявка «Подбор» с фильтрами, событие «фильтр» для ленты кабинета и
 // фокус после «Показать ещё» — отдельно от разметки выдачи.
 
-/** Фильтр текстом: «komnat 2, do 45000» — для заявки «Подбор». */
-function filterText(filter: Filter): string {
-  return [...new URLSearchParams(searchFromFilter(filter))].map(([key, value]) => `${key} ${value}`).join(", ");
+/**
+ * «Подберём вручную» (ТЗ 10.1): заявка «Подбор» с фильтрами — словами для менеджера и плашки окна
+ * («Комнаты: 2 · Цена квартиры, $: до $60 000», lib/site/catalog/describe.ts) и ссылкой на ту же выдачу.
+ */
+export function pickIntent(filter: Filter, text: string): LeadIntent {
+  return {
+    type: "pick",
+    context: text || undefined,
+    filters: { text, link: `${window.location.pathname}${searchFromFilter(filter)}` },
+  };
 }
 
-/**
- * «Подберём вручную» (ТЗ 10.1): заявка «Подбор» с фильтрами — текстом для менеджера («komnat 2,
- * do 60000») и ссылкой на ту же выдачу.
- */
-export function pickIntent(filter: Filter): LeadIntent {
-  return { type: "pick", filters: { text: filterText(filter), link: `${window.location.pathname}${searchFromFilter(filter)}` } };
+type CatalogTranslator = ReturnType<typeof useTranslations<"catalog">>;
+
+/** Подписи фильтра для describeFilter — из messages каталога (те же, что у чипов фильтра). */
+export function filterLabels(t: CatalogTranslator): FilterLabels {
+  const payments = Object.fromEntries(PAYMENT_KINDS.map((kind) => [kind, t(`filter.payments.${kind}`)]));
+  return {
+    rooms: t("filter.rooms"),
+    studio: t("card.rooms.0"),
+    price: t("filter.price"),
+    priceFrom: t("filter.priceFrom"),
+    priceTo: t("filter.priceTo"),
+    location: t("filter.location"),
+    payment: t("filter.payment"),
+    payments: payments as Record<PaymentKind, string>,
+    deadline: t("filter.deadline"),
+    deadlineBuilt: t("filter.deadlineBuilt"),
+    deadlineUpTo: (year) => t("filter.deadlineUpTo", { year }),
+    developer: t("filter.developer"),
+    finishing: t("filter.finishing"),
+  };
 }
 
 const FILTER_TRACK_MS = 1500;
@@ -45,7 +68,8 @@ export function useFilterTracking() {
   );
   return (next: Filter) => {
     clearTimeout(timer.current);
-    pending.current = filterText(next) ? `${window.location.pathname}${searchFromFilter(next)}` : null;
+    const search = searchFromFilter(next);
+    pending.current = search ? `${window.location.pathname}${search}` : null;
     if (pending.current) timer.current = setTimeout(send, FILTER_TRACK_MS);
   };
 }

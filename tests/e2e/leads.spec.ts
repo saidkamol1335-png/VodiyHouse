@@ -59,6 +59,8 @@ test.describe("сайт · заявки", () => {
     // Под ответом — «Закрыть» текстом (у «×» в шапке та же подпись для диктора).
     await dialog.getByText("Закрыть", { exact: true }).click();
     await expect(dialog).toBeHidden();
+    // Фокус вернулся на кнопку, открывшую окно (браузер возвращает его при close()).
+    await expect(page.getByRole("button", { name: "Записаться на просмотр" }).first()).toBeFocused();
     expect(errors).toEqual([]);
   });
 

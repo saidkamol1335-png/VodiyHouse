@@ -1,7 +1,7 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -9,13 +9,15 @@ import { CatalogFilter } from "@/components/CatalogFilter";
 import { CatalogGrid } from "@/components/CatalogGrid";
 import { useLeadOpener } from "@/components/LeadDialog";
 import { SelectField } from "@/components/SelectField";
+import type { Locale } from "@/lib/i18n/routing";
 import { getMotionTier } from "@/lib/motion";
+import { describeFilter } from "@/lib/site/catalog/describe";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
 import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
 import { CATALOG_PENDING_ATTRIBUTE } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog } from "@/lib/site/catalog/sort";
-import { pickIntent, useFilterTracking, useFocusOnMore } from "./results";
+import { filterLabels, pickIntent, useFilterTracking, useFocusOnMore } from "./results";
 
 type CatalogResultsProps = {
   catalog: SiteCatalog;
@@ -108,7 +110,7 @@ function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, on
         <h3 className="catalog-results__empty-title">{t("nothing")}</h3>
         <p className="catalog-results__empty-hint">{t("nothingHint")}</p>
         <div className="catalog-results__empty-actions">
-          <PickButton filter={filter} />
+          <PickButton catalog={catalog} filter={filter} />
           <Button variant="outline" size="sm" onClick={onReset}>
             {t("reset")}
           </Button>
@@ -190,12 +192,14 @@ function useSheetLock(open: boolean, close: () => void) {
 }
 
 /** Окно заявки открывается с фильтрами на момент нажатия (адрес страницы — только в браузере). */
-function PickButton({ filter }: { filter: Filter }) {
+function PickButton({ catalog, filter }: { catalog: SiteCatalog; filter: Filter }) {
   const open = useLeadOpener();
   const t = useTranslations("lead.buttons");
+  const tCatalog = useTranslations("catalog");
+  const locale = useLocale() as Locale;
   if (!open) return null;
   return (
-    <Button size="sm" onClick={() => open(pickIntent(filter))}>
+    <Button size="sm" onClick={() => open(pickIntent(filter, describeFilter(filter, catalog, filterLabels(tCatalog), locale)))}>
       {t("pick")}
     </Button>
   );

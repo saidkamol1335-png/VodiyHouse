@@ -35,19 +35,24 @@ export function LeadDone({ type, number, repeat, ref }: LeadDoneProps) {
   );
 }
 
+type NextKey = "nextPartner" | "nextView" | "nextCalc" | "nextPick" | "nextDocuments";
+
+/** Свой ответ у типов, где дело не в звонке: расчёт сверяют, подбор готовят, документы присылают. */
+const NEXT_BY_TYPE: Partial<Record<LeadType, NextKey>> = {
+  partner: "nextPartner",
+  view: "nextView",
+  calc: "nextCalc",
+  pick: "nextPick",
+  documents: "nextDocuments",
+};
+
 /** «Что дальше» (ТЗ 10.2): под формой и после отправки; минуты — из «Настройки → Контакты».
  *  После отправки минуты уже сказаны строкой выше — здесь без них. */
 export function LeadNext({ type, sent = false }: { type: LeadType; sent?: boolean }) {
   const t = useTranslations("lead");
   const { callbackMinutes } = useSiteContacts();
-  const text =
-    type === "partner"
-      ? t("nextPartner")
-      : type === "view"
-      ? t("nextView")
-      : callbackMinutes && !sent
-        ? t("nextMinutes", { minutes: callbackMinutes })
-        : t("next");
+  const own = NEXT_BY_TYPE[type];
+  const text = own ? t(own) : callbackMinutes && !sent ? t("nextMinutes", { minutes: callbackMinutes }) : t("next");
   return (
     <p className="lead-form__next">
       <Info size={16} aria-hidden="true" />

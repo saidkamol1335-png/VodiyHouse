@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { track } from "@/lib/events/client";
 import { submitLeadAction } from "@/lib/leads/actions";
 import { fieldErrorsOf } from "@/lib/leads/request";
@@ -9,6 +9,7 @@ import { leadSource } from "@/lib/leads/source";
 import type {
   LeadCalc,
   LeadErrorCode,
+  LeadField,
   LeadFieldErrors,
   LeadObject,
   LeadRequest,
@@ -88,11 +89,20 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
       }
     });
   };
+  /** Правка поля снимает его ошибку — до следующей отправки. Стабильна: формы кладут её в зависимости. */
+  const edited = useCallback((field: LeadField) => {
+    setFields((current) => {
+      if (!current[field]) return current;
+      const rest = { ...current };
+      delete rest[field];
+      return rest;
+    });
+  }, []);
   /** «Отправить ещё одну» (застройщик): снова пустая форма. */
   const reset = () => {
     setSent(null);
     setFields({});
     setError(null);
   };
-  return { submit, fields, error, sent, pending, reset };
+  return { submit, fields, edited, error, sent, pending, reset };
 }

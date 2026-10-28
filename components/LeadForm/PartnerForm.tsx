@@ -11,7 +11,7 @@ import { PARTNER_ANCHOR, PARTNER_FORMATS, type PartnerFormat } from "@/lib/leads
 import type { LeadFieldErrors, SiteLang } from "@/lib/leads/types";
 import { LeadChoices } from "./LeadChoices";
 import { LeadDone } from "./LeadDone";
-import { LeadConsent } from "./LeadForm";
+import { LeadConsent, TrapField } from "./LeadForm";
 import { useLeadSubmit } from "./useLeadSubmit";
 
 const FORM_ID = "partner-form";
@@ -68,10 +68,14 @@ function usePartnerForm(defaultCity: string) {
   const locale = useLocale() as SiteLang;
   const empty = { company: "", name: "", phone: "", format: null, projects: "", comment: "", trap: "" };
   const [fields, setFields] = useState<PartnerFields>({ ...empty, city: defaultCity });
-  const { submit, fields: errors, error, sent, pending, reset } = useLeadSubmit(FORM_ID, INTENT);
+  const { submit, fields: errors, edited, error, sent, pending, reset } = useLeadSubmit(FORM_ID, INTENT);
   const onChange = useCallback(
-    (patch: Partial<PartnerFields>) => setFields((current) => ({ ...current, ...patch })),
-    [],
+    (patch: Partial<PartnerFields>) => {
+      setFields((current) => ({ ...current, ...patch }));
+      // Правка поля снимает его ошибку — до следующей отправки.
+      for (const key of ["company", "name", "phone"] as const) if (key in patch) edited(key);
+    },
+    [edited],
   );
   const pickFormat = useCallback((format: PartnerFormat) => onChange({ format }), [onChange]);
   const form = useFormatFromHash(pickFormat);
@@ -163,8 +167,7 @@ function PartnerContacts({ errors, ...props }: FieldsProps & { errors: LeadField
         onChange={(event) => onChange({ phone: maskPhone(event.target.value) })}
       />
       <Field id={id("city")} label={t("partner.city")} autoComplete="address-level2" {...bind(props, "city")} />
-      {/* Ловушка (ТЗ 10.2): человек её не видит и не может в неё попасть с клавиатуры. */}
-      <input className="lead-form__trap" name="website" tabIndex={-1} autoComplete="off" aria-label={t("trap")} {...bind(props, "trap")} />
+      <TrapField value={fields.trap} onChange={(trap) => onChange({ trap })} />
     </div>
   );
 }

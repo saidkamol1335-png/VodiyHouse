@@ -1,5 +1,5 @@
 import { createTranslator } from "next-intl";
-import { formatDateTime, formatPhone } from "@/lib/format";
+import { APP_TIME_ZONE, formatDate, formatPhone, formatTime } from "@/lib/format";
 import ru from "@/messages/ru.json";
 import { deliveryOf, sourceText, type LeadRow } from "./screen";
 
@@ -21,11 +21,13 @@ const phoneCell = (phone: string) => `"=""${formatPhone(phone) ?? ""}"""`;
 
 /** Строки выборки; truncatedAt — выборка больше потолка: последняя строка говорит, что файл неполный. */
 export function leadsCsv(rows: readonly LeadRow[], truncatedAt?: number): string {
-  const columns = ["number", "when", "client", "type", "complex", "source", "status", "manager", "delivery"] as const;
+  // Дата и время — разными столбцами: в Excel по ним фильтруют и сортируют (мокап CabLeads).
+  const columns = ["number", "date", "time", "client", "type", "complex", "source", "status", "manager", "delivery"] as const;
   const titles = columns.map((key) => t(`columns.${key}`));
-  titles.splice(3, 0, t("card.phone"));
+  titles.splice(4, 0, t("card.phone"));
   const lines = rows.map((row) => {
-    const before = [row.number, formatDateTime(new Date(row.createdAt)), row.name];
+    const created = new Date(row.createdAt);
+    const before = [row.number, formatDate(created), formatTime(created), row.name];
     const after = [
       t(`types.${row.type}`),
       row.subject.complex?.ru ?? "",
@@ -38,4 +40,10 @@ export function leadsCsv(rows: readonly LeadRow[], truncatedAt?: number): string
   });
   const truncated = truncatedAt !== undefined ? [cell(t("csvLimit", { count: truncatedAt }))] : [];
   return `﻿${[titles.map(cell).join(";"), ...lines, ...truncated].join("\r\n")}\r\n`;
+}
+
+/** «vodiyhouse-zayavki-2026-10-28.csv» — дата выгрузки по Ташкенту в имени файла. */
+export function leadsCsvFilename(now: Date = new Date()): string {
+  const day = new Intl.DateTimeFormat("sv-SE", { timeZone: APP_TIME_ZONE }).format(now);
+  return `vodiyhouse-zayavki-${day}.csv`;
 }

@@ -32,4 +32,17 @@ describe("источник захода", () => {
     fresh.rememberVisitSource("http://localhost:3000/ru?utm_source=telegram", "");
     expect(fresh.leadSource().utm_source).toBe("telegram");
   });
+
+  it("метки живут 90 дней: позже заход без меток их заменяет", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-28T06:00:00Z"));
+    const { rememberVisitSource } = await load();
+    rememberVisitSource("http://localhost:3000/ru?utm_source=instagram", "");
+    vi.setSystemTime(new Date("2027-01-27T06:00:00Z"));
+    const later = await load();
+    later.rememberVisitSource("http://localhost:3000/ru/novostroyki", "");
+    expect(later.leadSource()).toMatchObject({ landing: "/ru/novostroyki" });
+    expect(later.leadSource().utm_source).toBeUndefined();
+    vi.useRealTimers();
+  });
 });
