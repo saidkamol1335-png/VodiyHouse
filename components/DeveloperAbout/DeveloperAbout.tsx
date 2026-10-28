@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import type { DeveloperChecks } from "@/lib/site/developers/model";
 import type { DeveloperPage } from "@/lib/site/developers/records";
+import { AboutText } from "./AboutText";
 
 type DeveloperAboutProps = { page: DeveloperPage; checks: DeveloperChecks; locale: Locale };
 
@@ -25,7 +26,7 @@ export async function DeveloperAbout({ page, checks, locale }: DeveloperAboutPro
           {about ? (
             <>
               <p className="developer-about__label">{t("about")}</p>
-              <p className="developer-about__body">{about}</p>
+              <AboutText text={about} />
             </>
           ) : null}
           {founders ? (

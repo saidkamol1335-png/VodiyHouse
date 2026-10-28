@@ -91,3 +91,30 @@
     padding: 18px;
   }
 }
+
+/* «Читать полностью» (мокап MobDev): свёрнуто только на телефоне. */
+.developer-about__more {
+  display: none;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-3);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .developer-about__body--clamped {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+  }
+
+  .developer-about__more {
+    display: inline-block;
+  }
+}

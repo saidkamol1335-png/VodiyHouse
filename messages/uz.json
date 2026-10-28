@@ -482,7 +482,9 @@
       "termsLead": "Quruvchi va hamkor banklarning to‘lov dasturlari.",
       "calculate": "To‘lovni hisoblash",
       "others": "Boshqa quruvchilar",
-      "unavailable": "Quruvchi sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz."
+      "unavailable": "Quruvchi sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz.",
+      "readMore": "To‘liq o‘qish",
+      "collapse": "Yig‘ish"
     }
   },
   "complex": {
