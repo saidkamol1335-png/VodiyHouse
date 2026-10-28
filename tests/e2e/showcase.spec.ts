@@ -23,7 +23,8 @@ test.describe("кабинет · витрина · руководитель", ()
     await page.getByLabel("Срок сдачи").selectOption("built");
     await page.getByRole("button", { name: "Создать" }).click();
     await expect(page).toHaveURL(/\/admin\/vitrina\/podborki\/[0-9a-f-]{36}$/, { timeout: 15_000 });
-    await expect(page.getByText(/\/novostroyki\?podborka=e2e-sdannye/)).toBeVisible();
+    // Адрес — по узбекской латинице (lib/slug.ts): «ы» → «i».
+    await expect(page.getByText(/\/novostroyki\?podborka=e2e-sdannie/)).toBeVisible();
 
     await page.goto(LIST);
     const row = rowOf(page, title);

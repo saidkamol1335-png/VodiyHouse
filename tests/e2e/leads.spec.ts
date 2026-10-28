@@ -141,7 +141,7 @@ test.describe("кабинет · заявки", () => {
         headers: { cookie: (await page.context().cookies()).map((c) => `${c.name}=${c.value}`).join("; ") },
       });
       expect(csv.headers()["content-type"]).toContain("text/csv");
-      expect(await csv.text()).toContain("№;Когда;Клиент;Номер;Тип");
+      expect(await csv.text()).toContain("№;Дата;Время;Клиент;Номер;Тип");
     });
   });
 
