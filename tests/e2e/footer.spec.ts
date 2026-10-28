@@ -18,6 +18,7 @@ test.describe("подвал сайта", () => {
     await expect(root.getByRole("link", { name: "Новостройки" })).toHaveAttribute("href", "/ru/novostroyki");
     await expect(root.getByRole("link", { name: "О нас" })).toHaveAttribute("href", "/ru/o-nas");
     await expect(root.getByRole("link", { name: "Как купить" })).toHaveAttribute("href", "/ru/kak-kupit");
+    await expect(root.getByRole("link", { name: "Подбор за 1 минуту" })).toHaveAttribute("href", "/ru/podbor");
     await expect(root.getByRole("link", { name: "Стать партнёром" })).toHaveAttribute("href", "/ru/dlya-zastroyshchikov");
     await expect(root.getByRole("link", { name: "Вход для сотрудников" })).toHaveAttribute("href", "/admin");
     await expect(root.getByRole("link", { name: "Политика конфиденциальности" })).toHaveAttribute("href", "/ru/privacy");

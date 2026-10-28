@@ -10,9 +10,10 @@ import { HomeOffers } from "@/components/HomeOffers";
 import { HomePartner } from "@/components/HomePartner";
 import { HomeWhy } from "@/components/HomeWhy";
 import { JsonLd } from "@/components/JsonLd";
+import { QuizSection } from "@/components/Quiz";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
-import { OFFERS_ANCHOR } from "@/lib/routes";
+import { OFFERS_ANCHOR, QUIZ_ANCHOR } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { availabilitySample, heroFound, homeStats } from "@/lib/site/home/stats";
 import { readSiteContacts } from "@/lib/site/contacts";
@@ -38,8 +39,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран «Чертёж → стройка»
  * (блок H, поручение исполнителя 28.10.2026 — вместо обложки с фото ЖК), бегущая строка,
  * каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
- * «Предложения от застройщиков» (3.16б), «Vodiy House в двух словах», «Почему через Vodiy House»,
- * «Вы застройщик?». Квиз — 3.17. Страница статичная: всё — из кэшированных ответов каталога и витрины.
+ * «Предложения от застройщиков» (3.16б), квиз «Подбор за 1 минуту» (3.17), «Vodiy House в двух
+ * словах», «Почему через Vodiy House», «Вы застройщик?». Страница статичная: всё — из кэшированных
+ * ответов каталога и витрины.
  */
 export default async function HomePage() {
   const locale = (await rootLocale()) as Locale;
@@ -52,6 +54,7 @@ export default async function HomePage() {
         <HomeMarquee />
         {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} showcase={showcase} /> : <CatalogUnavailable id={CATALOG_ID} />}
         {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
+        <QuizSection id={QUIZ_ANCHOR} catalog={catalog} variant="home" />
         <HomeManifesto />
         <HomeWhy sample={catalog ? availabilitySample(catalog) : null} />
         <HomePartner />

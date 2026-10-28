@@ -9,6 +9,8 @@ const shot = (page: Page, name: string) =>
 // «Спецпредложения» (3.16б) — якорь раздела главной, пункт есть только при действующих
 // предложениях или рекламе: с облаком их даёт DEMO, без облака витрина пустая — пять пунктов.
 const NAV_COUNT = hasCloud ? 6 : 5;
+/** Меню планшета и телефона: пункты шапки и «Подбор за 1 минуту» последним (3.17). */
+const MENU_COUNT = NAV_COUNT + 1;
 
 test.describe("шапка · десктоп 1440", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "только десктоп");
@@ -88,7 +90,8 @@ test.describe("шапка · планшет 1100", () => {
     await toggle.click();
     const menu = page.locator(".tablet-menu");
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".tablet-menu__link")).toHaveCount(NAV_COUNT);
+    await expect(menu.locator(".tablet-menu__link")).toHaveCount(MENU_COUNT);
+    await expect(menu.getByRole("link", { name: "Подбор за 1 минуту" })).toHaveAttribute("href", "/ru/podbor");
     await expect(page.locator(".phone-menu")).toBeHidden();
     await shot(page, "1100-menu");
     await page.keyboard.press("Escape");
@@ -100,14 +103,17 @@ test.describe("шапка · планшет 1100", () => {
 test.describe("шапка · телефон 390", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) > 760, "только телефон");
 
-  test("Ш5: меню на весь экран — 01–05 (06 — «Спецпредложения» с витриной), офис, язык, тема", async ({ page }) => {
+  test("Ш5: меню на весь экран — 01–05 (06 — «Спецпредложения» с витриной, 07 — «Подбор за 1 минуту»), офис, язык, тема", async ({ page }) => {
     await page.goto("/ru");
     await shot(page, "390-top");
     await page.getByRole("button", { name: "Открыть меню" }).click();
     const menu = page.getByRole("dialog", { name: "Меню" });
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".phone-menu__item")).toHaveCount(NAV_COUNT);
+    await expect(menu.locator(".phone-menu__item")).toHaveCount(MENU_COUNT);
     await expect(menu.locator(".phone-menu__number").first()).toHaveText("01");
+    const quiz = menu.locator(".phone-menu__item").last();
+    await expect(quiz).toContainText("Подбор за 1 минуту");
+    await expect(quiz).toHaveAttribute("href", "/ru/podbor");
     await expect(menu).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(menu.getByRole("link", { name: "O‘zbekcha" })).toBeVisible();
     await expect(menu.getByRole("button", { name: "Тёмная" })).toBeVisible();

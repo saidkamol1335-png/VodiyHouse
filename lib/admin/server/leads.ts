@@ -49,7 +49,7 @@ function leadTexts(record: LeadCardRecord): LeadTexts {
   };
   return {
     subject: subjectLine(lead.subject),
-    details: payloadLines(lead.payload),
+    details: payloadLines(lead.payload, site),
     botMessage: telegramText(lead, { site, cabinet: `${site}${ADMIN_ROUTES.leads}` }),
   };
 }

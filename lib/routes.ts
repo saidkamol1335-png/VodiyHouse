@@ -30,6 +30,7 @@ const READY_ROUTES: ReadonlySet<string> = new Set([
   ROUTES.forDevelopers,
   ROUTES.howToBuy,
   ROUTES.privacy,
+  ROUTES.quiz,
 ]);
 
 /** Страницы ЖК (шаг 3.5) и застройщика (3.15): адрес — slug. */
@@ -51,6 +52,8 @@ export type NavKey =
  */
 /** Якорь раздела «Предложения от застройщиков» на главной (3.16б): отдельной страницы нет. */
 export const OFFERS_ANCHOR = "spetspredlozheniya";
+/** Якорь квиза «Подбор за 1 минуту» на главной (3.17); та же анкета — страница /podbor. */
+export const QUIZ_ANCHOR = "podbor";
 export const OFFERS_HREF = `${ROUTES.home}#${OFFERS_ANCHOR}`;
 
 export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
@@ -82,7 +85,8 @@ export const FOOTER_NAV: readonly { key: NavKey; href: string }[] = [
   { key: "developers", href: ROUTES.developers },
   { key: "about", href: ROUTES.about },
   { key: "howToBuy", href: ROUTES.howToBuy },
+  { key: "quiz", href: ROUTES.quiz },
 ];
 
-/** Меню планшета и телефона: пункты шапки; «Подбор за 1 минуту» (решение Ш5) — с квизом в 3б. */
-export const MENU_NAV: readonly { key: NavKey; href: string }[] = [...HEADER_NAV];
+/** Меню планшета и телефона: пункты шапки и «Подбор за 1 минуту» последним пунктом (решение Ш5, 3.17). */
+export const MENU_NAV: readonly { key: NavKey; href: string }[] = [...HEADER_NAV, { key: "quiz", href: ROUTES.quiz }];

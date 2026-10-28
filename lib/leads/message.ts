@@ -44,6 +44,8 @@ export type LeadPayloadRecord = {
   telegram?: string;
   /** «Хочу это условие» (3.16б): название спецпредложения или рекламы. */
   promo?: { title: string };
+  /** Квиз (3.17): ответы словами, сколько ЖК и квартир подошло, ссылка на них. */
+  quiz?: { answers: string; link: string | null; complexes: number; flats: number };
 };
 
 const t = createTranslator({ locale: "ru", messages: ru, namespace: "admin.leads" });
@@ -68,8 +70,8 @@ export function sourceLine(source: LeadSource): string {
   return sourceText(source) ?? t("source.direct");
 }
 
-/** Строки «что ещё» по типу: просмотр, фильтры, застройщик, расчёт, ник в Telegram. */
-export function payloadLines(payload: LeadPayloadRecord): string[] {
+/** Строки «что ещё» по типу: просмотр, фильтры, застройщик, расчёт, квиз, ник в Telegram; site — адрес сайта для ссылок. */
+export function payloadLines(payload: LeadPayloadRecord, site = ""): string[] {
   const lines: string[] = [];
   if (payload.view) {
     const { target, day, time } = payload.view;
@@ -86,6 +88,12 @@ export function payloadLines(payload: LeadPayloadRecord): string[] {
   }
   for (const row of payload.rows ?? []) lines.push(`${row.label}: ${row.value}`);
   if (payload.promo?.title) lines.push(t("message.promo", { title: payload.promo.title }));
+  if (payload.quiz) {
+    const { answers, link, complexes, flats } = payload.quiz;
+    lines.push(t("message.quiz", { answers: answers || t("message.quizNoAnswers") }));
+    lines.push(t("message.quizFound", { complexes, flats }));
+    if (link) lines.push(t("message.quizLink", { url: `${site}${link}` }));
+  }
   if (payload.telegram) lines.push(t("message.telegram", { nick: payload.telegram }));
   return lines;
 }
@@ -99,7 +107,7 @@ export function telegramText(lead: LeadRecord, links: MessageLinks): string {
     t("message.title", { number: lead.number, type: t(`types.${lead.type}`) }),
     lead.repeat_number ? t("message.repeat", { number: lead.repeat_number }) : null,
     subject,
-    ...payloadLines(lead.payload),
+    ...payloadLines(lead.payload, links.site),
     t("message.name", { name: lead.name }),
     t("message.phone", { phone: formatPhone(lead.phone) }),
     lead.contact_lang ? t("message.lang", { lang: t(`langs.${lead.contact_lang}`) }) : null,
@@ -124,7 +132,7 @@ export function sheetRow(lead: LeadRecord, links: MessageLinks): Record<string, 
     site_lang: t(`langs.${lead.site_lang}`),
     subject: subjectLine(lead.subject) ?? "",
     developer: lead.subject.developer ?? "",
-    details: payloadLines(lead.payload).join("\n"),
+    details: payloadLines(lead.payload, links.site).join("\n"),
     page: lead.page_url ? `${links.site}${lead.page_url}` : "",
     utm_source: source.utm_source ?? "",
     utm_medium: source.utm_medium ?? "",

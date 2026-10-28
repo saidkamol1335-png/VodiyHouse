@@ -8,7 +8,7 @@ type HeroCopyProps = {
   ctaHref: string;
   secondaryHref: string;
   titleId: string;
-  /** Быстрый подбор под «бесплатно» (HeroQuickPick; с 3.17 — «Подбор за 1 минуту»). */
+  /** Под «бесплатно»: «Найдено сейчас» (HeroQuickPick) и «Подбор за 1 минуту» (HeroQuizLink, 3.17). */
   children?: ReactNode;
 };
 

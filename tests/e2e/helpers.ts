@@ -10,7 +10,7 @@ export function collectPageErrors(page: Page): string[] {
   return errors;
 }
 
-export const PUBLIC_PAGES = ["/uz", "/ru"] as const;
+export const PUBLIC_PAGES = ["/uz", "/ru", "/ru/podbor", "/uz/podbor"] as const;
 
 // Картинки для загрузки рисуются прямо в браузере — фикстуры в git не нужны.
 export type ImageSpec = {

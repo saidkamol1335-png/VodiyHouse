@@ -5,13 +5,14 @@ import { defineConfig, devices } from "@playwright/test";
 // без них — кабинет открыт без входа, облачные проверки пропускаются.
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
-const PORT = 3000;
+/** E2E_PORT — прогон против другого сервера (например, прод-сборки на 3010). */
+const PORT = Number(process.env.E2E_PORT) || 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 
 // Приёмка 3а (PLAN, 3.14): публичный сайт ещё на 360 и 768 и в WebKit — по запросу, не в каждом
 // прогоне (`npm run e2e:extra`; WebKit — `npx playwright test --project=webkit-390` после
 // `npx playwright install webkit`).
-const SITE_SPECS = /(home|blueprint-hero|catalog|complex-page|pages|header|footer|leads|events|seo-meta|rule-1-2|site-calc-view)\.spec\.ts/;
+const SITE_SPECS = /(home|blueprint-hero|quiz|catalog|complex-page|pages|header|footer|leads|events|seo-meta|rule-1-2|site-calc-view)\.spec\.ts/;
 const EXTRA_PROJECTS = [
   { name: "mobile-360", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Pixel 7"], viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 } },
   { name: "tablet-768", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1024 }, deviceScaleFactor: 1 } },

@@ -16,10 +16,12 @@ export const SITEMAP_ROUTES = [
   ROUTES.about,
   ROUTES.forDevelopers,
   ROUTES.howToBuy,
+  ROUTES.quiz,
   ROUTES.privacy,
 ] as const;
 
-const PRIORITY: Partial<Record<string, number>> = { [ROUTES.home]: 1, [ROUTES.catalog]: 0.9 };
+/** /podbor — посадочная для рекламы (3.17): выше обычных страниц. */
+const PRIORITY: Partial<Record<string, number>> = { [ROUTES.home]: 1, [ROUTES.catalog]: 0.9, [ROUTES.quiz]: 0.6 };
 const COMPLEX_PRIORITY = 0.8;
 const DEVELOPER_PRIORITY = 0.7;
 const PAGE_PRIORITY = 0.5;

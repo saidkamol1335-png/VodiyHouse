@@ -58,6 +58,24 @@ describe("сообщение заявки", () => {
     });
   });
 
+  it("квиз: ответы, сколько подошло и ссылка на подходящие ЖК на сайте; без ответов — «без ответов» и без ссылки", () => {
+    const quiz: LeadRecord = {
+      ...lead,
+      type: "quiz",
+      page_url: "/ru/podbor",
+      payload: { quiz: { answers: "2-комн. · до $45 000 · рассрочка", link: "/ru/novostroyki?komnat=2&do=45000&oplata=inst", complexes: 2, flats: 7 } },
+    };
+    const text = telegramText(quiz, links);
+    expect(text).toContain("Ответы: 2-комн. · до $45 000 · рассрочка");
+    expect(text).toContain("Подходит: 2 ЖК · 7 квартир");
+    expect(text).toContain("Подходящие ЖК: https://vodiyhouse.uz/ru/novostroyki?komnat=2&do=45000&oplata=inst");
+    expect(sheetRow(quiz, links).details).toContain("Подходит: 2 ЖК · 7 квартир");
+    const empty = telegramText({ ...quiz, payload: { quiz: { answers: "", link: null, complexes: 0, flats: 0 } } }, links);
+    expect(empty).toContain("Ответы: без ответов");
+    expect(empty).toContain("Подходит: 0 ЖК · 0 квартир");
+    expect(empty).not.toContain("Подходящие ЖК");
+  });
+
   it("тревога: сколько заявок не дошло и ссылки на них", () => {
     expect(alertText([{ number: 7, type: "callback" }, { number: 8, type: "calc" }], links.cabinet)).toContain(
       "2 заявки не дошли",

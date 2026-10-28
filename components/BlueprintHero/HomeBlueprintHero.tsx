@@ -4,6 +4,7 @@ import { ROUTES } from "@/lib/routes";
 import type { HeroFound, HomeStats } from "@/lib/site/home/stats";
 import { BlueprintHero } from "./BlueprintHero";
 import { HeroQuickPick } from "./HeroQuickPick";
+import { HeroQuizLink } from "./HeroQuizLink";
 import { STAGE_KEYS } from "./stages";
 import type { HeroStat, HeroText } from "./types";
 
@@ -49,6 +50,7 @@ export async function HomeBlueprintHero({ stats, found, catalogId }: HomeBluepri
   return (
     <BlueprintHero text={text} stats={items} ctaHref={`#${catalogId}`} secondaryHref={ROUTES.catalog} finaleHref={`#${catalogId}`}>
       {found ? <HeroQuickPick found={found} locale={locale as Locale} /> : null}
+      <HeroQuizLink />
     </BlueprintHero>
   );
 }

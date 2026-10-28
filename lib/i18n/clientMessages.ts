@@ -78,6 +78,10 @@ export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, SHARE_
 export const SHOWCASE_NAMESPACE = "showcase";
 export const SHOWCASE_MESSAGES = [SHOWCASE_NAMESPACE, LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
 
+/** Квиз «Подбор за 1 минуту» (3.17): вопросы, живой счётчик и контакты с текстами заявки — главная и /podbor. */
+export const QUIZ_NAMESPACE = "quiz";
+export const QUIZ_MESSAGES = [QUIZ_NAMESPACE, LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
 /** «Застройщикам» (шаг 3.11): форма застройщика — тексты окна заявки (lead) в HTML страницы. */
 export const PARTNERS_MESSAGES = [LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
 

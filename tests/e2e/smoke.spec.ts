@@ -7,7 +7,7 @@ test.describe("каркас открывается", () => {
       const errors = collectPageErrors(page);
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
-      await expect(page.locator("html")).toHaveAttribute("lang", path.slice(1));
+      await expect(page.locator("html")).toHaveAttribute("lang", path.slice(1, 3));
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       expect(errors).toEqual([]);
     });

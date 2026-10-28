@@ -19,6 +19,7 @@ import {
   LAZY_SITE_MESSAGES,
   PARTNERS_MESSAGES,
   pickMessages,
+  QUIZ_MESSAGES,
   SHOWCASE_MESSAGES,
   SITE_SHELL_MESSAGES,
   siteMessages,
@@ -62,8 +63,8 @@ describe("сообщения для браузера", () => {
     // своим провайдером каталога получает и его тексты.
     const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
     // Страница ЖК: провайдер с COMPLEX_MESSAGES ставит page.tsx — его получают и разделы рядом.
-    // Главная: каталог с подборками (HomeCatalog) и «Предложения от застройщиков» (HomeOffers) —
-    // каждый со своим провайдером, остальные разделы — серверные.
+    // Главная: каталог с подборками (HomeCatalog), «Предложения от застройщиков» (HomeOffers) и квиз
+    // (QuizSection) — каждый со своим провайдером, остальные разделы — серверные.
     const allowedFor = (file: string): readonly string[] => {
       if (isComplexRoute(file)) return COMPLEX_MESSAGES;
       const source = readSource(file);
@@ -71,6 +72,8 @@ describe("сообщения для браузера", () => {
       const picked = [
         ...(uses("CATALOG_MESSAGES") || source.includes("<HomeCatalog") ? CATALOG_MESSAGES : []),
         ...(source.includes("<HomeOffers") ? SHOWCASE_MESSAGES : []),
+        // Квиз (3.17) — свой провайдер с QUIZ_MESSAGES ставит QuizSection: главная и /podbor.
+        ...(source.includes("<QuizSection") ? QUIZ_MESSAGES : []),
         ...(uses("FAVORITES_MESSAGES") ? FAVORITES_MESSAGES : []),
         ...(uses("PARTNERS_MESSAGES") ? PARTNERS_MESSAGES : []),
         ...(uses("ABOUT_MESSAGES") ? ABOUT_MESSAGES : []),

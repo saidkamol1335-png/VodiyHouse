@@ -32,6 +32,8 @@ export type LeadIntent = {
   calcRows?: LeadRequest["calcRows"];
   /** «Хочу это условие»: название спецпредложения или рекламы — менеджеру. */
   promo?: LeadRequest["promo"];
+  /** Квиз: ответы словами, сколько подошло и ссылка на подходящие ЖК — менеджеру. */
+  quiz?: LeadRequest["quiz"];
 };
 
 export type LeadContact = { name: string; phone: string; lang: SiteLang; trap: string };
@@ -59,6 +61,7 @@ function requestOf(intent: LeadIntent, contact: LeadContact, siteLang: SiteLang,
     ...(intent.filters ? { filters: intent.filters } : {}),
     ...(intent.calc ? { calc: intent.calc, calcRows: intent.calcRows } : {}),
     ...(intent.promo ? { promo: intent.promo } : {}),
+    ...(intent.quiz ? { quiz: intent.quiz } : {}),
     trap: contact.trap,
   };
 }

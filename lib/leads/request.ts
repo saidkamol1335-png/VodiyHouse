@@ -58,6 +58,10 @@ const multiline = (value: unknown, max: number): string =>
         .slice(0, max)
     : "";
 
+/** Счётчики квиза: целое от нуля; мусор — ноль. */
+const count = (value: unknown): number =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 1_000_000 ? value : 0;
+
 const oneOf = <T extends string>(value: unknown, options: readonly T[]): T | null =>
   typeof value === "string" && (options as readonly string[]).includes(value) ? (value as T) : null;
 
@@ -132,6 +136,10 @@ function payloadFrom(type: LeadType, raw: Partial<LeadRequest>): Record<string, 
   if (type === "promo" && isRecord(raw.promo)) {
     const title = text(raw.promo.title, TEXT_MAX);
     return title ? { promo: { title } } : {};
+  }
+  if (type === "quiz" && isRecord(raw.quiz)) {
+    const quiz = raw.quiz;
+    return { quiz: { answers: text(quiz.answers, TEXT_MAX), link: pagePathFrom(quiz.link), complexes: count(quiz.complexes), flats: count(quiz.flats) } };
   }
   return {};
 }

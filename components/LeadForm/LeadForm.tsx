@@ -107,8 +107,8 @@ type ContactFieldsProps = {
   errors: LeadFieldErrors;
 };
 
-/** Имя и телефон рядом (`.form__two`, на телефоне — столбиком) и скрытая ловушка для ботов. */
-function ContactFields({ id, contact, onChange, onEdit, errors }: ContactFieldsProps) {
+/** Имя и телефон рядом (`.form__two`, на телефоне — столбиком) и скрытая ловушка для ботов; квиз (3.17) собирает контакты ими же. */
+export function ContactFields({ id, contact, onChange, onEdit, errors }: ContactFieldsProps) {
   const t = useTranslations("lead");
   const phoneError =
     errors.phone === "required" ? t("fieldErrors.phoneRequired") : errors.phone ? t("fieldErrors.phone") : undefined;

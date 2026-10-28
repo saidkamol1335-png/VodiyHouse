@@ -365,7 +365,16 @@
 }
 
 .blueprint-hero__quick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   margin-top: 16px;
+}
+
+/* «Подбор за 1 минуту» (3.17) — второй строкой под «найдено сейчас», серебром. */
+.blueprint-hero__pick--quiz {
+  color: var(--hero-steel);
 }
 
 /* «Найдено сейчас: 4 ЖК · 12 кв. · „2-комн. до $45 000“ →» — ссылка на каталог с фильтром. */

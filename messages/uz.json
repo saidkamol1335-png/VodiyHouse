@@ -1154,5 +1154,69 @@
       "text": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — Vodiy House telefoni yoki Telegrami orqali: kontaktlar sahifa pastida."
     },
     "edition": "Tahrir: 25.10.2026"
+  },
+  "quiz": {
+    "metaTitle": "1 daqiqada kvartira tanlash — Vodiy House",
+    "metaDescription": "To‘rtta savol — Farg‘onaning qaysi yangi uylari mos kelishi darhol ko‘rinadi. Menejer rejalar bilan tanlovni Telegramga yuboradi.",
+    "eyebrow": "1 daqiqada tanlash",
+    "title": "Nimani tanlashni bilmaysizmi? ",
+    "titleAccent": "1 daqiqada tanlab beramiz",
+    "lead": "To‘rtta savol — mos TJMlar darhol ko‘rinadi. Menejer rejalar bilan tanlovni Telegramga yuboradi.",
+    "start": "Tanlashni boshlash",
+    "time": "≈ 40 soniya",
+    "step": "{a}-savol, jami {b}",
+    "questions": {
+      "rooms": "Necha xona kerak?",
+      "budget": "Byudjet qancha?",
+      "payment": "Qanday to‘lamoqchisiz?",
+      "when": "Qachon ko‘chib o‘tmoqchisiz?",
+      "contact": "Tanlovni qayerga yuboraylik?"
+    },
+    "multi": "Bir nechtasini tanlash mumkin",
+    "rooms": {
+      "0": "Studiya",
+      "1": "1 xonali",
+      "2": "2 xonali",
+      "3": "3 xonali",
+      "4": "4+ xonali"
+    },
+    "upTo": "{price} gacha",
+    "any": "Farqi yo‘q",
+    "payments": {
+      "full": "100% to‘lov",
+      "inst": "Muddatli to‘lov",
+      "bank": "Bank orqali",
+      "mort": "Ipoteka",
+      "unsure": "Hali bilmayman"
+    },
+    "when": {
+      "now": "Darhol — topshirilgan uyga",
+      "year": "Bir yil ichida",
+      "later": "1–2 yildan keyin",
+      "any": "Farqi yo‘q"
+    },
+    "answers": {
+      "budgetAny": "byudjet istalgan",
+      "paymentUnsure": "to‘lov — aniq emas",
+      "whenAny": "muddat — farqi yo‘q"
+    },
+    "next": "Keyingi",
+    "skip": "O‘tkazib yuborish",
+    "back": "Orqaga",
+    "live": "Hozir mos keladi",
+    "fits": "{count, plural, other {ta TJM mos keladi}}",
+    "flats": "{count, plural, other {{n} ta kvartira sotuvda}}",
+    "none": "Hozircha bunday variant yo‘q — menejer qo‘lda tanlaydi",
+    "priceFrom": "{price} dan",
+    "more": "+{n}",
+    "yourAnswers": "Javoblaringiz",
+    "send": "Tanlovni olish",
+    "doneTitle": "Tanlov tayyor",
+    "doneMinutes": "Menejer uni {minutes, plural, other {# daqiqa}} ichida Telegramga yuboradi. Hozircha variantlarni ko‘ring:",
+    "done": "Menejer uni Telegramga yuboradi. Hozircha variantlarni ko‘ring:",
+    "doneNone": "Menejer variantlarni qo‘lda tanlab, Telegramga yuboradi.",
+    "show": "{count, plural, other {# ta TJMni ko‘rsatish}}",
+    "showAll": "Barcha yangi uylar",
+    "again": "Qaytadan"
   }
 }

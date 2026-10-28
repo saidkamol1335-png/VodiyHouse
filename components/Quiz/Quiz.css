@@ -1,0 +1,675 @@
+/* Квиз «Подбор за 1 минуту» (3.17, мокап .qz на 1440 и MobQuiz / .qi на 390): карточка на два
+   столбца — слева зачем и живой счётчик с миниатюрами, справа анкета в карточке с лучом по рамке.
+   На телефоне раздел главной — только вступление, счётчик и кнопка на /podbor; сама анкета живёт
+   на /podbor: вопросы во всю ширину, живой счётчик полосой внизу. */
+
+.quiz-section {
+  padding: 40px 0 72px;
+}
+
+.quiz {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  gap: 48px;
+  align-items: start;
+  padding: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2xl);
+  background: var(--quiz-glow), var(--glass-2);
+}
+
+.quiz__title {
+  margin-top: 16px;
+}
+
+.quiz__lead {
+  max-width: 520px;
+  margin: 16px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+}
+
+/* ---------- живой счётчик ---------- */
+
+.quiz__live {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--dash);
+}
+
+.quiz__pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ok);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.quiz__pulse i {
+  position: relative;
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 10px var(--ok);
+}
+
+/* Пульс точки — только full (CLAUDE.md, анимации): opacity и transform. */
+[data-motion="full"] .quiz__pulse i::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 1.5px solid var(--ok);
+  border-radius: 50%;
+  opacity: 0;
+  animation: quiz-ping 1.8s ease-out infinite;
+}
+
+@keyframes quiz-ping {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+.quiz__count {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.quiz__count > b {
+  font-size: var(--fs-quiz-count);
+  font-weight: 500;
+  line-height: 0.82;
+  letter-spacing: -0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz__count > span {
+  padding-bottom: 4px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.quiz__count small {
+  display: block;
+  margin-top: 2px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.quiz__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.quiz__thumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 5px 5px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--quiz-thumb-bg);
+  color: var(--fg);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease);
+}
+
+.quiz__thumb:hover {
+  border-color: var(--amber-line);
+}
+
+[data-motion="full"] .quiz__thumb:hover {
+  transform: translateY(-2px);
+}
+
+.quiz__thumb-photo {
+  position: relative;
+  flex: none;
+  width: var(--quiz-thumb);
+  height: var(--quiz-thumb);
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--photo-bg);
+}
+
+.quiz__thumb b {
+  display: block;
+  font-size: var(--fs-small);
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.quiz__thumb small {
+  display: block;
+  color: var(--fg-3);
+  font-size: var(--fs-label-l);
+  font-weight: 500;
+}
+
+.quiz__more {
+  padding: 0 6px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+
+.quiz__none {
+  margin: 14px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+/* Кнопка на /podbor — только телефон (раздел главной). */
+.quiz__start {
+  display: none;
+}
+
+/* ---------- карточка анкеты ---------- */
+
+.quiz__card {
+  position: relative;
+  isolation: isolate;
+  padding: 26px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xl);
+  background: var(--quiz-card-bg);
+  box-shadow: var(--shadow-1);
+}
+
+.quiz__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-label-l);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.quiz__time {
+  color: var(--fg-3);
+}
+
+.quiz__bar {
+  height: 4px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--quiz-bar-bg);
+}
+
+.quiz__bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--amber), var(--amber-2));
+  box-shadow: var(--quiz-bar-glow);
+  transition: width var(--dur-reveal) var(--ease);
+}
+
+.quiz__question {
+  margin: 22px 0 0;
+  font-size: var(--fs-quiz-question);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.032em;
+}
+
+.quiz__hint {
+  margin: 8px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small-l);
+}
+
+/* Смена вопроса: заголовок и варианты поднимаются по очереди — только full. */
+[data-motion="full"] .quiz__question,
+[data-motion="full"] .quiz__option {
+  animation: quiz-rise var(--dur-slow) var(--ease) both;
+}
+
+[data-motion="full"] .quiz__option {
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+@keyframes quiz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.quiz__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.quiz__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--quiz-option-h);
+  padding: 0 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: var(--quiz-option-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-control-l);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.quiz__option:hover {
+  border-color: var(--line-3);
+  background: var(--quiz-option-hover);
+}
+
+.quiz__option:active {
+  transform: scale(0.98);
+}
+
+.quiz__option > i {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-3);
+  border-radius: 50%;
+  color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.quiz__option--on {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  box-shadow: var(--quiz-option-on-glow);
+}
+
+.quiz__option--on > i {
+  border-color: var(--amber);
+  background: var(--amber);
+  color: var(--on-amber);
+}
+
+.quiz__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 18px;
+}
+
+.quiz__nav-gap {
+  flex: 1;
+}
+
+/* ---------- контакты ---------- */
+
+.quiz__answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quiz__answer {
+  display: inline-flex;
+  align-items: center;
+  height: 25px;
+  padding: 0 10px;
+  border: 1px dashed var(--dash);
+  border-radius: var(--r-pill);
+  color: var(--fg-2);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quiz__form {
+  margin-top: 20px;
+}
+
+.quiz__submit {
+  height: 52px;
+  font-size: var(--fs-body);
+}
+
+/* ---------- готово ---------- */
+
+.quiz__done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 4px;
+  text-align: center;
+}
+
+.quiz__done:focus-visible {
+  outline: none;
+}
+
+.quiz__done-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.quiz__done-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+[data-motion="full"] .quiz__done-icon {
+  animation: quiz-pop var(--dur-slow) var(--ease) both;
+}
+
+@keyframes quiz-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.quiz__done-title {
+  font-size: var(--fs-h3);
+  font-weight: 650;
+  letter-spacing: var(--ls-h3);
+}
+
+.quiz__done-number {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+}
+
+.quiz__done-text {
+  max-width: 360px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  line-height: 1.5;
+}
+
+.quiz__done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Полоса живого счётчика внизу экрана телефона — только /podbor. */
+.quiz__foot {
+  display: none;
+}
+
+/* ---------- планшет: один столбец ---------- */
+@media (max-width: 980px) {
+  .quiz {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
+/* ---------- телефон ---------- */
+@media (max-width: 760px) {
+  .quiz-section {
+    padding: 24px 0 48px;
+  }
+
+  .quiz {
+    gap: 20px;
+    padding: 20px 16px 16px;
+    border-radius: var(--r-xl);
+    background: var(--bg-2);
+  }
+
+  .quiz__lead {
+    font-size: var(--fs-body);
+  }
+
+  .quiz__live {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px dashed var(--line-3);
+    border-radius: var(--r-l);
+    background: var(--bg-3);
+  }
+
+  .quiz__count {
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .quiz__count > b {
+    font-size: var(--fs-quiz-count-phone);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+  }
+
+  .quiz__count > span {
+    padding-bottom: 0;
+    font-size: var(--fs-control);
+    font-weight: 700;
+  }
+
+  .quiz__thumbs {
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-top: 12px;
+  }
+
+  .quiz__thumb {
+    padding: 0;
+    margin-left: -10px;
+    border: 2px solid var(--bg-3);
+    border-radius: 12px;
+    background: none;
+  }
+
+  .quiz__thumb:first-child {
+    margin-left: 0;
+  }
+
+  /* Подпись миниатюры скрыта глазу, но остаётся именем ссылки для диктора. */
+  .quiz__thumb > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .quiz__thumb-photo {
+    width: var(--quiz-thumb-phone);
+    height: var(--quiz-thumb-phone);
+    border-radius: 10px;
+  }
+
+  .quiz__more {
+    display: none;
+  }
+
+  /* Раздел главной: анкета — на /podbor; остаётся вступление, счётчик и кнопка. */
+  .quiz--home .quiz__card {
+    display: none;
+  }
+
+  .quiz--home .quiz__start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 20px;
+    border-radius: var(--r-pill);
+    background: var(--amber);
+    color: var(--on-amber);
+    font-size: var(--fs-control-l);
+    font-weight: 650;
+    text-decoration: none;
+    box-shadow: var(--glow-amber);
+  }
+
+  .quiz__start-note {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  /* /podbor: анкета во всю ширину, вступление не нужно — счётчик полосой внизу. */
+  .quiz--page {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .quiz--page .quiz__lead,
+  .quiz--page .quiz__intro .quiz__live {
+    display: none;
+  }
+
+  .quiz--page .quiz__title {
+    margin-top: 10px;
+  }
+
+  .quiz--page .quiz__card {
+    padding: 12px 0 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .quiz--page .quiz__beam {
+    display: none;
+  }
+
+  .quiz--page .quiz__question {
+    font-size: var(--fs-quiz-question-phone);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+  }
+
+  .quiz__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quiz__option {
+    min-height: var(--quiz-option-h-phone);
+    padding: 0 14px 0 18px;
+    border-radius: var(--r-l);
+    font-size: var(--fs-h4);
+    font-weight: 700;
+  }
+
+  .quiz__option > i {
+    width: 26px;
+    height: 26px;
+    border-width: 2px;
+  }
+
+  .quiz--page .quiz__foot {
+    display: block;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .quiz__live--compact {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .quiz__live--compact .quiz__count {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .quiz__live--compact .quiz__count > b {
+    font-size: var(--fs-h3);
+  }
+
+  .quiz__live--compact .quiz__thumbs {
+    margin: 0;
+  }
+
+  .quiz__live--compact .quiz__thumb {
+    border-color: var(--bg);
+  }
+
+  .quiz__live--compact .quiz__none {
+    display: none;
+  }
+
+  .quiz__done-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
