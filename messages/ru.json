@@ -3081,10 +3081,11 @@
       "next": "Следующие подборки",
       "complexes": "{n, plural, one {# ЖК} other {# ЖК}}",
       "flats": "{n, plural, one {# квартира в продаже} few {# квартиры в продаже} many {# квартир в продаже} other {# квартиры в продаже}}",
-      "flatsMin": "от {n} квартир в продаже",
+      "flatsMin": "от {n, plural, one {# квартиры} other {# квартир}} в продаже",
       "applied": "Подборка «{title}» применена",
       "appliedHint": "Ссылку с этими фильтрами можно отправить клиенту",
-      "reset": "Сбросить"
+      "reset": "Сбросить",
+      "flatsUnknown": "Наличие — у менеджера"
     },
     "offers": {
       "eyebrow": "Спецпредложения",
@@ -3098,7 +3099,7 @@
       "label": "Реклама · {title}",
       "inSale": "В продаже",
       "flats": "{n, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
-      "flatsMin": "от {n} квартир",
+      "flatsMin": "от {n, plural, one {# квартиры} other {# квартир}}",
       "complexes": "{n, plural, one {# ЖК} other {# ЖК}}",
       "price": "Цена от",
       "payment": "Платёж от",

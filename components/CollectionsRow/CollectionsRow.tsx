@@ -122,7 +122,8 @@ function CollectionCard({ catalog, collection, index, selected, onPick }: Collec
         </span>
         <span className="collections__name">{collection.title[locale]}</span>
         <span className="collections__bottom">
-          <span>{count.partial ? t("flatsMin", { n: count.flats }) : t("flats", { n: count.flats })}</span>
+          {/* Наличие неизвестно и счёт пуст — не «от 0 квартир», а «у менеджера». */}
+          <span>{count.partial ? (count.flats > 0 ? t("flatsMin", { n: count.flats }) : t("flatsUnknown")) : t("flats", { n: count.flats })}</span>
           <span className="collections__go" aria-hidden="true">
             <ArrowRight size={16} strokeWidth={2} />
           </span>

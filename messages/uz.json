@@ -831,7 +831,8 @@
       "flatsMin": "sotuvda {n} tadan ko‘p kvartira",
       "applied": "«{title}» tanlovi qo‘llandi",
       "appliedHint": "Shu filtrli havolani mijozga yuborish mumkin",
-      "reset": "Bekor qilish"
+      "reset": "Bekor qilish",
+      "flatsUnknown": "Mavjudlikni menejerdan bilib oling"
     },
     "offers": {
       "eyebrow": "Maxsus takliflar",
