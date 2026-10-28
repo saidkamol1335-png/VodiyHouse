@@ -7,13 +7,13 @@ import { decideFromSignals, readSignals, type MotionTier } from "./signals";
 
 export const MOTION_ATTRIBUTE = "data-motion";
 export const MOTION_STORAGE_KEY = "vh-motion";
-/** ?motion=full | lite — ручной переключатель для тестов, в localStorage не сохраняется. */
+/** ?motion=full | lite | none — ручной переключатель для тестов, в localStorage не сохраняется. */
 export const MOTION_QUERY_PARAM = "motion";
 export const DEFAULT_MOTION_TIER: MotionTier = "lite";
 
-export function parseMotionOverride(search: string): Exclude<MotionTier, "none"> | null {
+export function parseMotionOverride(search: string): MotionTier | null {
   const value = new URLSearchParams(search).get(MOTION_QUERY_PARAM);
-  return value === "full" || value === "lite" ? value : null;
+  return value === "full" || value === "lite" || value === "none" ? value : null;
 }
 
 function readSavedTier(win: Window): Exclude<MotionTier, "none"> | null {

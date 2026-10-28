@@ -19,6 +19,6 @@ export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.se
 var p=new URLSearchParams(location.search);if(/\\/novostroyki\\/?$/.test(location.pathname)&&${JSON.stringify(CATALOG_FILTER_PARAMS)}.some(function(k){return p.has(k)})){d.setAttribute(${PENDING},"");setTimeout(function(){d.removeAttribute(${PENDING})},${CATALOG_PENDING_TIMEOUT_MS});}}catch(e){}try{
 var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="dark"||t==="light")d.setAttribute("data-theme",t);
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});
-var m=(q==="full"||q==="lite")?q:localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)});
+var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)});
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";
 if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);}catch(e){}})();`;

@@ -34,6 +34,11 @@ describe("HEAD_BOOT_SCRIPT", () => {
     expect(runBootScript({ search: "?motion=lite" }).getAttribute("data-motion")).toBe("lite");
   });
 
+  it("?motion=none глушит анимации до отрисовки, сохранённый full не мешает", () => {
+    localStorage.setItem("vh-motion", "full");
+    expect(runBootScript({ search: "?motion=none" }).getAttribute("data-motion")).toBe("none");
+  });
+
   it("reduced-motion — none поверх сохранённого full", () => {
     localStorage.setItem("vh-motion", "full");
     expect(runBootScript({ reduced: true }).getAttribute("data-motion")).toBe("none");

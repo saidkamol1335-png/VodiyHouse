@@ -38,10 +38,11 @@ function fakeWindow(options: FakeOptions = {}): Window {
 }
 
 describe("parseMotionOverride", () => {
-  it("понимает только full и lite", () => {
+  it("понимает full, lite и none, остальное — нет", () => {
     expect(parseMotionOverride("?motion=full")).toBe("full");
     expect(parseMotionOverride("?motion=lite")).toBe("lite");
-    expect(parseMotionOverride("?motion=none")).toBeNull();
+    expect(parseMotionOverride("?motion=none")).toBe("none");
+    expect(parseMotionOverride("?motion=turbo")).toBeNull();
     expect(parseMotionOverride("")).toBeNull();
   });
 });
@@ -55,6 +56,11 @@ describe("detectMotionTier", () => {
 
   it("?motion=lite на мощном десктопе — lite без пробы", async () => {
     expect(await detectMotionTier(fakeWindow({ search: "?motion=lite" }))).toBe("lite");
+    expect(probeAverageFrameMs).not.toHaveBeenCalled();
+  });
+
+  it("?motion=none на мощном десктопе — none без пробы (только постер первого экрана)", async () => {
+    expect(await detectMotionTier(fakeWindow({ search: "?motion=none" }))).toBe("none");
     expect(probeAverageFrameMs).not.toHaveBeenCalled();
   });
 

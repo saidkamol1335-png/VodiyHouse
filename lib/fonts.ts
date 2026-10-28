@@ -3,7 +3,7 @@
 // Заранее (<link rel="preload">) грузится только Manrope — им набран почти весь первый экран;
 // акценты и подписи приходят следом (решение фазы 3 «Скорость»: LCP < 2,5 с на телефоне), а
 // подменный шрифт next/font с подогнанными метриками держит строку на месте.
-import { Cormorant_Garamond, JetBrains_Mono, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Inter, JetBrains_Mono, Manrope } from "next/font/google";
 
 const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
@@ -32,4 +32,16 @@ const jetbrainsMono = JetBrains_Mono({
   preload: false,
 });
 
-export const fontVariables = [manrope.variable, cormorant.variable, jetbrainsMono.variable].join(" ");
+// Inter — только первый экран главной «Чертёж → стройка» (поручение исполнителя 28.10.2026, стиль
+// портфолио; веса по промпту). Заранее не грузится: им набран один экран одной страницы, браузер
+// берёт файл только там, где текст набран --font-body (styles/tokens.css); остальные страницы —
+// по-прежнему «только Manrope заранее» (3.1).
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: false,
+});
+
+export const fontVariables = [manrope.variable, cormorant.variable, jetbrainsMono.variable, inter.variable].join(" ");

@@ -19,6 +19,12 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
     await expect(html(page)).toHaveAttribute("data-motion", "lite");
   });
 
+  // Третий режим первого экрана «Чертёж → стройка»: только постер — проверяется этим параметром.
+  test("?motion=none глушит анимации", async ({ page }) => {
+    await page.goto("/uz?motion=none");
+    await expect(html(page)).toHaveAttribute("data-motion", "none");
+  });
+
   // Приёмка §3: автоопределение без ?motion — 1440 с мышью → full, 390 с CPU ×4 → lite.
   test("1440 без подсказки: сигналы + проба FPS → full", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "только десктоп");

@@ -10,6 +10,11 @@
   --font: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Первый экран «Чертёж → стройка» (поручение 28.10.2026): его CSS набран --font-body (Inter, без
+     него — Manrope) и --font-mono. Переменная задана здесь, а не только в @theme globals.css:
+     Tailwind v4 не выпускает в :root переменные темы, которые не использует ни одна утилита. */
+  --font-body: var(--font-inter), var(--font);
+  --font-mono: var(--mono);
 
   /* ---------- размеры текста по ролям (точные значения мокапа) ---------- */
   --fs-nano: 9.5px; /* подпись под логотипом кабинета */
@@ -92,6 +97,9 @@
   --container: 1280px;
   --gutter: 32px;
   --header-h: 68px;
+  /* Псевдонимы для CSS первого экрана «Чертёж → стройка»: текст hero стоит по краю логотипа шапки. */
+  --header-height: var(--header-h);
+  --hero-container: var(--container);
   --control-xs: 30px; /* маленькая кнопка мокапа (.btn--xs) */
   --control-sm: 36px; /* кнопка мокапа .btn--sm и кружок .ibtn--sm рядом с ней */
   --demo-h: 0px;
