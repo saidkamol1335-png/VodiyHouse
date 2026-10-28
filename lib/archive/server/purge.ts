@@ -42,7 +42,16 @@ async function sendUnits(admin: SupabaseClient, item: ArchiveItem, caption: stri
   return result.ok;
 }
 
-const date = (iso: string) => new Date(iso).toLocaleDateString("ru-RU", { timeZone: "Asia/Tashkent" });
+/**
+ * «29.11.2026 в 00:30» по Ташкенту: удаление — ровно через 30 суток (cron раз в 5 минут), и без
+ * времени ЖК, ушедший в архив в 00:30, читался бы «доступен ещё весь день 29.11».
+ */
+export const purgeMoment = (iso: string) => {
+  const moment = new Date(iso);
+  const day = moment.toLocaleDateString("ru-RU", { timeZone: "Asia/Tashkent" });
+  const time = moment.toLocaleTimeString("ru-RU", { timeZone: "Asia/Tashkent", hour: "2-digit", minute: "2-digit" });
+  return `${day} в ${time}`;
+};
 
 /** За 3 дня до удаления: «… удалится dd.mm. Восстановить — в кабинете», с CSV квартир. */
 export async function remindArchive(admin: SupabaseClient): Promise<number> {
@@ -50,7 +59,7 @@ export async function remindArchive(admin: SupabaseClient): Promise<number> {
   const cabinet = `${siteOrigin()}${ADMIN_ROUTES.complexes}`;
   for (const item of due) {
     // Напоминания уже отмечены: сбой одного не должен оставить без напоминания остальные.
-    await sendUnits(admin, item, `${archiveTitle(item)} в архиве: ${date(item.purge_at)} удалится окончательно. Восстановить — ${cabinet}. Квартиры — в файле.`).catch(
+    await sendUnits(admin, item, `${archiveTitle(item)} в архиве: ${purgeMoment(item.purge_at)} удалится окончательно. Восстановить — ${cabinet}. Квартиры — в файле.`).catch(
       (error: unknown) => console.error("[archive] напоминание не отправлено", item.slug, error),
     );
   }
