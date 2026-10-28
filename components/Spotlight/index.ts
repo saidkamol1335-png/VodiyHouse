@@ -1,1 +1,1 @@
-export { Spotlight } from "./Spotlight";
+export { Spotlight, useSpotlight } from "./Spotlight";

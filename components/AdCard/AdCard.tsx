@@ -11,6 +11,7 @@ import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
 import type { AdView, ShowcaseComplexRef } from "@/lib/site/showcase/model";
 import { useAdView } from "./useAdView";
+import { useSpotlight } from "@/components/Spotlight";
 
 const SIZES = "(max-width: 980px) 100vw, 640px";
 /** Чипов ЖК в карточке, дальше «ещё N» (в мокапе — два). */
@@ -22,6 +23,7 @@ const CHIPS_MAX = 4;
  * «Показать N квартир» и «Хочу это условие» → заявка promo. Показ и клики — события ad_view / ad_click.
  */
 export function AdCard({ view }: { view: AdView }) {
+  const spotlight = useSpotlight();
   const t = useTranslations("showcase");
   const locale = useLocale() as Locale;
   const card = useRef<HTMLElement>(null);
@@ -29,7 +31,8 @@ export function AdCard({ view }: { view: AdView }) {
   const title = view.ad.title[locale];
   const text = view.ad.text?.[locale];
   return (
-    <article ref={card} className="ad-card" data-track-entity={`ad:${view.ad.id}`} aria-label={t("ad.label", { title })}>
+    // Подсветка за курсором (мокап .adb.spot): только full и только мышь — решает CSS .spotlight.
+    <article ref={card} className="ad-card spotlight" onPointerMove={spotlight} data-track-entity={`ad:${view.ad.id}`} aria-label={t("ad.label", { title })}>
       <div className="ad-card__media">
         {view.cover ? <SitePhoto photo={view.cover} alt="" frame="card" sizes={SIZES} className="ad-card__photo" /> : null}
         <span className="ad-card__tag">{t("ad.tag")}</span>

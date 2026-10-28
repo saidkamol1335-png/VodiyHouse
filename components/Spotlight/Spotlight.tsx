@@ -9,13 +9,10 @@ type SpotlightProps = {
   as?: "div" | "article" | "section" | "li";
 };
 
-/**
- * Подсветка за курсором (21st.dev в мокапе): заливка и светящийся край идут за мышью.
- * Видна только в режиме full и только с мышью — это решает CSS, компонент лишь передаёт координаты.
- */
-export function Spotlight({ children, className, as: Tag = "div" }: SpotlightProps) {
+/** Обработчик для блока со своим ref (карточка рекламы): координаты курсора — в --spot-x / --spot-y. */
+export function useSpotlight() {
   const frame = useRef(0);
-  const handlePointerMove = useCallback((event: PointerEvent<HTMLElement>) => {
+  return useCallback((event: PointerEvent<HTMLElement>) => {
     if (event.pointerType !== "mouse") return;
     const element = event.currentTarget;
     const { clientX, clientY } = event;
@@ -27,7 +24,14 @@ export function Spotlight({ children, className, as: Tag = "div" }: SpotlightPro
       element.style.setProperty("--spot-y", `${clientY - rect.top}px`);
     });
   }, []);
+}
 
+/**
+ * Подсветка за курсором (21st.dev в мокапе): заливка и светящийся край идут за мышью.
+ * Видна только в режиме full и только с мышью — это решает CSS, компонент лишь передаёт координаты.
+ */
+export function Spotlight({ children, className, as: Tag = "div" }: SpotlightProps) {
+  const handlePointerMove = useSpotlight();
   return (
     <Tag className={className ? `spotlight ${className}` : "spotlight"} onPointerMove={handlePointerMove}>
       {children}
