@@ -9,7 +9,7 @@ import { deviceOf, isBot } from "../visitor";
 // Приёмник событий сайта (шаг 3.12): посетитель без входа — секретным ключом, проверяет база
 // (track_events открыт только серверу). Посетитель — случайный id в cookie на год, сессия — 30 минут
 // без действий; IP не храним — лимит с адреса считает база по его солёному хэшу (как у заявок): без
-// cookie каждая пачка — новый посетитель. Боты и сотрудники (с cookie сессии кабинета) не записываются.
+// cookie — id вкладки из пачки (пока открыта вкладка — один посетитель и одна сессия). Боты и сотрудники (с cookie сессии кабинета) не записываются.
 
 export const VISITOR_COOKIE = "vh-vid";
 export const SESSION_COOKIE = "vh-sid";
@@ -32,7 +32,8 @@ export function batchFrom(raw: unknown): EventBatch | null {
     .map((event) => event as SiteEvent);
   const lang = raw.lang === "ru" ? "ru" : "uz";
   const source = typeof raw.source === "string" ? raw.source.slice(0, 60) : null;
-  return events.length > 0 ? { events, lang, source } : null;
+  const tab = typeof raw.tab === "string" && UUID.test(raw.tab) ? raw.tab : undefined;
+  return events.length > 0 ? { events, lang, source, ...(tab ? { tab } : {}) } : null;
 }
 
 export type TrackRequest = { userAgent: string | null; cookies: Map<string, string>; body: unknown };
@@ -43,8 +44,10 @@ export async function trackEvents({ userAgent, cookies, body }: TrackRequest): P
   if (!hasSupabaseAdminEnv() || isBot(userAgent) || hasAuthCookie([...cookies.keys()])) return null;
   const batch = batchFrom(body);
   if (!batch) return null;
-  const visitor = idOr(cookies.get(VISITOR_COOKIE));
-  const session = idOr(cookies.get(SESSION_COOKIE));
+  // Без cookie посетителя (запрещены) — id вкладки из пачки: иначе каждая пачка — новый посетитель.
+  const fallback = cookies.has(VISITOR_COOKIE) ? undefined : batch.tab;
+  const visitor = idOr(cookies.get(VISITOR_COOKIE) ?? fallback);
+  const session = idOr(cookies.get(SESSION_COOKIE) ?? fallback);
   const { error } = await createSupabaseAdminClient().rpc("track_events", {
     p_visitor: visitor,
     p_session: session,

@@ -30,6 +30,24 @@ function sourceLabel(): string | null {
   return source.utm_source ?? source.referrer ?? null;
 }
 
+const TAB_KEY = "vh-tab";
+let tabId: string | null = null;
+
+/** id вкладки — на случай запрета cookie: sessionStorage (живёт, пока открыта вкладка) или память. */
+function tabOf(): string {
+  if (tabId) return tabId;
+  try {
+    tabId = sessionStorage.getItem(TAB_KEY);
+    if (!tabId) {
+      tabId = crypto.randomUUID();
+      sessionStorage.setItem(TAB_KEY, tabId);
+    }
+  } catch {
+    tabId ??= crypto.randomUUID();
+  }
+  return tabId;
+}
+
 function langOf(): EventBatch["lang"] {
   return document.documentElement.lang === "ru" ? "ru" : "uz";
 }
@@ -38,7 +56,7 @@ export function flushEvents(): void {
   clearTimeout(timer);
   timer = undefined;
   if (queue.length === 0) return;
-  const batch: EventBatch = { events: queue.splice(0, EVENT_BATCH_MAX), lang: langOf(), source: sourceLabel() };
+  const batch: EventBatch = { events: queue.splice(0, EVENT_BATCH_MAX), lang: langOf(), source: sourceLabel(), tab: tabOf() };
   const body = JSON.stringify(batch);
   const sent = typeof navigator.sendBeacon === "function" && navigator.sendBeacon(ENDPOINT, new Blob([body], { type: "application/json" }));
   if (!sent) void fetch(ENDPOINT, { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => undefined);
