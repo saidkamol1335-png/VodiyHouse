@@ -21,11 +21,14 @@ const cormorant = Cormorant_Garamond({
   preload: false,
 });
 
+// optional, а не swap: подписи моно шире подменного шрифта, и пришедший после первой отрисовки
+// JetBrains перестраивал ряд цифр первого экрана (CLS главной 0,054 на тестовом деплое, ТЗ < 0,05).
+// Не успел к отрисовке — страница остаётся на подменном; со следующей он уже из кэша.
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
   variable: "--font-jetbrains",
-  display: "swap",
+  display: "optional",
   preload: false,
 });
 

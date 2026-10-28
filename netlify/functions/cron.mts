@@ -7,7 +7,10 @@ async function run(site: string, secret: string, job: string): Promise<void> {
     method: "POST",
     headers: { authorization: `Bearer ${secret}` },
   });
-  if (!response.ok) console.error(`[cron] /api/cron/${job} ответил`, response.status);
+  if (!response.ok) {
+    const body = (await response.text().catch(() => "")).slice(0, 300);
+    console.error(`[cron] /api/cron/${job} ответил`, response.status, body);
+  }
 }
 
 export default async function cron(): Promise<void> {

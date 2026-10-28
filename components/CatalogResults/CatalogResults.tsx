@@ -148,9 +148,10 @@ function ResultsTop({ ref, filtersRef, found, filter, onChange, onOpenFilter }: 
   const sorts = CATALOG_SORTS.map((sort) => ({ value: sort, label: t(`filter.sorts.${sort}`) }));
   return (
     <div ref={ref} className="catalog-results__top">
-      <p className="catalog-results__count" aria-live="polite">
+      {/* Заголовок выдачи: между h1 страницы и h3 карточек (порядок заголовков для диктора). */}
+      <h2 className="catalog-results__count" aria-live="polite">
         {t("page.found", { n: found })}
-      </p>
+      </h2>
       <div className="catalog-results__tools">
         <Button ref={filtersRef} variant="outline" size="sm" className="catalog-results__filters" onClick={onOpenFilter}>
           <SlidersHorizontal size={16} strokeWidth={1.9} aria-hidden />

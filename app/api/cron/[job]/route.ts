@@ -24,6 +24,8 @@ export async function POST(request: Request, { params }: RouteContext<"/api/cron
     return json({ ok: true, ...(await job()) });
   } catch (error) {
     console.error("[cron] работа упала", error);
-    return json({ error: "failed" }, 500);
+    // Причина — в ответ: его пишет в свой лог функция расписания (адрес и так закрыт секретом).
+    // Только message: в cause бывают ответы базы.
+    return json({ error: "failed", reason: error instanceof Error ? error.message : String(error) }, 500);
   }
 }
