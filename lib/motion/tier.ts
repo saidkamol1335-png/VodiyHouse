@@ -38,8 +38,33 @@ export function getMotionTier(doc: Document = document): MotionTier {
   return value === "full" || value === "none" ? value : DEFAULT_MOTION_TIER;
 }
 
+/** Метка «режим решён»: до неё на <html> стартовый lite, который ещё может смениться на full. */
+export const MOTION_READY_ATTRIBUTE = "data-motion-ready";
+
 export function applyMotionTier(tier: MotionTier, doc: Document = document): void {
   doc.documentElement.setAttribute(MOTION_ATTRIBUTE, tier);
+  doc.documentElement.setAttribute(MOTION_READY_ATTRIBUTE, "");
+}
+
+/**
+ * Дождаться решения режима (не дольше limitMs): тяжёлое, что нужно только одному режиму (ролик
+ * lite первого экрана, 4,4 МБ), не начинает грузиться, пока стартовый lite может стать full.
+ */
+export function whenMotionDecided(limitMs = 3000, doc: Document = document): Promise<void> {
+  const root = doc.documentElement;
+  if (root.hasAttribute(MOTION_READY_ATTRIBUTE)) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+      resolve();
+    };
+    const observer = new MutationObserver(() => {
+      if (root.hasAttribute(MOTION_READY_ATTRIBUTE)) done();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: [MOTION_READY_ATTRIBUTE] });
+    const timer = window.setTimeout(done, limitMs);
+  });
 }
 
 /** Порядок: reduced-motion → ?motion → сигналы → сохранённый результат → проба FPS. */

@@ -6,7 +6,7 @@ vi.mock("./fpsProbe", async (importOriginal) => {
 });
 
 import { probeAverageFrameMs } from "./fpsProbe";
-import { detectMotionTier, MOTION_STORAGE_KEY, parseMotionOverride } from "./tier";
+import { applyMotionTier, detectMotionTier, MOTION_READY_ATTRIBUTE, MOTION_STORAGE_KEY, parseMotionOverride, whenMotionDecided } from "./tier";
 
 type FakeOptions = {
   search?: string;
@@ -84,5 +84,27 @@ describe("detectMotionTier", () => {
   it("сохранённый результат пробы — без повторной пробы", async () => {
     expect(await detectMotionTier(fakeWindow({ saved: "full" }))).toBe("full");
     expect(probeAverageFrameMs).not.toHaveBeenCalled();
+  });
+});
+
+describe("метка «режим решён»", () => {
+  it("applyMotionTier ставит метку; whenMotionDecided ждёт её или выходит по пределу", async () => {
+    document.documentElement.removeAttribute(MOTION_READY_ATTRIBUTE);
+    let decided = false;
+    const waiting = whenMotionDecided(1000).then(() => {
+      decided = true;
+    });
+    await Promise.resolve();
+    expect(decided).toBe(false);
+    applyMotionTier("lite");
+    await waiting;
+    expect(decided).toBe(true);
+    await expect(whenMotionDecided(1000)).resolves.toBeUndefined();
+    document.documentElement.removeAttribute(MOTION_READY_ATTRIBUTE);
+    vi.useFakeTimers();
+    const late = whenMotionDecided(50);
+    vi.advanceTimersByTime(60);
+    await expect(late).resolves.toBeUndefined();
+    vi.useRealTimers();
   });
 });

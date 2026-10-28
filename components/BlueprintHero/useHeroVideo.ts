@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
+import { whenMotionDecided } from "@/lib/motion";
 import { frameOfProgress, HERO_ASSETS } from "./stages";
 import type { ScrubFrame } from "./types";
 
@@ -33,6 +34,9 @@ const BLOCKED_ERRORS = new Set(["NotAllowedError", "NotSupportedError"]);
 class HeroPlayer {
   private started = false;
   private detached = false;
+  private ready = false;
+  /** Экран сейчас виден — после решения режима запускать, только если всё ещё виден. */
+  private wanted = false;
 
   constructor(
     private readonly host: HTMLElement,
@@ -49,7 +53,16 @@ class HeroPlayer {
 
   /** Экран виден: первый раз — загрузить и запустить, затем — продолжить; после финала — ничего. */
   readonly show = (): void => {
+    this.wanted = true;
     if (this.detached || this.player.ended) return;
+    // Первый запуск — когда режим решён: решат full — этот плеер отцепят, ролик не скачается.
+    if (!this.started && !this.ready) {
+      void whenMotionDecided().then(() => {
+        this.ready = true;
+        if (this.wanted) this.show();
+      });
+      return;
+    }
     if (!this.started) {
       this.started = true;
       this.player.setAttribute("preload", "auto");
@@ -62,6 +75,7 @@ class HeroPlayer {
   };
 
   readonly hide = (): void => {
+    this.wanted = false;
     if (this.started && !this.player.ended) this.player.pause();
   };
 
