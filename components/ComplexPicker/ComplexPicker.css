@@ -371,6 +371,8 @@
 }
 
 .complex-picker__floors {
+  /* Точка отсчёта offsetLeft: выбранный этаж ставится в середину ленты. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -715,6 +717,22 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.complex-picker__telegram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  color: var(--fg);
+}
+
+.complex-picker__telegram:hover {
+  border-color: var(--amber-2);
+  color: var(--amber-2);
 }
 
 .complex-picker__close {

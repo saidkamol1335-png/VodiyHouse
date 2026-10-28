@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, useRef, useState } from "react";
+import { type MouseEvent, type PointerEvent, useRef, useState } from "react";
 import { CONTOUR_POINTS, percentPoint, type Point } from "@/lib/admin/facade/contours";
 import type { FacadeImage } from "@/lib/admin/facade/types";
 
@@ -23,17 +23,17 @@ const toPoints = (points: readonly Point[]) => points.map(([x, y]) => `${x},${y}
  * сайта (viewBox 0 0 100 100), поэтому контур не зависит от размера, в котором картинку показали.
  */
 export function ContourEditor({ image, alt, others, value, onChange }: ContourEditorProps) {
-  const { surface, add, move, setDragging } = useContourDrag(value, onChange);
+  const { surface, add, move, stop, setDragging } = useContourDrag(value, onChange);
   return (
     <div
       ref={surface}
       className="facade-editor"
       style={{ aspectRatio: `${image.width} / ${image.height}` }}
-      onPointerDown={add}
+      onClick={add}
       onPointerMove={move}
-      onPointerUp={() => setDragging(null)}
-      onPointerLeave={() => setDragging(null)}
-      onPointerCancel={() => setDragging(null)}
+      onPointerUp={stop}
+      onPointerLeave={stop}
+      onPointerCancel={stop}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- кабинет: картинка как есть, без обрезки и next/image */}
       <img className="facade-editor__image" src={image.src} alt={alt} draggable={false} />
@@ -77,13 +77,24 @@ function EditorLabels({ others }: { others: OtherContour[] }) {
 function useContourDrag(value: Point[], onChange: (points: Point[]) => void) {
   const surface = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<number | null>(null);
-  const pointOf = (event: PointerEvent) => {
+  // Угол только что тянули — щелчок, который придёт следом, не ставит новый.
+  const dragged = useRef(false);
+  const pointOf = (event: { clientX: number; clientY: number }) => {
     const box = surface.current!.getBoundingClientRect();
     return percentPoint(event.clientX - box.left, event.clientY - box.top, box.width, box.height);
   };
-  const add = (event: PointerEvent<HTMLDivElement>) => {
-    if (dragging !== null || event.button !== 0 || value.length >= CONTOUR_POINTS.max) return;
+  // Щелчок (касание без сдвига), а не нажатие: свайп по картинке на телефоне прокручивает страницу.
+  const add = (event: MouseEvent<HTMLDivElement>) => {
+    if (dragged.current) {
+      dragged.current = false;
+      return;
+    }
+    if (value.length >= CONTOUR_POINTS.max) return;
     onChange([...value, pointOf(event)]);
+  };
+  const stop = () => {
+    if (dragging !== null) dragged.current = true;
+    setDragging(null);
   };
   const move = (event: PointerEvent<HTMLDivElement>) => {
     if (dragging === null) return;
@@ -91,5 +102,5 @@ function useContourDrag(value: Point[], onChange: (points: Point[]) => void) {
     next[dragging] = pointOf(event);
     onChange(next);
   };
-  return { surface, add, move, setDragging };
+  return { surface, add, move, stop, setDragging };
 }

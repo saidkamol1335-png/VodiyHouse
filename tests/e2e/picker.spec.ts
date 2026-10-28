@@ -71,6 +71,26 @@ test.describe("сайт · выбрать квартиру на фасаде", (
     expect(errors).toEqual([]);
   });
 
+  test("с клавиатуры: блок → «Все корпуса» и обратно — фокус не теряется; квартира — панель с фокусом", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "клавиатура — на 1440");
+    await page.goto(SHODLIK);
+    const section = page.locator("#vybrat-kvartiru");
+    await section.scrollIntoViewIfNeeded();
+    const tag = section.locator(".complex-picker__tag", { hasText: "Блок B" });
+    await tag.focus();
+    await page.keyboard.press("Enter");
+    const back = section.getByRole("button", { name: "Все корпуса" });
+    await expect(back).toBeFocused();
+    await section.locator(".complex-picker__unit--free").first().focus();
+    await page.keyboard.press("Enter");
+    await expect(section.locator(".complex-picker__flat h3")).toBeFocused();
+    await section.getByRole("button", { name: "Закрыть" }).click();
+    await expect(section.locator(".complex-picker__unit--free").first()).toBeFocused();
+    await back.focus();
+    await page.keyboard.press("Enter");
+    await expect(section.locator(".complex-picker__tag", { hasText: "Блок B" })).toBeFocused();
+  });
+
   test("продана и бронь — только подсказка; занятая квартира панель не открывает", async ({ page }) => {
     const section = await openBlock(page, "B");
     const taken = section.locator(".complex-picker__unit--sold, .complex-picker__unit--reserved").first();

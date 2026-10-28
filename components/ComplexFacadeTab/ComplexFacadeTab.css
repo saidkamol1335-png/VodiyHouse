@@ -118,7 +118,8 @@
   border-radius: var(--r-l);
   background: var(--bg-2);
   cursor: crosshair;
-  touch-action: none;
+  /* Свайп прокручивает страницу; угол ставится касанием без сдвига (click). */
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -172,6 +173,8 @@
   background: var(--amber-2);
   box-shadow: var(--shadow-1);
   cursor: grab;
+  /* Угол тянется пальцем — страница под ним не едет. */
+  touch-action: none;
   transform: translate(-50%, -50%);
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useState, useTransition } from "react";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
@@ -32,11 +32,12 @@ export function PlanForm(props: PlanFormProps) {
   const t = useTranslations("admin.complexes.facade");
   const { published, block, plan } = props;
   const { id, entrance, setEntrance, from, setFrom, to, setTo, rule12, setRule12, error, range, upload, saveFloors } = usePlanForm(props);
+  const [saving, startSaving] = useTransition();
   return (
     <div className="facade-tab__plan-form">
       <PlanFields id={id} block={block} entrance={entrance} from={from} to={to} onEntrance={setEntrance} onFrom={setFrom} onTo={setTo}>
         {plan ? (
-          <Button variant="outline" size="sm" onClick={() => void saveFloors()}>
+          <Button variant="outline" size="sm" pending={saving} onClick={() => startSaving(saveFloors)}>
             {t("savePlan")}
           </Button>
         ) : null}

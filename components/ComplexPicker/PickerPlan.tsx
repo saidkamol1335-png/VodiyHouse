@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
+import { getMotionTier } from "@/lib/motion";
 import type { FloorCount, EntranceCount } from "@/lib/site/picker/model";
 import { useBlockLabels } from "./blockLabels";
 import type { PickerBlockView } from "./ComplexPicker";
@@ -103,10 +104,18 @@ function Legend() {
 
 function Floors({ floors, floor, onFloor }: { floors: FloorCount[]; floor: number | null; onFloor: (floor: number) => void }) {
   const t = useTranslations("complex.pick");
+  const list = useRef<HTMLUListElement>(null);
+  // Телефон: этажи — лента прокруткой; выбранный этаж — в её середине (мокап MobJkFloor).
+  useEffect(() => {
+    const strip = list.current;
+    const pressed = strip?.querySelector<HTMLElement>("[aria-pressed='true']");
+    if (!strip || !pressed || strip.scrollWidth <= strip.clientWidth) return;
+    strip.scrollTo({ left: pressed.offsetLeft - (strip.clientWidth - pressed.offsetWidth) / 2, behavior: getMotionTier() === "full" ? "smooth" : "auto" });
+  }, [floor]);
   return (
     <div className="complex-picker__floors-wrap">
       <p className="complex-picker__label">{t("floor")}</p>
-      <ul className="complex-picker__floors">
+      <ul ref={list} className="complex-picker__floors">
         {floors.map((item) => (
           <li key={item.floor}>
             <button

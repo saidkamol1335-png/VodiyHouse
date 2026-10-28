@@ -738,7 +738,8 @@
       "failed": "Kvartiralarni yuklab bo‘lmadi.",
       "retry": "Qayta urinish",
       "entrances": "Kirish",
-      "takenNow": "Bu kvartira hozirgina band qilindi — boshqa yashil kvartiralarni ko‘ring"
+      "takenNow": "Bu kvartira hozirgina band qilindi — boshqa yashil kvartiralarni ko‘ring",
+      "telegram": "Telegramda yozish"
     },
     "layouts": {
       "title": "Rejalar",

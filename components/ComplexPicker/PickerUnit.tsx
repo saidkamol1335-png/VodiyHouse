@@ -1,12 +1,13 @@
 "use client";
 
-import { Calculator, X } from "lucide-react";
+import { Calculator, Send, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { loadFlatCalculator, useLayoutCalc } from "@/components/ComplexPlans/useLayoutCalc";
 import { LeadButton } from "@/components/LeadDialog";
+import { TelegramButton } from "@/components/TelegramButton";
 import type { CalcHints } from "@/lib/calc/hints";
 import { readCalcParams } from "@/lib/calc/params";
 import { unitPricePerM2 } from "@/lib/calc/unitPrice";
@@ -143,6 +144,10 @@ function UnitActions({ unit, title, taken, calc, complexSlug, complexName, leadE
           {calc.pending === layoutId ? t("calculating") : t("calculate")}
         </Button>
       ) : null}
+      {/* Вопрос о квартире — в Telegram Vodiy House (правило 1.2), бот получит ЖК и квартиру. */}
+      <TelegramButton object={{ complex: complexSlug, unit: unit.id }} className="complex-picker__telegram" aria-label={t("telegram")}>
+        <Send size={18} aria-hidden="true" />
+      </TelegramButton>
       <button type="button" className="complex-picker__close" aria-label={t("close")} onClick={onClose}>
         <X size={18} aria-hidden="true" />
       </button>
