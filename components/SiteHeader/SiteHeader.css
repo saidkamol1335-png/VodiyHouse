@@ -35,7 +35,8 @@
   transition: opacity var(--dur-slow) var(--ease);
 }
 
-.site-header--solid::before {
+.site-header--solid::before,
+:root[data-anchor-start] .site-header::before {
   opacity: 1;
 }
 
@@ -142,12 +143,12 @@
   }
 
   /* Поверх фото: белые иконки на тёмных кружках и лёгкое затемнение сверху. */
-  .site-header--over-photo,
-  .site-header--over-photo .site-header__logo {
+  :root:not([data-anchor-start]) .site-header--over-photo,
+  :root:not([data-anchor-start]) .site-header--over-photo .site-header__logo {
     color: var(--over-photo-fg);
   }
 
-  .site-header--over-photo::after {
+  :root:not([data-anchor-start]) .site-header--over-photo::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -155,7 +156,7 @@
     background: var(--over-photo-shade);
   }
 
-  .site-header--over-photo .site-header__icon {
+  :root:not([data-anchor-start]) .site-header--over-photo .site-header__icon {
     background: var(--over-photo-button);
     color: var(--over-photo-fg);
     -webkit-backdrop-filter: var(--over-photo-filter);
@@ -167,7 +168,7 @@
    наверху и тёмное стекло после прокрутки, пока экран ещё под ней (html[data-hero-dark] ставит
    сам экран, useHeroOverHeader). Подменяются токены на всём поддереве: логотип, пункты, кнопки,
    язык и тема перекрашиваются сами; ниже первого экрана шапка снова в цветах темы. */
-.site-header--dark:not(.site-header--solid),
+:root:not([data-anchor-start]) .site-header--dark:not(.site-header--solid),
 :root[data-hero-dark] .site-header--dark {
   --fg: var(--hero-fg);
   --fg-2: var(--hero-muted);
@@ -188,7 +189,7 @@
 }
 
 /* Пункты в стиле экрана: 14 px, 500 (обычно 550) — только пока шапка над ним. */
-.site-header--dark:not(.site-header--solid) .header-nav__link,
+:root:not([data-anchor-start]) .site-header--dark:not(.site-header--solid) .header-nav__link,
 :root[data-hero-dark] .site-header--dark .header-nav__link {
   font-weight: 500;
 }

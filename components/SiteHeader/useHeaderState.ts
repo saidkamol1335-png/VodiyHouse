@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ANCHOR_START_ATTRIBUTE } from "@/lib/boot/anchorStart";
 
 /** Прокручена ли страница: метка в начале документа ушла из виду — шапка становится стеклом. */
 export function useScrolledPast() {
@@ -9,7 +10,11 @@ export function useScrolledPast() {
   useEffect(() => {
     const element = sentinel.current;
     if (!element) return;
-    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry?.isIntersecting));
+    const observer = new IntersectionObserver(([entry]) => {
+      setScrolled(!entry?.isIntersecting);
+      // Шапка знает, где страница, — метка «открыта по якорю» из <head> больше не нужна.
+      document.documentElement.removeAttribute(ANCHOR_START_ATTRIBUTE);
+    });
     observer.observe(element);
     return () => observer.disconnect();
   }, []);

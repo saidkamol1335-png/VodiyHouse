@@ -6,6 +6,7 @@
 // бывают недоступны, а это от них не зависит.
 
 import { MOTION_QUERY_PARAM, MOTION_STORAGE_KEY } from "@/lib/motion/tier";
+import { ANCHOR_START_ATTRIBUTE } from "./anchorStart";
 import {
   CATALOG_FILTER_PARAMS,
   CATALOG_PENDING_ATTRIBUTE,
@@ -15,7 +16,7 @@ import { THEME_STORAGE_KEY } from "@/lib/theme/theme";
 
 const PENDING = JSON.stringify(CATALOG_PENDING_ATTRIBUTE);
 
-export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{
+export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");if(location.hash.length>1)d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");try{
 var p=new URLSearchParams(location.search);if(/\\/novostroyki\\/?$/.test(location.pathname)&&${JSON.stringify(CATALOG_FILTER_PARAMS)}.some(function(k){return p.has(k)})){d.setAttribute(${PENDING},"");setTimeout(function(){d.removeAttribute(${PENDING})},${CATALOG_PENDING_TIMEOUT_MS});}}catch(e){}try{
 var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="dark"||t==="light")d.setAttribute("data-theme",t);
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});
