@@ -20,8 +20,9 @@ import { complexPageFrom, type ComplexPageRecord } from "./records";
 /** «Выбрать квартиру» (фаза 4): фасад, контуры блоков и планы этажей — в той же записи кэша. */
 async function withPicker(client: SupabaseClient, page: ComplexPage): Promise<ComplexPage> {
   const { data, error } = await client.rpc("site_complex_picker", { p_complex: page.id });
-  if (error) throw new Error("site-complex-picker-unavailable", { cause: error });
-  return { ...page, picker: pickerFrom(data as PickerRecord | null) };
+  // Раздел необязательный: его сбой не снимает страницу — она выходит без «Выбрать квартиру».
+  if (error) console.error("[novostroyki/zhk] «Выбрать квартиру» недоступен", error);
+  return { ...page, picker: error ? null : pickerFrom(data as PickerRecord | null) };
 }
 
 async function fetchComplexPage(slug: string): Promise<ComplexPage | null> {

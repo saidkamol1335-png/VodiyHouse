@@ -323,6 +323,38 @@
   --s-sold: rgba(201, 64, 47, 0.065);
   --s-sold-b: rgba(201, 64, 47, 0.26);
   --s-sold-t: #9e3a2e;
+  /* «Выбрать квартиру» (фаза 4, мокап .vis / .fplan): подложка плана этажа, рамка фасада; подписи
+     поверх фото — тёмное стекло в обеих темах (фото-блоки мокапа тёмные всегда). */
+  --picker-plan-bg: #fbf9f5;
+  --picker-frame-bg: #efeae2;
+  --picker-glass: rgba(17, 14, 10, 0.72);
+  --picker-glass-line: rgba(255, 240, 220, 0.2);
+  --picker-glass-fg: #ffffff;
+  --picker-glass-ok: #7ee2a8;
+  --picker-contour: rgba(198, 126, 16, 0.12);
+  --picker-contour-line: rgba(119, 75, 6, 0.92);
+  --picker-contour-hover: rgba(248, 155, 13, 0.32);
+  --picker-contour-empty: rgba(11, 10, 9, 0.38);
+  --picker-contour-empty-line: rgba(255, 240, 220, 0.38);
+  --picker-contour-night: rgba(255, 196, 110, 0.16);
+  --picker-contour-night-line: rgba(255, 214, 150, 0.95);
+  --picker-contour-night-hover: rgba(255, 190, 90, 0.38);
+  --picker-stage-bg: #0d0c0b;
+  --picker-tip-bg: rgba(16, 15, 13, 0.95);
+  --picker-glass-fg-2: rgba(255, 255, 255, 0.7);
+  --picker-light-on-bg: #ffffff;
+  --picker-light-on-fg: #17140f;
+  /* Квартиры на плане: картинка плана — белый лист в обеих темах, поэтому и цвета статусов светлые
+     (в тёмной теме не переопределяются, иначе светлый текст ляжет на белое). */
+  --picker-unit-free: rgba(26, 143, 76, 0.16);
+  --picker-unit-free-b: rgba(26, 143, 76, 0.5);
+  --picker-unit-free-t: #0f5a33;
+  --picker-unit-res: rgba(248, 155, 13, 0.26);
+  --picker-unit-res-b: rgba(207, 115, 0, 0.62);
+  --picker-unit-res-t: #6e3d00;
+  --picker-unit-sold: rgba(201, 64, 47, 0.1);
+  --picker-unit-sold-b: rgba(201, 64, 47, 0.32);
+  --picker-unit-sold-t: #9e3a2e;
 
   --shadow-1: 0 1px 2px rgba(40, 28, 12, 0.04), 0 10px 28px rgba(40, 28, 12, 0.05);
   --shadow-2:
@@ -557,6 +589,9 @@
   --s-sold: rgba(255, 122, 107, 0.08);
   --s-sold-b: rgba(255, 122, 107, 0.26);
   --s-sold-t: #eba89f;
+  --picker-frame-bg: #0d0c0b;
+  --picker-contour: rgba(248, 155, 13, 0.12);
+  --picker-contour-line: rgba(255, 214, 150, 0.92);
 
   --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px rgba(0, 0, 0, 0.42);
   --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 50px rgba(0, 0, 0, 0.45);

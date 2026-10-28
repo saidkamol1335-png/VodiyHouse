@@ -97,12 +97,3 @@ export function placeUnits(plan: FloorPlan, floor: number, units: readonly Picke
       ) ?? null,
   }));
 }
-
-/** Короткая цена плитки мокапа: «$43,6k» (до тысячи — целиком). */
-export function shortUsd(amount: number, locale: string): string {
-  if (amount < 1000) return `$${Math.round(amount)}`;
-  const thousands = new Intl.NumberFormat(locale === "uz" ? "uz-UZ" : "ru-RU", { maximumFractionDigits: 1 }).format(
-    Math.round(amount / 100) / 10,
-  );
-  return `$${thousands}k`;
-}

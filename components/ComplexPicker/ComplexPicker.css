@@ -1,0 +1,910 @@
+/* «Выбрать квартиру» на фасаде (фаза 4, мокап SiteJkPick .vis-site / .pku; телефон — MobJkFacade,
+   MobJkFloor): рамка с фасадом или планом этажа, под ней — выбранная квартира. Освещение — слои
+   тонировки поверх фото, сменяются прозрачностью (анимации — только transform и opacity). */
+.complex-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.complex-picker__lead-phone,
+.complex-picker__hint-phone {
+  display: none;
+}
+
+.complex-picker__frame {
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2xl);
+  background: var(--picker-frame-bg);
+  box-shadow: var(--card-shadow);
+}
+
+/* ─── Фасад ─── */
+.complex-picker__facade {
+  position: relative;
+}
+
+.complex-picker__stage {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--picker-stage-bg);
+}
+
+.complex-picker__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.complex-picker__stage::before,
+.complex-picker__stage::after,
+.complex-picker__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Затенение краёв — всегда; закат и ночь — свои слои, видимые в своём режиме. */
+.complex-picker__shade {
+  background: linear-gradient(180deg, rgba(11, 10, 9, 0.38), transparent 26%, transparent 72%, rgba(11, 10, 9, 0.6));
+}
+
+.complex-picker__stage::before {
+  content: "";
+  opacity: 0;
+  mix-blend-mode: multiply;
+  background: linear-gradient(180deg, rgba(255, 128, 52, 0.55), rgba(176, 72, 96, 0.42) 50%, rgba(60, 30, 20, 0.62));
+}
+
+.complex-picker__stage::after {
+  content: "";
+  opacity: 0;
+  mix-blend-mode: multiply;
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(60, 90, 190, 0.35), transparent 70%),
+    linear-gradient(180deg, rgba(14, 20, 52, 0.86), rgba(10, 14, 38, 0.8) 50%, rgba(5, 5, 10, 0.9));
+}
+
+.complex-picker__stage--dusk::before,
+.complex-picker__stage--night::after {
+  opacity: 1;
+}
+
+.complex-picker__contours {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.complex-picker__contour {
+  fill: var(--picker-contour);
+  stroke: var(--picker-contour-line);
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.complex-picker__contour--hover {
+  fill: var(--picker-contour-hover);
+  stroke: var(--amber-2);
+  stroke-dasharray: none;
+}
+
+.complex-picker__contour--empty {
+  fill: var(--picker-contour-empty);
+  stroke: var(--picker-contour-empty-line);
+}
+
+.complex-picker__stage--night .complex-picker__contour {
+  fill: var(--picker-contour-night);
+  stroke: var(--picker-contour-night-line);
+}
+
+.complex-picker__stage--night .complex-picker__contour--hover {
+  fill: var(--picker-contour-night-hover);
+}
+
+.complex-picker__tag {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-height: 44px;
+  padding: 7px 13px;
+  border: 1px solid var(--picker-glass-line);
+  border-radius: var(--r-l);
+  background: var(--picker-glass);
+  color: var(--picker-glass-fg);
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translate(-50%, 0);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.complex-picker__tag > b {
+  font-size: var(--fs-small);
+  font-weight: 800;
+}
+
+.complex-picker__tag > small {
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  color: var(--picker-glass-ok);
+}
+
+.complex-picker__tag > .complex-picker__tag-none {
+  color: var(--picker-glass-fg-2);
+}
+
+.complex-picker__tag--on,
+.complex-picker__tag:hover,
+.complex-picker__tag:focus-visible {
+  border-color: var(--amber-2);
+  background: var(--amber);
+}
+
+.complex-picker__tag--on > b,
+.complex-picker__tag--on > small,
+.complex-picker__tag:hover > b,
+.complex-picker__tag:hover > small,
+.complex-picker__tag:focus-visible > b,
+.complex-picker__tag:focus-visible > small {
+  color: var(--on-amber);
+}
+
+.complex-picker__tip {
+  position: absolute;
+  z-index: 5;
+  width: 236px;
+  padding: 14px 16px;
+  border: 1px solid var(--picker-glass-line);
+  border-radius: var(--r-xl);
+  background: var(--picker-tip-bg);
+  color: var(--picker-glass-fg);
+  pointer-events: none;
+  transform: translate(-50%, 58px);
+}
+
+.complex-picker__tip--up {
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.complex-picker__tip-title {
+  display: block;
+  font-size: var(--fs-body);
+  font-weight: 800;
+}
+
+.complex-picker__tip-status {
+  margin: 2px 0 10px;
+  font-size: var(--fs-tiny);
+  color: var(--picker-glass-fg-2);
+}
+
+.complex-picker__tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 5px 0;
+  border-top: 1px dashed var(--picker-glass-line);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__tip-row > span {
+  color: var(--picker-glass-fg-2);
+}
+
+.complex-picker__tip-free {
+  color: var(--picker-glass-ok);
+}
+
+.complex-picker__tip-go {
+  margin: 10px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-nano);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber-2);
+}
+
+.complex-picker__hint {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--picker-glass-line);
+  border-radius: var(--r-pill);
+  background: var(--picker-glass);
+  color: var(--picker-glass-fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.complex-picker__hint svg {
+  flex: none;
+  color: var(--amber-2);
+}
+
+.complex-picker__lights {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--picker-glass-line);
+  border-radius: var(--r-pill);
+  background: var(--picker-glass);
+  backdrop-filter: blur(10px);
+}
+
+.complex-picker__light {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--picker-glass-fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.complex-picker__light[aria-pressed="true"] {
+  background: var(--picker-light-on-bg);
+  color: var(--picker-light-on-fg);
+}
+
+.complex-picker__blocks {
+  display: none;
+}
+
+/* ─── План этажа ─── */
+.complex-picker__plan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  background: var(--card-bg);
+}
+
+.complex-picker__plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.complex-picker__plan-block {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+}
+
+.complex-picker__plan-block > b {
+  font-size: var(--fs-body);
+  font-weight: 750;
+}
+
+.complex-picker__plan-block > small {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.complex-picker__legend > li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.complex-picker__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.complex-picker__swatch--free {
+  background: var(--s-free);
+  box-shadow: inset 0 0 0 1px var(--s-free-b);
+}
+
+.complex-picker__swatch--reserved {
+  background: var(--s-res);
+  box-shadow: inset 0 0 0 1px var(--s-res-b);
+}
+
+.complex-picker__swatch--sold {
+  background: var(--s-sold);
+  box-shadow: inset 0 0 0 1px var(--s-sold-b);
+}
+
+.complex-picker__plan-body {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.complex-picker__label {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-nano);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-picker__floors {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 560px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.complex-picker__floor {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 4px;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: transparent;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.complex-picker__floor > b {
+  grid-row: 1 / 3;
+  font-size: var(--fs-h4);
+  font-weight: 800;
+  text-align: center;
+}
+
+.complex-picker__floor > span {
+  color: var(--ok-strong);
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.complex-picker__floor > i {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--line);
+}
+
+.complex-picker__floor > i > em {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--ok);
+  transform-origin: left center;
+}
+
+.complex-picker__floor--none {
+  opacity: 0.55;
+}
+
+.complex-picker__floor--none > span {
+  color: var(--fg-3);
+}
+
+.complex-picker__floor[aria-pressed="true"] {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  opacity: 1;
+}
+
+.complex-picker__plan-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.complex-picker__entrances {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+}
+
+.complex-picker__entrance {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.complex-picker__entrance > small {
+  font-size: var(--fs-tiny);
+  font-weight: 600;
+}
+
+.complex-picker__entrance[aria-pressed="true"] {
+  background: var(--card-bg);
+  color: var(--fg);
+  box-shadow: var(--shadow-1);
+}
+
+.complex-picker__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.complex-picker__sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-nano);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.complex-picker__floor-plan {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 12px solid var(--picker-plan-bg);
+  border-radius: var(--r-xl);
+  outline: 1px solid var(--line-2);
+  background: var(--picker-plan-bg);
+}
+
+.complex-picker__plan-image {
+  object-fit: fill;
+}
+
+.complex-picker__units {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.complex-picker__unit-shape {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5;
+}
+
+.complex-picker__unit-shape--free {
+  fill: var(--picker-unit-free);
+  stroke: var(--picker-unit-free-b);
+}
+
+.complex-picker__unit-shape--reserved {
+  fill: var(--picker-unit-res);
+  stroke: var(--picker-unit-res-b);
+}
+
+.complex-picker__unit-shape--sold {
+  fill: var(--picker-unit-sold);
+  stroke: var(--picker-unit-sold-b);
+}
+
+.complex-picker__unit-shape--selected {
+  stroke: var(--amber-2);
+  stroke-width: 3;
+}
+
+.complex-picker__unit {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--r-m);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.complex-picker__unit--free {
+  color: var(--picker-unit-free-t);
+}
+
+.complex-picker__unit--reserved {
+  color: var(--picker-unit-res-t);
+}
+
+.complex-picker__unit--sold {
+  color: var(--picker-unit-sold-t);
+}
+
+.complex-picker__unit:hover,
+.complex-picker__unit:focus-visible {
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.complex-picker__unit-number {
+  font-size: var(--fs-small);
+  font-weight: 800;
+}
+
+.complex-picker__unit-rooms {
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.complex-picker__unit-price {
+  font-size: var(--fs-small);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.complex-picker__unit-tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-nano);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.complex-picker__note {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.complex-picker__tap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__tap svg {
+  flex: none;
+  color: var(--amber-2);
+}
+
+.complex-picker__status {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+}
+
+.complex-picker__retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ─── Выбранная квартира ─── */
+.complex-picker__flat {
+  padding: 18px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-2xl);
+  background: radial-gradient(700px 300px at 100% 0%, var(--amber-soft), transparent 70%), var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.complex-picker__flat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+
+.complex-picker__flat-title {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.complex-picker__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-nano);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber-3);
+}
+
+.complex-picker__flat-title > h3 {
+  margin: 8px 0 0;
+  font-size: var(--fs-h4);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.complex-picker__flat-title > p:last-child {
+  margin: 4px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__flat-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+}
+
+.complex-picker__flat-price > b {
+  font-size: var(--fs-h3);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+}
+
+.complex-picker__flat-price > small {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__flat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.complex-picker__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.complex-picker__close:hover {
+  background: var(--bg-2);
+}
+
+.complex-picker__calc {
+  margin-top: 16px;
+}
+
+/* ─── Движение: подпись блока приподнимается (full), подсказка проявляется (full / lite) ─── */
+[data-motion="full"] .complex-picker__tag {
+  transition: transform var(--dur-base) var(--ease);
+}
+
+[data-motion="full"] .complex-picker__tag--on,
+[data-motion="full"] .complex-picker__tag:hover {
+  transform: translate(-50%, -3px);
+}
+
+[data-motion="full"] .complex-picker__stage::before,
+[data-motion="full"] .complex-picker__stage::after {
+  transition: opacity var(--dur-slower) var(--ease);
+}
+
+[data-motion="lite"] .complex-picker__stage::before,
+[data-motion="lite"] .complex-picker__stage::after {
+  transition: opacity var(--dur-fast) linear;
+}
+
+[data-motion="full"] .complex-picker__floor > i > em {
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+/* ─── Телефон (мокап MobJkFacade / MobJkFloor) ─── */
+@media (max-width: 760px) {
+  .complex-picker__lead-wide,
+  .complex-picker__hint-wide,
+  .complex-picker__tip {
+    display: none;
+  }
+
+  .complex-picker__lead-phone,
+  .complex-picker__hint-phone {
+    display: inline;
+  }
+
+  .complex-picker__frame {
+    border-radius: var(--r-xl);
+  }
+
+  .complex-picker__hint {
+    left: 50%;
+    padding: 0;
+    border: 0;
+    background: none;
+    backdrop-filter: none;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .complex-picker__tag {
+    padding: 4px 12px;
+  }
+
+  .complex-picker__lights {
+    position: static;
+    margin: 12px;
+    border-color: var(--line);
+    background: var(--bg-2);
+    backdrop-filter: none;
+  }
+
+  .complex-picker__light {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 44px;
+    color: var(--fg-2);
+  }
+
+  .complex-picker__blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0 12px 12px;
+    list-style: none;
+  }
+
+  .complex-picker__block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 58px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-l);
+    background: var(--card-bg);
+    color: var(--fg);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .complex-picker__block > b {
+    font-size: var(--fs-body);
+    font-weight: 750;
+  }
+
+  .complex-picker__block-status {
+    flex: 1 1 auto;
+    color: var(--fg-3);
+    font-size: var(--fs-small);
+  }
+
+  .complex-picker__block-free {
+    color: var(--ok-strong);
+    font-size: var(--fs-small);
+    font-weight: 750;
+  }
+
+  .complex-picker__block-free--none {
+    color: var(--fg-3);
+  }
+
+  .complex-picker__plan {
+    padding: 12px;
+  }
+
+  .complex-picker__plan-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .complex-picker__floors {
+    flex-direction: row;
+    max-height: none;
+    margin: 0 -12px;
+    padding: 0 12px 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .complex-picker__floors > li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .complex-picker__floor {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    width: 66px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+
+  .complex-picker__floor > b {
+    grid-row: auto;
+  }
+
+  .complex-picker__floor > i {
+    width: 100%;
+  }
+
+  .complex-picker__floor-plan {
+    border-width: 8px;
+  }
+
+  .complex-picker__unit {
+    padding: 6px 7px;
+  }
+
+  .complex-picker__unit-rooms {
+    font-family: var(--font-mono);
+    font-size: var(--fs-nano);
+  }
+
+  .complex-picker__flat-price {
+    align-items: flex-start;
+  }
+}

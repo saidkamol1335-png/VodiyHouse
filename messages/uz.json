@@ -720,7 +720,7 @@
       },
       "roomsShort": "{rooms, plural, =0 {St} other {#X}}",
       "tapHint": "Yashil — bo‘sh. Narx va to‘lovni ko‘rish uchun ustiga bosing.",
-      "unitAria": "{number}-kvartira, {rooms}, {status}",
+      "unitAria": "{number}-kvartira",
       "reservedNote": "{number}-kvartira band qilingan",
       "soldNote": "{number}-kvartira sotilgan",
       "seeGreen": "Shu qavatdagi yashil kvartiralar bo‘sh",
@@ -736,7 +736,9 @@
       "close": "Yopish",
       "loading": "Kvartiralar yuklanmoqda…",
       "failed": "Kvartiralarni yuklab bo‘lmadi.",
-      "retry": "Qayta urinish"
+      "retry": "Qayta urinish",
+      "entrances": "Kirish",
+      "takenNow": "Bu kvartira hozirgina band qilindi — boshqa yashil kvartiralarni ko‘ring"
     },
     "layouts": {
       "title": "Rejalar",

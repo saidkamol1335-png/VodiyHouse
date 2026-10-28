@@ -8,8 +8,8 @@ import {
   placeUnits,
   planFor,
   polygonPoints,
-  shortUsd,
 } from "./model";
+import { formatUsdThousands } from "@/lib/format";
 import { pickerFrom, unitFrom, type FloorPlan, type PickerRecord, type PickerUnit } from "./records";
 
 const photo = { path: "complexes/x/y.png", width: 1600, height: 1200, blur: null, focus_x: 0.5, focus_y: 0.5, alt: null };
@@ -118,8 +118,8 @@ describe("выбор квартиры на фасаде: данные", () => {
   it("геометрия и короткая цена", () => {
     expect(polygonPoints(rect(0, 0, 10, 20))).toBe("0,0 10,0 10,20 0,20");
     expect(boxOf(rect(10, 20, 30, 60))).toEqual({ x0: 10, x1: 30, y0: 20, y1: 60, cx: 20, cy: 40 });
-    expect(shortUsd(43600, "ru")).toBe("$43,6k");
-    expect(shortUsd(32000, "ru")).toBe("$32k");
-    expect(shortUsd(950, "ru")).toBe("$950");
+    expect(formatUsdThousands(43600)).toBe("$43,6k");
+    expect(formatUsdThousands(32000)).toBe("$32k");
+    expect(formatUsdThousands(950)).toBe("$950");
   });
 });

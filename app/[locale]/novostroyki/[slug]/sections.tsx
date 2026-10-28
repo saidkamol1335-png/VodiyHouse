@@ -5,6 +5,7 @@ import { ComplexDetails } from "@/components/ComplexDetails";
 import { ComplexDeveloper } from "@/components/ComplexDeveloper";
 import { ComplexDocuments } from "@/components/ComplexDocuments";
 import { ComplexFacts } from "@/components/ComplexFacts";
+import { ComplexPicker } from "@/components/ComplexPicker";
 import { ComplexPlans } from "@/components/ComplexPlans";
 import { ComplexLocation } from "@/components/ComplexLocation";
 import { ComplexSection } from "@/components/ComplexSection";
@@ -44,6 +45,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       ) : null}
       {has("location") ? <LocationSection page={page} name={name} locale={locale} /> : null}
       {has("stock") ? <StockSection page={page} cards={cards} /> : null}
+      {has("pick") && page.picker ? <PickSection page={page} name={name} /> : null}
       {has("layouts") ? (
         <ComplexSection id={COMPLEX_ANCHORS.layouts} title={t("layouts.title")}>
           <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} complexSlug={page.slug} complexName={name} leadEnabled={LEAD_FORM_ENABLED} />
@@ -65,6 +67,30 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
     </>
+  );
+}
+
+/** «Выбрать квартиру» на фасаде (фаза 4): заголовок с акцентом и подзаголовок — разный на 1440 и телефоне. */
+async function PickSection({ page, name }: { page: ComplexPage; name: string }) {
+  const t = await getTranslations("complex.pick");
+  const lead = (
+    <>
+      <span className="complex-picker__lead-wide">{t("lead")}</span>
+      <span className="complex-picker__lead-phone">{t("leadPhone")}</span>
+    </>
+  );
+  return (
+    <ComplexPicker
+      id={COMPLEX_ANCHORS.pick}
+      title={t.rich("title", { accent: (chunks) => <span className="heading__accent">{chunks}</span> })}
+      lead={lead}
+      picker={page.picker!}
+      blocks={page.blocks.map((block) => ({ id: block.id, name: block.name, buildStatus: block.buildStatus, progressPct: block.progressPct }))}
+      complexSlug={page.slug}
+      complexName={name}
+      hints={await readSiteCalcHints()}
+      leadEnabled={LEAD_FORM_ENABLED}
+    />
   );
 }
 

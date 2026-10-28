@@ -185,6 +185,12 @@ export function formatPriceShort(
   return `${ONE_DECIMAL.format(amount / scale.from)} ${scale[locale]} ${SUM_WORD[locale]}`;
 }
 
+/** Цена на плитке плана этажа (мокап .fa__p): «$43,6k», до тысячи — целиком. */
+export function formatUsdThousands(amount: number): string {
+  if (amount < 1000) return `$${Math.round(amount)}`;
+  return `$${ONE_DECIMAL.format(Math.round(amount / 100) / 10)}k`;
+}
+
 const RATE = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /** Курс как у ЦБ: «11 808,76». */
