@@ -163,7 +163,7 @@ const SHOWCASE_ITEM_BASE = {
   ad: ADMIN_ROUTES.showcaseAds,
 } as const;
 
-/** Страница записи витрины; base — корень раздела (кабинет или служебный стенд /dev/vitrina). */
+/** Страница записи витрины; base — корень раздела (по умолчанию — кабинет). */
 export function showcaseItemHref(
   kind: keyof typeof SHOWCASE_ITEM_BASE,
   id: string,
