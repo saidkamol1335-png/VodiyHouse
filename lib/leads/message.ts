@@ -42,6 +42,8 @@ export type LeadPayloadRecord = {
   partner?: { company: string; city: string; format: string; projects: string; comment: string };
   rows?: { label: string; value: string }[];
   telegram?: string;
+  /** «Хочу это условие» (3.16б): название спецпредложения или рекламы. */
+  promo?: { title: string };
 };
 
 const t = createTranslator({ locale: "ru", messages: ru, namespace: "admin.leads" });
@@ -83,6 +85,7 @@ export function payloadLines(payload: LeadPayloadRecord): string[] {
     }
   }
   for (const row of payload.rows ?? []) lines.push(`${row.label}: ${row.value}`);
+  if (payload.promo?.title) lines.push(t("message.promo", { title: payload.promo.title }));
   if (payload.telegram) lines.push(t("message.telegram", { nick: payload.telegram }));
   return lines;
 }

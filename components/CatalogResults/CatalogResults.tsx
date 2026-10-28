@@ -7,16 +7,19 @@ import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { CatalogFilter } from "@/components/CatalogFilter";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { CollectionsRow } from "@/components/CollectionsRow";
 import { useLeadOpener } from "@/components/LeadDialog";
 import { SelectField } from "@/components/SelectField";
+import type { LocalizedText } from "@/lib/contacts";
 import type { Locale } from "@/lib/i18n/routing";
 import { getMotionTier } from "@/lib/motion";
 import { describeFilter } from "@/lib/site/catalog/describe";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
-import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
-import { CATALOG_PENDING_ATTRIBUTE } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog } from "@/lib/site/catalog/sort";
+import { collectionResults } from "@/lib/site/showcase/model";
+import type { ShowcaseCollection } from "@/lib/site/showcase/records";
+import { useCatalogSelection } from "./collection";
 import { filterLabels, pickIntent, useFilterTracking, useFocusOnMore } from "./results";
 
 type CatalogResultsProps = {
@@ -25,21 +28,12 @@ type CatalogResultsProps = {
   pageSize: number;
   /** false — каталог ниже первого экрана (главная): первую обложку не грузить заранее. */
   preloadFirst?: boolean;
+  /** Подборки витрины (3.16б): ?podborka=slug понимают обе страницы, ряд карточек — только главная. */
+  collections?: readonly ShowcaseCollection[];
+  collectionsRow?: boolean;
+  /** Бейдж спецпредложения на карточке ЖК по id ЖК (cardBadges). */
+  badges?: Record<string, LocalizedText>;
 };
-
-
-/** Фильтр из адреса (ссылка менеджера и «Поделиться», Ф3) — один раз после загрузки. */
-function useFilterFromAddress(apply: (filter: Filter) => void) {
-  const applyRef = useRef(apply);
-  useEffect(() => {
-    applyRef.current = apply;
-  });
-  useEffect(() => {
-    const filter = filterFromSearch(Object.fromEntries(new URLSearchParams(window.location.search)));
-    if (JSON.stringify(filter) !== JSON.stringify(NO_FILTER)) applyRef.current(filter);
-    document.documentElement.removeAttribute(CATALOG_PENDING_ATTRIBUTE);
-  }, []);
-}
 
 /** Сколько групп фильтра задано — счётчик на кнопке «Фильтры» телефона. */
 function activeGroups(filter: Filter): number {
@@ -50,29 +44,27 @@ function activeGroups(filter: Filter): number {
 }
 
 /**
- * Каталог (Ф3, мокап .cat): фильтр, «Найдено N ЖК», сортировка, карточки порциями и пустой
- * результат. Фильтр живёт в браузере и в адресе — без перехода страницы (history.replaceState).
+ * Каталог (Ф3, мокап .cat): фильтр, подборки (слот между фильтром и выдачей, 3.16б), «Найдено N ЖК»,
+ * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
+ * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true }: CatalogResultsProps) {
-  const [filter, setFilter] = useState(NO_FILTER);
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges }: CatalogResultsProps) {
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
   const results = useRef<HTMLDivElement>(null);
   const filtersButton = useRef<HTMLButtonElement>(null);
   const closeSheet = () => setOpen(false);
   useFocusBack(open, filtersButton);
-  const found = useMemo(() => filterCatalog(catalog, filter), [catalog, filter]);
-  useSheetLock(open, closeSheet);
-  useFilterFromAddress(setFilter);
   const trackFilter = useFilterTracking();
-  const change = (next: Filter) => {
-    setFilter(next);
+  const { filter, collection, change, pick, reset } = useCatalogSelection(collections, (next) => {
     setShown(pageSize);
     trackFilter(next);
-    // null, а не history.state: так Next сверяет свой адрес с нашим (как useCalcParams), и обновление
-    // страницы роутером не вернёт адрес без фильтра.
-    window.history.replaceState(null, "", `${window.location.pathname}${searchFromFilter(next)}`);
-  };
+  });
+  const found = useMemo(
+    () => (collection ? collectionResults(catalog, collection, filter) : filterCatalog(catalog, filter)),
+    [catalog, collection, filter],
+  );
+  useSheetLock(open, closeSheet);
   const showResults = () => {
     setOpen(false);
     results.current?.scrollIntoView({ behavior: getMotionTier() === "full" ? "smooth" : "auto", block: "start" });
@@ -80,11 +72,32 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true }: Catal
   return (
     <div className="catalog-results">
       <CatalogFilter catalog={catalog} filter={filter} onChange={change} found={found.length} open={open} onClose={closeSheet} onShow={showResults} />
+      {collectionsRow && collections.length > 0 ? (
+        <CollectionsRow catalog={catalog} collections={collections} selected={collection?.id ?? null} onPick={pick} />
+      ) : null}
       {/* Пока открыт экран фильтра телефона, выдача за ним недоступна (диалог). */}
       <div className="catalog-results__body" inert={open}>
+        {collection ? <AppliedCollection collection={collection} onReset={reset} /> : null}
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
-        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} onMore={() => setShown(shown + pageSize)} onReset={() => change({ ...NO_FILTER, sort: filter.sort })} />
+        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} badges={badges} onMore={() => setShown(shown + pageSize)} onReset={reset} />
       </div>
+    </div>
+  );
+}
+
+/** «Подборка «X» применена · Сбросить» над выдачей (мокап collApplied). */
+function AppliedCollection({ collection, onReset }: { collection: ShowcaseCollection; onReset: () => void }) {
+  const t = useTranslations("showcase.collections");
+  const locale = useLocale() as Locale;
+  return (
+    <div className="catalog-results__collection" role="status">
+      <p className="catalog-results__collection-text">
+        <b>{t("applied", { title: collection.title[locale] })}</b>
+        <span>{t("appliedHint")}</span>
+      </p>
+      <Button variant="outline" size="sm" onClick={onReset}>
+        {t("reset")}
+      </Button>
     </div>
   );
 }
@@ -96,12 +109,13 @@ type ResultsListProps = {
   filter: Filter;
   shown: number;
   pageSize: number;
+  badges?: Record<string, LocalizedText>;
   onMore: () => void;
   onReset: () => void;
 };
 
 /** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
-function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, onMore, onReset }: ResultsListProps) {
+function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, badges, onMore, onReset }: ResultsListProps) {
   const t = useTranslations("catalog.filter");
   const { list, more } = useFocusOnMore(shown, onMore);
   if (found.length === 0) {
@@ -121,7 +135,7 @@ function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, on
   return (
     <>
       <div ref={list}>
-        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} />
+        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} badges={badges} />
       </div>
       {found.length > shown ? (
         <div className="catalog-results__more">

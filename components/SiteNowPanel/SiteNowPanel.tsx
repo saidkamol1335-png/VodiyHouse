@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Heart, Inbox, Phone, Send, Share2, SlidersHorizontal } from "lucide-react";
+import { Eye, Heart, Inbox, Megaphone, Phone, Send, Share2, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LeadWhen } from "@/components/LeadWhen";
@@ -25,6 +25,9 @@ const ICONS = {
   share: Share2,
   filter: SlidersHorizontal,
   lead_sent: Inbox,
+  // Реклама (3.16б): показы в ленту не идут (site_now их не отдаёт), клик — с заголовком рекламы.
+  ad_view: Megaphone,
+  ad_click: Megaphone,
 } as const satisfies Record<SiteNowItem["type"], unknown>;
 
 /** Перечитывать раз в 30 секунд, пока вкладка видна; вернулись на вкладку — сразу. */
@@ -125,6 +128,7 @@ function itemText(item: SiteNowItem, t: NowT): string {
   const name = item.complex?.ru ?? null;
   if (item.type === "complex_view") return t("types.complex_view", { name: name ?? "—" });
   if (item.type === "filter") return t("types.filter", { detail: item.detail ?? "" });
+  if (item.type === "ad_click" || item.type === "ad_view") return t(`types.${item.type}`, { name: item.ad?.ru ?? "—" });
   const text = t(`types.${item.type}`);
   if (name) return t("withComplex", { text, name });
   const detail = item.type === "share" && (item.detail === "telegram" || item.detail === "copy") ? t(`share.${item.detail}`) : item.detail;

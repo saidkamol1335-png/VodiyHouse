@@ -1,4 +1,4 @@
-import { CalendarCheck, Check, Send } from "lucide-react";
+import { CalendarCheck, Check, Gift, Send } from "lucide-react";
 import { Beam } from "@/components/Beam";
 import { getLocale, getTranslations } from "next-intl/server";
 import { LeadButton } from "@/components/LeadDialog";
@@ -6,7 +6,7 @@ import type { LeadIntent } from "@/components/LeadForm";
 import type { LeadObject } from "@/lib/leads/types";
 import { PhoneButton } from "@/components/PhoneButton";
 import { TelegramButton } from "@/components/TelegramButton";
-import { type SiteContacts, phoneHref } from "@/lib/contacts";
+import { type LocalizedText, type SiteContacts, phoneHref } from "@/lib/contacts";
 import { formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import type { CardDeadline } from "@/lib/site/catalog/card";
@@ -20,14 +20,16 @@ type ComplexOfferProps = {
   summary: ComplexSummary;
   /** Контакты Vodiy House (Ф9) — единственные на сайте (правило ТЗ 1.2). */
   contacts: SiteContacts;
+  /** Действующее спецпредложение-подарок с этим ЖК (витрина, 3.16б) — строка «Подарок: …». */
+  gift?: LocalizedText | null;
 };
 
 /**
  * Главное за 10 секунд (ТЗ 7.1, мокап .jki; телефон — .sum): в продаже, цена «от» и за м², платёж,
- * срок сдачи, проверенные документы, «Записаться на просмотр» (форма 10.1), связь с Vodiy House и
- * плашка «Для вас бесплатно». Без скидок (PLAN §3.13); «Подарок» — со спецпредложениями (3б).
+ * «Подарок» из витрины, срок сдачи, проверенные документы, «Записаться на просмотр» (форма 10.1),
+ * связь с Vodiy House и плашка «Для вас бесплатно». Без скидок (PLAN §3.13).
  */
-export async function ComplexOffer({ name, slug, summary, contacts }: ComplexOfferProps) {
+export async function ComplexOffer({ name, slug, summary, contacts, gift = null }: ComplexOfferProps) {
   const t = await getTranslations("complex.offer");
   const locale = (await getLocale()) as Locale;
   const { price } = summary;
@@ -41,6 +43,12 @@ export async function ComplexOffer({ name, slug, summary, contacts }: ComplexOff
           <OfferLive free={summary.free} />
           <p className="complex-offer__amount">{price ? t("priceFrom", { price: money(price.amount) }) : t("priceOnRequest")}</p>
           {price?.perM2 ? <p className="complex-offer__per-m2">{t("perM2From", { price: money(price.perM2) })}</p> : null}
+          {gift ? (
+            <p className="complex-offer__gift">
+              <Gift size={14} strokeWidth={2} aria-hidden />
+              {`${t("gift")}: ${gift[locale]}`}
+            </p>
+          ) : null}
         </div>
         <dl className="complex-offer__facts">
           {price?.payment ? (

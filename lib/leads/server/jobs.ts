@@ -1,8 +1,9 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { purgeArchive, remindArchive } from "@/lib/archive/server/purge";
-import { expireRateNow } from "@/lib/cache";
+import { expireRateNow, expireShowcaseNow } from "@/lib/cache";
 import { updateCbuRate } from "@/lib/rates/update";
+import { remindShowcase } from "@/lib/showcase/server/remind";
 import { alertUndelivered, deliverDue } from "./deliver";
 
 // Работы расписания (/api/cron/<работа>): адрес проверил секрет CRON_SECRET, дальше — секретный
@@ -37,6 +38,13 @@ export const CRON_JOBS: Record<string, CronJob> = {
     const { data, error } = await createSupabaseAdminClient().rpc("cleanup_events");
     if (error) throw new Error("events-cleanup-failed", { cause: error });
     return { removed: Number(data ?? 0) };
+  },
+  // Витрина (3.16б): раз в сутки в ташкентскую полночь — напоминание за 3 дня до конца
+  // спецпредложения или рекламы и снятие по дате (кэш витрины и каталога истекает).
+  showcase: async () => {
+    const reminded = await remindShowcase(createSupabaseAdminClient());
+    expireShowcaseNow();
+    return { reminded };
   },
   // Курс ЦБ (3.2): раз в сутки; изменился — калькуляторы и «Платёж от» пересчитываются сразу.
   rate: async () => {

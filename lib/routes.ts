@@ -49,17 +49,27 @@ export type NavKey =
  * Пункты шапки — порядок мокапа 09.10.2026 (PLAN §7, фаза 3): «Застройщики» — с 3.15;
  * «Спецпредложения» (якорь раздела главной, отдельной страницы нет) — с 3.16.
  */
+/** Якорь раздела «Предложения от застройщиков» на главной (3.16б): отдельной страницы нет. */
+export const OFFERS_ANCHOR = "spetspredlozheniya";
+export const OFFERS_HREF = `${ROUTES.home}#${OFFERS_ANCHOR}`;
+
 export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
   { key: "new", href: ROUTES.catalog },
+  { key: "specials", href: OFFERS_HREF },
   { key: "developers", href: ROUTES.developers },
   { key: "calculator", href: ROUTES.calculator },
   { key: "about", href: ROUTES.about },
   { key: "forDevelopers", href: ROUTES.forDevelopers },
 ];
 
-/** Скрытые пункты (решение «Пустые состояния»): «Калькулятор» — без застройщиков с программами. */
-export const hiddenNav = ({ calculator }: { calculator: boolean }): NavKey[] =>
-  calculator ? [] : ["calculator"];
+/**
+ * Скрытые пункты (решение «Пустые состояния»): «Калькулятор» — без застройщиков с программами,
+ * «Спецпредложения» — пока на главной нет действующих предложений и рекламы (3.16б).
+ */
+export const hiddenNav = ({ calculator, specials = false }: { calculator: boolean; specials?: boolean }): NavKey[] => [
+  ...(calculator ? [] : (["calculator"] as NavKey[])),
+  ...(specials ? [] : (["specials"] as NavKey[])),
+];
 
 /**
  * Подвал, «Каталог» (порядок мокапа): новостройки, калькулятор, застройщики (3.15), «О нас» и
@@ -67,6 +77,7 @@ export const hiddenNav = ({ calculator }: { calculator: boolean }): NavKey[] =>
  */
 export const FOOTER_NAV: readonly { key: NavKey; href: string }[] = [
   { key: "new", href: ROUTES.catalog },
+  { key: "specials", href: OFFERS_HREF },
   { key: "calculator", href: ROUTES.calculator },
   { key: "developers", href: ROUTES.developers },
   { key: "about", href: ROUTES.about },

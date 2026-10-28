@@ -1,0 +1,336 @@
+/* Спецпредложения (мокап .spg/.spc; телефон — MobSpecials): на 1440 сетка 3 в ряд, на 390 лента
+   карточек 300 px с точками. Карточка: фото 16:10 с бейджем и «ещё N дней», застройщик, заголовок,
+   текст, внизу через пунктир — ЖК и «от $…», справа «Хочу это условие», под ними «до дд.мм.гггг». */
+.specials {
+  margin-top: 20px;
+}
+
+.specials__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.specials__item {
+  min-width: 0;
+}
+
+.specials__dots {
+  display: none;
+}
+
+.special-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.special-card__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--bg-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.special-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--over-photo-shade);
+}
+
+.special-card__photo {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+[data-motion="full"] .special-card__photo {
+  transition: transform var(--dur-slower) var(--ease);
+}
+
+[data-motion="full"] .special-card:hover .special-card__photo {
+  transform: scale(1.05);
+}
+
+/* Бейдж из базы («Подарок», «Рассрочка 24 мес.»): на 1440 — курсив Cormorant золотом (мокап .spc__badge). */
+.special-card__badge {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 1;
+  max-width: calc(100% - 32px);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: var(--fs-special-badge);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--gold);
+}
+
+.special-card__left {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--over-photo-line);
+  border-radius: var(--r-pill);
+  background: var(--over-photo-chip-strong);
+  color: var(--over-photo-fg);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-mono);
+  white-space: nowrap;
+}
+
+.special-card__left--hot {
+  border-color: var(--amber-line);
+  color: var(--amber-2);
+}
+
+.special-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 20px;
+}
+
+.special-card__developer {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.special-card__title {
+  margin: 0;
+  font-size: var(--fs-card-name);
+  line-height: 1.18;
+  font-weight: 650;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+}
+
+.special-card__text {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  line-height: 1.55;
+}
+
+.special-card__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px dashed var(--dash);
+}
+
+.special-card__offer {
+  min-width: 0;
+}
+
+.special-card__complex {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.special-card__complex:hover {
+  color: var(--fg);
+}
+
+.special-card__price {
+  margin: 2px 0 0;
+  font-size: var(--fs-card-name);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.special-card__want {
+  flex: none;
+}
+
+.special-card__until {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-nano);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+@media (max-width: 1180px) {
+  .specials__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Телефон (MobSpecials): лента 300 px во всю ширину, бейдж — янтарная пилюля, кнопка во всю ширину. */
+@media (max-width: 760px) {
+  .specials {
+    margin-top: 0;
+  }
+
+  .specials__grid {
+    display: flex;
+    gap: 12px;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 2px var(--gutter) 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .specials__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .specials__item {
+    flex: 0 0 300px;
+    scroll-snap-align: start;
+  }
+
+  .specials__dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .specials__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--line-3);
+    transition: width var(--dur-base) var(--ease), background var(--dur-base);
+  }
+
+  .specials__dot--on {
+    width: 20px;
+    background: var(--amber);
+  }
+
+  .special-card__media {
+    height: 172px;
+    aspect-ratio: auto;
+  }
+
+  .special-card__badge {
+    display: inline-flex;
+    align-items: center;
+    left: 12px;
+    top: 12px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-pill);
+    background: var(--amber);
+    color: var(--on-amber);
+    font-family: var(--font);
+    font-style: normal;
+    font-size: var(--fs-small-l);
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .special-card__left {
+    right: 12px;
+    top: 12px;
+    height: 30px;
+    border-color: transparent;
+    font-family: var(--font);
+    font-size: var(--fs-small);
+    font-weight: 650;
+    letter-spacing: 0;
+  }
+
+  .special-card__left--hot {
+    background: var(--bad);
+    color: var(--over-photo-fg);
+  }
+
+  .special-card__body {
+    padding: 14px 16px;
+  }
+
+  .special-card__title {
+    font-size: var(--fs-control-l);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+  }
+
+  .special-card__text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .special-card__foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 0;
+  }
+
+  .special-card__complex {
+    min-height: var(--touch-target);
+    color: var(--amber-2);
+    font-size: var(--fs-small-l);
+    font-weight: 700;
+  }
+
+  .special-card__price {
+    font-size: var(--fs-card-price);
+    font-weight: 800;
+  }
+
+  .special-card .special-card__want {
+    width: 100%;
+    height: 48px;
+    border-color: var(--control-border);
+    background: var(--control-bg);
+    color: var(--fg);
+    box-shadow: none;
+  }
+
+  .special-card__until {
+    font-family: var(--font);
+    font-size: var(--fs-caption);
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: none;
+  }
+}

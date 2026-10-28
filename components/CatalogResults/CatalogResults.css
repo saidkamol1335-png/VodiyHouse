@@ -12,6 +12,36 @@
   visibility: hidden;
 }
 
+/* «Подборка «X» применена · Сбросить» над выдачей (3.16б). */
+.catalog-results__collection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--badge-amber-border);
+  border-radius: var(--r-l);
+  background: var(--offer-free-bg);
+}
+
+.catalog-results__collection-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.catalog-results__collection-text b {
+  font-size: var(--fs-small-l);
+  font-weight: 700;
+}
+
+.catalog-results__collection-text span {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
 .catalog-results__top {
   display: flex;
   flex-wrap: wrap;

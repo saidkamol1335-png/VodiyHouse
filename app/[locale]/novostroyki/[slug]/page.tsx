@@ -25,6 +25,8 @@ import { complexSlugState } from "@/lib/site/complex/retired";
 import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
 import { complexSummary } from "@/lib/site/complex/summary";
 import { pageMetadata } from "@/lib/site/metadata";
+import { complexGift } from "@/lib/site/showcase/model";
+import { readSiteShowcase } from "@/lib/site/showcase/read";
 import { ComplexSections } from "./sections";
 import { complexDescription, ComplexJsonLd } from "./seo";
 
@@ -77,7 +79,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/novostro
 export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/novostroyki/[slug]">) {
   const [{ slug }, messages, localeRaw] = await Promise.all([params, getMessages(), getLocale()]);
   const locale = (isLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE) as Locale;
-  const [result, contacts, t] = await Promise.all([readComplexPage(slug), readSiteContacts(), getTranslations("complex")]);
+  const [result, contacts, t, showcase] = await Promise.all([readComplexPage(slug), readSiteContacts(), getTranslations("complex"), readSiteShowcase()]);
   if (result.kind === "missing") return goneOrNotFound(slug, locale);
   if (result.kind === "unavailable") {
     return (
@@ -102,7 +104,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
           <ComplexHero
             page={page}
             gallery={<ComplexGallery photos={page.photos} name={name} locale={locale} tools={<ComplexTools page={page} name={name} locale={locale} />} />}
-            offer={<ComplexOffer name={name} slug={page.slug} summary={complexSummary(page)} contacts={contacts} />}
+            offer={<ComplexOffer name={name} slug={page.slug} summary={complexSummary(page)} contacts={contacts} gift={complexGift(showcase, page.id)?.title ?? null} />}
           />
         </Container>
         <ComplexNav label={t("nav.label")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`) }))} />

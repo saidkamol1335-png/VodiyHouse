@@ -70,7 +70,13 @@ export function siteMessages(messages: AbstractIntlMessages): AbstractIntlMessag
 export const CATALOG_NAMESPACE = "catalog";
 /** Избранное и «Поделиться» (шаг 3.10): сердце и окно ссылки — на карточках и странице ЖК. */
 export const SHARE_NAMESPACE = "share";
-export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, SHARE_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+/** Подборки витрины над выдачей (3.16б): ряд карточек и плашка «Подборка применена» — в каталоге. */
+export const COLLECTIONS_MESSAGES = "showcase.collections";
+export const CATALOG_MESSAGES = [CATALOG_NAMESPACE, LEAD_BUTTON_MESSAGES, SHARE_NAMESPACE, COLLECTIONS_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
+
+/** «Предложения от застройщиков» на главной (3.16б): карточка рекламы и спецпредложения с кнопкой заявки. */
+export const SHOWCASE_NAMESPACE = "showcase";
+export const SHOWCASE_MESSAGES = [SHOWCASE_NAMESPACE, LEAD_BUTTON_MESSAGES, ...SITE_SHELL_MESSAGES] as const;
 
 /** «Застройщикам» (шаг 3.11): форма застройщика — тексты окна заявки (lead) в HTML страницы. */
 export const PARTNERS_MESSAGES = [LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

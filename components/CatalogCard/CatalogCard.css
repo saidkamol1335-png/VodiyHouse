@@ -75,6 +75,16 @@
   font-weight: 650;
 }
 
+/* Бейдж спецпредложения (витрина, 3.16б; мокап MobSpecials .spc__badge) — янтарная пилюля перед классом. */
+.catalog-card__promo {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--on-amber);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+
 .catalog-card__nav {
   position: absolute;
   top: 50%;

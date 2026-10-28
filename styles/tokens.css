@@ -32,6 +32,10 @@
   --fs-card-name: 21px; /* название ЖК на карточке */
   --fs-card-name-phone: 20px;
   --fs-card-price: 25px; /* «от $31 000» на карточке */
+  /* Витрина (мокап .coll__t, .adb__t, .spc__badge) */
+  --fs-collection-name: clamp(26px, 2.6vw, 38px); /* название подборки на карточке-фото */
+  --fs-ad-title: clamp(28px, 2.8vw, 40px); /* заголовок карточки рекламы */
+  --fs-special-badge: 34px; /* бейдж спецпредложения курсивом на фото */
   --fs-footer-promise-phone: 24px; /* обещание подвала на телефоне (мокап .ftr__big) */
   --fs-stat: 34px;
   /* Страница ЖК (мокап SiteJk / MobJk) */
@@ -271,6 +275,8 @@
     0.7
   ); /* «×» на превью фото — читается на любом снимке */
   --over-photo-shade: linear-gradient(180deg, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0));
+  /* Карточка подборки (мокап .coll__c): фото затемнено целиком, к низу сильнее — под название. */
+  --collection-shade: linear-gradient(180deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.78));
   --over-photo-filter: blur(8px);
   --photo-bg: #0b0a09; /* подложка тёмных фото-блоков до загрузки картинки */
 

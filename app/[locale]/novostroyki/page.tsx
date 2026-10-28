@@ -11,6 +11,8 @@ import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { pageMetadata } from "@/lib/site/metadata";
+import { cardBadges, visibleCollections } from "@/lib/site/showcase/model";
+import { readSiteShowcase } from "@/lib/site/showcase/read";
 
 /** Карточек на порцию: 4 ряда по 3 на десктопе (на главной — 6, Ф3). */
 const PAGE_SIZE = 12;
@@ -28,11 +30,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * /novostroyki (Ф3): каталог без обложки, страница статичная — карточки в первом HTML (LCP).
- * Фильтр из адреса применяет браузер сразу после загрузки (CatalogResults); чтение searchParams
- * на сервере делало выдачу потоковой — список рисовался дважды, и LCP ждал второй (замер 3.4).
+ * Фильтр и подборка витрины (?podborka=, 3.16б) из адреса применяет браузер сразу после загрузки
+ * (CatalogResults); чтение searchParams на сервере делало выдачу потоковой — список рисовался
+ * дважды, и LCP ждал второй (замер 3.4). Ряда подборок, рекламы и спецпредложений здесь нет (Ф3).
  */
 export default async function CatalogPage() {
-  const [t, catalog, messages] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages()]);
+  const [t, catalog, messages, showcase] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages(), readSiteShowcase()]);
   return (
     <>
       <SiteHeader />
@@ -44,7 +47,7 @@ export default async function CatalogPage() {
           </Heading>
           {catalog ? (
             <NextIntlClientProvider messages={pickMessages(messages, CATALOG_MESSAGES)}>
-              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} />
+              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} collections={visibleCollections(catalog, showcase)} badges={cardBadges(showcase)} />
             </NextIntlClientProvider>
           ) : (
             <p className="text-muted-foreground">{t("unavailable")}</p>

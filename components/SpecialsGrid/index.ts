@@ -1,0 +1,1 @@
+export { SpecialsGrid } from "./SpecialsGrid";

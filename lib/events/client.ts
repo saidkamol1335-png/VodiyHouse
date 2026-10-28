@@ -95,7 +95,7 @@ export function setTrackContext(entity: Pick<SiteEvent, "entity_type" | "entity_
   context = { pathname: window.location.pathname, entity };
 }
 
-const ENTITY = /^(complex|layout|developer):([0-9a-f-]{36})$/i;
+const ENTITY = /^(complex|layout|developer|ad):([0-9a-f-]{36})$/i;
 
 /**
  * Клик по ссылке «tel:» или элементу с data-track="<тип>" (Telegram, «Поделиться»): тип, подпись

@@ -522,7 +522,8 @@
       "telegram": "Telegramda yozish",
       "freePrice": "Narx quruvchinikidek — Vodiy House hech narsa qo‘shmaydi.",
       "freeBadge": "Siz uchun bepul",
-      "soldOut": "Bo‘sh kvartiralar yo‘q"
+      "soldOut": "Bo‘sh kvartiralar yo‘q",
+      "gift": "Sovg‘a"
     },
     "nav": {
       "label": "Sahifa bo‘limlari",
@@ -742,6 +743,56 @@
       "developerHidden": "TJM e’lon qilingan, lekin quruvchi — yo‘q: tashrif buyuruvchilar sahifani ko‘rmaydi"
     }
   },
+  "showcase": {
+    "complex": "{name} TJM",
+    "collections": {
+      "eyebrow": "Tayyor tanlovlar",
+      "title": "TJM tanlovlari — ",
+      "titleAccent": "bir bosishda",
+      "lead": "Tanlovni bosing — quyidagi katalog darhol mos TJMlarni ko‘rsatadi. Filtrli havolani Telegramga yuborish mumkin.",
+      "label": "TJM tanlovlari",
+      "prev": "Oldingi tanlovlar",
+      "next": "Keyingi tanlovlar",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "flats": "{n, plural, one {# ta kvartira sotuvda} other {# ta kvartira sotuvda}}",
+      "flatsMin": "sotuvda {n} tadan ko‘p kvartira",
+      "applied": "«{title}» tanlovi qo‘llandi",
+      "appliedHint": "Shu filtrli havolani mijozga yuborish mumkin",
+      "reset": "Bekor qilish"
+    },
+    "offers": {
+      "eyebrow": "Maxsus takliflar",
+      "title": "Quruvchilardan ",
+      "titleAccent": "takliflar",
+      "lead": "Hamkor quruvchilarning reklamasi va shartlari: muddatli to‘lov, sovg‘alar, savdo boshlanishi. Kartochkadagi sanagacha amal qiladi.",
+      "place": "Reklama joylashtirish"
+    },
+    "ad": {
+      "tag": "Reklama",
+      "label": "Reklama · {title}",
+      "inSale": "Sotuvda",
+      "flats": "{n, plural, one {# ta kvartira} other {# ta kvartira}}",
+      "flatsMin": "{n} tadan ko‘p kvartira",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "price": "Narx",
+      "payment": "To‘lov",
+      "from": "{price} dan",
+      "monthly": "oyiga {price} dan",
+      "onRequest": "so‘rov bo‘yicha",
+      "show": "{n, plural, one {# ta kvartirani ko‘rsatish} other {# ta kvartirani ko‘rsatish}}",
+      "showComplexes": "{n, plural, one {# ta TJMni ko‘rsatish} other {# ta TJMni ko‘rsatish}}",
+      "more": "yana {n}"
+    },
+    "special": {
+      "label": "Maxsus takliflar",
+      "daysLeft": "{n, plural, one {yana # kun} other {yana # kun}}",
+      "lastDay": "oxirgi kun",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "priceFrom": "{price} dan",
+      "until": "{date} gacha",
+      "slide": "{total} tadan {n}-taklif"
+    }
+  },
   "siteError": {
     "title": "Sahifa vaqtincha mavjud emas",
     "text": "Ma’lumotlarni yuklab bo‘lmadi. Bir daqiqadan so‘ng sahifani yangilang — yoki bizga qo‘ng‘iroq qiling, TJM haqida aytib beramiz.",
@@ -778,7 +829,7 @@
       "partner": "Ariza qoldirish",
       "tg": "Telegramda yozish",
       "quiz": "Tanlovni olish",
-      "promo": "Shu taklifni xohlayman",
+      "promo": "Shu shartni xohlayman",
       "telegram": "Telegramda yozish"
     },
     "name": "Ism",

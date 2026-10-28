@@ -4,4 +4,6 @@
 
 export const CATALOG_PENDING_ATTRIBUTE = "data-catalog-pending";
 export const CATALOG_PENDING_TIMEOUT_MS = 4000;
-export const CATALOG_FILTER_PARAMS = ["komnat", "gorod", "ot", "do", "srok", "oplata", "zastr", "otdelka", "sort"] as const;
+/** Подборка витрины в адресе (3.16б): /novostroyki?podborka=slug — выдача ждёт и её. */
+export const COLLECTION_PARAM = "podborka";
+export const CATALOG_FILTER_PARAMS = ["komnat", "gorod", "ot", "do", "srok", "oplata", "zastr", "otdelka", "sort", COLLECTION_PARAM] as const;

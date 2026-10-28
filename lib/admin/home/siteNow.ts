@@ -14,6 +14,8 @@ export type SiteNowItem = {
   complex: LocalizedText | null;
   /** Адрес страницы — только у фильтра: что выбрано, читаем из параметров каталога. */
   path?: string | null;
+  /** Заголовок рекламы (3.16б) — у клика по рекламе на главной. */
+  ad?: LocalizedText | null;
 };
 
 export type SiteNow = { online: number; feed: SiteNowItem[] };

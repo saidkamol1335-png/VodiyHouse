@@ -95,6 +95,12 @@ export function markShowcaseStale(): void {
   revalidateTag(SHOWCASE_TAG, "max");
 }
 
+/** Снятие по дате (/api/cron/showcase в ташкентскую полночь): не Server Action — те же теги истекают сразу. */
+export function expireShowcaseNow(): void {
+  revalidateTag(SHOWCASE_TAG, { expire: 0 });
+  revalidateTag(CATALOG_TAG, { expire: 0 });
+}
+
 /** Курс ЦБ по расписанию: не Server Action, updateTag там нельзя — те же теги истекают сразу. */
 export function expireRateNow(): void {
   revalidateTag(PROGRAMS_TAG, { expire: 0 });

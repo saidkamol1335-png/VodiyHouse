@@ -19,6 +19,7 @@ import {
   LAZY_SITE_MESSAGES,
   PARTNERS_MESSAGES,
   pickMessages,
+  SHOWCASE_MESSAGES,
   SITE_SHELL_MESSAGES,
   siteMessages,
 } from "./clientMessages";
@@ -61,17 +62,23 @@ describe("сообщения для браузера", () => {
     // своим провайдером каталога получает и его тексты.
     const pages = routeFiles("app/[locale]").filter((file) => !/[\\/]kalkulyator[\\/]/.test(file));
     // Страница ЖК: провайдер с COMPLEX_MESSAGES ставит page.tsx — его получают и разделы рядом.
-    // Главная: каталог внизу — со своим провайдером (HomeCatalog), остальные разделы — серверные.
-    const allowedFor = (file: string): readonly string[] =>
-      isComplexRoute(file) ? COMPLEX_MESSAGES
-      : readSource(file).includes("pickMessages(messages, CATALOG_MESSAGES)") ? CATALOG_MESSAGES
-      : readSource(file).includes("pickMessages(messages, FAVORITES_MESSAGES)") ? FAVORITES_MESSAGES
-      : readSource(file).includes("<HomeCatalog") ? CATALOG_MESSAGES
-      : readSource(file).includes("pickMessages(messages, PARTNERS_MESSAGES)") ? PARTNERS_MESSAGES
-      : readSource(file).includes("pickMessages(messages, ABOUT_MESSAGES)") ? ABOUT_MESSAGES
-      : readSource(file).includes("pickMessages(messages, DEVELOPERS_MESSAGES)") ? DEVELOPERS_MESSAGES
-      : readSource(file).includes("pickMessages(messages, DEVELOPERS_LIST_MESSAGES)") ? DEVELOPERS_LIST_MESSAGES
-      : SITE_SHELL_MESSAGES;
+    // Главная: каталог с подборками (HomeCatalog) и «Предложения от застройщиков» (HomeOffers) —
+    // каждый со своим провайдером, остальные разделы — серверные.
+    const allowedFor = (file: string): readonly string[] => {
+      if (isComplexRoute(file)) return COMPLEX_MESSAGES;
+      const source = readSource(file);
+      const uses = (marker: string) => source.includes(`pickMessages(messages, ${marker})`);
+      const picked = [
+        ...(uses("CATALOG_MESSAGES") || source.includes("<HomeCatalog") ? CATALOG_MESSAGES : []),
+        ...(source.includes("<HomeOffers") ? SHOWCASE_MESSAGES : []),
+        ...(uses("FAVORITES_MESSAGES") ? FAVORITES_MESSAGES : []),
+        ...(uses("PARTNERS_MESSAGES") ? PARTNERS_MESSAGES : []),
+        ...(uses("ABOUT_MESSAGES") ? ABOUT_MESSAGES : []),
+        ...(uses("DEVELOPERS_MESSAGES") ? DEVELOPERS_MESSAGES : []),
+        ...(uses("DEVELOPERS_LIST_MESSAGES") ? DEVELOPERS_LIST_MESSAGES : []),
+      ];
+      return picked.length > 0 ? picked : SITE_SHELL_MESSAGES;
+    };
     // Тексты окна заявки приходят с самим окном (LAZY_SITE_MESSAGES) — их провайдер ставит LeadProvider.
     const missing = pages.flatMap((file) =>
       [...clientNamespaces([file])]

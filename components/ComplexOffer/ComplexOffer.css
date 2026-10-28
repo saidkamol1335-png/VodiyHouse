@@ -53,6 +53,21 @@
   font-weight: 550;
 }
 
+/* «Подарок: кухонный гарнитур» (витрина, 3.16б) — янтарная плашка под ценой. */
+.complex-offer__gift {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 4px 10px;
+  border: 1px solid var(--badge-amber-border);
+  border-radius: var(--r-pill);
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-fg);
+  font-size: var(--fs-small);
+  font-weight: 650;
+}
+
 .complex-offer__facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

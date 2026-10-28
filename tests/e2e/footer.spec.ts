@@ -1,3 +1,4 @@
+import { hasCloud } from "./cloud";
 import { expect, test } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
@@ -11,7 +12,9 @@ test.describe("подвал сайта", () => {
     const errors = collectPageErrors(page);
     await page.goto("/ru");
     const root = footer(page);
-    await root.scrollIntoViewIfNeeded();
+    // К знаку вверху подвала, а не к середине подвала: с витриной главная на телефоне длиннее, и
+    // прокрутка «к подвалу» ставила знак выше экрана — он не проявлялся (useReveal ждёт показа).
+    await root.locator(".site-footer__pixels").scrollIntoViewIfNeeded();
     await expect(root.getByRole("link", { name: "Новостройки" })).toHaveAttribute("href", "/ru/novostroyki");
     await expect(root.getByRole("link", { name: "О нас" })).toHaveAttribute("href", "/ru/o-nas");
     await expect(root.getByRole("link", { name: "Как купить" })).toHaveAttribute("href", "/ru/kak-kupit");
@@ -20,7 +23,9 @@ test.describe("подвал сайта", () => {
     await expect(root.getByRole("link", { name: "Политика конфиденциальности" })).toHaveAttribute("href", "/ru/privacy");
     await expect(root).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(root).toContainText("© 2026 Vodiy House");
-    await expect(root).not.toContainText("Спецпредложения");
+    // «Спецпредложения» (3.16б) — якорь главной, только при действующей витрине (с облаком — DEMO).
+    if (hasCloud) await expect(root.getByRole("link", { name: "Спецпредложения" })).toHaveAttribute("href", "/ru#spetspredlozheniya");
+    else await expect(root).not.toContainText("Спецпредложения");
     await expect(root.locator('a[href^="tel:"]')).toHaveCount(0);
     // Снимок — когда знак проявился (full: клетки по диагонали до ~1,5 с); липкая шапка не мешает.
     await expect(root.locator(".site-footer__pixel").last()).toHaveCSS("opacity", "1", { timeout: 5000 });

@@ -14,6 +14,7 @@ import { hiddenNav } from "@/lib/routes";
 import { readCalculatorInMenu } from "@/lib/site/calculator";
 import { readSiteContacts } from "@/lib/site/contacts";
 import { SITE_NAME, siteOrigin } from "@/lib/site/metadata";
+import { readSiteShowcase } from "@/lib/site/showcase/read";
 import "../globals.css";
 import "../site.css";
 
@@ -36,15 +37,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SiteLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await rootLocale();
   if (!isLocale(locale)) notFound();
-  const [calculator, contacts, messages] = await Promise.all([
+  const [calculator, contacts, messages, showcase] = await Promise.all([
     readCalculatorInMenu(),
     readSiteContacts(),
     getMessages(),
+    readSiteShowcase(),
   ]);
+  // «Спецпредложения» в меню — якорь раздела главной: без действующих предложений и рекламы пункта нет.
+  const specials = showcase.specials.length > 0 || showcase.ads.length > 0;
   return (
     <RootDocument lang={locale} withColumns messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>
-        <HiddenNavProvider hidden={hiddenNav({ calculator })}>
+        <HiddenNavProvider hidden={hiddenNav({ calculator, specials })}>
           <LeadProvider>
             {children}
             <SiteFooter />

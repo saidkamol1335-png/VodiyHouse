@@ -9,6 +9,7 @@ import { PhoneButton } from "@/components/PhoneButton";
 import { ShareButton } from "@/components/ShareButton";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { TelegramButton } from "@/components/TelegramButton";
+import type { LocalizedText } from "@/lib/contacts";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
@@ -22,6 +23,8 @@ type CatalogCardProps = {
   catalog: SiteCatalog;
   /** Первые карточки первого экрана: обложка грузится сразу (LCP). */
   preload?: boolean;
+  /** Бейдж спецпредложения (витрина, 3.16б) — пилюля на фото перед классом. */
+  badge?: LocalizedText | null;
 };
 
 /**
@@ -30,7 +33,7 @@ type CatalogCardProps = {
  * цена «от» в валюте блока (Ф6) и «Платёж от», «Показать телефон» и «Перезвоните мне» (ТЗ 10.1).
  * Без скидок (PLAN §3.13). Связь — только Vodiy House.
  */
-export function CatalogCard({ complex, catalog, preload = false }: CatalogCardProps) {
+export function CatalogCard({ complex, catalog, preload = false, badge = null }: CatalogCardProps) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
   const { phone } = useSiteContacts();
@@ -42,13 +45,7 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
   const finishings = [...new Set(complex.blocks.flatMap((block) => (block.finishing ? [block.finishing.name[locale]] : [])))];
   return (
     <article className="catalog-card" data-track-entity={`complex:${complex.id}`}>
-      <CardMedia
-        photos={complex.photos}
-        alt={name}
-        preload={preload}
-        badges={complex.class ? <span className="catalog-card__class">{t(`class.${complex.class}`)}</span> : null}
-        tools={<CardTools complex={complex} name={name} />}
-      />
+      <CardMedia photos={complex.photos} alt={name} preload={preload} badges={<CardBadges complex={complex} badge={badge} />} tools={<CardTools complex={complex} name={name} />} />
       <div className="catalog-card__body">
         <p className="catalog-card__top">
           <span className="catalog-card__developer">{developer?.name}</span>
@@ -73,6 +70,18 @@ export function CatalogCard({ complex, catalog, preload = false }: CatalogCardPr
         </div>
       </div>
     </article>
+  );
+}
+
+/** Пилюли на фото: бейдж спецпредложения (витрина) перед классом ЖК (мокап .jc__badges). */
+function CardBadges({ complex, badge }: { complex: CatalogComplex; badge: LocalizedText | null }) {
+  const t = useTranslations("catalog.card");
+  const locale = useLocale() as Locale;
+  return (
+    <>
+      {badge ? <span className="catalog-card__promo">{badge[locale]}</span> : null}
+      {complex.class ? <span className="catalog-card__class">{t(`class.${complex.class}`)}</span> : null}
+    </>
   );
 }
 

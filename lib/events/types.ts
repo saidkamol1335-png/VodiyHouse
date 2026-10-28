@@ -10,10 +10,13 @@ export const EVENT_TYPES = [
   "share",
   "filter",
   "lead_sent",
+  // Реклама на главной (3.16б): показ карточки в кадре и клик по «Показать квартиры» или ЖК.
+  "ad_view",
+  "ad_click",
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
-export type EventEntity = "complex" | "layout" | "developer";
+export type EventEntity = "complex" | "layout" | "developer" | "ad";
 export type Device = "mobile" | "tablet" | "desktop";
 
 /** Одно действие посетителя; detail — подпись ленты «Сейчас на сайте» (фильтр текстом, канал). */

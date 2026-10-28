@@ -1,0 +1,63 @@
+/* «Предложения от застройщиков» (мокап .sec--spec): заголовок с лидом слева, «Разместить рекламу»
+   справа; якорь — под шапкой. Карточка рекламы и сетка спецпредложений — свои блоки. */
+.home-offers {
+  padding: 72px 0 24px;
+  scroll-margin-top: var(--header-h);
+}
+
+.home-offers__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.home-offers__title {
+  margin: 16px 0 14px;
+}
+
+.home-offers__lead {
+  margin: 0;
+  max-width: 640px;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.home-offers__place {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  color: var(--fg);
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-offers__place:hover {
+  background: var(--glass-3);
+}
+
+@media (max-width: 760px) {
+  .home-offers {
+    padding-top: 56px;
+  }
+
+  .home-offers__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .home-offers__place {
+    min-height: var(--touch-target);
+    padding: 0;
+  }
+}

@@ -129,6 +129,10 @@ function payloadFrom(type: LeadType, raw: Partial<LeadRequest>): Record<string, 
     };
   }
   if (type === "calc") return { rows: rowsFrom(raw.calcRows) };
+  if (type === "promo" && isRecord(raw.promo)) {
+    const title = text(raw.promo.title, TEXT_MAX);
+    return title ? { promo: { title } } : {};
+  }
   return {};
 }
 

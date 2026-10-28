@@ -6,17 +6,20 @@ import { HomeCatalog } from "@/components/HomeCatalog";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeManifesto } from "@/components/HomeManifesto";
 import { HomeMarquee } from "@/components/HomeMarquee";
+import { HomeOffers } from "@/components/HomeOffers";
 import { HomePartner } from "@/components/HomePartner";
 import { HomeWhy } from "@/components/HomeWhy";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
+import { OFFERS_ANCHOR } from "@/lib/routes";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { availabilitySample, heroFound, homeStats } from "@/lib/site/home/stats";
 import { readSiteContacts } from "@/lib/site/contacts";
 import { pageMetadata, siteOrigin } from "@/lib/site/metadata";
 import { agencyLd } from "@/lib/site/seo/jsonLd";
+import { readSiteShowcase } from "@/lib/site/showcase/read";
 
 /** Карточек на порцию на главной (Ф3 A): 2 ряда по 3; «Показать ещё» добавляет столько же. */
 const PAGE_SIZE = 6;
@@ -40,14 +43,14 @@ function coversOf(catalog: SiteCatalog | null, locale: Locale) {
 }
 
 /**
- * Главная (шаг 3.9, мокап Main): первый экран без заставки, бегущая строка, каталог (Ф3 A — тот же
- * компонент, что /novostroyki, 6 карточек), «Vodiy House в двух словах», «Почему через Vodiy
- * House», «Вы застройщик?». Подборки, спецпредложения и квиз — с 3б. Страница статичная: всё — из
- * одного кэшированного ответа каталога.
+ * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран без заставки, бегущая
+ * строка, каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
+ * «Предложения от застройщиков» (3.16б), «Vodiy House в двух словах», «Почему через Vodiy House»,
+ * «Вы застройщик?». Квиз — 3.17. Страница статичная: всё — из кэшированных ответов каталога и витрины.
  */
 export default async function HomePage() {
   const locale = (await rootLocale()) as Locale;
-  const catalog = await readSiteCatalog();
+  const [catalog, showcase] = await Promise.all([readSiteCatalog(), readSiteShowcase()]);
   return (
     <>
       <SiteHeader transparentAtTop />
@@ -59,7 +62,8 @@ export default async function HomePage() {
           catalogId={CATALOG_ID}
         />
         <HomeMarquee />
-        {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} /> : <CatalogUnavailable id={CATALOG_ID} />}
+        {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} showcase={showcase} /> : <CatalogUnavailable id={CATALOG_ID} />}
+        {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
         <HomeManifesto />
         <HomeWhy sample={catalog ? availabilitySample(catalog) : null} />
         <HomePartner />

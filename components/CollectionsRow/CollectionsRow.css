@@ -1,0 +1,281 @@
+/* Подборки ЖК (мокап .sec + .collx/.coll): заголовок раздела, лента тёмных карточек-фото 380 px
+   с прокруткой по кадрам, затухание по краям и стрелки; выбранная карточка — янтарное кольцо.
+   Фото затемнено, в full при наведении приближается (transform). */
+.collections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 0 4px;
+}
+
+.collections__head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collections__title {
+  margin-top: 4px;
+}
+
+.collections__lead {
+  margin: 0;
+  max-width: 640px;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  line-height: var(--lh-body);
+}
+
+.collections__viewport {
+  position: relative;
+}
+
+/* Затухание по краям — там, где лента продолжается. */
+.collections__viewport::before,
+.collections__viewport::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 18px;
+  z-index: 2;
+  width: 84px;
+  pointer-events: none;
+  transition: opacity var(--dur-base);
+}
+
+.collections__viewport::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg) 18%, transparent);
+}
+
+.collections__viewport::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg) 18%, transparent);
+}
+
+.collections__viewport[data-edge="start"]::before,
+.collections__viewport[data-edge="end"]::after,
+.collections__viewport[data-edge="all"]::before,
+.collections__viewport[data-edge="all"]::after {
+  opacity: 0;
+}
+
+.collections__row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(300px, 34%);
+  gap: 14px;
+  margin: 0;
+  padding: 4px 0 18px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.collections__row::-webkit-scrollbar {
+  display: none;
+}
+
+.collections__item {
+  scroll-snap-align: start;
+}
+
+.collections__card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 380px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--inv);
+  color: var(--over-photo-fg);
+  text-align: left;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.collections__card:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.collections__card--on {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* Затемнение, как в мокапе (brightness .55): текст на фото читается всегда. */
+.collections__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--collection-shade);
+}
+
+.collections__photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+[data-motion="full"] .collections__photo {
+  transform: scale(1.08);
+  transition: transform var(--dur-slower) var(--ease);
+}
+
+[data-motion="full"] .collections__card:hover .collections__photo {
+  transform: scale(1);
+}
+
+.collections__top,
+.collections__bottom {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.collections__top {
+  top: 16px;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.collections__name {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 60px;
+  z-index: 1;
+  font-size: var(--fs-collection-name);
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+[data-motion="full"] .collections__name {
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+[data-motion="full"] .collections__card:hover .collections__name {
+  transform: translateX(6px);
+}
+
+.collections__bottom {
+  bottom: 18px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.collections__go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--over-photo-line);
+  border-radius: var(--r-pill);
+  background: var(--over-photo-chip);
+}
+
+.collections__arrow {
+  position: absolute;
+  top: 194px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  margin-top: -29px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg);
+  box-shadow: var(--shadow-2);
+  cursor: pointer;
+  transition: opacity var(--dur-base), visibility var(--dur-base), transform var(--dur-base) var(--ease);
+}
+
+.collections__arrow--prev {
+  left: 14px;
+}
+
+.collections__arrow--next {
+  right: 14px;
+  border-color: transparent;
+  background: var(--amber);
+  color: var(--on-amber);
+  box-shadow: var(--glow-amber);
+}
+
+[data-motion="full"] .collections__arrow:hover {
+  transform: scale(1.07);
+}
+
+.collections__arrow:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.collections__viewport[data-edge="start"] .collections__arrow--prev,
+.collections__viewport[data-edge="end"] .collections__arrow--next,
+.collections__viewport[data-edge="all"] .collections__arrow {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .collections {
+    gap: 16px;
+    padding-top: 8px;
+  }
+
+  .collections__viewport::before,
+  .collections__viewport::after {
+    bottom: 16px;
+    width: 44px;
+  }
+
+  /* Лента во всю ширину экрана, карточка 82 % (мокап). */
+  .collections__row {
+    grid-auto-columns: 82%;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 4px var(--gutter) 16px;
+    scroll-padding: 0 var(--gutter);
+  }
+
+  .collections__card {
+    height: 320px;
+  }
+
+  .collections__arrow {
+    top: 164px;
+    width: 48px;
+    height: 48px;
+    margin-top: -24px;
+  }
+
+  .collections__arrow--prev {
+    left: 8px;
+  }
+
+  .collections__arrow--next {
+    right: 8px;
+  }
+}

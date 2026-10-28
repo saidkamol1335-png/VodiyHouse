@@ -1,3 +1,4 @@
+import { hasCloud } from "./cloud";
 import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
@@ -5,19 +6,24 @@ import { collectPageErrors } from "./helpers";
 const shot = (page: Page, name: string) =>
   page.screenshot({ caret: "initial", path: `test-results/screens/header/${name}.png` });
 
+// «Спецпредложения» (3.16б) — якорь раздела главной, пункт есть только при действующих
+// предложениях или рекламе: с облаком их даёт DEMO, без облака витрина пустая — пять пунктов.
+const NAV_COUNT = hasCloud ? 6 : 5;
+
 test.describe("шапка · десктоп 1440", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "только десктоп");
 
-  test("пять пунктов, RU/UZ, тема, избранное; кнопки меню нет", async ({ page }) => {
+  test("пункты шапки, RU/UZ, тема, избранное; кнопки меню нет", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru");
     const nav = page.locator(".header-nav");
     // «Застройщики» — с 3.15; «Спецпредложения» — с 3.16 (PLAN §7, фаза 3).
-    await expect(nav.getByRole("link")).toHaveCount(5);
+    await expect(nav.getByRole("link")).toHaveCount(NAV_COUNT);
     await expect(nav).toContainText("Новостройки");
     await expect(nav.getByRole("link", { name: "Застройщики", exact: true })).toHaveAttribute("href", "/ru/zastroyshchiki");
     await expect(nav).toContainText("Застройщикам");
-    await expect(nav).not.toContainText("Спецпредложения");
+    if (hasCloud) await expect(nav.getByRole("link", { name: "Спецпредложения" })).toHaveAttribute("href", "/ru#spetspredlozheniya");
+    else await expect(nav).not.toContainText("Спецпредложения");
     await expect(page.getByRole("link", { name: "Избранное" })).toHaveAttribute("href", "/ru/izbrannoe");
     await expect(page.locator(".site-header__menu-button")).toBeHidden();
     await expect(page.getByRole("group", { name: "Язык" })).toBeVisible();
@@ -82,7 +88,7 @@ test.describe("шапка · планшет 1100", () => {
     await toggle.click();
     const menu = page.locator(".tablet-menu");
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".tablet-menu__link")).toHaveCount(5);
+    await expect(menu.locator(".tablet-menu__link")).toHaveCount(NAV_COUNT);
     await expect(page.locator(".phone-menu")).toBeHidden();
     await shot(page, "1100-menu");
     await page.keyboard.press("Escape");
@@ -94,13 +100,13 @@ test.describe("шапка · планшет 1100", () => {
 test.describe("шапка · телефон 390", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) > 760, "только телефон");
 
-  test("Ш5: меню на весь экран — 01–05, офис, язык, тема", async ({ page }) => {
+  test("Ш5: меню на весь экран — 01–05 (06 — «Спецпредложения» с витриной), офис, язык, тема", async ({ page }) => {
     await page.goto("/ru");
     await shot(page, "390-top");
     await page.getByRole("button", { name: "Открыть меню" }).click();
     const menu = page.getByRole("dialog", { name: "Меню" });
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".phone-menu__item")).toHaveCount(5);
+    await expect(menu.locator(".phone-menu__item")).toHaveCount(NAV_COUNT);
     await expect(menu.locator(".phone-menu__number").first()).toHaveText("01");
     await expect(menu).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(menu.getByRole("link", { name: "O‘zbekcha" })).toBeVisible();
