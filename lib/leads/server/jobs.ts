@@ -1,6 +1,8 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { purgeArchive, remindArchive } from "@/lib/archive/server/purge";
+import { expireRateNow } from "@/lib/cache";
+import { updateCbuRate } from "@/lib/rates/update";
 import { alertUndelivered, deliverDue } from "./deliver";
 
 // Работы расписания (/api/cron/<работа>): адрес проверил секрет CRON_SECRET, дальше — секретный
@@ -35,5 +37,11 @@ export const CRON_JOBS: Record<string, CronJob> = {
     const { data, error } = await createSupabaseAdminClient().rpc("cleanup_events");
     if (error) throw new Error("events-cleanup-failed", { cause: error });
     return { removed: Number(data ?? 0) };
+  },
+  // Курс ЦБ (3.2): раз в сутки; изменился — калькуляторы и «Платёж от» пересчитываются сразу.
+  rate: async () => {
+    const changed = await updateCbuRate(createSupabaseAdminClient());
+    if (changed) expireRateNow();
+    return { changed: Number(changed) };
   },
 };

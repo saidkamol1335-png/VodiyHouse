@@ -1,6 +1,6 @@
 // Netlify Scheduled Function (решение фазы 3): раз в 5 минут — повтор доставки заявок и тревога,
-// раз в час — очистка кодов «Написать в Telegram» и старых событий сайта. Сама работа — на сайте (/api/cron/<работа>),
-// здесь только вызов с секретом. URL — адрес сайта Netlify.
+// раз в час — очистка кодов «Написать в Telegram» и старых событий сайта, раз в сутки — архив и курс ЦБ.
+// Сама работа — на сайте (/api/cron/<работа>), здесь только вызов с секретом. URL — адрес сайта Netlify.
 
 async function run(site: string, secret: string, job: string): Promise<void> {
   const response = await fetch(`${site}/api/cron/${job}`, {
@@ -19,8 +19,12 @@ export default async function cron(): Promise<void> {
   if (now.getUTCMinutes() < 5) {
     await run(site, secret, "tg-starts");
     await run(site, secret, "events");
-    // Архив — раз в сутки, в 03:00 по Ташкенту (22:00 UTC): ночью, когда сайтом не пользуются.
-    if (now.getUTCHours() === 22) await run(site, secret, "archive");
+    // Раз в сутки, в 03:00 по Ташкенту (22:00 UTC): архив — ночью, когда сайтом не пользуются;
+    // курс ЦБ — уже на наступивший день (ЦБ публикует его накануне).
+    if (now.getUTCHours() === 22) {
+      await run(site, secret, "archive");
+      await run(site, secret, "rate");
+    }
   }
 }
 

@@ -4,7 +4,7 @@ import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
 
 // Расписание (решение фазы 3): один защищённый адрес /api/cron/<работа>, его дёргает Netlify
 // Scheduled Function (netlify/functions/cron.mts) с секретом CRON_SECRET. Без секрета адрес закрыт.
-// Работы: leads — повтор доставки заявок и тревога «не дошла за 10 минут».
+// Работы — lib/leads/server/jobs.ts: заявки, коды бота, события, архив, курс ЦБ.
 
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 

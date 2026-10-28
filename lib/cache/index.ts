@@ -79,6 +79,12 @@ export function expirePrograms(developerId?: string | null): void {
   if (developerId) updateTag(developerTag(developerId));
 }
 
+/** Курс ЦБ по расписанию: не Server Action, updateTag там нельзя — те же теги истекают сразу. */
+export function expireRateNow(): void {
+  revalidateTag(PROGRAMS_TAG, { expire: 0 });
+  revalidateTag(CATALOG_TAG, { expire: 0 });
+}
+
 /** id ЖК из ответа функции базы {complex_id, …}. */
 export function complexIdFrom(data: unknown): string | null {
   if (typeof data !== "object" || data === null) return null;
