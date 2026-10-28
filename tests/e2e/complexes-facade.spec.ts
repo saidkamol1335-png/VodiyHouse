@@ -70,9 +70,8 @@ test.describe("кабинет · фасад и планы этажей", () => {
     await facadeSection.locator("input[type=file]").first().setInputFiles(await imageFile(page, { width: 2400, height: 1600, type: "image/jpeg" }));
     const contours = page.locator(".facade-tab__section").nth(1);
     const editor = contours.locator(".facade-editor");
+    // Редактор появляется только после того, как страница перечитала данные (router.refresh).
     await expect(editor).toBeVisible({ timeout: 30_000 });
-    // После загрузки страница перечитывает данные (router.refresh) — рисуем, когда она закончила.
-    await page.waitForLoadState("networkidle");
     await drawTriangle(page, editor, [[20, 20], [60, 20], [40, 70]]);
     await expect(contours.getByText("3 точки")).toBeVisible();
     await contours.getByRole("button", { name: "Сохранить контур" }).click();
@@ -86,7 +85,6 @@ test.describe("кабинет · фасад и планы этажей", () => {
     await plans.locator("input[type=file]").first().setInputFiles(await imageFile(page, { width: 1600, height: 1200, type: "image/png" }));
     const card = plans.locator("details.facade-tab__card", { hasText: "Подъезд 1 · этажи 2–3" });
     await expect(card).toBeVisible({ timeout: 30_000 });
-    await page.waitForLoadState("networkidle");
     await card.locator("summary").click();
     await expect(card.getByText("Обведено 0 из 2").first()).toBeVisible();
     await drawTriangle(page, card.locator(".facade-editor"), [[5, 5], [45, 5], [25, 90]]);

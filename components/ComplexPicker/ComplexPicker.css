@@ -568,6 +568,25 @@
   cursor: pointer;
 }
 
+/* Узкая или низкая квартира на плане: сначала уходит цена, потом комнаты — номер остаётся всегда
+   (цена — в подписи для диктора и в панели квартиры). */
+.complex-picker__unit {
+  container-type: size;
+}
+
+@container (max-width: 64px) or (max-height: 72px) {
+  .complex-picker__unit-price,
+  .complex-picker__unit-tag {
+    display: none;
+  }
+}
+
+@container (max-width: 40px) or (max-height: 44px) {
+  .complex-picker__unit-rooms {
+    display: none;
+  }
+}
+
 .complex-picker__unit--free {
   color: var(--picker-unit-free-t);
 }
