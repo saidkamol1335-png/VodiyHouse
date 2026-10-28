@@ -413,6 +413,62 @@
       "nothingHint": "Filtrlarni o‘zgartiring yoki Vodiy House bilan bog‘laning — menejer variantlarni qo‘lda tanlab beradi."
     }
   },
+  "developers": {
+    "metaTitle": "Farg‘ona viloyati quruvchilari — Vodiy House",
+    "metaDescription": "Vodiy House sotadigan yangi uylarning quruvchilari: tekshirilgan hujjatlar, topshirilgan obyektlar, to‘lov dasturlari. Quruvchilar kontaktlarini e’lon qilmaymiz — barcha savollarni menejeringiz hal qiladi.",
+    "eyebrow": "Quruvchilar",
+    "title": "<accent>Farg‘ona viloyati</accent> quruvchilari",
+    "lead": "Vodiy House sotadigan TJMlarning kompaniyalari. Quruvchilar kontaktlarini e’lon qilmaymiz: barcha savollarni menejeringiz bepul hal qiladi.",
+    "search": "Nomi bo‘yicha qidirish",
+    "count": "saytda {n} ta quruvchi",
+    "complexes": "{n, plural, =0 {saytda hali yangi uylar yo‘q} other {saytda # ta yangi uy}}",
+    "since": "{year} yildan",
+    "verified": "Vodiy House tekshirgan",
+    "open": "Sahifani ochish: {name}",
+    "nothing": "Hech narsa topilmadi",
+    "unavailable": "Quruvchilar ro‘yxati vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz.",
+    "page": {
+      "metaTitle": "{name} quruvchisi — yangi uylar, to‘lov shartlari",
+      "metaDescription": "{name}: Vodiy House saytidagi yangi uylar, topshirilgan obyektlar, hujjatlar tekshiruvi va to‘lov dasturlari. Maslahat — Vodiy House menejeri orqali, bepul.",
+      "crumbs": "Siz shu yerdasiz",
+      "role": "Quruvchi",
+      "founded": "{year} yilda tashkil etilgan",
+      "countBuilt": "Topshirilgan: {n}",
+      "countBuilding": "Qurilmoqda: {n}",
+      "complexesN": "{n} ta TJM",
+      "flats": "Topshirilgan kvartiralar: {n}",
+      "note": "Quruvchi bo‘yicha savollar — Vodiy House menejerlari orqali. Siz uchun bepul.",
+      "consultContext": "{name} quruvchisi bo‘yicha maslahat",
+      "about": "Kompaniya haqida",
+      "founders": "Asoschilar",
+      "checks": "Vodiy House tekshirgan",
+      "checkedOn": "Tekshirilgan: {date}",
+      "permit": "Qurilish ruxsatnomasi tekshirilgan",
+      "land": "Yer rasmiylashtirilgan",
+      "delivered": "Topshirilgan obyektlari bor",
+      "visit": "Vodiy House xodimi obyektda bo‘lgan",
+      "objects": "Obyektlar",
+      "tabs": {
+        "label": "Quruvchi obyektlari",
+        "all": "Barchasi",
+        "built": "Topshirilgan",
+        "building": "Qurilmoqda"
+      },
+      "noObjects": "Bu quruvchining yangi uylari saytda hali yo‘q.",
+      "projects": "Topshirilgan obyektlar",
+      "project": "Obyekt",
+      "planned": "Reja",
+      "deliveredOn": "Amalda",
+      "onTime": "O‘z vaqtida topshirilgan",
+      "delayed": "{months} oyga kechikkan",
+      "quarter": "{quarter}-chorak {year}",
+      "terms": "Xarid shartlari",
+      "termsLead": "Quruvchi va hamkor banklarning to‘lov dasturlari.",
+      "calculate": "To‘lovni hisoblash",
+      "others": "Boshqa quruvchilar",
+      "unavailable": "Quruvchi sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz."
+    }
+  },
   "complex": {
     "metaTitle": "{name} TJM — kvartiralar, narxlar va rejalar",
     "metaDescription": "{name} TJM{place}{price}: kvartiralar mavjudligi, quruvchi narxlari, rejalar va to‘lov hisobi. Tanlash, ko‘rsatish va hujjatlarni tekshirish — bepul.",
@@ -669,7 +725,8 @@
       "visit": "Vodiy House xodimi obyektda bo‘lgan",
       "checkedOn": "Tekshirilgan: {date}",
       "countBuilt": "Topshirilgan: {n}",
-      "countBuilding": "Qurilmoqda: {n}"
+      "countBuilding": "Qurilmoqda: {n}",
+      "more": "Quruvchi haqida batafsil"
     },
     "documents": {
       "title": "TJM hujjatlari",

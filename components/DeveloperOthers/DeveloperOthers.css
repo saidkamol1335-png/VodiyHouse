@@ -1,0 +1,95 @@
+/* «Другие застройщики» (мокап SiteDev): ряд карточек со знаком и «N ЖК»; на телефоне — лента с
+   прокруткой по горизонтали. */
+
+.developer-others {
+  margin: 56px 0 72px;
+}
+
+.developer-others__title {
+  margin: 0 0 16px;
+  font-size: var(--fs-h3);
+  font-weight: 650;
+}
+
+.developer-others__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.developer-others__card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.developer-others__card:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.developer-others__card:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.developer-others__card b {
+  display: block;
+  font-size: var(--fs-control);
+  font-weight: 650;
+}
+
+.developer-others__card small {
+  display: block;
+  margin-top: 2px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.developer-others__logo {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+}
+
+.developer-others__logo--mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .developer-others {
+    margin: 36px 0 48px;
+  }
+
+  .developer-others__row {
+    display: flex;
+    gap: 10px;
+    margin: 0 calc(-1 * var(--gutter, 16px));
+    padding: 0 var(--gutter, 16px);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .developer-others__row li {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
+  }
+}

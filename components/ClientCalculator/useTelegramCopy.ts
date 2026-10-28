@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale } from "@/lib/calc/text";
 import type { CalcSnapshot } from "@/components/PaymentCalculator/PaymentCalculator";
 import { NETWORK_FAILURE, type ProgramActionResult } from "@/lib/admin/programs/types";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";

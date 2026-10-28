@@ -5,7 +5,7 @@ import type { CalcStock } from "@/lib/calc/priceSource";
 import { type CalcProgram, isTiered } from "@/lib/calc/programs";
 import { formatPercent, formatPrice, formatPriceShort, termParts } from "@/lib/format";
 
-// Тексты калькулятора (раздел calc — сайт и кабинет, ru и uz): названия программ, сроки, суммы
+// Тексты калькулятора (раздел calc — сайт, кабинет и страница застройщика, ru и uz): названия программ, сроки, суммы
 // в валюте итога. Слова «скидка» здесь нет — его добавляет только кабинет (PLAN §3.13).
 
 export type CalcT = ReturnType<typeof useTranslations<"calc">>;

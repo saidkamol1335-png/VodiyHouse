@@ -1,7 +1,9 @@
 import type { Currency } from "@/lib/calc/money";
 import type { SiteContacts } from "@/lib/contacts";
 import type { Locale } from "@/lib/i18n/routing";
-import { defaultImage, SITE_NAME } from "@/lib/site/metadata";
+import { developerRoute } from "@/lib/routes";
+import type { DeveloperPage } from "@/lib/site/developers/records";
+import { defaultImage, localizedPath, SITE_NAME } from "@/lib/site/metadata";
 
 // schema.org для поиска (шаг 3.14): агентство — на главной, ЖК с ценой «от» и крошками — на странице
 // ЖК. Контакты — только Vodiy House (правило ТЗ 1.2): у ЖК нет ни телефона, ни сайта застройщика.
@@ -90,4 +92,16 @@ export function breadcrumbLd(items: { name: string; url: string }[]): JsonLd {
 /** JSON внутри <script>: «<» экранируем — текст из базы не закроет тег и не вставит разметку. */
 export function serializeJsonLd(data: JsonLd | JsonLd[]): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+/** Застройщик (шаг 3.15): организация без контактов (правило ТЗ 1.2) — название, страница, год основания. */
+export function developerLd(input: { origin: string; locale: Locale; page: DeveloperPage }): JsonLd {
+  const { origin, locale, page } = input;
+  return {
+    "@context": CONTEXT,
+    "@type": "Organization",
+    name: page.name,
+    url: `${origin}${localizedPath(locale, developerRoute(page.slug))}`,
+    ...(page.foundedYear ? { foundingDate: String(page.foundedYear) } : {}),
+  };
 }

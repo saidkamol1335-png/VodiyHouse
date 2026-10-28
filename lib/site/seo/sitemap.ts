@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/routing";
-import { complexRoute, ROUTES } from "@/lib/routes";
+import { complexRoute, developerRoute, ROUTES } from "@/lib/routes";
 import { localizedPath } from "@/lib/site/metadata";
 
 // Карта сайта (шаг 3.14): страницы для поиска на обоих языках с парой hreflang и x-default.
@@ -11,6 +11,7 @@ import { localizedPath } from "@/lib/site/metadata";
 export const SITEMAP_ROUTES = [
   ROUTES.home,
   ROUTES.catalog,
+  ROUTES.developers,
   ROUTES.calculator,
   ROUTES.about,
   ROUTES.forDevelopers,
@@ -20,6 +21,7 @@ export const SITEMAP_ROUTES = [
 
 const PRIORITY: Partial<Record<string, number>> = { [ROUTES.home]: 1, [ROUTES.catalog]: 0.9 };
 const COMPLEX_PRIORITY = 0.8;
+const DEVELOPER_PRIORITY = 0.7;
 const PAGE_PRIORITY = 0.5;
 
 /** Одна страница — строка на каждый язык, у каждой — все языки и x-default. */
@@ -29,9 +31,14 @@ function entriesOf(origin: string, path: string, priority: number): MetadataRout
   return LOCALES.map((locale) => ({ url: url(locale), priority, alternates: { languages } }));
 }
 
-export function buildSitemap(origin: string, complexSlugs: readonly string[]): MetadataRoute.Sitemap {
+export function buildSitemap(
+  origin: string,
+  complexSlugs: readonly string[],
+  developerSlugs: readonly string[] = [],
+): MetadataRoute.Sitemap {
   return [
     ...SITEMAP_ROUTES.flatMap((path) => entriesOf(origin, path, PRIORITY[path] ?? PAGE_PRIORITY)),
     ...complexSlugs.flatMap((slug) => entriesOf(origin, complexRoute(slug), COMPLEX_PRIORITY)),
+    ...developerSlugs.flatMap((slug) => entriesOf(origin, developerRoute(slug), DEVELOPER_PRIORITY)),
   ];
 }

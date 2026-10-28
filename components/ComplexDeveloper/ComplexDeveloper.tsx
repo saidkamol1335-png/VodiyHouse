@@ -1,4 +1,4 @@
-import { Check, Phone } from "lucide-react";
+import { ArrowRight, Check, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { LeadButton } from "@/components/LeadDialog";
 import type { LeadIntent } from "@/components/LeadForm";
@@ -6,7 +6,7 @@ import { SitePhoto } from "@/components/SitePhoto";
 import { formatPrice, initialsOf } from "@/lib/format";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
-import { complexRoute } from "@/lib/routes";
+import { complexRoute, developerRoute } from "@/lib/routes";
 import { cheapest } from "@/lib/site/catalog/card";
 import type { ComplexPage } from "@/lib/site/complex/model";
 
@@ -32,7 +32,7 @@ const dotted = (iso: string) => iso.slice(0, 10).split("-").reverse().join(".");
  * застройщике» — со страницами застройщиков (3б).
  */
 export async function ComplexDeveloper({ page, consult }: { page: ComplexPage; consult: LeadIntent }) {
-  const [t, tLead] = await Promise.all([getTranslations("complex.developer"), getTranslations("lead.buttons")]);
+  const t = await getTranslations("complex.developer");
   const locale = (await getLocale()) as Locale;
   const { developer } = page;
   const checks = checksOf(page);
@@ -64,15 +64,27 @@ export async function ComplexDeveloper({ page, consult }: { page: ComplexPage; c
           </p>
         ) : null}
         {developer.about ? <p className="complex-developer__about">{developer.about[locale]}</p> : null}
-        <div className="complex-developer__actions">
-          <LeadButton intent={consult} variant="ghost" size="sm">
-            <Phone size={16} aria-hidden="true" />
-            {tLead("consult")}
-          </LeadButton>
-        </div>
+        <DeveloperActions consult={consult} slug={developer.slug} />
         <OtherComplexes page={page} locale={locale} />
       </div>
       <DeveloperChecks checks={checks} />
+    </div>
+  );
+}
+
+/** «Получить консультацию» — к Vodiy House (правило 1.2) и «Подробнее о застройщике» (3.15). */
+async function DeveloperActions({ consult, slug }: { consult: LeadIntent; slug: string }) {
+  const [t, tLead] = await Promise.all([getTranslations("complex.developer"), getTranslations("lead.buttons")]);
+  return (
+    <div className="complex-developer__actions">
+      <LeadButton intent={consult} variant="ghost" size="sm">
+        <Phone size={16} aria-hidden="true" />
+        {tLead("consult")}
+      </LeadButton>
+      <Link className="complex-developer__more" href={developerRoute(slug)}>
+        {t("more")}
+        <ArrowRight size={16} aria-hidden="true" />
+      </Link>
     </div>
   );
 }

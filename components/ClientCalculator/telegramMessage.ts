@@ -1,5 +1,5 @@
 import { type AbstractIntlMessages, createTranslator } from "next-intl";
-import type { CalcLocale, CalcT } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale, CalcT } from "@/lib/calc/text";
 import type { CalcSnapshot } from "@/components/PaymentCalculator/PaymentCalculator";
 import { calcTelegramText, type TelegramSource } from "@/components/PaymentCalculator/telegramText";
 import type { CabinetProgram } from "@/lib/calc/cabinet/discounts";

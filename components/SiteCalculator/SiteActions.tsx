@@ -6,7 +6,7 @@ import { type RefObject, useState } from "react";
 import { Button } from "@/components/Button";
 import { CalcLead, type CalcLeadRow } from "@/components/CalcLead";
 import { FormStatus } from "@/components/FormStatus";
-import { programName, termText } from "@/components/PaymentCalculator/calcText";
+import { programName, termText } from "@/lib/calc/text";
 import type { CalcSnapshot } from "@/components/PaymentCalculator/PaymentCalculator";
 import { calcTelegramText, type TelegramSource } from "@/components/PaymentCalculator/telegramText";
 import { searchWith } from "@/components/PaymentCalculator/useCalcParams";

@@ -2,7 +2,7 @@
 
 import { type AbstractIntlMessages, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale } from "@/lib/calc/text";
 import { DeveloperPills } from "@/components/PaymentCalculator/DeveloperPills";
 import {
   PaymentCalculator,

@@ -4,7 +4,7 @@ import type { CalcProgram } from "@/lib/calc/programs";
 import type { CalcView } from "@/lib/calc/view";
 import type { Currency } from "@/lib/calc/money";
 import { formatAmount } from "@/lib/format";
-import { type CalcLocale, type CalcT, programName, termText } from "./calcText";
+import { type CalcLocale, type CalcT, programName, termText } from "@/lib/calc/text";
 import { type DecorateRows, footnotes, totalView } from "./outputParts";
 
 // Текст «Скопировать для Telegram» (решение фазы 2): один шаблон на кабинет и сайт — название,

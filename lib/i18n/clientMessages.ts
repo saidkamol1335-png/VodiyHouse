@@ -84,3 +84,8 @@ export const FAVORITES_MESSAGES = ["favorites", ...CATALOG_MESSAGES] as const;
 /** Страница ЖК (шаг 3.5): свои тексты, калькулятор «Расчёт для этой квартиры» и оболочка. */
 export const COMPLEX_NAMESPACE = "complex";
 export const COMPLEX_MESSAGES = [COMPLEX_NAMESPACE, CALC_NAMESPACE, LEAD_NAMESPACE, SHARE_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
+/** Застройщики (шаг 3.15): список — поиск на месте; страница — вкладки объектов и карточки каталога. */
+export const DEVELOPERS_NAMESPACE = "developers";
+export const DEVELOPERS_LIST_MESSAGES = [DEVELOPERS_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+export const DEVELOPERS_MESSAGES = [DEVELOPERS_NAMESPACE, ...CATALOG_MESSAGES] as const;

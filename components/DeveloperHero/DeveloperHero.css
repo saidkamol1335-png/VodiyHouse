@@ -1,0 +1,225 @@
+/* Первый экран застройщика (мокап SiteDev): фото объектов во всю ширину со скруглением, поверх
+   слева — тёмная стеклянная карточка; на телефоне (MobDev) фото под шапкой, карточка наезжает
+   на него снизу и становится светлой. */
+
+.developer-hero {
+  padding-top: calc(var(--header-h) + 8px);
+}
+
+.developer-hero__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0 16px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.developer-hero__crumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.developer-hero__crumbs a:hover {
+  color: var(--fg);
+}
+
+.developer-hero__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 460px;
+  padding: 40px;
+  overflow: hidden;
+  border-radius: var(--r-2xl);
+  background: var(--about-card-bg);
+  box-shadow: var(--shadow-3);
+}
+
+/* Фото на всю сцену: кадр задаёт сцена, а не пропорция снимка (селектор сильнее .site-photo). */
+.developer-hero__stage .developer-hero__cover {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.developer-hero__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(23, 20, 15, 0.72) 0%, rgba(23, 20, 15, 0.35) 55%, rgba(23, 20, 15, 0.1) 100%);
+}
+
+.developer-hero__card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+  padding: 28px;
+  border: 1px solid var(--about-card-line);
+  border-radius: var(--r-xl);
+  background: rgba(23, 20, 15, 0.62);
+  color: var(--about-card-fg);
+}
+
+[data-motion="full"] .developer-hero__card {
+  backdrop-filter: blur(14px);
+}
+
+.developer-hero__logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+}
+
+.developer-hero__logo--mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+
+.developer-hero__name {
+  margin: 6px 0 0;
+  font-size: var(--fs-h2);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.developer-hero__founded {
+  margin: 0;
+  color: var(--about-card-fg-2, var(--about-card-fg));
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.developer-hero__counts {
+  margin: 6px 0 0;
+  font-size: var(--fs-body);
+  font-weight: 650;
+}
+
+.developer-hero__flats {
+  margin: 0;
+  font-size: var(--fs-small);
+  opacity: 0.8;
+}
+
+.developer-hero__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  margin: 4px 0 0;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--chip-on-bg);
+  color: var(--amber-3);
+  font-size: var(--fs-small);
+  font-weight: 650;
+}
+
+.developer-hero__note {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 0;
+  color: var(--about-card-fg);
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  opacity: 0.85;
+}
+
+.developer-hero__note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.developer-hero__consult {
+  width: max-content;
+  margin-top: 6px;
+}
+
+@media (max-width: 760px) {
+  .developer-hero {
+    padding-top: 0;
+  }
+
+  /* Крошки под фото не нужны: назад ведёт стрелка в шапке (MobDev). */
+  .developer-hero__crumbs {
+    display: none;
+  }
+
+  .developer-hero__stage {
+    display: block;
+    min-height: 0;
+    margin: 0 calc(-1 * var(--gutter, 16px));
+    padding: 0;
+    border-radius: 0;
+    background: var(--bg);
+    box-shadow: none;
+  }
+
+  .developer-hero__stage .developer-hero__cover {
+    position: relative;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .developer-hero__cover::after {
+    background: linear-gradient(180deg, rgba(23, 20, 15, 0.35) 0%, rgba(23, 20, 15, 0) 40%);
+  }
+
+  .developer-hero__card {
+    max-width: none;
+    margin: -40px var(--gutter, 16px) 0;
+    padding: 20px;
+    border-color: var(--line);
+    border-radius: var(--r-l);
+    background: var(--bg-2);
+    color: var(--fg);
+    box-shadow: var(--shadow-2);
+  }
+
+  .developer-hero__stage--plain .developer-hero__card {
+    margin-top: 0;
+  }
+
+  [data-motion="full"] .developer-hero__card {
+    backdrop-filter: none;
+  }
+
+  .developer-hero__logo--mark {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .developer-hero__name {
+    font-size: 28px;
+  }
+
+  .developer-hero__founded,
+  .developer-hero__flats,
+  .developer-hero__note {
+    color: var(--fg-2);
+    opacity: 1;
+  }
+
+  .developer-hero__consult {
+    width: 100%;
+  }
+}

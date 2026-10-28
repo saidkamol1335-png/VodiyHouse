@@ -13,6 +13,8 @@ import {
   CALC_NAMESPACE,
   COMPLEX_MESSAGES,
   ABOUT_MESSAGES,
+  DEVELOPERS_LIST_MESSAGES,
+  DEVELOPERS_MESSAGES,
   FAVORITES_MESSAGES,
   LAZY_SITE_MESSAGES,
   PARTNERS_MESSAGES,
@@ -67,6 +69,8 @@ describe("сообщения для браузера", () => {
       : readSource(file).includes("<HomeCatalog") ? CATALOG_MESSAGES
       : readSource(file).includes("pickMessages(messages, PARTNERS_MESSAGES)") ? PARTNERS_MESSAGES
       : readSource(file).includes("pickMessages(messages, ABOUT_MESSAGES)") ? ABOUT_MESSAGES
+      : readSource(file).includes("pickMessages(messages, DEVELOPERS_MESSAGES)") ? DEVELOPERS_MESSAGES
+      : readSource(file).includes("pickMessages(messages, DEVELOPERS_LIST_MESSAGES)") ? DEVELOPERS_LIST_MESSAGES
       : SITE_SHELL_MESSAGES;
     // Тексты окна заявки приходят с самим окном (LAZY_SITE_MESSAGES) — их провайдер ставит LeadProvider.
     const missing = pages.flatMap((file) =>

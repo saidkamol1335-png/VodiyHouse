@@ -129,7 +129,7 @@ function blockFrom(record: BlockRecord): CatalogBlock {
   };
 }
 
-function photoFrom(record: PhotoRecord): CatalogPhoto {
+export function photoFrom(record: PhotoRecord): CatalogPhoto {
   const { focus_x, focus_y, ...rest } = record;
   return { ...rest, focus: { x: Number(focus_x), y: Number(focus_y) } };
 }

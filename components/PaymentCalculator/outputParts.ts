@@ -12,7 +12,7 @@ import type { CalcHintSlug } from "@/lib/calc/hints";
 import type { CalcProgram, ProgramKind } from "@/lib/calc/programs";
 import type { CalcView } from "@/lib/calc/view";
 import { formatDate, formatPercent, formatRate } from "@/lib/format";
-import { type CalcT, moneyIn, programName, termText } from "./calcText";
+import { type CalcT, moneyIn, programName, termText } from "@/lib/calc/text";
 
 // Итог, сравнение и сноски калькулятора — из состояния (lib/calc/view). Строки скидки кабинет
 // добавляет своей функцией decorate (сайт про скидки не знает, PLAN §3.13).

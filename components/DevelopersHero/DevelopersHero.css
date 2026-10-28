@@ -1,0 +1,33 @@
+/* Шапка списка застройщиков (мокап SiteDevs): под шапкой сайта, заголовок с курсивным акцентом,
+   подводка и счётчик моно-подписью. */
+
+.developers-hero {
+  padding: calc(var(--header-h) + 40px) 0 24px;
+}
+
+.developers-hero__title {
+  margin: 14px 0 0;
+}
+
+.developers-hero__lead {
+  max-width: 640px;
+  margin: 18px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.developers-hero__count {
+  margin: 14px 0 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .developers-hero {
+    padding-top: calc(var(--header-h) + 24px);
+  }
+}

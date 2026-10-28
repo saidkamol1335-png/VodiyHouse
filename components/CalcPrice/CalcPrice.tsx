@@ -1,7 +1,7 @@
 "use client";
 
 import { Field } from "@/components/Field";
-import type { CalcLocale, CalcT } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale, CalcT } from "@/lib/calc/text";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import { SelectField } from "@/components/SelectField";
 import type { Currency } from "@/lib/calc/money";

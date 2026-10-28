@@ -24,7 +24,7 @@ import {
   footnotes,
   totalView,
 } from "./outputParts";
-import type { CalcLocale, CalcT } from "./calcText";
+import type { CalcLocale, CalcT } from "@/lib/calc/text";
 import { useCalcParams } from "./useCalcParams";
 
 /** Что видят кнопки итога: расчёт, его строки и сноски — для текста Telegram и снимка. */

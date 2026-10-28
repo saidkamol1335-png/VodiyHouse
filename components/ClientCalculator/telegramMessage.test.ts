@@ -1,6 +1,6 @@
 import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
-import type { CalcT } from "@/components/PaymentCalculator/calcText";
+import type { CalcT } from "@/lib/calc/text";
 import type { CalcSnapshot } from "@/components/PaymentCalculator/PaymentCalculator";
 import { demoClientCalc } from "@/lib/admin/calc/demo";
 import { clientCalcFrom } from "@/lib/admin/calc/screen";

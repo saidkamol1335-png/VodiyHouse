@@ -1,0 +1,180 @@
+/* Список застройщиков (мокап SiteDevs / MobDevs): поиск в рамке, строки-карточки — знак слева,
+   название с галочкой «Проверено», год моно-подписью справа, стрелка. */
+
+.developers-list {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 72px;
+}
+
+.developers-list__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  color: var(--fg-3);
+}
+
+.developers-list__search:focus-within {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--chip-on-bg);
+}
+
+.developers-list__search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-control);
+  outline: none;
+}
+
+.developers-list__search input::placeholder {
+  color: var(--fg-3);
+}
+
+.developers-list__rows {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.developers-list__row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 88px;
+  padding: 16px 20px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  color: var(--fg);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast, 180ms) ease,
+    box-shadow var(--dur-fast, 180ms) ease;
+}
+
+.developers-list__row:hover {
+  box-shadow: var(--shadow-2);
+}
+
+[data-motion="full"] .developers-list__row:hover {
+  transform: translateY(-2px);
+}
+
+.developers-list__row:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.developers-list__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+.developers-list__logo--mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.developers-list__text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.developers-list__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-h3);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.developers-list__verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: #fff;
+}
+
+.developers-list__complexes {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.developers-list__since {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.developers-list__inline-since {
+  display: none;
+}
+
+.developers-list__arrow {
+  color: var(--fg-2);
+}
+
+.developers-list__empty {
+  margin: 0;
+  color: var(--fg-3);
+}
+
+@media (max-width: 760px) {
+  .developers-list__search {
+    max-width: none;
+  }
+
+  .developers-list__row {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .developers-list__logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  .developers-list__name {
+    font-size: var(--fs-body);
+  }
+
+  /* Год — в строке под названием (MobDevs), колонка справа не нужна. */
+  .developers-list__since {
+    display: none;
+  }
+
+  .developers-list__inline-since {
+    display: inline;
+  }
+}

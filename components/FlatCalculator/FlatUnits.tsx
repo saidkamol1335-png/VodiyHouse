@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale } from "@/lib/calc/text";
 import { SelectField } from "@/components/SelectField";
 import type { CalcParams } from "@/lib/calc/params";
 import type { CalcStock, ResolvedPrice } from "@/lib/calc/priceSource";

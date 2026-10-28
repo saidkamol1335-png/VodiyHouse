@@ -208,3 +208,19 @@
     border-radius: 50%;
   }
 }
+
+/* «Подробнее о застройщике» (мокап dvMore, с 3.15): ссылка рядом с консультацией. */
+.complex-developer__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--amber-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.complex-developer__more:hover {
+  text-decoration: underline;
+}

@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { type KeyboardEvent, type RefObject, type SyntheticEvent, useEffect, useRef } from "react";
-import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale } from "@/lib/calc/text";
 import { PaymentCalculator } from "@/components/PaymentCalculator/PaymentCalculator";
 import { SiteActions, ToTotal } from "@/components/SiteCalculator/SiteActions";
 import type { FlatCalcScreen } from "@/lib/calc/flatScreen";

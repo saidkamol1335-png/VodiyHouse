@@ -15,7 +15,7 @@ import {
   programNote,
   programTitle,
   termText,
-} from "./calcText";
+} from "@/lib/calc/text";
 
 // Что показывают поля калькулятора: карточки программ, чипы взноса, кнопки срока и строка
 // превышения — из состояния (lib/calc/view). Кабинет дописывает своё (скидки) через extras.

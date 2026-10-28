@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Eyebrow } from "@/components/Eyebrow";
-import { approxIn, type CalcLocale, moneyIn } from "@/components/PaymentCalculator/calcText";
+import { approxIn, type CalcLocale, moneyIn } from "@/lib/calc/text";
 import type { FlatCalcScreen } from "@/lib/calc/flatScreen";
 import type { CalcProgram } from "@/lib/calc/programs";
 import type { CalcView } from "@/lib/calc/view";

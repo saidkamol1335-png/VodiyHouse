@@ -1,0 +1,83 @@
+/* «Объекты» застройщика (мокап SiteDev): заголовок слева, пилюли вкладок со счётчиками справа,
+   ниже — сетка карточек каталога. */
+
+.developer-objects {
+  margin-top: 56px;
+}
+
+.developer-objects__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 22px;
+}
+
+.developer-objects__head .heading {
+  margin: 0;
+}
+
+.developer-objects__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.developer-objects__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--fg-2);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.developer-objects__tab--on {
+  border-color: var(--amber);
+  background: var(--chip-on-bg);
+  color: var(--fg);
+}
+
+.developer-objects__tab:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.developer-objects__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  text-align: center;
+}
+
+.developer-objects__tab--on .developer-objects__count {
+  background: var(--amber);
+  color: #fff;
+}
+
+.developer-objects__empty {
+  margin: 0;
+  color: var(--fg-3);
+}
+
+@media (max-width: 760px) {
+  .developer-objects {
+    margin-top: 36px;
+  }
+
+  .developer-objects__tab {
+    min-height: 44px;
+  }
+}

@@ -11,7 +11,7 @@ import type { CalcParams } from "@/lib/calc/params";
 import { type CalcProgram, DOWN_MAX_PCT } from "@/lib/calc/programs";
 import type { CalcView } from "@/lib/calc/view";
 import { formatPercent } from "@/lib/format";
-import { type CalcLocale, type CalcT, approxIn, moneyIn, termText } from "./calcText";
+import { type CalcLocale, type CalcT, approxIn, moneyIn, termText } from "@/lib/calc/text";
 import { downChips, programChoices, termButtonsOf, termMessage } from "./inputParts";
 import type { PaymentCalculatorProps } from "./PaymentCalculator";
 

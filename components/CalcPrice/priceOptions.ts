@@ -1,4 +1,4 @@
-import type { CalcLocale, CalcT } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale, CalcT } from "@/lib/calc/text";
 import type { SelectOption } from "@/components/SelectField";
 import type { CalcBlock, CalcStock } from "@/lib/calc/priceSource";
 import { formatPrice } from "@/lib/format";

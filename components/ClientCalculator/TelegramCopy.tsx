@@ -4,7 +4,7 @@ import { Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/Button";
 import { FormStatus } from "@/components/FormStatus";
-import type { CalcLocale } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale } from "@/lib/calc/text";
 import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import type { TelegramCopyControl } from "./useTelegramCopy";
 

@@ -9,6 +9,14 @@
 @import "../components/CatalogGrid/CatalogGrid.css";
 @import "../components/CatalogResults/CatalogResults.css";
 @import "../components/Container/Container.css";
+@import "../components/DeveloperAbout/DeveloperAbout.css";
+@import "../components/DeveloperHero/DeveloperHero.css";
+@import "../components/DeveloperObjects/DeveloperObjects.css";
+@import "../components/DeveloperOthers/DeveloperOthers.css";
+@import "../components/DeveloperPrograms/DeveloperPrograms.css";
+@import "../components/DeveloperDelivered/DeveloperDelivered.css";
+@import "../components/DevelopersHero/DevelopersHero.css";
+@import "../components/DevelopersList/DevelopersList.css";
 @import "../components/Eyebrow/Eyebrow.css";
 @import "../components/FavoritesView/FavoritesView.css";
 @import "../components/FavoriteButton/FavoriteButton.css";

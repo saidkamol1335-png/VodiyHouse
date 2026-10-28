@@ -2,7 +2,7 @@
 
 import { ChevronDown, Table2 } from "lucide-react";
 import { useId, useState } from "react";
-import type { CalcLocale, CalcT } from "@/components/PaymentCalculator/calcText";
+import type { CalcLocale, CalcT } from "@/lib/calc/text";
 import type { Calculation } from "@/lib/calc/calculate";
 import type { Currency, ExchangeRate } from "@/lib/calc/money";
 import { formatPrice } from "@/lib/format";

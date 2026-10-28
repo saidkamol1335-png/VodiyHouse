@@ -5,7 +5,7 @@ import {
   moneyIn,
   shortIn,
   termText,
-} from "@/components/PaymentCalculator/calcText";
+} from "@/lib/calc/text";
 import type { Calculation } from "@/lib/calc/calculate";
 import type { CalcHintSlug } from "@/lib/calc/hints";
 import type { Currency, ExchangeRate } from "@/lib/calc/money";

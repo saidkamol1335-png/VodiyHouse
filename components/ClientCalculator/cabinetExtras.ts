@@ -1,6 +1,6 @@
 import type { useTranslations } from "next-intl";
 import type { TotalContext, TotalRow } from "@/components/CalcTotal";
-import { moneyIn } from "@/components/PaymentCalculator/calcText";
+import { moneyIn } from "@/lib/calc/text";
 import type { CalcExtras } from "@/components/PaymentCalculator/inputParts";
 import type { DecorateRows } from "@/components/PaymentCalculator/outputParts";
 import type { Calculation } from "@/lib/calc/calculate";

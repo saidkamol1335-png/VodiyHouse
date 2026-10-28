@@ -8,13 +8,14 @@ const shot = (page: Page, name: string) =>
 test.describe("шапка · десктоп 1440", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "только десктоп");
 
-  test("3а: четыре пункта, RU/UZ, тема, избранное; кнопки меню нет", async ({ page }) => {
+  test("пять пунктов, RU/UZ, тема, избранное; кнопки меню нет", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru");
     const nav = page.locator(".header-nav");
-    // «Спецпредложения» и «Застройщики» — с 3б (PLAN §7, фаза 3).
-    await expect(nav.getByRole("link")).toHaveCount(4);
+    // «Застройщики» — с 3.15; «Спецпредложения» — с 3.16 (PLAN §7, фаза 3).
+    await expect(nav.getByRole("link")).toHaveCount(5);
     await expect(nav).toContainText("Новостройки");
+    await expect(nav.getByRole("link", { name: "Застройщики", exact: true })).toHaveAttribute("href", "/ru/zastroyshchiki");
     await expect(nav).toContainText("Застройщикам");
     await expect(nav).not.toContainText("Спецпредложения");
     await expect(page.getByRole("link", { name: "Избранное" })).toHaveAttribute("href", "/ru/izbrannoe");
@@ -81,7 +82,7 @@ test.describe("шапка · планшет 1100", () => {
     await toggle.click();
     const menu = page.locator(".tablet-menu");
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".tablet-menu__link")).toHaveCount(4);
+    await expect(menu.locator(".tablet-menu__link")).toHaveCount(5);
     await expect(page.locator(".phone-menu")).toBeHidden();
     await shot(page, "1100-menu");
     await page.keyboard.press("Escape");
@@ -93,13 +94,13 @@ test.describe("шапка · планшет 1100", () => {
 test.describe("шапка · телефон 390", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) > 760, "только телефон");
 
-  test("Ш5: меню на весь экран — 01–04, офис, язык, тема", async ({ page }) => {
+  test("Ш5: меню на весь экран — 01–05, офис, язык, тема", async ({ page }) => {
     await page.goto("/ru");
     await shot(page, "390-top");
     await page.getByRole("button", { name: "Открыть меню" }).click();
     const menu = page.getByRole("dialog", { name: "Меню" });
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".phone-menu__item")).toHaveCount(4);
+    await expect(menu.locator(".phone-menu__item")).toHaveCount(5);
     await expect(menu.locator(".phone-menu__number").first()).toHaveText("01");
     await expect(menu).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(menu.getByRole("link", { name: "O‘zbekcha" })).toBeVisible();
