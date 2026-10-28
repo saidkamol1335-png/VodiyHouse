@@ -166,6 +166,29 @@ describe("витрина: права, правила и DEMO", () => {
       expect(ad.rows[0]!.complex_ids).toEqual([]);
       await asHead((tx) => tx.exec("delete from ads; delete from specials"));
     });
+
+    // Ревью 3.16а (20261029000000): current_date — дата базы в UTC, и запись с 00:00 до 05:00 по
+    // Ташкенту получала вчерашнее начало, хотя видимость считает private.tashkent_today().
+    it("начало периода по умолчанию — дата в Ташкенте, как у видимости", async () => {
+      const defaults = await db.admin.query<{ table_name: string; column_default: string }>(
+        `select table_name, column_default from information_schema.columns
+         where table_schema = 'public' and table_name in ('ads', 'specials') and column_name = 'valid_from'
+         order by table_name`,
+      );
+      expect(defaults.rows.map((row) => [row.table_name, row.column_default])).toEqual([
+        ["ads", "private.tashkent_today()"],
+        ["specials", "private.tashkent_today()"],
+      ]);
+      const inserted = await asHead((tx) =>
+        tx.query<{ today: boolean }>(
+          `insert into ads (developer_id, title, valid_to) values ($1, $2, private.tashkent_today() + 5)
+           returning valid_from = private.tashkent_today() as today`,
+          [ids.publicDeveloper, text("Реклама", "Reklama")],
+        ),
+      );
+      expect(inserted.rows[0]!.today).toBe(true);
+      await asHead((tx) => tx.query("delete from ads"));
+    });
   });
 
   describe("обложки", () => {

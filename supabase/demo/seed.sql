@@ -368,9 +368,10 @@ values (
 on conflict (key) do nothing;
 
 -- ─── Витрина (3.16а): спецпредложения, реклама, подборки мокапа ─────────────────────────
--- Периоды — от дня сида: три спецпредложения идут, «Старт продаж» ждёт своего дня; одна реклама
--- идёт, вторая ждёт и пересекается с первой (в кабинете — предупреждение, Г1 A). Своих фото нет —
--- сайт берёт обложку первого ЖК. Удаление — каскадом с DEMO-застройщиками, подборки — по «demo-».
+-- Периоды — от дня сида в Ташкенте (private.tashkent_today(), как видимость на сайте): три
+-- спецпредложения идут, «Старт продаж» ждёт своего дня; одна реклама идёт, вторая ждёт и
+-- пересекается с первой (в кабинете — предупреждение, Г1 A). Своих фото нет — сайт берёт обложку
+-- первого ЖК. Удаление — каскадом с DEMO-застройщиками, подборки — по «demo-».
 
 insert into public.specials (developer_id, kind, badge, title, text, complex_ids, valid_from, valid_to, is_active, sort)
 select
@@ -379,7 +380,7 @@ select
   jsonb_build_object('ru', s.title_ru, 'uz', s.title_uz),
   jsonb_build_object('ru', s.text_ru, 'uz', s.text_uz),
   array(select c.id from public.complexes c where c.slug = any (s.complexes) order by array_position(s.complexes, c.slug)),
-  current_date + s.from_days, current_date + s.to_days, true, s.sort
+  private.tashkent_today() + s.from_days, private.tashkent_today() + s.to_days, true, s.sort
 from (values
   ('demo-sifat', 'gift', 'Подарок', 'Sovg‘a',
    'Кухонный гарнитур в подарок', 'Oshxona mebeli sovg‘a',
@@ -410,7 +411,7 @@ select
   jsonb_build_object('ru', a.title_ru, 'uz', a.title_uz),
   jsonb_build_object('ru', a.text_ru, 'uz', a.text_uz),
   array(select c.id from public.complexes c where c.slug = any (a.complexes) order by array_position(a.complexes, c.slug)),
-  a.filter::jsonb, current_date + a.from_days, current_date + a.to_days, true, a.sort
+  a.filter::jsonb, private.tashkent_today() + a.from_days, private.tashkent_today() + a.to_days, true, a.sort
 from (values
   ('demo-sifat',
    'Готовые 2-комнатные квартиры в рассрочку', 'Tayyor 2 xonali kvartiralar muddatli to‘lovga',
