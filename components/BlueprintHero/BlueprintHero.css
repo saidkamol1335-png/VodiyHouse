@@ -842,3 +842,29 @@
     display: none;
   }
 }
+
+/* Короткие телефоны (360×780): с «Подбор за 1 минуту» (3.17) текст внизу поднимался на плашку этапа —
+   ужимаем отступы, не содержимое. */
+@media (max-width: 767px) and (max-height: 800px) {
+  .blueprint-hero__lead {
+    margin-top: 10px;
+  }
+
+  .blueprint-hero__actions {
+    margin-top: 16px;
+  }
+
+  .blueprint-hero__perks {
+    margin-top: 12px;
+  }
+
+  .blueprint-hero__quick {
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .blueprint-hero__stats {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+}

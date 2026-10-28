@@ -1,12 +1,38 @@
 import { expect, test } from "./fixtures";
 import pg from "pg";
+import { contactsFrom, SITE_CONTACTS_KEY } from "../../lib/contacts";
 import { dbClientConfig } from "../../lib/supabase/dbClient";
 import { hasCloud, NO_CLOUD } from "./cloud";
 import { PUBLIC_PAGES } from "./helpers";
 
-// Правило ТЗ 1.2: в публичной части нет ни одного контакта застройщика.
-// Разрешены только контакты Vodiy House — их пока нет (TODO-заказчик), список пуст.
-const ALLOWED_VODIY_HOUSE_CONTACTS: readonly string[] = [];
+// Правило ТЗ 1.2: в публичной части нет ни одного контакта застройщика. Разрешены только контакты
+// Vodiy House — те, что введены в «Настройки → Контакты» (телефон, Telegram, бот, Instagram):
+// читаем их из базы перед прогоном (приёмка 3б: в облаке появился бот @vodiyhousebot); без
+// строки подключения список пуст, и любой контакт — чужой.
+let ownContacts: readonly string[] = [];
+
+/** Телефон — цифрами, профили — именем строчными: так сравниваем и ссылки, и текст страницы. */
+function ownContactsOf(value: unknown): string[] {
+  const contacts = contactsFrom(value);
+  const handles = [contacts.telegram, contacts.bot, contacts.instagram].filter((handle): handle is string => Boolean(handle));
+  const phone = contacts.phone ? contacts.phone.replace(/\D/g, "") : "";
+  return [...handles.map((handle) => handle.toLowerCase()), ...(phone ? [phone] : [])];
+}
+
+/** Ссылка или номер со страницы принадлежит Vodiy House (tel: — по цифрам, t.me / instagram — по имени). */
+function isOwnContact(found: string): boolean {
+  const digits = found.replace(/\D/g, "");
+  const lower = found.toLowerCase();
+  return ownContacts.some((own) => (/^\d+$/.test(own) ? digits.endsWith(own) : lower.includes(`/${own}`)));
+}
+
+test.beforeAll(async () => {
+  if (!process.env.SUPABASE_DB_URL) return;
+  ownContacts = await withDb(async (client) => {
+    const { rows } = await client.query<{ value: unknown }>("select value from settings where key = $1 and is_public", [SITE_CONTACTS_KEY]);
+    return ownContactsOf(rows[0]?.value);
+  });
+});
 
 const CONTACT_LINK = /href="(tel:|mailto:|https?:\/\/(t\.me|wa\.me|api\.whatsapp\.com|instagram\.com|www\.instagram\.com)\/)[^"]*"/gi;
 const UZ_PHONE = /\+?998[\s\-()]*\d{2}[\s\-()]*\d{3}[\s\-()]*\d{2}[\s\-()]*\d{2}/g;
@@ -19,18 +45,14 @@ test.describe("правило ТЗ 1.2", () => {
     test(`${path}: нет чужих ссылок на телефон, Telegram, WhatsApp, email`, async ({ page }) => {
       await page.goto(path);
       const htmlText = await page.content();
-      const links = (htmlText.match(CONTACT_LINK) ?? []).filter(
-        (link) => !ALLOWED_VODIY_HOUSE_CONTACTS.some((allowed) => link.includes(allowed)),
-      );
+      const links = (htmlText.match(CONTACT_LINK) ?? []).filter((link) => !isOwnContact(link));
       expect(links).toEqual([]);
     });
 
     test(`${path}: нет номеров телефонов +998 в тексте`, async ({ page }) => {
       await page.goto(path);
       const text = await page.locator("body").innerText();
-      const phones = (text.match(UZ_PHONE) ?? []).filter(
-        (phone) => !ALLOWED_VODIY_HOUSE_CONTACTS.some((allowed) => phone.includes(allowed)),
-      );
+      const phones = (text.match(UZ_PHONE) ?? []).filter((phone) => !isOwnContact(phone));
       expect(phones).toEqual([]);
     });
   }
@@ -87,9 +109,7 @@ test.describe("приёмка 3а: HTML публичных страниц", () =
       const response = await request.get(path);
       expect(response.status(), path).toBe(200);
       const html = await response.text();
-      const contacts = (html.match(CONTACT_LINK) ?? []).filter(
-        (link) => !ALLOWED_VODIY_HOUSE_CONTACTS.some((allowed) => link.includes(allowed)),
-      );
+      const contacts = (html.match(CONTACT_LINK) ?? []).filter((link) => !isOwnContact(link));
       if (contacts.length > 0) problems.push(`${path}: ${contacts.join(", ")}`);
       if (DISCOUNT.test(html)) problems.push(`${path}: ${html.match(DISCOUNT)![0]}`);
       if (html.includes(PRIVATE_MARK) || html.includes("developer_private")) problems.push(`${path}: внутренние поля застройщика`);
