@@ -104,12 +104,15 @@ describe("витрина: права, правила и DEMO", () => {
             [slug, text("Сданные дома", "Topshirilgan uylar"), active],
           ),
         );
+      // В облаке рядом живут подборки DEMO-сида — считаем относительно того, что уже есть.
+      const visibleBefore = await count(anon, "collections");
+      const allBefore = await count(user(manager), "collections");
       await insert("sdannye-doma", true);
       await insert("skrytaya", false);
-      expect(await count(anon, "collections")).toBe(1);
-      expect(await count(user(manager), "collections")).toBe(2);
+      expect(await count(anon, "collections")).toBe(visibleBefore + 1);
+      expect(await count(user(manager), "collections")).toBe(allBefore + 2);
       await expect(insert("sdannye-doma", true)).rejects.toMatchObject({ code: "23505" });
-      await asHead((tx) => tx.query("delete from collections"));
+      await asHead((tx) => tx.query("delete from collections where slug in ('sdannye-doma', 'skrytaya')"));
     });
   });
 
