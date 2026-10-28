@@ -126,6 +126,7 @@
   --hero-chip-bg: rgba(9, 9, 11, 0.4);
   --hero-ghost-bg: rgba(9, 9, 11, 0.35);
   --hero-text-shadow: 0 1px 10px rgba(9, 9, 11, 0.7);
+  --special-badge-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
   --hero-metal-text: linear-gradient(180deg, var(--hero-steel-strong), var(--hero-steel) 50%, var(--hero-steel-2));
   --hero-text-fade: linear-gradient(180deg, var(--hero-fg) 62%, #b9b9be);
   --hero-silver: linear-gradient(180deg, var(--hero-steel) 0%, var(--hero-steel-2) 100%);

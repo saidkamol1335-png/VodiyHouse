@@ -81,6 +81,8 @@
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--gold);
+  /* Тень мокапа (.spc__badge): золото читается и на светлом фото. */
+  text-shadow: var(--special-badge-shadow);
 }
 
 .special-card__left {
