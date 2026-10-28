@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { ComplexFileKind } from "../complexes/types";
 import { parseComplexRows, type ComplexListRow, type ComplexRowRecord } from "../complexes/list";
 import { parseReadiness, type ReadinessItem, type ReadinessRecord } from "../complexes/readiness";
 import {
@@ -95,19 +96,22 @@ export async function readFloorsRange(
   return floors.length > 0 ? { min: Math.min(...floors), max: Math.max(...floors) } : null;
 }
 
-/** Фото и чертежи ЖК для панели публикации (правило 1.2): фото — по порядку галереи. */
+/**
+ * Файлы ЖК для панели публикации (правило 1.2): фото — по порядку галереи, чертежи, фасад и планы
+ * этажей (фаза 4) — у черновика они загружаются без отметки, проверяются здесь.
+ */
 export async function readComplexFiles(
   supabase: SupabaseClient,
   id: string,
-): Promise<{ id: string; path: string; kind: "photo" | "drawing" }[]> {
+): Promise<{ id: string; path: string; kind: ComplexFileKind }[]> {
   const { data, error } = await supabase
     .from("media_assets")
     .select("id, path, kind")
     .eq("complex_id", id)
-    .in("kind", ["photo", "drawing"])
+    .in("kind", ["photo", "drawing", "facade", "floor_plan"])
     .order("kind")
     .order("sort")
     .order("created_at");
   if (error) unavailable("complex-files", error);
-  return (data ?? []) as { id: string; path: string; kind: "photo" | "drawing" }[];
+  return (data ?? []) as { id: string; path: string; kind: ComplexFileKind }[];
 }

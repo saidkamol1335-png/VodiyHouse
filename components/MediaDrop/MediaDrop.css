@@ -172,3 +172,12 @@
   opacity: var(--opacity-unavailable);
   cursor: not-allowed;
 }
+
+.media-drop__plain {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-l);
+}

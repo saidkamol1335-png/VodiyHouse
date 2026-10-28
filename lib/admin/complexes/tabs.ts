@@ -9,6 +9,8 @@ export const COMPLEX_TABS = [
   { key: "layouts", segment: "planirovki" },
   { key: "units", segment: "kvartiry" },
   { key: "photos", segment: "foto" },
+  // Фаза 4: фасад с контурами блоков и планы этажей — раздел «Выбрать квартиру» на сайте.
+  { key: "facade", segment: "fasad" },
   // Шаг 3.5 (Ф4): разделы страницы ЖК сверх мокапа — в порядке страницы; без данных их не видно.
   { key: "videos", segment: "video" },
   { key: "details", segment: "detali" },
@@ -22,9 +24,11 @@ export type ComplexTabKey = (typeof COMPLEX_TABS)[number]["key"];
 
 /**
  * Мастер «Новый ЖК» (решение фазы 3): у черновика вкладки — шаги с номером и «Далее →», после
- * предпросмотра — «Опубликовать» в шапке. «Журнал» — не шаг.
+ * предпросмотра — «Опубликовать» в шапке. «Журнал» — не шаг; «Фасад и планы» (фаза 4) — тоже:
+ * раздел необязательный, без него ЖК публикуется.
  */
-export const WIZARD_STEPS: readonly ComplexTabKey[] = COMPLEX_TABS.map((tab) => tab.key).filter((key) => key !== "log");
+const NOT_STEPS: readonly ComplexTabKey[] = ["facade", "log"];
+export const WIZARD_STEPS: readonly ComplexTabKey[] = COMPLEX_TABS.map((tab) => tab.key).filter((key) => !NOT_STEPS.includes(key));
 
 export type WizardStep = { segment: string | null; href: string; next: string };
 

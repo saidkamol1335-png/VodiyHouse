@@ -31,7 +31,8 @@ async function openBlock(page: Page, name: "A" | "B") {
   const section = page.locator("#vybrat-kvartiru");
   await section.scrollIntoViewIfNeeded();
   await expect(section.getByText(/свободно \d+/).first()).toBeVisible({ timeout: 15_000 });
-  const isPhone = test.info().project.name !== "desktop-1440";
+  // Телефон (до 760 px) — список блоков под фасадом; шире — подписи на фасаде.
+  const isPhone = (page.viewportSize()?.width ?? 1440) <= 760;
   const label = `Блок ${name}`;
   await (isPhone ? section.locator(".complex-picker__block", { hasText: label }) : section.locator(".complex-picker__tag", { hasText: label })).click();
   await expect(section.getByRole("button", { name: "Все корпуса" })).toBeVisible();

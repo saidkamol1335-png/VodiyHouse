@@ -1,0 +1,188 @@
+/* Вкладка ЖК «Фасад и планы» (фаза 4; в мокапе её нет — кабинетный стиль вкладок «Фото» и
+   «Планировки»): разделы карточками, выбор блока и места — пилюлями, редактор контура поверх
+   картинки. */
+.facade-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.facade-tab__lead {
+  max-width: 760px;
+  margin: 0;
+  color: var(--fg-2);
+}
+
+.facade-tab__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-xl);
+  background: var(--card-bg);
+}
+
+.facade-tab__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+
+.facade-tab__facade,
+.facade-tab__contours,
+.facade-tab__plans,
+.facade-tab__units,
+.facade-tab__plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.facade-tab__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.facade-tab__pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: transparent;
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.facade-tab__pill > small {
+  color: var(--fg-3);
+  font-weight: 500;
+}
+
+.facade-tab__pill[aria-pressed="true"] {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.facade-tab__row,
+.facade-tab__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+}
+
+.facade-tab__fields .field {
+  width: 160px;
+}
+
+.facade-tab__card {
+  padding: 14px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-l);
+}
+
+.facade-tab__card[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.facade-tab__card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.facade-tab__card-title > small {
+  color: var(--fg-3);
+  font-weight: 500;
+}
+
+/* Редактор контура: картинка как есть, поверх — svg в процентах и точки-углы. */
+.facade-editor {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.facade-editor__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.facade-editor__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.facade-editor__other {
+  fill: var(--ok-soft);
+  stroke: var(--ok);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.facade-editor__shape {
+  fill: var(--amber-soft);
+  stroke: var(--amber-2);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.facade-editor__label {
+  position: absolute;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--card-bg);
+  color: var(--ok-strong);
+  font-size: var(--fs-tiny);
+  font-weight: 700;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.facade-editor__point {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--card-bg);
+  border-radius: 50%;
+  background: var(--amber-2);
+  box-shadow: var(--shadow-1);
+  cursor: grab;
+  transform: translate(-50%, -50%);
+}
+
+.facade-tab__confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  font-size: var(--fs-small);
+}

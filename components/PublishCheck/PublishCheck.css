@@ -48,6 +48,8 @@
 
 /* Чертёж и логотип — целиком, на белом: подписи площадей и мелкий текст логотипа должны быть видны. */
 .publish-check__file--drawing img,
+.publish-check__file--facade img,
+.publish-check__file--floor_plan img,
 .publish-check__file--logo img {
   object-fit: contain;
   background: var(--drawing-bg);

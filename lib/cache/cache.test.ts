@@ -69,6 +69,8 @@ const ACTIONS_DIR = path.join("lib", "admin", "actions");
 const CONTENT_FILES = [
   "complexes.ts",
   "complexContent.ts",
+  // «Фасад и планы» (фаза 4): раздел «Выбрать квартиру» на странице ЖК.
+  "complexFacade.ts",
   "complexMedia.ts",
   "contacts.ts",
   "developers.ts",

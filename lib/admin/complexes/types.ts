@@ -36,7 +36,9 @@ export type SaveComplexMainResult =
 export type ComplexStatusResult = StatusResult<ComplexRequirement>;
 
 /** Превью файла в панели публикации (правило 1.2): фото галереи и чертежи. */
-export type ComplexFilePreview = { id: string; src: string; kind: "photo" | "drawing" };
+/** Файлы ЖК в панели публикации: фото кадром; чертёж, фасад и план этажа — целиком. */
+export type ComplexFileKind = "photo" | "drawing" | "facade" | "floor_plan";
+export type ComplexFilePreview = { id: string; src: string; kind: ComplexFileKind };
 
 /** Вкладки со строками («Блоки», «Планировки»): ошибки по строке (key) и что нарушила бы правка. */
 export type SaveRowsResult =

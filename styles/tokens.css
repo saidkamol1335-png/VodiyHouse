@@ -345,15 +345,16 @@
   --picker-light-on-bg: #ffffff;
   --picker-light-on-fg: #17140f;
   /* Квартиры на плане: картинка плана — белый лист в обеих темах, поэтому и цвета статусов светлые
-     (в тёмной теме не переопределяются, иначе светлый текст ляжет на белое). */
-  --picker-unit-free: rgba(26, 143, 76, 0.16);
-  --picker-unit-free-b: rgba(26, 143, 76, 0.5);
+     (в тёмной теме не переопределяются, иначе светлый текст ляжет на белое); значения — как у
+     светлых --s-*: цвета статусов те же, что в кабинете. */
+  --picker-unit-free: rgba(26, 143, 76, 0.11);
+  --picker-unit-free-b: rgba(26, 143, 76, 0.42);
   --picker-unit-free-t: #0f5a33;
-  --picker-unit-res: rgba(248, 155, 13, 0.26);
-  --picker-unit-res-b: rgba(207, 115, 0, 0.62);
+  --picker-unit-res: rgba(248, 155, 13, 0.22);
+  --picker-unit-res-b: rgba(207, 115, 0, 0.58);
   --picker-unit-res-t: #6e3d00;
-  --picker-unit-sold: rgba(201, 64, 47, 0.1);
-  --picker-unit-sold-b: rgba(201, 64, 47, 0.32);
+  --picker-unit-sold: rgba(201, 64, 47, 0.065);
+  --picker-unit-sold-b: rgba(201, 64, 47, 0.26);
   --picker-unit-sold-t: #9e3a2e;
 
   --shadow-1: 0 1px 2px rgba(40, 28, 12, 0.04), 0 10px 28px rgba(40, 28, 12, 0.05);

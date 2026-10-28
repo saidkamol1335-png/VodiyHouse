@@ -35,6 +35,7 @@
 @import "../components/ComplexCreateForm/ComplexCreateForm.css";
 @import "../components/ComplexDetailsForm/ComplexDetailsForm.css";
 @import "../components/ComplexDocumentsForm/ComplexDocumentsForm.css";
+@import "../components/ComplexFacadeTab/ComplexFacadeTab.css";
 @import "../components/ComplexLayoutsForm/ComplexLayoutsForm.css";
 @import "../components/ComplexLayoutsForm/LayoutRow.css";
 @import "../components/ComplexList/ComplexList.css";

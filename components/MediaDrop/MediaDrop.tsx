@@ -176,12 +176,13 @@ function Wide(props: PartProps & { hint: string }) {
   }
   return (
     <div className="media-drop__filled">
-      <FocusPreview
-        src={value.src}
-        size={value}
-        focus={value.focus}
-        onFocusChange={onFocusChange ?? (() => {})}
-      />
+      {onFocusChange ? (
+        <FocusPreview src={value.src} size={value} focus={value.focus} onFocusChange={onFocusChange} />
+      ) : (
+        // Без точки фокуса (фасад, план этажа — кадр как есть): картинка без кадров обрезки.
+        // eslint-disable-next-line @next/next/no-img-element -- превью файла бакета в кабинете
+        <img className="media-drop__plain" src={value.src} alt="" width={value.width} height={value.height} />
+      )}
       <div className="media-drop__actions">
         <label
           htmlFor={id}

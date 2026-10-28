@@ -7,7 +7,7 @@ import type { PublishPanelProps } from "@/components/StatusCapsule";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 
 /** Файл для проверки: фото и фон — кадром, чертёж и логотип — целиком на белом. */
-export type PublishFile = { id: string; src: string; kind: "photo" | "drawing" | "logo" | "cover" };
+export type PublishFile = { id: string; src: string; kind: "photo" | "drawing" | "facade" | "floor_plan" | "logo" | "cover" };
 
 /** Тексты панели: у ЖК и застройщика одинаковые ключи. */
 export type PublishCheckMessages = "admin.complexes.publish" | "admin.developers.publish";
