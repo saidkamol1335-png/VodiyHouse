@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { cacheLife, cacheTag } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
-import { DEVELOPERS_TAG, developerTag } from "@/lib/cache";
+import { CATALOG_TAG, DEVELOPERS_TAG, developerTag } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { SLUG } from "@/lib/site/complex/read";
@@ -16,13 +16,14 @@ import {
 } from "./records";
 
 // Застройщики на сайте (шаг 3.15): site_developers() и site_developer(slug) ролью посетителя, в кэше
-// страницы (договор lib/cache: список — DEVELOPERS_TAG, страница — ещё и developerTag). ЖК и их
-// счётчики страницы берут из кэша каталога — его сбрасывает CATALOG_TAG отдельно. Ошибка базы —
+// страницы (договор lib/cache: список — DEVELOPERS_TAG, страница — ещё и developerTag). Счётчики
+// «N новостроек на сайте», «Сдано · Строится» считает база по ЖК — поэтому ещё и CATALOG_TAG:
+// публикация или снятие ЖК (expireComplex) обновляет их сразу, а не через час. Ошибка базы —
 // исключение, а не пустой ответ в кэше на час (как у каталога и страницы ЖК).
 
 async function fetchDevelopers(): Promise<DeveloperSummary[]> {
   "use cache";
-  cacheTag(DEVELOPERS_TAG);
+  cacheTag(DEVELOPERS_TAG, CATALOG_TAG);
   cacheLife("hours");
   const { data, error } = await createSupabasePublicClient().rpc("site_developers");
   if (error) throw new Error("site-developers-unavailable", { cause: error });
@@ -43,7 +44,7 @@ export async function readSiteDevelopers(): Promise<DeveloperSummary[] | null> {
 
 async function fetchDeveloper(slug: string): Promise<DeveloperPage | null> {
   "use cache";
-  cacheTag(DEVELOPERS_TAG);
+  cacheTag(DEVELOPERS_TAG, CATALOG_TAG);
   cacheLife("hours");
   const { data, error } = await createSupabasePublicClient().rpc("site_developer", { p_slug: slug });
   if (error) throw new Error("site-developer-unavailable", { cause: error });
@@ -74,7 +75,7 @@ export const readSiteDeveloper = cache(async (slug: string): Promise<DeveloperPa
 
 async function fetchSlugState(slug: string): Promise<"archived" | null> {
   "use cache";
-  cacheTag(DEVELOPERS_TAG);
+  cacheTag(DEVELOPERS_TAG, CATALOG_TAG);
   cacheLife("hours");
   const { data, error } = await createSupabasePublicClient().rpc("site_developer_slug_state", {
     p_slug: slug,

@@ -81,6 +81,8 @@ test.describe("сайт · выбрать квартиру на фасаде", (
 
   test("менеджер ставит бронь в кабинете — открытый план на сайте показывает её за секунды", async ({ page, browser }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440" || !process.env.SUPABASE_DB_URL, "один раз: статус меняется в общей базе");
+    // В общем прогоне бронь задела бы счётчики DEMO соседних спек: только `npm run e2e:1440 -- picker.spec.ts`.
+    test.skip(process.env.E2E_LIVE !== "1", "живой статус — только при отдельном запуске picker.spec");
     // Раздел перечитывает статусы раз в 15 с: ждём до 25 с; кабинет грузит список квартир лениво.
     test.setTimeout(120_000);
     const unit = await withDb(async (client) =>

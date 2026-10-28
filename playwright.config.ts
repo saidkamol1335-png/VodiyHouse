@@ -25,6 +25,11 @@ const WEBKIT_PROJECTS = [
 for (const [flag, names] of [["E2E_EXTRA", EXTRA_PROJECTS], ["E2E_WEBKIT", WEBKIT_PROJECTS]] as const) {
   if (names.some(({ name }) => process.argv.some((arg) => arg.includes(name)))) process.env[flag] = "1";
 }
+// Живой статус (фаза 4, picker.spec): бронь в кабинете на ~25 с меняет счётчики DEMO, которые
+// проверяют соседние спеки, — тест идёт, только когда picker.spec запущен отдельно.
+if (process.argv.some((arg) => arg.includes("picker.spec")) && !process.argv.some((arg) => /.spec.ts$/.test(arg) && !arg.includes("picker.spec"))) {
+  process.env.E2E_LIVE = "1";
+}
 const extraProjects = [
   ...(process.env.E2E_EXTRA === "1" ? EXTRA_PROJECTS : []),
   ...(process.env.E2E_WEBKIT === "1" ? WEBKIT_PROJECTS : []),
