@@ -163,6 +163,36 @@
   }
 }
 
+/* Над первым экраном «Чертёж → стройка» (главная, tone="dark"): шапка в его тонах — прозрачная
+   наверху и тёмное стекло после прокрутки, пока экран ещё под ней (html[data-hero-dark] ставит
+   сам экран, useHeroOverHeader). Подменяются токены на всём поддереве: логотип, пункты, кнопки,
+   язык и тема перекрашиваются сами; ниже первого экрана шапка снова в цветах темы. */
+.site-header--dark:not(.site-header--solid),
+:root[data-hero-dark] .site-header--dark {
+  --fg: var(--hero-fg);
+  --fg-2: var(--hero-muted);
+  --line: var(--hero-line);
+  --glass: var(--hero-glass);
+  --glass-solid: var(--hero-glass-solid);
+  --glass-3: var(--hero-glass-2);
+  --control-bg: transparent;
+  --control-border: var(--hero-line-2);
+  --control-shadow: none;
+  --seg-bg: var(--hero-glass-2);
+  --seg-border: var(--hero-line);
+  --seg-on-bg: var(--hero-glass-3);
+  --seg-on-shadow: none;
+  --amber-line: var(--hero-line-strong);
+  --logo-glow: none;
+  color: var(--hero-fg);
+}
+
+/* Пункты в стиле экрана: 14 px, 500 (обычно 550) — только пока шапка над ним. */
+.site-header--dark:not(.site-header--solid) .header-nav__link,
+:root[data-hero-dark] .site-header--dark .header-nav__link {
+  font-weight: 500;
+}
+
 /* Счётчик избранного на сердце (мокап MobFav: янтарный кружок с числом). */
 .site-header__count {
   position: absolute;

@@ -28,13 +28,16 @@ type SiteHeaderProps = {
   pageTitle?: string;
   /** Телефон: «назад» на внутренних страницах. */
   backHref?: string;
+  /** Главная: над первым экраном «Чертёж → стройка» шапка в его тонах, пока экран под ней (SiteHeader.css). */
+  tone?: "dark";
 };
 
 const ICON = { size: 20, strokeWidth: 1.7 } as const;
 const MENU_ID = "site-menu";
 
-function headerClasses(solid: boolean, transparentAtTop: boolean, overPhoto: boolean, phoneOnly: boolean): string {
+function headerClasses(solid: boolean, transparentAtTop: boolean, overPhoto: boolean, phoneOnly: boolean, dark: boolean): string {
   const classes = ["site-header"];
+  if (dark) classes.push("site-header--dark");
   if (solid) classes.push("site-header--solid");
   if (transparentAtTop) classes.push("site-header--transparent");
   if (transparentAtTop && phoneOnly) classes.push("site-header--phone-only");
@@ -42,14 +45,14 @@ function headerClasses(solid: boolean, transparentAtTop: boolean, overPhoto: boo
   return classes.join(" ");
 }
 
-export function SiteHeader({ transparentAtTop = false, overPhoto = false, transparentOnPhoneOnly = false, pageTitle, backHref }: SiteHeaderProps) {
+export function SiteHeader({ transparentAtTop = false, overPhoto = false, transparentOnPhoneOnly = false, pageTitle, backHref, tone }: SiteHeaderProps) {
   const { sentinel, scrolled } = useScrolledPast();
   const { open: menuOpen, close: closeMenu, toggle: toggleMenu, toggleButton } = useMenu();
   const solid = scrolled || !transparentAtTop || menuOpen;
   return (
     <>
       <div ref={sentinel} className="site-header__sentinel" aria-hidden="true" />
-      <header className={headerClasses(solid, transparentAtTop, overPhoto, transparentOnPhoneOnly)}>
+      <header className={headerClasses(solid, transparentAtTop, overPhoto, transparentOnPhoneOnly, tone === "dark")}>
         <div className="site-header__inner">
           <HeaderBrand backHref={backHref} pageTitle={pageTitle} showTitle={Boolean(pageTitle) && scrolled} />
           <HeaderNav />

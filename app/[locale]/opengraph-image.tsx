@@ -36,7 +36,7 @@ function words(text: string, color: string) {
 export default async function OpengraphImage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = isLocale(raw) ? raw : DEFAULT_LOCALE;
-  const t = await getTranslations({ locale, namespace: "home" });
+  const t = await getTranslations({ locale, namespace: "home.hero" });
   return new ImageResponse(
     (
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", height: "100%", padding: 72, background: COLOR.bg, color: COLOR.fg, fontFamily: OG_FONT_FAMILY }}>
@@ -53,7 +53,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ loc
             {t("eyebrow")}
           </span>
           <div style={{ display: "flex", flexWrap: "wrap", columnGap: 16, maxWidth: 1000, fontSize: 64, fontWeight: 800, lineHeight: 1.04, letterSpacing: "-0.04em" }}>
-            {words(t("title"), COLOR.fg)}
+            {words(t("titleLead"), COLOR.fg)}
             {words(t("titleAccent"), COLOR.gold)}
           </div>
         </div>

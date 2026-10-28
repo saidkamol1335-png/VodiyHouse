@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { locale as rootLocale } from "next/root-params";
 import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
+import { HomeBlueprintHero } from "@/components/BlueprintHero";
 import { HomeCatalog } from "@/components/HomeCatalog";
-import { HomeHero } from "@/components/HomeHero";
 import { HomeManifesto } from "@/components/HomeManifesto";
 import { HomeMarquee } from "@/components/HomeMarquee";
 import { HomeOffers } from "@/components/HomeOffers";
@@ -13,7 +13,6 @@ import { JsonLd } from "@/components/JsonLd";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { OFFERS_ANCHOR } from "@/lib/routes";
-import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { availabilitySample, heroFound, homeStats } from "@/lib/site/home/stats";
 import { readSiteContacts } from "@/lib/site/contacts";
@@ -35,16 +34,10 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-/** Обложки ЖК по порядку каталога: фон первого экрана и видоискатель. */
-function coversOf(catalog: SiteCatalog | null, locale: Locale) {
-  return (catalog?.complexes ?? []).flatMap((complex) =>
-    complex.photos[0] ? [{ photo: complex.photos[0], name: complex.name[locale] }] : [],
-  );
-}
-
 /**
- * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран без заставки, бегущая
- * строка, каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
+ * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран «Чертёж → стройка»
+ * (блок H, поручение исполнителя 28.10.2026 — вместо обложки с фото ЖК), бегущая строка,
+ * каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
  * «Предложения от застройщиков» (3.16б), «Vodiy House в двух словах», «Почему через Vodiy House»,
  * «Вы застройщик?». Квиз — 3.17. Страница статичная: всё — из кэшированных ответов каталога и витрины.
  */
@@ -53,14 +46,9 @@ export default async function HomePage() {
   const [catalog, showcase] = await Promise.all([readSiteCatalog(), readSiteShowcase()]);
   return (
     <>
-      <SiteHeader transparentAtTop />
+      <SiteHeader transparentAtTop tone="dark" />
       <main>
-        <HomeHero
-          stats={catalog ? homeStats(catalog) : null}
-          found={catalog ? heroFound(catalog) : null}
-          photos={coversOf(catalog, locale)}
-          catalogId={CATALOG_ID}
-        />
+        <HomeBlueprintHero stats={catalog ? homeStats(catalog) : null} found={catalog ? heroFound(catalog) : null} catalogId={CATALOG_ID} />
         <HomeMarquee />
         {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} showcase={showcase} /> : <CatalogUnavailable id={CATALOG_ID} />}
         {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}

@@ -45,33 +45,49 @@
     "hours": "Ish vaqti"
   },
   "home": {
-    "eyebrow": "Farg‘ona viloyati yangi uylari",
-    "title": "Farg‘ona yangi uylaridagi kvartiralar — ",
-    "titleAccent": "quruvchi narxida",
-    "lead": "Vodiy House ishlaydigan barcha TJMlar: quruvchi narxlari, kvartiralar mavjudligi va tekshirilgan hujjatlar. Tanlash va ko‘rsatish — bepul.",
-    "cta": "Kvartira tanlash",
-    "free": {
-      "price": "Narx — quruvchinikidek",
-      "service": "Tanlash va ko‘rsatish — bepul",
-      "docs": "TJM hujjatlari tekshirilgan"
+    "hero": {
+      "eyebrow": "Yangi uylar · Farg‘ona",
+      "chip": "Tanlash va ko‘rsatish bepul",
+      "titleLead": "Farg‘onadagi yangi binolarda kvartiralar",
+      "titleAccent": "quruvchi narxida",
+      "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
+      "cta": "Kvartira tanlash",
+      "secondaryCta": "TJMlarni ko‘rish",
+      "scrollCue": "Pastga suring",
+      "finaleTitle": "Uy topshirildi.",
+      "finaleText": "Undan kvartira tanlab beramiz — quruvchi narxida.",
+      "finaleCta": "Kvartiralarni ko‘rish",
+      "stageLabel": "Bosqich",
+      "elevationLabel": "Belgi",
+      "stages": {
+        "site": "Yer uchastkasi",
+        "pit": "Kotlovan",
+        "foundation": "Poydevor",
+        "frame": "Monolit karkas",
+        "facade": "Fasad va derazalar",
+        "roof": "Tom",
+        "yard": "Obodonlashtirish",
+        "done": "Uy topshirildi"
+      },
+      "free": {
+        "price": "Narx — quruvchinikidek",
+        "service": "Tanlash va ko‘rsatish — bepul",
+        "docs": "TJM hujjatlari tekshirilgan"
+      },
+      "stats": {
+        "label": "Vodiy House raqamlarda",
+        "complexes": "{count, plural, other {turar-joy majmuasi}}",
+        "developers": "{count, plural, other {quruvchi}}",
+        "flats": "{count, plural, other {kvartira sotuvda}}"
+      },
+      "found": {
+        "label": "Hozir topildi",
+        "query": "2 xonali $45 000 gacha",
+        "value": "{complexes} TJM · {flats} kv.",
+        "some": "{complexes} TJM · kvartiralar bor",
+        "partial": "{complexes} TJM · {flats}+ kv."
+      }
     },
-    "stats": {
-      "label": "Vodiy House raqamlarda",
-      "complexes": "{count, plural, other {turar-joy majmuasi}}",
-      "developers": "{count, plural, other {quruvchi}}",
-      "flats": "{count, plural, other {kvartira sotuvda}}"
-    },
-    "vf": {
-      "label": "Tanlov",
-      "coords": "40.38°N · 71.78°E",
-      "found": "Hozir topildi",
-      "foundValue": "{complexes} TJM · {flats} kv.",
-      "query": "2 xonali $45 000 gacha",
-      "go": "GO →",
-      "foundSome": "{complexes} TJM · kvartiralar bor",
-      "foundPartial": "{complexes} TJM · {flats}+ kv."
-    },
-    "scroll": "Pastga",
     "marquee": "Vodiy House · Farg‘ona · Marg‘ilon · Qo‘qon · Quvasoy · Yangi uylar",
     "catalog": {
       "eyebrow": "Filtr",

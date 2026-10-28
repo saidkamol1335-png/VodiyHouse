@@ -45,33 +45,49 @@
     "hours": "Часы работы"
   },
   "home": {
-    "eyebrow": "Новостройки Ферганской области",
-    "title": "Квартиры в новостройках Ферганы — ",
-    "titleAccent": "по цене застройщика",
-    "lead": "Все ЖК, с которыми работает Vodiy House: цены застройщика, наличие квартир и проверенные документы. Подбор и показ — бесплатно.",
-    "cta": "Подобрать квартиру",
-    "free": {
-      "price": "Цена как у застройщика",
-      "service": "Подбор и показ — бесплатно",
-      "docs": "Документы ЖК проверены"
+    "hero": {
+      "eyebrow": "Новостройки · Фергана",
+      "chip": "Подбор и показ бесплатно",
+      "titleLead": "Квартиры в новостройках Ферганы",
+      "titleAccent": "по цене застройщика",
+      "lead": "Все ЖК, с которыми работает Vodiy House: цены застройщика, наличие квартир и проверенные документы.",
+      "cta": "Подобрать квартиру",
+      "secondaryCta": "Смотреть ЖК",
+      "scrollCue": "Листайте",
+      "finaleTitle": "Дом сдан.",
+      "finaleText": "Подберём квартиру в нём — по цене застройщика.",
+      "finaleCta": "Смотреть квартиры",
+      "stageLabel": "Этап",
+      "elevationLabel": "Отметка",
+      "stages": {
+        "site": "Участок",
+        "pit": "Котлован",
+        "foundation": "Фундамент",
+        "frame": "Монолитный каркас",
+        "facade": "Фасад и окна",
+        "roof": "Кровля",
+        "yard": "Благоустройство",
+        "done": "Дом сдан"
+      },
+      "free": {
+        "price": "Цена как у застройщика",
+        "service": "Подбор и показ — бесплатно",
+        "docs": "Документы ЖК проверены"
+      },
+      "stats": {
+        "label": "Vodiy House в цифрах",
+        "complexes": "{count, plural, one {жилой комплекс} few {жилых комплекса} other {жилых комплексов}}",
+        "developers": "{count, plural, one {застройщик} few {застройщика} other {застройщиков}}",
+        "flats": "{count, plural, one {квартира в продаже} few {квартиры в продаже} other {квартир в продаже}}"
+      },
+      "found": {
+        "label": "Найдено сейчас",
+        "query": "2-комн. до $45 000",
+        "value": "{complexes} ЖК · {flats} кв.",
+        "some": "{complexes} ЖК · есть квартиры",
+        "partial": "{complexes} ЖК · {flats}+ кв."
+      }
     },
-    "stats": {
-      "label": "Vodiy House в цифрах",
-      "complexes": "{count, plural, one {жилой комплекс} few {жилых комплекса} other {жилых комплексов}}",
-      "developers": "{count, plural, one {застройщик} few {застройщика} other {застройщиков}}",
-      "flats": "{count, plural, one {квартира в продаже} few {квартиры в продаже} other {квартир в продаже}}"
-    },
-    "vf": {
-      "label": "Подбор",
-      "coords": "40.38°N · 71.78°E",
-      "found": "Найдено сейчас",
-      "foundValue": "{complexes} ЖК · {flats} кв.",
-      "query": "2-комн. до $45 000",
-      "go": "GO →",
-      "foundSome": "{complexes} ЖК · есть квартиры",
-      "foundPartial": "{complexes} ЖК · {flats}+ кв."
-    },
-    "scroll": "Листайте",
     "marquee": "Vodiy House · Farg‘ona · Marg‘ilon · Qo‘qon · Quvasoy · Новостройки",
     "catalog": {
       "eyebrow": "Фильтр",
