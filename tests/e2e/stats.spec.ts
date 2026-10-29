@@ -157,6 +157,7 @@ test.describe("кабинет · статистика · руководител�
     const card = page.getByRole("link", { name: /Сайт сегодня/ });
     await expect(card).toHaveAttribute("href", `${STATS}?per=today`);
     await expect(card).toContainText(/посетителей/);
+    await shot(page, "home-head");
     await card.click();
     await expect(
       page.getByRole("group", { name: "Период" }).getByRole("link", { name: "Сегодня" }),
