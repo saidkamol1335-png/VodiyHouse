@@ -1,12 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ANCHOR_START_ATTRIBUTE } from "@/lib/boot/anchorStart";
+import { ANCHOR_START_ATTRIBUTE, SCROLL_MEMORY_KEY } from "@/lib/boot/anchorStart";
 
 /** Прокручена ли страница: метка в начале документа ушла из виду — шапка становится стеклом. */
 export function useScrolledPast() {
   const sentinel = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    // Прокрутку при уходе — для скрипта в <head>: после перезагрузки браузер вернёт её до гидратации.
+    const remember = () => {
+      try {
+        sessionStorage.setItem(
+          SCROLL_MEMORY_KEY + location.pathname,
+          String(Math.round(window.scrollY)),
+        );
+      } catch {
+        // Хранилище недоступно — шапка просто узнает о прокрутке после гидратации.
+      }
+    };
+    window.addEventListener("pagehide", remember);
+    return () => window.removeEventListener("pagehide", remember);
+  }, []);
   useEffect(() => {
     const element = sentinel.current;
     if (!element) return;

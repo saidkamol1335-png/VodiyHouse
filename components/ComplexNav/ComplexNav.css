@@ -42,6 +42,11 @@
   transition: opacity var(--dur-base) ease-out;
 }
 
+/* Полоса прокручивается и обрезает всё за краем: кольцо фокуса — внутри пункта. */
+.complex-nav__link:focus-visible {
+  outline-offset: -2px;
+}
+
 .complex-nav__link:hover,
 .complex-nav__link--active {
   color: var(--fg);

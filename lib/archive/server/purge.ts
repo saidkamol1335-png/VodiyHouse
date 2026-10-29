@@ -17,6 +17,7 @@ import { archiveTitle, type ArchiveName } from "../title";
 type ArchiveItem = ArchiveName & {
   id: string;
   slug: string;
+  archived_at: string;
   purge_at: string;
   complexes: string[];
   media: string[];
@@ -24,7 +25,7 @@ type ArchiveItem = ArchiveName & {
 
 const REMOVE_CHUNK = 100;
 
-async function items(admin: SupabaseClient, fn: "archive_due" | "take_archive_reminders"): Promise<ArchiveItem[]> {
+async function items(admin: SupabaseClient, fn: "archive_due" | "archive_reminders_due"): Promise<ArchiveItem[]> {
   const { data, error } = await admin.rpc(fn);
   if (error) throw new Error(`${fn}-failed`, { cause: error });
   return (data ?? []) as ArchiveItem[];
@@ -53,17 +54,31 @@ export const purgeMoment = (iso: string) => {
   return `${day} в ${time}`;
 };
 
-/** За 3 дня до удаления: «… удалится dd.mm. Восстановить — в кабинете», с CSV квартир. */
+/**
+ * За 3 дня до удаления: «… удалится dd.mm. Восстановить — в кабинете», с CSV квартир. Отметка — по
+ * одному, перед отправкой (обрыв функции теряет не больше одного); не ушло — отметка снята, и
+ * следующей ночью напоминание повторится. Число — отправленные.
+ */
 export async function remindArchive(admin: SupabaseClient): Promise<number> {
-  const due = await items(admin, "take_archive_reminders");
   const cabinet = `${siteOrigin()}${ADMIN_ROUTES.complexes}`;
-  for (const item of due) {
-    // Напоминания уже отмечены: сбой одного не должен оставить без напоминания остальные.
-    await sendUnits(admin, item, `${archiveTitle(item)} в архиве: ${purgeMoment(item.purge_at)} удалится окончательно. Восстановить — ${cabinet}. Квартиры — в файле.`).catch(
-      (error: unknown) => console.error("[archive] напоминание не отправлено", item.slug, error),
-    );
+  let reminded = 0;
+  for (const item of await items(admin, "archive_reminders_due")) {
+    const { data: claimed, error } = await admin.rpc("claim_archive_reminder", { p_kind: item.kind, p_id: item.id, p_archived_at: item.archived_at });
+    if (error) throw new Error("archive-claim-failed", { cause: error });
+    if (claimed !== true) continue;
+    const caption = `${archiveTitle(item)} в архиве: ${purgeMoment(item.purge_at)} удалится окончательно. Восстановить — ${cabinet}. Квартиры — в файле.`;
+    const sent = await sendUnits(admin, item, caption).catch((error: unknown) => {
+      console.error("[archive] напоминание не отправлено", item.slug, error);
+      return false;
+    });
+    if (sent) {
+      reminded += 1;
+      continue;
+    }
+    const released = await admin.rpc("release_archive_reminder", { p_kind: item.kind, p_id: item.id, p_archived_at: item.archived_at });
+    if (released.error) console.error("[archive] отметка напоминания не снята", item.slug, released.error.message);
   }
-  return due.length;
+  return reminded;
 }
 
 /** Папки владельцев в бакете media: ЖК — complexes/<id>, застройщик — developers/<id>. */

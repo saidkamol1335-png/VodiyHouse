@@ -341,6 +341,42 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     expect(everywhere).toEqual(expect.arrayContaining(local.map((row) => ({ ...row, subject: `${name} · ${row.subject}` }))));
   });
 
+  it("журнал после удаления: правка документа, темы и видео — их названием, перенос — блоком; удаление блока без «Перенос · удалено»", async () => {
+    const id = await complexId("demo-orzu");
+    const permit = (await db.admin.query<{ id: number }>("select id from document_types where slug = 'permit'")).rows[0]!.id;
+    const topic = (await db.admin.query<{ id: number; name: string }>("select id, name ->> 'ru' as name from detail_topics order by sort limit 1")).rows[0]!;
+    const rpc = (fn: string, items: unknown) => asHead((tx) => tx.query(`select ${fn}($1, $2)`, [id, JSON.stringify(items)]));
+    const since = Number((await db.admin.query<{ n: string }>("select coalesce(max(id), 0) as n from audit_log")).rows[0]!.n);
+    await rpc("save_complex_documents", [{ type_id: permit, checked_on: "2026-09-01" }]);
+    await rpc("save_complex_documents", [{ type_id: permit, checked_on: "2026-09-02" }]);
+    await rpc("save_complex_details", [{ topic_id: topic.id, text: { ru: "Было", uz: "Edi" } }]);
+    await rpc("save_complex_details", [{ topic_id: topic.id, text: { ru: "Стало", uz: "Bo'ldi" } }]);
+    await rpc("save_complex_videos", [{ youtube_id: "ccccccccccc", title: { ru: "Обзор", uz: "Sharh" } }]);
+    await rpc("save_complex_videos", [{ youtube_id: "ccccccccccc", title: { ru: "Двор", uz: "Hovli" } }]);
+    for (const fn of ["save_complex_documents", "save_complex_details", "save_complex_videos"]) await rpc(fn, []);
+    const block = (await db.admin.query<{ id: string }>("insert into blocks (complex_id, name, sort) values ($1, 'Z', 9) returning id", [id])).rows[0]!.id;
+    await db.admin.query(
+      "insert into deadline_changes (complex_id, block_id, from_year, from_quarter, to_year, to_quarter) values ($1, $2, 2027, 1, 2027, 3)",
+      [id, block],
+    );
+    await db.admin.query("update deadline_changes set to_quarter = 4 where block_id = $1", [block]);
+    await db.admin.query("delete from blocks where id = $1", [block]);
+    const rows = (
+      await asHead((tx) =>
+        tx.query<{ id: string; entity: string; action: string; subject: string }>("select id, entity, action, subject from journal_entries(null, null, 200, $1)", [id]),
+      )
+    ).rows.filter((row) => Number(row.id) > since && row.entity !== "blocks");
+    expect(rows.filter((row) => row.action === "update").map(({ entity, subject }) => ({ entity, subject }))).toEqual(
+      expect.arrayContaining([
+        { entity: "complex_documents", subject: "Разрешение на строительство" },
+        { entity: "complex_details", subject: topic.name },
+        { entity: "complex_videos", subject: "Двор" },
+        { entity: "deadline_changes", subject: "Блок Z" },
+      ]),
+    );
+    expect(rows.filter((row) => row.entity === "deadline_changes").map((row) => row.action).sort()).toEqual(["insert", "update"]);
+  });
+
   it("порядок каталога (3.6): руководитель переставляет опубликованные; неполный список и менеджер — отказ", async () => {
     const published = (await db.admin.query<{ id: string }>("select id from complexes where status = 'published' order by sort, name ->> 'ru'")).rows.map((r) => r.id);
     expect(published.length).toBeGreaterThan(1);

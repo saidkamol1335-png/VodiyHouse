@@ -4,3 +4,9 @@
  * ставит скрипт в <head>, снимает шапка, как только узнала, прокручена ли страница (useScrolledPast).
  */
 export const ANCHOR_START_ATTRIBUTE = "data-anchor-start";
+
+/**
+ * То же после перезагрузки и «Назад»: браузер вернёт прокрутку до гидратации. Шапка запоминает
+ * scrollY страницы при уходе (sessionStorage, ключ + путь), скрипт в <head> ставит ту же метку.
+ */
+export const SCROLL_MEMORY_KEY = "vh:scrollY:";

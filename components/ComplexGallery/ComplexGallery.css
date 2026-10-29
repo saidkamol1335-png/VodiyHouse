@@ -29,6 +29,11 @@
   cursor: zoom-in;
 }
 
+/* Лента прокручивается и обрезает всё за краем: кольцо фокуса — внутри кадра. */
+.complex-gallery__slide:focus-visible {
+  outline-offset: -4px;
+}
+
 /* Кадр мокапа: 21:9 на десктопе; точка фокуса — от кадра обложки (SitePhoto). */
 .complex-gallery__photo,
 .complex-gallery__placeholder {

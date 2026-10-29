@@ -11,6 +11,10 @@ const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost"]);
 
 function supabaseHost(): URL | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Netlify без адреса облака в окружении сборки собрал бы сайт, где каждое фото — 400: лучше не собрать.
+  if (!url && process.env.NETLIFY === "true") {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL нет в окружении сборки Netlify — фото сайта не загрузятся");
+  }
   return url ? new URL(url) : null;
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { BilingualField } from "@/components/BilingualField";
 import { ComplexTabForm } from "@/components/ComplexTabForm";
 import { DETAIL_LIMITS, detailField, type DetailRow } from "@/lib/admin/complexes/details";
@@ -21,19 +22,37 @@ type ComplexDetailsFormProps = {
  * Вкладка «Детали» (ТЗ 7.7, Ф4): темы справочника по порядку — текст RU | UZ и фото из галереи.
  * Тема без текста на сайт не попадает; раздел без тем скрыт целиком.
  */
-export function ComplexDetailsForm({ complexId, details, photos, action }: ComplexDetailsFormProps) {
+export function ComplexDetailsForm({
+  complexId,
+  details,
+  photos,
+  action,
+}: ComplexDetailsFormProps) {
   const t = useTranslations("admin.complexes");
   const save = useTabSave(action, t("unsaved"));
   const errors = save.state.status === "error" ? save.state.errors : {};
+  const list = useOpenIssues(save.state);
   return (
-    <ComplexTabForm title={t("details.title")} lead={t("details.lead")} complexId={complexId} save={save}>
-      {details.length === 0 ? <p className="complex-details-form__empty">{t("details.empty")}</p> : null}
-      <div className="complex-details-form">
+    <ComplexTabForm
+      title={t("details.title")}
+      lead={t("details.lead")}
+      complexId={complexId}
+      save={save}
+    >
+      {details.length === 0 ? (
+        <p className="complex-details-form__empty">{t("details.empty")}</p>
+      ) : null}
+      <div ref={list} className="complex-details-form">
         {details.map((detail) => {
           const issue = errors[detail.topicId];
           const filled = Boolean(detail.text.ru || detail.text.uz);
           return (
-            <details key={detail.topicId} className="complex-details-form__topic" open={filled || Boolean(issue)}>
+            <details
+              key={detail.topicId}
+              className="complex-details-form__topic"
+              open={filled || Boolean(issue)}
+              data-issue={issue ? "" : undefined}
+            >
               <summary className="complex-details-form__summary">
                 <span>{detail.name.ru}</span>
                 <small>{filled ? t("details.filled") : t("details.blank")}</small>
@@ -58,7 +77,22 @@ export function ComplexDetailsForm({ complexId, details, photos, action }: Compl
   );
 }
 
-type PhotoChoiceProps = { topicId: number; photos: ComplexDetailsFormProps["photos"]; selected: string | null };
+/** Заполненная тема уже с open: свёрнутую руками проп не раскроет — тему с ошибкой открываем сами. */
+function useOpenIssues(state: unknown) {
+  const list = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    list.current?.querySelectorAll<HTMLDetailsElement>("details[data-issue]").forEach((topic) => {
+      topic.open = true;
+    });
+  }, [state]);
+  return list;
+}
+
+type PhotoChoiceProps = {
+  topicId: number;
+  photos: ComplexDetailsFormProps["photos"];
+  selected: string | null;
+};
 
 /** Фото темы: «Без фото» или одно из галереи — превью радиокнопками. */
 function PhotoChoice({ topicId, photos, selected }: PhotoChoiceProps) {
@@ -75,7 +109,13 @@ function PhotoChoice({ topicId, photos, selected }: PhotoChoiceProps) {
       </label>
       {photos.map((photo, index) => (
         <label key={photo.id} className="complex-details-form__photo">
-          <input type="radio" name={name} value={photo.id} defaultChecked={current === photo.id} aria-label={t("photoNumber", { n: index + 1 })} />
+          <input
+            type="radio"
+            name={name}
+            value={photo.id}
+            defaultChecked={current === photo.id}
+            aria-label={t("photoNumber", { n: index + 1 })}
+          />
           {/* eslint-disable-next-line @next/next/no-img-element -- превью из бакета в кабинете; next/image — на сайте */}
           <img src={photo.src} alt="" loading="lazy" decoding="async" />
         </label>

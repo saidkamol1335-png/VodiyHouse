@@ -63,8 +63,11 @@ export function flushEvents(): void {
   if (queue.length > 0) timer = setTimeout(flushEvents, FLUSH_MS);
 }
 
-/** Редкие и ценные действия уходят сразу: посетитель может тут же закрыть вкладку. */
-const URGENT: ReadonlySet<SiteEvent["type"]> = new Set(["lead_sent", "phone_click", "telegram_click", "favorite", "share"]);
+/**
+ * Редкие и ценные действия уходят сразу: посетитель может тут же закрыть вкладку. Клик по рекламе —
+ * то, за что платит рекламодатель, и в ленте кабинета он виден сразу.
+ */
+const URGENT: ReadonlySet<SiteEvent["type"]> = new Set(["lead_sent", "phone_click", "telegram_click", "favorite", "share", "ad_click"]);
 /** То же событие в ту же секунду — один раз (двойной вызов эффекта, двойное нажатие). */
 const REPEAT_MS = 1000;
 let last: { key: string; at: number } | null = null;

@@ -9,7 +9,7 @@ import { anon, createStaff, createTestDb, expectDenied, expectHint, isRemoteTarg
 
 const DEMO_DIR = path.resolve(import.meta.dirname, "../../supabase/demo");
 
-type Item = { kind: string; id: string; slug: string; media: string[]; complexes: string[] };
+type Item = { kind: string; id: string; slug: string; archived_at: string; media: string[]; complexes: string[] };
 
 describe.skipIf(isRemoteTarget)("архив: окончательное удаление", () => {
   let db: TestDb;
@@ -30,6 +30,9 @@ describe.skipIf(isRemoteTarget)("архив: окончательное удал
     const head = await createStaff(db.admin, "head");
     for (const actor of [anon, user(head)]) {
       await expectDenied(db.as(actor, (tx) => tx.query("select archive_due()")));
+      await expectDenied(db.as(actor, (tx) => tx.query("select archive_reminders_due()")));
+      await expectDenied(db.as(actor, (tx) => tx.query("select claim_archive_reminder('complex', gen_random_uuid(), now())")));
+      await expectDenied(db.as(actor, (tx) => tx.query("select release_archive_reminder('complex', gen_random_uuid(), now())")));
       await expectDenied(db.as(actor, (tx) => tx.query("select purge_archived('complex', gen_random_uuid())")));
       await expectDenied(db.as(actor, (tx) => tx.query("select * from retired_slugs")));
     }
@@ -43,9 +46,18 @@ describe.skipIf(isRemoteTarget)("архив: окончательное удал
     );
     const complex = rows[0]!;
     await archiveDaysAgo("complexes", complex.id, 28);
-    const reminders = await call<Item[]>("select take_archive_reminders() as v");
+    const reminders = await call<Item[]>("select archive_reminders_due() as v");
     expect(reminders.map((item) => item.slug)).toEqual([complex.slug]);
-    expect(await call<Item[]>("select take_archive_reminders() as v")).toEqual([]);
+    const key = [reminders[0]!.kind, reminders[0]!.id, reminders[0]!.archived_at];
+    const claim = () => call<boolean>("select claim_archive_reminder($1, $2, $3) as v", key);
+    // Отметка — одна: второй запуск задачи не отправит; не ушло — отметка снята, напомнит снова.
+    expect(await claim()).toBe(true);
+    expect(await claim()).toBe(false);
+    expect(await call<Item[]>("select archive_reminders_due() as v")).toEqual([]);
+    await call("select release_archive_reminder($1, $2, $3) as v", key);
+    expect((await call<Item[]>("select archive_reminders_due() as v")).map((item) => item.slug)).toEqual([complex.slug]);
+    expect(await claim()).toBe(true);
+    expect(await call<Item[]>("select archive_reminders_due() as v")).toEqual([]);
     expect(await call<Item[]>("select archive_due() as v")).toEqual([]);
     const units = await call<{ number: string }[]>("select archive_units($1::uuid[]) as v", [[complex.id]]);
     expect(units.length).toBeGreaterThan(0);

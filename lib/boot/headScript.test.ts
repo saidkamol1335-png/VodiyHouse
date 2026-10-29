@@ -67,3 +67,29 @@ describe("HEAD_BOOT_SCRIPT · ссылка на каталог с фильтро
     window.history.replaceState(null, "", "/");
   });
 });
+
+describe("HEAD_BOOT_SCRIPT · шапка над прокрученной страницей", () => {
+  const run = (type: string, scrollY: string | null) => {
+    document.documentElement.removeAttribute("data-anchor-start");
+    window.history.replaceState(null, "", "/ru/novostroyki");
+    sessionStorage.clear();
+    if (scrollY !== null) sessionStorage.setItem("vh:scrollY:/ru/novostroyki", scrollY);
+    vi.stubGlobal("matchMedia", () => ({ matches: false }));
+    vi.spyOn(performance, "getEntriesByType").mockReturnValue([
+      { type } as unknown as PerformanceEntry,
+    ]);
+    new Function(HEAD_BOOT_SCRIPT)();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    return document.documentElement.hasAttribute("data-anchor-start");
+  };
+
+  it("перезагрузка и «Назад» ниже первого экрана — метка до гидратации; сверху или новый переход — нет", () => {
+    expect(run("reload", "1800")).toBe(true);
+    expect(run("back_forward", "640")).toBe(true);
+    expect(run("reload", "0")).toBe(false);
+    expect(run("reload", null)).toBe(false);
+    expect(run("navigate", "1800")).toBe(false);
+    window.history.replaceState(null, "", "/");
+  });
+});

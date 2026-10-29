@@ -186,7 +186,8 @@
 
   .developer-hero__card {
     max-width: none;
-    margin: -40px var(--gutter, 16px) 0;
+    /* Внахлёст на обложку — как в мокапе MobDev (~56 px из ~260). */
+    margin: -56px var(--gutter, 16px) 0;
     padding: 20px;
     border-color: var(--line);
     border-radius: var(--r-l);
