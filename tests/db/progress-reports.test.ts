@@ -383,6 +383,20 @@ describe("отчёты хода строительства: права и пра
     expect(items[0]!.photos).toHaveLength(3);
     expect(items.map((item) => item.id)).not.toContain(draft.id);
     expect(await site(ids.draftComplex)).toBeNull();
+
+    // 5C.3: кадры для каталога и главной — последний отчёт блока ЖК на сайте, не квартиры.
+    const frames = (
+      await db.as(anon, (tx) =>
+        tx.query<{
+          r: { complex_id: string; report_id: string; block: string; photos: { path: string }[] }[];
+        }>("select public.site_progress_frames() as r"),
+      )
+    ).rows[0]!.r;
+    const frame = frames.find((item) => item.complex_id === ids.publicComplex);
+    expect(frame).toMatchObject({ report_id: published, block: expect.any(String) });
+    expect(frame!.photos).toHaveLength(3);
+    expect(frames.map((item) => item.report_id)).not.toContain(draft.id);
+    expect(frames.map((item) => item.complex_id)).not.toContain(ids.draftComplex);
   });
 
   it("сайт: видео квартиры — опубликованный отчёт по квартире без номера, id квартиры и цены; история — квартира и блок", async () => {
@@ -439,9 +453,18 @@ describe("отчёты хода строительства: права и пра
   });
 
   it("обзор для кабинета: все сотрудники видят статусы отчётов блоков и последние видео, посетитель — нет", async () => {
-    type Overview = { complexes: { id: string; built: boolean }[]; reports: { id: string; status: string }[]; videos: { id: string; unit: string | null }[] };
-    const overview = (actor: string) => call<Overview | null>(actor, "public.progress_overview()", []);
-    const published = (await db.admin.query<{ id: string }>("select id from progress_reports where status = 'published' and not is_unit limit 1")).rows[0]!.id;
+    type Overview = {
+      complexes: { id: string; built: boolean }[];
+      reports: { id: string; status: string }[];
+      videos: { id: string; unit: string | null }[];
+    };
+    const overview = (actor: string) =>
+      call<Overview | null>(actor, "public.progress_overview()", []);
+    const published = (
+      await db.admin.query<{ id: string }>(
+        "select id from progress_reports where status = 'published' and not is_unit limit 1",
+      )
+    ).rows[0]!.id;
     for (const actor of [video, otherVideo, manager, head]) {
       const data = (await overview(actor))!;
       expect(data.complexes.map((complex) => complex.id)).toContain(ids.publicComplex);

@@ -116,7 +116,12 @@
       "stockTitle": "Har bir TJM qoldiqlari",
       "stockText": "«3 xonali — 5 ta qoldi» kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
       "stockCta": "Mavjudlikni ko‘rish",
-      "priceBig": "0%"
+      "priceBig": "0%",
+      "videoKicker": "Qurilish videosi",
+      "videoTitle": "Har oy har bir qurilishni suratga olamiz",
+      "videoText": "Obyektga borish shart emas — kvartira hozir qanday ko‘rinishini ko‘ring.",
+      "videoCta": "Namunani ko‘rish",
+      "videoRec": "REC · {complex} · {block}-blok"
     },
     "partner": {
       "eyebrow": "Quruvchilar uchun",
@@ -381,7 +386,8 @@
       "monthlyFrom": "To‘lov oyiga {price} dan",
       "photo": "{total} tadan {n}-surat",
       "prevPhoto": "Oldingi surat",
-      "nextPhoto": "Keyingi surat"
+      "nextPhoto": "Keyingi surat",
+      "progressCaption": "Qurilish · {month}"
     },
     "page": {
       "eyebrow": "Loyihalar",

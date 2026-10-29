@@ -66,3 +66,33 @@ test.describe("ход строительства на странице ЖК", ()
     expect(errors).toEqual([]);
   });
 });
+
+// 5C.3 (мокап Main): плитка «Видео стройки» на главной — кадры последнего отчёта, «Смотреть пример» →
+// «Ход строительства» этого ЖК; в карточке каталога второй кадр — «Стройка · <месяц>».
+test.describe("кадры стройки на главной и в каталоге", () => {
+  test.skip(!hasCloud, "страница читает DEMO из облака");
+
+  test("главная: «Видео стройки» → «Смотреть пример» ведёт в раздел ЖК; карточка — кадр «Стройка»", async ({
+    page,
+  }) => {
+    const errors = collectPageErrors(page);
+    await page.goto("/ru?motion=none");
+    const tile = page.locator(".home-why__tile--video");
+    await expect(tile).toContainText("Раз в месяц снимаем каждую стройку");
+    await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · \S+ · блок \S+$/);
+    const section = page.locator(".home-why");
+    await section.scrollIntoViewIfNeeded();
+    await expect(tile.locator(".home-why__frame img").first()).toHaveJSProperty("complete", true);
+    await section.screenshot({
+      path: `test-results/screens/${test.info().project.name}/p5-home-video.png`,
+    });
+
+    const card = page.locator(".catalog-card", { has: page.locator(".catalog-card__caption") }).first();
+    await expect(card.locator(".catalog-card__caption")).toHaveText(/^Стройка · [А-Я][а-я]+$/);
+
+    await tile.getByRole("link", { name: "Смотреть пример" }).click();
+    await expect(page).toHaveURL(/\/ru\/novostroyki\/[a-z0-9-]+#hod-stroitelstva$/);
+    await expect(page.locator("#hod-stroitelstva .progress-player")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+});

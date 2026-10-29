@@ -12,11 +12,12 @@ import { TelegramButton } from "@/components/TelegramButton";
 import type { LocalizedText } from "@/lib/contacts";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
+import { formatMonthName } from "@/lib/format";
 import { complexRoute } from "@/lib/routes";
 import { cardDeadline, cardPays, cardPrice, cardRoomTypes } from "@/lib/site/catalog/card";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { CardFacts, CardPayChips, CardPriceRow, CardTypes } from "./CardDetails";
-import { CardMedia } from "./CardMedia";
+import { CardMedia, type CardFrame } from "./CardMedia";
 
 type CatalogCardProps = {
   complex: CatalogComplex;
@@ -26,6 +27,13 @@ type CatalogCardProps = {
   /** Бейдж спецпредложения (витрина, 3.16б) — пилюля на фото перед классом. */
   badge?: LocalizedText | null;
 };
+
+/** Кадры карточки: обложка, кадр стройки из последнего отчёта (мокап cardShots), остальные фото ЖК. */
+function cardFrames(complex: CatalogComplex, caption: string): CardFrame[] {
+  const [cover, ...rest] = complex.photos;
+  if (!cover || !complex.progress) return complex.photos;
+  return [cover, { ...complex.progress.photo, caption }, ...rest];
+}
 
 /**
  * Карточка ЖК каталога (мокап .jc): фото, застройщик и «Проверено Vodiy House», название — ссылка
@@ -45,7 +53,7 @@ export function CatalogCard({ complex, catalog, preload = false, badge = null }:
   const finishings = [...new Set(complex.blocks.flatMap((block) => (block.finishing ? [block.finishing.name[locale]] : [])))];
   return (
     <article className="catalog-card" data-track-entity={`complex:${complex.id}`}>
-      <CardMedia photos={complex.photos} alt={name} preload={preload} badges={<CardBadges complex={complex} badge={badge} />} tools={<CardTools complex={complex} name={name} />} />
+      <CardMedia photos={cardFrames(complex, t("progressCaption", { month: formatMonthName(complex.progress?.month ?? "", locale) }))} alt={name} preload={preload} badges={<CardBadges complex={complex} badge={badge} />} tools={<CardTools complex={complex} name={name} />} />
       <div className="catalog-card__body">
         <p className="catalog-card__top">
           <span className="catalog-card__developer">{developer?.name}</span>

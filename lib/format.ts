@@ -317,6 +317,11 @@ export function formatMonthShort(month: string, withYear = false): string {
   return withYear || monthNumber === 1 ? `${short} ’${String(year).slice(2)}` : short;
 }
 
+/** «2026-10-01» → «Октябрь» («Oktabr»): подпись кадра стройки в карточке ЖК. */
+export function formatMonthName(month: string, locale: Locale = "ru"): string {
+  return MONTH_NAMES[locale][(Number(month.split("-")[1]) || 1) - 1]!;
+}
+
 /** «2026-10-01» (первое число месяца отчёта) → «Октябрь 2026». */
 export function formatMonthYear(month: string, locale: Locale = "ru"): string {
   const [year, monthNumber] = month.split("-").map(Number);

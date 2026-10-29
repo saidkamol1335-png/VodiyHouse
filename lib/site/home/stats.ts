@@ -3,6 +3,7 @@ import { NO_FILTER, offerMatches, type CatalogFilter } from "../catalog/filter";
 import type { CatalogComplex, SiteCatalog } from "../catalog/records";
 import { searchFromFilter } from "../catalog/params";
 import { filterCatalog } from "../catalog/sort";
+import type { ProgressFrame } from "../progress/frames";
 
 // Цифры главной (шаг 3.9, мокап: .hero__stats, .vf__found, .avmini) — из того же ответа каталога,
 // что и лента: страница статичная, отдельных запросов к базе нет. «Свободно» без числа у типа
@@ -62,6 +63,17 @@ export function availabilitySample(catalog: SiteCatalog): { complex: CatalogComp
   for (const complex of catalog.complexes) {
     const types = cardRoomTypes(complex).filter((type) => type.free !== null).slice(0, 4);
     if (types.length > 0) return { complex, types };
+  }
+  return null;
+}
+
+export type ProgressSample = { complex: CatalogComplex; frame: ProgressFrame };
+
+/** Плитка «Видео стройки» (5C.3): последний опубликованный отчёт ЖК из ленты; отчётов нет — плитки нет. */
+export function progressSample(catalog: SiteCatalog, frames: readonly ProgressFrame[]): ProgressSample | null {
+  for (const frame of frames) {
+    const complex = catalog.complexes.find((entry) => entry.id === frame.complexId);
+    if (complex) return { complex, frame };
   }
   return null;
 }

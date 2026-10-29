@@ -4,6 +4,7 @@ import { unstable_rethrow } from "next/navigation";
 import { CATALOG_TAG, DEVELOPERS_TAG, DICTIONARIES_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { readProgressFrames } from "@/lib/site/progress/read";
 import { catalogFrom, type SiteCatalog, type SiteCatalogRecord } from "./records";
 
 // Каталог сайта (шаг 3.3): site_catalog() ролью посетителя, в кэше страницы. Сбрасывают: ЖК, квартиры
@@ -14,10 +15,14 @@ async function fetchSiteCatalog(): Promise<SiteCatalog> {
   "use cache";
   cacheTag(CATALOG_TAG, DEVELOPERS_TAG, PROGRAMS_TAG, DICTIONARIES_TAG);
   cacheLife("hours");
-  const { data, error } = await createSupabasePublicClient().rpc("site_catalog");
+  const [{ data, error }, frames] = await Promise.all([
+    createSupabasePublicClient().rpc("site_catalog"),
+    // Второй кадр карточки — «Стройка · месяц» из последнего отчёта (5C.3).
+    readProgressFrames(),
+  ]);
   // Исключение не кэшируется: база вернётся — каталог сразу снова на месте.
   if (error) throw new Error("site-catalog-unavailable", { cause: error });
-  return catalogFrom(data as SiteCatalogRecord);
+  return catalogFrom(data as SiteCatalogRecord, frames);
 }
 
 /**

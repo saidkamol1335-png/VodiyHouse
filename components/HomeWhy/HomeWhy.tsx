@@ -10,18 +10,23 @@ import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
 import type { CardRoomType } from "@/lib/site/catalog/card";
 import type { CatalogComplex } from "@/lib/site/catalog/records";
+import type { ProgressSample } from "@/lib/site/home/stats";
+import { VideoTile } from "./VideoTile";
 
 type HomeWhyProps = {
   /** «Остатки по каждому ЖК» — живой пример: первый ЖК ленты и его типы (мокап .avmini). */
   sample: { complex: CatalogComplex; types: CardRoomType[] } | null;
+  /** «Видео стройки» (фаза 5): последний отчёт ЖК из ленты; нет отчётов — плитки нет. */
+  video?: ProgressSample | null;
 };
 
 /**
- * «Почему через Vodiy House» (мокап .bento): наличие на живом примере, цена как у застройщика
- * («0%»), проверенные документы, бесплатные услуги лентой. Плитка видео стройки — с фазой 5
- * (решение фазы 3: «Смотреть пример» скрыт до видео). Подсветка за курсором — только full.
+ * «Почему через Vodiy House» (мокап .bento): видео стройки, наличие на живом примере, цена как у
+ * застройщика («0%»), проверенные документы, бесплатные услуги лентой. Видео стройки (фаза 5) —
+ * баннером во всю ширину над сеткой (решение 5C.3: в узкой плитке «Наличие» не помещается); пока
+ * опубликованных отчётов нет, баннера нет. Подсветка за курсором — только full.
  */
-export async function HomeWhy({ sample }: HomeWhyProps) {
+export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
   const t = await getTranslations("home.why");
   return (
     <section className="home-why" aria-labelledby="home-why-title">
@@ -33,6 +38,11 @@ export async function HomeWhy({ sample }: HomeWhyProps) {
           </Heading>
         </div>
         <div className="home-why__grid">
+          {video ? (
+            <Spotlight className="home-why__tile home-why__tile--video">
+              <VideoTile video={video} />
+            </Spotlight>
+          ) : null}
           <StockTile sample={sample} />
           <Spotlight className="home-why__tile home-why__tile--olive">
             <span className="home-why__big" aria-hidden="true">{t("priceBig")}</span>
@@ -65,7 +75,7 @@ function Tile({ kicker, title, text, children }: { kicker: string; title: string
   );
 }
 
-async function StockTile({ sample }: HomeWhyProps) {
+async function StockTile({ sample }: Pick<HomeWhyProps, "sample">) {
   const [t, tRooms] = await Promise.all([getTranslations("home.why"), getTranslations("catalog.card")]);
   const locale = (await getLocale()) as Locale;
   return (

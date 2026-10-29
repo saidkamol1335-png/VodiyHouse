@@ -3,6 +3,7 @@ import type { Currency, ExchangeRate } from "@/lib/calc/money";
 import type { CalcProgram } from "@/lib/calc/programs";
 import { programFromRecord, rateFromRecord, type SiteProgramsRecord } from "@/lib/calc/records";
 import type { SitePhotoData } from "@/lib/site/photo";
+import { catalogProgressOf, type CatalogProgress, type ProgressFrame } from "@/lib/site/progress/frames";
 
 // Запись site_catalog() (20261025120000_site_catalog.sql) → каталог сайта. numeric приходит и
 // строкой — числа приводятся явно; полей скидки в записи нет (PLAN §3.13).
@@ -88,6 +89,8 @@ export type CatalogComplex = Omit<ComplexRecord, "developer_id" | "minutes_to_ce
   createdAt: string;
   photos: CatalogPhoto[];
   blocks: CatalogBlock[];
+  /** Второй кадр карточки: первое фото последнего отчёта о стройке (5C.3); нет отчётов — нет кадра. */
+  progress?: CatalogProgress | null;
 };
 
 /** Программа застройщика и на какие блоки она (block_ids — только блоки на сайте). */
@@ -141,7 +144,7 @@ export function photoFrom(record: PhotoRecord): CatalogPhoto {
  */
 const BLUR_PHOTOS = 2;
 
-function complexFrom(record: ComplexRecord): CatalogComplex {
+function complexFrom(record: ComplexRecord, frames: readonly ProgressFrame[]): CatalogComplex {
   const { developer_id, minutes_to_center, created_at, photos, blocks, ...rest } = record;
   return {
     ...rest,
@@ -150,10 +153,11 @@ function complexFrom(record: ComplexRecord): CatalogComplex {
     createdAt: created_at,
     photos: photos.map((photo, index) => ({ ...photoFrom(photo), ...(index < BLUR_PHOTOS ? {} : { blur: null }) })),
     blocks: blocks.map(blockFrom),
+    progress: catalogProgressOf(frames.find((frame) => frame.complexId === record.id)),
   };
 }
 
-export function catalogFrom(record: SiteCatalogRecord): SiteCatalog {
+export function catalogFrom(record: SiteCatalogRecord, frames: readonly ProgressFrame[] = []): SiteCatalog {
   return {
     rate: rateFromRecord(record.rate),
     developers: record.developers.map((developer) => ({
@@ -168,6 +172,6 @@ export function catalogFrom(record: SiteCatalogRecord): SiteCatalog {
         blockIds: program.block_ids,
       })),
     })),
-    complexes: record.complexes.map(complexFrom),
+    complexes: record.complexes.map((complex) => complexFrom(complex, frames)),
   };
 }

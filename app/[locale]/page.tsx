@@ -15,7 +15,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { OFFERS_ANCHOR, QUIZ_ANCHOR } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
-import { availabilitySample, heroFound, homeStats } from "@/lib/site/home/stats";
+import { availabilitySample, heroFound, homeStats, progressSample } from "@/lib/site/home/stats";
+import { readProgressFrames } from "@/lib/site/progress/read";
 import { readSiteContacts } from "@/lib/site/contacts";
 import { pageMetadata, siteOrigin } from "@/lib/site/metadata";
 import { agencyLd } from "@/lib/site/seo/jsonLd";
@@ -40,12 +41,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * (блок H, поручение исполнителя 28.10.2026 — вместо обложки с фото ЖК), бегущая строка,
  * каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
  * «Предложения от застройщиков» (3.16б), квиз «Подбор за 1 минуту» (3.17), «Vodiy House в двух
- * словах», «Почему через Vodiy House», «Вы застройщик?». Страница статичная: всё — из кэшированных
+ * словах», «Почему через Vodiy House» (с плиткой «Видео стройки» — фаза 5), «Вы застройщик?». Страница статичная: всё — из кэшированных
  * ответов каталога и витрины.
  */
 export default async function HomePage() {
   const locale = (await rootLocale()) as Locale;
-  const [catalog, showcase] = await Promise.all([readSiteCatalog(), readSiteShowcase()]);
+  const [catalog, showcase, frames] = await Promise.all([readSiteCatalog(), readSiteShowcase(), readProgressFrames()]);
   return (
     <>
       <SiteHeader transparentAtTop tone="dark" />
@@ -56,7 +57,7 @@ export default async function HomePage() {
         {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
         <QuizSection id={QUIZ_ANCHOR} catalog={catalog} variant="home" />
         <HomeManifesto />
-        <HomeWhy sample={catalog ? availabilitySample(catalog) : null} />
+        <HomeWhy sample={catalog ? availabilitySample(catalog) : null} video={catalog ? progressSample(catalog, frames) : null} />
         <HomePartner />
       </main>
       <AgencyJsonLd locale={locale} />

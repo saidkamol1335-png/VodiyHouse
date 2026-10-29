@@ -8,8 +8,11 @@ import type { Locale } from "@/lib/i18n/routing";
 import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
 
+/** Кадр карточки; подпись — у кадра стройки («Стройка · Октябрь», мокап .jc__track figcaption). */
+export type CardFrame = CatalogPhoto & { caption?: string };
+
 type CardMediaProps = {
-  photos: readonly CatalogPhoto[];
+  photos: readonly CardFrame[];
   alt: string;
   /** Первые карточки первого экрана — фото грузится сразу (LCP). */
   preload: boolean;
@@ -75,13 +78,24 @@ export function CardMedia({ photos, alt, preload, badges, tools }: CardMediaProp
   );
 }
 
-type CardSlideProps = { photo: CatalogPhoto; alt: string; loaded: boolean; preload: boolean };
+type CardSlideProps = { photo: CardFrame; alt: string; loaded: boolean; preload: boolean };
 
-/** Кадр ленты: фото — или, пока галерею не трогали, его размытое превью. */
+/** Кадр ленты: фото — или, пока галерею не трогали, его размытое превью; у кадра стройки — подпись. */
 function CardSlide({ photo, alt, loaded, preload }: CardSlideProps) {
+  const caption = photo.caption ? <span className="catalog-card__caption">{photo.caption}</span> : null;
   if (!loaded) {
     const style = photo.blur ? { backgroundImage: `url("${photo.blur}")` } : undefined;
-    return <div className="catalog-card__placeholder" style={style} />;
+    return (
+      <>
+        <div className="catalog-card__placeholder" style={style} />
+        {caption}
+      </>
+    );
   }
-  return <SitePhoto photo={photo} alt={alt} frame="card" sizes={SIZES} preload={preload} className="catalog-card__photo" />;
+  return (
+    <>
+      <SitePhoto photo={photo} alt={alt} frame="card" sizes={SIZES} preload={preload} className="catalog-card__photo" />
+      {caption}
+    </>
+  );
 }

@@ -34,8 +34,25 @@
 }
 
 .catalog-card__slide {
+  position: relative;
   flex: 0 0 100%;
   scroll-snap-align: start;
+}
+
+/* Подпись кадра стройки (мокап .jc__track figcaption): над точками, белым по затемнению в обеих темах. */
+.catalog-card__caption {
+  position: absolute;
+  bottom: 28px;
+  left: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
 }
 
 /* Кадр, который ещё не грузили: размытое превью того же фото в пропорции карточки. */
