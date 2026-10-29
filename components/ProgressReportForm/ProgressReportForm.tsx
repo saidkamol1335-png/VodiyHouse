@@ -69,7 +69,7 @@ export function ProgressReportForm({ complexes, months, fix = null }: ProgressRe
   );
 }
 
-/** «или ссылка YouTube · канал Vodiy House»; у исправления — ссылка отчёта. */
+/** «или ссылка на ролик YouTube или Shorts»; у исправления — ссылка отчёта. */
 function YoutubeField({ initial }: { initial: string }) {
   const t = useTranslations("admin.video.form");
   return (
