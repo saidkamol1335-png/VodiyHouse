@@ -9,17 +9,29 @@ import { hasCloud } from "./cloud";
 const SHODLIK = "/ru/novostroyki/demo-shodlik";
 
 const shot = (page: Page, name: string) =>
-  page.locator("#hod-stroitelstva").screenshot({ path: `test-results/screens/${test.info().project.name}/p5-${name}.png`, caret: "initial" });
+  page
+    .locator("#hod-stroitelstva")
+    .screenshot({
+      path: `test-results/screens/${test.info().project.name}/p5-${name}.png`,
+      caret: "initial",
+    });
 
 test.describe("ход строительства на странице ЖК", () => {
   test.skip(!hasCloud, "страница читает DEMO из облака");
 
-  test("Shodlik: пункт навигатора, чипы месяцев, плеер со штампами, готовность блока, выбор месяца", async ({ page }) => {
+  test("Shodlik: пункт навигатора, чипы месяцев, плеер со штампами, готовность блока, выбор месяца", async ({
+    page,
+  }) => {
     const errors = collectPageErrors(page);
     await page.goto(`${SHODLIK}?motion=none`);
-    await page.getByRole("navigation", { name: "Разделы страницы" }).getByRole("link", { name: "Ход строительства" }).click();
+    await page
+      .getByRole("navigation", { name: "Разделы страницы" })
+      .getByRole("link", { name: "Ход строительства" })
+      .click();
     const section = page.locator("#hod-stroitelstva");
-    await expect(section.getByRole("heading", { level: 2, name: "Ход строительства" })).toBeVisible();
+    await expect(
+      section.getByRole("heading", { level: 2, name: "Ход строительства" }),
+    ).toBeVisible();
     await expect(section).toContainText(/Обновлено \d{2}\.\d{2}\.\d{4}/);
 
     const months = section.getByRole("group", { name: "Месяцы отчётов" }).getByRole("button");
@@ -46,6 +58,10 @@ test.describe("ход строительства на странице ЖК", ()
 
     await expect(section).toContainText(/Готовность блока A/i);
     await expect(section).not.toContainText(/скидк|−\d+\s?%|-\d+\s?%/i);
+    // Лента превью на телефоне не распирает страницу.
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
     await shot(page, "progress");
     expect(errors).toEqual([]);
   });

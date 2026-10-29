@@ -19,6 +19,8 @@ export const DICTIONARIES_TAG = "dictionaries";
 
 export const complexTag = (id: string) => `complex:${id}`;
 export const developerTag = (id: string) => `developer:${id}`;
+/** Видео квартиры для клиента (фаза 5): страница /video/<id> — публикация и снятие отчёта сбрасывают её. */
+export const progressTag = (id: string) => `progress:${id}`;
 
 /** ЖК поменялся. null — менять было нечего (пустой список у функций квартир). */
 export function expireComplex(id: string | null | undefined): void {

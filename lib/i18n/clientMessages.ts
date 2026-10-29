@@ -131,6 +131,12 @@ export const COMPLEX_MESSAGES = [
   ...SITE_SHELL_MESSAGES,
 ] as const;
 
+/**
+ * Видео квартиры для клиента (фаза 5, /video/<id>): свои тексты, плеер «Хода строительства»,
+ * калькулятор «Сколько платить за эту квартиру» и заявка «Записаться на просмотр».
+ */
+export const UNIT_VIDEO_MESSAGES = ["unitVideo", "complex.progress", CALC_NAMESPACE, LEAD_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;
+
 /** Застройщики (шаг 3.15): список — поиск на месте; страница — вкладки объектов и карточки каталога. */
 export const DEVELOPERS_NAMESPACE = "developers";
 export const DEVELOPERS_LIST_MESSAGES = [DEVELOPERS_NAMESPACE, ...SITE_SHELL_MESSAGES] as const;

@@ -12,6 +12,7 @@ import {
   CATALOG_MESSAGES,
   CALC_NAMESPACE,
   COMPLEX_MESSAGES,
+  UNIT_VIDEO_MESSAGES,
   ABOUT_MESSAGES,
   DEVELOPERS_LIST_MESSAGES,
   DEVELOPERS_MESSAGES,
@@ -42,6 +43,8 @@ function clientNamespaces(entries: readonly string[]): Set<string> {
 }
 
 const isComplexRoute = (file: string) => /[\\/]novostroyki[\\/]\[slug\][\\/]/.test(file);
+// Видео квартиры (фаза 5): калькулятор «Сколько платить за эту квартиру» — со своим провайдером.
+const isUnitVideoRoute = (file: string) => /[\\/]video[\\/]\[id\][\\/]/.test(file);
 
 const covers = (paths: readonly string[], namespace: string) =>
   paths.some((picked) => namespace === picked || namespace.startsWith(`${picked}.`));
@@ -81,6 +84,7 @@ describe("сообщения для браузера", () => {
         ...(uses("ABOUT_MESSAGES") ? ABOUT_MESSAGES : []),
         ...(uses("DEVELOPERS_MESSAGES") ? DEVELOPERS_MESSAGES : []),
         ...(uses("DEVELOPERS_LIST_MESSAGES") ? DEVELOPERS_LIST_MESSAGES : []),
+        ...(uses("UNIT_VIDEO_MESSAGES") ? UNIT_VIDEO_MESSAGES : []),
       ];
       return picked.length > 0 ? picked : SITE_SHELL_MESSAGES;
     };
@@ -105,7 +109,7 @@ describe("сообщения для браузера", () => {
     // Тексты калькулятора — только /kalkulyator и странице ЖК («Расчёт для этой квартиры»): у них
     // свои провайдеры с CALC_MESSAGES и COMPLEX_MESSAGES.
     const outside = routeFiles("app/[locale]").filter(
-      (file) => !/[\\/]kalkulyator[\\/]/.test(file) && !isComplexRoute(file),
+      (file) => !/[\\/]kalkulyator[\\/]/.test(file) && !isComplexRoute(file) && !isUnitVideoRoute(file),
     );
     const elsewhere = [...clientNamespaces(outside)];
     expect(elsewhere.filter((namespace) => namespace.startsWith(CALC_NAMESPACE))).toEqual([]);
@@ -115,6 +119,8 @@ describe("сообщения для браузера", () => {
       "pickMessages(messages, COMPLEX_MESSAGES)",
     );
     expect(COMPLEX_MESSAGES).toContain(CALC_NAMESPACE);
+    expect(readSource("app/[locale]/video/[id]/page.tsx")).toContain("pickMessages(messages, UNIT_VIDEO_MESSAGES)");
+    expect(UNIT_VIDEO_MESSAGES).toContain(CALC_NAMESPACE);
   });
 
   // Квизу — не весь `lead`, а контакты (LEAD_CONTACT_MESSAGES): новый ключ в квизе или в полях

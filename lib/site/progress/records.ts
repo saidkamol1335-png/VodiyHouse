@@ -99,7 +99,9 @@ export function progressReportFrom(record: ProgressReportRecord): ProgressReport
   };
 }
 
-export function progressReportsFrom(records: readonly ProgressReportRecord[] | null): ProgressReport[] {
+export function progressReportsFrom(
+  records: readonly ProgressReportRecord[] | null,
+): ProgressReport[] {
   return (records ?? []).map(progressReportFrom);
 }
 

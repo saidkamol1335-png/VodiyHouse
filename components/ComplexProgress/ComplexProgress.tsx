@@ -25,28 +25,31 @@ export function ComplexProgress({ reports }: ComplexProgressProps) {
   const current = shown.find((report) => report.id === currentId) ?? shown[0];
   if (!current) return null;
   // Два блока в одном месяце — чип с названием блока, иначе два одинаковых «Октябрь 2026».
-  const repeated = new Set(shown.map((report) => report.month).filter((month, index, all) => all.indexOf(month) !== index));
+  const repeated = new Set(
+    shown.map((report) => report.month).filter((month, index, all) => all.indexOf(month) !== index),
+  );
   const chipOf = (report: ProgressReport) =>
-    [formatMonthYear(report.month, locale), repeated.has(report.month) && report.block ? t("block", { name: report.block.name }) : null]
+    [
+      formatMonthYear(report.month, locale),
+      repeated.has(report.month) && report.block ? t("block", { name: report.block.name }) : null,
+    ]
       .filter(Boolean)
       .join(" · ");
   return (
     <div className="complex-progress">
       <div className="complex-progress__main">
-        <div className="complex-progress__months" role="group" aria-label={t("months")}>
-          {shown.map((report) => (
-            <button key={report.id} type="button" className="complex-progress__month" aria-pressed={report.id === current.id} onClick={() => setCurrentId(report.id)}>
-              {chipOf(report)}
-            </button>
-          ))}
-        </div>
+        <Months reports={shown} currentId={current.id} labelOf={chipOf} onPick={setCurrentId} />
         <ProgressPlayer key={current.id} report={current} />
         <p className="complex-progress__comment">{current.comment[locale]}</p>
-        <p className="complex-progress__shot">{t("shot", { date: formatDate(new Date(current.shotAt)) })}</p>
+        <p className="complex-progress__shot">
+          {t("shot", { date: formatDate(new Date(current.shotAt)) })}
+        </p>
       </div>
       <div className="complex-progress__side">
         {current.block ? <BlockReadiness block={current.block} /> : null}
-        {shown.length > 1 ? <Thumbs reports={shown} currentId={current.id} labelOf={chipOf} onPick={setCurrentId} /> : null}
+        {shown.length > 1 ? (
+          <Thumbs reports={shown} currentId={current.id} labelOf={chipOf} onPick={setCurrentId} />
+        ) : null}
       </div>
     </div>
   );
@@ -59,6 +62,26 @@ type ThumbsProps = {
   onPick: (id: string) => void;
 };
 
+/** Чипы месяцев (мокап .prog__months): выбранный — янтарный. */
+function Months({ reports, currentId, labelOf, onPick }: ThumbsProps) {
+  const t = useTranslations("complex.progress");
+  return (
+    <div className="complex-progress__months" role="group" aria-label={t("months")}>
+      {reports.map((report) => (
+        <button
+          key={report.id}
+          type="button"
+          className="complex-progress__month"
+          aria-pressed={report.id === currentId}
+          onClick={() => onPick(report.id)}
+        >
+          {labelOf(report)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /** Превью отчётов (мокап .vthumbs): сетка 2 × N на 1440, лента на телефоне; нажатие — отчёт в плеер. */
 function Thumbs({ reports, currentId, labelOf, onPick }: ThumbsProps) {
   const t = useTranslations("complex.progress");
@@ -66,7 +89,13 @@ function Thumbs({ reports, currentId, labelOf, onPick }: ThumbsProps) {
     <ul className="complex-progress__thumbs" aria-label={t("thumbs")}>
       {reports.map((report) => (
         <li key={report.id}>
-          <button type="button" className="complex-progress__thumb" aria-pressed={report.id === currentId} aria-label={t("play", { month: labelOf(report) })} onClick={() => onPick(report.id)}>
+          <button
+            type="button"
+            className="complex-progress__thumb"
+            aria-pressed={report.id === currentId}
+            aria-label={t("play", { month: labelOf(report) })}
+            onClick={() => onPick(report.id)}
+          >
             <Thumb report={report} />
             <span className="complex-progress__thumb-label">{labelOf(report)}</span>
           </button>
@@ -88,7 +117,9 @@ function BlockReadiness({ block }: { block: ProgressBlock }) {
         <span style={{ transform: `scaleX(${block.progressPct / 100})` }} />
       </span>
       {block.floorsBuilt !== null && block.floorsTotal ? (
-        <p className="complex-progress__ready-floors">{t("floors", { built: block.floorsBuilt, total: block.floorsTotal })}</p>
+        <p className="complex-progress__ready-floors">
+          {t("floors", { built: block.floorsBuilt, total: block.floorsTotal })}
+        </p>
       ) : null}
     </div>
   );
@@ -96,10 +127,27 @@ function BlockReadiness({ block }: { block: ProgressBlock }) {
 
 function Thumb({ report }: { report: ProgressReport }) {
   const photo = report.photos[0];
-  if (photo) return <SitePhoto photo={photo} alt="" frame="card" sizes="(max-width: 760px) 128px, 160px" className="complex-progress__thumb-photo" />;
+  if (photo)
+    return (
+      <SitePhoto
+        photo={photo}
+        alt=""
+        frame="card"
+        sizes="(max-width: 760px) 128px, 160px"
+        className="complex-progress__thumb-photo"
+      />
+    );
   if (report.youtubeId) {
-    // eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета
-    return <img className="complex-progress__thumb-photo" src={`https://i.ytimg.com/vi/${report.youtubeId}/mqdefault.jpg`} alt="" loading="lazy" decoding="async" />;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета
+      <img
+        className="complex-progress__thumb-photo"
+        src={`https://i.ytimg.com/vi/${report.youtubeId}/mqdefault.jpg`}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    );
   }
   return <span className="complex-progress__thumb-photo" />;
 }

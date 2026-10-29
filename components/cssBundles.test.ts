@@ -17,7 +17,8 @@ type Bundle = (typeof BUNDLES)[number];
 
 const siteFiles = routeFiles("app/[locale]");
 const isCalculatorRoute = (file: string) => /[\\/]kalkulyator[\\/]/.test(file);
-const isComplexRoute = (file: string) => /[\\/]novostroyki[\\/]\[slug\][\\/]/.test(file);
+// Видео квартиры (фаза 5) — тот же набор: плеер «Хода строительства» и калькулятор квартиры.
+const isComplexRoute = (file: string) => /[\\/](novostroyki[\\/]\[slug\]|video[\\/]\[id\])[\\/]/.test(file);
 
 /** Какие разделы грузит корень маршрутов — в порядке каскада. */
 const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
@@ -51,6 +52,7 @@ const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/kalkulyator/layout.tsx": ["calc"],
   // calc страницы ЖК — с чанком калькулятора по «Рассчитать платёж» (useLayoutCalc.ts), не в layout.
   "app/[locale]/novostroyki/[slug]/layout.tsx": ["complex"],
+  "app/[locale]/video/[id]/layout.tsx": ["complex"],
   "app/global-not-found.tsx": ["globals", "site"],
   "app/admin/layout.tsx": ["globals", "admin"],
   "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],

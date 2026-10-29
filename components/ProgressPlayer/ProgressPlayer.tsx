@@ -32,13 +32,18 @@ export function ProgressPlayer({ report, caption = true, label }: ProgressPlayer
   const t = useTranslations("complex.progress");
   const locale = useLocale() as Locale;
   const month = formatMonthYear(report.month, locale);
-  const stamp = [formatDate(new Date(report.shotAt)), report.block ? t("block", { name: report.block.name }) : null]
+  const stamp = [
+    formatDate(new Date(report.shotAt)),
+    report.block ? t("block", { name: report.block.name }) : null,
+  ]
     .filter(Boolean)
     .join(" · ");
   const kind = report.youtubeId ? "youtube" : report.videoPath ? "file" : "photos";
   return (
     <figure className={`progress-player progress-player--${kind}`}>
-      {kind === "youtube" ? <YoutubeMedia youtubeId={report.youtubeId!} title={t("play", { month })} /> : null}
+      {kind === "youtube" ? (
+        <YoutubeMedia youtubeId={report.youtubeId!} title={t("play", { month })} />
+      ) : null}
       {kind === "file" ? <FileMedia report={report} /> : null}
       {kind === "photos" ? <Slideshow report={report} label={t("play", { month })} /> : null}
       <span className="progress-player__corners" aria-hidden="true" />
@@ -49,7 +54,9 @@ export function ProgressPlayer({ report, caption = true, label }: ProgressPlayer
       <span className="progress-player__stamp progress-player__stamp--end">
         {label ?? t(kind === "photos" ? "stampPhotos" : "stampVideo", { month })}
       </span>
-      {caption ? <figcaption className="progress-player__caption">{report.comment[locale]}</figcaption> : null}
+      {caption ? (
+        <figcaption className="progress-player__caption">{report.comment[locale]}</figcaption>
+      ) : null}
     </figure>
   );
 }
@@ -70,9 +77,20 @@ function YoutubeMedia({ youtubeId, title }: { youtubeId: string; title: string }
     );
   }
   return (
-    <button type="button" className="progress-player__poster" aria-label={title} onClick={() => setPlaying(true)}>
+    <button
+      type="button"
+      className="progress-player__poster"
+      aria-label={title}
+      onClick={() => setPlaying(true)}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета */}
-      <img className="progress-player__media" src={posterOf(youtubeId)} alt="" loading="lazy" decoding="async" />
+      <img
+        className="progress-player__media"
+        src={posterOf(youtubeId)}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
       <span className="progress-player__play" aria-hidden="true">
         <Play size={26} fill="currentColor" />
       </span>
@@ -110,29 +128,53 @@ function Slideshow({ report, label }: { report: ProgressReport; label: string })
     const timer = window.setInterval(() => setFrame((current) => (current + 1) % total), FRAME_MS);
     return () => window.clearInterval(timer);
   }, [playing, total]);
-  const alt = report.comment[locale];
   return (
-    <div className={playing ? "progress-player__slides progress-player__slides--playing" : "progress-player__slides"}>
-      {report.photos.map((photo, index) => (
-        <SitePhoto
-          key={photo.path}
-          photo={photo}
-          alt={index === frame ? alt : ""}
-          frame="cover"
-          sizes="(max-width: 760px) 100vw, 860px"
-          className={index === frame ? "progress-player__frame progress-player__frame--active" : "progress-player__frame"}
-        />
-      ))}
+    <div
+      className={
+        playing
+          ? "progress-player__slides progress-player__slides--playing"
+          : "progress-player__slides"
+      }
+    >
+      <Frames report={report} frame={frame} alt={report.comment[locale]} />
       {playing ? null : (
-        <button type="button" className="progress-player__poster" aria-label={label} onClick={() => setPlaying(true)}>
+        <button
+          type="button"
+          className="progress-player__poster"
+          aria-label={label}
+          onClick={() => setPlaying(true)}
+        >
           <span className="progress-player__play" aria-hidden="true">
             <Play size={26} fill="currentColor" />
           </span>
         </button>
       )}
-      <SlideshowBar frame={frame} total={total} playing={playing} onToggle={() => setPlaying((value) => !value)} />
+      <SlideshowBar
+        frame={frame}
+        total={total}
+        playing={playing}
+        onToggle={() => setPlaying((value) => !value)}
+      />
     </div>
   );
+}
+
+/** Кадры стопкой: виден текущий (смена — opacity, см. CSS), диктор слышит только его. */
+function Frames({ report, frame, alt }: { report: ProgressReport; frame: number; alt: string }) {
+  return report.photos.map((photo, index) => (
+    <SitePhoto
+      key={photo.path}
+      photo={photo}
+      alt={index === frame ? alt : ""}
+      frame="cover"
+      sizes="(max-width: 760px) 100vw, 860px"
+      className={
+        index === frame
+          ? "progress-player__frame progress-player__frame--active"
+          : "progress-player__frame"
+      }
+    />
+  ));
 }
 
 type SlideshowBarProps = { frame: number; total: number; playing: boolean; onToggle: () => void };
@@ -142,11 +184,23 @@ function SlideshowBar({ frame, total, playing, onToggle }: SlideshowBarProps) {
   const t = useTranslations("complex.progress");
   return (
     <div className="progress-player__bar">
-      <button type="button" className="progress-player__toggle" aria-label={playing ? t("pause") : t("resume")} onClick={onToggle}>
-        {playing ? <Pause size={14} fill="currentColor" aria-hidden="true" /> : <Play size={14} fill="currentColor" aria-hidden="true" />}
+      <button
+        type="button"
+        className="progress-player__toggle"
+        aria-label={playing ? t("pause") : t("resume")}
+        onClick={onToggle}
+      >
+        {playing ? (
+          <Pause size={14} fill="currentColor" aria-hidden="true" />
+        ) : (
+          <Play size={14} fill="currentColor" aria-hidden="true" />
+        )}
       </button>
       <span className="progress-player__track" aria-hidden="true">
-        <span className="progress-player__fill" style={{ transform: `scaleX(${(frame + 1) / Math.max(total, 1)})` }} />
+        <span
+          className="progress-player__fill"
+          style={{ transform: `scaleX(${(frame + 1) / Math.max(total, 1)})` }}
+        />
       </span>
       <span className="progress-player__count" aria-label={t("frame", { n: frame + 1, total })}>
         {frame + 1} / {total}

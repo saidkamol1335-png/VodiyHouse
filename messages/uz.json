@@ -1294,5 +1294,31 @@
     "show": "{count, plural, other {# ta TJMni ko‘rsatish}}",
     "showAll": "Barcha yangi uylar",
     "again": "Qaytadan"
+  },
+  "unitVideo": {
+    "metaTitle": "Kvartira videosi · {name} TJM",
+    "metaDescription": "{name} TJMdagi kvartira hozir qanday ko‘rinadi: Vodiy House videosi va suratlari, to‘lov hisobi.",
+    "back": "{name} TJM",
+    "eyebrow": "Siz uchun kvartira videosi",
+    "title": "Kvartira <accent>hozir</accent> qanday ko‘rinadi",
+    "floor": "{n}-qavat",
+    "levelUnit": "Shu kvartira videosi",
+    "levelBlock": "{name}-blok videosi",
+    "levelComplex": "TJM videosi",
+    "state": "{month} holatiga",
+    "shot": "{date} da Vodiy House videografi suratga olgan",
+    "done": "Bir oyda nima qilindi",
+    "history": "Oldingi oylar",
+    "ready": "Blok tayyorligi",
+    "deadline": "Topshirish: {quarter}",
+    "cta": "Jonli ko‘rmoqchimisiz?",
+    "ctaText": "Vodiy House menejeri kvartirani va uyning o‘zini bepul ko‘rsatadi.",
+    "toComplex": "TJM sahifasi",
+    "calcTitle": "<accent>Shu kvartira</accent> uchun qancha to‘lanadi",
+    "calcLead": "Narx va to‘lov dasturlari — shu kvartira uchun. Bank, boshlang‘ich to‘lov va muddatni o‘zgartirish mumkin.",
+    "calcButton": "To‘lovni hisoblash",
+    "calcPending": "Hisoblanmoqda…",
+    "calcFailed": "Hisob yuklanmadi — qayta urinib ko‘ring",
+    "fromVideo": "videodan"
   }
 }

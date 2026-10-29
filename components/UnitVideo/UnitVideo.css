@@ -1,0 +1,318 @@
+/* Видео квартиры для клиента (фаза 5, мокап SiteVideo .vp — контейнер 1080 px; MobVideo): шапка с
+   мета и бейджами, плеер, под ним сетка 1fr / 300px — «Что сделано», «Предыдущие месяцы» и справа
+   готовность блока с «Хотите посмотреть вживую?»; ниже — «Сколько платить за эту квартиру». */
+.unit-video {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding: 112px 0 72px;
+}
+
+.unit-video__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.unit-video__back:hover {
+  color: var(--fg);
+}
+
+.unit-video__eyebrow {
+  margin: 12px 0 0;
+  color: var(--amber-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.unit-video__title {
+  margin: 10px 0 0;
+  color: var(--fg);
+  font-size: clamp(32px, 4.2vw, 52px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.unit-video__accent {
+  font-family: var(--serif);
+  font-size: 1.12em;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--amber-2);
+}
+
+.unit-video__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin: 16px 0 0;
+  padding: 0;
+  color: var(--fg-2);
+  font-size: 15px;
+  list-style: none;
+}
+
+.unit-video__meta li + li::before {
+  content: "·";
+  margin: 0 8px;
+  color: var(--fg-3);
+}
+
+.unit-video__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
+.unit-video__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.unit-video__badge--level {
+  border-color: var(--amber-line);
+  background: var(--amber-soft);
+  color: var(--fg);
+}
+
+.unit-video__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.unit-video__main,
+.unit-video__side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.unit-video__card,
+.unit-video__ready,
+.unit-video__cta {
+  /* Элемент сетки не уже содержимого по умолчанию: лента месяцев на телефоне распирала бы страницу. */
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+}
+
+.unit-video__label {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.unit-video__card-title {
+  margin: 14px 0 0;
+  color: var(--fg-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.unit-video__comment {
+  margin: 6px 0 0;
+  color: var(--fg);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.unit-video__history {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.unit-video__month {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--photo-bg);
+  color: var(--over-photo-fg);
+  cursor: pointer;
+}
+
+.unit-video__month[aria-pressed="true"] {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-soft);
+}
+
+.unit-video__month-photo {
+  position: absolute;
+  inset: 0;
+}
+
+.unit-video__month-label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 16px 8px 6px;
+  background: linear-gradient(180deg, rgba(10, 8, 6, 0), rgba(10, 8, 6, 0.72));
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.unit-video__month:focus-visible {
+  outline-offset: -3px;
+}
+
+.unit-video__ready-value {
+  margin: 6px 0 12px;
+  color: var(--fg);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.unit-video__ready-bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.unit-video__ready-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--amber-2), var(--amber));
+  transform-origin: left center;
+}
+
+.unit-video__ready-facts {
+  margin: 10px 0 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.unit-video__cta {
+  display: grid;
+  gap: 10px;
+}
+
+.unit-video__cta-title {
+  margin: 0;
+  color: var(--fg);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.unit-video__cta-text {
+  margin: 0 0 6px;
+  color: var(--fg-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.unit-video__phone {
+  width: 100%;
+}
+
+.unit-video__to-complex {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--amber-2);
+  font-size: var(--fs-control);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.unit-video__pay {
+  margin-top: 56px;
+}
+
+.unit-video__pay-title {
+  margin: 0;
+  color: var(--fg);
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.unit-video__pay-lead {
+  margin: 8px 0 20px;
+  color: var(--fg-2);
+  font-size: 15px;
+}
+
+.unit-video__calc-error {
+  margin: 10px 0 0;
+  color: var(--danger, #b42318);
+  font-size: 14px;
+}
+
+@media (max-width: 980px) {
+  .unit-video__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .unit-video {
+    padding-top: 84px;
+  }
+
+  .unit-video__comment {
+    font-size: 17px;
+  }
+
+  /* Предыдущие месяцы — лентой (мокап MobVideo). */
+  .unit-video__history {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .unit-video__history > li {
+    flex: none;
+    width: 128px;
+  }
+}
+
+[data-motion="full"] .unit-video__month {
+  transition: transform var(--dur-base) var(--ease);
+}
+
+[data-motion="full"] .unit-video__month:hover {
+  transform: scale(1.03);
+}
