@@ -13,7 +13,7 @@ import type {
   LeadFieldErrors,
   LeadObject,
   LeadRequest,
-  LeadSubmitResult,
+  SiteLeadResult,
   LeadType,
   SiteLang,
   ViewChoice,
@@ -41,9 +41,9 @@ export type LeadContact = { name: string; phone: string; lang: SiteLang; trap: s
 /** «Застройщикам» (3.11): компания обязательна, остальное — по желанию. */
 export type LeadPartner = NonNullable<LeadRequest["partner"]>;
 
-export type LeadSent = { number: number; repeat: boolean };
+export type LeadSent = { number: number };
 
-const NETWORK: LeadSubmitResult = { status: "error", error: "network" };
+const NETWORK: SiteLeadResult = { status: "error", error: "network" };
 
 /** Что уходит на сервер: тип и объект формы, контакт, страница, метки первого захода, данные по типу. */
 function requestOf(intent: LeadIntent, contact: LeadContact, siteLang: SiteLang, view: ViewChoice | null, partner?: LeadPartner): LeadRequest {
@@ -87,7 +87,7 @@ export function useLeadSubmit(id: string, intent: LeadIntent) {
     startTransition(async () => {
       const result = await submitLeadAction(request).catch(() => NETWORK);
       if (result.status === "sent") {
-        setSent({ number: result.number, repeat: result.repeat });
+        setSent({ number: result.number });
         if (result.number > 0) track("lead_sent", { detail: intent.type });
       } else {
         setError(result.error);

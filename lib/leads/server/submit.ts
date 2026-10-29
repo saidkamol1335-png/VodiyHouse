@@ -3,7 +3,7 @@ import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
 import { after } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { CLIENT_IP_HEADER } from "@/lib/supabase/authForwarding";
+import { visitorAddress } from "@/lib/clientAddress";
 import { hasSupabaseAdminEnv, supabaseSecretKey } from "@/lib/supabase/env";
 import { leadDbErrorCode } from "../errors";
 import type { LeadPayload } from "../request";
@@ -21,13 +21,11 @@ export function rateKey(kind: "ip" | "tg", value: string): string {
 }
 
 /**
- * Адрес посетителя для лимитов — только заголовок Netlify (его ставит край сети): x-forwarded-for
- * и x-real-ip посетитель подделывает, как в authForwarding. Формат не проверяем — адрес идёт только
- * в хэш, а e2e дают каждому тесту свой «адрес». Без заголовка — null: база пропускает лимит по
- * адресу, остаются лимиты по номеру и чату.
+ * Адрес посетителя для лимитов (lib/clientAddress.ts): заголовок Netlify, IPv6 — сетью /64. Без
+ * заголовка — null: база пропускает лимит по адресу, остаются лимиты по номеру и чату.
  */
 export function visitorIp(list: Pick<Headers, "get">): string | null {
-  return list.get(CLIENT_IP_HEADER)?.trim() || null;
+  return visitorAddress(list);
 }
 
 export async function visitorKey(): Promise<string | null> {

@@ -22,13 +22,15 @@ import { ADMIN_ROUTES, isSectionOpen, type AdminNavKey } from "./nav";
 
 export type CabinetSession = { result: ViewerResult; email: string | null };
 
-const PROFILE_COLUMNS = "id, full_name, role, is_active, must_change_password";
-
-/** Свой профиль под сессией сотрудника (RLS: каждый видит себя). Ошибка сети — исключение. */
+/**
+ * Свой профиль под сессией сотрудника — функцией own_profile: флаг смены пароля в таблице виден только
+ * о себе (аудит 29.10, 20261029070000). Ошибка сети — исключение.
+ */
 export async function readOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfileRow | null> {
-  const { data, error } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", userId).maybeSingle();
+  const { data, error } = await supabase.rpc("own_profile").maybeSingle();
   if (error) throw new Error("cabinet-profile-unavailable", { cause: error });
-  return data as OwnProfileRow | null;
+  const profile = data as OwnProfileRow | null;
+  return profile?.id === userId ? profile : null;
 }
 
 /** Один раз на запрос (React.cache): layout, страница и меню читают одно и то же. */

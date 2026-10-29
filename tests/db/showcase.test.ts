@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { seedContent, type ContentIds } from "./content-fixtures";
 import {
   anon,
+  createAuthUser,
   createStaff,
   createTestDb,
   expectDenied,
@@ -38,12 +39,15 @@ describe("витрина: права, правила и DEMO", () => {
   let ids: ContentIds;
   let head: string;
   let manager: string;
+  /** Вошедший без роли (отключённый, без профиля): таблиц витрины не видит, как и посетитель (аудит 29.10). */
+  let outsider: Actor;
 
   beforeAll(async () => {
     db = await createTestDb();
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head", { fullName: "Бахтиёр Каримов" });
     manager = await createStaff(db.admin, "manager");
+    outsider = user(await createAuthUser(db.admin));
   });
   afterAll(() => db.close());
 
@@ -68,6 +72,9 @@ describe("витрина: права, правила и DEMO", () => {
 
   const count = async (actor: Actor, table: string) =>
     (await db.as(actor, (tx) => tx.query<{ n: number }>(`select count(*)::int as n from ${table}`))).rows[0]!.n;
+  /** Что видит сайт: site_showcase() от имени посетителя — напрямую таблицы витрины ему закрыты (20261029070000). */
+  const onSite = async (key: "specials" | "ads" | "collections") =>
+    (await db.as(anon, (tx) => tx.query<{ v: { id: string }[] }>("select public.site_showcase() -> $1 as v", [key]))).rows[0]!.v;
 
   describe("права и видимость", () => {
     it("добавляет руководитель; менеджер и посетитель — отказ, чужая правка — ноль строк", async () => {
@@ -90,8 +97,11 @@ describe("витрина: права, правила и DEMO", () => {
         complexes: [ids.orphanComplex],
         title: "Черновик застройщика",
       });
-      const seen = await db.as(anon, (tx) => tx.query<{ id: string }>("select id from specials"));
-      expect(seen.rows.map((row) => row.id)).toEqual([visible]);
+      expect((await onSite("specials")).map((item) => item.id)).toEqual([visible]);
+      for (const table of ["specials", "ads", "collections"]) {
+        await expectDenied(db.as(anon, (tx) => tx.query(`select id from ${table}`)));
+        expect(await count(outsider, table)).toBe(0);
+      }
       expect(await count(user(manager), "specials")).toBe(4);
       await asHead((tx) => tx.query("delete from specials"));
     });
@@ -105,11 +115,11 @@ describe("витрина: права, правила и DEMO", () => {
           ),
         );
       // В облаке рядом живут подборки DEMO-сида — считаем относительно того, что уже есть.
-      const visibleBefore = await count(anon, "collections");
+      const visibleBefore = (await onSite("collections")).length;
       const allBefore = await count(user(manager), "collections");
       await insert("sdannye-doma", true);
       await insert("skrytaya", false);
-      expect(await count(anon, "collections")).toBe(visibleBefore + 1);
+      expect((await onSite("collections")).length).toBe(visibleBefore + 1);
       expect(await count(user(manager), "collections")).toBe(allBefore + 2);
       await expect(insert("sdannye-doma", true)).rejects.toMatchObject({ code: "23505" });
       await asHead((tx) => tx.query("delete from collections where slug in ('sdannye-doma', 'skrytaya')"));
@@ -255,9 +265,9 @@ describe("витрина: права, правила и DEMO", () => {
 
   describe.skipIf(isRemoteTarget)("DEMO", () => {
     const demoCounts = async () => ({
-      specials: await count(anon, "specials"),
-      ads: await count(anon, "ads"),
-      collections: await count(anon, "collections"),
+      specials: (await onSite("specials")).length,
+      ads: (await onSite("ads")).length,
+      collections: (await onSite("collections")).length,
       staffSpecials: await count(user(head), "specials"),
       staffAds: await count(user(head), "ads"),
     });

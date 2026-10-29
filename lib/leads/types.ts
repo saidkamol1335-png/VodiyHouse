@@ -93,6 +93,14 @@ export type LeadSubmitResult =
   | { status: "sent"; number: number; repeat: boolean; id?: string }
   | { status: "error"; error: LeadErrorCode; fields?: LeadFieldErrors };
 
+/**
+ * Ответ формы сайта посетителю: без признака повтора (аудит 29.10). Иначе по чужому номеру и ЖК
+ * можно было узнать, оставлял ли человек заявку за сутки. Повтор видят сотрудники и бот (свой номер).
+ */
+export type SiteLeadResult =
+  | { status: "sent"; number: number }
+  | { status: "error"; error: LeadErrorCode; fields?: LeadFieldErrors };
+
 export type LeadField = "name" | "phone" | "company";
 export type LeadFieldErrors = Partial<Record<LeadField, "required" | "phone">>;
 

@@ -61,12 +61,13 @@ describe("застройщики, ЖК и медиа", () => {
     expect(await contacts(head)).toHaveLength(1);
   });
 
-  it("сданные объекты и фото видны сайту только у опубликованных", async () => {
+  it("сданные объекты видны сайту только у опубликованных; фото — только через функции сайта", async () => {
     const { rows } = await db.as(anon, (tx) =>
       tx.query<{ name: string }>("select name ->> 'ru' as name from developer_past_projects"),
     );
     expect(rows).toEqual([{ name: "Сданный дом" }]);
-    expect(await idsVisible(anon, "media_assets")).toEqual([ids.publicPhoto]);
+    // Аудит 29.10 (20261029070000): таблицу медиа посетитель напрямую не читает — сайт берёт фото из site_complex.
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from media_assets")));
     expect(await idsVisible(user(videographer), "media_assets")).toHaveLength(2);
   });
 

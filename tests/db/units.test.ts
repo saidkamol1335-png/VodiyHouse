@@ -29,13 +29,15 @@ describe("блоки, планировки и квартиры", () => {
       ])
     ).rows[0];
 
-  it("сайт видит блоки и планировки только опубликованных ЖК", async () => {
+  it("сайт видит блоки только опубликованных ЖК; планировки — только через функции сайта", async () => {
     const blocks = await db.as(anon, (tx) => tx.query<{ id: string }>("select id from blocks"));
     expect(blocks.rows.map((row) => row.id)).toEqual([ids.publicBlock]);
-    const layouts = await db.as(anon, (tx) => tx.query<{ id: string }>("select id from layouts"));
-    expect(layouts.rows.map((row) => row.id).sort()).toEqual(
-      [ids.oneRoomLayout, ids.twoRoomLayout].sort(),
+    // Аудит 29.10 (20261029070000): ручные price_from и available напрямую не видны — только layout_availability.
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from layouts")));
+    const offers = await db.as(anon, (tx) =>
+      tx.query<{ layout_id: string }>("select layout_id from public.layout_availability($1)", [ids.publicComplex]),
     );
+    expect(offers.rows.map((row) => row.layout_id).sort()).toEqual([ids.oneRoomLayout, ids.twoRoomLayout].sort());
   });
 
   it("квартиры посетителю напрямую закрыты — ни строк, ни полей сотрудников", async () => {

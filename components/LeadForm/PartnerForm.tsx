@@ -106,7 +106,7 @@ export function PartnerForm({ defaultCity }: { defaultCity: string }) {
   if (sent) {
     return (
       <div className="lead-form">
-        <LeadDone ref={done} type="partner" number={sent.number} repeat={sent.repeat} />
+        <LeadDone ref={done} type="partner" number={sent.number} />
         <Button variant="outline" onClick={again}>
           {t("partner.again")}
         </Button>

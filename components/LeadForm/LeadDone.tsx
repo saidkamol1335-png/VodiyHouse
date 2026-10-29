@@ -9,12 +9,11 @@ import type { LeadType } from "@/lib/leads/types";
 type LeadDoneProps = {
   type: LeadType;
   number: number;
-  repeat: boolean;
   ref: Ref<HTMLDivElement>;
 };
 
 /** «Заявка отправлена» мокапа (`.done`): значок, номер, когда перезвонят, «что дальше». */
-export function LeadDone({ type, number, repeat, ref }: LeadDoneProps) {
+export function LeadDone({ type, number, ref }: LeadDoneProps) {
   const t = useTranslations("lead");
   const { callbackMinutes } = useSiteContacts();
   // Просмотр: «перезвонит в течение N минут», а «что дальше» — «подтвердит время» (не повторяем).
@@ -29,7 +28,7 @@ export function LeadDone({ type, number, repeat, ref }: LeadDoneProps) {
       <b className="lead-form__done-title">{t("done")}</b>
       {/* Ловушка для ботов отвечает без номера — заявки нет. */}
       {number > 0 ? <p className="lead-form__done-number">{t("doneNumber", { number })}</p> : null}
-      <p className="lead-form__done-text">{repeat ? t("doneRepeat") : when}</p>
+      <p className="lead-form__done-text">{when}</p>
       <LeadNext type={type} sent />
     </div>
   );

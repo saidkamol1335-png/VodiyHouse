@@ -959,7 +959,6 @@
     "doneNumber": "Ariza raqami #{number}",
     "doneCall": "Vodiy House menejeri ish vaqtida {minutes} daqiqa ichida qo‘ng‘iroq qiladi.",
     "doneCallPlain": "Vodiy House menejeri ish vaqtida qo‘ng‘iroq qiladi.",
-    "doneRepeat": "Arizangizni oldik — menejer siz yana murojaat qilganingizni ko‘radi.",
     "close": "Yopish",
     "more": {
       "title": "<accent>Batafsil</accent> bilishni xohlaysizmi?",

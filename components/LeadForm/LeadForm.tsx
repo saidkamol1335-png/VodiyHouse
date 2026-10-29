@@ -52,7 +52,7 @@ export function LeadForm({ id, intent, variant = "dialog", afterDone }: LeadForm
   if (sent) {
     return (
       <>
-        <LeadDone ref={done} type={intent.type} number={sent.number} repeat={sent.repeat} />
+        <LeadDone ref={done} type={intent.type} number={sent.number} />
         {afterDone}
       </>
     );

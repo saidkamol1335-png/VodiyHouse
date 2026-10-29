@@ -3,7 +3,7 @@ import { createHmac } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { CLIENT_IP_HEADER } from "@/lib/supabase/authForwarding";
+import { visitorAddress } from "@/lib/clientAddress";
 import { hasSupabaseAdminEnv, supabaseSecretKey } from "@/lib/supabase/env";
 import { createSupabaseVerifierClient } from "@/lib/supabase/verifier";
 import type { ChangePasswordDeps } from "../auth/changePassword";
@@ -42,9 +42,8 @@ export function loginAttemptKey(email: string, ip: string | null): string {
 function loginAttemptDeps(): Pick<SignInDeps, "beginAttempt" | "clearAttempts"> {
   if (!hasSupabaseAdminEnv()) return { beginAttempt: async () => true, clearAttempts: async () => undefined };
   const admin = createSupabaseAdminClient();
-  // Адрес — только заголовок Netlify, как у лимита заявок (x-forwarded-for посетитель подделывает).
-  const keyOf = async (email: string) =>
-    loginAttemptKey(email, (await headers()).get(CLIENT_IP_HEADER)?.trim() || null);
+  // Адрес — как у лимита заявок (lib/clientAddress.ts): заголовок Netlify, IPv6 — сетью /64.
+  const keyOf = async (email: string) => loginAttemptKey(email, visitorAddress(await headers()));
   return {
     async beginAttempt(email) {
       try {

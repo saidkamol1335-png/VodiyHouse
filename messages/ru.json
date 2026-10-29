@@ -3215,7 +3215,6 @@
     "doneNumber": "Номер заявки #{number}",
     "doneCall": "Менеджер Vodiy House перезвонит в течение {minutes, plural, one {# минуты} few {# минут} other {# минут}} в рабочее время.",
     "doneCallPlain": "Менеджер Vodiy House перезвонит в рабочее время.",
-    "doneRepeat": "Мы уже получили вашу заявку — менеджер увидит, что вы обратились ещё раз.",
     "close": "Закрыть",
     "more": {
       "title": "Хотите узнать <accent>больше?</accent>",
