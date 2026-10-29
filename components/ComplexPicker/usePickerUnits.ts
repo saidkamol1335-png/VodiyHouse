@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { readComplexUnitsAction } from "@/lib/site/complex/actions";
 import type { PickerUnit } from "@/lib/site/picker/records";
-
-/** Как часто перечитывать статусы, пока раздел на экране и вкладка открыта. */
-export const PICKER_REFRESH_MS = 15_000;
+import { PICKER_REFRESH } from "@/lib/site/picker/refresh";
 
 export type PickerUnits = {
   /** Квартиры по блокам; блока ещё нет — грузится. */
@@ -18,24 +16,26 @@ export type PickerUnits = {
 
 /**
  * Квартиры блоков раздела одним запросом (block_units мимо кэша): первый раз — когда раздел подошёл
- * к экрану, потом каждые 15 с, пока он на экране и вкладка видна, и сразу при возвращении на
- * вкладку. Смена статуса в кабинете видна на сайте за секунды (PLAN §7, приёмка фазы 4). Один запрос
- * за раз; ответ старше последнего не применяется; ушли со страницы — опрос останавливается.
+ * к экрану, потом с паузой, которую назвал сервер (по числу посетителей онлайн: 60, 30 или 15 с), пока
+ * он на экране и вкладка видна, и сразу при возвращении на вкладку. Один запрос за раз; ответ старше
+ * последнего не применяется; ушли со страницы — опрос останавливается.
  */
 export function usePickerUnits(blockIds: readonly string[], section: React.RefObject<HTMLElement | null>): PickerUnits {
   const [byBlock, setByBlock] = useState<Record<string, PickerUnit[]>>({});
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [failed, setFailed] = useState(false);
   const inFlight = useRef<Promise<void> | null>(null);
+  const refreshMs = useRef<number>(PICKER_REFRESH.usual);
   const key = blockIds.join(",");
   const load = useCallback((): Promise<void> => {
     if (inFlight.current) return inFlight.current;
     const request = readComplexUnitsAction(key.split(",").filter(Boolean))
       .catch(() => null)
-      .then((units) => {
-        setFailed(!units);
-        if (!units) return;
-        setByBlock(units);
+      .then((answer) => {
+        setFailed(!answer);
+        if (!answer) return;
+        setByBlock(answer.units);
+        refreshMs.current = answer.refreshMs;
         setUpdatedAt(new Date());
       })
       .finally(() => {
@@ -44,11 +44,15 @@ export function usePickerUnits(blockIds: readonly string[], section: React.RefOb
     inFlight.current = request;
     return request;
   }, [key]);
-  usePolling(load, section);
+  usePolling(load, section, refreshMs);
   return { byBlock, updatedAt, failed, retry: () => void load() };
 }
 
-function usePolling(load: () => Promise<void>, section: React.RefObject<HTMLElement | null>) {
+function usePolling(
+  load: () => Promise<void>,
+  section: React.RefObject<HTMLElement | null>,
+  refreshMs: React.RefObject<number>,
+) {
   useEffect(() => {
     const node = section.current;
     if (!node) return;
@@ -61,7 +65,7 @@ function usePolling(load: () => Promise<void>, section: React.RefObject<HTMLElem
       void load().finally(() => {
         // Два вызова tick ждут один запрос — таймер остаётся один.
         window.clearTimeout(timer);
-        if (!stopped) timer = window.setTimeout(tick, PICKER_REFRESH_MS);
+        if (!stopped) timer = window.setTimeout(tick, refreshMs.current);
       });
     };
     const observer = new IntersectionObserver(
@@ -80,5 +84,5 @@ function usePolling(load: () => Promise<void>, section: React.RefObject<HTMLElem
       document.removeEventListener("visibilitychange", tick);
       window.clearTimeout(timer);
     };
-  }, [load, section]);
+  }, [load, section, refreshMs]);
 }

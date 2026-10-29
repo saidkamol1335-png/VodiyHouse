@@ -2,7 +2,9 @@
 
 import { draftMode } from "next/headers";
 import type { FlatCalcRecord } from "@/lib/calc/flatScreen";
+import { readOnlineVisitors } from "@/lib/events/server/online";
 import { unitFrom, type BlockUnitRecord, type PickerUnit } from "@/lib/site/picker/records";
+import { pickerRefreshMs } from "@/lib/site/picker/refresh";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { readLayoutCalc } from "./flatCalc";
@@ -33,25 +35,29 @@ export async function readLayoutCalcWithoutUnitsAction(
 
 /**
  * «Выбрать квартиру» (фаза 4): квартиры блоков со статусами — мимо кэша, раздел перечитывает их,
- * пока он на экране: смена статуса в кабинете видна за секунды. block_units отдаёт цену только
- * свободной и только видимого ЖК (в предпросмотре — сессией сотрудника).
+ * пока он на экране. block_units отдаёт цену только свободной и только видимого ЖК (в предпросмотре —
+ * сессией сотрудника). refreshMs — через сколько спросить снова: по числу посетителей онлайн.
  */
 export async function readComplexUnitsAction(
   blockIds: string[],
-): Promise<Record<string, PickerUnit[]> | null> {
+): Promise<{ units: Record<string, PickerUnit[]>; refreshMs: number } | null> {
   if (!Array.isArray(blockIds) || blockIds.length === 0 || blockIds.length > 20) return null;
   if (!blockIds.every((id) => typeof id === "string" && UUID.test(id)) || !hasSupabaseEnv())
     return null;
   const supabase = await createSupabaseServerClient();
-  const answers = await Promise.all(
-    blockIds.map((id) => supabase.rpc("block_units", { target_block: id })),
-  );
+  const [online, ...answers] = await Promise.all([
+    readOnlineVisitors(),
+    ...blockIds.map((id) => supabase.rpc("block_units", { target_block: id })),
+  ]);
   const failed = answers.find((answer) => answer.error);
   if (failed) {
     console.error("[novostroyki/zhk] квартиры блоков недоступны", failed.error);
     return null;
   }
-  return Object.fromEntries(
-    blockIds.map((id, index) => [id, (answers[index]!.data as BlockUnitRecord[]).map(unitFrom)]),
-  );
+  return {
+    units: Object.fromEntries(
+      blockIds.map((id, index) => [id, (answers[index]!.data as BlockUnitRecord[]).map(unitFrom)]),
+    ),
+    refreshMs: pickerRefreshMs(online),
+  };
 }

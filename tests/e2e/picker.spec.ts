@@ -103,8 +103,9 @@ test.describe("сайт · выбрать квартиру на фасаде", (
     test.skip(testInfo.project.name !== "desktop-1440" || !process.env.SUPABASE_DB_URL, "один раз: статус меняется в общей базе");
     // В общем прогоне бронь задела бы счётчики DEMO соседних спек: только `npm run e2e:1440 -- picker.spec.ts`.
     test.skip(process.env.E2E_LIVE !== "1", "живой статус — только при отдельном запуске picker.spec");
-    // Раздел перечитывает статусы раз в 15 с: ждём до 25 с; кабинет грузит список квартир лениво.
-    test.setTimeout(120_000);
+    // Пауза опроса — по онлайну (60 / 30 / 15 с): на DEMO посетителей мало — ждём до 70 с; кабинет грузит
+    // список квартир лениво.
+    test.setTimeout(240_000);
     const unit = await withDb(async (client) =>
       (
         await client.query<{ id: string; number: string; floor: number; entrance: number; complex_id: string }>(
@@ -140,11 +141,11 @@ test.describe("сайт · выбрать квартиру на фасаде", (
       await row.getByRole("button", { name: `Кв. ${unit.number}, свободна. Сменить статус` }).click();
       await admin.getByRole("group", { name: new RegExp(`^Статус кв\\. ${unit.number}`) }).getByRole("button", { name: "бронь" }).click();
       await expect(admin.locator(".units-undo")).toContainText(`Кв. ${unit.number}: свободна → бронь`);
-      await expect(tile).toHaveClass(/complex-picker__unit--reserved/, { timeout: 25_000 });
+      await expect(tile).toHaveClass(/complex-picker__unit--reserved/, { timeout: 70_000 });
       // «Отменить» живёт 5 с — сайт ждём дольше; обратно — тем же выбором статуса, сайт видит и это.
       await row.getByRole("button", { name: `Кв. ${unit.number}, бронь. Сменить статус` }).click();
       await admin.getByRole("group", { name: new RegExp(`^Статус кв\. ${unit.number}`) }).getByRole("button", { name: "свободна" }).click();
-      await expect(tile).toHaveClass(/complex-picker__unit--free/, { timeout: 25_000 });
+      await expect(tile).toHaveClass(/complex-picker__unit--free/, { timeout: 70_000 });
     } finally {
       // Страховка: квартира DEMO снова свободна, даже если тест упал посередине.
       await setStatus("free");

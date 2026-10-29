@@ -118,6 +118,14 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
     expect(now.feed.some((item) => item.type === "page_view")).toBe(false);
     const videographer = await createStaff(db.admin, "videographer");
     await expectHint(db.as(user(videographer), (tx) => tx.query("select site_now()")), "vh:forbidden");
+
+    // «Выбрать квартиру» (ответ 29.10): то же число онлайн — серверу; посетителю и сотруднику — нет.
+    const count = await db.as(service, async (tx) =>
+      (await tx.query<{ v: number }>("select site_online_count() as v")).rows[0]!.v,
+    );
+    expect(count).toBe(now.online);
+    await expectDenied(db.as(anon, (tx) => tx.query("select site_online_count()")));
+    await expectDenied(db.as(user(manager), (tx) => tx.query("select site_online_count()")));
   });
 
   it("очистка: старше 400 дней — удаляются", async () => {
