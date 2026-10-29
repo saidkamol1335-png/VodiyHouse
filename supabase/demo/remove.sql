@@ -67,6 +67,13 @@ where entity = 'collections'
     or changes ->> 'slug' like 'demo-%');
 delete from public.collections where slug like 'demo-%';
 
+-- Статистика (фаза 6, stats.sql): DEMO-посещения — по id посетителя «00000000-de30-…», DEMO-заявки —
+-- по имени «DEMO · …» (доставок у них нет; журнал смены статуса из кабинета — тоже DEMO).
+delete from public.events where visitor_id::text like '00000000-de30-%';
+delete from public.audit_log
+where entity = 'leads' and entity_id in (select id::text from public.leads where name like 'DEMO · %');
+delete from public.leads where name like 'DEMO · %';
+
 delete from public.complexes where slug like 'demo-%';
 delete from public.developers where slug like 'demo-%';
 

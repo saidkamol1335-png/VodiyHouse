@@ -7,7 +7,8 @@ import { filterFromSearch, searchFromFilter } from "@/lib/site/catalog/params";
 
 export type SiteNowItem = {
   at: string;
-  type: Exclude<EventType, "page_view">;
+  // Просмотры страниц и «Планировки на экране» в ленту не идут (site_now) — только в статистику.
+  type: Exclude<EventType, "page_view" | "layout_view">;
   detail: string | null;
   source: string | null;
   device: Device;

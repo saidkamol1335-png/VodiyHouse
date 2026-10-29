@@ -229,7 +229,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
 
     it("лимит событий снова под замком ключа адреса", async () => {
       const { rows } = await db.admin.query<{ body: string }>(
-        "select pg_get_functiondef('public.track_events(uuid, uuid, text, text, text, text, jsonb)'::regprocedure) as body",
+        "select pg_get_functiondef('public.track_events(uuid, uuid, text, text, text, text, jsonb, text, text)'::regprocedure) as body",
       );
       expect(rows[0]?.body).toMatch(/private\.lock_event_key\(p_client_key\)[\s\S]*event_rates/);
     });
@@ -303,6 +303,14 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       expect(await visible(user(videographer), "select * from public.developer_private")).toBe(0);
       await expect(db.as(user(videographer), (tx) => tx.query("select public.leads_screen(null, null, null)"))).rejects.toThrow();
       await expect(db.as(user(videographer), (tx) => tx.query("select public.lead_card(1001)"))).rejects.toThrow();
+    });
+
+    it("статистику сайта (фаза 6) видит только руководитель — ни видеограф, ни менеджер", async () => {
+      const call = "select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())";
+      for (const actor of [user(videographer), user(manager), anon]) {
+        await expect(db.as(actor, (tx) => tx.query(call))).rejects.toThrow(DENIED);
+      }
+      await expect(db.as(user(head), (tx) => tx.query(call))).resolves.toBeTruthy();
     });
 
     it("не читает служебное и не меняет квартиры: статус и цена — руководителю и менеджеру", async () => {

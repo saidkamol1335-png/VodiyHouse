@@ -39,6 +39,31 @@ test.describe("события сайта → «Сейчас на сайте»", 
     await cabinet.close();
   });
 
+  test("фаза 6: «Планировки» на экране секунду — layout_view, в пачке метки креатива первого захода", async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "одна запись в базу на прогон");
+    const visitor = await browser.newContext({ userAgent: VISITOR_AGENT });
+    const site = await visitor.newPage();
+    // Тело sendBeacon (Blob) Playwright не показывает — копия пачки в window до отправки.
+    await site.addInitScript(() => {
+      const beacons: string[] = [];
+      Object.assign(window, { __beacons: beacons });
+      const send = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = (url, data) => {
+        if (data instanceof Blob) void data.text().then((text) => beacons.push(text));
+        return send(url, data);
+      };
+    });
+    await site.goto("/ru/novostroyki/demo-shodlik?utm_source=e2e-events.test&utm_medium=reels&utm_content=e2e_reels_01");
+    await site.locator("#planirovki").scrollIntoViewIfNeeded();
+    // Пачка уходит по таймеру очереди (4 с).
+    const sent = () => site.evaluate(() => ((window as unknown as { __beacons: string[] }).__beacons ?? []).find((text) => text.includes('"layout_view"')) ?? "");
+    await expect.poll(sent, { timeout: 15_000 }).toContain('"layout_view"');
+    const batch = JSON.parse(await sent()) as { medium: string; content: string; events: { type: string }[] };
+    expect(batch).toMatchObject({ medium: "reels", content: "e2e_reels_01" });
+    expect(batch.events.filter((event) => event.type === "layout_view")).toHaveLength(1);
+    await visitor.close();
+  });
+
   test("сотрудник с сессией кабинета и безголовый браузер — без событий", async ({ browser }) => {
     const staff = await browser.newContext({ storageState: cabinetState("head"), userAgent: VISITOR_AGENT });
     const page = await staff.newPage();

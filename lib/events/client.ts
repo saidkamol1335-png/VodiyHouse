@@ -24,10 +24,10 @@ const HISTORY_MAX = 20;
 /** Сотрудник с сессией кабинета или стенд /dev: ни наших событий, ни пикселей. */
 export const isStaff = () => AUTH_COOKIE.test(document.cookie) || window.location.pathname.startsWith("/dev");
 
-/** Источник для ленты: utm_source первого захода или домен, откуда пришли. */
-function sourceLabel(): string | null {
+/** Источник для ленты: utm_source первого захода или домен, откуда пришли; метки креатива — utm_medium и utm_content. */
+function sourceMarks(): Pick<EventBatch, "source" | "medium" | "content"> {
   const source = leadSource();
-  return source.utm_source ?? source.referrer ?? null;
+  return { source: source.utm_source ?? source.referrer ?? null, medium: source.utm_medium ?? null, content: source.utm_content ?? null };
 }
 
 const TAB_KEY = "vh-tab";
@@ -56,7 +56,7 @@ export function flushEvents(): void {
   clearTimeout(timer);
   timer = undefined;
   if (queue.length === 0) return;
-  const batch: EventBatch = { events: queue.splice(0, EVENT_BATCH_MAX), lang: langOf(), source: sourceLabel(), tab: tabOf() };
+  const batch: EventBatch = { events: queue.splice(0, EVENT_BATCH_MAX), lang: langOf(), ...sourceMarks(), tab: tabOf() };
   const body = JSON.stringify(batch);
   const sent = typeof navigator.sendBeacon === "function" && navigator.sendBeacon(ENDPOINT, new Blob([body], { type: "application/json" }));
   if (!sent) void fetch(ENDPOINT, { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => undefined);

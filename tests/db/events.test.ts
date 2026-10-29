@@ -128,6 +128,33 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
     await expectDenied(db.as(user(manager), (tx) => tx.query("select site_online_count()")));
   });
 
+  it("фаза 6: метки креатива — только слово латиницей; layout_view пишется, но не в ленту; старый вызов без меток работает", async () => {
+    const visitor = crypto.randomUUID();
+    const call = (medium: string | null, content: string | null, events: unknown[]) =>
+      db.as(service, async (tx) =>
+        (await tx.query<{ v: number }>("select track_events($1, gen_random_uuid(), null, 'mobile', 'uz', 'instagram', $2::jsonb, $3, $4) as v", [
+          visitor,
+          JSON.stringify(events),
+          medium,
+          content,
+        ])).rows[0]!.v,
+      );
+    expect(await call("reels", "shodlik_reels_03", [{ type: "layout_view", entity_type: "complex", entity_id: complex }])).toBe(1);
+    expect(await call("Позвоните +998901234567", "a b", [{ type: "page_view" }])).toBe(1);
+    expect(await track(visitor, [{ type: "page_view" }])).toBe(1);
+    const rows = await db.admin.query("select type, medium, content from events where visitor_id = $1 order by id", [visitor]);
+    expect(rows.rows).toEqual([
+      { type: "layout_view", medium: "reels", content: "shodlik_reels_03" },
+      { type: "page_view", medium: null, content: null },
+      { type: "page_view", medium: null, content: null },
+    ]);
+    const manager = await createStaff(db.admin, "manager");
+    const feed = await db.as(user(manager), async (tx) =>
+      (await tx.query<{ v: { feed: { type: string }[] } }>("select site_now() as v")).rows[0]!.v.feed,
+    );
+    expect(feed.some((item) => item.type === "layout_view")).toBe(false);
+  });
+
   it("очистка: старше 400 дней — удаляются", async () => {
     const visitor = crypto.randomUUID();
     await track(visitor, [{ type: "page_view" }, { type: "share", detail: "telegram" }]);

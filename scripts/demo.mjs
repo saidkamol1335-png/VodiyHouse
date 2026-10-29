@@ -14,9 +14,10 @@ const DEMO_DIR = path.join(import.meta.dirname, "..", "supabase", "demo");
 // (scripts/demoMedia.mjs): папки узнаём до remove.sql, файлы удаляем после SQL (откатилось — целы),
 // новые грузим после seed.sql.
 // `demo:seed -- stress` — плюс «худший», «лучший» и 30 ЖК для нагрузки (stress.sql, приёмка 3а).
+// stats.sql — 60 дней DEMO-посещений и заявок для «Статистики сайта» (фаза 6).
 const STEPS = {
-  seed: ["remove.sql", "seed.sql"],
-  stress: ["remove.sql", "seed.sql", "stress.sql"],
+  seed: ["remove.sql", "seed.sql", "stats.sql"],
+  stress: ["remove.sql", "seed.sql", "stats.sql", "stress.sql"],
   remove: ["remove.sql"],
 };
 
@@ -47,10 +48,12 @@ try {
        (select count(*) from public.developers where slug like 'demo-%')::int as developers,
        (select count(*) from public.complexes where slug like 'demo-%')::int as complexes,
        (select count(*) from public.units u join public.blocks b on b.id = u.block_id
-          join public.complexes c on c.id = b.complex_id where c.slug like 'demo-%')::int as units`,
+          join public.complexes c on c.id = b.complex_id where c.slug like 'demo-%')::int as units,
+       (select count(*) from public.events where visitor_id::text like '00000000-de30-%')::int as events,
+       (select count(*) from public.leads where name like 'DEMO · %')::int as leads`,
   );
-  const { developers, complexes, units } = rows[0];
-  console.log(`DEMO в базе: застройщиков ${developers}, ЖК ${complexes}, квартир ${units}.`);
+  const { developers, complexes, units, events, leads } = rows[0];
+  console.log(`DEMO в базе: застройщиков ${developers}, ЖК ${complexes}, квартир ${units}, событий ${events}, заявок ${leads}.`);
 } finally {
   await client.end();
 }

@@ -32,9 +32,18 @@ export function batchFrom(raw: unknown): EventBatch | null {
     .map((event) => event as SiteEvent);
   const lang = raw.lang === "ru" ? "ru" : "uz";
   const source = typeof raw.source === "string" ? raw.source.slice(0, 60) : null;
+  const medium = markOf(raw.medium);
+  const content = markOf(raw.content);
   const tab = typeof raw.tab === "string" && UUID.test(raw.tab) ? raw.tab : undefined;
-  return events.length > 0 ? { events, lang, source, ...(tab ? { tab } : {}) } : null;
+  return events.length > 0 ? { events, lang, source, medium, content, ...(tab ? { tab } : {}) } : null;
 }
+
+/**
+ * Метка креатива (utm_medium, utm_content): пробелы → «_», как у заявок в site_stats (private.utm_mark):
+ * «Shodlik reels 03» из {{ad.name}} Meta и у события, и у заявки — «Shodlik_reels_03». Длиннее 60
+ * знаков и не латиницей база отбросит.
+ */
+const markOf = (value: unknown) => (typeof value === "string" ? value.trim().replace(/\s+/g, "_").slice(0, 200) || null : null);
 
 export type TrackRequest = { userAgent: string | null; cookies: Map<string, string>; body: unknown };
 export type TrackResult = { visitor: string; session: string } | null;
@@ -56,6 +65,8 @@ export async function trackEvents({ userAgent, cookies, body }: TrackRequest): P
     p_lang: batch.lang,
     p_source: batch.source,
     p_events: batch.events,
+    p_medium: batch.medium ?? null,
+    p_content: batch.content ?? null,
   });
   if (error) console.error("[events] пачка не записана", error.message);
   return { visitor, session };

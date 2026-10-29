@@ -4,6 +4,8 @@
 export const EVENT_TYPES = [
   "page_view",
   "complex_view",
+  // Раздел «Планировки» ЖК на экране (фаза 6, «Путь посетителя» статистики).
+  "layout_view",
   "phone_click",
   "telegram_click",
   "favorite",
@@ -28,12 +30,20 @@ export type SiteEvent = {
   detail?: string;
 };
 
-/** Пачка от браузера: события, язык страницы и источник первого захода (utm_source или домен). */
 /**
+ * Пачка от браузера: события, язык страницы и источник первого захода (utm_source или домен);
+ * medium и content — utm_medium и utm_content того же захода (креативы статистики, фаза 6).
  * tab — случайный id вкладки: посетитель и сессия, если cookie запрещены (иначе каждая пачка была бы
  * новым посетителем). При cookie сервер его не смотрит.
  */
-export type EventBatch = { events: SiteEvent[]; lang: "ru" | "uz"; source: string | null; tab?: string };
+export type EventBatch = {
+  events: SiteEvent[];
+  lang: "ru" | "uz";
+  source: string | null;
+  medium?: string | null;
+  content?: string | null;
+  tab?: string;
+};
 
 /** Сколько событий за раз отправляет браузер (база всё равно возьмёт не больше 20). */
 export const EVENT_BATCH_MAX = 20;

@@ -10,4 +10,11 @@ describe("пачка событий", () => {
     expect(batchFrom({ events: [event], lang: "ru", source: null, tab: "не-uuid" })).not.toHaveProperty("tab");
     expect(batchFrom({ events: [event], lang: "ru", source: null })).not.toHaveProperty("tab");
   });
+
+  it("метки креатива (фаза 6): пробелы → «_» (как у заявок в базе), не строка — null; старый браузер без них — null", () => {
+    const batch = batchFrom({ events: [{ type: "layout_view" }], lang: "uz", source: "instagram", medium: "reels", content: " Shodlik  reels 03 " });
+    expect(batch).toMatchObject({ source: "instagram", medium: "reels", content: "Shodlik_reels_03" });
+    expect(batch?.events).toEqual([{ type: "layout_view" }]);
+    expect(batchFrom({ events: [event], lang: "ru", source: null, medium: 5 })).toMatchObject({ medium: null, content: null });
+  });
 });
