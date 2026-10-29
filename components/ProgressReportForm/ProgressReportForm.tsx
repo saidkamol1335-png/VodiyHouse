@@ -10,6 +10,7 @@ import { FormStatus } from "@/components/FormStatus";
 import type { ProgressFormComplex } from "@/lib/admin/progress/types";
 import { ReportPhotos } from "./ReportPhotos";
 import { ReportTarget } from "./ReportTarget";
+import { ReportVideo } from "./ReportVideo";
 import { useReportForm } from "./useReportForm";
 
 type ProgressReportFormProps = {
@@ -26,15 +27,19 @@ const COMMENT_MAX = 300;
  */
 export function ProgressReportForm({ complexes, months }: ProgressReportFormProps) {
   const t = useTranslations("admin.video.form");
-  const { form, round, target, change, queue, issues, sent, pending, submit } = useReportForm(
-    complexes,
-    months,
-  );
+  const { form, round, target, change, queue, video, issues, sent, pending, submit } =
+    useReportForm(complexes, months);
   if (complexes.length === 0) return <AdminPanel title={t("title")}>{t("noComplexes")}</AdminPanel>;
   return (
     <AdminPanel title={t("title")} wide>
       <form ref={form} className="progress-form" onSubmit={submit} noValidate>
         <ReportTarget complexes={complexes} months={months} value={target} onChange={change} />
+        <ReportVideo video={video.state} onPick={video.pick} onRemove={video.remove} />
+        {issues.video ? (
+          <p className="progress-form__error" role="alert">
+            {issues.video}
+          </p>
+        ) : null}
         <Field
           key={`youtube-${round}`}
           id="progress-youtube"

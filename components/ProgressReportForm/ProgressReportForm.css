@@ -165,3 +165,122 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* «Видео» (мокап .drop / .upl): пунктирная зона загрузки; карточка с именем, процентом и полосой. */
+.progress-form__drop {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 22px 16px;
+  border: 1px dashed var(--line-2);
+  border-radius: 14px;
+  color: var(--fg-2);
+  text-align: center;
+  cursor: pointer;
+}
+
+.progress-form__drop svg {
+  color: var(--amber-2);
+}
+
+.progress-form__drop-title {
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.progress-form__drop-hint {
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-form__drop input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.progress-form__drop:has(input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.progress-form__upload {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto 44px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+}
+
+.progress-form__upload-name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-form__upload-percent {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-form__upload-remove {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.progress-form__upload-bar {
+  grid-column: 1 / -1;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.progress-form__upload-bar span {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+  transform-origin: left center;
+}
+
+.progress-form__upload--done .progress-form__upload-bar span {
+  background: var(--ok, #12805c);
+}
+
+.progress-form__upload-note {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.progress-form__upload-note--offline,
+.progress-form__upload-note--error {
+  color: var(--bad, #b42318);
+}
+
+.progress-form__upload-note--done {
+  color: var(--ok, #12805c);
+}
+
+[data-motion="full"] .progress-form__upload-bar span,
+[data-motion="lite"] .progress-form__upload-bar span {
+  transition: transform 0.3s linear;
+}

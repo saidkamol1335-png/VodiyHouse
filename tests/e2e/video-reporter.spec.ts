@@ -65,6 +65,14 @@ test.describe("кабинет видеографа", () => {
     await expect(unit).toBeEnabled();
     const firstUnit = await unit.locator("option").nth(1).getAttribute("value");
     await unit.selectOption(firstUnit!);
+
+    // Видео с телефона — загрузкой с докачкой (TUS) в progress-video: «.mov» не берётся, MP4 — до «Загружено».
+    const videoInput = page.locator(".progress-form__drop input[type=file]");
+    await videoInput.setInputFiles({ name: "iphone.mov", mimeType: "video/quicktime", buffer: Buffer.alloc(2048) });
+    await expect(page.getByText(/Нужен MP4/)).toBeVisible();
+    const mp4 = Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from("ftypmp42"), Buffer.alloc(200 * 1024)]);
+    await videoInput.setInputFiles({ name: "stroyka.mp4", mimeType: "video/mp4", buffer: mp4 });
+    await expect(page.getByText(/Загружено · видео в отчёте/)).toBeVisible({ timeout: 30_000 });
     await page.getByRole("button", { name: "Отправить на проверку" }).click();
     await expect(page.getByText(/Отчёт отправлен на проверку/)).toBeVisible({ timeout: 15_000 });
     // Форма пустая: фото, квартира и комментарий — с нуля.
