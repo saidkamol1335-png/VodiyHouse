@@ -1,0 +1,167 @@
+/* «Новый отчёт» видеографа (фаза 5, мокап CabVideo): поля парами (.form__two), фото квадратами с
+   «×» и плиткой «+» (.shots, minmax(82px, 1fr)), кнопка «Отправить на проверку» во всю ширину.
+   На телефоне (до 760 px) пары — столбцом; плитки и кнопки — не меньше 44 px. */
+.progress-form {
+  display: grid;
+  gap: 18px;
+}
+
+.progress-form__two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.progress-form__field {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.progress-form__label {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.progress-form__photos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.progress-form__photos-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+}
+
+.progress-form__photos-hint {
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-form__shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-form__shot {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--bg-3, var(--bg));
+}
+
+.progress-form__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.progress-form__shot--error {
+  border-color: var(--bad, #b42318);
+}
+
+.progress-form__shot--add {
+  border-style: dashed;
+}
+
+.progress-form__add {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+/* Поле выбора файлов — под плиткой «+», фокус виден на плитке. */
+.progress-form__add input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.progress-form__add:has(input:focus-visible) {
+  outline: 2px solid var(--amber);
+  outline-offset: -3px;
+}
+
+.progress-form__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -10px 0 0 -10px;
+  color: var(--fg-2);
+}
+
+.progress-form__shot-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(10, 8, 6, 0.6);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* Цель нажатия 44 px — невидимым полем вокруг кружка. */
+.progress-form__shot-remove::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.progress-form__error {
+  margin: 0;
+  color: var(--bad, #b42318);
+  font-size: 13px;
+}
+
+.progress-form__notice {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.progress-form__submit {
+  min-height: 52px;
+}
+
+[data-motion="full"] .progress-form__spinner,
+[data-motion="lite"] .progress-form__spinner {
+  animation: progress-form-spin 0.9s linear infinite;
+}
+
+@keyframes progress-form-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .progress-form__two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

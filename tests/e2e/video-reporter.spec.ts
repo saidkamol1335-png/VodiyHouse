@@ -1,0 +1,86 @@
+import pg from "pg";
+import { dbClientConfig } from "../../lib/supabase/dbClient";
+import { expect, test } from "./fixtures";
+import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
+import { collectPageErrors, imageFile } from "./helpers";
+
+// Кабинет видеографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото,
+// комментарий RU и UZ, «Отправить на проверку» → «Мои отчёты» с «На проверке». У блока Yulduz отчёт за
+// прошлый месяц уже есть (DEMO-сид) — понятный отказ; отчёт по квартире за месяц — сколько угодно. После
+// теста строка удаляется (файлы — в папке DEMO-ЖК, их уберёт demo:seed). Скриншот — test-results/screens/<проект>/p5-reporter.png.
+
+async function removeE2eReports(): Promise<void> {
+  const client = new pg.Client(dbClientConfig(process.env.SUPABASE_DB_URL!));
+  await client.connect();
+  try {
+    await client.query("begin");
+    await client.query("select set_config('vodiy.skip_audit', 'on', true)");
+    await client.query("delete from progress_reports where comment ->> 'ru' like 'E2E ·%'");
+    await client.query("commit");
+  } finally {
+    await client.end();
+  }
+}
+
+test.describe("кабинет видеографа", () => {
+  test.skip(!hasCloud || !process.env.SUPABASE_DB_URL, NO_CLOUD);
+  test.use({ storageState: cabinetState("videographer") });
+  test.beforeAll(removeE2eReports);
+  test.afterAll(removeE2eReports);
+
+  test("«Новый отчёт»: ЖК, прошлый месяц, 3 фото, комментарий → «Мои отчёты» · На проверке", async ({
+    page,
+  }) => {
+    const errors = collectPageErrors(page);
+    await page.goto("/admin/video");
+    await expect(page.getByRole("heading", { level: 1, name: "Отчёты видеографа" })).toBeVisible();
+    await expect(page.getByText("Как снимать")).toBeVisible();
+
+    await page.getByLabel("ЖК", { exact: true }).selectOption({ label: "ЖК Yulduz" });
+    await page.getByRole("group", { name: "Месяц отчёта" }).getByRole("button").nth(1).click();
+
+    // Без фото и комментария — подсказки формы, не отправка.
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+    await expect(page.getByText("Добавьте минимум 3 фото")).toBeVisible();
+    await expect(page.getByText("Комментарий нужен на двух языках")).toBeVisible();
+
+    const files = await Promise.all(
+      [0, 1, 2].map(() => imageFile(page, { width: 1800, height: 1200, type: "image/jpeg" })),
+    );
+    await page
+      .locator(".progress-form__add input[type=file]")
+      .setInputFiles(files.map((file, index) => ({ ...file, name: `stroyka-${index}.jpg` })));
+    await expect(page.locator(".progress-form__shot--done")).toHaveCount(3, { timeout: 30_000 });
+    await expect(page.getByText("Фото · 3 из 3–15")).toBeVisible();
+
+    await page.locator("textarea[name='comment.ru']").fill("E2E · Залит 9-й этаж");
+    await page.locator("textarea[name='comment.uz']").fill("E2E · 9-qavat quyildi");
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+    await expect(
+      page.getByText("Отчёт по этому блоку за месяц уже есть — выберите квартиру или другой месяц"),
+    ).toBeVisible({ timeout: 15_000 });
+
+    // Видео квартиры для клиента: первая свободная или в брони квартира блока.
+    const unit = page.getByLabel("Квартира · необязательно");
+    await expect(unit).toBeEnabled();
+    const firstUnit = await unit.locator("option").nth(1).getAttribute("value");
+    await unit.selectOption(firstUnit!);
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+    await expect(page.getByText(/Отчёт отправлен на проверку/)).toBeVisible({ timeout: 15_000 });
+    // Форма пустая: фото, квартира и комментарий — с нуля.
+    await expect(page.locator(".progress-form__shot--done")).toHaveCount(0);
+    await expect(page.locator("textarea[name='comment.ru']")).toHaveValue("");
+    await expect(unit).toHaveValue("");
+
+    const mine = page.locator(".video-screen__mine li").first();
+    await expect(mine).toContainText("ЖК Yulduz");
+    await expect(mine).toContainText(/кв\. \S+/);
+    await expect(mine).toContainText("На проверке");
+    await page.screenshot({
+      path: `test-results/screens/${test.info().project.name}/p5-reporter.png`,
+      fullPage: true,
+      caret: "initial",
+    });
+    expect(errors).toEqual([]);
+  });
+});

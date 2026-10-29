@@ -45,6 +45,7 @@ export const CONTENT_ERRORS = [
   "reportPhotos",
   "reportYoutube",
   "returnNote",
+  "reportDuplicate",
   "savedReload",
   "network",
   "notConfigured",

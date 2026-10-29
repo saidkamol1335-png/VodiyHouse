@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { MEDIA_BUCKET, PROGRESS_VIDEO_BUCKET, PROGRESS_VIDEO_PATH_PATTERN } from "@/lib/media";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Уборка файлов в бакете media через Storage API (прямой delete в storage.objects запрещён).
@@ -54,12 +55,21 @@ export async function removeProgressFiles(admin: SupabaseClient, paths: unknown)
     (path): path is string => typeof path === "string" && path.length > 0,
   );
   const videos = list.filter((path) => PROGRESS_VIDEO_PATH_PATTERN.test(path));
-  await removeMediaFiles(admin, list.filter((path) => !videos.includes(path)));
+  await removeMediaFiles(
+    admin,
+    list.filter((path) => !videos.includes(path)),
+  );
   if (videos.length === 0) return;
   try {
     const { error } = await admin.storage.from(PROGRESS_VIDEO_BUCKET).remove(videos);
-    if (error) console.error("progress-video-remove-failed", { paths: videos, error: error.message });
+    if (error)
+      console.error("progress-video-remove-failed", { paths: videos, error: error.message });
   } catch (error) {
     console.error("progress-video-remove-failed", { paths: videos, error });
   }
+}
+
+/** То же секретным ключом сервера — для действий видеографа (его сессии удалять файлы нельзя). */
+export async function removeProgressFilesAsServer(paths: unknown): Promise<void> {
+  await removeProgressFiles(createSupabaseAdminClient(), paths);
 }

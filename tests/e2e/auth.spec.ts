@@ -1,18 +1,29 @@
 import { createHmac } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "./fixtures";
-import { assertE2eProject, cabinetState, e2eStaff, hasCloud, NO_CLOUD, signIn, submitSignIn } from "./cloud";
+import {
+  assertE2eProject,
+  cabinetState,
+  e2eStaff,
+  hasCloud,
+  NO_CLOUD,
+  signIn,
+  submitSignIn,
+} from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Вход в кабинет против облачного Supabase (шаг 8). Входы с паролем — только на 1440:
 // у Supabase предел 30 входов за 5 минут с одного адреса.
 test.skip(!hasCloud, NO_CLOUD);
 
-const desktopOnly = (projectName: string) => test.skip(projectName !== "desktop-1440", "входы — только на 1440");
+const desktopOnly = (projectName: string) =>
+  test.skip(projectName !== "desktop-1440", "входы — только на 1440");
 const SECRET_KEY_SHAPE = /sb_secret_[A-Za-z0-9_-]{20,}/;
 
 test.describe("без входа", () => {
-  test("/admin и /admin/parol → 307 на /admin/vhod; экран входа без cookie сессии", async ({ request }) => {
+  test("/admin и /admin/parol → 307 на /admin/vhod; экран входа без cookie сессии", async ({
+    request,
+  }) => {
     for (const path of ["/admin", "/admin/nastroyki", "/admin/parol"]) {
       const response = await request.get(path, { maxRedirects: 0 });
       expect(response.status(), path).toBe(307);
@@ -35,20 +46,27 @@ test.describe("без входа", () => {
       await page.getByLabel("Email").fill(email!);
       await page.getByLabel("Пароль", { exact: true }).fill(password!);
       await page.getByRole("button", { name: "Войти" }).click();
-      await expect(page.locator(".login-form .form-status--error")).toHaveText("Неверный email или пароль");
+      await expect(page.locator(".login-form .form-status--error")).toHaveText(
+        "Неверный email или пароль",
+      );
       await expect(page.getByLabel("Email")).toHaveValue(email!);
     }
   });
 
   // Проверка безопасности 29.10: 10 попыток за 15 минут с одним email и адресом закрывают вход
   // (20261029060000). Попытки записываются напрямую — без 10 входов в Auth (лимит Auth по адресу).
-  test("после 10 попыток вход с этим email и адреса закрыт, с другого адреса — нет", async ({ page }, testInfo) => {
+  test("после 10 попыток вход с этим email и адреса закрыт, с другого адреса — нет", async ({
+    page,
+  }, testInfo) => {
     desktopOnly(testInfo.project.name);
     const { url, secret } = assertE2eProject();
-    const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
+    const admin = createClient(url, secret, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const email = `e2e-lock-${crypto.randomUUID().slice(0, 8)}@example.com`;
     // Тот же ключ, что loginAttemptKey в lib/admin/server/deps.ts (там server-only).
-    const keyOf = (ip: string) => createHmac("sha256", secret).update(`login:${email}:${ip}`).digest("hex");
+    const keyOf = (ip: string) =>
+      createHmac("sha256", secret).update(`login:${email}:${ip}`).digest("hex");
     const ip = `e2e-${crypto.randomUUID()}`;
     for (let i = 0; i < 10; i += 1) {
       const { error } = await admin.rpc("begin_login_attempt", { p_key: keyOf(ip) });
@@ -57,7 +75,9 @@ test.describe("без входа", () => {
     const error = page.locator(".login-form .form-status--error");
     await page.setExtraHTTPHeaders({ "x-nf-client-connection-ip": ip });
     await submitSignIn(page, email, "любой-пароль-1");
-    await expect(error).toHaveText("Слишком много попыток входа с этим email. Попробуйте через 15 минут.");
+    await expect(error).toHaveText(
+      "Слишком много попыток входа с этим email. Попробуйте через 15 минут.",
+    );
 
     await page.setExtraHTTPHeaders({ "x-nf-client-connection-ip": `e2e-${crypto.randomUUID()}` });
     await submitSignIn(page, email, "любой-пароль-1");
@@ -73,11 +93,18 @@ test.describe("руководитель", () => {
     const errors = collectPageErrors(page);
     await page.goto("/admin");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("E2E");
-    await expect(page.getByRole("navigation", { name: "Разделы кабинета" }).getByRole("link", { name: "Настройки" })).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы кабинета" })
+        .getByRole("link", { name: "Настройки" }),
+    ).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test("cookie сессии: SameSite=Lax, путь /; секретного ключа нет ни в HTML, ни в JS, ни в ответах", async ({ page, context }) => {
+  test("cookie сессии: SameSite=Lax, путь /; секретного ключа нет ни в HTML, ни в JS, ни в ответах", async ({
+    page,
+    context,
+  }) => {
     // Все тела ответов (документ, RSC, скрипты) — ждём их явно, а не в обработчике события.
     const bodies: Promise<string>[] = [];
     page.on("response", (response) => bodies.push(response.text().catch(() => "")));
@@ -85,9 +112,13 @@ test.describe("руководитель", () => {
     await page.goto("/admin/nastroyki");
     await page.waitForLoadState("networkidle");
     const sources = [...(await Promise.all(bodies)), await page.content()];
-    expect(sources.filter((source) => source.includes("<script") || source.includes("function")).length).toBeGreaterThan(0);
+    expect(
+      sources.filter((source) => source.includes("<script") || source.includes("function")).length,
+    ).toBeGreaterThan(0);
 
-    const session = (await context.cookies()).find((cookie) => /^sb-.+-auth-token/.test(cookie.name));
+    const session = (await context.cookies()).find((cookie) =>
+      /^sb-.+-auth-token/.test(cookie.name),
+    );
     expect(session).toMatchObject({ sameSite: "Lax", path: "/" });
     // Ищем ключ по форме, а не голый префикс: он есть в комментарии env.ts (чанк разработки
     // /admin/nastroyki) и в коде supabase-js — это не утечка.
@@ -104,8 +135,12 @@ test.describe("руководитель", () => {
     const chunks = (await context.cookies())
       .filter((cookie) => /^sb-.+-auth-token(\.\d+)?$/.test(cookie.name))
       .sort((a, b) => a.name.localeCompare(b.name, "en", { numeric: true }));
-    const cookie = chunks.map((chunk) => chunk.value).join("").replace(/^base64-/, "");
-    const fromBase64 = (value: string) => JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    const cookie = chunks
+      .map((chunk) => chunk.value)
+      .join("")
+      .replace(/^base64-/, "");
+    const fromBase64 = (value: string) =>
+      JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
     const session = fromBase64(cookie) as { access_token: string };
     const header = fromBase64(session.access_token.split(".")[0]!) as { alg: string };
     expect(header.alg).toMatch(/^(ES|RS|PS|EdDSA)/);
@@ -113,11 +148,17 @@ test.describe("руководитель", () => {
 });
 
 test.describe("менеджер и видеограф", () => {
-  test("менеджер: «Настроек» в меню нет; адрес напрямую — «Раздел доступен руководителю»", async ({ browser }) => {
+  test("менеджер: «Настроек» в меню нет; адрес напрямую — «Раздел доступен руководителю»", async ({
+    browser,
+  }) => {
     const context = await browser.newContext({ storageState: cabinetState("manager") });
     const page = await context.newPage();
     await page.goto("/admin");
-    await expect(page.getByRole("navigation", { name: "Разделы кабинета" }).getByRole("link", { name: "Настройки" })).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы кабинета" })
+        .getByRole("link", { name: "Настройки" }),
+    ).toHaveCount(0);
     await page.goto("/admin/nastroyki");
     await expect(page.getByRole("heading", { name: "Раздел доступен руководителю" })).toBeVisible();
     await context.close();
@@ -126,12 +167,17 @@ test.describe("менеджер и видеограф", () => {
   // 12.6 (Н2): права роли в облаке — меню, список, вкладки и действия квартир (DEMO после demo:seed).
   // Н7 здесь не проверить: в сиде у всех блоков есть список — его проверяют тесты базы и стенд.
   // Только на 1440: оба проекта тапнули бы одну и ту же свободную квартиру общего DEMO в облаке.
-  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({ browser }, testInfo) => {
+  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({
+    browser,
+  }, testInfo) => {
     desktopOnly(testInfo.project.name);
     const context = await browser.newContext({ storageState: cabinetState("manager") });
     const page = await context.newPage();
     await page.goto("/admin");
-    await page.getByRole("navigation", { name: "Разделы кабинета" }).getByRole("link", { name: "ЖК", exact: true }).click();
+    await page
+      .getByRole("navigation", { name: "Разделы кабинета" })
+      .getByRole("link", { name: "ЖК", exact: true })
+      .click();
     await expect(page).toHaveURL(/\/admin\/zhk$/);
     await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
     await expect(page.locator(".complex-list__status")).toHaveCount(0);
@@ -164,17 +210,28 @@ test.describe("менеджер и видеограф", () => {
     await context.close();
   });
 
-  test("видеограф: на Главной — заглушка роли", async ({ browser }) => {
+  test("видеограф: «Видео и ход стройки» — единственный раздел, Главной и заявок нет (фаза 5)", async ({
+    browser,
+  }) => {
     const context = await browser.newContext({ storageState: cabinetState("videographer") });
     const page = await context.newPage();
-    await page.goto("/admin");
-    await expect(page.getByText("Ваш раздел «Видео» появится")).toBeVisible();
+    await page.goto("/admin/video");
+    await expect(page.getByRole("heading", { level: 1, name: "Отчёты видеографа" })).toBeVisible();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Разделы кабинета" })
+        .getByRole("link", { name: /Видео и ход стройки/ }),
+    ).toBeVisible();
+    await page.goto("/admin/zayavki");
+    await expect(page.getByText(/Раздел доступен/)).toBeVisible();
     await context.close();
   });
 });
 
 test.describe("первый вход и выход", () => {
-  test("новичок: /admin → /admin/parol; ошибки; свой пароль → Главная; выход и вход новым", async ({ page }, testInfo) => {
+  test("новичок: /admin → /admin/parol; ошибки; свой пароль → Главная; выход и вход новым", async ({
+    page,
+  }, testInfo) => {
     desktopOnly(testInfo.project.name);
     // Два входа и смена пароля — три действия сервера: в общем прогоне не укладываются в 30 с.
     test.setTimeout(60_000);
@@ -191,9 +248,13 @@ test.describe("первый вход и выход", () => {
       await page.getByRole("button", { name: "Сохранить и войти" }).click();
     };
     await fill("не-тот-пароль", "e2e-новый-пароль", "e2e-новый-пароль");
-    await expect(page.locator(".password-change-form .field__error")).toHaveText(["Временный пароль не подходит"]);
+    await expect(page.locator(".password-change-form .field__error")).toHaveText([
+      "Временный пароль не подходит",
+    ]);
     await fill(newcomer.password, newcomer.password, newcomer.password);
-    await expect(page.locator(".password-change-form .field__error")).toHaveText(["Совпадает с временным — придумайте другой"]);
+    await expect(page.locator(".password-change-form .field__error")).toHaveText([
+      "Совпадает с временным — придумайте другой",
+    ]);
     await fill(newcomer.password, "e2e-новый-пароль", "e2e-новый-пароль");
     // Смена пароля и вход — действие сервера: в общем прогоне под нагрузкой дольше 5 с.
     await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });

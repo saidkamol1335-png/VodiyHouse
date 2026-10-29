@@ -18,7 +18,7 @@ describe("куда вести после входа", () => {
 
   it("без смены пароля — первый раздел роли (сейчас Главная у всех)", () => {
     expect(afterSignInPath(viewer())).toBe("/admin");
-    expect(afterSignInPath(viewer({ role: "videographer" }))).toBe("/admin");
+    expect(afterSignInPath(viewer({ role: "videographer" }))).toBe("/admin/video");
   });
 });
 

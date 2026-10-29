@@ -92,6 +92,8 @@ const NO_CONTENT_FILES = [
   "journal.ts",
   // Заявки (шаг 3.7) — только кабинет: на сайте их нет.
   "leads.ts",
+  // Отчёт на проверке (фаза 5) на сайт не попадает — его публикует менеджер (5D, свой файл).
+  "progressReports.ts",
   "siteNow.ts",
   "siteStock.ts",
   "staff.ts",

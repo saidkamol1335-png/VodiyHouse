@@ -32,7 +32,8 @@ describe("меню кабинета", () => {
       "complexes",
       "programs",
     ]);
-    expect(visibleNav("videographer")).toEqual([]);
+    // Фаза 5 (5B): видеограф — сразу в «Видео и ход стройки».
+    expect(visibleNav("videographer").map((item) => item.key)).toEqual(["video"]);
     expect(isSectionOpen("manager", "complexes")).toBe(true);
     expect(isSectionOpen("manager", "developers")).toBe(false);
   });
@@ -98,7 +99,7 @@ describe("доступ к разделам", () => {
 
   it("после входа — первый пункт меню роли; нет пунктов — Главная", () => {
     expect(landingPath("head")).toBe("/admin");
-    expect(landingPath("videographer")).toBe("/admin");
+    expect(landingPath("videographer")).toBe(ADMIN_ROUTES.video);
     expect(landingPath("videographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 

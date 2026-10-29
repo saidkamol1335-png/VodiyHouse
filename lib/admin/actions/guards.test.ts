@@ -83,6 +83,10 @@ describe("Server Actions кабинета", () => {
       setLeadStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       assignLeadAction: /requireActionViewer\(\["head", "manager"\]\)/,
       retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\], \{ fresh: true \}\)/,
+      // Отчёты хода строительства (фаза 5): отправляют видеограф и руководитель; файлы удаляет сервер.
+      readProgressUnitsAction: /requireActionViewer\(\["head", "videographer"\]\)/,
+      submitProgressReportAction:
+        /requireActionViewer\(\["head", "videographer"\], \{ fresh: true \}\)/,
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {
@@ -114,7 +118,9 @@ describe("Server Actions кабинета", () => {
     for (const file of files) {
       for (const { name, body } of exportedFunctions(readSource(file))) {
         if (WITHOUT_SESSION.has(name) || AUTH_CHECKED.has(name) || !SECRET_KEY.test(body)) continue;
-        expect(/const guard = await ([^;]+);/.exec(body)?.[1], `${file}: ${name}`).toContain("fresh: true");
+        expect(/const guard = await ([^;]+);/.exec(body)?.[1], `${file}: ${name}`).toContain(
+          "fresh: true",
+        );
       }
     }
   });

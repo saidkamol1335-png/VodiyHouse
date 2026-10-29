@@ -1,0 +1,106 @@
+/* Экран видеографа (фаза 5, мокап CabVideo .grid-main 1.6fr / 1fr): форма слева, «Как снимать» и
+   «Мои отчёты» справа; до 1180 px — колонкой, правая часть под формой. */
+.video-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.video-screen__main,
+.video-screen__side {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.video-screen__howto {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.video-screen__howto li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 10px;
+}
+
+.video-screen__howto svg {
+  margin-top: 2px;
+  color: var(--ok, #12805c);
+}
+
+.video-screen__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 14px;
+}
+
+.video-screen__mine {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.video-screen__report {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line-2);
+}
+
+.video-screen__report:first-child {
+  border-top: 0;
+}
+
+.video-screen__thumb {
+  display: block;
+  width: 64px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--line);
+  object-fit: cover;
+}
+
+.video-screen__report-text {
+  min-width: 0;
+}
+
+.video-screen__report-title {
+  margin: 0;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.video-screen__report-when {
+  margin: 2px 0 0;
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.video-screen__report-note {
+  margin: 4px 0 0;
+  color: var(--bad, #b42318);
+  font-size: 12px;
+}
+
+.video-screen__status {
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .video-screen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

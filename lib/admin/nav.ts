@@ -62,11 +62,13 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     ready: true,
     hrefFor: { manager: ADMIN_ROUTES.programsCalc },
   },
+  // «Видео и ход стройки» (фаза 5): видеографу — с 5B (свои отчёты), руководителю и менеджеру — с 5D (проверка).
   {
     key: "video",
     href: ADMIN_ROUTES.video,
     roles: ["head", "manager", "videographer"],
-    ready: false,
+    ready: true,
+    readyFor: ["videographer"],
   },
   { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: false },
   { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
