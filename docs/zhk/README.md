@@ -22,4 +22,6 @@
 
 Тяжёлые исходники (> 15 МБ) в git не кладём: в папке лежит уменьшенная до 4800 px копия, исходник указан в README (ID файла на Drive).
 
-Цены, наличие и тексты из чек-листа в базу пока не переносим — это шаг «Запуск». В чек-листе есть: цены — у Shodlik, Sayilgoh, Chinor, Garant, Ibrat 14, Dubai, Dream Residence; наличие — у них же и у Alliance Avenue; у San'at Saroyi и Sokin нет ни цен, ни наличия.
+**В базе** (29.10.2026, `npm run content:import`, данные — `content.json`): черновики застройщиков MYB Development, Ibrat Building, Qadrdonlar Developments и ЖК Shodlik, Sayilgoh, Alliance Avenue, Sokin (2 рендера как фото, первый — обложка, и фасад «Выбрать квартиру»), Ibrat Building 14 qavat и Dubai (только название). ЖК без известного застройщика, контуры блоков, планы этажей, цены, наличие и тексты добавляет заказчик в кабинете (`docs/head-guide.md`); планы этажей Sayilgoh и Chinor лежат здесь — загружаются во вкладке «Фасад и планы», когда у блока будет список квартир.
+
+Цены, наличие и тексты из чек-листа в базу не переносились. В чек-листе есть: цены — у Shodlik, Sayilgoh, Chinor, Garant, Ibrat 14, Dubai, Dream Residence; наличие — у них же и у Alliance Avenue; у San'at Saroyi и Sokin нет ни цен, ни наличия.

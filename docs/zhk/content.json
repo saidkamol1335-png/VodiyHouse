@@ -1,0 +1,40 @@
+{
+  "note": "Настоящие ЖК из материалов docs/zhk/<slug>/ (собраны 29.10.2026 из чек-листа заказчика). Только то, что есть в материалах: застройщик, название, рендеры как фото, фасад для «Выбрать квартиру». Всё создаётся черновиком; остальное (адрес, блоки, планировки, цены, фото до 5, тексты, логотип) руководитель заполняет в кабинете. ЖК без известного застройщика (Chinor Residence, Garant Avenue, San'at Saroyi, Dream Residence, Soy Bo'yi Avenue) добавляет заказчик. Загрузка: npm run content:import (повторный запуск ничего не дублирует).",
+  "developers": [
+    { "slug": "myb-development", "name": "MYB Development" },
+    { "slug": "ibrat-building", "name": "Ibrat Building" },
+    { "slug": "qadrdonlar-developments", "name": "Qadrdonlar Developments" }
+  ],
+  "complexes": [
+    {
+      "slug": "shodlik",
+      "name": "Shodlik",
+      "developer": "myb-development",
+      "photos": ["shodlik/fasad-1-front.jpg", "shodlik/fasad-2-aerial.jpg"],
+      "facade": "shodlik/fasad-1-front.jpg"
+    },
+    {
+      "slug": "sayilgoh",
+      "name": "Sayilgoh",
+      "developer": "myb-development",
+      "photos": ["sayilgoh/fasad-1-aerial.jpg", "sayilgoh/fasad-2-aerial-night.jpg"],
+      "facade": "sayilgoh/fasad-1-aerial.jpg"
+    },
+    { "slug": "ibrat-building-14-qavat", "name": "Ibrat Building 14 qavat", "developer": "ibrat-building", "photos": [] },
+    { "slug": "dubai", "name": "Dubai", "developer": "ibrat-building", "photos": [] },
+    {
+      "slug": "alliance-avenue",
+      "name": "Alliance Avenue",
+      "developer": "qadrdonlar-developments",
+      "photos": ["alliance-avenue/fasad-2-front.jpg", "alliance-avenue/fasad-1-corner.jpg"],
+      "facade": "alliance-avenue/fasad-2-front.jpg"
+    },
+    {
+      "slug": "sokin",
+      "name": "Sokin",
+      "developer": "qadrdonlar-developments",
+      "photos": ["sokin/fasad-1-front.jpg", "sokin/fasad-2-corner.jpg"],
+      "facade": "sokin/fasad-1-front.jpg"
+    }
+  ]
+}

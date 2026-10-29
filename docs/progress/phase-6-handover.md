@@ -7,7 +7,7 @@
 ## 1. Аккаунты и доступы (переезжают на аккаунт заказчика)
 
 - [ ] Google-аккаунт заказчика для всего ниже (PLAN §9.1).
-- [ ] **Supabase** — новый проект заказчика. Порядок — `docs/progress/phase-3.md`, «Новый проект Supabase»: регион Frankfurt, новые ключи `sb_publishable_…` / `sb_secret_…`, `SUPABASE_DB_URL` через Session pooler. Auth: Email включён; регистрация, Confirm email и Anonymous — выключены; пароль от 10 знаков; Secure password change — выключен; JWT асимметричные; IP Address Forwarding включён; «Automatically expose new tables» не включать. Закрытые настройки `cloud:check` проверяет с разовым `SUPABASE_ACCESS_TOKEN` (в `.env.local` не сохранять). Потом: `npm run cloud:check` → `npm run db:push` → (для показа — `npm run demo:seed`) → первый руководитель (п. 3).
+- [ ] **Supabase** — новый проект заказчика. Порядок — `docs/progress/phase-3.md`, «Новый проект Supabase»: регион Frankfurt, новые ключи `sb_publishable_…` / `sb_secret_…`, `SUPABASE_DB_URL` через Session pooler. Auth: Email включён; регистрация, Confirm email и Anonymous — выключены; пароль от 10 знаков; Secure password change — выключен; JWT асимметричные; IP Address Forwarding включён; «Automatically expose new tables» не включать. Закрытые настройки `cloud:check` проверяет с разовым `SUPABASE_ACCESS_TOKEN` (в `.env.local` не сохранять). Потом: `npm run cloud:check` → `npm run db:push` → `npm run content:import` (настоящие ЖК из материалов заказчика черновиками — `docs/zhk/content.json`) → (для показа — `npm run demo:seed`) → первый руководитель (п. 3).
 - [ ] **Тариф Supabase Pro — на организации, где лежит новый проект.** Pro куплен (29.10) на текущей организации тестового облака; проект на Google-аккаунте заказчика окажется в другой организации — перенести проект или оформить Pro там. Без Pro нет Leaked password protection и ежедневных бэкапов.
 - [ ] **Netlify** — сайт на команде заказчика, подключён к репозиторию, Production открыт. Переменные (полный список — `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` (новый), `SITE_URL=https://vodiyhouse.uz` (вшивается при сборке — задать до неё), `CRON_SECRET` (без него не работают повтор доставки заявок, тревога «10 мин», архив, очистка событий, напоминания), `TELEGRAM_*`, `LEADS_SHEET_*`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA4_ID`, ключ Яндекс Карт. `SITE_NOINDEX` на продакшене **не задавать** — иначе сайт закрыт от поиска.
 - [ ] Токен Netlify CLI исполнителя — отозвать (User settings → Applications).
@@ -35,11 +35,11 @@
 
 ## 4. Проверка вместе с руководителем: «добавил ЖК сам — на сайте всё как надо»
 
-Без DEMO (после п. 5) — на настоящих данных застройщика из `docs/zhk/<slug>/` и `docs/developers/<slug>/`, без подсказок исполнителя, по `docs/head-guide.md`:
+Без DEMO (после п. 5), без подсказок исполнителя, по `docs/head-guide.md`. Черновики уже есть (`npm run content:import`): застройщики MYB Development, Ibrat Building, Qadrdonlar Developments; ЖК Shodlik, Sayilgoh, Alliance Avenue, Sokin (по 2 рендера и фасад), Ibrat Building 14 qavat, Dubai (только название). Руководитель дописывает их; Chinor Residence, Garant Avenue, San'at Saroyi, Dream Residence, Soy Bo'yi Avenue (застройщик в материалах не указан) добавляет сам.
 
-1. [ ] Застройщик: создать, «О компании» RU и UZ, логотип, контакты — во «Внутреннее»; опубликовать.
+1. [ ] Застройщик: «О компании» RU и UZ, логотип, контакты — во «Внутреннее»; опубликовать.
 2. [ ] Программы оплаты: банки в «Настройки → Справочники», программа застройщика, «Условия проверены сегодня»; курс ЦБ записан (команда исполнителя или «Зафиксировать курс») — без программ и курса расчёта на сайте нет.
-3. [ ] ЖК: создать, «Основное», блок со сроком сдачи, 2–3 планировки с чертежами, генератор квартир, стояки, цены, 5+ фото с обложкой от 2400 px; «Для публикации: 8 из 8».
+3. [ ] ЖК: «Основное», блок со сроком сдачи, 2–3 планировки с чертежами, генератор квартир, стояки, цены, 5+ фото с обложкой от 2400 px; «Для публикации: 8 из 8».
 4. [ ] «Предпросмотр» на 390 и RU / UZ → «Опубликовать» с галочкой правила 1.2.
 5. [ ] На сайте с телефона, **на котором не входили в кабинет**: ЖК в каталоге и на главной, страница ЖК, «осталось N шт.» у планировок, расчёт под планировкой, ни одного контакта застройщика — только Vodiy House.
 6. [ ] Менеджер ставит бронь на квартиру — на сайте «осталось N» уменьшилось.

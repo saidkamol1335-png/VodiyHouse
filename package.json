@@ -21,6 +21,7 @@
     "db:push": "node --env-file-if-exists=.env.local scripts/db-push.mjs",
     "demo:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs seed",
     "demo:remove": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/demo.mjs remove",
+    "content:import": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/realContent.mjs",
     "cloud:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/cloud-check.mjs",
     "rate:update": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/rate-update.mjs",
     "staff:create-head": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-create-head.mjs",
