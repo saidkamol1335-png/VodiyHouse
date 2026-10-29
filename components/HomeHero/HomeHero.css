@@ -1,0 +1,455 @@
+/* Первый экран главной (30.10.2026, вместо «Чертёж → стройка»): ролик стройки на весь экран — ЖК
+   справа, слева текст и кнопки мокапа Main под тёмной пеленой, внизу «бесплатно», цифры каталога и
+   «Найдено сейчас». Тёмный в обеих темах: data-theme-island="dark" подменяет токены темы на тёмные.
+   Шапка лежит поверх (margin-top) и в его тонах — SiteHeader.css по html[data-hero-dark].
+   Ролик проявляется поверх постера «вечер» с первым кадром: full — за --dur-hero-video, lite —
+   200 мс, в none ролика нет. Планшет и телефон: ролик — первый экран целиком, текст внизу, а
+   «бесплатно», цифры и «Найдено сейчас» — полосой под ним (мокап Mobile). */
+
+.home-hero {
+  /* Край текста — по краю логотипа шапки: поле контейнера плюс его внутренний отступ. */
+  --home-hero-edge: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+
+  position: relative;
+  display: grid;
+  /* minmax(0, …): лента «бесплатно» на телефоне длиннее экрана — она прокручивается, а не раздвигает колонку. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "stage";
+  margin-top: calc(-1 * var(--header-h));
+  overflow: hidden;
+  background: var(--home-hero-bg);
+  color: var(--fg);
+  isolation: isolate;
+}
+
+/* Кадр, пелена и текст лежат в одной ячейке сетки: высоту задаёт текст, кадр тянется за ним. */
+.home-hero__media,
+.home-hero__shade,
+.home-hero__inner {
+  grid-area: stage;
+}
+
+.home-hero__media {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.home-hero__poster,
+.home-hero__poster img,
+.home-hero__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.home-hero__poster img,
+.home-hero__video {
+  object-fit: cover;
+  object-position: var(--home-hero-focus);
+}
+
+/* Ролик — поверх постера; проявляется, когда пошёл первый кадр (класс --playing). */
+.home-hero__video {
+  opacity: 0;
+  transition: opacity var(--dur-hero-video) var(--ease-2);
+}
+
+.home-hero--playing .home-hero__video {
+  opacity: 1;
+}
+
+.home-hero__shade {
+  position: relative;
+  z-index: 0;
+  background: var(--home-hero-shade);
+  pointer-events: none;
+}
+
+.home-hero__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: max(100svh, var(--home-hero-min-h));
+  padding: calc(var(--header-h) + 32px) var(--home-hero-edge) var(--home-hero-bottom);
+}
+
+/* Пауза ролика (WCAG 2.2.2) — в правом верхнем углу кадра, под шапкой; видна, пока ролик идёт. */
+.home-hero__toggle {
+  position: relative;
+  z-index: 2;
+  grid-area: stage;
+  align-self: start;
+  justify-self: end;
+  margin: calc(var(--header-h) + 16px) var(--home-hero-edge) 0 0;
+}
+
+/* ---------- текст и кнопки ---------- */
+
+.home-hero__copy {
+  max-width: var(--home-hero-copy-w);
+  margin-block: auto;
+}
+
+.home-hero__title {
+  margin-top: 20px;
+  text-shadow: var(--home-hero-text-shadow);
+}
+
+.home-hero__lead {
+  max-width: 560px;
+  margin: 20px 0 0;
+  color: var(--home-hero-lead);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+  text-wrap: pretty;
+}
+
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* Кнопки мокапа .btn--lg — 54 px: главная — янтарная пилюля сайта, вторая — тёмное стекло. */
+.home-hero__cta,
+.home-hero__quiz {
+  height: 54px;
+  padding: 0 28px;
+  font-size: var(--fs-body);
+}
+
+.home-hero__quiz {
+  border-color: var(--home-hero-glass-line);
+  background: var(--home-hero-glass);
+  color: var(--fg);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}
+
+.home-hero__quiz:hover {
+  background: var(--home-hero-glass-hover);
+}
+
+.home-hero__quiz svg {
+  color: var(--amber);
+}
+
+.home-hero :focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* ---------- «бесплатно», цифры, «Найдено сейчас» ---------- */
+
+.home-hero__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.home-hero__perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-hero__perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--home-hero-lead);
+  font-size: var(--fs-small);
+  font-weight: 550;
+}
+
+.home-hero__perk svg {
+  flex: none;
+  color: var(--amber);
+}
+
+.home-hero__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px 40px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--dash);
+}
+
+.home-hero__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 44px;
+  margin: 0;
+}
+
+/* Число над подписью; в разметке подпись (dt) первая — так читает диктор. flex-end в column-reverse —
+   верх: числа в ряду на одной линии, даже если подпись соседа в две строки. */
+.home-hero__stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.home-hero__stat-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: var(--fs-kpi);
+  font-weight: 600;
+  line-height: var(--lh-figure);
+  letter-spacing: var(--ls-h2);
+  font-variant-numeric: tabular-nums;
+}
+
+.home-hero__stat-label {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* «Квартир в продаже» — живое число: зелёная точка, в full она мерцает. */
+.home-hero__stat--live .home-hero__stat-value::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--live-dot);
+  box-shadow: var(--live-dot-glow);
+}
+
+[data-motion="full"] .home-hero__stat--live .home-hero__stat-value::after {
+  animation: home-hero-live var(--dur-ping) var(--ease-2) infinite;
+}
+
+.home-hero__found {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-height: var(--touch-target);
+  padding: 0 16px;
+  border: 1px solid var(--home-hero-glass-line);
+  border-radius: var(--r-pill);
+  background: var(--home-hero-found-bg);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  text-decoration: none;
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.home-hero__found:hover {
+  background: var(--home-hero-found-hover);
+}
+
+/* Подпись светлее --fg-3: плашка лежит на огнях бульвара, AA — и днём, и вечером (ревью 30.10). */
+.home-hero__found-label {
+  color: var(--home-hero-lead);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-hero__found-value {
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.home-hero__found-query {
+  overflow: hidden;
+  color: var(--home-hero-lead);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-hero__found svg {
+  flex: none;
+  color: var(--amber);
+}
+
+@keyframes home-hero-live {
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+/* ---------- низкое окно десктопа (1280×720): воздух ужимается, заголовок мельче ---------- */
+
+@media (min-width: 1024px) and (max-height: 780px) {
+  .home-hero__inner {
+    padding-top: calc(var(--header-h) + 16px);
+  }
+
+  .home-hero__title {
+    --fs-h1: clamp(38px, 7.2vh, 56px);
+  }
+
+  .home-hero__lead {
+    margin-top: 14px;
+  }
+
+  .home-hero__actions {
+    margin-top: 22px;
+  }
+
+  .home-hero__facts {
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .home-hero__row {
+    padding-top: 14px;
+  }
+}
+
+/* ---------- планшет и телефон: ролик — первый экран, полоса фактов под ним ---------- */
+
+@media (max-width: 1023px) {
+  .home-hero {
+    --home-hero-focus: 64% 50%;
+
+    grid-template-areas:
+      "stage"
+      "facts";
+  }
+
+  .home-hero__shade {
+    background: var(--home-hero-shade-stacked);
+  }
+
+  /* Текст и полоса — прямые ячейки сетки: текст в ячейке ролика внизу, полоса — под роликом. */
+  .home-hero__inner {
+    display: contents;
+  }
+
+  .home-hero__copy {
+    position: relative;
+    z-index: 1;
+    grid-area: stage;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
+    max-width: none;
+    min-height: max(100svh, var(--home-hero-min-h));
+    margin: 0;
+    padding: calc(var(--header-h) + 24px) var(--gutter) 28px;
+  }
+
+  .home-hero__facts {
+    position: relative;
+    z-index: 1;
+    grid-area: facts;
+    min-width: 0;
+    margin: 0;
+    padding: 24px var(--gutter) 32px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Телефону — вырезка 9:16 с ЖК посередине. */
+  .home-hero {
+    --home-hero-focus: 50% 50%;
+  }
+
+  .home-hero__copy {
+    padding-bottom: 24px;
+  }
+
+  .home-hero__lead {
+    margin-top: 14px;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
+
+  .home-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .home-hero__cta,
+  .home-hero__quiz {
+    width: 100%;
+    height: 52px;
+  }
+
+  /* Мокап Mobile: цифры в три колонки, под ними «бесплатно» пилюлями. */
+  .home-hero__facts {
+    gap: 18px;
+    padding-top: 20px;
+  }
+
+  .home-hero__row {
+    display: contents;
+  }
+
+  .home-hero__stats {
+    order: -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .home-hero__stat {
+    padding: 0 12px;
+    border-left: 1px solid var(--line);
+  }
+
+  .home-hero__stat:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .home-hero__stat-label {
+    color: var(--fg-2);
+    font-family: var(--font);
+    font-size: var(--fs-small);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Пилюли переносятся, а не уезжают лентой: скрытая прокрутка прятала третью и не листалась с клавиатуры. */
+  .home-hero__perks {
+    gap: 8px;
+  }
+
+  .home-hero__perk {
+    padding: 8px 14px;
+    border: 1px solid var(--home-hero-perk-line);
+    border-radius: var(--r-pill);
+    background: var(--home-hero-perk-bg);
+    color: var(--fg);
+  }
+
+  .home-hero__perk svg {
+    color: var(--ok);
+  }
+
+  .home-hero__found {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    padding: 10px 16px;
+    border-radius: var(--r-l);
+  }
+}

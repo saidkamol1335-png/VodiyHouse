@@ -1,9 +1,33 @@
 /* Первый экран «Застройщикам» (мокап SitePartners .phero): светлый фон с колоннами здания из
-   общего фона страницы, текст слева, цифры под пунктиром. */
+   общего фона страницы, текст слева, справа — панель с роликом стройки, цифры под пунктиром. */
 
 .partners-hero {
   padding: calc(var(--header-h) + 72px) 0 56px;
   border-bottom: 1px dashed var(--dash);
+}
+
+.partners-hero__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--partners-media-w);
+  align-items: center;
+  gap: 48px;
+}
+
+/* Панель с роликом (места роликов, docs/design/video/: «Застройщикам» — панель справа). */
+.partners-hero__media {
+  aspect-ratio: 1;
+  border-radius: var(--r-2xl);
+  box-shadow: var(--shadow-3);
+}
+
+@media (max-width: 1023px) {
+  .partners-hero__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .partners-hero__media {
+    display: none;
+  }
 }
 
 .partners-hero__title {

@@ -1,0 +1,28 @@
+/* Пауза ролика стройки: круглая тёмная стеклянная кнопка поверх кадра (цель нажатия 44 px).
+   Где стоит — задаёт место (.home-hero__toggle, .timelapse-clip__toggle). */
+
+.timelapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  padding: 0;
+  border: 1px solid var(--timelapse-toggle-line);
+  border-radius: 50%;
+  background: var(--timelapse-toggle-bg);
+  color: var(--timelapse-toggle-fg);
+  cursor: pointer;
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.timelapse-toggle:hover {
+  background: var(--timelapse-toggle-hover);
+}
+
+.timelapse-toggle:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}

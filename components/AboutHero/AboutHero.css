@@ -1,16 +1,48 @@
 /* «О Vodiy House» (мокап .ab): тёмная карточка на светлой странице (в тёмной теме — та же),
-   три цифры в рамках-ячейках; число янтарное. */
+   справа фоном — ролик стройки под пеленой цвета карточки, три цифры в рамках-ячейках; число янтарное. */
 
 .about-hero {
   padding: calc(var(--header-h) + 32px) 0 24px;
 }
 
 .about-hero__card {
+  position: relative;
   padding: 44px 44px 40px;
+  overflow: hidden;
   border-radius: var(--r-2xl);
   background: var(--about-card-bg);
   color: var(--about-card-fg);
   box-shadow: var(--shadow-3);
+  isolation: isolate;
+}
+
+/* Ролик — фон правой части карточки (места роликов, docs/design/video/: «О нас» — фон тёмной
+   карточки); пелена от цвета карточки слева и снизу — текст и цифры читаются. Селектор сильнее
+   .timelapse-clip (его CSS подключён позже). */
+.about-hero__card .about-hero__media {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: var(--about-media-w);
+}
+
+.about-hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--about-media-shade);
+}
+
+/* Пауза ролика — в правом верхнем углу карточки: внизу ряд цифр перекрывал бы кнопку. */
+.about-hero__card .about-hero__media .timelapse-clip__toggle {
+  top: 12px;
+  bottom: auto;
+}
+
+@media (max-width: 760px) {
+  .about-hero__media {
+    display: none;
+  }
 }
 
 .about-hero__card .eyebrow {

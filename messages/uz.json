@@ -47,28 +47,10 @@
   "home": {
     "hero": {
       "eyebrow": "Yangi uylar · Farg‘ona",
-      "chip": "Tanlash va ko‘rsatish bepul",
-      "titleLead": "Farg‘onadagi yangi binolarda kvartiralar",
+      "titleLead": "Farg‘onadagi yangi binolarda kvartiralar —",
       "titleAccent": "quruvchi narxida",
       "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
       "cta": "Kvartira tanlash",
-      "secondaryCta": "TJMlarni ko‘rish",
-      "scrollCue": "Pastga suring",
-      "finaleTitle": "Uy topshirildi.",
-      "finaleText": "Undan kvartira tanlab beramiz — quruvchi narxida.",
-      "finaleCta": "Kvartiralarni ko‘rish",
-      "stageLabel": "Bosqich",
-      "elevationLabel": "Belgi",
-      "stages": {
-        "site": "Yer uchastkasi",
-        "pit": "Kotlovan",
-        "foundation": "Poydevor",
-        "frame": "Monolit karkas",
-        "facade": "Fasad va derazalar",
-        "roof": "Tom",
-        "yard": "Obodonlashtirish",
-        "done": "Uy topshirildi"
-      },
       "free": {
         "price": "Narx — quruvchinikidek",
         "service": "Tanlash va ko‘rsatish — bepul",
@@ -129,6 +111,10 @@
       "text": "Saytda reklama va Vodiy House rieltorlari bilan birgalikda sotuv.",
       "cta": "Hamkor bo‘lish"
     }
+  },
+  "timelapse": {
+    "pause": "Rolikni to‘xtatish",
+    "play": "Rolikni davom ettirish"
   },
   "calc": {
     "page": {

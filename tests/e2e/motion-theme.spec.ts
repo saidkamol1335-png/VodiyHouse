@@ -19,7 +19,7 @@ test.describe("режимы анимации (CLAUDE.md §3)", () => {
     await expect(html(page)).toHaveAttribute("data-motion", "lite");
   });
 
-  // Третий режим первого экрана «Чертёж → стройка»: только постер — проверяется этим параметром.
+  // Третий режим первого экрана с роликом: только постер — проверяется этим параметром.
   test("?motion=none глушит анимации", async ({ page }) => {
     await page.goto("/uz?motion=none");
     await expect(html(page)).toHaveAttribute("data-motion", "none");

@@ -24,7 +24,7 @@
 @import "../components/FavoriteButton/FavoriteButton.css";
 @import "../components/HeaderNav/HeaderNav.css";
 @import "../components/HomeCatalog/HomeCatalog.css";
-@import "../components/BlueprintHero/BlueprintHero.css";
+@import "../components/HomeHero/HomeHero.css";
 @import "../components/HomeManifesto/HomeManifesto.css";
 @import "../components/HomeMarquee/HomeMarquee.css";
 @import "../components/HomeOffers/HomeOffers.css";
@@ -49,6 +49,8 @@
 @import "../components/SpecialsGrid/SpecialsGrid.css";
 @import "../components/Spotlight/Spotlight.css";
 @import "../components/SiteStats/SiteStats.css";
+@import "../components/TimelapseClip/TimelapseClip.css";
+@import "../components/TimelapseToggle/TimelapseToggle.css";
 @import "../components/SiteSteps/SiteSteps.css";
 @import "../components/TextPage/TextPage.css";
 @import "../components/TabletMenu/TabletMenu.css";

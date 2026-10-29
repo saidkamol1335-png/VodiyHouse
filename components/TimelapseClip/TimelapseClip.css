@@ -1,0 +1,43 @@
+/* Ролик стройки в панели или фоном карточки (тот же, что на первом экране главной): постер «вечер»,
+   ролик поверх проявляется с первым кадром (full — --dur-hero-video, lite — 200 мс), доиграл — снова
+   постер (тот же кадр); в none ролика нет. Размер и скругление задаёт место (.partners-hero__media,
+   .about-hero__media); кнопка паузы — в правом нижнем углу, у фона карточки — в правом верхнем. */
+
+.timelapse-clip {
+  position: relative;
+  overflow: hidden;
+  background: var(--photo-bg);
+}
+
+.timelapse-clip__frame,
+.timelapse-clip__poster,
+.timelapse-clip__poster img,
+.timelapse-clip__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.timelapse-clip__poster img,
+.timelapse-clip__video {
+  object-fit: cover;
+  object-position: var(--timelapse-focus);
+}
+
+.timelapse-clip__video {
+  opacity: 0;
+  transition: opacity var(--dur-hero-video) var(--ease-2);
+}
+
+.timelapse-clip--playing .timelapse-clip__video {
+  opacity: 1;
+}
+
+.timelapse-clip__toggle {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+}

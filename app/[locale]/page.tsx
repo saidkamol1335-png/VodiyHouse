@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { locale as rootLocale } from "next/root-params";
 import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
-import { HomeBlueprintHero } from "@/components/BlueprintHero";
 import { HomeCatalog } from "@/components/HomeCatalog";
+import { HomeHero } from "@/components/HomeHero";
 import { HomeManifesto } from "@/components/HomeManifesto";
 import { HomeMarquee } from "@/components/HomeMarquee";
 import { HomeOffers } from "@/components/HomeOffers";
@@ -37,8 +37,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран «Чертёж → стройка»
- * (блок H, поручение исполнителя 28.10.2026 — вместо обложки с фото ЖК), бегущая строка,
+ * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран — ролик стройки ЖК на весь
+ * экран (Higgsfield, 30.10.2026 — вместо «Чертёж → стройка»), текст и кнопки мокапа, бегущая строка,
  * каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
  * «Предложения от застройщиков» (3.16б), квиз «Подбор за 1 минуту» (3.17), «Vodiy House в двух
  * словах», «Почему через Vodiy House» (с плиткой «Видео стройки» — фаза 5), «Вы застройщик?». Страница статичная: всё — из кэшированных
@@ -51,7 +51,7 @@ export default async function HomePage() {
     <>
       <SiteHeader transparentAtTop tone="dark" />
       <main>
-        <HomeBlueprintHero stats={catalog ? homeStats(catalog) : null} found={catalog ? heroFound(catalog) : null} catalogId={CATALOG_ID} />
+        <HomeHero stats={catalog ? homeStats(catalog) : null} found={catalog ? heroFound(catalog) : null} catalogId={CATALOG_ID} />
         <HomeMarquee />
         {catalog ? <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} showcase={showcase} /> : <CatalogUnavailable id={CATALOG_ID} />}
         {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}

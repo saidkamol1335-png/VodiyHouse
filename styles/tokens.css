@@ -10,10 +10,8 @@
   --font: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
-  /* Первый экран «Чертёж → стройка» (поручение 28.10.2026): его CSS набран --font-body (Inter, без
-     него — Manrope) и --font-mono. Переменная задана здесь, а не только в @theme globals.css:
-     Tailwind v4 не выпускает в :root переменные темы, которые не использует ни одна утилита. */
-  --font-body: var(--font-inter), var(--font);
+  /* --font-mono — для CSS выбора квартиры (ComplexPicker). Задана здесь, а не только в @theme
+     globals.css: Tailwind v4 не выпускает в :root переменные темы, которые не использует ни одна утилита. */
   --font-mono: var(--mono);
 
   /* ---------- размеры текста по ролям (точные значения мокапа) ---------- */
@@ -97,68 +95,55 @@
   --container: 1280px;
   --gutter: 32px;
   --header-h: 68px;
-  /* Псевдонимы для CSS первого экрана «Чертёж → стройка»: текст hero стоит по краю логотипа шапки. */
-  --header-height: var(--header-h);
-  --hero-container: var(--container);
-  /* Первый экран «Чертёж → стройка» (блок H): монохром и холодное серебро портфолио, свой набор —
-     экран одинаково тёмный в обеих темах. Шапка над ним подменяет свои токены этими (SiteHeader.css). */
-  --hero-bg: #09090b;
-  /* Тот же цвет каналами — для градиентов с прозрачностью: rgb(var(--hero-bg-rgb) / 0.6). */
-  --hero-bg-rgb: 9 9 11;
+  /* Шапка над первым экраном главной (tone="dark", SiteHeader.css) подменяет свои токены этими —
+     экран тёмный в обеих темах. */
   --hero-fg: #fafafa;
   --hero-muted: #a1a1aa;
-  --hero-faint: #7c7c87;
-  --hero-steel: #dbe1ea;
-  --hero-steel-strong: #f2f5f9;
-  --hero-steel-2: #8ea0bb;
-  --hero-steel-deep: #4d5a70; /* тонировка синьки (mix-blend-mode: color) */
-  --hero-success: #8fb6a0; /* точка у «Подбор и показ бесплатно» */
-  --hero-success-glow: rgba(143, 182, 160, 0.16);
-  --hero-on-fill: #09090b;
   --hero-line: rgba(255, 255, 255, 0.08);
   --hero-line-2: rgba(255, 255, 255, 0.16);
   --hero-line-strong: rgba(255, 255, 255, 0.34);
-  --hero-dot-done: rgba(255, 255, 255, 0.45);
-  --hero-glass: rgba(9, 9, 11, 0.55); /* пилюля этапа на телефоне */
+  --hero-glass: rgba(9, 9, 11, 0.55);
   --hero-glass-solid: rgba(9, 9, 11, 0.95);
   --hero-glass-2: rgba(250, 250, 250, 0.06);
   --hero-glass-3: rgba(250, 250, 250, 0.12);
-  --hero-chip-bg: rgba(9, 9, 11, 0.4);
-  --hero-ghost-bg: rgba(9, 9, 11, 0.35);
-  --hero-text-shadow: 0 1px 10px rgba(9, 9, 11, 0.7);
   --special-badge-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
-  --hero-metal-text: linear-gradient(180deg, var(--hero-steel-strong), var(--hero-steel) 50%, var(--hero-steel-2));
-  --hero-text-fade: linear-gradient(180deg, var(--hero-fg) 62%, #b9b9be);
-  --hero-silver: linear-gradient(180deg, var(--hero-steel) 0%, var(--hero-steel-2) 100%);
-  /* Лист синьки: крупная и мелкая сетка поверх тонированного кадра. */
-  --hero-sheet-line: rgba(255, 255, 255, 0.07);
-  --hero-sheet-line-2: rgba(255, 255, 255, 0.05);
-  --hero-sheet-line-3: rgba(255, 255, 255, 0.022);
-  --hero-sheet-tint: rgba(9, 9, 11, 0.38);
-  --hero-sheet-step: 80px;
-  --hero-sheet-step-s: 16px;
-  --fs-hero-label: clamp(11px, 10.4px + 0.15vw, 12px);
-  --fs-hero-label-s: 10px;
-  --fs-hero-label-xs: 10px;
-  --fs-hero-title: clamp(32px, 17.6px + 2.4vw, 52px);
-  --fs-hero-title-phone: clamp(28px, 17.6px + 3.2vw, 36px);
-  --fs-hero-lead: clamp(16px, 15.2px + 0.3vw, 19px);
-  --fs-hero-lead-phone: 15px;
-  --fs-hero-finale: clamp(40px, 25.6px + 2.6vw, 64px);
-  --fs-hero-button: 14px;
-  --fs-hero-button-phone: 13px;
-  --fs-hero-stat: 28px;
-  --fs-hero-stat-phone: 24px;
-  --ls-hero-label: 0.16em;
-  --ls-hero-wide: 0.3em;
-  --ls-hero-title: -0.028em;
-  --hero-button-h: 56px;
-  --hero-button-h-phone: 52px;
-  --hero-text-w: 600px;
-  --hero-min-h: 620px;
-  --hero-bottom: clamp(24px, 4.5vh, 44px);
-  --dur-hero: 400ms;
-  --dur-hero-cue: 2.4s;
+  /* Первый экран главной (30.10.2026): ролик стройки на весь экран под тёмной пеленой; тексты и
+     кнопки — в токенах тёмной темы (data-theme-island). Пелена на десктопе — слева под текст, сверху
+     под шапку, снизу под цифры; на планшете и телефоне — снизу под текст. */
+  --home-hero-bg: #0b0a09;
+  --home-hero-min-h: 640px;
+  --home-hero-copy-w: 640px;
+  --home-hero-bottom: clamp(24px, 4.5vh, 44px);
+  --home-hero-focus: 30% 50%; /* ЖК правее центра: экран уже 16:9 режет кадр справа, а не по ЖК */
+  --home-hero-lead: rgba(244, 239, 231, 0.84);
+  --home-hero-glass: rgba(255, 255, 255, 0.08); /* «Подбор за 1 минуту» */
+  --home-hero-glass-hover: rgba(255, 255, 255, 0.14);
+  --home-hero-glass-line: rgba(255, 255, 255, 0.22);
+  /* «Найдено сейчас» лежит на огнях бульвара — тёмное стекло, иначе подпись ниже AA (ревью 30.10). */
+  --home-hero-found-bg: rgba(11, 10, 9, 0.62);
+  --home-hero-found-hover: rgba(11, 10, 9, 0.78);
+  /* Пауза ролика (WCAG 2.2.2): круглая тёмная стеклянная кнопка поверх кадра. */
+  --timelapse-toggle-bg: rgba(11, 10, 9, 0.55);
+  --timelapse-toggle-hover: rgba(11, 10, 9, 0.75);
+  --timelapse-toggle-line: rgba(255, 255, 255, 0.24);
+  --timelapse-toggle-fg: #ffffff;
+  --home-hero-text-shadow: 0 1px 18px rgba(0, 0, 0, 0.45);
+  --home-hero-perk-bg: rgba(91, 212, 140, 0.1); /* «бесплатно» пилюлями на телефоне (мокап Mobile) */
+  --home-hero-perk-line: rgba(91, 212, 140, 0.26);
+  /* Тот же ролик в панели «Застройщикам» и фоном карточки «О нас»: ЖК в кадре правее центра. */
+  --timelapse-focus: 64% 50%;
+  --partners-media-w: 440px;
+  --about-media-w: 62%;
+  /* Верх пелены — под пункты шапки: днём небо ролика светлое, пункты --hero-muted держат AA (ревью 30.10).
+     На телефоне низ пелены поднят до надзаголовка: текст высокий, на 360×780 он с середины экрана. */
+  --home-hero-shade:
+    linear-gradient(90deg, rgba(8, 7, 6, 0.86) 0%, rgba(8, 7, 6, 0.6) 30%, rgba(8, 7, 6, 0.16) 52%, rgba(8, 7, 6, 0) 64%),
+    linear-gradient(180deg, rgba(8, 7, 6, 0.82) 0%, rgba(8, 7, 6, 0.45) 14%, rgba(8, 7, 6, 0) 28%),
+    linear-gradient(0deg, rgba(8, 7, 6, 0.72) 0%, rgba(8, 7, 6, 0) 30%);
+  --home-hero-shade-stacked:
+    linear-gradient(180deg, rgba(8, 7, 6, 0.78) 0%, rgba(8, 7, 6, 0.4) 12%, rgba(8, 7, 6, 0) 24%),
+    linear-gradient(0deg, rgba(8, 7, 6, 0.94) 0%, rgba(8, 7, 6, 0.84) 42%, rgba(8, 7, 6, 0.62) 62%, rgba(8, 7, 6, 0.2) 80%, rgba(8, 7, 6, 0) 92%);
+  --dur-hero-video: 1.2s; /* ролик проявляется поверх постера; lite — 200 мс, в none ролика нет */
   /* Квиз «Подбор за 1 минуту» (3.17, мокап .qz / MobQuiz) */
   --fs-quiz-count: 84px; /* число подходящих ЖК */
   --fs-quiz-count-phone: 40px;
@@ -271,6 +256,10 @@
   --about-card-fg: #f7f3ec;
   --about-card-fg-2: rgba(247, 243, 236, 0.68);
   --about-card-line: rgba(247, 243, 236, 0.14);
+  /* Пелена над роликом карточки «О нас»: от цвета карточки слева (текст) и снизу (цифры) к ролику справа. */
+  --about-media-shade:
+    linear-gradient(90deg, var(--about-card-bg) 0%, rgba(23, 20, 15, 0.7) 30%, rgba(23, 20, 15, 0.15) 75%),
+    linear-gradient(0deg, var(--about-card-bg) 0%, rgba(23, 20, 15, 0) 45%);
 
   --glass: rgba(250, 248, 244, 0.84); /* шапка и панели со стеклом */
   --glass-solid: rgba(250, 248, 244, 0.95); /* то же без blur — режим lite */
@@ -679,7 +668,7 @@
 /* ---------- режимы анимации (CLAUDE.md §3): компоненты читают только токены ---------- */
 /* lite: переходы ≤ 200 мс, без blur и стекла */
 [data-motion="lite"] {
-  --dur-hero: 200ms; /* первый экран «Чертёж → стройка»: переходы lite не длиннее 200 мс (§ анимации) */
+  --dur-hero-video: 200ms; /* первый экран главной: ролик проявляется не дольше 200 мс (§ анимации) */
   --dur-base: 200ms;
   --dur-slow: 200ms;
   --dur-slower: 200ms;

@@ -25,7 +25,7 @@ test.describe("квиз «Подбор за 1 минуту»", () => {
     const quiz = page.locator("#podbor .quiz");
     const count = quiz.locator(".quiz__intro .quiz__count b");
     await expect(count).toHaveText("4");
-    await expect(page.locator(".blueprint-hero__pick--quiz")).toHaveAttribute("href", "#podbor");
+    await expect(page.locator(".home-hero__quiz")).toHaveAttribute("href", "#podbor");
     await shot(page, "home-quiz");
     // Комнаты — несколько; без выбора — «Пропустить».
     await expect(quiz.getByRole("button", { name: "Пропустить" })).toBeVisible();

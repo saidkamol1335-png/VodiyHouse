@@ -10,12 +10,12 @@ test.describe("главная, избранное, подборка", () => {
 
   test("главная: заголовок, «Подобрать квартиру» → каталог ниже, цифры из базы, без скидок и контактов застройщика", async ({ page }) => {
     const errors = collectPageErrors(page);
-    // lite: первый экран высотой в экран, а не лента на 460vh (full зависит от машины) — снимок главной ровный.
+    // lite: режим не зависит от пробы FPS машины — снимок главной ровный.
     await page.goto("/ru?motion=lite");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Квартиры в новостройках Ферганы");
     await expect(page.getByRole("link", { name: /Подобрать квартиру/ }).first()).toHaveAttribute("href", /#katalog$/);
     await expect(page.locator("#katalog .catalog-card").first()).toBeVisible();
-    const complexes = page.locator(".blueprint-hero__stat").first();
+    const complexes = page.locator(".home-hero__stat").first();
     await expect(complexes.locator("dt")).toHaveText("жилых комплекса");
     await expect(complexes.locator("dd")).toHaveText("4");
     await expect(page.locator(".home-partner").getByRole("link", { name: /Стать партнёром/ })).toBeVisible();
