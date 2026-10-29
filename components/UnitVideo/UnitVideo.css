@@ -243,7 +243,8 @@
   line-height: 1.45;
 }
 
-.unit-video__phone {
+.unit-video__phone,
+.unit-video__telegram {
   width: 100%;
 }
 

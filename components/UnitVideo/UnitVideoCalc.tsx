@@ -9,7 +9,7 @@ import { loadFlatCalculator } from "@/components/ComplexPlans/useLayoutCalc";
 import type { CalcHints } from "@/lib/calc/hints";
 import { readCalcParams } from "@/lib/calc/params";
 import { flatCalcFrom, type FlatCalcScreen } from "@/lib/calc/flatScreen";
-import { readLayoutCalcAction } from "@/lib/site/complex/actions";
+import { readLayoutCalcWithoutUnitsAction } from "@/lib/site/complex/actions";
 
 const FlatCalculator = dynamic(loadFlatCalculator, { ssr: false });
 const INITIAL_PARAMS = readCalcParams({});
@@ -23,8 +23,8 @@ type UnitVideoCalcProps = {
 
 /**
  * «Сколько платить за эту квартиру» (мокап SiteVideo .pcalc, MobVideo .vcalc): калькулятор планировки
- * той же кнопкой и тем же чанком, что на странице ЖК. Без списка квартир — номер квартиры клиенту не
- * показываем (PLAN фазы 5): расчёт по «цене от» планировки (вопрос заказчику — PROGRESS).
+ * той же кнопкой и тем же чанком, что на странице ЖК. Без списка квартир (его убирает сервер) — номер
+ * квартиры клиенту не показываем (PLAN фазы 5): расчёт по «цене от» планировки (вопрос заказчику — PROGRESS).
  */
 export function UnitVideoCalc({ layoutId, complexSlug, hints, leadEnabled }: UnitVideoCalcProps) {
   const t = useTranslations("unitVideo");
@@ -36,11 +36,11 @@ export function UnitVideoCalc({ layoutId, complexSlug, hints, leadEnabled }: Uni
     startTransition(async () => {
       setFailed(false);
       const [record] = await Promise.all([
-        readLayoutCalcAction(layoutId),
+        readLayoutCalcWithoutUnitsAction(layoutId),
         loadFlatCalculator(),
       ]).catch(() => [null]);
       if (!record) return setFailed(true);
-      setScreen(flatCalcFrom({ ...record, units: [] }));
+      setScreen(flatCalcFrom(record));
     });
   const close = () => {
     setScreen(null);

@@ -20,19 +20,38 @@ export async function readLayoutCalcAction(layoutId: string): Promise<FlatCalcRe
 }
 
 /**
+ * Расчёт на странице видео квартиры (фаза 5): та же планировка, но без списка квартир — номера,
+ * цены и id свободных квартир не уходят в браузер вовсе (по этажу из видео клиент нашёл бы свою).
+ */
+export async function readLayoutCalcWithoutUnitsAction(
+  layoutId: string,
+): Promise<FlatCalcRecord | null> {
+  if (typeof layoutId !== "string") return null;
+  const record = await readLayoutCalc(layoutId, false);
+  return record ? { ...record, units: [] } : null;
+}
+
+/**
  * «Выбрать квартиру» (фаза 4): квартиры блоков со статусами — мимо кэша, раздел перечитывает их,
  * пока он на экране: смена статуса в кабинете видна за секунды. block_units отдаёт цену только
  * свободной и только видимого ЖК (в предпросмотре — сессией сотрудника).
  */
-export async function readComplexUnitsAction(blockIds: string[]): Promise<Record<string, PickerUnit[]> | null> {
+export async function readComplexUnitsAction(
+  blockIds: string[],
+): Promise<Record<string, PickerUnit[]> | null> {
   if (!Array.isArray(blockIds) || blockIds.length === 0 || blockIds.length > 20) return null;
-  if (!blockIds.every((id) => typeof id === "string" && UUID.test(id)) || !hasSupabaseEnv()) return null;
+  if (!blockIds.every((id) => typeof id === "string" && UUID.test(id)) || !hasSupabaseEnv())
+    return null;
   const supabase = await createSupabaseServerClient();
-  const answers = await Promise.all(blockIds.map((id) => supabase.rpc("block_units", { target_block: id })));
+  const answers = await Promise.all(
+    blockIds.map((id) => supabase.rpc("block_units", { target_block: id })),
+  );
   const failed = answers.find((answer) => answer.error);
   if (failed) {
     console.error("[novostroyki/zhk] квартиры блоков недоступны", failed.error);
     return null;
   }
-  return Object.fromEntries(blockIds.map((id, index) => [id, (answers[index]!.data as BlockUnitRecord[]).map(unitFrom)]));
+  return Object.fromEntries(
+    blockIds.map((id, index) => [id, (answers[index]!.data as BlockUnitRecord[]).map(unitFrom)]),
+  );
 }

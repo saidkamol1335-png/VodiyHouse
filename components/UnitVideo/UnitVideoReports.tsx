@@ -24,12 +24,11 @@ export function UnitVideoReports({ video, aside }: UnitVideoReportsProps) {
   const reports = [video, ...video.history];
   const [currentId, setCurrentId] = useState(video.id);
   const current = reports.find((report) => report.id === currentId) ?? video;
-  const label =
-    current.id === video.id
-      ? t("levelUnit")
-      : current.block
-        ? t("levelBlock", { name: current.block.name })
-        : t("levelComplex");
+  const label = current.isUnit
+    ? t("levelUnit")
+    : current.block
+      ? t("levelBlock", { name: current.block.name })
+      : t("levelComplex");
   return (
     <>
       <ProgressPlayer key={current.id} report={current} label={label} />

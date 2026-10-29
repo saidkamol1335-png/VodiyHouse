@@ -1,4 +1,4 @@
-import { CalendarCheck, Film } from "lucide-react";
+import { CalendarCheck, Film, Send } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
@@ -7,6 +7,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
 import { LeadButton } from "@/components/LeadDialog";
 import { PhoneButton } from "@/components/PhoneButton";
+import { TelegramButton } from "@/components/TelegramButton";
 import { SiteHeader } from "@/components/SiteHeader";
 import { UnitVideoCalc, UnitVideoReports } from "@/components/UnitVideo";
 import { formatArea, formatMonthYear } from "@/lib/format";
@@ -49,7 +50,10 @@ export async function generateMetadata({
 }
 
 /** «ЖК Shodlik · Блок B · 2-комн. · 58,7 м² · 6 этаж» — без номера квартиры (мокап .vp__meta). */
-async function metaOf(video: UnitVideo, locale: Locale): Promise<string[]> {
+async function metaOf(
+  video: UnitVideo,
+  locale: Locale,
+): Promise<{ parts: string[]; book: string }> {
   const [t, tComplex, tProgress] = await Promise.all([
     getTranslations("unitVideo"),
     getTranslations("complex"),
@@ -61,13 +65,20 @@ async function metaOf(video: UnitVideo, locale: Locale): Promise<string[]> {
       : video.rooms <= 4
         ? tComplex(`rooms.${video.rooms as 0 | 1 | 2 | 3 | 4}`)
         : tComplex("rooms.more", { n: video.rooms });
-  return [
-    tComplex("name", { name: video.complex.name[locale] }),
-    video.block ? tProgress("block", { name: video.block.name }) : null,
-    rooms,
-    video.area === null ? null : formatArea(video.area, locale),
-    video.floor === null ? null : t("floor", { n: video.floor }),
-  ].filter((part): part is string => Boolean(part));
+  const complex = tComplex("name", { name: video.complex.name[locale] });
+  const area = video.area === null ? null : formatArea(video.area, locale);
+  const present = (part: string | null): part is string => Boolean(part);
+  return {
+    parts: [
+      complex,
+      video.block ? tProgress("block", { name: video.block.name }) : null,
+      rooms,
+      area,
+      video.floor === null ? null : t("floor", { n: video.floor }),
+    ].filter(present),
+    // Контекст заявки «ЖК Shodlik · 2-комн. · 58,7 м² · из видео» — без блока, этажа и номера.
+    book: [complex, rooms, area, t("fromVideo")].filter(present).join(" · "),
+  };
 }
 
 /**
@@ -85,11 +96,14 @@ export default async function UnitVideoRoute({ params }: PageProps<"/[locale]/vi
   const complexHref = complexRoute(video.complex.slug);
   return (
     <NextIntlClientProvider messages={pickMessages(messages, UNIT_VIDEO_MESSAGES)}>
-      <SiteHeader backHref={complexHref} pageTitle={meta[0]} />
+      <SiteHeader backHref={complexHref} pageTitle={meta.parts[0]} />
       <main className="unit-video">
         <Container>
-          <VideoHead video={video} meta={meta} locale={locale} />
-          <UnitVideoReports video={video} aside={<VideoAside video={video} meta={meta} />} />
+          <VideoHead video={video} meta={meta.parts} locale={locale} />
+          <UnitVideoReports
+            video={video}
+            aside={<VideoAside video={video} context={meta.book} />}
+          />
           {video.layoutId ? (
             <PaySection video={video} layoutId={video.layoutId} hints={hints} />
           ) : null}
@@ -138,18 +152,18 @@ async function VideoHead({
 }
 
 /** Правая колонка: готовность блока и «Хотите посмотреть вживую?» — только кнопки Vodiy House (правило 1.2). */
-async function VideoAside({ video, meta }: { video: UnitVideo; meta: string[] }) {
+async function VideoAside({ video, context }: { video: UnitVideo; context: string }) {
   const [t, tLead, contacts] = await Promise.all([
     getTranslations("unitVideo"),
     getTranslations("lead.buttons"),
     readSiteContacts(),
   ]);
-  // Заявка — с ЖК и планировкой, контекст «ЖК Shodlik · 2-комн. · 58,7 м² · из видео», без номера квартиры.
-  const book = {
-    type: "view" as const,
-    object: { complex: video.complex.slug, ...(video.layoutId ? { layout: video.layoutId } : {}) },
-    context: [...meta.slice(0, 1), ...meta.slice(2, 4), t("fromVideo")].join(" · "),
+  // Заявка и Telegram — с ЖК и планировкой, без номера квартиры.
+  const object = {
+    complex: video.complex.slug,
+    ...(video.layoutId ? { layout: video.layoutId } : {}),
   };
+  const book = { type: "view" as const, object, context };
   return (
     <>
       <Readiness video={video} />
@@ -163,6 +177,10 @@ async function VideoAside({ video, meta }: { video: UnitVideo; meta: string[] })
         {contacts.phone ? (
           <PhoneButton phone={contacts.phone} className="unit-video__phone" />
         ) : null}
+        <TelegramButton object={object} className="button button--outline unit-video__telegram">
+          <Send size={16} strokeWidth={1.9} aria-hidden />
+          {t("telegram")}
+        </TelegramButton>
         <Link href={complexRoute(video.complex.slug)} className="unit-video__to-complex">
           {t("toComplex")} →
         </Link>

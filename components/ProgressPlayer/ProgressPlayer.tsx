@@ -31,7 +31,9 @@ const playerOf = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?a
 export function ProgressPlayer({ report, caption = true, label }: ProgressPlayerProps) {
   const t = useTranslations("complex.progress");
   const locale = useLocale() as Locale;
-  const month = formatMonthYear(report.month, locale);
+  // «Видео за октябрь 2026»: в подписях месяц строчный; штамп — капсом через CSS.
+  const month = formatMonthYear(report.month, locale).toLowerCase();
+  const videoTitle = t("stampVideo", { month });
   const stamp = [
     formatDate(new Date(report.shotAt)),
     report.block ? t("block", { name: report.block.name }) : null,
@@ -42,9 +44,13 @@ export function ProgressPlayer({ report, caption = true, label }: ProgressPlayer
   return (
     <figure className={`progress-player progress-player--${kind}`}>
       {kind === "youtube" ? (
-        <YoutubeMedia youtubeId={report.youtubeId!} title={t("play", { month })} />
+        <YoutubeMedia
+          youtubeId={report.youtubeId!}
+          label={t("play", { month })}
+          title={videoTitle}
+        />
       ) : null}
-      {kind === "file" ? <FileMedia report={report} /> : null}
+      {kind === "file" ? <FileMedia report={report} title={videoTitle} /> : null}
       {kind === "photos" ? <Slideshow report={report} label={t("play", { month })} /> : null}
       <span className="progress-player__corners" aria-hidden="true" />
       <span className="progress-player__stamp progress-player__stamp--start">
@@ -61,7 +67,15 @@ export function ProgressPlayer({ report, caption = true, label }: ProgressPlayer
   );
 }
 
-function YoutubeMedia({ youtubeId, title }: { youtubeId: string; title: string }) {
+function YoutubeMedia({
+  youtubeId,
+  label,
+  title,
+}: {
+  youtubeId: string;
+  label: string;
+  title: string;
+}) {
   const [playing, setPlaying] = useState(false);
   const player = useFocusWhen<HTMLIFrameElement>(playing);
   if (playing) {
@@ -80,7 +94,7 @@ function YoutubeMedia({ youtubeId, title }: { youtubeId: string; title: string }
     <button
       type="button"
       className="progress-player__poster"
-      aria-label={title}
+      aria-label={label}
       onClick={() => setPlaying(true)}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- превью YouTube, не из бакета */}
@@ -98,7 +112,7 @@ function YoutubeMedia({ youtubeId, title }: { youtubeId: string; title: string }
   );
 }
 
-function FileMedia({ report }: { report: ProgressReport }) {
+function FileMedia({ report, title }: { report: ProgressReport; title: string }) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const poster = report.photos[0];
   return (
@@ -108,6 +122,7 @@ function FileMedia({ report }: { report: ProgressReport }) {
       src={progressVideoPublicUrl(supabaseUrl, report.videoPath!)}
       poster={poster ? mediaPublicUrl(supabaseUrl, poster.path) : undefined}
       preload="none"
+      aria-label={title}
       controls
       playsInline
     />
@@ -122,6 +137,8 @@ function Slideshow({ report, label }: { report: ProgressReport; label: string })
   const locale = useLocale() as Locale;
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
+  // Нажали «Смотреть» хоть раз: большой кнопки больше нет, пауза замирает на кадре, а не сбрасывает наезд.
+  const [started, setStarted] = useState(false);
   const total = report.photos.length;
   useEffect(() => {
     if (!playing || total < 2) return;
@@ -130,61 +147,91 @@ function Slideshow({ report, label }: { report: ProgressReport; label: string })
   }, [playing, total]);
   return (
     <div
-      className={
-        playing
-          ? "progress-player__slides progress-player__slides--playing"
-          : "progress-player__slides"
-      }
+      className={[
+        "progress-player__slides",
+        started ? "progress-player__slides--started" : null,
+        started && !playing ? "progress-player__slides--paused" : null,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <Frames report={report} frame={frame} alt={report.comment[locale]} />
-      {playing ? null : (
-        <button
-          type="button"
-          className="progress-player__poster"
-          aria-label={label}
-          onClick={() => setPlaying(true)}
-        >
-          <span className="progress-player__play" aria-hidden="true">
-            <Play size={26} fill="currentColor" />
-          </span>
-        </button>
+      {started ? null : (
+        <StartButton
+          label={label}
+          onStart={() => {
+            setStarted(true);
+            setPlaying(true);
+          }}
+        />
       )}
       <SlideshowBar
         frame={frame}
         total={total}
         playing={playing}
-        onToggle={() => setPlaying((value) => !value)}
+        focus={started}
+        onToggle={() => {
+          setStarted(true);
+          setPlaying((value) => !value);
+        }}
       />
     </div>
   );
 }
 
-/** Кадры стопкой: виден текущий (смена — opacity, см. CSS), диктор слышит только его. */
-function Frames({ report, frame, alt }: { report: ProgressReport; frame: number; alt: string }) {
-  return report.photos.map((photo, index) => (
-    <SitePhoto
-      key={photo.path}
-      photo={photo}
-      alt={index === frame ? alt : ""}
-      frame="cover"
-      sizes="(max-width: 760px) 100vw, 860px"
-      className={
-        index === frame
-          ? "progress-player__frame progress-player__frame--active"
-          : "progress-player__frame"
-      }
-    />
-  ));
+/** Большая кнопка «Смотреть» поверх первого кадра — до первого запуска. */
+function StartButton({ label, onStart }: { label: string; onStart: () => void }) {
+  return (
+    <button type="button" className="progress-player__poster" aria-label={label} onClick={onStart}>
+      <span className="progress-player__play" aria-hidden="true">
+        <Play size={26} fill="currentColor" />
+      </span>
+    </button>
+  );
 }
 
-type SlideshowBarProps = { frame: number; total: number; playing: boolean; onToggle: () => void };
+/**
+ * Кадры стопкой: виден текущий (смена — opacity, см. CSS), диктор слышит только его. В разметке —
+ * только прошлый (он ещё гаснет), текущий и следующий: остальные 3–15 фото не грузятся заранее.
+ */
+function Frames({ report, frame, alt }: { report: ProgressReport; frame: number; alt: string }) {
+  const total = report.photos.length;
+  const near = new Set([frame, (frame + 1) % total, (frame - 1 + total) % total]);
+  return report.photos.map((photo, index) =>
+    near.has(index) ? (
+      <SitePhoto
+        key={photo.path}
+        photo={photo}
+        alt={index === frame ? alt : ""}
+        frame="cover"
+        sizes="(max-width: 760px) 100vw, 860px"
+        className={
+          index === frame
+            ? "progress-player__frame progress-player__frame--active"
+            : "progress-player__frame"
+        }
+      />
+    ) : null,
+  );
+}
+
+type SlideshowBarProps = {
+  frame: number;
+  total: number;
+  playing: boolean;
+  /** Большая кнопка пропала — фокус на паузу, а не в body. */
+  focus: boolean;
+  onToggle: () => void;
+};
 
 /** Стеклянная полоса снизу (мокап .player__bar): пауза / смотреть, трек кадров, «2 / 5». */
-function SlideshowBar({ frame, total, playing, onToggle }: SlideshowBarProps) {
+function SlideshowBar({ frame, total, playing, focus, onToggle }: SlideshowBarProps) {
   const t = useTranslations("complex.progress");
+  const toggle = useFocusWhen<HTMLButtonElement>(focus);
   return (
     <div className="progress-player__bar">
       <button
+        ref={toggle}
         type="button"
         className="progress-player__toggle"
         aria-label={playing ? t("pause") : t("resume")}
@@ -202,8 +249,11 @@ function SlideshowBar({ frame, total, playing, onToggle }: SlideshowBarProps) {
           style={{ transform: `scaleX(${(frame + 1) / Math.max(total, 1)})` }}
         />
       </span>
-      <span className="progress-player__count" aria-label={t("frame", { n: frame + 1, total })}>
-        {frame + 1} / {total}
+      <span className="progress-player__count">
+        <span aria-hidden="true">
+          {frame + 1} / {total}
+        </span>
+        <span className="sr-only">{t("frame", { n: frame + 1, total })}</span>
       </span>
     </div>
   );

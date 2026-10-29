@@ -17,6 +17,7 @@ type ProgressBlockRecord = {
 
 export type ProgressReportRecord = {
   id: string;
+  is_unit: boolean;
   month: string;
   shot_at: string;
   comment: LocalizedText;
@@ -47,6 +48,8 @@ export type ProgressBlock = {
 
 export type ProgressReport = {
   id: string;
+  /** Отчёт по квартире (видео для клиента), а не по блоку. */
+  isUnit: boolean;
   /** Первое число месяца отчёта, «2026-10-01». */
   month: string;
   /** Когда снято (загружено) — «Снято 02.10.2026». */
@@ -89,6 +92,7 @@ function blockFrom(record: ProgressBlockRecord | null): ProgressBlock | null {
 export function progressReportFrom(record: ProgressReportRecord): ProgressReport {
   return {
     id: record.id,
+    isUnit: record.is_unit,
     month: record.month,
     shotAt: record.shot_at,
     comment: record.comment,

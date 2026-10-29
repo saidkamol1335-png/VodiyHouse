@@ -248,8 +248,17 @@
   transition: transform 0.6s var(--ease-2);
 }
 
-[data-motion="full"] .progress-player__slides--playing .progress-player__frame--active {
+/* Наезд: гаснущий кадр остаётся в конце наезда (без скачка к 1), пауза замирает на месте. */
+[data-motion="full"] .progress-player__slides--started .progress-player__frame {
+  transform: scale(1.09) translate(-1.5%, -1%);
+}
+
+[data-motion="full"] .progress-player__slides--started .progress-player__frame--active {
   animation: progress-player-zoom 3.4s linear both;
+}
+
+[data-motion="full"] .progress-player__slides--paused .progress-player__frame--active {
+  animation-play-state: paused;
 }
 
 [data-motion="full"] .progress-player__stamp i {

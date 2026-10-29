@@ -3091,7 +3091,7 @@
       "shot": "Снято {date} · Vodiy House",
       "ready": "Готовность блока {name}",
       "readyNoName": "Готовность блока",
-      "floors": "{built} из {total} этажей",
+      "floors": "{built} из {total, plural, one {# этажа} other {# этажей}}",
       "play": "Смотреть отчёт за {month}",
       "pause": "Пауза",
       "resume": "Смотреть",
@@ -3583,6 +3583,7 @@
     "calcButton": "Рассчитать платёж",
     "calcPending": "Считаем…",
     "calcFailed": "Расчёт не загрузился — попробуйте ещё раз",
-    "fromVideo": "из видео"
+    "fromVideo": "из видео",
+    "telegram": "Написать в Telegram"
   }
 }
