@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MEDIA_BUCKET, mediaPath, processImage } from "@/lib/media";
+import { MEDIA_BUCKET, mediaPath, mediaPublicUrl, processImage } from "@/lib/media";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { ProgressPhoto } from "./types";
 
@@ -44,6 +44,15 @@ async function uploadPhoto(
   };
 }
 
+const storedTile = (photo: ProgressPhoto): PhotoTile => ({
+  key: photo.path,
+  name: photo.path.split("/").at(-1) ?? photo.path,
+  state: "done",
+  photo,
+  preview: mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", photo.path),
+  error: null,
+});
+
 const newTile = (file: File, key: string): PhotoTile => ({
   key,
   name: file.name,
@@ -74,8 +83,9 @@ function usePreviews() {
 }
 
 /** Очередь фото одного ЖК: добавить (до 15), убрать, сбросить. */
-export function usePhotoQueue(complexId: string | null) {
-  const [tiles, setTiles] = useState<PhotoTile[]>([]);
+export function usePhotoQueue(complexId: string | null, initial: readonly ProgressPhoto[] = []) {
+  // Исправление возвращённого отчёта: его фото уже в бакете — плитки сразу «загружены».
+  const [tiles, setTiles] = useState<PhotoTile[]>(() => initial.map(storedTile));
   const { keep, release } = usePreviews();
 
   /** Сколько файлов принято (остальные — сверх 15). */

@@ -22,7 +22,25 @@ async function removeE2eReports(): Promise<void> {
   }
 }
 
-test.describe("кабинет видеографа", () => {
+/** Как менеджер (экран проверки — 5D): вернуть отчёт E2E с причиной. */
+async function returnE2eReport(note: string): Promise<void> {
+  const client = new pg.Client(dbClientConfig(process.env.SUPABASE_DB_URL!));
+  await client.connect();
+  try {
+    await client.query("begin");
+    await client.query("select set_config('vodiy.skip_audit', 'on', true)");
+    const { rowCount } = await client.query(
+      "update progress_reports set status = 'returned', return_note = $1 where comment ->> 'ru' like 'E2E ·%' and status = 'review'",
+      [note],
+    );
+    await client.query("commit");
+    expect(rowCount).toBe(1);
+  } finally {
+    await client.end();
+  }
+}
+
+test.describe.serial("кабинет видеографа", () => {
   test.skip(!hasCloud || !process.env.SUPABASE_DB_URL, NO_CLOUD);
   test.use({ storageState: cabinetState("videographer") });
   test.beforeAll(removeE2eReports);
@@ -68,9 +86,17 @@ test.describe("кабинет видеографа", () => {
 
     // Видео с телефона — загрузкой с докачкой (TUS) в progress-video: «.mov» не берётся, MP4 — до «Загружено».
     const videoInput = page.locator(".progress-form__drop input[type=file]");
-    await videoInput.setInputFiles({ name: "iphone.mov", mimeType: "video/quicktime", buffer: Buffer.alloc(2048) });
+    await videoInput.setInputFiles({
+      name: "iphone.mov",
+      mimeType: "video/quicktime",
+      buffer: Buffer.alloc(2048),
+    });
     await expect(page.getByText(/Нужен MP4/)).toBeVisible();
-    const mp4 = Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from("ftypmp42"), Buffer.alloc(200 * 1024)]);
+    const mp4 = Buffer.concat([
+      Buffer.from([0, 0, 0, 0x18]),
+      Buffer.from("ftypmp42"),
+      Buffer.alloc(200 * 1024),
+    ]);
     await videoInput.setInputFiles({ name: "stroyka.mp4", mimeType: "video/mp4", buffer: mp4 });
     await expect(page.getByText(/Загружено · видео в отчёте/)).toBeVisible({ timeout: 30_000 });
     await page.getByRole("button", { name: "Отправить на проверку" }).click();
@@ -89,6 +115,36 @@ test.describe("кабинет видеографа", () => {
       fullPage: true,
       caret: "initial",
     });
+    expect(errors).toEqual([]);
+  });
+
+  test("возвращённый отчёт: причина, «Исправить» — форма заполнена, ЖК не меняется → снова на проверке", async ({
+    page,
+  }) => {
+    const errors = collectPageErrors(page);
+    await returnE2eReport("E2E · В кадре вывеска застройщика");
+    await page.goto("/admin/video");
+    const mine = page.locator(".video-screen__mine li").first();
+    await expect(mine).toContainText("Возвращён");
+    await expect(mine).toContainText("Что исправить: E2E · В кадре вывеска застройщика");
+    await mine.getByRole("link", { name: "Исправить" }).click();
+
+    await expect(page.getByText("Исправить отчёт")).toBeVisible();
+    await expect(
+      page.getByText("Менеджер вернул отчёт: E2E · В кадре вывеска застройщика"),
+    ).toBeVisible();
+    await expect(page.getByLabel("ЖК", { exact: true })).toBeDisabled();
+    await expect(page.locator(".progress-form__shot--done")).toHaveCount(3);
+    await expect(page.getByText(/Загружено · видео в отчёте/)).toBeVisible();
+    const ru = page.locator("textarea[name='comment.ru']");
+    await expect(ru).toHaveValue("E2E · Залит 9-й этаж");
+    await ru.fill("E2E · Переснято без вывески");
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+
+    await expect(page).toHaveURL(/\/admin\/video$/, { timeout: 15_000 });
+    await expect(page.getByText("Исправить отчёт")).toHaveCount(0);
+    await expect(mine).toContainText("На проверке");
+    await expect(mine).not.toContainText("Что исправить");
     expect(errors).toEqual([]);
   });
 });

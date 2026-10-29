@@ -91,8 +91,19 @@ async function resumePrevious(upload: Upload, complexId: string): Promise<void> 
 }
 
 /** Одно видео отчёта: выбрать, следить за процентами и обрывом связи, убрать. */
-export function useVideoUpload(complexId: string | null) {
-  const [state, setState] = useState<VideoUploadState>(IDLE);
+export function useVideoUpload(complexId: string | null, initialPath: string | null = null) {
+  // Исправление возвращённого отчёта: его видео уже в бакете.
+  const [state, setState] = useState<VideoUploadState>(() =>
+    initialPath
+      ? {
+          ...IDLE,
+          status: "done",
+          name: initialPath.split("/").at(-1) ?? "",
+          percent: 100,
+          path: initialPath,
+        }
+      : IDLE,
+  );
   const upload = useRef<Upload | null>(null);
   const update = (patch: Partial<VideoUploadState>) =>
     setState((current) => ({ ...current, ...patch }));
@@ -112,7 +123,8 @@ export function useVideoUpload(complexId: string | null) {
   // Не загрузилось до конца — загрузка отменяется; загруженный файл останется в папке ЖК.
   const remove = () => {
     // Отменять (и стирать на сервере) — только незаконченную: завершённую сервер уже не отдаёт (409).
-    if (state.status === "uploading" || state.status === "offline") void upload.current?.abort(true);
+    if (state.status === "uploading" || state.status === "offline")
+      void upload.current?.abort(true);
     upload.current = null;
     setState(IDLE);
   };

@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 import { submitProgressReportAction } from "@/lib/admin/actions/progressReports";
-import type { ProgressFormComplex } from "@/lib/admin/progress/types";
+import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import type { ProgressFix, ProgressFormComplex } from "@/lib/admin/progress/types";
 import { PHOTOS_MIN, usePhotoQueue } from "@/lib/admin/progress/usePhotoQueue";
 import { useVideoUpload } from "@/lib/admin/progress/useVideoUpload";
 import type { ReportTargetValue } from "./ReportTarget";
@@ -52,17 +53,27 @@ function videoIssue(
 /** ЖК, месяц, блок, квартира и фото этого ЖК: другой ЖК — блок последний, квартира и фото с нуля. */
 function useReportTarget(
   complexes: readonly ProgressFormComplex[],
-  months: readonly [string, string],
+  months: readonly string[],
   onChange: () => void,
+  fix: ProgressFix | null,
 ) {
-  const [target, setTarget] = useState<ReportTargetValue>({
-    complexId: complexes[0]?.id ?? "",
-    month: months[0],
-    blockId: lastBlock(complexes[0]),
-    unitId: "",
-  });
-  const queue = usePhotoQueue(target.complexId || null);
-  const { video, pick, remove } = useVideoUpload(target.complexId || null);
+  const [target, setTarget] = useState<ReportTargetValue>(() =>
+    fix
+      ? {
+          complexId: fix.complexId,
+          month: fix.month,
+          blockId: fix.blockId,
+          unitId: fix.unitId ?? "",
+        }
+      : {
+          complexId: complexes[0]?.id ?? "",
+          month: months[0] ?? "",
+          blockId: lastBlock(complexes[0]),
+          unitId: "",
+        },
+  );
+  const queue = usePhotoQueue(target.complexId || null, fix?.photos);
+  const { video, pick, remove } = useVideoUpload(target.complexId || null, fix?.videoPath ?? null);
   const change = (patch: Partial<ReportTargetValue>) => {
     onChange();
     if (patch.complexId && patch.complexId !== target.complexId) {
@@ -89,19 +100,23 @@ function useReportTarget(
 /**
  * Состояние «Нового отчёта»: ЖК, месяц, блок, квартира, очередь фото; проверка перед отправкой
  * (3–15 фото загружены, комментарий на двух языках) и отправка. После «Отправлено» — пустая форма и
- * свежие «Мои отчёты» (router.refresh).
+ * свежие «Мои отчёты» (router.refresh); исправленный возвращённый отчёт — обратно на экран без ?fix.
  */
 export function useReportForm(
   complexes: readonly ProgressFormComplex[],
-  months: readonly [string, string],
+  months: readonly string[],
+  fix: ProgressFix | null = null,
 ) {
   const t = useTranslations("admin.video.form");
   const tError = useTranslations("admin.developers.errors");
   const router = useRouter();
   const form = useRef<HTMLFormElement>(null);
   const [sent, setSent] = useState(false);
-  const { target, change, queue, video, clear } = useReportTarget(complexes, months, () =>
-    setSent(false),
+  const { target, change, queue, video, clear } = useReportTarget(
+    complexes,
+    months,
+    () => setSent(false),
+    fix,
   );
   // Поля текста управляемые (счётчик знаков): после отправки форма собирается заново — пустой.
   const [round, setRound] = useState(0);
@@ -120,9 +135,11 @@ export function useReportForm(
     data.set("unitId", target.unitId);
     data.set("month", target.month);
     data.set("photos", JSON.stringify(queue.photos));
+    if (fix) data.set("id", fix.id);
     start(async () => {
       const result = await submitProgressReportAction(data);
       if (result.status === "error") return setIssues({ form: tError(result.error) });
+      if (fix) return router.replace(ADMIN_ROUTES.video);
       clear();
       setRound((value) => value + 1);
       setSent(true);

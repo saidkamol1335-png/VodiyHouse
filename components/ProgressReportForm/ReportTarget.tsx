@@ -17,9 +17,11 @@ export type ReportTargetValue = {
 
 type ReportTargetProps = {
   complexes: readonly ProgressFormComplex[];
-  months: readonly [string, string];
+  months: readonly string[];
   value: ReportTargetValue;
   onChange: (patch: Partial<ReportTargetValue>) => void;
+  /** Исправление возвращённого отчёта: ЖК не меняется (фото уже в его папке). */
+  lockComplex?: boolean;
 };
 
 type Choice = { id: string; label: string };
@@ -28,22 +30,24 @@ type Choice = { id: string; label: string };
  * «ЖК · Месяц отчёта», «Блок» (только если строящихся блоков несколько) и «Квартира · необязательно»
  * (мокап CabVideo .form__two): квартиры блока — по выбору блока, без проданных.
  */
-export function ReportTarget({ complexes, months, value, onChange }: ReportTargetProps) {
+export function ReportTarget({
+  complexes,
+  months,
+  value,
+  onChange,
+  lockComplex = false,
+}: ReportTargetProps) {
   const t = useTranslations("admin.video.form");
   const complex = complexes.find((item) => item.id === value.complexId);
   const blocks = complex?.blocks ?? [];
   return (
     <>
       <div className="progress-form__two">
-        <SelectField
-          id="progress-complex"
-          label={t("complex")}
+        <ComplexSelect
+          complexes={complexes}
           value={value.complexId}
-          options={complexes.map((item) => ({
-            value: item.id,
-            label: t("complexOption", { name: item.name }),
-          }))}
-          onChange={(event) => onChange({ complexId: event.target.value })}
+          locked={lockComplex}
+          onChange={(complexId) => onChange({ complexId })}
         />
         <Choices
           label={t("month")}
@@ -52,24 +56,7 @@ export function ReportTarget({ complexes, months, value, onChange }: ReportTarge
           onPick={(month) => onChange({ month })}
         />
       </div>
-      <div className="progress-form__two">
-        {blocks.length > 1 ? (
-          <Choices
-            label={t("block")}
-            choices={blocks.map((block) => ({
-              id: block.id,
-              label: t("blockOption", { name: block.name }),
-            }))}
-            current={value.blockId}
-            onPick={(blockId) => onChange({ blockId })}
-          />
-        ) : null}
-        <UnitSelect
-          blockId={value.blockId}
-          unitId={value.unitId}
-          onChange={(unitId) => onChange({ unitId })}
-        />
-      </div>
+      <BlockUnitRow blocks={blocks} value={value} onChange={onChange} />
     </>
   );
 }
@@ -162,5 +149,61 @@ function UnitSelect({
       ]}
       onChange={(event) => onChange(event.target.value)}
     />
+  );
+}
+
+type ComplexSelectProps = {
+  complexes: readonly ProgressFormComplex[];
+  value: string;
+  locked: boolean;
+  onChange: (complexId: string) => void;
+};
+
+/** «ЖК»: «ЖК Yulduz» — только со строящимися блоками. */
+function ComplexSelect({ complexes, value, locked, onChange }: ComplexSelectProps) {
+  const t = useTranslations("admin.video.form");
+  return (
+    <SelectField
+      id="progress-complex"
+      label={t("complex")}
+      value={value}
+      disabled={locked}
+      options={complexes.map((item) => ({
+        value: item.id,
+        label: t("complexOption", { name: item.name }),
+      }))}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
+type BlockUnitRowProps = {
+  blocks: readonly { id: string; name: string }[];
+  value: ReportTargetValue;
+  onChange: (patch: Partial<ReportTargetValue>) => void;
+};
+
+/** «Блок» (если строящихся несколько) и «Квартира · необязательно». */
+function BlockUnitRow({ blocks, value, onChange }: BlockUnitRowProps) {
+  const t = useTranslations("admin.video.form");
+  return (
+    <div className="progress-form__two">
+      {blocks.length > 1 ? (
+        <Choices
+          label={t("block")}
+          choices={blocks.map((block) => ({
+            id: block.id,
+            label: t("blockOption", { name: block.name }),
+          }))}
+          current={value.blockId}
+          onPick={(blockId) => onChange({ blockId })}
+        />
+      ) : null}
+      <UnitSelect
+        blockId={value.blockId}
+        unitId={value.unitId}
+        onChange={(unitId) => onChange({ unitId })}
+      />
+    </div>
   );
 }

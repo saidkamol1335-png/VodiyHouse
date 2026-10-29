@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   MyProgressReport,
+  ProgressFix,
   ProgressFormComplex,
   ProgressReportStatus,
 } from "@/lib/admin/progress/types";
@@ -79,4 +80,49 @@ export async function readMyProgressReports(
     createdAt: row.created_at,
     thumb: [...row.photos].sort((a, b) => a.sort - b.sort)[0]?.path ?? null,
   }));
+}
+
+type FixRow = {
+  id: string;
+  complex_id: string;
+  block_id: string;
+  unit_id: string | null;
+  month: string;
+  comment: { ru: string; uz: string };
+  youtube_id: string | null;
+  video_path: string | null;
+  return_note: string | null;
+  photos: { path: string; width: number; height: number; blur: string | null; sort: number }[];
+};
+
+/** Возвращённый отчёт для «Исправить» (видеографу RLS отдаёт только свой); иначе null. */
+export async function readProgressReportForFix(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<ProgressFix | null> {
+  const { data, error } = await supabase
+    .from("progress_reports")
+    .select(
+      "id, complex_id, block_id, unit_id, month, comment, youtube_id, video_path, return_note, photos:progress_photos(path, width, height, blur, sort)",
+    )
+    .eq("id", id)
+    .eq("status", "returned")
+    .maybeSingle();
+  if (error) throw new Error("progress-fix-unavailable", { cause: error });
+  if (!data) return null;
+  const row = data as unknown as FixRow;
+  return {
+    id: row.id,
+    complexId: row.complex_id,
+    blockId: row.block_id,
+    unitId: row.unit_id,
+    month: row.month,
+    comment: row.comment,
+    youtubeId: row.youtube_id,
+    videoPath: row.video_path,
+    photos: [...row.photos]
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ path, width, height, blur }) => ({ path, width, height, blur })),
+    returnNote: row.return_note ?? "",
+  };
 }

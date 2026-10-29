@@ -57,3 +57,17 @@ export function reportMonths(today: Date): [string, string] {
   const previous = month === 1 ? `${year - 1}-12-01` : `${year}-${pad(month - 1)}-01`;
   return [`${year}-${pad(month)}-01`, previous];
 }
+
+/** Возвращённый отчёт для «Исправить»: форма открывается заполненной (фаза 5, 5B.4). */
+export type ProgressFix = {
+  id: string;
+  complexId: string;
+  blockId: string;
+  unitId: string | null;
+  month: string;
+  comment: { ru: string; uz: string };
+  youtubeId: string | null;
+  videoPath: string | null;
+  photos: ProgressPhoto[];
+  returnNote: string;
+};
