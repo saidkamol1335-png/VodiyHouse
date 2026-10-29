@@ -1,6 +1,6 @@
 // Netlify Scheduled Function (решение фазы 3): раз в 5 минут — повтор доставки заявок и тревога,
 // раз в час — очистка кодов «Написать в Telegram» и старых событий сайта, раз в сутки — архив и
-// витрина (снятие по дате, напоминание за 3 дня).
+// витрина (снятие по дате, напоминание за 3 дня), напоминание о ходе строительства.
 // Сама работа — на сайте (/api/cron/<работа>), здесь только вызов с секретом. URL — адрес сайта Netlify.
 
 async function run(site: string, secret: string, job: string): Promise<void> {
@@ -29,6 +29,8 @@ export default async function cron(): Promise<void> {
     if (now.getUTCHours() === 22) await run(site, secret, "archive");
     // Витрина — в ташкентскую полночь (19:00 UTC): «до 05.11» кончается с наступлением 06.11 в Ташкенте.
     if (now.getUTCHours() === 19) await run(site, secret, "showcase");
+    // Ход строительства (фаза 5) — в 09:00 по Ташкенту (04:00 UTC): в рабочее время, когда его прочтут.
+    if (now.getUTCHours() === 4) await run(site, secret, "progress");
   }
 }
 

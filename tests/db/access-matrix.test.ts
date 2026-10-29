@@ -98,7 +98,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       for (const table of [
         "leads", "lead_deliveries", "developer_private", "calculations", "audit_log", "profiles",
         "events", "event_rates", "tg_starts", "tg_updates", "login_failures", "archive_notices", "showcase_notices",
-        "progress_reports", "progress_photos",
+        "progress_reports", "progress_photos", "progress_notices",
       ]) {
         expect(await visible(anon, `select * from public.${table}`), table).toBe(0);
       }
@@ -305,7 +305,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
     });
 
     it("не читает служебное и не меняет квартиры: статус и цена — руководителю и менеджеру", async () => {
-      for (const table of ["audit_log", "payment_programs", "events", "tg_starts", "login_failures", "archive_notices", "showcase_notices"]) {
+      for (const table of ["audit_log", "payment_programs", "events", "tg_starts", "login_failures", "archive_notices", "showcase_notices", "progress_notices"]) {
         expect(await visible(user(videographer), `select * from public.${table}`), table).toBe(0);
       }
       const unit = ids.units[0];
