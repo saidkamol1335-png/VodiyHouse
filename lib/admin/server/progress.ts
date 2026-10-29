@@ -5,6 +5,8 @@ import type {
   ProgressFix,
   ProgressFormComplex,
   ProgressReportStatus,
+  ReportDetail,
+  ReviewItem,
 } from "@/lib/admin/progress/types";
 
 // «Видео и ход стройки» (фаза 5): чтение экрана сессией сотрудника — права решает база (видеограф видит
@@ -125,4 +127,83 @@ export async function readProgressReportForFix(
       .map(({ path, width, height, blur }) => ({ path, width, height, blur })),
     returnNote: row.return_note ?? "",
   };
+}
+
+const DETAIL_SELECT =
+  "id, status, is_unit, month, created_at, comment, youtube_id, video_path, return_note, complex:complexes(name, slug), block:blocks(name), unit:units(number), author:profiles!progress_reports_author_id_fkey(full_name), photos:progress_photos(path, width, height, blur, sort)";
+
+type DetailRow = {
+  id: string;
+  status: ProgressReportStatus;
+  is_unit: boolean;
+  month: string;
+  created_at: string;
+  comment: { ru: string; uz: string };
+  youtube_id: string | null;
+  video_path: string | null;
+  return_note: string | null;
+  complex: { name: { ru: string }; slug: string } | null;
+  block: { name: string } | null;
+  unit: { number: string } | null;
+  author: { full_name: string } | null;
+  photos: { path: string; width: number; height: number; blur: string | null; sort: number }[];
+};
+
+function detailFrom(row: DetailRow): ReportDetail {
+  return {
+    id: row.id,
+    status: row.status,
+    complexName: row.complex?.name.ru ?? "",
+    complexSlug: row.complex?.slug ?? "",
+    blockName: row.block?.name ?? "",
+    unitNumber: row.unit?.number ?? null,
+    isUnit: row.is_unit,
+    month: row.month,
+    createdAt: row.created_at,
+    author: row.author?.full_name ?? null,
+    comment: row.comment,
+    youtubeId: row.youtube_id,
+    videoPath: row.video_path,
+    photos: [...row.photos]
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ path, width, height, blur }) => ({ path, width, height, blur })),
+    returnNote: row.return_note,
+  };
+}
+
+/** «Ждут проверки» (руководитель и менеджер видят все отчёты): старые сверху — их проверяют первыми. */
+export async function readReviewQueue(supabase: SupabaseClient): Promise<ReviewItem[]> {
+  const { data, error } = await supabase
+    .from("progress_reports")
+    .select(DETAIL_SELECT)
+    .eq("status", "review")
+    .order("created_at", { ascending: true })
+    .limit(50);
+  if (error) throw new Error("progress-review-unavailable", { cause: error });
+  return (data as unknown as DetailRow[]).map(detailFrom).map((report) => ({
+    id: report.id,
+    complexName: report.complexName,
+    blockName: report.blockName,
+    unitNumber: report.unitNumber,
+    month: report.month,
+    createdAt: report.createdAt,
+    author: report.author,
+    photos: report.photos.length,
+    video: Boolean(report.youtubeId || report.videoPath),
+    thumb: report.photos[0]?.path ?? null,
+  }));
+}
+
+/** Ящик отчёта: любой статус (видеограф — только свой, по RLS); нет — null. */
+export async function readReportDetail(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<ReportDetail | null> {
+  const { data, error } = await supabase
+    .from("progress_reports")
+    .select(DETAIL_SELECT)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error("progress-report-unavailable", { cause: error });
+  return data ? detailFrom(data as unknown as DetailRow) : null;
 }

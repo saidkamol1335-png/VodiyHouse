@@ -29,6 +29,15 @@ export function expireComplex(id: string | null | undefined): void {
   updateTag(CATALOG_TAG);
 }
 
+/**
+ * Отчёт хода строительства опубликован или снят (фаза 5): раздел «Ход строительства» страницы ЖК и
+ * страница видео квартиры /video/<id>.
+ */
+export function expireProgress(reportId: string, complexId: string | null | undefined): void {
+  updateTag(progressTag(reportId));
+  expireComplex(complexId);
+}
+
 /** Порядок каталога поменялся (шаг 3.6): каталог и «Другие ЖК застройщика» — под CATALOG_TAG. */
 export function expireCatalog(): void {
   updateTag(CATALOG_TAG);

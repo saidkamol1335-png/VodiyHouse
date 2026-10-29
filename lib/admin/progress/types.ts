@@ -71,3 +71,39 @@ export type ProgressFix = {
   photos: ProgressPhoto[];
   returnNote: string;
 };
+
+/** «Ждут проверки · N» (мокап CabReview): отчёт видеографа на проверке, старые сверху. */
+export type ReviewItem = {
+  id: string;
+  complexName: string;
+  blockName: string;
+  unitNumber: string | null;
+  month: string;
+  createdAt: string;
+  author: string | null;
+  photos: number;
+  video: boolean;
+  thumb: string | null;
+};
+
+/** Ящик отчёта (мокап .drw): всё для проверки по правилу 1.2. */
+export type ReportDetail = {
+  id: string;
+  status: ProgressReportStatus;
+  complexName: string;
+  complexSlug: string;
+  blockName: string;
+  unitNumber: string | null;
+  isUnit: boolean;
+  month: string;
+  createdAt: string;
+  author: string | null;
+  comment: { ru: string; uz: string };
+  youtubeId: string | null;
+  videoPath: string | null;
+  photos: ProgressPhoto[];
+  returnNote: string | null;
+};
+
+/** Ответ «Опубликовать» и «Вернуть видеографу». */
+export type ReviewActionResult = { status: "done" } | { status: "error"; error: ContentErrorCode };

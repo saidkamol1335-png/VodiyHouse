@@ -1,0 +1,265 @@
+/* Проверка отчётов (фаза 5, мокап CabReview): «Ждут проверки · N» — строки с миниатюрой 76 × 50 и
+   «Проверить»; ящик отчёта справа (min(480px, 100%)) — шапка, видео, комментарий, фото, решение. */
+.progress-review__rule {
+  margin: -6px 0 12px;
+}
+
+.progress-review__queue {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-review__item {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line-2);
+}
+
+.progress-review__item:first-child {
+  border-top: 0;
+}
+
+.progress-review__thumb {
+  display: block;
+  width: 76px;
+  height: 50px;
+  border-radius: 8px;
+  background: var(--line);
+  object-fit: cover;
+}
+
+.progress-review__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progress-review__meta {
+  margin: 2px 0 0;
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-review__drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(480px, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--fg);
+  box-shadow: var(--shadow-sheet);
+}
+
+.progress-review__drawer[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.progress-review__drawer::backdrop {
+  background: var(--scrim);
+}
+
+.progress-review__head {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 22px 64px 16px 24px;
+  border-bottom: 1px dashed var(--dash, var(--line-2));
+}
+
+.progress-review__crumb {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.progress-review__heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.progress-review__by {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.progress-review__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.progress-review__body {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 18px 24px;
+  overflow-y: auto;
+}
+
+.progress-review__video {
+  width: 100%;
+  border-radius: 12px;
+  background: var(--photo-bg);
+}
+
+.progress-review__youtube {
+  color: var(--amber-2);
+  font-weight: 600;
+}
+
+.progress-review__label {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.progress-review__photos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-review__photos a {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--line);
+}
+
+.progress-review__photos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.progress-review__comment {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.progress-review__comment dt {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.progress-review__comment dd {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.progress-review__decision,
+.progress-review__notice {
+  margin: 0;
+  padding: 16px 24px 22px;
+  border-top: 1px dashed var(--dash, var(--line-2));
+}
+
+.progress-review__decision {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-review__notice {
+  display: flex;
+  gap: 8px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+.progress-review__notice--ok {
+  color: var(--ok, #12805c);
+}
+
+.progress-review__publish,
+.progress-review__return {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-review__check {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  align-items: start;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.progress-review__check input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+}
+
+.progress-review__return textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+[data-motion="full"] .progress-review__drawer[open],
+[data-motion="lite"] .progress-review__drawer[open] {
+  animation: progress-review-in var(--dur-base) var(--ease) both;
+}
+
+@keyframes progress-review-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@media (max-width: 760px) {
+  .progress-review__item {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .progress-review__item > :last-child {
+    grid-column: 1 / -1;
+  }
+}

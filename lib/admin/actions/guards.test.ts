@@ -87,6 +87,9 @@ describe("Server Actions кабинета", () => {
       readProgressUnitsAction: /requireActionViewer\(\["head", "videographer"\]\)/,
       submitProgressReportAction:
         /requireActionViewer\(\["head", "videographer"\], \{ fresh: true \}\)/,
+      // Проверку и публикацию ведут менеджер и руководитель (мокап CabReview).
+      publishProgressReportAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      returnProgressReportAction: /requireActionViewer\(\["head", "manager"\]\)/,
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {

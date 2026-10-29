@@ -147,4 +147,35 @@ test.describe.serial("кабинет видеографа", () => {
     await expect(mine).not.toContainText("Что исправить");
     expect(errors).toEqual([]);
   });
+
+  test("менеджер: «Ждут проверки» → ящик отчёта, «Опубликовать» — только с отметкой правила 1.2", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ storageState: cabinetState("manager") });
+    const page = await context.newPage();
+    const errors = collectPageErrors(page);
+    await page.goto("/admin/video");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Видео и ход строительства" }),
+    ).toBeVisible();
+    await expect(page.getByText(/Ждут проверки · \d+/)).toBeVisible();
+    const row = page
+      .locator(".progress-review__item", { hasText: "ЖК Yulduz" })
+      .filter({ hasText: /кв\. / })
+      .first();
+    await row.getByRole("link", { name: "Проверить" }).click();
+
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toContainText("Видео квартиры");
+    await expect(drawer).toContainText("E2E · Переснято без вывески");
+    const publish = drawer.getByRole("button", { name: "Опубликовать на сайте" });
+    await expect(publish).toBeDisabled();
+    await drawer.getByLabel(/Проверено по правилу 1\.2/).check();
+    await publish.click();
+    await expect(page).toHaveURL(/\/admin\/video$/, { timeout: 15_000 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.locator(".progress-review__item", { hasText: "E2E" })).toHaveCount(0);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
 });

@@ -67,6 +67,8 @@ describe("теги кэша сайта", () => {
 // только черновики (сайт их не видит), чертёж до сохранения планировок и «Внутреннее».
 const ACTIONS_DIR = path.join("lib", "admin", "actions");
 const CONTENT_FILES = [
+  // Публикация и снятие отчёта хода строительства (фаза 5, 5D).
+  "progressReview.ts",
   "complexes.ts",
   "complexContent.ts",
   // «Фасад и планы» (фаза 4): раздел «Выбрать квартиру» на странице ЖК.
@@ -104,9 +106,11 @@ const WITHOUT_TAG = new Set([
   "createDeveloperAction",
   "attachComplexDrawingAction",
   "saveDeveloperPrivateAction",
+  // Возврат отчёта видеографу (фаза 5): отчёт и так не на сайте.
+  "returnProgressReportAction",
 ]);
 const EXPIRES =
-  /\b(expireCatalog|expireComplex|expireDeveloper|expireDictionaries|expirePrograms|expireShowcase|expireSiteSettings|markComplexStale|markDeveloperStale|markShowcaseStale)\(/;
+  /\b(expireCatalog|expireComplex|expireProgress|expireDeveloper|expireDictionaries|expirePrograms|expireShowcase|expireSiteSettings|markComplexStale|markDeveloperStale|markShowcaseStale)\(/;
 
 describe("действия контента сбрасывают кэш сайта", () => {
   const all = readdirSync(ACTIONS_DIR).filter(
