@@ -4,7 +4,7 @@ import { expect, test } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors, imageFile } from "./helpers";
 
-// Кабинет видеографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото,
+// Кабинет видеографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото, ссылка Shorts,
 // комментарий RU и UZ, «Отправить на проверку» → «Мои отчёты» с «На проверке». У блока Yulduz отчёт за
 // прошлый месяц уже есть (DEMO-сид) — понятный отказ; отчёт по квартире за месяц — сколько угодно. После
 // теста строка удаляется (файлы — в папке DEMO-ЖК, их уберёт demo:seed). Скриншот — test-results/screens/<проект>/p5-reporter.png.
@@ -88,21 +88,11 @@ test.describe.serial("кабинет видеографа", () => {
     const firstUnit = await unit.locator("option").nth(1).getAttribute("value");
     await unit.selectOption(firstUnit!);
 
-    // Видео с телефона — загрузкой с докачкой (TUS) в progress-video: «.mov» не берётся, MP4 — до «Загружено».
-    const videoInput = page.locator(".progress-form__drop input[type=file]");
-    await videoInput.setInputFiles({
-      name: "iphone.mov",
-      mimeType: "video/quicktime",
-      buffer: Buffer.alloc(2048),
-    });
-    await expect(page.getByText(/Нужен MP4/)).toBeVisible();
-    const mp4 = Buffer.concat([
-      Buffer.from([0, 0, 0, 0x18]),
-      Buffer.from("ftypmp42"),
-      Buffer.alloc(200 * 1024),
-    ]);
-    await videoInput.setInputFiles({ name: "stroyka.mp4", mimeType: "video/mp4", buffer: mp4 });
-    await expect(page.getByText(/Загружено · видео в отчёте/)).toBeVisible({ timeout: 30_000 });
+    // Видео — только ссылкой YouTube (решение заказчика 29.10): загрузки с телефона в форме нет, Shorts подходит.
+    await expect(page.locator(".progress-form__drop")).toHaveCount(0);
+    await page
+      .getByLabel("Видео · ссылка на ролик YouTube или Shorts · необязательно")
+      .fill("https://youtube.com/shorts/dQw4w9WgXcQ");
     await page.getByRole("button", { name: "Отправить на проверку" }).click();
     await expect(page.getByText(/Отчёт отправлен на проверку/)).toBeVisible({ timeout: 15_000 });
     // Форма пустая: фото, квартира и комментарий — с нуля.
@@ -139,7 +129,7 @@ test.describe.serial("кабинет видеографа", () => {
     ).toBeVisible();
     await expect(page.getByLabel("ЖК", { exact: true })).toBeDisabled();
     await expect(page.locator(".progress-form__shot--done")).toHaveCount(3);
-    await expect(page.getByText(/Загружено · видео в отчёте/)).toBeVisible();
+    await expect(page.locator("#progress-youtube")).toHaveValue("https://youtu.be/dQw4w9WgXcQ");
     const ru = page.locator("textarea[name='comment.ru']");
     await expect(ru).toHaveValue("E2E · Залит 9-й этаж");
     await ru.fill("E2E · Переснято без вывески");

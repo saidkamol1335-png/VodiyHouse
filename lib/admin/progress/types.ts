@@ -44,6 +44,13 @@ export type ProgressSubmitResult =
   { status: "done"; id: string } | { status: "error"; error: ContentErrorCode };
 
 /** Текущий и прошлый месяц по Ташкенту — первые числа: «2026-10-01», «2026-09-01» (мокап). */
+/**
+ * Загрузка видео с телефона в хранилище (5B.3, докачка TUS). Выключена решением заказчика 29.10: лимит
+ * файла проекта Supabase не поднимаем, видео — только ссылкой на ролик или Shorts YouTube. Код загрузки
+ * остаётся: включить — если лимит поднимут (docs/design-decisions.md).
+ */
+export const PHONE_VIDEO_UPLOAD = false;
+
 export function reportMonths(today: Date): [string, string] {
   const [year, month] = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tashkent",

@@ -8,7 +8,11 @@ import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import type { ProgressFix, ProgressFormComplex } from "@/lib/admin/progress/types";
+import {
+  PHONE_VIDEO_UPLOAD,
+  type ProgressFix,
+  type ProgressFormComplex,
+} from "@/lib/admin/progress/types";
 import { ReportPhotos } from "./ReportPhotos";
 import { ReportTarget } from "./ReportTarget";
 import { ReportVideo } from "./ReportVideo";
@@ -47,7 +51,10 @@ export function ProgressReportForm({ complexes, months, fix = null }: ProgressRe
           onChange={change}
           lockComplex={Boolean(fix)}
         />
-        <ReportVideo video={video.state} onPick={video.pick} onRemove={video.remove} />
+        {/* Файл — только если загрузка включена или у возвращённого отчёта он уже есть (убрать его). */}
+        {PHONE_VIDEO_UPLOAD || video.state.status !== "idle" ? (
+          <ReportVideo video={video.state} onPick={video.pick} onRemove={video.remove} />
+        ) : null}
         {issues.video ? (
           <p className="progress-form__error" role="alert">
             {issues.video}
@@ -69,15 +76,18 @@ export function ProgressReportForm({ complexes, months, fix = null }: ProgressRe
   );
 }
 
-/** «или ссылка на ролик YouTube или Shorts»; у исправления — ссылка отчёта. */
+/**
+ * Ссылка на ролик или Shorts YouTube — без загрузки с телефона это и есть поле «Видео»; у исправления —
+ * ссылка отчёта.
+ */
 function YoutubeField({ initial }: { initial: string }) {
   const t = useTranslations("admin.video.form");
   return (
     <Field
       id="progress-youtube"
       name="youtube"
-      label={t("youtube")}
-      placeholder={t("youtubePlaceholder")}
+      label={PHONE_VIDEO_UPLOAD ? t("youtube") : t("youtubeOnly")}
+      placeholder={PHONE_VIDEO_UPLOAD ? t("youtubePlaceholder") : t("youtubeOnlyPlaceholder")}
       maxLength={120}
       inputMode="url"
       defaultValue={initial ? `https://youtu.be/${initial}` : undefined}
