@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Suspense, useActionState } from "react";
 import { Button } from "@/components/Button";
+import { Turnstile } from "@/components/Turnstile";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
 import { LoginNotice } from "@/components/LoginNotice";
@@ -47,6 +48,7 @@ export function LoginForm({ action, devOpenHref }: LoginFormProps) {
         label={t("password")}
         error={passwordIssue ? t(`errors.${passwordIssue}`) : undefined}
       />
+      <Turnstile label={t("captcha")} attempt={state} />
       {state.error ? <FormStatus tone="error">{t(`errors.${state.error}`)}</FormStatus> : null}
       <Button type="submit" block pending={pending} className="login-form__submit">
         {pending ? t("pending") : t("submit")}

@@ -9,6 +9,7 @@ import { signIn } from "@/lib/admin/auth/signIn";
 import type { PasswordState, SignInState } from "@/lib/admin/auth/types";
 import type { PasswordErrorCode } from "@/lib/admin/authErrors";
 import { parsePasswordChange, parseSignIn } from "@/lib/admin/credentials";
+import { captchaTokenOf } from "@/lib/captcha";
 import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
 import { RETURN_COOKIE, safeReturnPath } from "@/lib/admin/returnPath";
 import { passwordDeps, signInDeps } from "@/lib/admin/server/deps";
@@ -61,7 +62,8 @@ export async function changePasswordAction(_previous: PasswordState, formData: F
   if (!email) return { error: "session", fieldErrors: {} };
 
   const fields = parsePasswordChange(formData);
-  const outcome = await changeFirstPassword(passwordDeps(supabase), { ...fields, userId: viewer.id, email, role: viewer.role });
+  const captchaToken = captchaTokenOf(formData);
+  const outcome = await changeFirstPassword(passwordDeps(supabase), { ...fields, ...(captchaToken ? { captchaToken } : {}), userId: viewer.id, email, role: viewer.role });
   if (outcome.kind === "error") return { error: outcome.code, fieldErrors: outcome.fieldErrors };
   redirect(outcome.to, RedirectType.replace);
 }

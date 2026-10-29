@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 import { Button } from "@/components/Button";
 import { FormStatus } from "@/components/FormStatus";
+import { Turnstile } from "@/components/Turnstile";
 import { PasswordField } from "@/components/PasswordField";
 import { PASSWORD_IDLE, type PasswordChangeAction } from "@/lib/admin/auth/types";
 import type { PasswordErrorCode } from "@/lib/admin/authErrors";
@@ -19,6 +20,7 @@ type PasswordChangeFormProps = {
 /** Первая смена пароля (С4): временный, новый и повтор — в карточке входа. */
 export function PasswordChangeForm({ action, email }: PasswordChangeFormProps) {
   const t = useTranslations("admin.password");
+  const tLogin = useTranslations("admin.login");
   const [state, formAction, pending] = useActionState(action, PASSWORD_IDLE);
   const min = PASSWORD_RULES.minLength;
   const message = (code: PasswordErrorCode | undefined) => (code ? t(`errors.${code}`, { min }) : undefined);
@@ -53,6 +55,7 @@ export function PasswordChangeForm({ action, email }: PasswordChangeFormProps) {
         label={t("repeat")}
         error={message(state.fieldErrors.confirm)}
       />
+      <Turnstile label={tLogin("captcha")} attempt={state} />
       {state.error ? <FormStatus tone="error">{message(state.error)}</FormStatus> : null}
       <Button type="submit" block pending={pending} className="password-change-form__submit">
         {pending ? t("pending") : t("submit")}

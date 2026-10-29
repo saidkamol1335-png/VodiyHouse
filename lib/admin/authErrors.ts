@@ -10,6 +10,7 @@ export const SIGN_IN_ERRORS = [
   "noAccess",
   "locked",
   "rateLimited",
+  "captchaFailed",
   "network",
   "notConfigured",
   "unknown",
@@ -25,6 +26,7 @@ export const PASSWORD_ERRORS = [
   "weakPassword",
   "session",
   "rateLimited",
+  "captchaFailed",
   "network",
   "finishFailed",
   "notConfigured",
@@ -71,6 +73,8 @@ const SIGN_IN_BY_CODE: Record<string, SignInErrorCode> = {
   validation_failed: "invalidCredentials",
   email_provider_disabled: "notConfigured",
   email_not_confirmed: "notConfigured",
+  // CAPTCHA включена в Supabase, а токена нет или он истёк (lib/captcha.ts).
+  captcha_failed: "captchaFailed",
 };
 
 export function signInErrorCode(error: AuthErrorLike): SignInErrorCode {
@@ -83,6 +87,7 @@ export function passwordErrorCode(error: AuthErrorLike): PasswordErrorCode {
   if (error.code === "same_password") return "sameAsCurrent";
   if (error.code === "weak_password" || error.name === "AuthWeakPasswordError") return "weakPassword";
   if (error.code === "session_not_found" || error.name === "AuthSessionMissingError") return "session";
+  if (error.code === "captcha_failed") return "captchaFailed";
   if (isRateLimited(error)) return "rateLimited";
   if (isNetwork(error)) return "network";
   return "unknown";

@@ -1,3 +1,4 @@
+import { captchaTokenOf } from "@/lib/captcha";
 import { isStaffRole, type StaffRole } from "./access";
 import type { PasswordField } from "./password";
 
@@ -33,7 +34,8 @@ function emailIssue(email: string): EmailIssue | null {
   return isEmail(email) ? null : "emailInvalid";
 }
 
-export type SignInInput = { email: string; password: string };
+/** captchaToken — Turnstile (lib/captcha.ts); без CAPTCHA его нет. */
+export type SignInInput = { email: string; password: string; captchaToken?: string };
 export type SignInFieldErrors = Partial<{ email: EmailIssue; password: "passwordRequired" }>;
 export type SignInParse =
   { ok: true; value: SignInInput } | { ok: false; email: string; fieldErrors: SignInFieldErrors };
@@ -47,7 +49,8 @@ export function parseSignIn(formData: FormData): SignInParse {
   if (issue) fieldErrors.email = issue;
   if (!password) fieldErrors.password = "passwordRequired";
   if (fieldErrors.email || fieldErrors.password) return { ok: false, email, fieldErrors };
-  return { ok: true, value: { email, password } };
+  const captchaToken = captchaTokenOf(formData);
+  return { ok: true, value: { email, password, ...(captchaToken ? { captchaToken } : {}) } };
 }
 
 export type StaffInput = { fullName: string; email: string; role: StaffRole };

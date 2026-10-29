@@ -35,6 +35,20 @@ test.describe("без входа", () => {
     expect(login.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
   });
 
+  // CAPTCHA (Turnstile, «Запуск»): виджет — только при ключе сайта в сборке (E2E_TURNSTILE=1 — прогон
+  // со сборкой на тестовом ключе Cloudflare); без ключа — форма как раньше.
+  test("CAPTCHA: виджет «не робот» — только при ключе сайта", async ({ page }) => {
+    await page.goto("/admin/vhod");
+    const widget = page.locator(".turnstile");
+    if (process.env.E2E_TURNSTILE === "1") {
+      await expect(widget).toHaveAttribute("aria-label", "Проверка, что вы не робот");
+      // Виджет — в закрытом shadow DOM; в форме — скрытое поле с токеном (тестовый ключ решает сам).
+      await expect(page.locator("form.login-form input[name=\"cf-turnstile-response\"]")).toHaveValue(/.+/, { timeout: 20_000 });
+    } else {
+      await expect(widget).toHaveCount(0);
+    }
+  });
+
   test("неверный пароль и отключённый — одна фраза, email остаётся", async ({ page }, testInfo) => {
     desktopOnly(testInfo.project.name);
     const { manager, disabled } = e2eStaff();
@@ -181,8 +195,9 @@ test.describe("менеджер и видеограф", () => {
     await expect(page).toHaveURL(/\/admin\/zhk$/);
     await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
     await expect(page.locator(".complex-list__status")).toHaveCount(0);
-    // DEMO-сид: у Shodlik оба блока со списком — проверяем, что видно после чтения списка.
-    const shodlik = page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" });
+    // DEMO-сид: у Shodlik оба блока со списком — проверяем, что видно после чтения списка. Застройщик —
+    // DEMO: настоящий черновик Shodlik (npm run content:import) — у MYB Development.
+    const shodlik = page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" }).filter({ hasText: /Sifat Qurilish/ });
     await expect(shodlik).toHaveAttribute("href", /\/admin\/zhk\/[0-9a-f-]{36}\/kvartiry$/);
     const units = (await shodlik.getAttribute("href"))!;
     await page.goto(units.replace(/\/kvartiry$/, "/bloki"));

@@ -7,7 +7,8 @@ import { checkNewPassword, type PasswordField } from "../password";
 
 export type ChangePasswordDeps = {
   /** Временный пароль проверяется отдельным входом без сохранения сессии. */
-  verifyCurrentPassword(email: string, password: string): Promise<"ok" | "wrong" | { error: AuthErrorLike }>;
+  /** captchaToken — Turnstile формы (lib/captcha.ts): проверка временного пароля — тоже вход в Auth. */
+  verifyCurrentPassword(email: string, password: string, captchaToken?: string): Promise<"ok" | "wrong" | { error: AuthErrorLike }>;
   /** Новый пароль — сессией самого сотрудника. null — успех. */
   updatePassword(password: string): Promise<AuthErrorLike | null>;
   /** Снять флаг смены пароля (сервер, ключ service_role); false — строка не изменилась. */
@@ -17,6 +18,7 @@ export type ChangePasswordDeps = {
 };
 
 export type ChangePasswordInput = {
+  captchaToken?: string;
   userId: string;
   email: string;
   role: StaffRole;
@@ -47,7 +49,7 @@ export async function changeFirstPassword(deps: ChangePasswordDeps, input: Chang
   const issues = checkNewPassword(input);
   if (Object.keys(issues).length > 0) return { kind: "error", code: null, fieldErrors: issues };
 
-  const verified = await deps.verifyCurrentPassword(input.email, input.current);
+  const verified = await deps.verifyCurrentPassword(input.email, input.current, input.captchaToken);
   if (verified === "wrong") return fieldError("current", "currentWrong");
   if (verified !== "ok") return formError(passwordErrorCode(verified.error));
 

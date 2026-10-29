@@ -66,8 +66,9 @@ function loginAttemptDeps(): Pick<SignInDeps, "beginAttempt" | "clearAttempts"> 
 export function signInDeps(supabase: SupabaseClient): SignInDeps {
   return {
     ...loginAttemptDeps(),
-    async signInWithPassword({ email, password }) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    async signInWithPassword({ email, password, captchaToken }) {
+      const options = captchaToken ? { options: { captchaToken } } : {};
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password, ...options });
       if (error || !data.user) return { error: error ?? {} };
       return { userId: data.user.id };
     },
@@ -80,9 +81,11 @@ export function signInDeps(supabase: SupabaseClient): SignInDeps {
 async function verifyPassword(
   email: string,
   password: string,
+  captchaToken?: string,
 ): ReturnType<ChangePasswordDeps["verifyCurrentPassword"]> {
   const verifier = await createSupabaseVerifierClient();
-  const { error } = await verifier.auth.signInWithPassword({ email, password });
+  const options = captchaToken ? { options: { captchaToken } } : {};
+  const { error } = await verifier.auth.signInWithPassword({ email, password, ...options });
   if (error) return error.code === "invalid_credentials" ? "wrong" : { error };
   await signOutQuietly(verifier, "local");
   return "ok";

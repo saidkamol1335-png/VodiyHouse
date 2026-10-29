@@ -40,7 +40,7 @@ describe("первая смена пароля", () => {
     const { fake, calls } = deps();
     expect(await changeFirstPassword(fake, INPUT)).toEqual({ kind: "redirect", to: "/admin" });
     expect(calls).toEqual(["verify", "update", "clear", "others"]);
-    expect(fake.verifyCurrentPassword).toHaveBeenCalledWith(INPUT.email, INPUT.current);
+    expect(fake.verifyCurrentPassword).toHaveBeenCalledWith(INPUT.email, INPUT.current, undefined);
     expect(fake.updatePassword).toHaveBeenCalledWith(INPUT.password);
     expect(fake.clearMustChange).toHaveBeenCalledWith(INPUT.userId);
   });
