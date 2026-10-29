@@ -23,6 +23,10 @@ import { pageMetadata } from "@/lib/site/metadata";
 import type { UnitVideo } from "@/lib/site/progress/records";
 import { readUnitVideo } from "@/lib/site/progress/read";
 
+// Адрес читается сразу, вне <Suspense>: чужой или снятый отчёт отвечает 404 (как у страницы ЖК). У layout
+// той же настройки dev-проверке мгновенного перехода мало — она смотрит на страницу.
+export const instant = false;
+
 // Ссылка менеджера клиенту (PLAN фазы 5): страница вне поиска (noindex, не в sitemap), без входа.
 // cacheComponents требует хотя бы один адрес при сборке: заглушка отвечает 404.
 export async function generateStaticParams() {

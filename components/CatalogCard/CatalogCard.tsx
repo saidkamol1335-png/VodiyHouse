@@ -32,7 +32,7 @@ type CatalogCardProps = {
 function cardFrames(complex: CatalogComplex, caption: string): CardFrame[] {
   const [cover, ...rest] = complex.photos;
   if (!cover || !complex.progress) return complex.photos;
-  return [cover, { ...complex.progress.photo, caption }, ...rest];
+  return [cover, { ...complex.progress.photo, caption, alt: { ru: caption, uz: caption } }, ...rest];
 }
 
 /**

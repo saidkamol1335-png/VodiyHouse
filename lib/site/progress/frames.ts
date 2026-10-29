@@ -43,5 +43,6 @@ export type CatalogProgress = { month: string; photo: CatalogPhoto };
 
 export function catalogProgressOf(frame: ProgressFrame | undefined): CatalogProgress | null {
   const photo = frame?.photos[0];
-  return frame && photo ? { month: frame.month, photo } : null;
+  // Без размытого превью: каталог уходит в браузер целиком (как фото ЖК после второго).
+  return frame && photo ? { month: frame.month, photo: { ...photo, blur: null } } : null;
 }

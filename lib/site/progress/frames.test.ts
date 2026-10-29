@@ -12,7 +12,7 @@ describe("кадры стройки (5C.3)", () => {
     expect(frames.map((frame) => frame.complexId)).toEqual(["a"]);
     expect(catalogProgressOf(frames[0])).toEqual({
       month: "2026-10-01",
-      photo: { ...photo("x.jpg"), focus: { x: 0.5, y: 0.5 }, alt: null },
+      photo: { ...photo("x.jpg"), blur: null, focus: { x: 0.5, y: 0.5 }, alt: null },
     });
     expect(catalogProgressOf(undefined)).toBeNull();
     expect(progressFramesFrom(null)).toEqual([]);
