@@ -53,6 +53,10 @@ test.describe.serial("кабинет видеографа", () => {
     await page.goto("/admin/video");
     await expect(page.getByRole("heading", { level: 1, name: "Отчёты видеографа" })).toBeVisible();
     await expect(page.getByText("Как снимать")).toBeVisible();
+    // Матрица у видеографа та же, но чужие отчёты из неё не открываются.
+    const matrix = page.getByRole("table", { name: "Отчёты по ЖК · последние 6 месяцев" });
+    await expect(matrix.getByRole("row", { name: /^Yulduz/ })).toBeVisible();
+    await expect(matrix.getByRole("link")).toHaveCount(0);
 
     await page.getByLabel("ЖК", { exact: true }).selectOption({ label: "ЖК Yulduz" });
     await page.getByRole("group", { name: "Месяц отчёта" }).getByRole("button").nth(1).click();
@@ -175,6 +179,32 @@ test.describe.serial("кабинет видеографа", () => {
     await expect(page).toHaveURL(/\/admin\/video$/, { timeout: 15_000 });
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(page.locator(".progress-review__item", { hasText: "E2E" })).toHaveCount(0);
+
+    // 5D.2: матрица «Отчёты по ЖК» (ячейка открывает отчёт) и «Видео для клиентов» — опубликованное
+    // видео квартиры первым, «Ссылка» копирует адрес страницы /ru/video/<id>.
+    await expect(
+      page.getByRole("table", { name: "Отчёты по ЖК · последние 6 месяцев" }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("row", { name: /^Yulduz/ })
+        .getByRole("link")
+        .first(),
+    ).toBeVisible();
+    const video = page.locator(".progress-overview__video").first();
+    await expect(video).toContainText("ЖК Yulduz");
+    await expect(video).toContainText("Видео квартиры");
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await video.getByRole("button", { name: "Ссылка" }).click();
+    await expect(video.getByRole("button", { name: "Скопировано" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
+      /\/ru\/video\/[0-9a-f-]{36}$/,
+    );
+    await page.screenshot({
+      path: `test-results/screens/${test.info().project.name}/p5-review.png`,
+      fullPage: true,
+      caret: "initial",
+    });
     expect(errors).toEqual([]);
     await context.close();
   });

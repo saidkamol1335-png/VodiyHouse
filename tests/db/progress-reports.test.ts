@@ -438,6 +438,20 @@ describe("отчёты хода строительства: права и пра
     expect(await page(blockReport)).toBeNull();
   });
 
+  it("обзор для кабинета: все сотрудники видят статусы отчётов блоков и последние видео, посетитель — нет", async () => {
+    type Overview = { complexes: { id: string; built: boolean }[]; reports: { id: string; status: string }[]; videos: { id: string; unit: string | null }[] };
+    const overview = (actor: string) => call<Overview | null>(actor, "public.progress_overview()", []);
+    const published = (await db.admin.query<{ id: string }>("select id from progress_reports where status = 'published' and not is_unit limit 1")).rows[0]!.id;
+    for (const actor of [video, otherVideo, manager, head]) {
+      const data = (await overview(actor))!;
+      expect(data.complexes.map((complex) => complex.id)).toContain(ids.publicComplex);
+      expect(data.reports.map((report) => report.id)).toContain(published);
+      expect(data.videos.length).toBeGreaterThan(0);
+      expect(JSON.stringify(data.reports)).not.toMatch(/comment|path/);
+    }
+    await expectDenied(db.as(anon, (tx) => tx.query("select public.progress_overview()")));
+  });
+
   it("журнал: отправка, публикация и удаление отчёта — записи с ЖК", async () => {
     const { rows } = await db.admin.query<{ action: string; n: number }>(
       "select action::text, count(*)::int as n from audit_log where entity = 'progress_reports' and complex_id = $1 group by action order by action",

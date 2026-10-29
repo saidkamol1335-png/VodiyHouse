@@ -107,3 +107,42 @@ export type ReportDetail = {
 
 /** Ответ «Опубликовать» и «Вернуть видеографу». */
 export type ReviewActionResult = { status: "done" } | { status: "error"; error: ContentErrorCode };
+
+/** Ячейка матрицы (мокап CabReview): опубликован (дата), на проверке, дом сдан, ждём (этот месяц), нет. */
+export type MatrixCell =
+  | { kind: "published"; date: string; reportId: string }
+  | { kind: "review"; reportId: string }
+  | { kind: "built" }
+  | { kind: "wait" }
+  | { kind: "none" };
+
+export type MatrixRow = { complexId: string; name: string; late: boolean; cells: MatrixCell[] };
+
+/** «Отчёты по ЖК · последние 6 месяцев»: месяцы слева направо, от старого к текущему. */
+export type ProgressMatrix = { months: string[]; rows: MatrixRow[]; late: number };
+
+/** «Видео для клиентов · последние»: опубликованные отчёты — ссылка клиенту и «Открыть». */
+export type ClientVideo = {
+  id: string;
+  complexName: string;
+  blockName: string;
+  unitNumber: string | null;
+  isUnit: boolean;
+  month: string;
+  shotAt: string;
+  author: string | null;
+  thumb: string | null;
+  /** Путь на сайте: видео квартиры — /video/<id>, отчёт блока — раздел «Ход строительства» ЖК. */
+  path: string;
+};
+
+/** Последние 6 месяцев до текущего по Ташкенту — первые числа, от старого к новому. */
+export function matrixMonths(today: Date, count = 6): string[] {
+  const [current] = reportMonths(today);
+  const [year, month] = current.split("-").map(Number) as [number, number];
+  return Array.from({ length: count }, (_, index) => {
+    const shift = count - 1 - index;
+    const total = year * 12 + (month - 1) - shift;
+    return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}-01`;
+  });
+}

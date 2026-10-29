@@ -19,6 +19,7 @@ import {
   relativeStamp,
   termParts,
   formatMonthYear,
+  formatMonthShort,
 } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
@@ -207,5 +208,11 @@ describe("месяц отчёта (фаза 5)", () => {
     expect(formatMonthYear("2026-10-01")).toBe("Октябрь 2026");
     expect(formatMonthYear("2026-09-01", "uz")).toBe("Sentabr 2026");
     expect(formatMonthYear("2027-01-01", "ru")).toBe("Январь 2027");
+  });
+
+  it("шапка матрицы: «Окт», с годом — первый столбец и январь", () => {
+    expect(formatMonthShort("2026-10-01")).toBe("Окт");
+    expect(formatMonthShort("2026-05-01", true)).toBe("Май ’26");
+    expect(formatMonthShort("2027-01-01")).toBe("Янв ’27");
   });
 });

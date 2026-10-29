@@ -280,9 +280,42 @@ export function formatPhone(raw: string): string | null {
 
 // Месяцы отчётов хода строительства (фаза 5): «Октябрь 2026», «Oktabr 2026» — как в мокапе (monthLabel).
 const MONTH_NAMES: Record<Locale, readonly string[]> = {
-  ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
-  uz: ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"],
+  ru: [
+    "Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь",
+  ],
+  uz: [
+    "Yanvar",
+    "Fevral",
+    "Mart",
+    "Aprel",
+    "May",
+    "Iyun",
+    "Iyul",
+    "Avgust",
+    "Sentabr",
+    "Oktabr",
+    "Noyabr",
+    "Dekabr",
+  ],
 };
+
+/** Шапка матрицы отчётов: «Окт», с годом — «Май ’26» (первый столбец и январь, как в мокапе). */
+export function formatMonthShort(month: string, withYear = false): string {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const short = MONTH_NAMES.ru[(monthNumber ?? 1) - 1]!.slice(0, 3);
+  return withYear || monthNumber === 1 ? `${short} ’${String(year).slice(2)}` : short;
+}
 
 /** «2026-10-01» (первое число месяца отчёта) → «Октябрь 2026». */
 export function formatMonthYear(month: string, locale: Locale = "ru"): string {

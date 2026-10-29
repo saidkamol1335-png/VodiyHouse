@@ -3,6 +3,7 @@ import { AdminDenied } from "@/components/AdminDenied";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
+import { ClientVideos, ProgressMatrixPanel } from "@/components/ProgressOverview";
 import { ReportDrawer, ReviewQueue } from "@/components/ProgressReview";
 import { ProgressReportForm } from "@/components/ProgressReportForm";
 import { VideoScreen } from "@/components/VideoScreen";
@@ -16,6 +17,7 @@ import {
   readReportDetail,
   readReviewQueue,
 } from "@/lib/admin/server/progress";
+import { readProgressOverview } from "@/lib/admin/server/progressOverview";
 import { requireSection } from "@/lib/admin/session";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -61,6 +63,20 @@ async function RoleScreen({ role, fixId }: { role: StaffRole; fixId: string | nu
   );
 }
 
+/** Для всех ролей (мокап CabReview): матрица отчётов по ЖК, напоминание «45+ дней» и видео для клиентов. */
+async function Overview({ role }: { role: StaffRole }) {
+  const { matrix, videos } = await readProgressOverview(
+    await createSupabaseServerClient(),
+    new Date(),
+  );
+  return (
+    <>
+      <ProgressMatrixPanel matrix={matrix} linked={role !== "videographer"} />
+      <ClientVideos videos={videos} />
+    </>
+  );
+}
+
 /** Ящик отчёта из ?report: решение — у менеджера и руководителя. */
 async function OpenReport({ id, role }: { id: string | null; role: StaffRole }) {
   if (!id) return null;
@@ -98,6 +114,7 @@ export default async function VideoPage({ searchParams }: PageProps<"/admin/vide
   return (
     <AdminPage topbar={topbar}>
       <RoleScreen role={viewer.role} fixId={idFrom(search.fix)} />
+      <Overview role={viewer.role} />
       <OpenReport id={idFrom(search.report)} role={viewer.role} />
     </AdminPage>
   );
