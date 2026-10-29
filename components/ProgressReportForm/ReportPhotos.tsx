@@ -67,7 +67,12 @@ function Shot({
       {/* eslint-disable-next-line @next/next/no-img-element -- превью из памяти браузера, до бакета */}
       {tile.preview ? <img src={tile.preview} alt="" /> : null}
       {tile.state === "working" ? (
-        <Loader2 className="progress-form__spinner" size={20} aria-label={t("photoUploading")} />
+        <Loader2
+          className="progress-form__spinner"
+          size={20}
+          role="img"
+          aria-label={t("photoUploading")}
+        />
       ) : null}
       <button
         type="button"

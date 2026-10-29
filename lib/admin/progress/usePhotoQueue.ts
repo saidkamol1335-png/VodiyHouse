@@ -82,42 +82,67 @@ function usePreviews() {
   return { keep, release };
 }
 
-/** Очередь фото одного ЖК: добавить (до 15), убрать, сбросить. */
+/** Плитка key — с итогом загрузки: фото и превью или ошибка. */
+const settled = (
+  tiles: readonly PhotoTile[],
+  key: string,
+  result: Pick<PhotoTile, "photo" | "preview" | "error">,
+) =>
+  tiles.map((tile) =>
+    tile.key === key
+      ? { ...tile, ...result, state: result.error ? ("error" as const) : ("done" as const) }
+      : tile,
+  );
+
+/** Ключи плиток, которые ещё в очереди: догрузившееся фото убранной плитки в форму не попадает. */
+function useLiveKeys(tiles: readonly PhotoTile[]) {
+  const live = useRef(new Set(tiles.map((tile) => tile.key)));
+  useEffect(() => {
+    live.current = new Set(tiles.map((tile) => tile.key));
+  }, [tiles]);
+  return live;
+}
+
+/** Очередь фото одного ЖК: добавить (до 15; add отвечает, сколько файлов принято), убрать, сбросить. */
 export function usePhotoQueue(complexId: string | null, initial: readonly ProgressPhoto[] = []) {
   // Исправление возвращённого отчёта: его фото уже в бакете — плитки сразу «загружены».
   const [tiles, setTiles] = useState<PhotoTile[]>(() => initial.map(storedTile));
   const { keep, release } = usePreviews();
+  const live = useLiveKeys(tiles);
 
-  /** Сколько файлов принято (остальные — сверх 15). */
   const add = (files: readonly File[]): number => {
     if (!complexId) return 0;
     const room = Math.max(0, PHOTOS_MAX - tiles.length);
     const taken = files.slice(0, room).map((file) => ({ file, key: crypto.randomUUID() }));
+    for (const { key } of taken) live.current.add(key);
     setTiles((current) => [...current, ...taken.map(({ file, key }) => newTile(file, key))]);
     for (const { file, key } of taken) {
       void uploadPhoto(complexId, file).then((result) => {
+        // Плитку уже убрали (сброс, другой ЖК) — превью сразу освобождается, в форму фото не попадает.
+        if (!live.current.has(key)) {
+          if (result.preview) URL.revokeObjectURL(result.preview);
+          return;
+        }
         keep(result.preview);
-        setTiles((current) =>
-          current.map((tile) =>
-            tile.key === key
-              ? { ...tile, ...result, state: result.error ? "error" : "done" }
-              : tile,
-          ),
-        );
+        setTiles((current) => settled(current, key, result));
       });
     }
     return taken.length;
   };
-  const remove = (key: string) =>
+  const remove = (key: string) => {
+    live.current.delete(key);
     setTiles((current) => {
       release(current.filter((tile) => tile.key === key));
       return current.filter((tile) => tile.key !== key);
     });
-  const reset = () =>
+  };
+  const reset = () => {
+    live.current.clear();
     setTiles((current) => {
       release(current);
       return [];
     });
+  };
   const photos = tiles.flatMap((tile) => (tile.photo ? [tile.photo] : []));
   const working = tiles.some((tile) => tile.state === "working");
   return { tiles, photos, working, add, remove, reset };

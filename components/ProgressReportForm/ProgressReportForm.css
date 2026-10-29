@@ -110,27 +110,32 @@
   color: var(--fg-2);
 }
 
+/* Цель нажатия 44 px внутри плитки (overflow: hidden срезал бы поле снаружи), кружок — 28 px. */
 .progress-form__shot-remove {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0;
+  right: 0;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: rgba(10, 8, 6, 0.6);
+  background: transparent;
   color: #ffffff;
   cursor: pointer;
 }
 
-/* Цель нажатия 44 px — невидимым полем вокруг кружка. */
-.progress-form__shot-remove::after {
+.progress-form__shot-remove::before {
   content: "";
   position: absolute;
-  inset: -8px;
+  inset: 8px;
+  border-radius: 50%;
+  background: rgba(10, 8, 6, 0.6);
+}
+
+.progress-form__shot-remove svg {
+  position: relative;
 }
 
 .progress-form__error {

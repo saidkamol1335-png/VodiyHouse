@@ -35,7 +35,14 @@ export function ReportVideo({ video, onPick, onRemove }: ReportVideoProps) {
         >
           <X size={16} aria-hidden="true" />
         </button>
-        <span className="progress-form__upload-bar" aria-hidden="true">
+        <span
+          className="progress-form__upload-bar"
+          role="progressbar"
+          aria-label={video.name}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={video.percent}
+        >
           <span style={{ transform: `scaleX(${video.percent / 100})` }} />
         </span>
       </div>

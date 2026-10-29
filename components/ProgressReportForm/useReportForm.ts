@@ -50,6 +50,27 @@ function videoIssue(
   return undefined;
 }
 
+/** Исправление — как в отчёте; блок отчёта с тех пор сдан — последний строящийся, без квартиры. */
+function initialTarget(
+  complexes: readonly ProgressFormComplex[],
+  months: readonly string[],
+  fix: ProgressFix | null,
+): ReportTargetValue {
+  if (!fix) {
+    return {
+      complexId: complexes[0]?.id ?? "",
+      month: months[0] ?? "",
+      blockId: lastBlock(complexes[0]),
+      unitId: "",
+    };
+  }
+  const complex = complexes.find((item) => item.id === fix.complexId);
+  const building = complex?.blocks.some((block) => block.id === fix.blockId) ?? false;
+  return building
+    ? { complexId: fix.complexId, month: fix.month, blockId: fix.blockId, unitId: fix.unitId ?? "" }
+    : { complexId: fix.complexId, month: fix.month, blockId: lastBlock(complex), unitId: "" };
+}
+
 /** ЖК, месяц, блок, квартира и фото этого ЖК: другой ЖК — блок последний, квартира и фото с нуля. */
 function useReportTarget(
   complexes: readonly ProgressFormComplex[],
@@ -58,19 +79,7 @@ function useReportTarget(
   fix: ProgressFix | null,
 ) {
   const [target, setTarget] = useState<ReportTargetValue>(() =>
-    fix
-      ? {
-          complexId: fix.complexId,
-          month: fix.month,
-          blockId: fix.blockId,
-          unitId: fix.unitId ?? "",
-        }
-      : {
-          complexId: complexes[0]?.id ?? "",
-          month: months[0] ?? "",
-          blockId: lastBlock(complexes[0]),
-          unitId: "",
-        },
+    initialTarget(complexes, months, fix),
   );
   const queue = usePhotoQueue(target.complexId || null, fix?.photos);
   const { video, pick, remove } = useVideoUpload(target.complexId || null, fix?.videoPath ?? null);

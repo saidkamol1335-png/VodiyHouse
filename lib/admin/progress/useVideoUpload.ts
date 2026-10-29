@@ -38,13 +38,17 @@ const IDLE: VideoUploadState = {
 
 const statusOf = (error: Error) => (error as DetailedError).originalResponse?.getStatus() ?? 0;
 
-async function startUpload(
-  file: File,
-  complexId: string,
-  update: (patch: Partial<VideoUploadState>) => void,
-) {
+const NO_RETRY = [400, 401, 403, 413];
+
+type Callbacks = {
+  update: (patch: Partial<VideoUploadState>) => void;
+  /** Сеть пропала и повторы tus кончились: ждём «online», чтобы продолжить с того же места. */
+  stall: () => void;
+};
+
+/** Загрузка с докачкой; запускает её вызывающий — после проверки, что её ещё не отменили. */
+async function prepareUpload(file: File, complexId: string, { update, stall }: Callbacks) {
   const supabase = createSupabaseBrowserClient();
-  const { data } = await supabase.auth.getSession();
   const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
   const path = progressVideoPath(complexId);
   const upload = new Upload(file, {
@@ -54,7 +58,6 @@ async function startUpload(
     uploadDataDuringCreation: true,
     removeFingerprintOnSuccess: true,
     headers: {
-      authorization: `Bearer ${data.session?.access_token ?? ""}`,
       apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
       "x-upsert": "false",
     },
@@ -64,16 +67,22 @@ async function startUpload(
       contentType: "video/mp4",
       cacheControl: "31536000",
     },
+    // Токен сессии живёт около часа, а загрузка с телефона бывает дольше — свежий перед каждым запросом.
+    onBeforeRequest: async (request) => {
+      const { data } = await supabase.auth.getSession();
+      request.setHeader("authorization", `Bearer ${data.session?.access_token ?? ""}`);
+    },
     // Отказ права или лимита повтором не исправить — сразу ошибка.
-    onShouldRetry: (error) => ![400, 401, 403, 413].includes(statusOf(error)),
+    onShouldRetry: (error) => !NO_RETRY.includes(statusOf(error)),
     onProgress: (sent, total) => update({ percent: total ? Math.floor((sent / total) * 100) : 0 }),
     onSuccess: () =>
       update({ status: "done", percent: 100, path: upload.options.metadata?.objectName ?? path }),
-    onError: (error) =>
-      update({ status: "error", error: statusOf(error) === 413 ? "tooLarge" : "failed" }),
+    onError: (error) => {
+      if (!navigator.onLine) return stall();
+      update({ status: "error", error: statusOf(error) === 413 ? "tooLarge" : "failed" });
+    },
   });
   await resumePrevious(upload, complexId);
-  upload.start();
   return upload;
 }
 
@@ -90,24 +99,29 @@ async function resumePrevious(upload: Upload, complexId: string): Promise<void> 
   upload.resumeFromPreviousUpload(previous);
 }
 
+const storedState = (path: string): VideoUploadState => ({
+  ...IDLE,
+  status: "done",
+  name: path.split("/").at(-1) ?? "",
+  percent: 100,
+  path,
+});
+
 /** Одно видео отчёта: выбрать, следить за процентами и обрывом связи, убрать. */
 export function useVideoUpload(complexId: string | null, initialPath: string | null = null) {
   // Исправление возвращённого отчёта: его видео уже в бакете.
   const [state, setState] = useState<VideoUploadState>(() =>
-    initialPath
-      ? {
-          ...IDLE,
-          status: "done",
-          name: initialPath.split("/").at(-1) ?? "",
-          percent: 100,
-          path: initialPath,
-        }
-      : IDLE,
+    initialPath ? storedState(initialPath) : IDLE,
   );
   const upload = useRef<Upload | null>(null);
-  const update = (patch: Partial<VideoUploadState>) =>
-    setState((current) => ({ ...current, ...patch }));
-  useOnlineStatus(state.status, setState);
+  // Номер попытки: убрали видео или сменили ЖК — ответы прежней загрузки форму больше не трогают.
+  const attempt = useRef(0);
+  const stalled = useRef(false);
+  useOnlineStatus(state.status, setState, () => {
+    if (!stalled.current) return;
+    stalled.current = false;
+    upload.current?.start();
+  });
   useEffect(() => () => void upload.current?.abort(), []);
 
   const pick = (file: File) => {
@@ -115,32 +129,54 @@ export function useVideoUpload(complexId: string | null, initialPath: string | n
     if (file.type !== "video/mp4" && !/\.mp4$/i.test(file.name)) {
       return setState({ ...IDLE, status: "error", name: file.name, error: "notMp4" });
     }
+    const mine = ++attempt.current;
+    const update = (patch: Partial<VideoUploadState>) => {
+      if (attempt.current === mine) setState((current) => ({ ...current, ...patch }));
+    };
+    const stall = () => {
+      stalled.current = true;
+      update({ status: "offline" });
+    };
     setState({ ...IDLE, status: "uploading", name: file.name, size: file.size });
-    void startUpload(file, complexId, update).then((started) => {
-      upload.current = started;
+    void prepareUpload(file, complexId, { update, stall }).then((prepared) => {
+      if (attempt.current !== mine) return;
+      upload.current = prepared;
+      prepared.start();
     });
   };
   // Не загрузилось до конца — загрузка отменяется; загруженный файл останется в папке ЖК.
   const remove = () => {
+    attempt.current += 1;
     // Отменять (и стирать на сервере) — только незаконченную: завершённую сервер уже не отдаёт (409).
     if (state.status === "uploading" || state.status === "offline")
       void upload.current?.abort(true);
     upload.current = null;
+    stalled.current = false;
     setState(IDLE);
   };
   return { video: state, pick, remove };
 }
 
-/** «Связь прервалась на 47%» / «Связь восстановлена — докачиваем с 47%»: повторы tus идут сами. */
+/**
+ * «Связь прервалась на 47%» / «Связь восстановлена — докачиваем с 47%»: пока tus повторяет, он
+ * продолжит сам; если повторы кончились без сети — resume запускает загрузку с того же места.
+ */
 function useOnlineStatus(
   status: VideoUploadState["status"],
   setState: (next: (current: VideoUploadState) => VideoUploadState) => void,
+  resume: () => void,
 ) {
+  const resumeRef = useRef(resume);
+  useEffect(() => {
+    resumeRef.current = resume;
+  });
   useEffect(() => {
     if (status !== "uploading" && status !== "offline") return;
     const offline = () => setState((current) => ({ ...current, status: "offline" }));
-    const online = () =>
+    const online = () => {
       setState((current) => ({ ...current, status: "uploading", resumedAt: current.percent }));
+      resumeRef.current();
+    };
     window.addEventListener("offline", offline);
     window.addEventListener("online", online);
     return () => {

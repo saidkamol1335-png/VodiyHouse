@@ -124,6 +124,10 @@ function UnitSelect({
 }) {
   const t = useTranslations("admin.video.form");
   const units = useBlockUnits(blockId);
+  // Исправление: квартиру отчёта с тех пор продали — выбор «весь ЖК / блок» виден, а не скрыт.
+  useEffect(() => {
+    if (units && unitId && !units.some((unit) => unit.id === unitId)) onChange("");
+  }, [units, unitId, onChange]);
   // «Кв. 62 · 5 эт. · 3-комн. 86 м² · свободна» (мокап).
   const labelOf = (unit: ProgressUnitOption) => {
     const known = unit.rooms !== null && unit.area !== null;
