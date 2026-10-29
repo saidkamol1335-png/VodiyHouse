@@ -156,6 +156,7 @@ test.describe("оболочка кабинета /admin", () => {
       "Витрина",
       "Программы оплаты",
       "Видео и ход стройки",
+      "Статистика сайта",
       "Настройки",
       /сайт/i,
     ]);
@@ -166,11 +167,9 @@ test.describe("оболочка кабинета /admin", () => {
     await expect(links.nth(4)).toHaveAttribute("href", "/admin/vitrina");
     await expect(links.nth(5)).toHaveAttribute("href", "/admin/programmy");
     await expect(links.nth(6)).toHaveAttribute("href", "/admin/video");
-    await expect(links.nth(7)).toHaveAttribute("href", "/admin/nastroyki");
+    await expect(links.nth(7)).toHaveAttribute("href", "/admin/statistika");
+    await expect(links.nth(8)).toHaveAttribute("href", "/admin/nastroyki");
     await expect(links.last()).toHaveAttribute("href", "/");
-    for (const hidden of ["Статистика"]) {
-      await expect(nav.getByRole("link", { name: hidden })).toHaveCount(0);
-    }
     await expect(
       page.locator(isPhone(testInfo.project.name) ? ".admin-nav--strip" : ".admin-shell__side"),
     ).toBeVisible();

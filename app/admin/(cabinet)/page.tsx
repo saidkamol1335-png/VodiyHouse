@@ -4,9 +4,9 @@ import { Suspense } from "react";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
-import { HomeLeadCards, HomeStockLive, LatestLeads } from "@/components/HomeLeads";
+import { HomeLeadCards, HomeStockLive, LatestLeads, SiteTodayCard } from "@/components/HomeLeads";
 import { SiteNowPanel } from "@/components/SiteNowPanel";
-import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
+import { isCabinetOpenWithoutLogin, type StaffRole } from "@/lib/admin/access";
 import { readSiteNowAction } from "@/lib/admin/actions/siteNow";
 import { readSiteStockAction } from "@/lib/admin/actions/siteStock";
 import { greetingOf } from "@/lib/admin/greeting";
@@ -15,6 +15,7 @@ import { cabinetPerson, type CabinetPerson } from "@/lib/admin/person";
 import { readLeadsHome } from "@/lib/admin/server/leads";
 import { readSiteNow } from "@/lib/admin/server/siteNow";
 import { readSiteStock } from "@/lib/admin/server/siteStock";
+import { readSiteToday } from "@/lib/admin/server/stats";
 import { requireSection } from "@/lib/admin/session";
 import { formatWeekdayDate } from "@/lib/format";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -62,7 +63,7 @@ export default async function AdminHomePage() {
   return (
     <AdminPage topbar={topbar}>
       {allowed ? (
-        <HomeStock />
+        <HomeStock role={viewer.role} />
       ) : (
         <AdminPanel title={t("home.emptyTitle")}>{t("home.roleLater")}</AdminPanel>
       )}
@@ -75,7 +76,7 @@ export default async function AdminHomePage() {
  * Карточки и «Последние заявки» (шаг 3.7, Г1 B), ниже — «Остатки по ЖК» (шаг 13): первые цифры —
  * здесь, дальше панель остатков перечитывает их сама (Г4 A).
  */
-async function HomeStock() {
+async function HomeStock({ role }: { role: StaffRole }) {
   const t = await getTranslations("admin");
   if (isCabinetOpenWithoutLogin || !hasSupabaseEnv()) {
     return (
@@ -84,14 +85,17 @@ async function HomeStock() {
   }
   const supabase = await createSupabaseServerClient();
   // Сбой чтения не роняет главную: панель скажет «не прочитались» и прочитает сама.
-  const [initial, leads, now] = await Promise.all([
+  // «Сайт сегодня» — только руководителю (мокап CabHome; статистика — его раздел).
+  const [initial, leads, now, today] = await Promise.all([
     readSiteStock(supabase).catch(() => null),
     readLeadsHome(supabase).catch(() => null),
     readSiteNow(supabase).catch(() => null),
+    role === "head" ? readSiteToday(supabase).catch(() => null) : null,
   ]);
   return (
     <HomeStockLive
       cards={leads ? <HomeLeadCards leads={leads} /> : null}
+      after={today !== null ? <SiteTodayCard visitors={today} online={now?.online ?? null} /> : null}
       latest={
         <div className="home-leads__split">
           {leads ? (

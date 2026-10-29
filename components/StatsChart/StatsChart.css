@@ -1,0 +1,219 @@
+/* График «Статистики сайта» (мокап CabStats .chart): ось Y слева 46 px, поле 1000 × 300 растянуто по
+   панели, подписи X снизу; линия и заливка — янтарь, прошлый период — синий пунктир. Подсказка без
+   анимации: показ и скрытие. */
+
+.stats-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: var(--admin-panel-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.stats-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stats-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.stats-chart__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-chart__key::before {
+  width: 18px;
+  height: 0;
+  border-top: 2.5px solid var(--amber);
+  content: "";
+}
+
+.stats-chart__key--prev::before {
+  border-top: 2px dashed var(--blue);
+}
+
+.stats-chart__box {
+  position: relative;
+  height: 270px;
+}
+
+.stats-chart__y {
+  position: absolute;
+  top: calc(8px + var(--y) * (100% - 36px));
+  left: 0;
+  width: 40px;
+  transform: translateY(-50%);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  text-align: right;
+}
+
+.stats-chart__plot {
+  position: absolute;
+  inset: 8px 0 28px 46px;
+  border-radius: var(--r-s);
+}
+
+.stats-chart__plot:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 4px;
+}
+
+.stats-chart__plot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stats-chart__grid {
+  fill: none;
+  stroke: var(--dash);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.stats-chart__stop {
+  stop-color: var(--amber);
+  stop-opacity: 0.32;
+}
+
+.stats-chart__stop--end {
+  stop-opacity: 0;
+}
+
+.stats-chart__line {
+  fill: none;
+  stroke: var(--amber);
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.stats-chart__prev {
+  fill: none;
+  stroke: var(--blue);
+  stroke-dasharray: 5 5;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.stats-chart__hits {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.stats-chart__hits > div {
+  flex: 1;
+}
+
+.stats-chart__hover {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stats-chart__cross {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--x);
+  border-left: 1px dashed var(--fg-3);
+}
+
+.stats-chart__dot {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--amber);
+  transform: translate(-50%, -50%);
+}
+
+.stats-chart__tip {
+  position: absolute;
+  top: -8px;
+  left: var(--x);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg);
+  box-shadow: var(--shadow-2);
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.stats-chart__tip--start {
+  transform: none;
+}
+
+.stats-chart__tip--end {
+  transform: translateX(-100%);
+}
+
+.stats-chart__tip b {
+  color: var(--fg);
+}
+
+.stats-chart__x {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 46px;
+  height: 20px;
+}
+
+.stats-chart__x span {
+  position: absolute;
+  left: var(--x);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* Крайние подписи — внутри поля: иначе последняя вылезает за панель (на телефоне — прокрутка вбок). */
+.stats-chart__x span:first-child {
+  transform: none;
+}
+
+.stats-chart__x span:last-child:not(:first-child) {
+  transform: translateX(-100%);
+}
+
+/* Телефон: 4 метки из 7 (первая, середины, последняя) — «30.09» и «05.10» иначе слипаются. */
+@media (max-width: 760px) {
+  .stats-chart__box {
+    height: 220px;
+  }
+
+  .stats-chart__x span:nth-child(even):not(:last-child) {
+    display: none;
+  }
+}

@@ -1,0 +1,356 @@
+/* «Статистика сайта» (фаза 6, мокап CabStats): строка периодов, 6 цифр, панели по три и по две в ряд;
+   уже 980 — столбиком, таблицы на телефоне — карточками строк. Полосы — статичная ширина, без анимации. */
+
+.stats-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-screen__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stats-screen__periods {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.stats-screen__segment {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.stats-screen__custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-screen__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.stats-screen__date-input {
+  width: auto;
+  height: 36px;
+  padding: 0 10px;
+}
+
+.stats-screen__tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stats-screen__online {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ok-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.stats-screen__online i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+[data-motion="full"] .stats-screen__online i {
+  animation: site-now-pulse var(--dur-ping) ease-in-out infinite;
+}
+
+.stats-screen__period {
+  margin: -6px 0 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.stats-screen__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-screen__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+}
+
+.stats-screen__kpi-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.stats-screen__kpi-label svg {
+  flex: none;
+  color: var(--amber-2);
+}
+
+.stats-screen__kpi-value {
+  font-size: var(--fs-kpi);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: var(--lh-tight);
+}
+
+.stats-screen__kpi-delta {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.stats-screen__kpi-delta--up {
+  color: var(--ok-strong);
+}
+
+.stats-screen__kpi-delta--down {
+  color: var(--bad);
+}
+
+.stats-screen__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
+.stats-screen__grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  .stats-screen__grid,
+  .stats-screen__grid--three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.stats-screen__panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stats-screen__panel-head .admin-panel__title {
+  margin: 0;
+}
+
+.stats-screen__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.stats-screen__divider {
+  margin: 16px 0;
+  border: 0;
+  border-top: 1px dashed var(--dash);
+}
+
+/* Полосы (мокап .hbars): подпись | полоса | число и доля. */
+.stats-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-bars__row {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr) 92px;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.stats-bars--wide .stats-bars__row {
+  grid-template-columns: 190px minmax(0, 1fr) 110px;
+}
+
+.stats-bars__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stats-bars__track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--seg-bg);
+}
+
+.stats-bars__track i {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--amber);
+}
+
+.stats-bars__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stats-bars__value small {
+  margin-left: 4px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+}
+
+@media (max-width: 760px) {
+  .stats-bars__row,
+  .stats-bars--wide .stats-bars__row {
+    grid-template-columns: 92px minmax(0, 1fr) 76px;
+    font-size: var(--fs-micro);
+  }
+}
+
+/* Таблицы «Популярные ЖК» и «Креативы» (мокап .tbl--compact). */
+.stats-table {
+  container: stats-table / inline-size;
+  overflow-x: auto;
+}
+
+.stats-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+
+.stats-table__table th {
+  padding: 8px 12px;
+  border-bottom: 1px dashed var(--dash);
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.stats-table__table td {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.stats-table__table tbody tr:nth-child(even) {
+  background: var(--seg-bg);
+}
+
+.stats-table__table .stats-table__num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stats-table__mono {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+}
+
+.stats-table__mark {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  overflow-wrap: anywhere;
+}
+
+.stats-table__sub {
+  display: block;
+  color: var(--fg-3);
+  font-size: var(--fs-micro);
+}
+
+.stats-table__link {
+  color: var(--fg);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.stats-table__link:hover {
+  color: var(--amber-2);
+}
+
+.stats-table__link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.stats-table__rate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats-table__minibar {
+  flex: 1;
+  min-width: 60px;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--seg-bg);
+}
+
+.stats-table__minibar i {
+  display: block;
+  width: var(--w);
+  height: 100%;
+  background: var(--amber);
+}
+
+@container stats-table (max-width: 460px) {
+  .stats-table__minibar {
+    display: none;
+  }
+
+  .stats-table__table th,
+  .stats-table__table td {
+    padding: 8px 6px;
+  }
+}

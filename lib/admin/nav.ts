@@ -69,7 +69,8 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     roles: ["head", "manager", "videographer"],
     ready: true,
   },
-  { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: false },
+  // «Статистика сайта» (фаза 6): только руководитель (PLAN §7).
+  { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: true },
   { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
 ];
 

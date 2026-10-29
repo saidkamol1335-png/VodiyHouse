@@ -267,10 +267,11 @@ describe.skipIf(isRemoteTarget)("статистика сайта: site_stats", (
     const result = await stats(-2, -1);
     expect(result.series.map((point) => point.day)).toEqual([await day(-2), await day(-1)]);
     expect(result.series.map((point) => point.cur)).toEqual([
-      { visitors: 1, visits: 1, views: 0, leads: 1 },
-      { visitors: 2, visits: 3, views: 4, leads: 1 },
+      { visitors: 1, visits: 1, views: 0, leads: 1, contacts: 1 },
+      { visitors: 2, visits: 3, views: 4, leads: 1, contacts: 1 },
     ]);
     expect(result.series.map((point) => point.prev.visitors)).toEqual([0, 1]);
+    expect(result.series.map((point) => point.prev.contacts)).toEqual([0, 0]);
   });
 
   it("панели: источник, устройство, язык — по посетителю; креатив — посетители и заявки по utm_content; типы заявок", async () => {
@@ -328,6 +329,20 @@ describe.skipIf(isRemoteTarget)("статистика сайта: site_stats", (
   it("прошлый период за сроком хранения (400 дней) — «нет данных», даже если события в нём есть", async () => {
     expect((await stats(-200, -1)).prev_has_data).toBe(true);
     expect((await stats(-250, -1)).prev_has_data).toBe(false);
+  });
+
+  it("site_today — посетители с полуночи по Ташкенту, только руководителю (KPI Главной)", async () => {
+    const visitors = await db.as(
+      user(head),
+      async (tx) => (await tx.query<{ v: number }>("select site_today() as v")).rows[0]!.v,
+    );
+    expect(visitors).toBe((await stats(0, 0)).totals.visitors);
+    expect(visitors).toBe(1);
+    const manager = await createStaff(db.admin, "manager");
+    await expectHint(
+      db.as(user(manager), (tx) => tx.query("select site_today()")),
+      "vh:forbidden",
+    );
   });
 
   it("без событий в прошлом периоде — prev_has_data false (экран пишет «нет данных»)", async () => {
@@ -429,3 +444,39 @@ describe.skipIf(isRemoteTarget)("статистика сайта: DEMO-посе�
     expect(await demoCounts()).toEqual({ events: 0, leads: 0 });
   });
 });
+
+// Ревью 6B: «Сегодня» ночью — у вчера до этого часа событий нет, но вчера целиком они есть: пунктир
+// «вчера» и строка прошлого периода остаются, изменения KPI — «нет данных» (сравнивать не с чем).
+describe.skipIf(isRemoteTarget)(
+  "статистика сайта: «Сегодня», вчера — только поздно вечером",
+  () => {
+    let db: TestDb;
+    let head: string;
+
+    beforeAll(async () => {
+      db = await createTestDb();
+      head = await createStaff(db.admin, "head");
+      await db.admin.query(
+        `insert into events (visitor_id, session_id, type, device, lang, at)
+       values (gen_random_uuid(), gen_random_uuid(), 'page_view', 'mobile', 'uz',
+               (((now() at time zone 'Asia/Tashkent')::date - 1)::timestamp + interval '23:59:59.9') at time zone 'Asia/Tashkent')`,
+      );
+    });
+    afterAll(() => db.close());
+
+    it("prev_has_data — по всему вчера; изменения «на это же время» — ноль", async () => {
+      const result = await db.as(
+        user(head),
+        async (tx) =>
+          (
+            await tx.query<{ v: Stats }>(
+              "select site_stats((now() at time zone 'Asia/Tashkent')::date, (now() at time zone 'Asia/Tashkent')::date) as v",
+            )
+          ).rows[0]!.v,
+      );
+      expect(result.prev_has_data).toBe(true);
+      expect(result.prev.visitors).toBe(0);
+      expect(result.series[23]!.prev.visitors).toBe(1);
+    });
+  },
+);

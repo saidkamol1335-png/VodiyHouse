@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { chartLabelIndexes, chartPaths, chartStep, chartTicks } from "./chart";
 import { conversion, statsBars, statsDelta } from "./numbers";
 import { addDays, daysIn, statsPeriodOf, statsPeriodQuery } from "./period";
 import { statsChannel, visitorsByChannel } from "./sources";
@@ -117,5 +118,32 @@ describe("каналы источников", () => {
       { key: "instagram", value: 5 },
       { key: "direct", value: 4 },
     ]);
+  });
+});
+
+describe("график статистики", () => {
+  it("шаг оси Y — круглый, 4 деления покрывают максимум", () => {
+    expect(chartStep(800)).toBe(200);
+    expect(chartStep(730)).toBe(200);
+    expect(chartStep(9)).toBe(2.5);
+    expect(chartStep(0)).toBe(1);
+    expect(chartTicks(41)).toEqual([0, 20, 40, 60, 80]);
+  });
+
+  it("подписи X: сегодня — часы мокапа, иначе до 7 равномерно с концами", () => {
+    expect(chartLabelIndexes(24, true)).toEqual([0, 4, 8, 12, 16, 20, 23]);
+    expect(chartLabelIndexes(30, false)).toEqual([0, 5, 10, 15, 19, 24, 29]);
+    expect(chartLabelIndexes(3, false)).toEqual([0, 1, 2]);
+    expect(chartLabelIndexes(1, false)).toEqual([0]);
+  });
+
+  it("пути: линия обрывается на будущих часах, одна точка — горизонталь, прошлый — пунктир", () => {
+    const paths = chartPaths([4, 8, null], [2, 2, 2]);
+    expect(paths.top).toBe(8);
+    expect(paths.line).toBe("M0.0,150.0L500.0,0.0");
+    expect(paths.area).toBe("M0.0,300.0L0.0,150.0L500.0,0.0L500.0,300.0Z");
+    expect(paths.prev).toBe("M0.0,225.0L500.0,225.0L1000.0,225.0");
+    expect(chartPaths([5], null).line).toBe("M0.0,112.5L1000.0,112.5");
+    expect(chartPaths([null, null], null)).toMatchObject({ line: "", area: "", prev: "" });
   });
 });

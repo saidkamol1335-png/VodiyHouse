@@ -17,6 +17,8 @@ type SiteNowPanelProps = {
 };
 
 const REFRESH_MS = 30_000;
+/** Свежее «онлайн» для других мест страницы (бейдж «Онлайн сейчас» статистики): одно чтение на экран. */
+export const SITE_NOW_EVENT = "vh:site-now";
 const ICONS = {
   complex_view: Eye,
   phone_click: Phone,
@@ -47,7 +49,10 @@ function useSiteNow(initial: SiteNow | null, read: SiteNowPanelProps["read"]) {
       loading = false;
       if (!active) return;
       setFailed(result.status === "error");
-      if (result.status === "done") setNow(result.now);
+      if (result.status === "done") {
+        setNow(result.now);
+        window.dispatchEvent(new CustomEvent(SITE_NOW_EVENT, { detail: result.now.online }));
+      }
       timer = setTimeout(load, REFRESH_MS);
     };
     if (initial === null) void load();

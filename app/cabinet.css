@@ -88,6 +88,8 @@
 @import "../components/StaffList/StaffList.css";
 @import "../components/StaffPasswordReveal/StaffPasswordReveal.css";
 @import "../components/StaffRowActions/StaffRowActions.css";
+@import "../components/StatsChart/StatsChart.css";
+@import "../components/StatsScreen/StatsScreen.css";
 @import "../components/StatusCapsule/StatusCapsule.css";
 @import "../components/StockBadge/StockBadge.css";
 @import "../components/StockRooms/StockRooms.css";

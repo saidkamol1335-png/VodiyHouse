@@ -1,2 +1,2 @@
-export { HomeLeadCards, LatestLeads } from "./HomeLeads";
+export { HomeLeadCards, LatestLeads, SiteTodayCard } from "./HomeLeads";
 export { HomeStockLive } from "./HomeStockLive";

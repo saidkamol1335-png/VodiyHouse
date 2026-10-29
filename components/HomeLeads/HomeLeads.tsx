@@ -1,4 +1,4 @@
-import { ArrowRight, Inbox, Users } from "lucide-react";
+import { ArrowRight, ChartLine, Inbox, Users } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/Avatar";
@@ -24,6 +24,13 @@ export async function HomeLeadCards({ leads }: HomeLeadCardsProps) {
       <HomeCard icon={<Users size={16} />} title={t("work")} value={leads.work} sub={t("workSub", { count: leads.meetings })} href={link("work")} />
     </>
   );
+}
+
+/** «Сайт сегодня» руководителя (мокап CabHome): посетители с полуночи и онлайн → статистика «Сегодня». */
+export async function SiteTodayCard({ visitors, online }: { visitors: number; online: number | null }) {
+  const t = await getTranslations("admin.leads.home");
+  const sub = online === null ? t("siteTodaySub") : t("siteTodaySubOnline", { online });
+  return <HomeCard icon={<ChartLine size={16} />} title={t("siteToday")} value={visitors} sub={sub} href={`${ADMIN_ROUTES.stats}?per=today`} ok />;
 }
 
 export async function LatestLeads({ rows }: { rows: readonly LeadRow[] }) {

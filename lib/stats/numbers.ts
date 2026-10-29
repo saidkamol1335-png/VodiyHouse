@@ -43,3 +43,13 @@ export function statsBars<K extends string>(
     width: max > 0 ? Math.round((row.value / max) * 1000) / 10 : 0,
   }));
 }
+
+const PERCENT = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+const COUNT = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+
+/** «2,3», «20,6», «1» — проценты статистики с одним знаком, «,0» отбрасывается (мокап trim1). */
+export const formatStatsPercent = (value: number) => PERCENT.format(value);
+/** «9 114» — счётчики статистики с разрядами. */
+export const formatStatsCount = (value: number) => COUNT.format(value);
+/** Подпись оси графика: «800», «2,5» — шаг 2,5 бывает, его дробь не округляем. */
+export const formatStatsAxis = (value: number) => PERCENT.format(value);

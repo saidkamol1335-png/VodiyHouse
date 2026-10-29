@@ -11,6 +11,8 @@ import { HomeCard } from "./HomeCard";
 type HomeStockLiveProps = {
   /** Серверные карточки заявок («Новые», «В работе») — перед живой «Свободно на сайте». */
   cards: ReactNode;
+  /** После «Свободно на сайте»: «Сайт сегодня» руководителя (мокап CabHome, фаза 6). */
+  after?: ReactNode;
   /** «Последние заявки» — между карточками и «Остатками по ЖК». */
   latest: ReactNode;
   initial: SiteStock | null;
@@ -22,7 +24,7 @@ type HomeStockLiveProps = {
  * Главная кабинета (Г1 B): «Свободно на сайте» и «Остатки по ЖК» — из одного живого чтения (Г4 A):
  * панель перечитала остатки — цифра карточки та же, без второго опроса.
  */
-export function HomeStockLive({ cards, latest, initial, read, complexesHref }: HomeStockLiveProps) {
+export function HomeStockLive({ cards, after, latest, initial, read, complexesHref }: HomeStockLiveProps) {
   const t = useTranslations("admin.leads.home");
   const live = useLiveStock(initial, read);
   const { stock } = live;
@@ -41,6 +43,7 @@ export function HomeStockLive({ cards, latest, initial, read, complexesHref }: H
             ok
           />
         ) : null}
+        {after}
       </div>
       {latest}
       <SiteStockView live={live} complexesHref={complexesHref} />

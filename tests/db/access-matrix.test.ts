@@ -306,11 +306,12 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
     });
 
     it("статистику сайта (фаза 6) видит только руководитель — ни видеограф, ни менеджер", async () => {
-      const call = "select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())";
-      for (const actor of [user(videographer), user(manager), anon]) {
-        await expect(db.as(actor, (tx) => tx.query(call))).rejects.toThrow(DENIED);
+      for (const call of ["select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())", "select public.site_today()"]) {
+        for (const actor of [user(videographer), user(manager), anon]) {
+          await expect(db.as(actor, (tx) => tx.query(call)), call).rejects.toThrow(DENIED);
+        }
+        await expect(db.as(user(head), (tx) => tx.query(call))).resolves.toBeTruthy();
       }
-      await expect(db.as(user(head), (tx) => tx.query(call))).resolves.toBeTruthy();
     });
 
     it("не читает служебное и не меняет квартиры: статус и цена — руководителю и менеджеру", async () => {

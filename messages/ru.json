@@ -370,7 +370,7 @@
       "showcase": "Витрина",
       "programs": "Программы оплаты",
       "video": "Видео и ход стройки",
-      "stats": "Статистика",
+      "stats": "Статистика сайта",
       "settings": "Настройки",
       "siteSection": "Сайт",
       "openSite": "Открыть сайт",
@@ -2594,7 +2594,10 @@
         "latest": "Последние заявки",
         "all": "Все заявки",
         "latestEmpty": "Заявок пока нет — первая появится здесь сразу после отправки формы на сайте.",
-        "unavailable": "Заявки не прочитались — обновите страницу."
+        "unavailable": "Заявки не прочитались — обновите страницу.",
+        "siteToday": "Сайт сегодня",
+        "siteTodaySub": "посетителей",
+        "siteTodaySubOnline": "посетителей · онлайн сейчас {online, number}"
       },
       "sourceDirect": "direct",
       "open": "Открыть заявку #{number}",
@@ -2744,6 +2747,130 @@
         "manual": "Скопируйте вручную: {url}",
         "open": "Открыть"
       }
+    },
+    "stats": {
+      "title": "Статистика сайта",
+      "subtitle": "Посещаемость, источники и заявки за любой период",
+      "periodsLabel": "Период",
+      "periods": {
+        "7": "7 дней",
+        "30": "30 дней",
+        "today": "Сегодня",
+        "month": "Этот месяц",
+        "custom": "Период…"
+      },
+      "from": "С",
+      "to": "По",
+      "apply": "Показать",
+      "online": "Онлайн сейчас: {count}",
+      "csv": "CSV",
+      "range": "{from} — {to} · {days, plural, one {# день} few {# дня} many {# дней} other {# дня}}",
+      "rangeCompare": "{from} — {to} · {days, plural, one {# день} few {# дня} many {# дней} other {# дня}} · сравнение с {prevFrom} — {prevTo}",
+      "rangeNoPrev": "{from} — {to} · {days, plural, one {# день} few {# дня} many {# дней} other {# дня}} · за прошлый период данных нет",
+      "today": "Сегодня, {date} · данные до {time} · сравнение со вчера на это же время",
+      "kpi": {
+        "visitors": "Посетители",
+        "visits": "Визиты",
+        "views": "Просмотры страниц",
+        "leads": "Заявки",
+        "conversion": "Конверсия в заявку",
+        "contacts": "Показали телефон / Telegram"
+      },
+      "delta": {
+        "up": "+{percent}% к прошлому периоду",
+        "down": "−{percent}% к прошлому периоду",
+        "flat": "как в прошлом периоде",
+        "none": "нет данных за прошлый период",
+        "upToday": "+{percent}% ко вчера",
+        "downToday": "−{percent}% ко вчера",
+        "flatToday": "как вчера",
+        "noneToday": "нет данных за вчера"
+      },
+      "metrics": {
+        "visitors": "Посетители",
+        "visits": "Визиты",
+        "views": "Просмотры",
+        "leads": "Заявки"
+      },
+      "metricsLabel": "Что показать на графике",
+      "legendCurrent": "{metric} · выбранный период",
+      "legendToday": "{metric} · сегодня",
+      "legendPrev": "прошлый период",
+      "legendYesterday": "вчера",
+      "chartLabel": "График: {metric} по {unit, select, hour {часам} other {дням}}",
+      "tipValue": "{value, number} · {metric}",
+      "tipPrev": "прошлый период: {value, number}",
+      "tipYesterday": "вчера: {value, number}",
+      "tipHour": "{hour}:00–{hour}:59",
+      "sources": {
+        "title": "Источники",
+        "instagram": "Instagram",
+        "telegram": "Telegram",
+        "google": "Google",
+        "facebook": "Facebook",
+        "yandex": "Яндекс",
+        "youtube": "YouTube",
+        "direct": "Прямые заходы",
+        "other": "Другие сайты"
+      },
+      "devices": {
+        "title": "Устройства и язык",
+        "mobile": "Телефон",
+        "desktop": "Компьютер",
+        "tablet": "Планшет",
+        "uz": "Узбекский",
+        "ru": "Русский"
+      },
+      "leadTypes": {
+        "title": "Типы заявок"
+      },
+      "objects": {
+        "title": "Популярные ЖК",
+        "complexes": "ЖК",
+        "developers": "Застройщики",
+        "complex": "ЖК",
+        "developer": "Застройщик",
+        "views": "Просмотры",
+        "leads": "Заявки",
+        "conversion": "Конверсия",
+        "complexName": "ЖК {name}",
+        "empty": "За период страницы ЖК не открывали."
+      },
+      "creatives": {
+        "title": "Рекламные креативы · UTM",
+        "content": "utm_content",
+        "visitors": "Посетители",
+        "leads": "Заявки",
+        "conversion": "Конв.",
+        "empty": "Заходов с меткой utm_content за период нет — добавьте её в ссылки рекламы."
+      },
+      "funnel": {
+        "title": "Путь посетителя",
+        "visitors": "Посетители",
+        "complex": "Открыли страницу ЖК",
+        "layouts": "Смотрели планировки",
+        "contacts": "Показали телефон / Telegram",
+        "leads": "Оставили заявку"
+      },
+      "share": "{share}%",
+      "empty": "За период событий нет.",
+      "unavailable": "Статистика не прочиталась — обновите страницу через минуту.",
+      "csvColumns": {
+        "date": "Дата",
+        "hour": "Час",
+        "visitors": "Посетители",
+        "visits": "Визиты",
+        "views": "Просмотры",
+        "leads": "Заявки",
+        "contacts": "Контакты (телефон / Telegram)",
+        "total": "Итого {from} — {to}",
+        "prev": "Прошлый период {from} — {to}",
+        "totalNote": "В итоге посетители — разные за весь период, поэтому меньше суммы по дням.",
+        "totalUntil": "Итого {from} — {to}, до {time}",
+        "prevUntil": "Прошлый период {from} — {to}, до {time}"
+      },
+      "chartKeys": "Точки графика: стрелки ← → показывают значения",
+      "todayNoPrev": "Сегодня, {date} · данные до {time} · за вчера данных нет"
     }
   },
   "footer": {
