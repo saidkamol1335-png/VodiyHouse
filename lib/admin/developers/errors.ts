@@ -37,6 +37,14 @@ export const CONTENT_ERRORS = [
   "invalidRate",
   "futureDate",
   "staleList",
+  "stale",
+  "complexArchived",
+  "reportMonth",
+  "reportSold",
+  "reportComment",
+  "reportPhotos",
+  "reportYoutube",
+  "returnNote",
   "savedReload",
   "network",
   "notConfigured",
@@ -70,6 +78,15 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:duplicate": "duplicate",
   "vh:future_date": "futureDate",
   "vh:stale_list": "staleList",
+  // Фаза 5: отчёты хода строительства.
+  "vh:stale": "stale",
+  "vh:archived": "complexArchived",
+  "vh:month": "reportMonth",
+  "vh:sold": "reportSold",
+  "vh:comment": "reportComment",
+  "vh:photos": "reportPhotos",
+  "vh:youtube": "reportYoutube",
+  "vh:note": "returnNote",
 };
 
 // Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.

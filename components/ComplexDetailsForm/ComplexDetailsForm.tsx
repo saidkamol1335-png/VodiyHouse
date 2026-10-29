@@ -45,35 +45,53 @@ export function ComplexDetailsForm({
       <div ref={list} className="complex-details-form">
         {details.map((detail) => {
           const issue = errors[detail.topicId];
-          const filled = Boolean(detail.text.ru || detail.text.uz);
           return (
-            <details
+            <DetailTopic
               key={detail.topicId}
-              className="complex-details-form__topic"
-              open={filled || Boolean(issue)}
-              data-issue={issue ? "" : undefined}
-            >
-              <summary className="complex-details-form__summary">
-                <span>{detail.name.ru}</span>
-                <small>{filled ? t("details.filled") : t("details.blank")}</small>
-              </summary>
-              <input type="hidden" name="detailTopic" value={detail.topicId} />
-              <BilingualField
-                id={`complex-${detailField(detail.topicId, "text")}`}
-                name={detailField(detail.topicId, "text")}
-                label={t("details.text")}
-                uzLabel={t("details.textUz")}
-                maxLength={DETAIL_LIMITS.textMax}
-                multiline
-                defaultValue={detail.text}
-                error={issue ? t(`issues.${issue}`) : undefined}
-              />
-              <PhotoChoice topicId={detail.topicId} photos={photos} selected={detail.photoId} />
-            </details>
+              detail={detail}
+              photos={photos}
+              error={issue ? t(`issues.${issue}`) : undefined}
+            />
           );
         })}
       </div>
     </ComplexTabForm>
+  );
+}
+
+type DetailTopicProps = {
+  detail: DetailRow;
+  photos: ComplexDetailsFormProps["photos"];
+  error: string | undefined;
+};
+
+/** Тема справочника: пустая — свёрнута, заполненная или с ошибкой — раскрыта. */
+function DetailTopic({ detail, photos, error }: DetailTopicProps) {
+  const t = useTranslations("admin.complexes");
+  const filled = Boolean(detail.text.ru || detail.text.uz);
+  return (
+    <details
+      className="complex-details-form__topic"
+      open={filled || Boolean(error)}
+      data-issue={error ? "" : undefined}
+    >
+      <summary className="complex-details-form__summary">
+        <span>{detail.name.ru}</span>
+        <small>{filled ? t("details.filled") : t("details.blank")}</small>
+      </summary>
+      <input type="hidden" name="detailTopic" value={detail.topicId} />
+      <BilingualField
+        id={`complex-${detailField(detail.topicId, "text")}`}
+        name={detailField(detail.topicId, "text")}
+        label={t("details.text")}
+        uzLabel={t("details.textUz")}
+        maxLength={DETAIL_LIMITS.textMax}
+        multiline
+        defaultValue={detail.text}
+        error={error}
+      />
+      <PhotoChoice topicId={detail.topicId} photos={photos} selected={detail.photoId} />
+    </details>
   );
 }
 

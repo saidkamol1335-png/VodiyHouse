@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { seedContent, type ContentIds } from "./content-fixtures";
-import { anon, createAuthUser, createStaff, createTestDb, service, user, type Actor, type TestDb } from "./harness";
+import { anon, createAuthUser, createStaff, createTestDb, expectHint, service, user, type Actor, type TestDb } from "./harness";
 
 // Аудит безопасности 29.10: матрица доступа PLAN §5 проверяется по факту — запросами от имени
 // посетителя и каждой роли к настоящим строкам, а не по тексту политик. «Не читает» = отказ в праве
@@ -96,6 +96,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       for (const table of [
         "leads", "lead_deliveries", "developer_private", "calculations", "audit_log", "profiles",
         "events", "event_rates", "tg_starts", "tg_updates", "login_failures", "archive_notices", "showcase_notices",
+        "progress_reports", "progress_photos",
       ]) {
         expect(await visible(anon, `select * from public.${table}`), table).toBe(0);
       }
@@ -299,6 +300,39 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       expect(await visible(user(videographer), "select * from public.developer_private")).toBe(0);
       await expect(db.as(user(videographer), (tx) => tx.query("select public.leads_screen(null, null, null)"))).rejects.toThrow();
       await expect(db.as(user(videographer), (tx) => tx.query("select public.lead_card(1001)"))).rejects.toThrow();
+    });
+
+    it("не читает служебное и не меняет квартиры: статус и цена — руководителю и менеджеру", async () => {
+      for (const table of ["audit_log", "payment_programs", "events", "tg_starts", "login_failures", "archive_notices", "showcase_notices"]) {
+        expect(await visible(user(videographer), `select * from public.${table}`), table).toBe(0);
+      }
+      const unit = ids.units[0];
+      const before = (await db.admin.query("select status::text, price from public.units where id = $1", [unit])).rows[0];
+      expect(await writes(user(videographer), "update public.units set status = 'sold', price = 1 where id = $1", [unit])).toBe(0);
+      await expect(
+        db.as(user(videographer), (tx) => tx.query("select public.set_units_status($1, $2::uuid[], 'sold')", [ids.publicBlock, [unit]])),
+      ).rejects.toThrow();
+      expect((await db.admin.query("select status::text, price from public.units where id = $1", [unit])).rows[0]).toEqual(before);
+    });
+
+    it("отчёты хода строительства: отправляет, видит только свои, не публикует (фаза 5)", async () => {
+      const month = (await db.admin.query<{ m: string }>("select to_char(date_trunc('month', private.tashkent_today()), 'YYYY-MM-DD') as m")).rows[0]!.m;
+      const body = (unit: string) =>
+        JSON.stringify({
+          block_id: ids.publicBlock,
+          unit_id: unit,
+          month,
+          comment: { ru: "Двор", uz: "Hovli" },
+          photos: [1, 2, 3].map(() => ({ path: `complexes/${ids.publicComplex}/${crypto.randomUUID()}.jpg`, width: 10, height: 10 })),
+        });
+      const submit = (actor: string, unit: string) =>
+        db.as(user(actor), (tx) => tx.query<{ r: { id: string } }>("select public.submit_progress_report($1) as r", [body(unit)])).then((r) => r.rows[0]!.r.id);
+      const own = await submit(videographer, ids.units[0]!);
+      const others = await submit(head, ids.units[1]!);
+      expect(await visible(user(videographer), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(1);
+      expect(await visible(user(manager), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(2);
+      await expectHint(db.as(user(videographer), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
+      expect(await writes(user(videographer), "update public.progress_reports set status = 'published', published_at = now() where id = $1", [own])).toBe(0);
     });
   });
 
