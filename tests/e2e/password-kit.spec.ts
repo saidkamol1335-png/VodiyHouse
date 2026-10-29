@@ -21,21 +21,25 @@ test.describe("первая смена пароля", () => {
     const errors = collectPageErrors(page);
     await page.goto(PAGE);
     await expect(page.getByRole("heading", { level: 1, name: "Задайте свой пароль" })).toBeVisible();
-    await expect(page.getByText("Не короче 10 символов")).toBeVisible();
+    await expect(page.getByText("Не короче 10 символов, буквы и цифры")).toBeVisible();
     await expect(page.getByRole("button", { name: "Выйти" })).toBeVisible();
     await expect(page.getByRole("link", { name: "На сайт" })).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
-  test("короткий, несовпадение, совпадает с временным, неверный временный — ошибки у полей", async ({ page }) => {
+  test("короткий, простой, несовпадение, совпадает с временным, неверный временный — ошибки у полей", async ({ page }) => {
     await page.goto(PAGE);
     await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "короткий", "короткий");
     await expect(fieldErrors(page)).toHaveText(["Не короче 10 символов"]);
-    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "мой-новый-пароль", "мой-другой-пароль");
+    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "1234567890", "1234567890");
+    await expect(fieldErrors(page)).toHaveText([
+      "Слишком простой пароль: нужны буквы и цифры, не частое слово и не ряд клавиатуры",
+    ]);
+    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "мой-новый-пароль-7", "мой-другой-пароль-7");
     await expect(fieldErrors(page)).toHaveText(["Пароли не совпадают"]);
     await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, DEMO_TEMPORARY_PASSWORD, DEMO_TEMPORARY_PASSWORD);
     await expect(fieldErrors(page)).toHaveText(["Совпадает с временным — придумайте другой"]);
-    await fillPasswords(page, "не-тот-пароль", "мой-новый-пароль", "мой-новый-пароль");
+    await fillPasswords(page, "не-тот-пароль", "мой-новый-пароль-7", "мой-новый-пароль-7");
     await expect(fieldErrors(page)).toHaveText(["Временный пароль не подходит"]);
     await expect(page).toHaveURL(/\/dev\/parol$/);
   });
@@ -55,7 +59,7 @@ test.describe("первая смена пароля", () => {
 
   test("успех — в кабинет; пароли не попадают в адрес", async ({ page }) => {
     await page.goto(PAGE);
-    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "мой-новый-пароль", "мой-новый-пароль");
+    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "мой-новый-пароль-7", "мой-новый-пароль-7");
     // С ключами у стенда нет сессии: кабинет отправит на вход.
     await expect(page).toHaveURL(hasCloud ? /\/admin\/vhod$/ : /\/admin$/);
     expect(decodeURIComponent(page.url())).not.toContain("пароль");

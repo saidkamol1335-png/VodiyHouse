@@ -8,6 +8,7 @@ export const SIGN_IN_ERRORS = [
   "passwordRequired",
   "invalidCredentials",
   "noAccess",
+  "locked",
   "rateLimited",
   "network",
   "notConfigured",

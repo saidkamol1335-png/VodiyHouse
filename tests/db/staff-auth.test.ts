@@ -45,6 +45,11 @@ describe("вход сотрудников и «Сотрудники»", () => {
       )
     ).rows[0];
 
+  const sessionsOf = async (id: string) =>
+    (await db.admin.query("select id from auth.sessions where user_id = $1", [id])).rows.length;
+  const openSession = (id: string) =>
+    db.admin.query("insert into auth.sessions (id, user_id) values (gen_random_uuid(), $1)", [id]);
+
   const insertProfile = "insert into profiles (id, full_name, role) values ($1, 'Азиз Рахимов', 'manager') returning id";
 
   it("руководитель добавляет профиль своей сессией: активен, ждёт смены пароля, автор в журнале — он", async () => {
@@ -124,7 +129,7 @@ describe("вход сотрудников и «Сотрудники»", () => {
   });
 
   it("флаг смены пароля снимает только сервер: автора в журнале нет, запись — о сотруднике", async () => {
-    const staff = await createStaff(db.admin, "manager");
+    const staff = await createStaff(db.admin, "manager", { mustChangePassword: true });
     const clear = "update profiles set must_change_password = false where id = $1";
     await expectDenied(db.as(user(staff), (tx) => tx.query(clear, [staff])));
     await db.as(service, (tx) => tx.query(clear, [staff]));
@@ -132,10 +137,18 @@ describe("вход сотрудников и «Сотрудники»", () => {
     expect(await lastAudit(staff)).toMatchObject({ actor_id: null, changes: { must_change_password: [true, false] } });
   });
 
-  it("отключение действует со следующего запроса; включение возвращает доступ", async () => {
+  const setStatus = "select (public.set_units_status(null, array[]::uuid[], 'free') ->> 'changed')::int as changed";
+  /** iat токена, выданного после закрытия сессий сотрудника (новый вход). */
+  const freshIat = async (id: string) =>
+    (
+      await db.admin.query<{ iat: number }>(
+        "select floor(extract(epoch from sessions_revoked_at))::int + 1 as iat from profiles where id = $1",
+        [id],
+      )
+    ).rows[0]!.iat;
+
+  it("отключение действует со следующего запроса; после включения — только новый вход", async () => {
     const staff = await createStaff(db.admin, "manager");
-    const setStatus =
-      "select (public.set_units_status(null, array[]::uuid[], 'free') ->> 'changed')::int as changed";
     expect((await db.as(user(staff), (tx) => tx.query(setStatus))).rows[0]).toEqual({ changed: 0 });
 
     await db.as(user(head), (tx) => tx.query("update profiles set is_active = false where id = $1", [staff]));
@@ -144,7 +157,67 @@ describe("вход сотрудников и «Сотрудники»", () => {
     expect(seen.rows.map((row) => row.id)).toEqual([staff]);
 
     await db.as(user(head), (tx) => tx.query("update profiles set is_active = true where id = $1", [staff]));
+    await expect(db.as(user(staff), (tx) => tx.query(setStatus))).rejects.toThrow(/руководитель и менеджер/);
+    const fresh = user(staff, await freshIat(staff));
+    expect((await db.as(fresh, (tx) => tx.query(setStatus))).rows[0]).toEqual({ changed: 0 });
+  });
+
+  // Проверка безопасности 29.10 (20261029050000): украденная сессия после «Новый пароль» не работает
+  // через Data API, а «Новый пароль» и «Отключить» закрывают открытые сессии.
+  it("с флагом смены пароля прав роли нет: только свой профиль; после смены — права возвращаются", async () => {
+    const staff = await createStaff(db.admin, "manager", { mustChangePassword: true });
+    await expect(db.as(user(staff), (tx) => tx.query(setStatus))).rejects.toThrow(/руководитель и менеджер/);
+    const seen = await db.as(user(staff), (tx) => tx.query<{ id: string }>("select id from profiles"));
+    expect(seen.rows.map((row) => row.id)).toEqual([staff]);
+
+    await db.as(service, (tx) => tx.query("update profiles set must_change_password = false where id = $1", [staff]));
     expect((await db.as(user(staff), (tx) => tx.query(setStatus))).rows[0]).toEqual({ changed: 0 });
+  });
+
+  it("после «Новый пароль» старый токен прав не получает и когда флаг снят; новый — получает", async () => {
+    const staff = await createStaff(db.admin, "manager");
+    await db.as(user(head), (tx) => tx.query("select public.require_password_change($1)", [staff]));
+    await db.as(service, (tx) => tx.query("update profiles set must_change_password = false where id = $1", [staff]));
+    await expect(db.as(user(staff), (tx) => tx.query(setStatus))).rejects.toThrow(/руководитель и менеджер/);
+    const revokedAt = (await freshIat(staff)) - 1;
+    await expect(db.as(user(staff, revokedAt), (tx) => tx.query(setStatus))).rejects.toThrow(/руководитель и менеджер/);
+    expect((await db.as(user(staff, revokedAt + 1), (tx) => tx.query(setStatus))).rows[0]).toEqual({ changed: 0 });
+  });
+
+  it("флаг смены пароля сервером или скриптом (false → true) тоже закрывает сессии", async () => {
+    const staff = await createStaff(db.admin, "manager");
+    await openSession(staff);
+    await db.as(service, (tx) => tx.query("update profiles set must_change_password = true where id = $1", [staff]));
+    expect(await sessionsOf(staff)).toBe(0);
+  });
+
+  it("«Новый пароль» при уже стоящем флаге всё равно закрывает сессии", async () => {
+    const staff = await createStaff(db.admin, "manager", { mustChangePassword: true });
+    await openSession(staff);
+    await db.as(user(head), (tx) => tx.query("select public.require_password_change($1)", [staff]));
+    expect(await sessionsOf(staff)).toBe(0);
+  });
+
+  it("«Новый пароль» закрывает все сессии сотрудника, чужие — нет", async () => {
+    const staff = await createStaff(db.admin, "manager");
+    await openSession(staff);
+    await openSession(staff);
+    await openSession(head);
+    await db.as(user(head), (tx) => tx.query("select public.require_password_change($1)", [staff]));
+    expect(await sessionsOf(staff)).toBe(0);
+    expect(await sessionsOf(head)).toBeGreaterThan(0);
+  });
+
+  it("«Отключить» закрывает сессии; правка имени и «Включить» — нет", async () => {
+    const staff = await createStaff(db.admin, "manager");
+    await openSession(staff);
+    await db.as(user(head), (tx) => tx.query("update profiles set full_name = 'Новое имя' where id = $1", [staff]));
+    expect(await sessionsOf(staff)).toBe(1);
+    await db.as(user(head), (tx) => tx.query("update profiles set is_active = false where id = $1", [staff]));
+    expect(await sessionsOf(staff)).toBe(0);
+    await openSession(staff);
+    await db.as(user(head), (tx) => tx.query("update profiles set is_active = true where id = $1", [staff]));
+    expect(await sessionsOf(staff)).toBe(1);
   });
 
   it("повышение до руководителя действует без нового входа", async () => {
@@ -192,6 +265,9 @@ describe("вход сотрудников и «Сотрудники»", () => {
       false,
     );
     expect(await check("has_function_privilege('authenticated', 'private.keep_active_head()', 'EXECUTE')")).toBe(
+      false,
+    );
+    expect(await check("has_function_privilege('authenticated', 'private.end_staff_sessions(uuid)', 'EXECUTE')")).toBe(
       false,
     );
   });

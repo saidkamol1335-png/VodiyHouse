@@ -7,6 +7,13 @@ import { afterSignInPath } from "../landing";
 // сервер — lib/admin/server/deps.ts).
 
 export type SignInDeps = {
+  /**
+   * Попытка записана до проверки пароля; false — 10 попыток за 15 минут с этим email и адресом
+   * (20261029060000). Сбой счётчика — не закрыт: остаётся лимит Supabase Auth.
+   */
+  beginAttempt(email: string): Promise<boolean>;
+  /** Пароль верный — попытки стёрты. Не бросает. */
+  clearAttempts(email: string): Promise<void>;
   signInWithPassword(input: SignInInput): Promise<{ userId: string } | { error: AuthErrorLike }>;
   /** Под только что открытой сессией; сбой сети — исключение. */
   readOwnProfile(userId: string): Promise<OwnProfileRow | null>;
@@ -16,10 +23,15 @@ export type SignInDeps = {
 
 export type SignInOutcome = { kind: "redirect"; to: string } | { kind: "error"; code: SignInErrorCode };
 
-/** Пароль → профиль → куда вести. Без профиля или отключённому сессия сразу закрывается. */
+/**
+ * Счётчик попыток → пароль → профиль → куда вести. Закрытый вход в Auth не идёт.
+ * Без профиля или отключённому сессия сразу закрывается.
+ */
 export async function signIn(deps: SignInDeps, input: SignInInput): Promise<SignInOutcome> {
+  if (!(await deps.beginAttempt(input.email))) return { kind: "error", code: "locked" };
   const result = await deps.signInWithPassword(input);
   if ("error" in result) return { kind: "error", code: signInErrorCode(result.error) };
+  await deps.clearAttempts(input.email);
 
   let profile: OwnProfileRow | null;
   try {

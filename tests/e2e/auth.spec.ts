@@ -1,5 +1,7 @@
+import { createHmac } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { expect, test } from "./fixtures";
-import { cabinetState, e2eStaff, hasCloud, NO_CLOUD, signIn } from "./cloud";
+import { assertE2eProject, cabinetState, e2eStaff, hasCloud, NO_CLOUD, signIn, submitSignIn } from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Вход в кабинет против облачного Supabase (шаг 8). Входы с паролем — только на 1440:
@@ -36,6 +38,31 @@ test.describe("без входа", () => {
       await expect(page.locator(".login-form .form-status--error")).toHaveText("Неверный email или пароль");
       await expect(page.getByLabel("Email")).toHaveValue(email!);
     }
+  });
+
+  // Проверка безопасности 29.10: 10 попыток за 15 минут с одним email и адресом закрывают вход
+  // (20261029060000). Попытки записываются напрямую — без 10 входов в Auth (лимит Auth по адресу).
+  test("после 10 попыток вход с этим email и адреса закрыт, с другого адреса — нет", async ({ page }, testInfo) => {
+    desktopOnly(testInfo.project.name);
+    const { url, secret } = assertE2eProject();
+    const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
+    const email = `e2e-lock-${crypto.randomUUID().slice(0, 8)}@example.com`;
+    // Тот же ключ, что loginAttemptKey в lib/admin/server/deps.ts (там server-only).
+    const keyOf = (ip: string) => createHmac("sha256", secret).update(`login:${email}:${ip}`).digest("hex");
+    const ip = `e2e-${crypto.randomUUID()}`;
+    for (let i = 0; i < 10; i += 1) {
+      const { error } = await admin.rpc("begin_login_attempt", { p_key: keyOf(ip) });
+      expect(error).toBeNull();
+    }
+    const error = page.locator(".login-form .form-status--error");
+    await page.setExtraHTTPHeaders({ "x-nf-client-connection-ip": ip });
+    await submitSignIn(page, email, "любой-пароль-1");
+    await expect(error).toHaveText("Слишком много попыток входа с этим email. Попробуйте через 15 минут.");
+
+    await page.setExtraHTTPHeaders({ "x-nf-client-connection-ip": `e2e-${crypto.randomUUID()}` });
+    await submitSignIn(page, email, "любой-пароль-1");
+    await expect(error).toHaveText("Неверный email или пароль");
+    await admin.rpc("clear_login_attempts", { p_key: keyOf(ip) });
   });
 });
 

@@ -27,6 +27,24 @@ for (const { path, canonical, pair } of PAGES) {
   });
 }
 
+// Проверка безопасности 29.10: заголовки на страницах сайта (next.config.ts), кабинет — строже.
+test("заголовки безопасности: сайт — только свой фрейм, nosniff, HSTS; кабинет — ни в каком фрейме", async ({ request }) => {
+  for (const path of ["/uz", "/ru/novostroyki"]) {
+    const headers = (await request.get(path)).headers();
+    expect(headers["x-frame-options"], path).toBe("SAMEORIGIN");
+    expect(headers["content-security-policy"], path).toBe("frame-ancestors 'self'");
+    expect(headers["x-content-type-options"], path).toBe("nosniff");
+    expect(headers["strict-transport-security"], path).toBe("max-age=31536000");
+    expect(headers["referrer-policy"], path).toBe("strict-origin-when-cross-origin");
+    expect(headers["permissions-policy"], path).toContain("camera=()");
+  }
+  const admin = (await request.get("/admin/vhod")).headers();
+  expect(admin["x-frame-options"]).toBe("DENY");
+  expect(admin["content-security-policy"]).toBe("frame-ancestors 'none'");
+  expect(admin["referrer-policy"]).toBe("same-origin");
+  expect(admin["x-content-type-options"]).toBe("nosniff");
+});
+
 // Шаг 3.14: robots.txt с картой сайта, sitemap.xml с парами языков, schema.org агентства и ЖК,
 // описание ЖК с ценой «от»; переход из каталога в ЖК без ошибок в консоли (скрипт разметки).
 

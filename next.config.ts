@@ -28,6 +28,18 @@ function supabaseMediaPattern(): { protocol: "https" | "http"; hostname: string;
 
 const isLocalSupabase = LOCAL_HOSTS.has(supabaseHost()?.hostname ?? "");
 
+// Проверка безопасности 29.10: заголовки на всех ответах, не только в кабинете. Страницы с формой заявки
+// не открываются во фрейме чужого сайта; HSTS — без includeSubDomains (поддомены домена заказчика
+// нам неизвестны), браузер учитывает его только по https. Полная CSP (script-src с nonce) — после запуска.
+const SECURITY_HEADERS = [
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+];
+
 const nextConfig: NextConfig = {
   // Статичная оболочка страницы + потоковые динамические части (PLAN 3а: страницы ЖК статичные).
   cacheComponents: true,
@@ -48,8 +60,10 @@ const nextConfig: NextConfig = {
     return [
       // Тестовый деплой (Ф2) — noindex на каждом ответе, и страницах, и картинках.
       ...(isIndexingClosed() ? [{ source: "/:path*", headers: [NOINDEX_HEADER] }] : []),
+      { source: "/:path*", headers: SECURITY_HEADERS },
       {
-        // Кабинет не открывается во фрейме чужого сайта (кликджекинг) и не отдаёт адрес наружу.
+        // Кабинет строже: ни в каком фрейме, адрес не уходит наружу. Правило ниже общего — с тем же
+        // заголовком побеждает последнее (docs Next.js, headers).
         source: "/admin/:path*",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },

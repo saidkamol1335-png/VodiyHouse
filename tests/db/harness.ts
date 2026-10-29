@@ -9,7 +9,8 @@ export const MIGRATIONS_DIR = path.join(ROOT, "supabase", "migrations");
 const SHIM_FILE = path.join(import.meta.dirname, "supabase-shim.sql");
 
 /** Кто выполняет запрос: как в облаке, роль Postgres и claims JWT задают RLS. */
-export type Actor = { kind: "anon" } | { kind: "user"; id: string } | { kind: "service" };
+/** iat — когда выдан токен (секунды); без него токен «старше» любого закрытия сессий (20261029050000). */
+export type Actor = { kind: "anon" } | { kind: "user"; id: string; iat?: number } | { kind: "service" };
 
 /** Общее у PGlite и облачной базы (pg): тесты не знают, где выполняются. */
 export type Db = {
@@ -36,14 +37,15 @@ export const PG_ROLE: Record<Actor["kind"], string> = {
 
 export const anon: Actor = { kind: "anon" };
 export const service: Actor = { kind: "service" };
-export const user = (id: string): Actor => ({ kind: "user", id });
+export const user = (id: string, iat?: number): Actor => ({ kind: "user", id, ...(iat === undefined ? {} : { iat }) });
 
 /** `npm run test:db:remote` — те же тесты против облачной базы (tests/db/remote.ts). */
 export const isRemoteTarget = process.env.DB_TEST_TARGET === "remote";
 
 export function claimsOf(actor: Actor): string {
   const role = PG_ROLE[actor.kind];
-  return JSON.stringify(actor.kind === "user" ? { sub: actor.id, role } : { role });
+  if (actor.kind !== "user") return JSON.stringify({ role });
+  return JSON.stringify(actor.iat === undefined ? { sub: actor.id, role } : { sub: actor.id, role, iat: actor.iat });
 }
 
 /** Чистая база: в PGlite — заглушка Supabase + все миграции, как `supabase db push`. */
@@ -95,7 +97,8 @@ type StaffOptions = { fullName?: string; isActive?: boolean; mustChangePassword?
 
 /** Создаёт пользователя Auth и профиль сотрудника в обход RLS (как сервер с ключом service_role). */
 export async function createStaff(admin: Db, role: StaffRole, options: StaffOptions = {}): Promise<string> {
-  const { fullName = `Тест · ${role}`, isActive = true, mustChangePassword = true } = options;
+  // Рабочий сотрудник уже сменил временный пароль: с флагом база не даёт прав роли (20261029050000).
+  const { fullName = `Тест · ${role}`, isActive = true, mustChangePassword = false } = options;
   const email = options.email ?? `${role}-${crypto.randomUUID()}@test.local`;
   const created = await admin.query<{ id: string }>("insert into auth.users (id, email) values (gen_random_uuid(), $1) returning id", [
     email,

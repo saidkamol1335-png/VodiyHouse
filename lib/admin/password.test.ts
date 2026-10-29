@@ -65,8 +65,32 @@ describe("свой пароль", () => {
   });
 
   it("9 символов — коротко, 10 — подходит", () => {
-    expect(checkNewPassword({ ...valid, password: "123456789", confirm: "123456789" })).toEqual({ password: "tooShort" });
-    expect(checkNewPassword({ ...valid, password: "1234567890", confirm: "1234567890" })).toEqual({});
+    expect(checkNewPassword({ ...valid, password: "Sardor-20", confirm: "Sardor-20" })).toEqual({ password: "tooShort" });
+    expect(checkNewPassword({ ...valid, password: "Sardor-202", confirm: "Sardor-202" })).toEqual({});
+  });
+
+  it("простой пароль — weakPassword: без букв, без цифр, мало разных символов, ряд клавиатуры, частое слово", () => {
+    for (const weak of [
+      "1234567890",
+      "998901234567",
+      "мой-новый-пароль",
+      "aaaaa11111",
+      "1q2w3e4r5t",
+      "p0o9i8u7y6t5r4e3w2q1",
+      "1й2ц3у4к5е6н",
+      "password2026",
+      "Qwerty-12345",
+      "VodiyHouse2026!",
+      "пароль12345",
+    ]) {
+      expect(checkNewPassword({ ...valid, password: weak, confirm: weak }), weak).toEqual({ password: "weakPassword" });
+    }
+  });
+
+  it("буквы любой раскладки с цифрами проходят: «мой-пароль-2026», «e2e-новый-пароль»", () => {
+    for (const ok of ["мой-пароль-2026", "e2e-новый-пароль", "Fargona 7 bahor", "Sardor-202"]) {
+      expect(checkNewPassword({ ...valid, password: ok, confirm: ok }), ok).toEqual({});
+    }
   });
 
   it("больше 72 байт — слишком длинный (37 кириллических букв = 74 байта)", () => {
@@ -83,7 +107,7 @@ describe("свой пароль", () => {
   });
 
   it("пробелы не обрезаются — это часть пароля", () => {
-    expect(checkNewPassword({ ...valid, password: " 123456789", confirm: "123456789 " })).toEqual({ confirm: "mismatch" });
+    expect(checkNewPassword({ ...valid, password: " мой-пароль-2026", confirm: "мой-пароль-2026 " })).toEqual({ confirm: "mismatch" });
   });
 
   it("минимальная длина совпадает с minimum_password_length в supabase/config.toml", () => {

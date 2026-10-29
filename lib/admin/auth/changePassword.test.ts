@@ -7,8 +7,8 @@ const INPUT: ChangePasswordInput = {
   email: "dilnoza@vodiyhouse.uz",
   role: "manager",
   current: "Temp7Pass9Xy",
-  password: "мой-новый-пароль",
-  confirm: "мой-новый-пароль",
+  password: "мой-новый-пароль-7",
+  confirm: "мой-новый-пароль-7",
 };
 
 function deps(patch: Partial<ChangePasswordDeps> = {}) {

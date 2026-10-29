@@ -23,6 +23,14 @@ create table auth.users (
   updated_at timestamptz not null default now()
 );
 
+-- Сессии входа; refresh-токены в облаке удаляются каскадом. Закрывает их private.end_staff_sessions().
+-- id без default, как в облаке.
+create table auth.sessions (
+  id uuid primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 -- Те же определения, что у Supabase: id и роль берутся из claims JWT текущего запроса.
 create function auth.jwt() returns jsonb
 language sql stable

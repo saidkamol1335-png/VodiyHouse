@@ -1,9 +1,14 @@
 import "server-only";
+import { createHmac } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { headers } from "next/headers";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { CLIENT_IP_HEADER } from "@/lib/supabase/authForwarding";
+import { hasSupabaseAdminEnv, supabaseSecretKey } from "@/lib/supabase/env";
 import { createSupabaseVerifierClient } from "@/lib/supabase/verifier";
 import type { ChangePasswordDeps } from "../auth/changePassword";
 import type { SignInDeps } from "../auth/signIn";
+import { normalizeEmail } from "../credentials";
 import { generatePassword } from "../password";
 import { readOwnProfile } from "../session";
 import type { CreateStaffDeps } from "../staff/createStaff";
@@ -22,8 +27,46 @@ async function signOutQuietly(supabase: SupabaseClient, scope: "local" | "others
   }
 }
 
+/**
+ * Ключ счётчика попыток входа (20261029060000_login_failures.sql): HMAC секретным ключом от email и
+ * адреса посетителя — в базе ни почты, ни адреса, а чужой подбор с другого адреса сотрудника не запирает.
+ */
+export function loginAttemptKey(email: string, ip: string | null): string {
+  return createHmac("sha256", supabaseSecretKey()).update(`login:${normalizeEmail(email)}:${ip ?? "-"}`).digest("hex");
+}
+
+/**
+ * Счётчик попыток — секретным ключом (функции базы только для service_role). Без ключа (разработка)
+ * и при сбое базы вход не закрывается: остаётся лимит Supabase Auth по адресу.
+ */
+function loginAttemptDeps(): Pick<SignInDeps, "beginAttempt" | "clearAttempts"> {
+  if (!hasSupabaseAdminEnv()) return { beginAttempt: async () => true, clearAttempts: async () => undefined };
+  const admin = createSupabaseAdminClient();
+  // Адрес — только заголовок Netlify, как у лимита заявок (x-forwarded-for посетитель подделывает).
+  const keyOf = async (email: string) =>
+    loginAttemptKey(email, (await headers()).get(CLIENT_IP_HEADER)?.trim() || null);
+  return {
+    async beginAttempt(email) {
+      try {
+        const { data, error } = await admin.rpc("begin_login_attempt", { p_key: await keyOf(email) });
+        return Boolean(error) || data !== false;
+      } catch {
+        return true;
+      }
+    },
+    async clearAttempts(email) {
+      try {
+        await admin.rpc("clear_login_attempts", { p_key: await keyOf(email) });
+      } catch {
+        // Счётчик — дополнительная защита; ответ сотруднику от него не зависит.
+      }
+    },
+  };
+}
+
 export function signInDeps(supabase: SupabaseClient): SignInDeps {
   return {
+    ...loginAttemptDeps(),
     async signInWithPassword({ email, password }) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error || !data.user) return { error: error ?? {} };

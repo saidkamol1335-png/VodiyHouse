@@ -16,6 +16,8 @@ const profile = (patch: Partial<OwnProfileRow> = {}): OwnProfileRow => ({
 
 function deps(patch: Partial<SignInDeps> = {}) {
   return {
+    beginAttempt: vi.fn<SignInDeps["beginAttempt"]>(async () => true),
+    clearAttempts: vi.fn<SignInDeps["clearAttempts"]>(async () => undefined),
     signInWithPassword: vi.fn<SignInDeps["signInWithPassword"]>(async () => ({ userId: USER })),
     readOwnProfile: vi.fn<SignInDeps["readOwnProfile"]>(async () => profile()),
     signOutLocal: vi.fn<SignInDeps["signOutLocal"]>(async () => undefined),
@@ -43,6 +45,23 @@ describe("вход", () => {
     const fake = deps({ signInWithPassword: async () => ({ error: new AuthApiError("x", 400, "invalid_credentials") }) });
     expect(await signIn(fake, INPUT)).toEqual({ kind: "error", code: "invalidCredentials" });
     expect(fake.readOwnProfile).not.toHaveBeenCalled();
+  });
+
+  it("счётчик попыток: записывается до пароля, верный пароль стирает, неверный — нет", async () => {
+    const wrong = deps({ signInWithPassword: async () => ({ error: new AuthApiError("x", 400, "invalid_credentials") }) });
+    await signIn(wrong, INPUT);
+    expect(wrong.beginAttempt).toHaveBeenCalledWith(INPUT.email);
+    expect(wrong.clearAttempts).not.toHaveBeenCalled();
+
+    const right = deps();
+    await signIn(right, INPUT);
+    expect(right.clearAttempts).toHaveBeenCalledWith(INPUT.email);
+  });
+
+  it("вход закрыт счётчиком → locked, в Auth не идёт", async () => {
+    const locked = deps({ beginAttempt: vi.fn(async () => false) });
+    expect(await signIn(locked, INPUT)).toEqual({ kind: "error", code: "locked" });
+    expect(locked.signInWithPassword).not.toHaveBeenCalled();
   });
 
   it("нет профиля или отключён → сессия закрывается, noAccess", async () => {

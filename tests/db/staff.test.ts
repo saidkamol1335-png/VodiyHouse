@@ -60,17 +60,18 @@ describe("сотрудники и роли", () => {
   });
 
   it("флаг смены пароля меняет только сервер", async () => {
-    await expectDenied(
-      db.as(user(head), (tx) =>
-        tx.query("update profiles set must_change_password = false where id = $1", [head]),
-      ),
-    );
+    const staff = await createStaff(db.admin, "manager", { mustChangePassword: true });
+    for (const actor of [user(head), user(staff)]) {
+      await expectDenied(
+        db.as(actor, (tx) => tx.query("update profiles set must_change_password = false where id = $1", [staff])),
+      );
+    }
     await db.as(service, (tx) =>
-      tx.query("update profiles set must_change_password = false where id = $1", [head]),
+      tx.query("update profiles set must_change_password = false where id = $1", [staff]),
     );
     const { rows } = await db.admin.query<{ must_change_password: boolean }>(
       "select must_change_password from profiles where id = $1",
-      [head],
+      [staff],
     );
     expect(rows[0]?.must_change_password).toBe(false);
   });
@@ -116,9 +117,11 @@ describe("сотрудники и роли", () => {
   });
 
   it("новый сотрудник обязан сменить пароль при первом входе", async () => {
+    const id = await createAuthUser(db.admin);
+    await db.as(user(head), (tx) => tx.query("insert into profiles (id, full_name, role) values ($1, 'Новый', 'manager')", [id]));
     const { rows } = await db.admin.query<{ must_change_password: boolean }>(
       "select must_change_password from profiles where id = $1",
-      [manager],
+      [id],
     );
     expect(rows[0]?.must_change_password).toBe(true);
   });
