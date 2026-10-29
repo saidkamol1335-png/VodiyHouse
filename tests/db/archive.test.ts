@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { anon, createStaff, createTestDb, expectDenied, isRemoteTarget, service, user, type TestDb } from "./harness";
+import { anon, createStaff, createTestDb, expectDenied, expectHint, isRemoteTarget, service, user, type TestDb } from "./harness";
 
 // Шаг 3.13: архив (миграция 20261026140000_archive_purge.sql) на DEMO-сиде, с подменой даты
 // архивации: напоминание за 3 дня — один раз, удаление через 30 дней — только всё ещё архивного,
@@ -118,5 +118,28 @@ describe.skipIf(isRemoteTarget)("архив: окончательное удал
     expect(await call<boolean>("select purge_archived('developer', $1) as v", [developer])).toBe(true);
     expect((await db.admin.query("select 1 from developers where id = $1", [developer])).rows.length).toBe(0);
     expect((await db.admin.query("select 1 from complexes where developer_id = $1", [developer])).rows.length).toBe(0);
+  });
+
+  // Полировка блока F (20261029040000): адрес из retired_slugs у посетителей помнит переадресацию.
+  it("адрес удалённого ЖК не занять: новый ЖК получает суффикс, правка адреса — отказ", async () => {
+    const head = await createStaff(db.admin, "head");
+    const { rows: developers } = await db.admin.query<{ id: string }>("select id from developers order by slug limit 1");
+    await db.admin.query("insert into retired_slugs (slug) values ('byvshiy') on conflict do nothing");
+    const created = await db.as(user(head), (tx) =>
+      tx.query<{ id: string }>("select create_complex($1, $2, 'byvshiy') as id", [developers[0]!.id, JSON.stringify({ ru: "Бывший", uz: "Bivshiy" })]),
+    );
+    const slug = await db.admin.query<{ slug: string }>("select slug from complexes where id = $1", [created.rows[0]!.id]);
+    expect(slug.rows[0]!.slug).toBe("byvshiy-2");
+    await expectHint(
+      db.as(user(head), (tx) => tx.query("update complexes set slug = 'byvshiy' where id = $1", [created.rows[0]!.id])),
+      "vh:slug_retired",
+    );
+    // DEMO пересоздаётся одной командой — его адреса не проверяются.
+    await db.admin.query("insert into retired_slugs (slug) values ('demo-byvshiy') on conflict do nothing");
+    const demo = await db.admin.query<{ id: string }>(
+      `insert into complexes (developer_id, slug, name) values ($1, 'demo-byvshiy', '{"ru": "Демо", "uz": "Demo"}') returning id`,
+      [developers[0]!.id],
+    );
+    expect(demo.rows).toHaveLength(1);
   });
 });
