@@ -2817,7 +2817,8 @@
       "video": "Видеообзор",
       "details": "Детали проекта",
       "developer": "Застройщик",
-      "documents": "Документы"
+      "documents": "Документы",
+      "progress": "Ход строительства"
     },
     "about": {
       "title": "О ЖК",
@@ -3078,6 +3079,24 @@
       "hidden": "не опубликован — посетители страницу не видят",
       "exit": "Выйти",
       "developerHidden": "ЖК опубликован, но застройщик — нет: посетители страницу не видят"
+    },
+    "progress": {
+      "title": "Ход строительства",
+      "lead": "Видеограф Vodiy House снимает каждый ЖК раз в месяц. Новые отчёты — сверху.",
+      "updated": "Обновлено {date}",
+      "months": "Месяцы отчётов",
+      "stampVideo": "Видео за {month}",
+      "stampPhotos": "Фото за {month}",
+      "block": "Блок {name}",
+      "shot": "Снято {date} · Vodiy House",
+      "ready": "Готовность блока {name}",
+      "readyNoName": "Готовность блока",
+      "floors": "{built} из {total} этажей",
+      "play": "Смотреть отчёт за {month}",
+      "pause": "Пауза",
+      "resume": "Смотреть",
+      "frame": "Кадр {n} из {total}",
+      "thumbs": "Все отчёты"
     }
   },
   "showcase": {

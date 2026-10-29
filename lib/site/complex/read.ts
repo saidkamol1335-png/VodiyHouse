@@ -8,6 +8,7 @@ import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { pickerFrom, type PickerRecord } from "@/lib/site/picker/records";
+import { progressReportsFrom, type ProgressReportRecord } from "@/lib/site/progress/records";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ComplexPage } from "./model";
 import { complexPageFrom, type ComplexPageRecord } from "./records";
@@ -17,12 +18,22 @@ import { complexPageFrom, type ComplexPageRecord } from "./records";
 // и другие ЖК застройщика — CATALOG_TAG (публикация нового адреса сбрасывает и его); программы —
 // PROGRAMS_TAG, названия отделки, документов и тем — DICTIONARIES_TAG.
 
-/** «Выбрать квартиру» (фаза 4): фасад, контуры блоков и планы этажей — в той же записи кэша. */
+/**
+ * «Выбрать квартиру» (фаза 4) и «Ход строительства» (фаза 5) — отдельными RPC в той же записи кэша.
+ * Разделы необязательные: сбой одного не снимает страницу — она выходит без него.
+ */
 async function withPicker(client: SupabaseClient, page: ComplexPage): Promise<ComplexPage> {
-  const { data, error } = await client.rpc("site_complex_picker", { p_complex: page.id });
-  // Раздел необязательный: его сбой не снимает страницу — она выходит без «Выбрать квартиру».
-  if (error) console.error("[novostroyki/zhk] «Выбрать квартиру» недоступен", error);
-  return { ...page, picker: error ? null : pickerFrom(data as PickerRecord | null) };
+  const [picker, progress] = await Promise.all([
+    client.rpc("site_complex_picker", { p_complex: page.id }),
+    client.rpc("site_complex_progress", { p_complex: page.id }),
+  ]);
+  if (picker.error) console.error("[novostroyki/zhk] «Выбрать квартиру» недоступен", picker.error);
+  if (progress.error) console.error("[novostroyki/zhk] «Ход строительства» недоступен", progress.error);
+  return {
+    ...page,
+    picker: picker.error ? null : pickerFrom(picker.data as PickerRecord | null),
+    progress: progress.error ? [] : progressReportsFrom(progress.data as ProgressReportRecord[] | null),
+  };
 }
 
 async function fetchComplexPage(slug: string): Promise<ComplexPage | null> {

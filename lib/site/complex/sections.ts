@@ -5,7 +5,7 @@ import { stockRows } from "./stock";
 // Разделы страницы ЖК и навигатор (ТЗ 7.2, мокап .jknav): порядок мокапа плюс разделы Ф4 на местах
 // ТЗ («Видеообзор» — после планировок, «Детали» — перед застройщиком). Раздел без данных скрыт
 // вместе со своим пунктом (PLAN 3а); «Выбрать квартиру» (фаза 4) — между наличием и планировками,
-// как в мокапе, только с фасадом и планами; «Ход строительства» — фаза 5.
+// как в мокапе, только с фасадом и планами; «Ход строительства» (фаза 5) — сразу после планировок, как в мокапе.
 
 export const COMPLEX_ANCHORS = {
   about: "o-zhk",
@@ -13,6 +13,7 @@ export const COMPLEX_ANCHORS = {
   stock: "nalichie",
   pick: "vybrat-kvartiru",
   layouts: "planirovki",
+  progress: "hod-stroitelstva",
   video: "video",
   details: "detali",
   developer: "zastroyshchik",
@@ -31,6 +32,7 @@ export function complexSections(page: ComplexPage): ComplexSectionKey[] {
     stock: stockRows(page).length > 0,
     pick: page.picker !== null,
     layouts: layoutCards(page).length > 0,
+    progress: page.progress.length > 0,
     video: page.videos.length > 0,
     details: page.details.length > 0,
     developer: true,

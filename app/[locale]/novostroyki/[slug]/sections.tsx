@@ -7,13 +7,14 @@ import { ComplexDocuments } from "@/components/ComplexDocuments";
 import { ComplexFacts } from "@/components/ComplexFacts";
 import { ComplexPicker } from "@/components/ComplexPicker";
 import { ComplexPlans } from "@/components/ComplexPlans";
+import { ComplexProgress } from "@/components/ComplexProgress";
 import { ComplexLocation } from "@/components/ComplexLocation";
 import { ComplexSection } from "@/components/ComplexSection";
 import { ComplexStock } from "@/components/ComplexStock";
 import { ComplexVideos } from "@/components/ComplexVideos";
 import { LeadButton } from "@/components/LeadDialog";
 import { LeadMore } from "@/components/LeadMore";
-import { formatDayTime } from "@/lib/format";
+import { formatDate, formatDayTime } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import { LEAD_FORM_ENABLED } from "@/lib/site/flags";
 import { readSiteCalcHints } from "@/lib/site/hints";
@@ -51,6 +52,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
           <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} complexSlug={page.slug} complexName={name} leadEnabled={LEAD_FORM_ENABLED} />
         </ComplexSection>
       ) : null}
+      {has("progress") ? <ProgressSection page={page} /> : null}
       {has("video") ? (
         <ComplexSection id={COMPLEX_ANCHORS.video} title={t("video.title")}>
           <ComplexVideos videos={page.videos} name={page.name[locale]} />
@@ -67,6 +69,21 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
     </>
+  );
+}
+
+/** «Ход строительства» (фаза 5): «Обновлено …» — когда снят последний опубликованный отчёт. */
+async function ProgressSection({ page }: { page: ComplexPage }) {
+  const t = await getTranslations("complex.progress");
+  return (
+    <ComplexSection
+      id={COMPLEX_ANCHORS.progress}
+      title={t("title")}
+      lead={t("lead")}
+      stamp={t("updated", { date: formatDate(new Date(page.progress[0]!.shotAt)) })}
+    >
+      <ComplexProgress reports={page.progress} />
+    </ComplexSection>
   );
 }
 

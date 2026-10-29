@@ -553,7 +553,8 @@
       "video": "Videosharh",
       "details": "Loyiha tafsilotlari",
       "developer": "Quruvchi",
-      "documents": "Hujjatlar"
+      "documents": "Hujjatlar",
+      "progress": "Qurilish jarayoni"
     },
     "about": {
       "title": "TJM haqida",
@@ -814,6 +815,24 @@
       "hidden": "e’lon qilinmagan — tashrif buyuruvchilar sahifani ko‘rmaydi",
       "exit": "Chiqish",
       "developerHidden": "TJM e’lon qilingan, lekin quruvchi — yo‘q: tashrif buyuruvchilar sahifani ko‘rmaydi"
+    },
+    "progress": {
+      "title": "Qurilish jarayoni",
+      "lead": "Vodiy House videografi har bir TJMni oyiga bir marta suratga oladi. Yangi hisobotlar — yuqorida.",
+      "updated": "Yangilangan: {date}",
+      "months": "Hisobot oylari",
+      "stampVideo": "{month} videosi",
+      "stampPhotos": "{month} suratlari",
+      "block": "{name}-blok",
+      "shot": "Suratga olingan: {date} · Vodiy House",
+      "ready": "{name}-blok tayyorligi",
+      "readyNoName": "Blok tayyorligi",
+      "floors": "{total} qavatdan {built} tasi",
+      "play": "{month} hisobotini ko‘rish",
+      "pause": "Pauza",
+      "resume": "Ko‘rish",
+      "frame": "{total} tadan {n}-kadr",
+      "thumbs": "Barcha hisobotlar"
     }
   },
   "showcase": {

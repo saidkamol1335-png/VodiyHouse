@@ -28,8 +28,8 @@ test.describe("страница ЖК", () => {
     const main = page.locator("main");
     await expect(main).toContainText(/от \$30\s290/);
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
-    // Разделов без данных нет: у Shodlik нет видео и деталей.
-    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Наличие", "Выбрать квартиру", "Планировки", "Застройщик", "Документы"]);
+    // Разделов без данных нет: у Shodlik нет видео и деталей; «Ход строительства» — DEMO-отчёты (фаза 5).
+    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Наличие", "Выбрать квартиру", "Планировки", "Ход строительства", "Застройщик", "Документы"]);
     await expect(main.locator("#o-zhk")).toContainText("перенесён с 2 кв. 2027");
     await expect(main.locator("#raspolozhenie")).toContainText("Школа №46");
     await expect(main.locator("#nalichie")).toContainText(/41\s*в продаже сейчас/);

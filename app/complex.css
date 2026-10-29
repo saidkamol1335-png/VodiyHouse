@@ -19,9 +19,11 @@
 @import "../components/ComplexPlans/DrawingZoom.css";
 @import "../components/ComplexPlans/LayoutCard.css";
 @import "../components/ComplexPreviewBanner/ComplexPreviewBanner.css";
+@import "../components/ComplexProgress/ComplexProgress.css";
 @import "../components/ComplexSection/ComplexSection.css";
 @import "../components/ComplexStock/ComplexStock.css";
 @import "../components/ComplexTerms/BlockCard.css";
 @import "../components/ComplexTerms/ComplexTerms.css";
 @import "../components/ComplexVideos/ComplexVideos.css";
 @import "../components/LeadMore/LeadMore.css";
+@import "../components/ProgressPlayer/ProgressPlayer.css";

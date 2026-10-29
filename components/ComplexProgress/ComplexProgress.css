@@ -1,0 +1,209 @@
+/* «Ход строительства» (фаза 5, мокап .prog): плеер слева, готовность блока и превью отчётов справа
+   (1fr / 330px); на телефоне — всё столбцом, чипы и превью — лентами с прокруткой. */
+.complex-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: start;
+  gap: 20px;
+}
+
+.complex-progress__main {
+  min-width: 0;
+}
+
+.complex-progress__months {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.complex-progress__months::-webkit-scrollbar {
+  display: none;
+}
+
+.complex-progress__month {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.complex-progress__month[aria-pressed="true"] {
+  border-color: var(--amber-line);
+  background: var(--amber-soft);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* Мокап 1440: пять чипов месяцев; шестой — только на телефоне. */
+.complex-progress__month:nth-child(n + 6) {
+  display: none;
+}
+
+.complex-progress__comment {
+  margin: 18px 0 0;
+  color: var(--fg);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.complex-progress__shot {
+  margin: 6px 0 0;
+  color: var(--fg-3);
+  font-size: 13px;
+}
+
+.complex-progress__side {
+  display: grid;
+  gap: 14px;
+}
+
+.complex-progress__ready {
+  padding: 22px 20px 20px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-l);
+  background: var(--bg-2);
+}
+
+.complex-progress__ready-label {
+  margin: 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.complex-progress__ready-value {
+  margin: 6px 0 12px;
+  color: var(--fg);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.complex-progress__ready-bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.complex-progress__ready-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--amber-2), var(--amber));
+  transform-origin: left center;
+}
+
+.complex-progress__ready-floors {
+  margin: 10px 0 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.complex-progress__thumbs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-progress__thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--photo-bg);
+  color: var(--over-photo-fg);
+  cursor: pointer;
+}
+
+.complex-progress__thumb[aria-pressed="true"] {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-soft), 0 0 22px rgba(248, 155, 13, 0.35);
+}
+
+.complex-progress__thumb-photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.complex-progress__thumb-label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 18px 8px 7px;
+  background: linear-gradient(180deg, rgba(10, 8, 6, 0), rgba(10, 8, 6, 0.72));
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.complex-progress__thumb:focus-visible {
+  outline-offset: -3px;
+}
+
+@media (max-width: 1180px) {
+  .complex-progress {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .complex-progress__month:nth-child(n + 6) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .complex-progress__comment {
+    margin-top: 14px;
+  }
+
+  /* Превью — горизонтальной лентой 128 × 84 с подписью месяца под кадром (мокап MobJkProg). */
+  .complex-progress__thumbs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .complex-progress__thumbs > li {
+    flex: none;
+    width: 128px;
+  }
+}
+
+[data-motion="full"] .complex-progress__thumb {
+  transition: transform var(--dur-base) var(--ease);
+}
+
+[data-motion="full"] .complex-progress__thumb:hover {
+  transform: scale(1.03);
+}
