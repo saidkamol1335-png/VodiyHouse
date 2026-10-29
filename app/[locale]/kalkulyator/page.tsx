@@ -36,7 +36,14 @@ export default async function CalculatorPage({ searchParams }: CalculatorPagePro
     <>
       <SiteHeader />
       <Container as="main">
-        <Suspense fallback={<CalcHero {...heroTexts(t)} examples={[]} />}>
+        <Suspense
+          fallback={
+            <>
+              <CalcHero {...heroTexts(t)} examples={[]} />
+              <div className="site-calculator__pending" aria-hidden="true" />
+            </>
+          }
+        >
           <Calculator searchParams={searchParams} />
         </Suspense>
       </Container>

@@ -6,6 +6,12 @@
   min-width: 0;
 }
 
+/* Место под калькулятор, пока он грузится (fallback страницы): подвал сразу ниже первого экрана —
+   иначе расчёт, пришедший потоком, сдвигал подвал (Lighthouse CLS 0,49 на /kalkulyator). */
+.site-calculator__pending {
+  min-height: 100svh;
+}
+
 .site-calculator__empty {
   margin: 0;
   padding: 24px;

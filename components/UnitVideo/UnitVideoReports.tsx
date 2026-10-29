@@ -31,7 +31,7 @@ export function UnitVideoReports({ video, aside }: UnitVideoReportsProps) {
       : t("levelComplex");
   return (
     <>
-      <ProgressPlayer key={current.id} report={current} label={label} />
+      <ProgressPlayer key={current.id} report={current} label={label} priority={current.id === reports[0]?.id} />
       <div className="unit-video__grid">
         <div className="unit-video__main">
           <section className="unit-video__card">

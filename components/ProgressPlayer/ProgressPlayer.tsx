@@ -16,6 +16,8 @@ type ProgressPlayerProps = {
   caption?: boolean;
   /** Штамп справа сверху: «Видео за октябрь 2026» (раздел ЖК) или «Видео этой квартиры» (страница видео). */
   label?: string;
+  /** Плеер — первое, что видно на странице (видео квартиры): первый кадр грузится сразу (LCP). */
+  priority?: boolean;
 };
 
 /** Кадр слайд-шоу фото — каждые 3,5 с (мокап: смена кадра 3.5 s, кроссфейд 1.1 s). */
@@ -28,7 +30,7 @@ const playerOf = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?a
  * «Видео за …». Видео — ролик YouTube (плеер только по нажатию, ТЗ 7.5) или файл MP4 (preload="none",
  * постер — первое фото); без видео — слайд-шоу фото отчёта, как кадры мокапа.
  */
-export function ProgressPlayer({ report, caption = true, label }: ProgressPlayerProps) {
+export function ProgressPlayer({ report, caption = true, label, priority = false }: ProgressPlayerProps) {
   const t = useTranslations("complex.progress");
   const locale = useLocale() as Locale;
   // «Видео за октябрь 2026»: в подписях месяц строчный; штамп — капсом через CSS.
@@ -51,7 +53,7 @@ export function ProgressPlayer({ report, caption = true, label }: ProgressPlayer
         />
       ) : null}
       {kind === "file" ? <FileMedia report={report} title={videoTitle} /> : null}
-      {kind === "photos" ? <Slideshow report={report} label={t("play", { month })} /> : null}
+      {kind === "photos" ? <Slideshow report={report} label={t("play", { month })} priority={priority} /> : null}
       <span className="progress-player__corners" aria-hidden="true" />
       <span className="progress-player__stamp progress-player__stamp--start">
         <i aria-hidden="true" />
@@ -133,7 +135,7 @@ function FileMedia({ report, title }: { report: ProgressReport; title: string })
  * Фото отчёта по очереди: «Смотреть» запускает смену кадров, «Пауза» — останавливает. Новый отчёт —
  * новый плеер (key у ProgressPlayer): кадр и пауза начинаются заново.
  */
-function Slideshow({ report, label }: { report: ProgressReport; label: string }) {
+function Slideshow({ report, label, priority }: { report: ProgressReport; label: string; priority: boolean }) {
   const locale = useLocale() as Locale;
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -155,7 +157,7 @@ function Slideshow({ report, label }: { report: ProgressReport; label: string })
         .filter(Boolean)
         .join(" ")}
     >
-      <Frames report={report} frame={frame} alt={report.comment[locale]} />
+      <Frames report={report} frame={frame} alt={report.comment[locale]} priority={priority} />
       {started ? null : (
         <StartButton
           label={label}
@@ -194,7 +196,7 @@ function StartButton({ label, onStart }: { label: string; onStart: () => void })
  * Кадры стопкой: виден текущий (смена — opacity, см. CSS), диктор слышит только его. В разметке —
  * только прошлый (он ещё гаснет), текущий и следующий: остальные 3–15 фото не грузятся заранее.
  */
-function Frames({ report, frame, alt }: { report: ProgressReport; frame: number; alt: string }) {
+function Frames({ report, frame, alt, priority }: { report: ProgressReport; frame: number; alt: string; priority: boolean }) {
   const total = report.photos.length;
   const near = new Set([frame, (frame + 1) % total, (frame - 1 + total) % total]);
   return report.photos.map((photo, index) =>
@@ -205,6 +207,7 @@ function Frames({ report, frame, alt }: { report: ProgressReport; frame: number;
         alt={index === frame ? alt : ""}
         frame="cover"
         sizes="(max-width: 760px) 100vw, 860px"
+        preload={priority && index === 0}
         className={
           index === frame
             ? "progress-player__frame progress-player__frame--active"
