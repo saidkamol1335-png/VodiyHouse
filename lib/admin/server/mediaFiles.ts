@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { MEDIA_BUCKET } from "@/lib/media";
+import { MEDIA_BUCKET, PROGRESS_VIDEO_BUCKET, PROGRESS_VIDEO_PATH_PATTERN } from "@/lib/media";
 
 /**
  * Уборка файлов в бакете media через Storage API (прямой delete в storage.objects запрещён).
@@ -42,4 +42,24 @@ export async function floorPlanFilesOfGoneBlocks(
   return (data as unknown as { block_id: string; image: { path: string } | null }[])
     .filter((row) => !kept.has(row.block_id) && row.image)
     .map((row) => row.image!.path);
+}
+
+/**
+ * Файлы отчёта хода строительства (фаза 5), которые вернула база после отправки или удаления: фото —
+ * в бакете media, видео (.mp4) — в progress-video. Удаляет сервер секретным ключом: у видеографа в
+ * хранилище права удалять нет, а пути уже проверила функция отчёта (только файлы этого отчёта).
+ */
+export async function removeProgressFiles(admin: SupabaseClient, paths: unknown): Promise<void> {
+  const list = (Array.isArray(paths) ? paths : []).filter(
+    (path): path is string => typeof path === "string" && path.length > 0,
+  );
+  const videos = list.filter((path) => PROGRESS_VIDEO_PATH_PATTERN.test(path));
+  await removeMediaFiles(admin, list.filter((path) => !videos.includes(path)));
+  if (videos.length === 0) return;
+  try {
+    const { error } = await admin.storage.from(PROGRESS_VIDEO_BUCKET).remove(videos);
+    if (error) console.error("progress-video-remove-failed", { paths: videos, error: error.message });
+  } catch (error) {
+    console.error("progress-video-remove-failed", { paths: videos, error });
+  }
 }

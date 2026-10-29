@@ -49,3 +49,16 @@ export function mediaPublicUrl(supabaseUrl: string, path: string): string {
 export function isOwnMediaPath(owner: MediaOwner, path: string): boolean {
   return MEDIA_PATH_PATTERN.test(path) && path.startsWith(`${mediaFolder(owner)}/`);
 }
+
+// Фаза 5: видео отчётов хода строительства — свой бакет, только MP4, та же папка ЖК
+// (политика Storage private.is_progress_video_path).
+export const PROGRESS_VIDEO_BUCKET = "progress-video";
+export const PROGRESS_VIDEO_PATH_PATTERN = /^complexes\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.mp4$/;
+
+export function progressVideoPath(complexId: string, fileId: string = crypto.randomUUID()): string {
+  return `${mediaFolder({ type: "complex", id: complexId })}/${fileId}.mp4`;
+}
+
+export function progressVideoPublicUrl(supabaseUrl: string, path: string): string {
+  return `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/${PROGRESS_VIDEO_BUCKET}/${path}`;
+}

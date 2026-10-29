@@ -6,6 +6,9 @@ import {
   mediaPath,
   mediaPublicUrl,
   ownerTypeOf,
+  PROGRESS_VIDEO_PATH_PATTERN,
+  progressVideoPath,
+  progressVideoPublicUrl,
 } from "./path";
 import { MEDIA_KINDS } from "./rules";
 
@@ -71,5 +74,15 @@ describe("ссылка и проверка пути из формы", () => {
     expect(isOwnMediaPath(developer, `developers/${FILE_ID}/${FILE_ID}.png`)).toBe(false);
     expect(isOwnMediaPath(developer, `complexes/${COMPLEX_ID}/${FILE_ID}.jpg`)).toBe(false);
     expect(isOwnMediaPath(developer, `developers/${COMPLEX_ID}/../x.png`)).toBe(false);
+  });
+});
+
+describe("видео отчётов (фаза 5)", () => {
+  it("MP4 в папке ЖК, отдельный бакет; шаблон — как у политики Storage", () => {
+    expect(progressVideoPath(COMPLEX_ID, FILE_ID)).toBe(`complexes/${COMPLEX_ID}/${FILE_ID}.mp4`);
+    expect(progressVideoPath(COMPLEX_ID)).toMatch(PROGRESS_VIDEO_PATH_PATTERN);
+    expect(progressVideoPublicUrl("https://x.supabase.co/", "complexes/a/b.mp4")).toBe(
+      "https://x.supabase.co/storage/v1/object/public/progress-video/complexes/a/b.mp4",
+    );
   });
 });

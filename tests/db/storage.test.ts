@@ -79,10 +79,47 @@ describe("хранилище фото", () => {
     expect(sql).toContain(`object_name ~ '${MEDIA_PATH_PATTERN.source.replaceAll("\\/", "/")}'`);
   });
 
-  it("менеджер, видеограф и посетитель загружать не могут", async () => {
-    for (const actor of [user(manager), user(videographer), anon]) {
+  it("менеджер и посетитель загружать не могут; видеограф — только JPEG в папку ЖК (фото отчётов, фаза 5)", async () => {
+    for (const actor of [user(manager), anon]) {
       await expectDenied(upload(actor, complexFile(ids.publicComplex)));
     }
+    await upload(user(videographer), complexFile(ids.publicComplex));
+    for (const name of [
+      complexFile(ids.publicComplex, "png"),
+      complexFile(crypto.randomUUID()),
+      `developers/${ids.publicDeveloper}/${crypto.randomUUID()}.jpg`,
+      `specials/${ids.publicComplex}/${crypto.randomUUID()}.jpg`,
+    ]) {
+      await expectDenied(upload(user(videographer), name));
+    }
+  });
+
+  it("видео отчётов: бакет progress-video, только MP4 в папку ЖК — видеограф и руководитель; удаляет руководитель", async () => {
+    const { rows } = await db.admin.query(
+      "select public, allowed_mime_types from storage.buckets where id = 'progress-video'",
+    );
+    expect(rows).toEqual([{ public: true, allowed_mime_types: ["video/mp4"] }]);
+    const video = (complexId: string, ext = "mp4") => complexFile(complexId, ext);
+    await upload(user(videographer), video(ids.publicComplex), "progress-video");
+    await upload(user(head), video(ids.draftComplex), "progress-video");
+    for (const actor of [user(manager), anon]) {
+      await expectDenied(upload(actor, video(ids.publicComplex), "progress-video"));
+    }
+    for (const name of [video(ids.publicComplex, "mov"), video(crypto.randomUUID()), complexFile(ids.publicComplex)]) {
+      await expectDenied(upload(user(videographer), name, "progress-video"));
+    }
+    // MP4 в бакет фото не попадает: там только картинки.
+    await expectDenied(upload(user(videographer), video(ids.publicComplex), "media"));
+
+    const name = video(ids.publicComplex);
+    await upload(user(videographer), name, "progress-video");
+    const remove = (actor: Actor) =>
+      db.as(actor, async (tx) => {
+        await tx.query("select set_config('storage.allow_delete_query', 'true', true)");
+        return tx.query("delete from storage.objects where bucket_id = 'progress-video' and name = $1", [name]);
+      });
+    expect((await remove(user(videographer))).affectedRows).toBe(0);
+    expect((await remove(user(head))).affectedRows).toBe(1);
   });
 
   it("путь — только папка существующего владельца, UUID и .jpg / .png", async () => {

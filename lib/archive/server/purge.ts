@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { sendTelegramDocument, telegramConfig } from "@/lib/leads/server/channels";
-import { MEDIA_BUCKET } from "@/lib/media";
+import { MEDIA_BUCKET, PROGRESS_VIDEO_BUCKET } from "@/lib/media";
 import { siteOrigin } from "@/lib/site/metadata";
 import { archiveUnitsCsv, type ArchiveUnit } from "../csv";
 import { archiveTitle, type ArchiveName } from "../title";
@@ -24,6 +24,7 @@ type ArchiveItem = ArchiveName & {
 };
 
 const REMOVE_CHUNK = 100;
+const LIST_PAGE = 1000;
 
 async function items(admin: SupabaseClient, fn: "archive_due" | "archive_reminders_due"): Promise<ArchiveItem[]> {
   const { data, error } = await admin.rpc(fn);
@@ -87,20 +88,30 @@ const foldersOf = (item: ArchiveItem) => [
   ...(item.kind === "developer" ? [`developers/${item.id}`] : []),
 ];
 
-/** Всё, что лежит в папках (и пути строк media_assets), — пачками; Storage не ответил — в лог. */
-async function removeFiles(admin: SupabaseClient, item: ArchiveItem): Promise<void> {
-  const bucket = admin.storage.from(MEDIA_BUCKET);
-  const paths = new Set(item.media);
-  for (const folder of foldersOf(item)) {
-    const { data, error } = await bucket.list(folder, { limit: 1000 });
-    if (error) console.error("[archive] папка не прочитана", folder, error.message);
-    for (const file of data ?? []) paths.add(`${folder}/${file.name}`);
+/** Всё, что лежит в папках бакета (и известные пути), — пачками; Storage не ответил — в лог. */
+async function clearFolders(admin: SupabaseClient, bucketId: string, folders: string[], known: string[] = []): Promise<void> {
+  const bucket = admin.storage.from(bucketId);
+  const paths = new Set(known);
+  for (const folder of folders) {
+    // Страницами: у ЖК с отчётами хода строительства (фаза 5) файлов за годы больше тысячи.
+    for (let offset = 0; ; offset += LIST_PAGE) {
+      const { data, error } = await bucket.list(folder, { limit: LIST_PAGE, offset });
+      if (error) console.error("[archive] папка не прочитана", bucketId, folder, error.message);
+      for (const file of data ?? []) paths.add(`${folder}/${file.name}`);
+      if (!data || data.length < LIST_PAGE) break;
+    }
   }
   const all = [...paths];
   for (let start = 0; start < all.length; start += REMOVE_CHUNK) {
     const { error } = await bucket.remove(all.slice(start, start + REMOVE_CHUNK));
-    if (error) console.error("[archive] файлы не удалены", error.message);
+    if (error) console.error("[archive] файлы не удалены", bucketId, error.message);
   }
+}
+
+/** Фото, логотипы и фото отчётов — бакет media (с путями строк media_assets); видео отчётов (фаза 5) — progress-video. */
+async function removeFiles(admin: SupabaseClient, item: ArchiveItem): Promise<void> {
+  await clearFolders(admin, MEDIA_BUCKET, foldersOf(item), item.media);
+  await clearFolders(admin, PROGRESS_VIDEO_BUCKET, item.complexes.map((id) => `complexes/${id}`));
 }
 
 /**

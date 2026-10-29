@@ -233,6 +233,46 @@ describe("отчёты хода строительства: права и пра
     expect(await journal(blockReport.id)).toEqual(["insert"]);
   });
 
+  it("сайт: «Ход строительства» — только опубликованные отчёты блоков видимого ЖК, новые сверху", async () => {
+    const site = (complex: string) =>
+      db.as(anon, (tx) => tx.query<{ r: { id: string; month: string; photos: unknown[]; block: { name: string } }[] | null }>(
+        "select public.site_complex_progress($1) as r", [complex],
+      )).then((result) => result.rows[0]!.r);
+    const before = (await site(ids.publicComplex))!.length;
+    const draft = await submit(video, report({ month: previous, block_id: ids.publicBlock, unit_id: ids.units[0] }));
+    const published = (await db.admin.query<{ id: string }>(
+      "select id from progress_reports where block_id = $1 and not is_unit and month = $2", [ids.publicBlock, month],
+    )).rows[0]!.id;
+    await publish(manager, published);
+    await publish(manager, draft.id);
+    const items = (await site(ids.publicComplex))!;
+    expect(items.length).toBe(before + 1);
+    expect(items[0]).toMatchObject({ id: published, month, block: { name: expect.any(String) } });
+    expect(items[0]!.photos).toHaveLength(3);
+    expect(items.map((item) => item.id)).not.toContain(draft.id);
+    expect(await site(ids.draftComplex)).toBeNull();
+  });
+
+  it("сайт: видео квартиры — опубликованный отчёт по квартире без номера, id квартиры и цены; история — квартира и блок", async () => {
+    const { id } = await submit(video, report({ unit_id: ids.units[2], youtube_id: "dQw4w9WgXcQ" }));
+    const page = (reportId: string) =>
+      db.as(anon, (tx) => tx.query<{ r: Record<string, unknown> | null }>("select public.site_unit_video($1) as r", [reportId]))
+        .then((result) => result.rows[0]?.r ?? null);
+    expect(await page(id)).toBeNull();
+    await publish(manager, id);
+    const video_ = (await page(id))!;
+    expect(Object.keys(video_).sort()).toEqual(
+      ["area", "block", "comment", "complex", "floor", "history", "id", "layout_id", "month", "photos", "rooms", "shot_at", "video_path", "youtube_id"].sort(),
+    );
+    expect(video_).toMatchObject({ rooms: 2, floor: 2, layout_id: ids.twoRoomLayout, youtube_id: "dQw4w9WgXcQ" });
+    expect(JSON.stringify(video_)).not.toMatch(/"number"|"unit_id"|"price"/);
+    expect((video_.history as { id: string }[]).length).toBeGreaterThan(0);
+    const blockReport = (await db.admin.query<{ id: string }>(
+      "select id from progress_reports where block_id = $1 and not is_unit and status = 'published' limit 1", [ids.publicBlock],
+    )).rows[0]!.id;
+    expect(await page(blockReport)).toBeNull();
+  });
+
   it("журнал: отправка, публикация и удаление отчёта — записи с ЖК", async () => {
     const { rows } = await db.admin.query<{ action: string; n: number }>(
       "select action::text, count(*)::int as n from audit_log where entity = 'progress_reports' and complex_id = $1 group by action order by action",

@@ -9,9 +9,11 @@ import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import { insertPickerRows, uploadPicker } from "./demoPicker.mjs";
+import { insertProgressRows, progressPhotoCount, uploadProgress } from "./demoProgress.mjs";
 
 const BLOB_DIR = path.join(import.meta.dirname, "..", "docs", "mockup", "source", "_blob");
 const BUCKET = "media";
+const PROGRESS_VIDEO_BUCKET = "progress-video";
 const JPEG_QUALITY = 82;
 // Заглушка, пока грузится фото: ~16 px по ширине — несколько сотен байт data URL (лимит базы 4000).
 const BLUR_WIDTH = 16;
@@ -46,11 +48,11 @@ function photoPlan(slug) {
   return own ? own.map((id) => [id, null]) : [];
 }
 
-function storageClient() {
+function storageClient(bucket = BUCKET) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) throw new Error("Нет NEXT_PUBLIC_SUPABASE_URL или SUPABASE_SECRET_KEY в .env.local.");
-  return createClient(url, key, { auth: { persistSession: false } }).storage.from(BUCKET);
+  return createClient(url, key, { auth: { persistSession: false } }).storage.from(bucket);
 }
 
 async function demoComplexIds(db) {
@@ -90,9 +92,19 @@ export async function demoMediaFolders(db) {
   return rows.map((row) => row.folder);
 }
 
-/** Удаляет файлы папок — после remove.sql: откатился он (проверки DEMO) — файлы целы. */
+/**
+ * Удаляет файлы папок — после remove.sql: откатился он (проверки DEMO) — файлы целы. Видео отчётов
+ * хода строительства (фаза 5), которые снимали на DEMO-ЖК в кабинете, — та же папка в progress-video.
+ */
 export async function removeMediaFolders(folders) {
-  const storage = storageClient();
+  let removed = 0;
+  for (const [bucket, list] of [[BUCKET, folders], [PROGRESS_VIDEO_BUCKET, folders.filter((folder) => folder.startsWith("complexes/"))]]) {
+    removed += await clearFolders(storageClient(bucket), list);
+  }
+  return removed;
+}
+
+async function clearFolders(storage, folders) {
   let removed = 0;
   for (const folder of folders) {
     const { data, error } = await storage.list(folder, { limit: 1000 });
@@ -178,7 +190,7 @@ async function insertMediaRows(db, photos, drawings) {
 }
 
 /**
- * Загружает фото, чертежи, фасады и планы этажей DEMO-ЖК и пишет строки (после seed.sql) одной транзакцией.
+ * Загружает фото, чертежи, фасады, планы этажей и отчёты хода строительства DEMO-ЖК и пишет строки (после seed.sql) одной транзакцией.
  * Сбой на середине — файлы остаются в папках DEMO-ЖК, следующий demo:seed их уберёт.
  */
 export async function seedDemoMedia(db) {
@@ -186,16 +198,18 @@ export async function seedDemoMedia(db) {
   const photos = await uploadPhotos(complexes);
   const drawings = await uploadDrawings(db, complexes);
   const picker = await uploadPicker(db, storageClient(), complexes);
+  const progress = await uploadProgress(db, storageClient(), complexes);
   await db.query("begin");
   try {
     // DEMO — не действия сотрудников: в журнал не пишется (только в этой транзакции, как seed.sql).
     await db.query("select set_config('vodiy.skip_audit', 'on', true)");
     await insertMediaRows(db, photos, drawings);
     await insertPickerRows(db, picker);
+    await insertProgressRows(db, progress);
     await db.query("commit");
   } catch (error) {
     await db.query("rollback");
     throw error;
   }
-  return photos.length + drawings.length + picker.reduce((sum, item) => sum + 1 + item.plans.length, 0);
+  return photos.length + drawings.length + picker.reduce((sum, item) => sum + 1 + item.plans.length, 0) + progressPhotoCount(progress);
 }

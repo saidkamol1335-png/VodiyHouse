@@ -20,6 +20,7 @@ const ANON_FUNCTIONS = [
   "site_catalog",
   "site_complex",
   "site_complex_picker",
+  "site_complex_progress",
   "site_developer",
   "site_developer_slug_state",
   "site_developers",
@@ -27,6 +28,7 @@ const ANON_FUNCTIONS = [
   "site_payment_programs",
   "site_showcase",
   "site_slug_state",
+  "site_unit_video",
 ];
 
 describe("матрица доступа по ролям (PLAN §5)", () => {

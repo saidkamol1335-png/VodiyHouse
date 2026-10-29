@@ -277,3 +277,15 @@ export function formatPhone(raw: string): string | null {
   const digits = phoneDigits(raw);
   return digits ? `+${digits}` : null;
 }
+
+// Месяцы отчётов хода строительства (фаза 5): «Октябрь 2026», «Oktabr 2026» — как в мокапе (monthLabel).
+const MONTH_NAMES: Record<Locale, readonly string[]> = {
+  ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+  uz: ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"],
+};
+
+/** «2026-10-01» (первое число месяца отчёта) → «Октябрь 2026». */
+export function formatMonthYear(month: string, locale: Locale = "ru"): string {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return `${MONTH_NAMES[locale][(monthNumber ?? 1) - 1]} ${year}`;
+}

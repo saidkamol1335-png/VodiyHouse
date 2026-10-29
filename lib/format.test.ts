@@ -18,6 +18,7 @@ import {
   phoneDigits,
   relativeStamp,
   termParts,
+  formatMonthYear,
 } from "./format";
 
 // 19.10.2026, 12:00 по Ташкенту (UTC+5) — понедельник, как на скриншоте мокапа.
@@ -198,5 +199,13 @@ describe("телефон +998 и знак минус (приёмка фазы 2:
   it("вычитаемая сумма — минус U+2212, как в мокапе r1", () => {
     // Разряды — узкий неразрывный пробел Intl, как во всех ценах.
     expect(formatMinus(formatPrice(3473, "USD"))).toMatch(/^−\$3\s473$/);
+  });
+});
+
+describe("месяц отчёта (фаза 5)", () => {
+  it("«Октябрь 2026» и «Oktabr 2026» — именительный падеж, как в мокапе", () => {
+    expect(formatMonthYear("2026-10-01")).toBe("Октябрь 2026");
+    expect(formatMonthYear("2026-09-01", "uz")).toBe("Sentabr 2026");
+    expect(formatMonthYear("2027-01-01", "ru")).toBe("Январь 2027");
   });
 });
