@@ -91,8 +91,8 @@ test.describe("экран загрузки при входе", () => {
       });
     });
     await page.goto(`${ENTRY}&motion=lite`);
-    // Раньше предела экрана (15 с): он ушёл по доле файла, а не по таймеру.
-    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 10_000 });
+    // Раньше предела экрана (10 с): он ушёл по доле файла, а не по таймеру.
+    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 8_000 });
     await expect(hero(page)).toHaveClass(/home-hero--lite/);
     await page.waitForTimeout(500);
     await expect(hero(page)).not.toHaveClass(/home-hero--playing/);

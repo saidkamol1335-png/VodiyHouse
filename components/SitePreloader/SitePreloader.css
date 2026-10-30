@@ -148,33 +148,33 @@ html[data-preloader] .site-preloader {
 /* ---------- Уход, full: текст гаснет, знак схлопывается, квадрат раскрывается, шторки расходятся. ---------- */
 
 .site-preloader--leaving-full .site-preloader__fade {
-  animation: site-preloader-fade 0.3s ease-in forwards;
+  animation: site-preloader-fade 0.2s ease-in forwards;
 }
 
 .site-preloader--leaving-full .site-preloader__block {
-  animation: site-preloader-collapse 0.5s var(--preloader-ease) forwards;
-  animation-delay: calc(0.1s + var(--preloader-i) * 0.02s);
+  animation: site-preloader-collapse 0.3s var(--preloader-ease) forwards;
+  animation-delay: calc(0.05s + var(--preloader-i) * 0.012s);
 }
 
 .site-preloader--leaving-full .site-preloader__logo {
-  animation: site-preloader-hide 0s linear 0.85s forwards;
+  animation: site-preloader-hide 0s linear 0.45s forwards;
 }
 
 .site-preloader--leaving-full .site-preloader__core {
   animation:
-    site-preloader-core 0.55s var(--preloader-ease) 0.85s forwards,
-    site-preloader-hide 0s linear 1.4s forwards;
+    site-preloader-core 0.3s var(--preloader-ease) 0.45s forwards,
+    site-preloader-hide 0s linear 0.75s forwards;
 }
 
 .site-preloader--leaving-full .site-preloader__bg {
-  animation: site-preloader-hide 0s linear 1.4s forwards;
+  animation: site-preloader-hide 0s linear 0.75s forwards;
 }
 
 .site-preloader--leaving-full .site-preloader__slab {
   animation:
-    site-preloader-show 0s linear 1.4s forwards,
-    site-preloader-slab-left 0.7s var(--preloader-ease) forwards;
-  animation-delay: 1.4s, calc(1.4s + var(--preloader-i) * 0.05s);
+    site-preloader-show 0s linear 0.75s forwards,
+    site-preloader-slab-left 0.35s var(--preloader-ease) forwards;
+  animation-delay: 0.75s, calc(0.75s + var(--preloader-i) * 0.03s);
 }
 
 .site-preloader--leaving-full .site-preloader__slab:nth-child(even) {

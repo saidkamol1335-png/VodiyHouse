@@ -57,6 +57,13 @@ const SETTLED = 0.05;
 const LAST = TIMELAPSE_FRAMES.count - 1;
 const VARS = ["--hero-intro", "--hero-finale"] as const;
 
+/**
+ * Экран загрузки ждёт половину черновика, начало полёта: остальные кадры догружаются при открытой
+ * странице, а прокрутка пока показывает ближайший готовый (решение исполнителя 30.10: вход короче).
+ */
+const PRELOADER_DRAFT_SHARE = 0.5;
+const reportDraft = (share: number) => reportHeroLoad(share / PRELOADER_DRAFT_SHARE);
+
 // Кадры живут, пока жив сайт: «Назад» на главную (Next держит её в скрытом Activity) и повторный показ
 // ленты не тянут их заново и не мигают пустым холстом. Загрузчик один, слушает текущая лента. Набор
 // кадров выбирается один раз, с загрузчиком: смена размера окна кадры заново не тянет.
@@ -146,8 +153,8 @@ class Scrubber {
     this.resize();
     this.target = frameAt(this.progress(), TIMELAPSE_FRAMES.count);
     this.current = this.target;
-    this.loader.onDraft = reportHeroLoad;
-    reportHeroLoad(this.loader.draftShare());
+    this.loader.onDraft = reportDraft;
+    reportDraft(this.loader.draftShare());
     this.loader.load(Math.round(this.target));
     this.loader.load(0);
     this.drawn = null;

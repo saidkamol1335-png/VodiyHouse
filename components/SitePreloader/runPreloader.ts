@@ -11,9 +11,9 @@ const FRAME_MS = 1000 / 60;
 const MAX_SHARE_PER_MS = 0.00075;
 const LONGEST_FRAME_MS = 100;
 const FILLED = 0.998;
-/** Уход — как у анимаций в SitePreloader.css: full открывает страницу шторками с 1,4 с. */
+/** Уход — как у анимаций в SitePreloader.css: full открывает страницу шторками с 0,75 с. */
 const EXIT = {
-  full: { className: "site-preloader--leaving-full", openAt: 1400, endAt: 2400 },
+  full: { className: "site-preloader--leaving-full", openAt: 750, endAt: 1250 },
   lite: { className: "site-preloader--leaving-lite", openAt: 0, endAt: 220 },
 } as const;
 /** Сторона янтарного квадрата, в который схлопывается знак, — доля меньшей стороны окна. */
