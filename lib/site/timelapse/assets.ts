@@ -1,11 +1,12 @@
-// Ролик стройки ЖК (Seedance 2.5, 1080p, 15 с, 30.10.2026): от пустого участка до синего часа, камера
-// неподвижна. Играет на первом экране главной, в панели «Застройщикам» и фоном карточки «О нас».
-// Файлы кэшируются на год (netlify.toml, immutable), поэтому новый ролик кладётся в новую папку версии:
-// меняются TIMELAPSE_VERSION и размеры, компоненты — нет. Телефону — вырезка 9:16 из того же ролика
-// (608×1080): свой 9:16 не генерируем (решение исполнителя 30.10). Сборка файлов —
-// out/higgsfield/pipeline/build-hero-video.mjs (вне git).
+// Ролик стройки ЖК v2 (Kling 3.0 Pro, 1080p, 15 с, 30.10.2026): полёт дрона — с высоты над пустым
+// участком вниз и дугой к фасаду, пока идёт стройка; день → синий час. На первом экране главной в full —
+// лента кадров по прокрутке (как в артефакте «Vodiy House Закат»), в lite — ролик один раз; в панели
+// «Застройщикам» и фоном карточки «О нас» — ролик один раз. Файлы кэшируются на год (netlify.toml,
+// immutable), поэтому новый ролик кладётся в новую папку версии: меняются TIMELAPSE_VERSION, размеры и
+// число кадров, компоненты — нет. Телефону — вырезка 9:16, окно идёт за ЖК (центр ЖК 0,58 → 0,65 ширины).
+// Сборка файлов — out/higgsfield/pipeline/build-hero-v2.mjs (вне git).
 
-export const TIMELAPSE_VERSION = "v1";
+export const TIMELAPSE_VERSION = "v2";
 export const TIMELAPSE_BASE = `/hero/timelapse/${TIMELAPSE_VERSION}`;
 export const TIMELAPSE_FRAME = { width: 1920, height: 1080 } as const;
 export const TIMELAPSE_PHONE_FRAME = { width: 608, height: 1080 } as const;
@@ -24,3 +25,12 @@ export const TIMELAPSE_POSTER = {
 export function timelapseVideoSrc({ phone, webm }: { phone: boolean; webm: boolean }): string {
   return `${TIMELAPSE_BASE}/${phone ? "hero-portrait" : "hero-1080"}.${webm ? "webm" : "mp4"}`;
 }
+
+/**
+ * Лента кадров по прокрутке (full — только десктоп, lib/motion): каждый третий кадр ролика, 8 к/с
+ * содержания, 1280×720 WebP ≈ 14 МБ. Последний кадр ленты — тот же, что постер.
+ */
+export const TIMELAPSE_FRAMES = { count: 121, width: 1280, height: 720 } as const;
+
+export const timelapseFrameSrc = (index: number): string =>
+  `${TIMELAPSE_BASE}/frames/${String(index + 1).padStart(4, "0")}.webp`;

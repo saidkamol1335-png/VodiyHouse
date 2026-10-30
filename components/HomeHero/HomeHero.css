@@ -1,10 +1,10 @@
-/* Первый экран главной (30.10.2026, вместо «Чертёж → стройка»): ролик стройки на весь экран — ЖК
-   справа, слева текст и кнопки мокапа Main под тёмной пеленой, внизу «бесплатно», цифры каталога и
-   «Найдено сейчас». Тёмный в обеих темах: data-theme-island="dark" подменяет токены темы на тёмные.
-   Шапка лежит поверх (margin-top) и в его тонах — SiteHeader.css по html[data-hero-dark].
-   Ролик проявляется поверх постера «вечер» с первым кадром: full — за --dur-hero-video, lite —
-   200 мс, в none ролика нет. Планшет и телефон: ролик — первый экран целиком, текст внизу, а
-   «бесплатно», цифры и «Найдено сейчас» — полосой под ним (мокап Mobile). */
+/* Первый экран главной (30.10.2026, вместо «Чертёж → стройка»): полёт дрона над стройкой на весь
+   экран — ЖК справа, слева текст и кнопки мокапа Main под тёмной пеленой, внизу «бесплатно», цифры
+   каталога и «Найдено сейчас». Тёмный в обеих темах: data-theme-island="dark" подменяет токены темы на
+   тёмные. Шапка лежит поверх (margin-top) и в его тонах — SiteHeader.css по html[data-hero-dark].
+   full — лента кадров по прокрутке на холсте (раздел в конце файла); lite — ролик проявляется поверх
+   постера «вечер» за 200 мс и играет один раз; none — только постер. Планшет и телефон: кадр — первый
+   экран целиком, текст внизу, а «бесплатно», цифры и «Найдено сейчас» — полосой под ним (мокап Mobile). */
 
 .home-hero {
   /* Край текста — по краю логотипа шапки: поле контейнера плюс его внутренний отступ. */
@@ -16,7 +16,9 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "stage";
   margin-top: calc(-1 * var(--header-h));
+  /* clip, а не hidden: hidden делает секцию контейнером прокрутки, и липкий экран full не липнет. */
   overflow: hidden;
+  overflow: clip;
   background: var(--home-hero-bg);
   color: var(--fg);
   isolation: isolate;
@@ -214,8 +216,9 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Светлее --fg-3: подписи лежат на огнях бульвара — AA и над вечерним постером (замер 30.10: было 4,29). */
 .home-hero__stat-label {
-  color: var(--fg-3);
+  color: var(--home-hero-lead);
   font-family: var(--mono);
   font-size: var(--fs-micro);
   letter-spacing: var(--ls-label);
@@ -451,5 +454,229 @@
     row-gap: 2px;
     padding: 10px 16px;
     border-radius: var(--r-l);
+  }
+}
+
+/* ---------- full: лента кадров по прокрутке (как в артефакте «Закат») ----------
+   Секция выше экрана на --home-hero-scrub: кадр, пелена, текст и финал липнут к верху, пока она
+   прокручивается. useHeroScrub рисует кадр на холсте и ведёт переменные --hero-intro (текст гаснет и
+   уходит вверх) и --hero-finale (финал проявляется), фазы — классы секции. Только transform и opacity. */
+
+.home-hero--full {
+  /* Окно ниже первого экрана (640 px): слои липнут низом, а не верхом — факты внизу не обрезаются. */
+  --home-hero-stick: min(0px, calc(100svh - var(--home-hero-min-h)));
+
+  grid-template-rows: calc(max(100svh, var(--home-hero-min-h)) + var(--home-hero-scrub));
+}
+
+.home-hero--full .home-hero__media,
+.home-hero--full .home-hero__shade,
+.home-hero--full .home-hero__finale {
+  position: sticky;
+  top: var(--home-hero-stick);
+  align-self: start;
+  height: max(100svh, var(--home-hero-min-h));
+}
+
+.home-hero--full .home-hero__inner {
+  position: sticky;
+  top: var(--home-hero-stick);
+  align-self: start;
+}
+
+/* Пелена: сверху — под пункты шапки, всегда; слева и снизу — под текст: со вступлением гаснет, с
+   финалом возвращается, в полёте кадр светлый. */
+.home-hero--full .home-hero__shade {
+  background: var(--home-hero-shade-top);
+}
+
+/* Слева — по ширине текста (край текста + его ширина), снизу — под фактами и финалом. Градиент здесь, а не
+   в токенах: --home-hero-edge задан на секции, в :root его нет. */
+.home-hero--full .home-hero__shade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      var(--home-hero-veil-strong) 0%,
+      var(--home-hero-veil) calc(var(--home-hero-edge) + var(--home-hero-copy-w) * 0.8),
+      transparent calc(var(--home-hero-edge) + var(--home-hero-copy-w) + 360px)
+    ),
+    linear-gradient(0deg, var(--home-hero-veil) 0%, transparent 34%);
+  opacity: max(var(--hero-intro, 1), var(--hero-finale, 0));
+}
+
+/* Над светлым первым кадром — тень под мелким текстом, как под заголовком (AA). */
+.home-hero--full .home-hero__lead,
+.home-hero--full .home-hero__perk,
+.home-hero__cue {
+  text-shadow: var(--home-hero-text-shadow);
+}
+
+.home-hero__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Не для отрисовки: useHeroScrub режет кадр по этой позиции — так же, как постер. */
+  object-position: var(--home-hero-focus);
+  opacity: 0;
+  transition: opacity var(--dur-hero-video) var(--ease-2);
+}
+
+.home-hero--ready .home-hero__canvas {
+  opacity: 1;
+}
+
+/* Последний кадр ⇄ постер (тот же кадр крупнее): после вступления холст гаснет и возвращается быстро. */
+.home-hero--past-intro .home-hero__canvas {
+  transition-duration: var(--dur-slow);
+}
+
+/* Текст и факты гаснут и уходят вверх с прокруткой. После вступления текст остаётся диктору (h1
+   страницы) и не ловит клики, а ссылки, пока их не видно, не ловят и фокус. */
+.home-hero--full .home-hero__copy,
+.home-hero--full .home-hero__facts {
+  opacity: var(--hero-intro, 1);
+  transform: translate3d(0, calc((1 - var(--hero-intro, 1)) * -40px), 0);
+}
+
+.home-hero--past-intro .home-hero__copy,
+.home-hero--past-intro .home-hero__facts {
+  pointer-events: none;
+}
+
+.home-hero--past-intro .home-hero__copy a,
+.home-hero--past-intro .home-hero__facts a {
+  visibility: hidden;
+}
+
+/* «Листайте» после кнопок: бегущая точка по линии (только в full — в lite и none подсказки нет). */
+.home-hero__cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 0 8px;
+  color: var(--home-hero-lead);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.home-hero__cue-line {
+  position: relative;
+  width: 1px;
+  height: 36px;
+  overflow: hidden;
+  background: var(--home-hero-glass-line);
+}
+
+.home-hero__cue-line::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -1px;
+  width: 3px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--amber);
+  animation: home-hero-cue 1.8s var(--ease-2) infinite;
+}
+
+@keyframes home-hero-cue {
+  to {
+    transform: translateY(46px);
+  }
+}
+
+/* Финал «Дом сдан» — слева внизу, проявляется на последних кадрах. */
+.home-hero__finale {
+  position: relative;
+  z-index: 1;
+  grid-area: stage;
+  display: flex;
+  align-items: flex-end;
+  padding: calc(var(--header-h) + 32px) var(--home-hero-edge) var(--home-hero-bottom);
+  opacity: var(--hero-finale, 0);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.home-hero--finale .home-hero__finale {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.home-hero__finale-body {
+  max-width: var(--home-hero-copy-w);
+  transform: translate3d(0, calc((1 - var(--hero-finale, 0)) * 32px), 0);
+}
+
+.home-hero__finale-title {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 650;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-h1);
+  text-shadow: var(--home-hero-text-shadow);
+}
+
+.home-hero__finale-text {
+  max-width: 520px;
+  margin: 16px 0 28px;
+  color: var(--home-hero-lead);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+  text-wrap: pretty;
+}
+
+/* Телефону постер — вырезка 9:16, холсту — кадр 16:9: подмена на последнем кадре — только от планшета. */
+@media (min-width: 768px) {
+  .home-hero--at-end .home-hero__canvas {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .home-hero--full {
+    grid-template-rows:
+      calc(max(100svh, var(--home-hero-min-h)) + var(--home-hero-scrub))
+      auto;
+  }
+
+  /* Пелена — как в lite: текст внизу кадра на телефонной пелене. */
+  .home-hero--full .home-hero__shade {
+    background: var(--home-hero-shade-stacked);
+  }
+
+  .home-hero--full .home-hero__shade::before {
+    content: none;
+  }
+
+  /* Текст — прямая ячейка сетки (inner — contents): липнет сам; полоса фактов — под лентой и не гаснет. */
+  .home-hero--full .home-hero__copy {
+    position: sticky;
+    top: var(--home-hero-stick);
+    align-self: start;
+  }
+
+  .home-hero--full .home-hero__facts {
+    opacity: 1;
+    transform: none;
+  }
+
+  .home-hero--past-intro .home-hero__facts {
+    pointer-events: auto;
+  }
+
+  .home-hero--past-intro .home-hero__facts a {
+    visibility: visible;
+  }
+
+  .home-hero__finale {
+    padding: calc(var(--header-h) + 24px) var(--gutter) 28px;
   }
 }

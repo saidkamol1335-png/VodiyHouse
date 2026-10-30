@@ -29,7 +29,7 @@ test.describe("ролик стройки на «Застройщикам» и «
     expect(box?.x ?? 0).toBeGreaterThan((title?.x ?? 0) + 400);
     await expect(panel.locator("video")).toHaveAttribute(
       "src",
-      /\/hero\/timelapse\/v1\/hero-1080\.webm$/,
+      /\/hero\/timelapse\/v2\/hero-1080\.webm$/,
     );
     await expect(panel).toHaveClass(/timelapse-clip--playing/, { timeout: 20_000 });
     // Пауза кнопкой в углу панели (WCAG 2.2.2).

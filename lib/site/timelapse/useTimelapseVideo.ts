@@ -36,7 +36,7 @@ const BLOCKED_ERRORS = new Set(["NotAllowedError", "NotSupportedError"]);
 /** Медленная сеть: ролик в 2–7 МБ не догонит показ, остаётся постер. */
 const SLOW_CONNECTIONS = new Set(["slow-2g", "2g", "3g"]);
 
-type NetworkHints = { connection?: { saveData?: boolean; effectiveType?: string } };
+export type NetworkHints = { connection?: { saveData?: boolean; effectiveType?: string } };
 
 /** Экономия трафика или медленная сеть — ролик не качаем. */
 export function skipsVideo(nav: NetworkHints): boolean {

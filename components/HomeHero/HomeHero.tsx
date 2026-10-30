@@ -18,7 +18,7 @@ type HeroTranslator = Awaited<ReturnType<typeof getTranslations<"home.hero">>>;
 
 const PERK_KEYS = ["price", "service", "docs"] as const;
 
-/** Первый экран главной: тексты home.hero и цифры каталога — серверу, экран с роликом — клиенту. */
+/** Первый экран главной: тексты home.hero и цифры каталога — серверу, экран с роликом и лентой — клиенту. */
 export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
   const [t, video, locale] = await Promise.all([
     getTranslations("home.hero"),
@@ -33,6 +33,10 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
     cta: t("cta"),
     perks: PERK_KEYS.map((key) => t(`free.${key}`)),
     statsLabel: t("stats.label"),
+    scrollCue: t("scrollCue"),
+    finaleTitle: t("finaleTitle"),
+    finaleText: t("finaleText"),
+    finaleCta: t("finaleCta"),
   };
   return (
     <HeroScreen

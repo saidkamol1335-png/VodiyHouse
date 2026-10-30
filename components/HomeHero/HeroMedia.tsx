@@ -12,15 +12,16 @@ type HeroMediaProps = {
   /** Кадр целиком: по нему решается, виден ли ролик (на планшете и телефоне под ним ещё полоса фактов). */
   media: RefObject<HTMLDivElement | null>;
   video: RefObject<HTMLVideoElement | null>;
+  canvas: RefObject<HTMLCanvasElement | null>;
 };
 
 /**
  * Кадр экрана. Постер — последний кадр ролика (вечер): первая картинка страницы во всех режимах (LCP;
  * телефону — вырезка 9:16). Сервер рендерит lite, режим известен только после гидрации — поэтому
- * постер один. В full и lite ролик проявляется поверх постера с первым кадром (пустой участок), играет
- * один раз и уступает постеру — тот же кадр; в none ролика нет.
+ * постер один. full — холст ленты по прокрутке: проявляется с первым кадром (высоко над участком), на
+ * последнем уступает постеру — тот же кадр крупнее; lite — ролик один раз и постер; none — только постер.
  */
-export function HeroMedia({ mode, media, video }: HeroMediaProps) {
+export function HeroMedia({ mode, media, video, canvas }: HeroMediaProps) {
   return (
     <div ref={media} className="home-hero__media" aria-hidden="true">
       <picture className="home-hero__poster">
@@ -50,7 +51,8 @@ export function HeroMedia({ mode, media, video }: HeroMediaProps) {
           decoding="async"
         />
       </picture>
-      {mode === "none" ? null : (
+      {mode === "full" ? <canvas ref={canvas} className="home-hero__canvas" /> : null}
+      {mode === "lite" ? (
         <video
           ref={video}
           className="home-hero__video"
@@ -59,7 +61,7 @@ export function HeroMedia({ mode, media, video }: HeroMediaProps) {
           preload="none"
           disablePictureInPicture
         />
-      )}
+      ) : null}
     </div>
   );
 }

@@ -51,6 +51,10 @@
       "titleAccent": "quruvchi narxida",
       "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
       "cta": "Kvartira tanlash",
+      "scrollCue": "Pastga suring",
+      "finaleTitle": "Uy topshirildi.",
+      "finaleText": "Topshirilgan yoki qurilayotgan TJMdan kvartira tanlab beramiz — quruvchi narxida.",
+      "finaleCta": "Kvartiralarni ko‘rish",
       "free": {
         "price": "Narx — quruvchinikidek",
         "service": "Tanlash va ko‘rsatish — bepul",

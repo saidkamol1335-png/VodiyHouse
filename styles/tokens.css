@@ -112,6 +112,7 @@
      под шапку, снизу под цифры; на планшете и телефоне — снизу под текст. */
   --home-hero-bg: #0b0a09;
   --home-hero-min-h: 640px;
+  --home-hero-scrub: 300vh; /* full: лента кадров по прокрутке — секция выше экрана на столько */
   --home-hero-copy-w: 640px;
   --home-hero-bottom: clamp(24px, 4.5vh, 44px);
   --home-hero-focus: 30% 50%; /* ЖК правее центра: экран уже 16:9 режет кадр справа, а не по ЖК */
@@ -136,10 +137,15 @@
   --about-media-w: 62%;
   /* Верх пелены — под пункты шапки: днём небо ролика светлое, пункты --hero-muted держат AA (ревью 30.10).
      На телефоне низ пелены поднят до надзаголовка: текст высокий, на 360×780 он с середины экрана. */
-  --home-hero-shade:
+  /* Пелена: верх — под пункты шапки (всегда); слева и снизу — под текст (в full гаснет в полёте). */
+  --home-hero-shade-top: linear-gradient(180deg, rgba(8, 7, 6, 0.82) 0%, rgba(8, 7, 6, 0.45) 14%, rgba(8, 7, 6, 0) 28%);
+  --home-hero-shade-text:
     linear-gradient(90deg, rgba(8, 7, 6, 0.86) 0%, rgba(8, 7, 6, 0.6) 30%, rgba(8, 7, 6, 0.16) 52%, rgba(8, 7, 6, 0) 64%),
-    linear-gradient(180deg, rgba(8, 7, 6, 0.82) 0%, rgba(8, 7, 6, 0.45) 14%, rgba(8, 7, 6, 0) 28%),
     linear-gradient(0deg, rgba(8, 7, 6, 0.72) 0%, rgba(8, 7, 6, 0) 30%);
+  --home-hero-shade: var(--home-hero-shade-text), var(--home-hero-shade-top);
+  /* full: первый кадр ленты — светлый день; пелена под текстом идёт по его ширине (HomeHero.css). */
+  --home-hero-veil-strong: rgba(8, 7, 6, 0.88);
+  --home-hero-veil: rgba(8, 7, 6, 0.8);
   --home-hero-shade-stacked:
     linear-gradient(180deg, rgba(8, 7, 6, 0.78) 0%, rgba(8, 7, 6, 0.4) 12%, rgba(8, 7, 6, 0) 24%),
     linear-gradient(0deg, rgba(8, 7, 6, 0.94) 0%, rgba(8, 7, 6, 0.84) 42%, rgba(8, 7, 6, 0.62) 62%, rgba(8, 7, 6, 0.2) 80%, rgba(8, 7, 6, 0) 92%);
