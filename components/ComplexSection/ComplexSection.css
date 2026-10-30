@@ -62,7 +62,7 @@
    Показанное в lite не прячется, когда проба включит full; без JS всё видно сразу. Ноль, а не 0.01,
    как у карточки входа: LCP страницы — фото первого экрана, а полупрозрачный текст ниже читается
    проверкой контраста как серый на сером. */
-[data-js][data-motion="full"] .complex-section:not([data-revealed]) {
+[data-js]:not([data-reveal-off])[data-motion="full"] .complex-section:not([data-revealed]) {
   opacity: 0;
   transform: translateY(var(--rise-offset));
 }
@@ -71,7 +71,7 @@
   animation: complex-section-rise var(--dur-reveal) var(--ease) both;
 }
 
-[data-js][data-motion="lite"] .complex-section:not([data-revealed]) {
+[data-js]:not([data-reveal-off])[data-motion="lite"] .complex-section:not([data-revealed]) {
   opacity: 0;
 }
 

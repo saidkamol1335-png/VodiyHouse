@@ -2,6 +2,7 @@ import { CalendarDays } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
 import { LeadButton } from "@/components/LeadDialog";
+import { Reveal } from "@/components/Reveal";
 
 /** «Приезжайте в офис — покажем все проекты на одной встрече» (мокап .ctaY): заявка «Просмотр» — офис. */
 export async function AboutCta() {
@@ -9,7 +10,7 @@ export async function AboutCta() {
   return (
     <section className="about-cta" aria-labelledby="about-cta-title">
       <Container>
-        <div className="about-cta__band">
+        <Reveal className="about-cta__band">
           <div>
             <h2 id="about-cta-title" className="about-cta__title">
               {t("title")}
@@ -20,7 +21,7 @@ export async function AboutCta() {
             <CalendarDays size={16} aria-hidden="true" />
             {t("button")}
           </LeadButton>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

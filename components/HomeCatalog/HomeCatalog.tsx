@@ -4,6 +4,7 @@ import { CatalogResults } from "@/components/CatalogResults";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
+import { Reveal } from "@/components/Reveal";
 import { CATALOG_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { cardBadges, visibleCollections } from "@/lib/site/showcase/model";
@@ -21,12 +22,14 @@ export async function HomeCatalog({ id, catalog, pageSize, showcase }: HomeCatal
   return (
     <section id={id} className="home-catalog" aria-labelledby={`${id}-title`}>
       <Container>
-        <Eyebrow>{t("eyebrow")}</Eyebrow>
-        <div id={`${id}-title`} className="home-catalog__title">
-          <Heading level={2} accent={t("titleAccent")}>
-            {t("title")}
-          </Heading>
-        </div>
+        <Reveal variant="words">
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
+          <div id={`${id}-title`} className="home-catalog__title">
+            <Heading level={2} accent={t("titleAccent")}>
+              {t("title")}
+            </Heading>
+          </div>
+        </Reveal>
         <NextIntlClientProvider messages={pickMessages(messages, CATALOG_MESSAGES)}>
           <CatalogResults
             catalog={catalog}

@@ -7,7 +7,8 @@
 
 import { MOTION_QUERY_PARAM, MOTION_STORAGE_KEY } from "@/lib/motion/tier";
 import { LOCALES } from "@/lib/i18n/routing";
-import { ANCHOR_START_ATTRIBUTE, SCROLL_MEMORY_KEY } from "./anchorStart";
+import { ANCHOR_START_ATTRIBUTE, REVEAL_FAILSAFE_MS, REVEAL_OFF_ATTRIBUTE, SCROLL_MEMORY_KEY } from "./anchorStart";
+import { HYDRATED_ATTRIBUTE } from "./hydrated";
 import { PRELOADER_ATTRIBUTE, PRELOADER_FAILSAFE_MS, PRELOADER_SEEN_KEY } from "./preloader";
 import {
   CATALOG_FILTER_PARAMS,
@@ -18,8 +19,8 @@ import { THEME_STORAGE_KEY } from "@/lib/theme/theme";
 
 const PENDING = JSON.stringify(CATALOG_PENDING_ATTRIBUTE);
 
-export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");if(location.hash.length>1)d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");try{
-var n=performance.getEntriesByType("navigation")[0];if(n&&(n.type==="reload"||n.type==="back_forward")&&Number(sessionStorage.getItem(${JSON.stringify(SCROLL_MEMORY_KEY)}+location.pathname))>0)d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");}catch(e){}try{
+export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");setTimeout(function(){if(!d.hasAttribute("${HYDRATED_ATTRIBUTE}"))d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")},${REVEAL_FAILSAFE_MS});if(location.hash.length>1){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}try{
+var n=performance.getEntriesByType("navigation")[0];if(n&&(n.type==="reload"||n.type==="back_forward")&&Number(sessionStorage.getItem(${JSON.stringify(SCROLL_MEMORY_KEY)}+location.pathname))>0){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}}catch(e){}try{
 var p=new URLSearchParams(location.search);if(/\\/novostroyki\\/?$/.test(location.pathname)&&${JSON.stringify(CATALOG_FILTER_PARAMS)}.some(function(k){return p.has(k)})){d.setAttribute(${PENDING},"");setTimeout(function(){d.removeAttribute(${PENDING})},${CATALOG_PENDING_TIMEOUT_MS});}}catch(e){}try{
 var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="dark"||t==="light")d.setAttribute("data-theme",t);
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});

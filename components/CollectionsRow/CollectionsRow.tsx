@@ -5,9 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
+import { Reveal } from "@/components/Reveal";
 import { SitePhoto } from "@/components/SitePhoto";
 import type { Locale } from "@/lib/i18n/routing";
-import { getMotionTier } from "@/lib/motion";
+import { getMotionTier, useReveal } from "@/lib/motion";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { collectionComplexes, collectionCount, coverOf } from "@/lib/site/showcase/model";
 import type { ShowcaseCollection } from "@/lib/site/showcase/records";
@@ -57,6 +58,12 @@ export function CollectionsRow({ catalog, collections, selected, onPick }: Colle
   const t = useTranslations("showcase.collections");
   const track = useRef<HTMLUListElement>(null);
   const { edge, update } = useEdge(track);
+  const hint = useReveal<HTMLDivElement>();
+  const [touched, setTouched] = useState(false);
+  const onRowScroll = () => {
+    update();
+    if ((track.current?.scrollLeft ?? 0) > 2) setTouched(true);
+  };
   const step = (direction: -1 | 1) => {
     const node = track.current;
     const card = node?.firstElementChild;
@@ -66,7 +73,7 @@ export function CollectionsRow({ catalog, collections, selected, onPick }: Colle
   };
   return (
     <section className="collections" aria-labelledby="collections-title">
-      <div className="collections__head">
+      <Reveal variant="words" className="collections__head">
         <Eyebrow>{t("eyebrow")}</Eyebrow>
         <div id="collections-title" className="collections__title">
           <Heading level={2} accent={t("titleAccent")}>
@@ -74,9 +81,9 @@ export function CollectionsRow({ catalog, collections, selected, onPick }: Colle
           </Heading>
         </div>
         <p className="collections__lead">{t("lead")}</p>
-      </div>
-      <div className="collections__viewport" data-edge={edge}>
-        <ul ref={track} className="collections__row" aria-label={t("label")} onScroll={update}>
+      </Reveal>
+      <div ref={hint} className="collections__viewport" data-edge={edge} data-touched={touched || undefined}>
+        <ul ref={track} className="collections__row" aria-label={t("label")} onScroll={onRowScroll}>
           {collections.map((collection, index) => (
             <CollectionCard key={collection.id} catalog={catalog} collection={collection} index={index} selected={collection.id === selected} onPick={onPick} />
           ))}

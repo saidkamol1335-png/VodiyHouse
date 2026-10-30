@@ -4,6 +4,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
+import { Reveal } from "@/components/Reveal";
 import { PartnersFormats } from "@/components/PartnersFormats";
 import { PartnersHero } from "@/components/PartnersHero";
 import { PartnersRequest } from "@/components/PartnersRequest";
@@ -49,12 +50,14 @@ async function PartnersSteps() {
   return (
     <section className="py-16" aria-labelledby="partners-steps-title">
       <Container>
-        <Eyebrow>{t("eyebrow")}</Eyebrow>
-        <div id="partners-steps-title" className="mt-3.5 mb-8">
-          <Heading level={2} accent={t("titleAccent")}>
-            {t("title")}
-          </Heading>
-        </div>
+        <Reveal variant="words">
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
+          <div id="partners-steps-title" className="mt-3.5 mb-8">
+            <Heading level={2} accent={t("titleAccent")}>
+              {t("title")}
+            </Heading>
+          </div>
+        </Reveal>
         <SiteSteps steps={steps} />
       </Container>
     </section>

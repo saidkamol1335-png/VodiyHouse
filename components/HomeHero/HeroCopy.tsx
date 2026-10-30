@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { RollText } from "@/components/RollText";
 import type { ReactNode } from "react";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
@@ -30,8 +31,8 @@ export function HeroCopy({ text, ctaHref, titleId, quiz, cue }: HeroCopyProps) {
       </div>
       <p className="home-hero__lead">{text.lead}</p>
       <div className="home-hero__actions">
-        <HeroLink href={ctaHref} className="button button--primary home-hero__cta">
-          {text.cta}
+        <HeroLink href={ctaHref} className="button button--primary home-hero__cta roll-trigger">
+          <RollText text={text.cta} />
           <ArrowRight size={18} aria-hidden="true" />
         </HeroLink>
         {quiz}

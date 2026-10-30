@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { DeveloperMark } from "@/components/DevelopersList";
+import { Reveal } from "@/components/Reveal";
 import { Link } from "@/lib/i18n/navigation";
 import { developerRoute } from "@/lib/routes";
 import type { DeveloperSummary } from "@/lib/site/developers/records";
@@ -14,7 +15,7 @@ export async function DeveloperOthers({ others }: { others: readonly OtherDevelo
   const t = await getTranslations("developers.page");
   if (others.length === 0) return null;
   return (
-    <section className="developer-others" aria-labelledby="developer-others-title">
+    <Reveal as="section" className="developer-others" aria-labelledby="developer-others-title">
       <h2 id="developer-others-title" className="developer-others__title">
         {t("others")}
       </h2>
@@ -31,6 +32,6 @@ export async function DeveloperOthers({ others }: { others: readonly OtherDevelo
           </li>
         ))}
       </ul>
-    </section>
+    </Reveal>
   );
 }

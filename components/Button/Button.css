@@ -52,6 +52,33 @@
   animation: button-shine var(--dur-shine) var(--ease-2) infinite;
 }
 
+/* Заливка поднимается снизу при наведении (мокап .rh), только full; в lite меняется лишь цвет. */
+@media (hover: hover) {
+  [data-motion="full"] .button--primary:not(:disabled)::before,
+  [data-motion="full"] .button--outline:not(:disabled)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--amber-hover);
+    transform: translateY(101%);
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  [data-motion="full"] .button--outline:not(:disabled)::before {
+    background: var(--glass-3);
+  }
+
+  [data-motion="full"] .button--primary:not(:disabled):hover {
+    background: var(--amber);
+  }
+
+  [data-motion="full"] .button--primary:not(:disabled):hover::before,
+  [data-motion="full"] .button--outline:not(:disabled):hover::before {
+    transform: translateY(0);
+  }
+}
+
 /* С рамкой — вторая кнопка рядом с главной (мокап: «Скопировать для Telegram» под «Получить
    точный расчёт»). */
 .button--outline {

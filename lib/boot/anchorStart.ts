@@ -10,3 +10,10 @@ export const ANCHOR_START_ATTRIBUTE = "data-anchor-start";
  * scrollY страницы при уходе (sessionStorage, ключ + путь), скрипт в <head> ставит ту же метку.
  */
 export const SCROLL_MEMORY_KEY = "vh:scrollY:";
+
+/**
+ * Блоки не прячутся до появления (useReveal): страница открыта не сверху — читатель уже на них смотрит,
+ * — или за REVEAL_FAILSAFE_MS не ожила (скрипты не дошли), и текст не должен оставаться скрытым.
+ */
+export const REVEAL_OFF_ATTRIBUTE = "data-reveal-off";
+export const REVEAL_FAILSAFE_MS = 8_000;

@@ -121,6 +121,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
+  width: 100%; /* иначе пропорции фото телефона оставляли полосу справа */
   height: 100%;
   aspect-ratio: auto;
   border-radius: 0;
@@ -277,5 +278,51 @@
 
   .collections__arrow--next {
     right: 8px;
+  }
+}
+
+/* Подсказка у стрелки «дальше», пока ленту не трогали (мокап .collx--hint). full — стрелка кивает и
+   кольцо расходится два раза: движение короче 5 с (WCAG 2.2.2); lite — кольцо проявляется один раз. */
+.collections__arrow--next::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 2px solid var(--amber);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-motion="full"] .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched]) .collections__arrow--next svg {
+  animation: collections-nudge var(--dur-collections-hint) var(--ease) 2;
+}
+
+[data-motion="full"] .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched]) .collections__arrow--next::after {
+  animation: collections-ping var(--dur-collections-hint) ease-out 2;
+}
+
+[data-motion="lite"] .collections__viewport[data-revealed="lite"][data-edge="start"]:not([data-touched]) .collections__arrow--next::after {
+  opacity: 0.6;
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+@keyframes collections-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes collections-ping {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
   }
 }

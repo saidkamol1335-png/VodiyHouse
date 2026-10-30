@@ -5,6 +5,7 @@ import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { PartnerForm } from "@/components/LeadForm";
+import { Reveal } from "@/components/Reveal";
 import { formatPhone, phoneHref, telegramHref } from "@/lib/contacts";
 import { PARTNER_ANCHOR } from "@/lib/leads/partner";
 import { readSiteContacts } from "@/lib/site/contacts";
@@ -24,7 +25,7 @@ export async function PartnersRequest() {
       <Container>
         <div className="partners-request__card">
           <Beam />
-          <div className="partners-request__text">
+          <Reveal variant="words" className="partners-request__text">
             <Eyebrow>Vodiy House</Eyebrow>
             <div id="partners-request-title" className="partners-request__title">
               <Heading level={2} accent={t("titleAccent")}>
@@ -50,7 +51,7 @@ export async function PartnersRequest() {
                 {tContacts("office")}
               </li>
             </ul>
-          </div>
+          </Reveal>
           <PartnerForm defaultCity={t("defaultCity")} />
         </div>
       </Container>

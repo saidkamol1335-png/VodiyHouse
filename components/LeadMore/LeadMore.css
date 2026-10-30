@@ -32,3 +32,21 @@
     padding: 22px 16px;
   }
 }
+
+/* Появление текста слева (useReveal на секции); форму справа не прячем: ею пользуются сразу. */
+[data-js]:not([data-reveal-off])[data-motion="full"] .lead-more:not([data-revealed]) .lead-more__text {
+  opacity: 0;
+  transform: translateY(var(--rise-offset));
+}
+
+[data-motion="full"] .lead-more[data-revealed="full"] .lead-more__text {
+  animation: reveal-rise var(--dur-reveal) var(--ease) backwards;
+}
+
+[data-js]:not([data-reveal-off])[data-motion="lite"] .lead-more:not([data-revealed]) .lead-more__text {
+  opacity: 0;
+}
+
+[data-motion="lite"] .lead-more__text {
+  transition: opacity var(--dur-fast) ease-out;
+}

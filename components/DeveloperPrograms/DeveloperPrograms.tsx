@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Reveal } from "@/components/Reveal";
 import { programNote, programTitle } from "@/lib/calc/text";
 import type { ProgramOption } from "@/lib/calc/options";
 import type { CalcProgram } from "@/lib/calc/programs";
@@ -28,7 +29,7 @@ export async function DeveloperPrograms({ options, developerSlug, developerName,
   const mark = (option: ProgramOption<CalcProgram>) =>
     initialsOf((option.bankName ? option.bankName[locale] : developerName).replace(APOSTROPHES, ""));
   return (
-    <section className="developer-programs" aria-labelledby="developer-programs-title">
+    <Reveal as="section" className="developer-programs" aria-labelledby="developer-programs-title">
       <h2 id="developer-programs-title" className="heading heading--h2">
         {t("terms")}
       </h2>
@@ -53,6 +54,6 @@ export async function DeveloperPrograms({ options, developerSlug, developerName,
           );
         })}
       </ul>
-    </section>
+    </Reveal>
   );
 }

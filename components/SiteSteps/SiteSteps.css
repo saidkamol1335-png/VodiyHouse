@@ -66,3 +66,14 @@
     border-left: 0;
   }
 }
+
+/* Подъём при прокрутке — только full и шире телефона: на телефоне лента этих блоков прокручивается сама. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 761px) {
+    [data-motion="full"] .site-steps__item {
+      animation: scroll-rise linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}

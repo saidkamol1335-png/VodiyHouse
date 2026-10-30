@@ -5,6 +5,7 @@ import { AdCard } from "@/components/AdCard";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
+import { Reveal } from "@/components/Reveal";
 import { SpecialsGrid } from "@/components/SpecialsGrid";
 import { pickMessages, SHOWCASE_MESSAGES } from "@/lib/i18n/clientMessages";
 import { Link } from "@/lib/i18n/navigation";
@@ -33,7 +34,7 @@ export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
   return (
     <section id={id} className="home-offers" aria-labelledby={`${id}-title`}>
       <Container>
-        <div className="home-offers__head">
+        <Reveal variant="words" className="home-offers__head">
           <div>
             <Eyebrow>{t("eyebrow")}</Eyebrow>
             <div id={`${id}-title`} className="home-offers__title">
@@ -47,10 +48,18 @@ export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
             <Megaphone size={16} strokeWidth={1.9} aria-hidden />
             {t("place")}
           </Link>
-        </div>
+        </Reveal>
         <NextIntlClientProvider messages={pickMessages(messages, SHOWCASE_MESSAGES)}>
-          {ad ? <AdCard view={ad} /> : null}
-          {specials.length > 0 ? <SpecialsGrid specials={specials} /> : null}
+          {ad ? (
+            <Reveal>
+              <AdCard view={ad} />
+            </Reveal>
+          ) : null}
+          {specials.length > 0 ? (
+            <Reveal variant="group">
+              <SpecialsGrid specials={specials} />
+            </Reveal>
+          ) : null}
         </NextIntlClientProvider>
       </Container>
     </section>

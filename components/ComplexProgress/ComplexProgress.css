@@ -215,3 +215,14 @@
 [data-motion="full"] .complex-progress__thumb:hover {
   transform: scale(1.03);
 }
+
+/* Полоса готовности растёт, когда раздел появился (мокап .pbar i): только full и только один раз. */
+[data-motion="full"] .complex-section[data-revealed="full"] .complex-progress__ready-bar span {
+  animation: complex-progress-bar var(--dur-reveal) var(--ease) backwards;
+}
+
+@keyframes complex-progress-bar {
+  from {
+    transform: scaleX(0);
+  }
+}

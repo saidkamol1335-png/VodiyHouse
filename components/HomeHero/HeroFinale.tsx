@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { RollText } from "@/components/RollText";
 import { HeroLink } from "./HeroLink";
 import type { HeroText } from "./types";
 
@@ -14,8 +15,8 @@ export function HeroFinale({ text, href }: HeroFinaleProps) {
       <div className="home-hero__finale-body">
         <p className="home-hero__finale-title">{text.finaleTitle}</p>
         <p className="home-hero__finale-text">{text.finaleText}</p>
-        <HeroLink href={href} className="button button--primary home-hero__cta">
-          {text.finaleCta}
+        <HeroLink href={href} className="button button--primary home-hero__cta roll-trigger">
+          <RollText text={text.finaleCta} />
           <ArrowRight size={18} aria-hidden="true" />
         </HeroLink>
       </div>

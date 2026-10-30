@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/Badge";
+import { Reveal } from "@/components/Reveal";
 import type { Locale } from "@/lib/i18n/routing";
 import { deliveryStatus, quarterOf } from "@/lib/quarters";
 import type { PastProject } from "@/lib/site/developers/records";
@@ -18,7 +19,7 @@ export async function DeveloperDelivered({ projects, locale }: DeveloperDelivere
     return value ? t("quarter", { quarter: value.quarter, year: value.year }) : "—";
   };
   return (
-    <section className="developer-delivered" aria-labelledby="developer-delivered-title">
+    <Reveal as="section" className="developer-delivered" aria-labelledby="developer-delivered-title">
       <h2 id="developer-delivered-title" className="heading heading--h2">
         {t("projects")}
       </h2>
@@ -52,6 +53,6 @@ export async function DeveloperDelivered({ projects, locale }: DeveloperDelivere
           </tbody>
         </table>
       </div>
-    </section>
+    </Reveal>
   );
 }

@@ -1,0 +1,59 @@
+/* Появление блоков при прокрутке (useReveal): full — подъём, lite — проявление за 200 мс, none — сразу.
+   Без JS всё видно ([data-js]). Показанное в lite не прячется, когда проба включит full. Скрыт блок
+   полностью, не 0.01: полупрозрачный текст проверка контраста читает как серый на сером. */
+
+[data-js]:not([data-reveal-off])[data-motion="full"] .reveal:not([data-revealed], .reveal--words, .reveal--group) {
+  opacity: 0;
+  transform: translateY(var(--rise-offset));
+}
+
+[data-motion="full"] .reveal[data-revealed="full"]:not(.reveal--words, .reveal--group) {
+  animation: reveal-rise var(--dur-reveal) var(--ease) backwards;
+}
+
+[data-js]:not([data-reveal-off])[data-motion="lite"] .reveal:not([data-revealed]) {
+  opacity: 0;
+}
+
+[data-motion="lite"] .reveal {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+/* Заголовок по словам (только full): слова поднимаются по очереди, блок на месте. Без маски: курсив
+   акцента с межстрочным 0,9 она обрезала бы. */
+[data-motion="full"] .reveal--words .heading__word {
+  display: inline-block;
+}
+
+[data-js]:not([data-reveal-off])[data-motion="full"] .reveal--words:not([data-revealed]) .heading__word {
+  opacity: 0;
+  transform: translateY(0.6em);
+}
+
+[data-motion="full"] .reveal--words[data-revealed="full"] .heading__word {
+  animation: reveal-word var(--dur-slower) var(--ease) backwards;
+  animation-delay: calc(var(--i) * var(--stagger));
+}
+
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise-offset));
+  }
+}
+
+@keyframes reveal-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+}
+
+/* Подъём карточек при прокрутке (мокап .jc, .sv): подключают блоки в своём CSS под view() и full, без
+   скрытого состояния, поэтому выдача каталога не мигает при смене фильтра. */
+@keyframes scroll-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--scroll-rise));
+  }
+}

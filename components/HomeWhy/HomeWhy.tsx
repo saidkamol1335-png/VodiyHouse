@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
+import { Reveal } from "@/components/Reveal";
 import { Spotlight } from "@/components/Spotlight";
 import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
@@ -31,13 +32,15 @@ export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
   return (
     <section className="home-why" aria-labelledby="home-why-title">
       <Container>
-        <Eyebrow>{t("eyebrow")}</Eyebrow>
-        <div id="home-why-title" className="home-why__title">
-          <Heading level={2} accent={t("titleAccent")}>
-            {t("title")}
-          </Heading>
-        </div>
-        <div className="home-why__grid">
+        <Reveal variant="words">
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
+          <div id="home-why-title" className="home-why__title">
+            <Heading level={2} accent={t("titleAccent")}>
+              {t("title")}
+            </Heading>
+          </div>
+        </Reveal>
+        <Reveal variant="group" className="home-why__grid">
           {video ? (
             <Spotlight className="home-why__tile home-why__tile--video">
               <VideoTile video={video} />
@@ -56,7 +59,7 @@ export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
             <ServicePills pills={t("pills").split(" · ")} />
             <Tile kicker={t("freeKicker")} title={t("freeTitle")} text={t("freeText")} />
           </Spotlight>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );
