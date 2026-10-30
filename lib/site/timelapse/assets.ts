@@ -2,7 +2,8 @@
 // неподвижна. Играет на первом экране главной, в панели «Застройщикам» и фоном карточки «О нас».
 // Файлы кэшируются на год (netlify.toml, immutable), поэтому новый ролик кладётся в новую папку версии:
 // меняются TIMELAPSE_VERSION и размеры, компоненты — нет. Телефону — вырезка 9:16 из того же ролика
-// (608×1080), пока нет своего 9:16. Сборка файлов — out/higgsfield/pipeline/build-hero-video.mjs (вне git).
+// (608×1080): свой 9:16 не генерируем (решение исполнителя 30.10). Сборка файлов —
+// out/higgsfield/pipeline/build-hero-video.mjs (вне git).
 
 export const TIMELAPSE_VERSION = "v1";
 export const TIMELAPSE_BASE = `/hero/timelapse/${TIMELAPSE_VERSION}`;
