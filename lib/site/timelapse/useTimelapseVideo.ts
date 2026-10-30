@@ -37,6 +37,11 @@ const START_DELAY_MS = 600;
 const BLOCKED_ERRORS = new Set(["NotAllowedError", "NotSupportedError"]);
 /** Раз в столько проверяем, качает ли браузер ролик: iOS без play() не качает, экрану загрузки ждать нечего. */
 const LOAD_CHECK_MS = 3000;
+/**
+ * Доля ролика 1080p, с которой экран загрузки уходит, даже если до конца ещё не хватает: ≈ 0,85 МБ.
+ * Столько ждали прежний файл 5,3 МБ при 4 Мбит/с; файл 8,1 МБ на такой сети ждали бы на 2,4 с дольше.
+ */
+const OPEN_AT_SHARE_1080 = 0.1;
 
 export type NetworkHints = { connection?: { saveData?: boolean } };
 
@@ -61,28 +66,33 @@ function inViewport(element: HTMLElement): boolean {
  */
 class TimelapsePlayer {
   private started = false;
+  /** Пошёл первый кадр: под постером ролик мог только качаться, такой при возврате играет с начала. */
+  private played = false;
   private detached = false;
   private ready = false;
   /** Блок сейчас виден — после решения режима запускать, только если всё ещё виден. */
   private wanted = false;
   /** Остановлен кнопкой — наблюдатель его не продолжает. */
   private held = false;
-  /** Ролик качается под экраном загрузки: запуск — когда экран уйдёт. */
+  /** Ролик качается под экраном загрузки: запуск — когда экран ушёл и ролика хватает до конца. */
   private gated = false;
   private stallTimer = 0;
   private phoneQuery: MediaQueryList | null = null;
+  /** Какая доля файла нужна экрану загрузки: телефону — весь до «хватит до конца», файл лёгкий. */
+  private openAtShare = OPEN_AT_SHARE_1080;
 
   constructor(
     private readonly player: HTMLVideoElement,
     private readonly callbacks: () => Callbacks,
   ) {}
 
-  get hasStarted(): boolean {
-    return this.started;
+  get hasPlayed(): boolean {
+    return this.played;
   }
 
   attach(portraitOnPhone: boolean): void {
     this.phoneQuery = portraitOnPhone ? window.matchMedia(PHONE_QUERY) : null;
+    if (this.phoneQuery?.matches) this.openAtShare = 1;
     const webm = this.player.canPlayType('video/webm; codecs="vp9"') !== "";
     this.player.setAttribute(
       "src",
@@ -151,17 +161,16 @@ class TimelapsePlayer {
     this.player.load();
   }
 
-  /** Под экраном загрузки ролик только качается: проценты — по буферу, готов — когда хватит до конца. */
+  /**
+   * Под экраном загрузки ролик только качается: проценты — по буферу до доли openAtShare, по ней экран
+   * уходит. Запуск — когда экран ушёл и ролика хватает до конца: на медленной сети страница уже открыта,
+   * ролик тянется под постером и не встаёт посреди полёта.
+   */
   private waitForPreloader(): void {
     this.gated = true;
     this.player.addEventListener("progress", this.buffered);
     this.player.addEventListener("canplaythrough", this.loaded);
     this.armStall();
-    void whenPreloaderGone().then(() => {
-      this.gated = false;
-      this.stopTracking();
-      if (this.wanted) this.show();
-    });
   }
 
   private armStall(): void {
@@ -184,16 +193,23 @@ class TimelapsePlayer {
   private readonly buffered = (): void => {
     const { buffered, duration } = this.player;
     if (buffered.length > 0 && duration > 0) {
-      reportHeroLoad(buffered.end(buffered.length - 1) / duration);
+      reportHeroLoad(buffered.end(buffered.length - 1) / duration / this.openAtShare);
     }
   };
 
   private readonly loaded = (): void => {
     this.stopTracking();
     finishHeroLoad();
+    void whenPreloaderGone().then(() => {
+      this.gated = false;
+      if (this.wanted) this.show();
+    });
   };
 
-  private readonly playing = (): void => this.callbacks().onPlaying();
+  private readonly playing = (): void => {
+    this.played = true;
+    this.callbacks().onPlaying();
+  };
   private readonly ended = (): void => this.callbacks().onEnded();
   private readonly failed = (): void => {
     if (!this.detached) this.callbacks().onBlocked();
@@ -231,7 +247,7 @@ export function useTimelapseVideo({
     control.current = { pause: () => clip.pause(), resume: () => clip.resume() };
     const stopWatching = watchVisibility(element, clip);
     return () => {
-      played.current ||= clip.hasStarted;
+      played.current ||= clip.hasPlayed;
       control.current = null;
       stopWatching();
       clip.detach();

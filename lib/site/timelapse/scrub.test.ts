@@ -1,5 +1,85 @@
 import { describe, expect, it } from "vitest";
-import { coverRect, frameAt, positionXOf, SCRUB, scrollProgress, span } from "./scrub";
+import {
+  canvasRatio,
+  coverRect,
+  crispFit,
+  frameAt,
+  frameRect,
+  frameSetFor,
+  positionXOf,
+  SCRUB,
+  scrollProgress,
+  span,
+} from "./scrub";
+
+describe("лента кадров: набор и задник холста", () => {
+  it("набор — по ширине задника: больше 1400 px — 1920, иначе 1280", () => {
+    expect(frameSetFor(1536, 1.25)).toBe(1920); // задник 1920
+    expect(frameSetFor(1366, 1)).toBe(1280);
+    expect(frameSetFor(1440, 1)).toBe(1920);
+    expect(frameSetFor(1400, 1)).toBe(1280); // ровно 1400 — ещё нет
+    expect(frameSetFor(1120, 1.25)).toBe(1280); // ровно 1400
+    expect(frameSetFor(1024, 1.5)).toBe(1920);
+  });
+
+  it("DPR больше 1,5 задник не увеличивает", () => {
+    expect(frameSetFor(930, 2)).toBe(1280); // 930 × 1,5 = 1395
+    expect(frameSetFor(940, 2)).toBe(1920); // 940 × 1,5 = 1410
+    expect(frameSetFor(930, 3)).toBe(1280);
+  });
+
+  it("ratio: по экрану, но задник не шире кадра набора и не плотнее 1,5", () => {
+    expect(canvasRatio(1536, 1.25, 1920)).toBe(1.25);
+    expect(canvasRatio(1366, 1, 1280)).toBeCloseTo(1280 / 1366);
+    expect(canvasRatio(1440, 2, 1920)).toBeCloseTo(1920 / 1440);
+    expect(canvasRatio(1000, 2, 1920)).toBe(1.5);
+    expect(canvasRatio(2560, 1, 1920)).toBe(0.75);
+    expect(canvasRatio(1024, 1, 1280)).toBe(1);
+  });
+});
+
+describe("лента кадров: кадр почти 1:1 — пиксель в пиксель", () => {
+  it("Full HD с полосой прокрутки: без пересчёта, край режется по object-position", () => {
+    // 125 %: 1520,8 × 729,6 CSS — задник 1901×912.
+    expect(frameRect(1920, { width: 1901, height: 912 }, 0.3)).toEqual({
+      left: -6,
+      top: -84,
+      width: 1920,
+      height: 1080,
+    });
+    // 100 %: 1905×950; смещение — целое, иначе кадр размылился бы на полпикселя.
+    const desktop = frameRect(1920, { width: 1905, height: 950 }, 0.3);
+    expect(Number.isInteger(desktop.left)).toBe(true);
+    expect(desktop).toMatchObject({ top: -65, width: 1920, height: 1080 });
+    // Ровно 1:1.
+    expect(frameRect(1920, { width: 1920, height: 1080 }, 0.3)).toEqual({
+      left: 0,
+      top: 0,
+      width: 1920,
+      height: 1080,
+    });
+  });
+
+  it("дальше от 1:1 — обложка, как у постера", () => {
+    const frame = { width: 1920, height: 1080 };
+    const window1440 = { width: 1440, height: 900 };
+    expect(frameRect(1920, window1440, 0.3)).toEqual(coverRect(frame, window1440, 0.3));
+    expect(crispFit(1920, window1440)).toBe(false);
+    // Кадр мельче окна на 2,1 %: край резался бы уже заметно.
+    expect(crispFit(1920, { width: 1880, height: 950 })).toBe(false);
+    expect(crispFit(1920, { width: 1882, height: 950 })).toBe(true);
+    // Окно больше кадра: 1:1 оставил бы пустой край.
+    expect(crispFit(1920, { width: 1920, height: 1081 })).toBe(false);
+    expect(frameRect(1920, { width: 1920, height: 1081 }, 0.3).height).toBe(1081);
+  });
+
+  it("кадр 1280 — всегда обложкой: постеру он уступает без рывка", () => {
+    const frame = { width: 1280, height: 720 };
+    const narrow = { width: 1265, height: 670 };
+    expect(crispFit(1280, narrow)).toBe(false);
+    expect(frameRect(1280, narrow, 0.3)).toEqual(coverRect(frame, narrow, 0.3));
+  });
+});
 
 describe("лента кадров по прокрутке", () => {
   it("доля прокрутки: 0 наверху, 1 когда липкий экран доехал до низа секции", () => {

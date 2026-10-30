@@ -13,30 +13,31 @@ const posterFiles = Object.values(TIMELAPSE_POSTER).flatMap((value) =>
 const videoFiles = [true, false].flatMap((phone) =>
   [true, false].map((webm) => timelapseVideoSrc({ phone, webm })),
 );
-const frameFiles = Array.from({ length: TIMELAPSE_FRAMES.count }, (_, index) =>
-  timelapseFrameSrc(index),
+const frameFiles = TIMELAPSE_FRAMES.sets.flatMap((set) =>
+  Array.from({ length: TIMELAPSE_FRAMES.count }, (_, index) => timelapseFrameSrc(set, index)),
 );
 
 describe("ролик стройки: файлы", () => {
   it("телефону — 9:16, остальным — 1080p; WebM, где он играет, иначе MP4", () => {
     expect(timelapseVideoSrc({ phone: true, webm: true })).toBe(
-      "/hero/timelapse/v2/hero-portrait.webm",
+      "/hero/timelapse/v3/hero-portrait.webm",
     );
     expect(timelapseVideoSrc({ phone: true, webm: false })).toBe(
-      "/hero/timelapse/v2/hero-portrait.mp4",
+      "/hero/timelapse/v3/hero-portrait.mp4",
     );
     expect(timelapseVideoSrc({ phone: false, webm: true })).toBe(
-      "/hero/timelapse/v2/hero-1080.webm",
+      "/hero/timelapse/v3/hero-1080.webm",
     );
     expect(timelapseVideoSrc({ phone: false, webm: false })).toBe(
-      "/hero/timelapse/v2/hero-1080.mp4",
+      "/hero/timelapse/v3/hero-1080.mp4",
     );
   });
 
-  it("кадры ленты пронумерованы с 0001 по порядку", () => {
-    expect(timelapseFrameSrc(0)).toBe("/hero/timelapse/v2/frames/0001.webp");
-    expect(timelapseFrameSrc(TIMELAPSE_FRAMES.count - 1)).toBe(
-      "/hero/timelapse/v2/frames/0121.webp",
+  it("два набора кадров, в каждом кадры пронумерованы с 0001 по порядку", () => {
+    expect(TIMELAPSE_FRAMES.sets).toEqual([1920, 1280]);
+    expect(timelapseFrameSrc(1920, 0)).toBe("/hero/timelapse/v3/frames-1920/0001.webp");
+    expect(timelapseFrameSrc(1280, TIMELAPSE_FRAMES.count - 1)).toBe(
+      "/hero/timelapse/v3/frames-1280/0121.webp",
     );
   });
 
@@ -45,7 +46,10 @@ describe("ролик стройки: файлы", () => {
       (url) => !existsSync(path.join("public", url)),
     );
     expect(missing).toEqual([]);
-    expect(existsSync(path.join("public", timelapseFrameSrc(TIMELAPSE_FRAMES.count)))).toBe(false);
+    for (const set of TIMELAPSE_FRAMES.sets) {
+      const extra = timelapseFrameSrc(set, TIMELAPSE_FRAMES.count);
+      expect(existsSync(path.join("public", extra))).toBe(false);
+    }
   });
 });
 

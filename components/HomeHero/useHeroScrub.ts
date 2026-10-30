@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { TIMELAPSE_FRAMES, timelapseFrameSrc } from "@/lib/site/timelapse/assets";
+import {
+  TIMELAPSE_FRAMES,
+  timelapseFrameSrc,
+  type TimelapseFrameSet,
+} from "@/lib/site/timelapse/assets";
 import { FrameLoader } from "@/lib/site/timelapse/frameLoader";
 import { isPreloading, reportHeroLoad } from "@/lib/site/timelapse/heroLoad";
 import {
-  coverRect,
+  canvasRatio,
+  crispFit,
   frameAt,
+  frameRect,
+  frameSetFor,
   positionXOf,
   SCRUB,
   scrollProgress,
@@ -16,8 +23,8 @@ import { skipsVideo, type NetworkHints } from "@/lib/site/timelapse/useTimelapse
 
 /**
  * Где прокрутка: вступление (текст и кнопки), полёт, финал, после — экран ушёл вверх целиком (текст и
- * ссылки вступления снова доступны: их не видно, а диктору и клавиатуре они нужны). atEnd — целевой
- * кадр последний: холст уступает постеру — тот же кадр крупнее.
+ * ссылки вступления снова доступны: их не видно, а диктору и клавиатуре они нужны). atEnd — холст
+ * уступает постеру (см. yieldsToPoster).
  */
 export type ScrubPhase = { stage: "intro" | "flight" | "finale" | "after"; atEnd: boolean };
 
@@ -39,9 +46,11 @@ type Options = Callbacks & {
   canvas: RefObject<HTMLCanvasElement | null>;
 };
 
-/** Пауза после загрузки страницы, прежде чем тянуть остальные кадры (≈ 14 МБ). */
+/** Пауза после загрузки страницы, прежде чем тянуть остальные кадры (18 или 30 МБ). */
 const BULK_DELAY_MS = 400;
 const CONCURRENCY = 4;
+/** Черновик — всегда из лёгкого набора: экран загрузки ждёт его, и с кадрами 1920 дольше не становится. */
+const DRAFT_SET: TimelapseFrameSet = 1280;
 /** Доля расстояния до целевого кадра за один кадр анимации: прокрутка догоняется мягко. */
 const EASE = 0.2;
 const SETTLED = 0.05;
@@ -49,36 +58,44 @@ const LAST = TIMELAPSE_FRAMES.count - 1;
 const VARS = ["--hero-intro", "--hero-finale"] as const;
 
 // Кадры живут, пока жив сайт: «Назад» на главную (Next держит её в скрытом Activity) и повторный показ
-// ленты не тянут их заново и не мигают пустым холстом. Загрузчик один, слушает текущая лента.
+// ленты не тянут их заново и не мигают пустым холстом. Загрузчик один, слушает текущая лента. Набор
+// кадров выбирается один раз, с загрузчиком: смена размера окна кадры заново не тянет.
 let sharedLoader: FrameLoader | null = null;
+let frameSet: TimelapseFrameSet = DRAFT_SET;
 let frameListener: ((index: number) => void) | null = null;
 
-function frameLoader(): FrameLoader {
-  sharedLoader ??= new FrameLoader(
+function frameLoader(surface: HTMLCanvasElement): FrameLoader {
+  if (sharedLoader) return sharedLoader;
+  frameSet = frameSetFor(surface.getBoundingClientRect().width, window.devicePixelRatio || 1);
+  sharedLoader = new FrameLoader(
     TIMELAPSE_FRAMES.count,
-    timelapseFrameSrc,
+    (index) => timelapseFrameSrc(frameSet, index),
     (index) => frameListener?.(index),
     CONCURRENCY,
+    undefined,
+    (index) => timelapseFrameSrc(DRAFT_SET, index),
   );
+  sharedLoader.holdForDraft = () => isPreloading();
   return sharedLoader;
 }
 
+/** Задник холста в его пикселях. */
 type Surface = { width: number; height: number; positionX: number };
 
 /**
- * Задник холста под его CSS-размер, но не крупнее кадра-источника; positionX — горизонталь
+ * Задник холста под его размер на экране, но не крупнее кадра набора; positionX — горизонталь
  * object-position холста (тот же токен, что у постера): кадр режется так же, как постер. Размер
- * задника меняется, только если стал другим: присвоение width и height стирает картинку.
+ * считается без округления CSS-пикселей: при масштабе экрана 125 % 729,6 CSS — это 912 пикселей, а
+ * лишняя строка задника мылила бы весь кадр. Меняется, только если стал другим: присвоение width и
+ * height стирает картинку.
  */
 function sizeCanvas(surface: HTMLCanvasElement, context: CanvasRenderingContext2D): Surface {
   const rect = surface.getBoundingClientRect();
-  const width = Math.max(1, Math.round(rect.width));
-  const height = Math.max(1, Math.round(rect.height));
-  const ratio = Math.min(window.devicePixelRatio || 1, TIMELAPSE_FRAMES.width / width, 1.5);
-  const backing = { width: Math.round(width * ratio), height: Math.round(height * ratio) };
-  if (surface.width !== backing.width) surface.width = backing.width;
-  if (surface.height !== backing.height) surface.height = backing.height;
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const ratio = canvasRatio(Math.max(1, rect.width), window.devicePixelRatio || 1, frameSet);
+  const width = Math.max(1, Math.round(rect.width * ratio));
+  const height = Math.max(1, Math.round(rect.height * ratio));
+  if (surface.width !== width) surface.width = width;
+  if (surface.height !== height) surface.height = height;
   context.imageSmoothingQuality = "high";
   return { width, height, positionX: positionXOf(getComputedStyle(surface).objectPosition) };
 }
@@ -92,12 +109,13 @@ function stageOf(progress: number): ScrubPhase["stage"] {
  * Лента кадров по прокрутке: целевой кадр — из доли прокрутки ленты, текущий догоняет его с
  * замедлением (после старта и возврата на экран — сразу, без перемотки от первого кадра); переменные
  * --hero-intro и --hero-finale на секции гасят вступление и проявляют финал в CSS (каждый кадр
- * анимации — мимо React). Пока нужный кадр не загружен, рисуется ближайший готовый.
+ * анимации — мимо React). Пока нужный кадр не загружен, рисуется ближайший готовый; кадр черновика
+ * перерисовывается, когда придёт настоящий.
  */
 class Scrubber {
   private current = 0;
   private target = 0;
-  private drawn = -1;
+  private drawn: HTMLImageElement | null = null;
   private surfaceSize: Surface = { width: 1, height: 1, positionX: 0.5 };
   /** Высота дорожки ленты (первая строка сетки секции; ниже на планшете — полоса фактов). */
   private track = 0;
@@ -108,7 +126,7 @@ class Scrubber {
   /** null — ещё не сообщали: первая фаза уходит в React всегда (после «Назад» там может быть чужая). */
   private phase: ScrubPhase | null = null;
   private readonly vars = new Map<string, string>();
-  private readonly loader = frameLoader();
+  private readonly loader: FrameLoader;
   private readonly onFrame = (): void => {
     this.draw();
     this.schedule();
@@ -120,6 +138,7 @@ class Scrubber {
     private readonly context: CanvasRenderingContext2D,
     private readonly callbacks: () => Callbacks,
   ) {
+    this.loader = frameLoader(surface);
     frameListener = this.onFrame;
   }
 
@@ -131,7 +150,7 @@ class Scrubber {
     reportHeroLoad(this.loader.draftShare());
     this.loader.load(Math.round(this.target));
     this.loader.load(0);
-    this.drawn = -1;
+    this.drawn = null;
     this.draw();
     this.schedule();
   }
@@ -158,7 +177,7 @@ class Scrubber {
   resize(): void {
     this.surfaceSize = sizeCanvas(this.surface, this.context);
     this.track = parseFloat(getComputedStyle(this.host).gridTemplateRows) || 0;
-    this.drawn = -1;
+    this.drawn = null;
     this.draw();
     this.schedule();
   }
@@ -196,10 +215,22 @@ class Scrubber {
     const after = this.host.getBoundingClientRect().bottom <= 0;
     this.report({
       stage: after ? "after" : stageOf(progress),
-      atEnd: !after && this.target === LAST,
+      atEnd: !after && this.yieldsToPoster(),
     });
     if (this.visible && this.current !== this.target) this.raf = requestAnimationFrame(this.update);
   };
+
+  /**
+   * На последнем кадре холст уступает постеру — тот же кадр крупнее. Настоящий кадр 1920 пиксель в
+   * пиксель не уступает: он не мельче постера, а обрезан чуть иначе, подмена дёрнулась бы; пока он не
+   * пришёл, вместо чужого кадра или черновика — постер.
+   */
+  private yieldsToPoster(): boolean {
+    if (this.target !== LAST) return false;
+    if (!crispFit(frameSet, this.surfaceSize)) return true;
+    const last = this.loader.nearest(LAST);
+    return last?.index !== LAST || last.image.naturalWidth !== frameSet;
+  }
 
   private report(next: ScrubPhase): void {
     if (this.phase && next.stage === this.phase.stage && next.atEnd === this.phase.atEnd) return;
@@ -216,12 +247,11 @@ class Scrubber {
 
   private draw(): void {
     const nearest = this.loader.nearest(this.current);
-    if (!nearest || nearest.index === this.drawn) return;
-    const frame = { width: nearest.image.naturalWidth, height: nearest.image.naturalHeight };
-    const rect = coverRect(frame, this.surfaceSize, this.surfaceSize.positionX);
+    if (!nearest || nearest.image === this.drawn) return;
+    const rect = frameRect(frameSet, this.surfaceSize, this.surfaceSize.positionX);
     this.context.drawImage(nearest.image, rect.left, rect.top, rect.width, rect.height);
-    const first = this.drawn < 0;
-    this.drawn = nearest.index;
+    const first = this.drawn === null;
+    this.drawn = nearest.image;
     if (first) this.callbacks().onDrawn();
   }
 }

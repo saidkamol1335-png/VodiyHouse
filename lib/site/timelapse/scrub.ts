@@ -3,6 +3,24 @@
 // прокрутки ведёт кадр полёта и стройки, гасит вступление (текст и кнопки) и проявляет финал.
 // Только расчёты — без DOM.
 
+import type { TimelapseFrameSet } from "./assets";
+
+/** Плотнее 1,5 пикселя на CSS-пиксель задник холста не делаем. */
+const MAX_CANVAS_DPR = 1.5;
+/** Задник шире — кадрам 1280 пришлось бы растягиваться заметно, берём набор 1920. */
+const LARGE_SET_ABOVE_PX = 1400;
+const CRISP_FROM_SCALE = 0.98;
+
+/** Набор кадров по ширине задника холста: CSS-ширина × min(DPR, 1,5). */
+export function frameSetFor(cssWidth: number, dpr: number): TimelapseFrameSet {
+  return cssWidth * Math.min(dpr, MAX_CANVAS_DPR) > LARGE_SET_ABOVE_PX ? 1920 : 1280;
+}
+
+/** Пикселей задника на CSS-пиксель: по экрану, но задник не шире кадра набора. */
+export function canvasRatio(cssWidth: number, dpr: number, set: TimelapseFrameSet): number {
+  return Math.min(dpr, set / cssWidth, MAX_CANVAS_DPR);
+}
+
 export const clamp01 = (value: number): number =>
   Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 
@@ -51,6 +69,44 @@ export function coverRect(
     top: (target.height - height) / 2,
     width,
     height,
+  };
+}
+
+/** Кадр набора: все кадры 16:9. */
+const frameOfSet = (set: TimelapseFrameSet) => ({ width: set, height: (set * 9) / 16 });
+
+/**
+ * Кадр 1920 мельче окна меньше чем на 2 % (Full HD с полосой прокрутки Windows: 1905 и 1901 px): такой
+ * пересчёт заметно мылит окна и фермы, поэтому кадр рисуется пиксель в пиксель, край режется чуть больше.
+ * Кадр 1280 — всегда обложкой: на последнем кадре он уступает постеру, подмена не должна дёргаться.
+ * target — задник в его пикселях.
+ */
+export function crispFit(
+  set: TimelapseFrameSet,
+  target: { width: number; height: number },
+): boolean {
+  if (set !== 1920) return false;
+  const frame = frameOfSet(set);
+  const scale = Math.max(target.width / frame.width, target.height / frame.height);
+  return scale >= CRISP_FROM_SCALE && scale <= 1;
+}
+
+/**
+ * Где на заднике рисовать кадр набора: пиксель в пиксель, если он почти 1:1, иначе обложкой. Кадр
+ * черновика из другого набора растягивается на то же место: настоящий сменяет его без сдвига.
+ */
+export function frameRect(
+  set: TimelapseFrameSet,
+  target: { width: number; height: number },
+  positionX: number,
+): { left: number; top: number; width: number; height: number } {
+  const frame = frameOfSet(set);
+  if (!crispFit(set, target)) return coverRect(frame, target, positionX);
+  return {
+    left: Math.round((target.width - frame.width) * clamp01(positionX)),
+    top: Math.round((target.height - frame.height) / 2),
+    width: frame.width,
+    height: frame.height,
   };
 }
 

@@ -48,7 +48,7 @@ export function applyMotionTier(tier: MotionTier, doc: Document = document): voi
 
 /**
  * Дождаться решения режима (не дольше limitMs): тяжёлое, что нужно только одному режиму (ролик
- * lite первого экрана, 4,4 МБ), не начинает грузиться, пока стартовый lite может стать full.
+ * lite первого экрана, 8 МБ), не начинает грузиться, пока стартовый lite может стать full.
  */
 export function whenMotionDecided(limitMs = 3000, doc: Document = document): Promise<void> {
   const root = doc.documentElement;

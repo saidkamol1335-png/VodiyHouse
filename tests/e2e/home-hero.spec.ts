@@ -22,13 +22,33 @@ function heroRequests(page: Page) {
   page.on("request", (request) => {
     const url = request.url();
     if (/\/hero\/timelapse\/.*\.(webm|mp4)$/.test(url)) videos.push(url);
-    if (/\/hero\/timelapse\/v2\/frames\/\d{4}\.webp$/.test(url)) frames.push(url);
+    if (/\/hero\/timelapse\/v3\/frames-(1920|1280)\/\d{4}\.webp$/.test(url)) frames.push(url);
   });
   return { videos, frames };
 }
 
 const scrollLength = (page: Page) =>
   hero(page).evaluate((element) => element.getBoundingClientRect().height - window.innerHeight);
+
+/** Середина холста совпадает с кадром 0001 из набора 1920, нарисованным без масштаба (допуск — округление). */
+const canvasMatchesFirstFrame = (page: Page) =>
+  canvas(page).evaluate(async (element) => {
+    const surface = element as HTMLCanvasElement;
+    const image = new Image();
+    image.src = "/hero/timelapse/v3/frames-1920/0001.webp";
+    await image.decode();
+    const probe = document.createElement("canvas");
+    probe.width = surface.width;
+    probe.height = surface.height;
+    const context = probe.getContext("2d")!;
+    const positionX = parseFloat(getComputedStyle(surface).objectPosition) / 100;
+    const left = Math.round((surface.width - image.naturalWidth) * positionX);
+    context.drawImage(image, left, Math.round((surface.height - image.naturalHeight) / 2));
+    const area = [surface.width / 2, surface.height / 2, 200, 200] as const;
+    const expected = context.getImageData(...area).data;
+    const actual = surface.getContext("2d")!.getImageData(...area).data;
+    return expected.every((value, index) => Math.abs(value - actual[index]!) <= 2);
+  });
 
 test.describe("первый экран главной — полёт над стройкой", () => {
   test("1440, full: кадры по прокрутке — текст гаснет, в конце финал и постер; шапка тёмная над экраном", async ({
@@ -61,7 +81,8 @@ test.describe("первый экран главной — полёт над ст
     await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
     await expect(page.locator(".home-hero__cue")).toContainText("Листайте");
     expect(await scrollLength(page)).toBeGreaterThan(page.viewportSize()!.height * 2);
-    expect(requests.frames[0]).toMatch(/\/frames\/0001\.webp$/);
+    // Сначала первый кадр из лёгкого набора: экран загрузки ждёт черновик, а не 1920.
+    expect(requests.frames[0]).toMatch(/\/frames-1280\/0001\.webp$/);
     // Середина ленты: вступление погасло, его ссылки не ловят фокус, но h1 остаётся диктору.
     const length = await scrollLength(page);
     await page.evaluate((top) => window.scrollTo(0, top), length * 0.5);
@@ -91,6 +112,87 @@ test.describe("первый экран главной — полёт над ст
     expect(errors).toEqual([]);
   });
 
+  for (const screen of [
+    // Задник 1920 > 1400: черновик из 1280, настоящие кадры — 1920, кадр рисуется 1:1.
+    { width: 1536, height: 864, dpr: 1.25, set: "1920", backing: [1920, 1080] },
+    // Full HD с полосой прокрутки: кадр на 0,8 % шире окна — всё равно пиксель в пиксель, край режется.
+    { width: 1905, height: 950, dpr: 1, set: "1920", backing: [1905, 950] },
+    // Задник 1366 ≤ 1400: только 1280, задник не шире кадра.
+    { width: 1366, height: 768, dpr: 1, set: "1280", backing: [1280, 720] },
+  ] as const) {
+    test(`${screen.width}×${screen.height}, DPR ${screen.dpr}: кадры ${screen.set}, задник ${screen.backing[0]}`, async ({
+      browser,
+    }, testInfo) => {
+      test.skip(testInfo.project.name !== "desktop-1440", "лента по прокрутке — десктоп");
+      const context = await browser.newContext({
+        viewport: { width: screen.width, height: screen.height },
+        deviceScaleFactor: screen.dpr,
+      });
+      const page = await context.newPage();
+      const errors = collectPageErrors(page);
+      const requests = heroRequests(page);
+      await page.goto("/ru?motion=full");
+      await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
+      const backing = await canvas(page).evaluate((element) => {
+        const surface = element as HTMLCanvasElement;
+        return [surface.width, surface.height];
+      });
+      expect(backing).toEqual(screen.backing);
+      // Настоящие кадры пошли, в том числе поверх черновика; чужого набора нет, кроме черновика.
+      await expect
+        .poll(
+          () => requests.frames.filter((url) => url.includes(`/frames-${screen.set}/`)).length,
+          {
+            timeout: 15_000,
+          },
+        )
+        .toBeGreaterThan(20);
+      const sets = new Set(requests.frames.map((url) => /frames-(\d+)/.exec(url)?.[1]));
+      expect([...sets].sort()).toEqual(screen.set === "1920" ? ["1280", "1920"] : ["1280"]);
+      if (screen.set === "1920") {
+        const light = requests.frames
+          .filter((url) => url.includes("/frames-1280/"))
+          .map((url) => Number(/(\d{4})\.webp$/.exec(url)?.[1]) - 1)
+          .sort((a, b) => a - b);
+        expect(light).toEqual(Array.from({ length: 13 }, (_, index) => index * 10));
+        expect(
+          requests.frames.filter((url) => url.endsWith("/frames-1920/0001.webp")),
+        ).toHaveLength(1);
+        // Настоящий первый кадр на холсте — пиксель в пиксель, как файл с целым смещением.
+        await expect.poll(() => canvasMatchesFirstFrame(page), { timeout: 15_000 }).toBe(true);
+      }
+      // Конец ленты: настоящий кадр 1920 пиксель в пиксель постеру не уступает, кадр 1280 уступает.
+      const length = await scrollLength(page);
+      await page.evaluate((top) => window.scrollTo(0, top + 10), length);
+      await expect(hero(page)).toHaveClass(/home-hero--finale/, { timeout: 10_000 });
+      if (screen.set === "1920") {
+        await expect(hero(page)).not.toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
+        await expect(canvas(page)).toHaveCSS("opacity", "1");
+      } else {
+        await expect(hero(page)).toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
+        await expect(canvas(page)).toHaveCSS("opacity", "0");
+      }
+      expect(errors).toEqual([]);
+      await context.close();
+    });
+  }
+
+  test("1905×950: настоящий последний кадр не пришёл — на конце ленты постер, а не чужой кадр", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "лента по прокрутке — десктоп");
+    const context = await browser.newContext({ viewport: { width: 1905, height: 950 } });
+    const page = await context.newPage();
+    await page.route(/\/frames-(1920|1280)\/0121\.webp$/, () => undefined);
+    await page.goto("/ru?motion=full");
+    await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
+    const length = await scrollLength(page);
+    await page.evaluate((top) => window.scrollTo(0, top + 10), length);
+    await expect(hero(page)).toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
+    await expect(canvas(page)).toHaveCSS("opacity", "0");
+    await context.close();
+  });
+
   test("1440, full по ссылке с #якорем: ленты нет — ролик, место у квиза не прыгает", async ({
     page,
   }, testInfo) => {
@@ -118,7 +220,7 @@ test.describe("первый экран главной — полёт над ст
     await expect(canvas(page)).toHaveCount(0);
     await expect(page.locator(".home-hero__cue")).toHaveCount(0);
     await expect(page.locator(".home-hero__finale")).toHaveCount(0);
-    await expect(video(page)).toHaveAttribute("src", /\/hero\/timelapse\/v2\/hero-1080\.webm$/);
+    await expect(video(page)).toHaveAttribute("src", /\/hero\/timelapse\/v3\/hero-1080\.webm$/);
     await expect(video(page)).toHaveJSProperty("muted", true);
     await expect(hero(page)).toHaveClass(/home-hero--playing/, { timeout: 20_000 });
     // Пауза кнопкой (WCAG 2.2.2): ролик стоит и сам не продолжается; кнопка продолжает.
@@ -181,7 +283,7 @@ test.describe("первый экран главной — полёт над ст
     await expect(hero(page)).toHaveClass(/home-hero--none/);
     await expect(video(page)).toHaveCount(0);
     await expect(canvas(page)).toHaveCount(0);
-    expect(await posterSrc(page)).toMatch(/\/v2\/poster-last-(1280|1920)\.(avif|webp)$/);
+    expect(await posterSrc(page)).toMatch(/\/v3\/poster-last-(1280|1920)\.(avif|webp)$/);
     await page.waitForTimeout(1_500);
     expect(requests.videos).toEqual([]);
     expect(requests.frames).toEqual([]);
@@ -219,13 +321,13 @@ test.describe("первый экран главной — полёт над ст
     await expect(hero(page)).toHaveClass(/home-hero--lite/);
     await expect(video(page)).toHaveAttribute(
       "src",
-      /\/hero\/timelapse\/v2\/hero-portrait\.(webm|mp4)$/,
+      /\/hero\/timelapse\/v3\/hero-portrait\.(webm|mp4)$/,
       {
         timeout: 10_000,
       },
     );
     await expect(video(page)).toHaveAttribute("playsinline", "");
-    expect(await posterSrc(page)).toMatch(/\/v2\/poster-portrait-last\.(avif|webp)$/);
+    expect(await posterSrc(page)).toMatch(/\/v3\/poster-portrait-last\.(avif|webp)$/);
     const viewport = page.viewportSize()!;
     const [copy, facts] = await Promise.all([
       page.locator(".home-hero__copy").boundingBox(),

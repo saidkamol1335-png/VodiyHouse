@@ -64,6 +64,44 @@ test.describe("экран загрузки при входе", () => {
     await expect(preloader(page)).toBeHidden();
   });
 
+  test("1440, lite, сеть медленнее ролика: экран уходит с 10 % файла, ролик стартует, когда его хватает до конца", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "файл 1080p — десктоп");
+    // Браузер всё ещё качает, в буфере 20 %, canplaythrough придёт по команде теста.
+    await page.addInitScript(() => {
+      const held: (() => void)[] = [];
+      (window as unknown as { __canPlayThrough: () => void }).__canPlayThrough = () =>
+        held.forEach((fire) => fire());
+      const add = HTMLMediaElement.prototype.addEventListener;
+      HTMLMediaElement.prototype.addEventListener = function (
+        this: HTMLMediaElement,
+        type: string,
+        listener: EventListenerOrEventListenerObject,
+        options?: boolean | AddEventListenerOptions,
+      ) {
+        if (type !== "canplaythrough") return add.call(this, type, listener, options);
+        held.push(() => (listener as EventListener).call(this, new Event(type)));
+      };
+      Object.defineProperty(HTMLMediaElement.prototype, "networkState", { get: () => 2 });
+      Object.defineProperty(HTMLMediaElement.prototype, "buffered", {
+        get(this: HTMLMediaElement) {
+          return { length: 1, end: () => this.duration * 0.2 };
+        },
+      });
+    });
+    await page.goto(`${ENTRY}&motion=lite`);
+    // Раньше предела экрана (15 с): он ушёл по доле файла, а не по таймеру.
+    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 10_000 });
+    await expect(hero(page)).toHaveClass(/home-hero--lite/);
+    await page.waitForTimeout(500);
+    await expect(hero(page)).not.toHaveClass(/home-hero--playing/);
+    await page.evaluate(() =>
+      (window as unknown as { __canPlayThrough: () => void }).__canPlayThrough(),
+    );
+    await expect(hero(page)).toHaveClass(/home-hero--playing/, { timeout: 10_000 });
+  });
+
   test("#якорь и другие страницы — без экрана", async ({ page }) => {
     await page.goto(`${ENTRY}#podbor`);
     await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/);

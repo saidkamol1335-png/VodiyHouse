@@ -4,9 +4,10 @@
 // «Застройщикам» и фоном карточки «О нас» — ролик один раз. Файлы кэшируются на год (netlify.toml,
 // immutable), поэтому новый ролик кладётся в новую папку версии: меняются TIMELAPSE_VERSION, размеры и
 // число кадров, компоненты — нет. Телефону — вырезка 9:16, окно идёт за ЖК (центр ЖК 0,58 → 0,65 ширины).
-// Сборка файлов — out/higgsfield/pipeline/build-hero-v2.mjs (вне git).
+// v3 — тот же клип без новых генераций, выше качество сборки: лента 1920 и 1280 q75 вместо 1280 q55,
+// hero-1080 11 / 8,5 МБ вместо 7 / 5,5. Сборка файлов — out/higgsfield/pipeline/build-hero-v3.mjs (вне git).
 
-export const TIMELAPSE_VERSION = "v2";
+export const TIMELAPSE_VERSION = "v3";
 export const TIMELAPSE_BASE = `/hero/timelapse/${TIMELAPSE_VERSION}`;
 export const TIMELAPSE_FRAME = { width: 1920, height: 1080 } as const;
 export const TIMELAPSE_PHONE_FRAME = { width: 608, height: 1080 } as const;
@@ -28,9 +29,11 @@ export function timelapseVideoSrc({ phone, webm }: { phone: boolean; webm: boole
 
 /**
  * Лента кадров по прокрутке (full — только десктоп, lib/motion): каждый третий кадр ролика, 8 к/с
- * содержания, 1280×720 WebP ≈ 14 МБ. Последний кадр ленты — тот же, что постер.
+ * содержания, WebP q75 — два набора по ширине кадра: 1920×1080 и 1280×720. Набор выбирает frameSetFor
+ * (scrub.ts); кадр номер N в обоих — один и тот же кадр ролика. Последний кадр ленты — тот же, что постер.
  */
-export const TIMELAPSE_FRAMES = { count: 121, width: 1280, height: 720 } as const;
+export const TIMELAPSE_FRAMES = { count: 121, sets: [1920, 1280] } as const;
+export type TimelapseFrameSet = (typeof TIMELAPSE_FRAMES.sets)[number];
 
-export const timelapseFrameSrc = (index: number): string =>
-  `${TIMELAPSE_BASE}/frames/${String(index + 1).padStart(4, "0")}.webp`;
+export const timelapseFrameSrc = (set: TimelapseFrameSet, index: number): string =>
+  `${TIMELAPSE_BASE}/frames-${set}/${String(index + 1).padStart(4, "0")}.webp`;
