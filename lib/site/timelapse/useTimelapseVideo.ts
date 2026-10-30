@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
+import { PRELOADER_MAX_WAIT_MS } from "@/lib/boot/preloader";
 import { whenMotionDecided } from "@/lib/motion";
 import { PHONE_QUERY, timelapseVideoSrc } from "./assets";
+import { finishHeroLoad, isPreloading, reportHeroLoad, whenPreloaderGone } from "./heroLoad";
 
 type Callbacks = {
   /** Пошёл первый кадр — ролик проявляется поверх постера. */
@@ -33,15 +35,17 @@ export type TimelapseControl = { pause: () => void; resume: () => void };
 const START_DELAY_MS = 600;
 /** Отказы play(), после которых ролика не будет; AbortError — лишь прерванный pause()/load(). */
 const BLOCKED_ERRORS = new Set(["NotAllowedError", "NotSupportedError"]);
-/** Медленная сеть: ролик в 2–7 МБ не догонит показ, остаётся постер. */
-const SLOW_CONNECTIONS = new Set(["slow-2g", "2g", "3g"]);
+/** Раз в столько проверяем, качает ли браузер ролик: iOS без play() не качает, экрану загрузки ждать нечего. */
+const LOAD_CHECK_MS = 3000;
 
-export type NetworkHints = { connection?: { saveData?: boolean; effectiveType?: string } };
+export type NetworkHints = { connection?: { saveData?: boolean } };
 
-/** Экономия трафика или медленная сеть — ролик не качаем. */
+/**
+ * Ролик и лента качаются при любой скорости (решение исполнителя 30.10.2026): на входе их ждёт экран
+ * загрузки. Не качаем только при экономии трафика: её посетитель включил сам.
+ */
 export function skipsVideo(nav: NetworkHints): boolean {
-  const connection = nav.connection;
-  return connection?.saveData === true || SLOW_CONNECTIONS.has(connection?.effectiveType ?? "");
+  return nav.connection?.saveData === true;
 }
 
 /** Блок сейчас на экране (и вообще показан: у display: none размеры нулевые). */
@@ -63,6 +67,9 @@ class TimelapsePlayer {
   private wanted = false;
   /** Остановлен кнопкой — наблюдатель его не продолжает. */
   private held = false;
+  /** Ролик качается под экраном загрузки: запуск — когда экран уйдёт. */
+  private gated = false;
+  private stallTimer = 0;
   private phoneQuery: MediaQueryList | null = null;
 
   constructor(
@@ -93,7 +100,9 @@ class TimelapsePlayer {
     if (this.detached || this.held || this.player.ended) return;
     // Первый запуск — когда режим решён: решат none — этот плеер отцепят, ролик не скачается.
     if (!this.started && !this.ready) {
-      void whenMotionDecided().then(() => {
+      // Под экраном загрузки ждём пробу FPS сколько нужно: иначе зря начнётся ролик, а придёт лента.
+      const limit = isPreloading() ? PRELOADER_MAX_WAIT_MS : undefined;
+      void whenMotionDecided(limit).then(() => {
         this.ready = true;
         if (this.wanted) this.show();
       });
@@ -104,7 +113,9 @@ class TimelapsePlayer {
       this.started = true;
       this.player.setAttribute("preload", "auto");
       this.player.load();
+      if (isPreloading()) this.waitForPreloader();
     }
+    if (this.gated) return;
     this.player.play().catch((error: unknown) => {
       const name =
         typeof error === "object" && error !== null ? (error as { name?: string }).name : undefined;
@@ -129,6 +140,7 @@ class TimelapsePlayer {
 
   detach(): void {
     this.detached = true;
+    this.stopTracking();
     this.player.removeEventListener("playing", this.playing);
     this.player.removeEventListener("ended", this.ended);
     this.player.removeEventListener("error", this.failed);
@@ -138,6 +150,48 @@ class TimelapsePlayer {
     this.player.setAttribute("preload", "none");
     this.player.load();
   }
+
+  /** Под экраном загрузки ролик только качается: проценты — по буферу, готов — когда хватит до конца. */
+  private waitForPreloader(): void {
+    this.gated = true;
+    this.player.addEventListener("progress", this.buffered);
+    this.player.addEventListener("canplaythrough", this.loaded);
+    this.armStall();
+    void whenPreloaderGone().then(() => {
+      this.gated = false;
+      this.stopTracking();
+      if (this.wanted) this.show();
+    });
+  }
+
+  private armStall(): void {
+    window.clearTimeout(this.stallTimer);
+    this.stallTimer = window.setTimeout(this.checkLoading, LOAD_CHECK_MS);
+  }
+
+  private stopTracking(): void {
+    window.clearTimeout(this.stallTimer);
+    this.player.removeEventListener("progress", this.buffered);
+    this.player.removeEventListener("canplaythrough", this.loaded);
+  }
+
+  /** Сеть просто медленная — ждём дальше, предел экрана загрузки решит сам; браузер не качает — не ждём. */
+  private readonly checkLoading = (): void => {
+    if (this.player.networkState === HTMLMediaElement.NETWORK_LOADING) this.armStall();
+    else this.loaded();
+  };
+
+  private readonly buffered = (): void => {
+    const { buffered, duration } = this.player;
+    if (buffered.length > 0 && duration > 0) {
+      reportHeroLoad(buffered.end(buffered.length - 1) / duration);
+    }
+  };
+
+  private readonly loaded = (): void => {
+    this.stopTracking();
+    finishHeroLoad();
+  };
 
   private readonly playing = (): void => this.callbacks().onPlaying();
   private readonly ended = (): void => this.callbacks().onEnded();
@@ -195,6 +249,12 @@ function watchVisibility(element: HTMLElement, clip: TimelapsePlayer): () => voi
     if (entries.some((entry) => entry.isIntersecting)) clip.show();
     else clip.hide();
   });
+  // Под экраном загрузки ждать load незачем: постера не видно, а экран ждёт именно этот файл.
+  if (isPreloading()) {
+    observer.observe(element);
+    if (inViewport(element)) clip.show();
+    return () => observer.disconnect();
+  }
   const timer = { id: 0 };
   const watch = () => {
     timer.id = window.setTimeout(() => {

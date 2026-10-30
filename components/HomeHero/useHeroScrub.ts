@@ -3,6 +3,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { TIMELAPSE_FRAMES, timelapseFrameSrc } from "@/lib/site/timelapse/assets";
 import { FrameLoader } from "@/lib/site/timelapse/frameLoader";
+import { isPreloading, reportHeroLoad } from "@/lib/site/timelapse/heroLoad";
 import {
   coverRect,
   frameAt,
@@ -27,7 +28,7 @@ type Callbacks = {
   onDrawn: () => void;
   /** Фаза сменилась (редко: на порогах прокрутки) — классы секции ведёт React. */
   onPhase: (phase: ScrubPhase) => void;
-  /** Ленты не будет (экономия трафика, медленная сеть) — остаётся постер. */
+  /** Ленты не будет (экономия трафика) — остаётся постер. */
   onBlocked: () => void;
 };
 
@@ -126,6 +127,8 @@ class Scrubber {
     this.resize();
     this.target = frameAt(this.progress(), TIMELAPSE_FRAMES.count);
     this.current = this.target;
+    this.loader.onDraft = reportHeroLoad;
+    reportHeroLoad(this.loader.draftShare());
     this.loader.load(Math.round(this.target));
     this.loader.load(0);
     this.drawn = -1;
@@ -167,6 +170,7 @@ class Scrubber {
   destroy(): void {
     cancelAnimationFrame(this.raf);
     if (frameListener === this.onFrame) frameListener = null;
+    this.loader.onDraft = null;
     this.loader.pause();
     for (const name of VARS) this.host.style.removeProperty(name);
   }
@@ -248,7 +252,9 @@ export function useHeroScrub({ enabled, section, canvas, onDrawn, onPhase, onBlo
     visibility.observe(host);
     window.addEventListener("scroll", scrubber.schedule, { passive: true });
     scrubber.start();
-    if (document.readyState === "complete") startBulk();
+    // Экран загрузки ждёт черновик ленты, поэтому кадры идут сразу, а не после load страницы.
+    if (isPreloading()) scrubber.startBulk();
+    else if (document.readyState === "complete") startBulk();
     else window.addEventListener("load", startBulk, { once: true });
     return () => {
       sizes.disconnect();

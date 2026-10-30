@@ -50,11 +50,11 @@ describe("ролик стройки: файлы", () => {
 });
 
 describe("ролик стройки: экономия трафика", () => {
-  it("Save-Data, 2G и 3G — только постер; 4G и без подсказок — ролик", () => {
-    expect(skipsVideo({ connection: { saveData: true, effectiveType: "4g" } })).toBe(true);
-    expect(skipsVideo({ connection: { effectiveType: "3g" } })).toBe(true);
-    expect(skipsVideo({ connection: { effectiveType: "slow-2g" } })).toBe(true);
-    expect(skipsVideo({ connection: { saveData: false, effectiveType: "4g" } })).toBe(false);
+  it("Save-Data — только постер; скорость сети ролик не отключает", () => {
+    expect(skipsVideo({ connection: { saveData: true } })).toBe(true);
+    expect(skipsVideo({ connection: { saveData: false } })).toBe(false);
+    const slow = { saveData: false, effectiveType: "slow-2g" };
+    expect(skipsVideo({ connection: slow })).toBe(false);
     expect(skipsVideo({})).toBe(false);
   });
 });

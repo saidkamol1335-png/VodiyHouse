@@ -19,6 +19,9 @@ export class FrameLoader {
   private cursor = 0;
   private running = false;
   private stopped = false;
+  private draftSettled = 0;
+  /** Доля черновика: кадр пришёл или не придёт совсем. По ней экран загрузки считает проценты. */
+  onDraft: ((share: number) => void) | null = null;
 
   constructor(
     private readonly count: number,
@@ -57,6 +60,10 @@ export class FrameLoader {
     image.decoding = "async";
     const done = () => {
       this.active--;
+      if (this.isDraft(index)) {
+        this.draftSettled++;
+        this.onDraft?.(this.draftShare());
+      }
       this.pump();
     };
     image.onload = () => {
@@ -86,6 +93,12 @@ export class FrameLoader {
       if (this.loaded[index]) return { image: this.images[index]!, index };
     }
     return null;
+  }
+
+  draftShare(): number {
+    let total = 0;
+    for (let index = 0; index < this.count; index++) if (this.isDraft(index)) total++;
+    return total > 0 ? this.draftSettled / total : 1;
   }
 
   isLoaded(index: number): boolean {

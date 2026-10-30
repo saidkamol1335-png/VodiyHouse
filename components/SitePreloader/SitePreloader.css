@@ -1,0 +1,240 @@
+/* Экран загрузки при входе на главную (артефакт «Vodiy House Закат»): знак собирается из блоков,
+   проценты внизу; уходя, знак схлопывается в янтарный квадрат, тот раскрывается на весь экран и
+   расходится шторками на страницу. Только transform и opacity. Режимы: full — как описано; lite —
+   блоки проявляются и экран гаснет за 200 мс; none — экрана нет (скрипт в <head> не ставит метку). */
+
+.site-preloader {
+  display: none;
+}
+
+/* Место под полосу прокрутки остаётся, чтобы страница не сдвинулась, и закрашено цветом экрана. */
+html[data-preloader] {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+  background: var(--preloader-bg);
+}
+
+html[data-preloader] .site-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--preloader-fg);
+}
+
+.site-preloader__bg {
+  position: absolute;
+  inset: 0;
+  background: var(--preloader-bg);
+}
+
+.site-preloader__logo {
+  position: relative;
+  width: min(34vmin, 260px);
+  height: auto;
+  overflow: visible;
+}
+
+/* До оживления страницы знак виден бледным силуэтом: экран не выглядит пустым, блоки его заполняют. */
+.site-preloader__block {
+  fill: var(--amber);
+  opacity: 0.14;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.site-preloader__block--set {
+  opacity: 1;
+}
+
+[data-motion="full"] .site-preloader__block {
+  transition: opacity 0.45s var(--ease);
+}
+
+[data-motion="lite"] .site-preloader__block {
+  transition: opacity 0.2s ease-out;
+}
+
+.site-preloader__meta {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 28px);
+  left: var(--preloader-gutter);
+  display: grid;
+  gap: 2px;
+}
+
+.site-preloader__brand {
+  font-size: var(--fs-preloader-brand);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.site-preloader__note {
+  color: var(--preloader-muted);
+  font-size: var(--fs-caption);
+}
+
+/* Счётчик и подпись — Manrope, а не моно: JetBrains (display: optional) к первому заходу не успевает. */
+.site-preloader__count {
+  position: absolute;
+  left: var(--preloader-gutter);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+  font-size: var(--fs-preloader-count);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-preloader__percent {
+  color: var(--amber);
+}
+
+.site-preloader__caption {
+  position: absolute;
+  right: var(--preloader-gutter);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 44px);
+  max-width: 22ch;
+  margin: 0;
+  color: var(--preloader-muted);
+  font-size: var(--fs-label);
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.site-preloader__bar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--preloader-track);
+}
+
+.site-preloader__fill {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.site-preloader__core {
+  position: absolute;
+  inset: 0;
+  background: var(--amber);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-preloader__curtain {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.site-preloader__slab {
+  flex: 1;
+  margin-bottom: -1px;
+  background: var(--amber);
+  opacity: 0;
+}
+
+/* ---------- Уход, full: текст гаснет, знак схлопывается, квадрат раскрывается, шторки расходятся. ---------- */
+
+.site-preloader--leaving-full .site-preloader__fade {
+  animation: site-preloader-fade 0.3s ease-in forwards;
+}
+
+.site-preloader--leaving-full .site-preloader__block {
+  animation: site-preloader-collapse 0.5s var(--preloader-ease) forwards;
+  animation-delay: calc(0.1s + var(--preloader-i) * 0.02s);
+}
+
+.site-preloader--leaving-full .site-preloader__logo {
+  animation: site-preloader-hide 0s linear 0.85s forwards;
+}
+
+.site-preloader--leaving-full .site-preloader__core {
+  animation:
+    site-preloader-core 0.55s var(--preloader-ease) 0.85s forwards,
+    site-preloader-hide 0s linear 1.4s forwards;
+}
+
+.site-preloader--leaving-full .site-preloader__bg {
+  animation: site-preloader-hide 0s linear 1.4s forwards;
+}
+
+.site-preloader--leaving-full .site-preloader__slab {
+  animation:
+    site-preloader-show 0s linear 1.4s forwards,
+    site-preloader-slab-left 0.7s var(--preloader-ease) forwards;
+  animation-delay: 1.4s, calc(1.4s + var(--preloader-i) * 0.05s);
+}
+
+.site-preloader--leaving-full .site-preloader__slab:nth-child(even) {
+  animation-name: site-preloader-show, site-preloader-slab-right;
+}
+
+/* ---------- Уход, lite: экран гаснет. ---------- */
+
+.site-preloader--leaving-lite {
+  animation: site-preloader-hide 0.2s ease-out forwards;
+}
+
+@keyframes site-preloader-fade {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes site-preloader-collapse {
+  to {
+    transform: translate(var(--preloader-dx), var(--preloader-dy)) scale(0.25);
+  }
+}
+
+@keyframes site-preloader-core {
+  0% {
+    opacity: 1;
+    transform: scale(var(--preloader-core-x), var(--preloader-core-y));
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1, var(--preloader-core-y));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes site-preloader-hide {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes site-preloader-show {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes site-preloader-slab-left {
+  to {
+    transform: translateX(-102%);
+  }
+}
+
+@keyframes site-preloader-slab-right {
+  to {
+    transform: translateX(102%);
+  }
+}

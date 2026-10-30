@@ -44,6 +44,7 @@
 @import "../components/SiteHeader/SiteHeader.css";
 @import "../components/SiteBareHeader/SiteBareHeader.css";
 @import "../components/SitePhoto/SitePhoto.css";
+@import "../components/SitePreloader/SitePreloader.css";
 @import "../components/ShareButton/ShareButton.css";
 @import "../components/SiteFooter/SiteFooter.css";
 @import "../components/SpecialsGrid/SpecialsGrid.css";

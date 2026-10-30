@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState, type RefObject } from "react";
+import { useCallback, useEffect, useState, type RefObject } from "react";
+import { finishHeroLoad } from "@/lib/site/timelapse/heroLoad";
 import { useTimelapse } from "@/lib/site/timelapse/useTimelapse";
 import { START_PHASE, useHeroScrub, type ScrubPhase } from "./useHeroScrub";
 import { useHeroOverHeader } from "./useHeroOverHeader";
@@ -32,6 +33,10 @@ export function useHeroScreen({ section, media, video, canvas }: Refs) {
     onBlocked: hero.onBlocked,
   });
   useHeroOverHeader(section);
+  // Постер: ни ролика, ни ленты не будет — экрану загрузки ждать нечего.
+  useEffect(() => {
+    if (hero.mode === "none") finishHeroLoad();
+  }, [hero.mode]);
 
   const classes = ["home-hero", `home-hero--${hero.mode}`];
   if (hero.playing) classes.push("home-hero--playing");

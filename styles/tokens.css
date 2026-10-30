@@ -107,6 +107,17 @@
   --hero-glass-2: rgba(250, 250, 250, 0.06);
   --hero-glass-3: rgba(250, 250, 250, 0.12);
   --special-badge-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  /* Экран загрузки при входе на главную (артефакт «Закат»): тёмный в обеих темах. */
+  --preloader-bg: #050505;
+  --preloader-fg: #f4efe7;
+  --preloader-muted: #8f877c;
+  --preloader-track: rgba(244, 239, 231, 0.12);
+  --preloader-gutter: clamp(16px, 4vw, 64px);
+  --fs-preloader-brand: 19px;
+  --fs-preloader-count: clamp(48px, 32px + 6vw, 120px);
+  --preloader-ease: cubic-bezier(0.87, 0, 0.13, 1);
+  --z-preloader: 1000;
+
   /* Первый экран главной (30.10.2026): ролик стройки на весь экран под тёмной пеленой; тексты и
      кнопки — в токенах тёмной темы (data-theme-island). Пелена на десктопе — слева под текст, сверху
      под шапку, снизу под цифры; на планшете и телефоне — снизу под текст. */

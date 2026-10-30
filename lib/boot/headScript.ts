@@ -6,7 +6,9 @@
 // бывают недоступны, а это от них не зависит.
 
 import { MOTION_QUERY_PARAM, MOTION_STORAGE_KEY } from "@/lib/motion/tier";
+import { LOCALES } from "@/lib/i18n/routing";
 import { ANCHOR_START_ATTRIBUTE, SCROLL_MEMORY_KEY } from "./anchorStart";
+import { PRELOADER_ATTRIBUTE, PRELOADER_FAILSAFE_MS, PRELOADER_SEEN_KEY } from "./preloader";
 import {
   CATALOG_FILTER_PARAMS,
   CATALOG_PENDING_ATTRIBUTE,
@@ -23,4 +25,6 @@ var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="dark"||
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});
 var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)});
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";
-if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);}catch(e){}})();`;
+if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);
+var s=sessionStorage.getItem(${JSON.stringify(PRELOADER_SEEN_KEY)});sessionStorage.setItem(${JSON.stringify(PRELOADER_SEEN_KEY)},"1");
+if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}})();`;

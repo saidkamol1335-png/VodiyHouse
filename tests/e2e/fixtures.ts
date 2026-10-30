@@ -1,5 +1,6 @@
 import { test as base, type BrowserContext, type Page, type Response } from "@playwright/test";
 import { HYDRATED_ATTRIBUTE } from "../../lib/boot/hydrated";
+import { PRELOADER_SEEN_KEY } from "../../lib/boot/preloader";
 
 // Общий `test` для всех спек: переход ждёт, пока React оживёт (решение исполнителя 28.10.2026, A).
 // Dev-сервер под параллельной нагрузкой отдаёт HTML задолго до скриптов, и клик до гидратации
@@ -65,6 +66,15 @@ export const test = base.extend<HydrationOptions>({
       const newContext = browser.newContext.bind(browser);
       browser.newContext = async (options) => {
         const context = await newContext(options);
+        // Экран загрузки при входе закрыл бы главную на первые секунды каждого теста. Его спека
+        // home-preloader открывает страницу с этим параметром.
+        await context.addInitScript((key) => {
+          try {
+            if (!location.search.includes("e2e-preloader")) sessionStorage.setItem(key, "1");
+          } catch {
+            // about:blank: хранилища ещё нет
+          }
+        }, PRELOADER_SEEN_KEY);
         const newPage = context.newPage.bind(context);
         context.newPage = async () => {
           const page = await newPage();

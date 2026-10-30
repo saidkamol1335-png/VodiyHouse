@@ -35,6 +35,24 @@ function setup(count = 20, concurrency = 2) {
 }
 
 describe("FrameLoader", () => {
+  it("draftShare: доля черновика считает и не пришедшие кадры", async () => {
+    const { loader } = setup(17, 4);
+    const shares: number[] = [];
+    loader.onDraft = (share) => shares.push(share);
+    expect(loader.draftShare()).toBe(0);
+    loader.load(0);
+    loader.load(8);
+    loader.load(16);
+    loader.load(3);
+    const [first, second, third, other] = FakeImage.all;
+    first?.finish();
+    second?.onerror?.();
+    other?.finish();
+    third?.finish();
+    expect(shares).toEqual([1 / 3, 2 / 3, 1]);
+    expect(loader.draftShare()).toBe(1);
+  });
+
   it("грузит не больше concurrency разом; сначала черновик — каждый восьмой кадр и последний", async () => {
     const { loader, requested, finish } = setup();
     loader.start();

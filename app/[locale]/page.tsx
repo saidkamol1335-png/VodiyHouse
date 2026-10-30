@@ -12,6 +12,7 @@ import { HomeWhy } from "@/components/HomeWhy";
 import { JsonLd } from "@/components/JsonLd";
 import { QuizSection } from "@/components/Quiz";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SitePreloader } from "@/components/SitePreloader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { OFFERS_ANCHOR, QUIZ_ANCHOR } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
@@ -49,6 +50,7 @@ export default async function HomePage() {
   const [catalog, showcase, frames] = await Promise.all([readSiteCatalog(), readSiteShowcase(), readProgressFrames()]);
   return (
     <>
+      <SitePreloader />
       <SiteHeader transparentAtTop tone="dark" />
       <main>
         <HomeHero stats={catalog ? homeStats(catalog) : null} found={catalog ? heroFound(catalog) : null} catalogId={CATALOG_ID} />
