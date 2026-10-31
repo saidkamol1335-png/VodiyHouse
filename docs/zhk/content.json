@@ -1,40 +1,2358 @@
 {
-  "note": "Настоящие ЖК из материалов docs/zhk/<slug>/ (собраны 29.10.2026 из чек-листа заказчика). Только то, что есть в материалах: застройщик, название, рендеры как фото, фасад для «Выбрать квартиру». Всё создаётся черновиком; остальное (адрес, блоки, планировки, цены, фото до 5, тексты, логотип) руководитель заполняет в кабинете. ЖК без известного застройщика (Chinor Residence, Garant Avenue, San'at Saroyi, Dream Residence, Soy Bo'yi Avenue) добавляет заказчик. Загрузка: npm run content:import (повторный запуск ничего не дублирует).",
+  "note": "Настоящие ЖК из «Чек-листа данных ЖК» заказчика (выгрузка 31.10.2026 — docs/zhk/<slug>/checklist.md) и файлов docs/zhk, docs/developers. Загрузка: npm run content:import — повторный запуск ничего не дублирует и не перезаписывает то, что уже заполнено в кабинете. publish: true — ЖК и застройщик опубликованы (файлы просмотрены по правилу 1.2, условия публикации выполнены); остальное — черновики: не хватает рендеров, чертежей или цен (docs/zhk/README.md). Soy Bo'yi Avenue в чек-листе пуст и сюда не входит. Цены и наличие — на дату выгрузки.",
   "developers": [
-    { "slug": "myb-development", "name": "MYB Development" },
-    { "slug": "ibrat-building", "name": "Ibrat Building" },
-    { "slug": "qadrdonlar-developments", "name": "Qadrdonlar Developments" }
+    {
+      "slug": "myb-development",
+      "name": "MYB Development",
+      "foundedYear": 2016,
+      "flatsDelivered": 106,
+      "logo": "../developers/myb-development/logo.png",
+      "publish": true,
+      "about": {
+        "ru": "Представьте: вы выходите из подъезда, во дворе играют дети — и ни одной машины. Так устроены дома MYB Development в самом центре Ферганы, в 10 минутах пешком от Центрального парка. Машины уходят на подземную парковку, а двор остаётся семьям. Квартиры сдаются в White Box: ремонт можно начать сразу.\n\nС 2016 года MYB построила и сдала 106 квартир. Первый этап Shodlik сдан в 2023 году. Напротив строится Sayilgoh — приезжайте и посмотрите на дома и стройку своими глазами.",
+        "uz": "Tasavvur qiling: podyezddan chiqasiz, hovlida bolalar o‘ynayapti — va birorta ham mashina yo‘q. MYB Development uylari aynan shunday: Farg‘ona shahrining qoq markazida, Markaziy bog‘dan piyoda 10 daqiqa. Mashinalar yer osti avtoturargohiga tushadi, hovli esa oilalarga qoladi. Xonadonlar White Box holatida topshiriladi: ta’mirni darhol boshlash mumkin.\n\nMYB 2016-yildan beri 106 ta xonadon qurib topshirdi. Shodlik’ning birinchi bosqichi 2023-yilda topshirilgan. Ro‘parada Sayilgoh qurilmoqda — kelib, uylarni va qurilishni o‘z ko‘zingiz bilan ko‘ring."
+      },
+      "pastProjects": [
+        {
+          "name": {
+            "ru": "Первый проект MYB — 27 квартир, сдан в 2018 году",
+            "uz": "MYB ning birinchi loyihasi — 27 ta xonadon, 2018-yilda topshirilgan"
+          }
+        },
+        {
+          "name": {
+            "ru": "Shodlik, 1-й этап — 79 квартир, сдан в 2023 году",
+            "uz": "Shodlik, 1-bosqich — 79 ta xonadon, 2023-yilda topshirilgan"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "ibrat-building",
+      "name": "Ibrat Building"
+    },
+    {
+      "slug": "qadrdonlar-developments",
+      "name": "Qadrdonlar Developments",
+      "foundedYear": 2021,
+      "about": {
+        "ru": "Qadrdonlar Developments — строительная компания, основана в 2021 году. Строит только жильё комфорт- и бизнес-класса, в штате более 100 сотрудников. «Qadrdonlar» значит «близкие люди»: компания строит так, как строила бы для своих. Один жилой комплекс сдан, два строятся. Обслуживанием домов занимается управляющая компания Hamroh Service.",
+        "uz": "Qadrdonlar Developments — 2021-yilda tashkil topgan qurilish kompaniyasi. Faqat komfort va biznes klassdagi uylar quradi, kompaniyada 100 dan ortiq xodim ishlaydi. «Qadrdonlar» — yaqin insonlar degani: kompaniya o‘z yaqinlari uchun qurayotgandek quradi. Bitta turar joy majmuasi topshirilgan, ikkitasi qurilmoqda. Uylarga Hamroh Service boshqaruv kompaniyasi xizmat ko‘rsatadi."
+      }
+    },
+    {
+      "slug": "ukasset",
+      "name": "UKASSET",
+      "foundedYear": 2018,
+      "flatsDelivered": 500,
+      "about": {
+        "ru": "UKASSET — «Прочные и надёжные дома». С 2018 года компания построила и в срок сдала 10 домов в Фергане и Маргилане — 500 квартир. С 2025 года строит в центре Ферганы жилой комплекс Chinor Residence: 5 блоков, 12 этажей, 407 квартир.",
+        "uz": "UKASSET — «Mustahkam va ishonchli uylar». Kompaniya 2018-yildan beri Farg‘ona va Marg‘ilonda 10 ta uyni o‘z vaqtida qurib topshirdi — jami 500 ta xonadon. 2025-yildan Farg‘ona markazida 5 blokli, 12 qavatli, 407 xonadonli Chinor Residence turar-joy majmuasini qurmoqda."
+      },
+      "pastProjects": [
+        {
+          "name": {
+            "ru": "Тарона и Марказ, Фергана — 2 дома, 84 квартиры (старт 2018)",
+            "uz": "Tarona va Markaz, Farg‘ona — 2 ta uy, 84 xonadon (2018-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Гулистан, Маргилан — 42 квартиры (старт 2019)",
+            "uz": "Guliston, Marg‘ilon — 42 xonadon (2019-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Манзара, Фергана — 24 квартиры (старт 2020)",
+            "uz": "Manzara, Farg‘ona — 24 xonadon (2020-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Истиклол, Фергана — 30 квартир (старт 2020)",
+            "uz": "Istiqlol, Farg‘ona — 30 xonadon (2020-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Куклам, Фергана — 20 квартир (старт 2021)",
+            "uz": "Ko‘klam, Farg‘ona — 20 xonadon (2021-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Марварид, Фергана — 26 квартир (старт 2021)",
+            "uz": "Marvarid, Farg‘ona — 26 xonadon (2021-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Флагман, Фергана — 26 квартир (старт 2021)",
+            "uz": "Flagman, Farg‘ona — 26 xonadon (2021-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Сайилгох (дом UKASSET), Фергана — 72 квартиры (старт 2022)",
+            "uz": "Sayilgoh (UKASSET uyi), Farg‘ona — 72 xonadon (2022-yilda boshlangan)"
+          }
+        },
+        {
+          "name": {
+            "ru": "Сакинат, Фергана — 176 квартир (старт 2023)",
+            "uz": "Sakinat, Farg‘ona — 176 xonadon (2023-yilda boshlangan)"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "garant-avenue",
+      "name": "Garant Avenue"
+    },
+    {
+      "slug": "fayz-akira",
+      "name": "FAYZ-AKIRA"
+    },
+    {
+      "slug": "jba-group",
+      "name": "JBA Group"
+    }
   ],
   "complexes": [
     {
       "slug": "shodlik",
       "name": "Shodlik",
       "developer": "myb-development",
-      "photos": ["shodlik/fasad-1-front.jpg", "shodlik/fasad-2-aerial.jpg"],
-      "facade": "shodlik/fasad-1-front.jpg"
+      "publish": true,
+      "photos": [
+        "shodlik/fasad-1-front.jpg",
+        "shodlik/fasad-2-aerial.jpg",
+        "shodlik/render-1.jpg",
+        "shodlik/render-4.jpg",
+        "shodlik/render-5.jpg",
+        "shodlik/render-6.jpg",
+        "shodlik/foto-10.jpg",
+        "shodlik/foto-13.jpg",
+        "shodlik/foto-14.jpg"
+      ],
+      "facade": "shodlik/fasad-1-front.jpg",
+      "class": "business",
+      "houseType": "frame",
+      "ceilingHeight": 3.2,
+      "parking": "underground",
+      "location": "fergana",
+      "address": {
+        "ru": "ул. Комус, 4А",
+        "uz": "Qomus ko‘chasi, 4A"
+      },
+      "landmark": {
+        "ru": "рядом со школой № 41 и центром Festival",
+        "uz": "41-maktab va Festival markazi yonida"
+      },
+      "minutesToCenter": 10,
+      "point": [
+        40.380305,
+        71.782739
+      ],
+      "nearby": [
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Школа № 41",
+            "uz": "41-maktab"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Кафе и рестораны",
+            "uz": "Kafe va restoranlar"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka (3-й филиал)",
+            "uz": "Korzinka supermarketi (3-filial)"
+          },
+          "minutes": 3
+        },
+        {
+          "kind": "kindergarten",
+          "name": {
+            "ru": "Детский сад",
+            "uz": "Bolalar bog‘chasi"
+          },
+          "minutes": 6
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "ТЦ Flagman",
+            "uz": "Flagman savdo markazi"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "clinic",
+          "name": {
+            "ru": "Больница Compass Hospital",
+            "uz": "Compass Hospital"
+          },
+          "minutes": 9
+        }
+      ],
+      "visitedOn": "2026-10-15",
+      "documents": {
+        "checkedOn": "2026-10-15",
+        "types": [
+          "land",
+          "permit",
+          "expertise"
+        ]
+      },
+      "units": "shodlik/units.json",
+      "blocks": [
+        {
+          "name": "A",
+          "status": "building",
+          "floorsTotal": 8,
+          "floorsBuilt": 7,
+          "deadline": [
+            2027,
+            1
+          ],
+          "finishing": "white-box",
+          "cadastre": "in_progress",
+          "cadastreExpectedOn": "2027-03-30",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса пентхауса, за м²",
+                "uz": "Pentxaus terrasasi, 1 m² uchun"
+              },
+              "included": false,
+              "price": 2400000
+            }
+          ]
+        },
+        {
+          "name": "B",
+          "status": "building",
+          "floorsTotal": 8,
+          "floorsBuilt": 8,
+          "deadline": [
+            2027,
+            1
+          ],
+          "finishing": "white-box",
+          "cadastre": "in_progress",
+          "cadastreExpectedOn": "2027-03-30",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса пентхауса, за м²",
+                "uz": "Pentxaus terrasasi, 1 m² uchun"
+              },
+              "included": false,
+              "price": 2400000
+            }
+          ]
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 8,
+          "active": true,
+          "sort": 10
+        },
+        {
+          "type": "installment",
+          "method": "tiers",
+          "tiers": [
+            {
+              "min_down_pct": 30,
+              "discount_pct": 0,
+              "min_months": 1,
+              "max_months": 18
+            },
+            {
+              "min_down_pct": 51,
+              "discount_pct": 4,
+              "min_months": 1,
+              "max_months": 12
+            }
+          ],
+          "presetMonths": [
+            12
+          ],
+          "allowCustomMonths": true,
+          "conditions": {
+            "ru": "До 1 декабря — рассрочка до 18 месяцев, с 1 декабря — 12 месяцев.",
+            "uz": "1-dekabrgacha — 18 oygacha bo‘lib to‘lash, 1-dekabrdan — 12 oy."
+          },
+          "active": true,
+          "sort": 20
+        }
+      ],
+      "progress": [
+        {
+          "month": "2026-10-01",
+          "date": "2026-10-15",
+          "block": "B",
+          "comment": {
+            "ru": "Блок А: бетон до 7-го этажа, на 2–3-м этажах наружные стены из газоблока. Блок Б: каркас завершён, окна установлены, перегородки готовы, фасад на финальном этапе. С 13 октября — водопровод, канализация, вентиляция и электрика. Лифтовая шахта — до 6-го этажа.",
+            "uz": "A blok: beton 7-qavatgacha, 2–3-qavatlarda tashqi devorlar gazoblokdan. B blok: karkas tayyor, derazalar o‘rnatildi, ichki devorlar tayyor, fasad yakuniy bosqichda. 13-oktyabrdan suv, kanalizatsiya, ventilyatsiya va elektr ishlari. Lift shaxtasi 6-qavatdan o‘tdi."
+          },
+          "photos": [
+            "shodlik/hod-2026-10-2.jpg",
+            "shodlik/hod-2026-10-3.jpg",
+            "shodlik/hod-2026-10-1.jpg",
+            "shodlik/hod-2026-10-4.jpg",
+            "shodlik/hod-2026-10-6.jpg"
+          ]
+        }
+      ],
+      "details": {
+        "about": {
+          "ru": "Shodlik — жилой комплекс бизнес-класса в центре Ферганы на участке больше 5 000 м². Это второй этап: первый, на 79 квартир, сдан в 2023 году. Два 8-этажных блока с двухуровневыми пентхаусами, квартиры начинаются со 2-го этажа, потолки 3,2 м. Главная идея — двор без машин: автомобили уходят на подземную парковку, а двор остаётся жителям.",
+          "uz": "Shodlik — Farg‘ona markazida, 5 000 m² dan ortiq maydonda joylashgan biznes-klass turar-joy majmuasi. Bu — ikkinchi bosqich: 79 xonadonli birinchi bosqich 2023-yilda topshirilgan. Ikki darajali pentxausli ikkita 8 qavatli blok, xonadonlar 2-qavatdan boshlanadi, ship balandligi 3,2 m. Asosiy g‘oya — mashinasiz hovli: avtomobillar yer osti avtoturargohiga tushadi, hovli esa aholiga qoladi."
+        },
+        "quality": {
+          "ru": "Фасад Shodlik со стороны улицы облицован травертином с узорами в марокканском стиле. Наружные стены утеплены базальтовой каменной ватой, поэтому в квартирах теплее и тише. Окна — качественные пластиковые, производства IMZO, с двумя стёклами в стеклопакете. Входная дверь — металлическая, с высокой степенью защиты, улучшенной звукоизоляцией и презентабельным внешним видом.",
+          "uz": "Shodlik fasadi ko‘cha tomondan Marokash uslubidagi naqshli travertin bilan qoplangan. Tashqi devorlar bazalt tosh paxtasi bilan issiqlik va shovqindan himoyalangan, shuning uchun xonadonlarda issiqroq va tinchroq. Derazalar — IMZO ishlab chiqargan sifatli plastik derazalar, steklopaketda ikki qavat oyna. Kirish eshigi — yuqori darajada himoyalangan, tovush izolyatsiyasi yaxshilangan, ko‘rinishi ko‘rkam metall eshik."
+        },
+        "landscaping": {
+          "ru": "Во двор Shodlik машины не заезжают, а сам двор озеленят — это место для детей и соседей. Уже готовы летняя кухня и казан-очаги, где можно собраться всей семьёй. Ещё во дворе будут небольшой фонтан, беседка, детская площадка, воркаут-зона и уличное освещение.",
+          "uz": "Shodlik hovlisiga mashinalar kirmaydi, hovlining o‘zi esa ko‘kalamzorlashtiriladi — bu bolalar va qo‘shnilar uchun joy. Yozgi oshxona va qozon-o‘choqlar allaqachon tayyor, bu yerda butun oila bilan yig‘ilish mumkin. Hovlida kichik fontan, shiypon, bolalar maydonchasi, workout zona va ko‘cha chiroqlari ham bo‘ladi."
+        },
+        "amenities": {
+          "ru": "В каждом блоке — лифт KONE, финского бренда. Подъезды и холлы оформят в марокканском стиле, с собственными узорами и декоративной отделкой Ottocento. Под домом — подземная парковка примерно на 60 машин, места покупаются отдельно.",
+          "uz": "Har bir blokda — Finlyandiyaning KONE brendi lifti. Podyezd va xollar o‘ziga xos naqshlar va Ottocento dekorativ qoplamasi bilan Marokash uslubida bezatiladi. Uy ostida taxminan 60 ta mashinaga mo‘ljallangan yer osti avtoturargohi bor, joylar alohida sotib olinadi."
+        },
+        "location": {
+          "ru": "Shodlik — в самом центре Ферганы. Школа № 41 в минуте ходьбы, Korzinka — в трёх, детский сад — в шести. Рядом кафе и развлекательный центр Festival, до ТЦ Flagman 8 минут, до Центрального парка — 10 минут пешком.",
+          "uz": "Shodlik — Farg‘onaning qoq markazida. 41-maktab bir daqiqalik, Korzinka uch daqiqalik, bolalar bog‘chasi olti daqiqalik masofada. Yonida kafelar va Festival ko‘ngilochar markazi, Flagman savdo markazigacha 8 daqiqa, Markaziy bog‘gacha piyoda 10 daqiqa."
+        },
+        "engineering": {
+          "ru": "Shodlik построен на бетонном каркасе, стены — из газоблока, сейсмостойкость — 8 баллов. Отопление — свой газовый котёл в каждой квартире. Горячая вода — от котла или от электрического водонагревателя. Счётчики газа, воды и электричества уже установлены в квартирах.",
+          "uz": "Shodlik beton karkasda qurilgan, devorlari — gazoblokdan, seysmik bardoshliligi 8 ball. Isitish — har bir xonadonda alohida gaz qozoni. Issiq suv — qozondan yoki elektr suv isitgichidan. Gaz, suv va elektr hisoblagichlari xonadonlarga o‘rnatilgan."
+        }
+      }
     },
     {
       "slug": "sayilgoh",
       "name": "Sayilgoh",
       "developer": "myb-development",
-      "photos": ["sayilgoh/fasad-1-aerial.jpg", "sayilgoh/fasad-2-aerial-night.jpg"],
-      "facade": "sayilgoh/fasad-1-aerial.jpg"
+      "publish": true,
+      "photos": [
+        "sayilgoh/fasad-1-aerial.jpg",
+        "sayilgoh/fasad-2-aerial-night.jpg",
+        "sayilgoh/render-5.jpg",
+        "sayilgoh/render-3.jpg",
+        "sayilgoh/render-4.jpg",
+        "sayilgoh/render-6.jpg"
+      ],
+      "facade": "sayilgoh/fasad-1-aerial.jpg",
+      "class": "business",
+      "houseType": "monolith",
+      "ceilingHeight": 3.2,
+      "parking": "underground",
+      "location": "fergana",
+      "address": {
+        "ru": "ул. Фаробий, 3",
+        "uz": "Farobiy ko‘chasi, 3"
+      },
+      "landmark": {
+        "ru": "рядом со школой № 41 и центром Festival",
+        "uz": "41-maktab va Festival markazi yonida"
+      },
+      "minutesToCenter": 10,
+      "point": [
+        40.380057,
+        71.781131
+      ],
+      "nearby": [
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Кафе и рестораны",
+            "uz": "Kafe va restoranlar"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Школа № 41",
+            "uz": "41-maktab"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka (3-й филиал)",
+            "uz": "Korzinka supermarketi (3-filial)"
+          },
+          "minutes": 3
+        },
+        {
+          "kind": "kindergarten",
+          "name": {
+            "ru": "Детский сад",
+            "uz": "Bolalar bog‘chasi"
+          },
+          "minutes": 5
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "ТЦ Flagman",
+            "uz": "Flagman savdo markazi"
+          },
+          "minutes": 7
+        },
+        {
+          "kind": "clinic",
+          "name": {
+            "ru": "Больница Compass Hospital",
+            "uz": "Compass Hospital"
+          },
+          "minutes": 9
+        }
+      ],
+      "visitedOn": "2026-10-18",
+      "documents": {
+        "checkedOn": "2026-10-25",
+        "types": [
+          "land",
+          "permit",
+          "expertise"
+        ]
+      },
+      "units": "sayilgoh/units.json",
+      "blocks": [
+        {
+          "name": "A",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 5,
+          "deadline": [
+            2028,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса и балкон — по цене трети площади",
+                "uz": "Terrasa va balkon — maydonining uchdan biri narxida"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "B",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 0,
+          "deadline": [
+            2028,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса и балкон — по цене трети площади",
+                "uz": "Terrasa va balkon — maydonining uchdan biri narxida"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C",
+          "status": "building",
+          "floorsTotal": 11,
+          "floorsBuilt": 0,
+          "deadline": [
+            2028,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса и балкон — по цене трети площади",
+                "uz": "Terrasa va balkon — maydonining uchdan biri narxida"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "D",
+          "status": "building",
+          "floorsTotal": 11,
+          "floorsBuilt": 9,
+          "deadline": [
+            2028,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса и балкон — по цене трети площади",
+                "uz": "Terrasa va balkon — maydonining uchdan biri narxida"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "E",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 0,
+          "deadline": [
+            2028,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            },
+            {
+              "item": {
+                "ru": "Терраса и балкон — по цене трети площади",
+                "uz": "Terrasa va balkon — maydonining uchdan biri narxida"
+              },
+              "included": true
+            }
+          ]
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 15,
+          "active": true,
+          "sort": 30
+        },
+        {
+          "type": "installment",
+          "method": "tiers",
+          "tiers": [
+            {
+              "min_down_pct": 25,
+              "discount_pct": 0,
+              "min_months": 1,
+              "max_months": 24
+            },
+            {
+              "min_down_pct": 50,
+              "discount_pct": 0,
+              "min_months": 1,
+              "max_months": 30
+            }
+          ],
+          "presetMonths": [
+            12,
+            24
+          ],
+          "allowCustomMonths": true,
+          "active": true,
+          "sort": 40
+        }
+      ],
+      "details": {
+        "about": {
+          "ru": "Sayilgoh — жилой комплекс бизнес-класса в центре Ферганы, напротив Shodlik, от того же застройщика MYB Development. Пять монолитных блоков высотой 11 и 12 этажей, квартиры начинаются с 3-го этажа, на двух верхних — двухуровневые пентхаусы с террасой. Во дворе машин нет: подземная парковка рассчитана примерно на половину квартир.",
+          "uz": "Sayilgoh — Farg‘ona markazidagi biznes-klass turar-joy majmuasi, Shodlik ro‘parasida, quruvchisi ham o‘sha — MYB Development. 11 va 12 qavatli beshta monolit blok, xonadonlar 3-qavatdan boshlanadi, yuqori ikki qavatda — terrasali ikki qavatli pentxauslar. Hovlida mashinalar yo‘q: yer osti avtoturargohi xonadonlarning qariyb yarmiga mo‘ljallangan."
+        },
+        "amenities": {
+          "ru": "Под домом — подземная парковка примерно на половину квартир, места покупаются отдельно. В подвале, на 1-м и 2-м этажах будут магазины, сервис и офисы, планируется небольшая клиника — нужные услуги прямо в доме.",
+          "uz": "Uy ostida xonadonlarning qariyb yarmiga mo‘ljallangan yer osti avtoturargohi bor, joylar alohida sotib olinadi. Yerto‘la, 1- va 2-qavatlarda do‘konlar, xizmat ko‘rsatish joylari va ofislar bo‘ladi, kichik klinika ham rejalashtirilgan — kerakli xizmatlar uyning o‘zida."
+        },
+        "location": {
+          "ru": "Sayilgoh — в самом центре Ферганы, на улице Фаробий. Школа № 41 в двух минутах ходьбы, Korzinka — в трёх, детский сад — в пяти. Рядом кафе и развлекательный центр Festival, до ТЦ Flagman 7 минут, до Центрального парка — 10 минут пешком.",
+          "uz": "Sayilgoh — Farg‘onaning qoq markazida, Farobiy ko‘chasida. 41-maktab ikki daqiqalik, Korzinka uch daqiqalik, bolalar bog‘chasi besh daqiqalik masofada. Yonida kafelar va Festival ko‘ngilochar markazi, Flagman savdo markazigacha 7 daqiqa, Markaziy bog‘gacha piyoda 10 daqiqa."
+        },
+        "engineering": {
+          "ru": "По проекту: монолитный железобетонный каркас, стены из газобетона, утепление минватой 100 мм и декоративная штукатурка «под травертин», цоколь — керамогранит. Отопление от своей котельной на газе и твёрдом топливе, биметаллические радиаторы; горячая вода — солнечный водонагреватель; 12 солнечных батарей. Окна ПВХ, входные двери металлические утеплённые. Сейсмостойкость 8 баллов.",
+          "uz": "Loyiha bo‘yicha: monolit temirbeton karkas, gazobeton devorlar, 100 mm minvata va «travertin» dekorativ shtukaturka, sokol — keramogranit. Isitish: hududdagi gaz va qattiq yoqilg‘ida ishlaydigan qozonxona, bimetall radiatorlar; issiq suv — quyosh suv isitgichi; 12 ta quyosh batareyasi. Derazalar PVX, kirish eshiklari — issiqlik saqlovchi metall. Seysmiklik 8 ball."
+        }
+      }
     },
-    { "slug": "ibrat-building-14-qavat", "name": "Ibrat Building 14 qavat", "developer": "ibrat-building", "photos": [] },
-    { "slug": "dubai", "name": "Dubai", "developer": "ibrat-building", "photos": [] },
+    {
+      "slug": "chinor-residence",
+      "name": "Chinor Residence",
+      "developer": "ukasset",
+      "photos": [
+        "chinor-residence/fasad-2-front.jpg",
+        "chinor-residence/fasad-1-aerial.jpg"
+      ],
+      "facade": "chinor-residence/fasad-1-aerial.jpg",
+      "class": "comfort",
+      "houseType": "monolith",
+      "ceilingHeight": 3,
+      "parking": "mixed",
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Ёшлар, ул. Мураббийлар, 29А",
+        "uz": "Yoshlar MFY, Murabbiylar ko‘chasi, 29A"
+      },
+      "landmark": {
+        "ru": "напротив Центрального парка Ферганы",
+        "uz": "Farg‘ona markaziy bog‘i qarshisida"
+      },
+      "minutesToCenter": 1,
+      "point": [
+        40.390162,
+        71.779308
+      ],
+      "nearby": [
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Школа № 2",
+            "uz": "2-maktab"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "park",
+          "name": {
+            "ru": "Центральный парк",
+            "uz": "Farg‘ona markaziy bog‘i"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "sport",
+          "name": {
+            "ru": "Спорткомплекс Samo",
+            "uz": "Samo sport majmuasi"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Ферганский госуниверситет",
+            "uz": "Farg‘ona davlat universiteti"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka",
+            "uz": "Korzinka supermarketi"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "ТЦ ЦУМ",
+            "uz": "TSUM savdo markazi"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Центральный дехканский рынок",
+            "uz": "Markaziy dehqon bozori"
+          },
+          "minutes": 4
+        },
+        {
+          "kind": "mosque",
+          "name": {
+            "ru": "Мечеть Янги Чек",
+            "uz": "Yangi Chek masjidi"
+          },
+          "minutes": 19
+        }
+      ],
+      "visitedOn": "2026-10-25",
+      "documents": {
+        "checkedOn": "2026-10-25",
+        "types": [
+          "permit",
+          "expertise"
+        ]
+      },
+      "units": "chinor-residence/units.json",
+      "blocks": [
+        {
+          "name": "A",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 12,
+          "deadline": [
+            2027,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование детской площадкой и надземной парковкой",
+                "uz": "Bolalar maydonchasi va yer usti avtoturargohidan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование террасой и открытой кухней на крыше",
+                "uz": "Tomdagi terrasa va ochiq oshxonadan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            }
+          ]
+        },
+        {
+          "name": "B",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 12,
+          "deadline": [
+            2027,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование детской площадкой и надземной парковкой",
+                "uz": "Bolalar maydonchasi va yer usti avtoturargohidan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование террасой и открытой кухней на крыше",
+                "uz": "Tomdagi terrasa va ochiq oshxonadan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            }
+          ]
+        },
+        {
+          "name": "C1",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 12,
+          "deadline": [
+            2027,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование детской площадкой и надземной парковкой",
+                "uz": "Bolalar maydonchasi va yer usti avtoturargohidan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование террасой и открытой кухней на крыше",
+                "uz": "Tomdagi terrasa va ochiq oshxonadan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            }
+          ]
+        },
+        {
+          "name": "C2",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 12,
+          "deadline": [
+            2027,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование детской площадкой и надземной парковкой",
+                "uz": "Bolalar maydonchasi va yer usti avtoturargohidan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование террасой и открытой кухней на крыше",
+                "uz": "Tomdagi terrasa va ochiq oshxonadan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            }
+          ]
+        },
+        {
+          "name": "C3",
+          "status": "building",
+          "floorsTotal": 12,
+          "floorsBuilt": 12,
+          "deadline": [
+            2027,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование детской площадкой и надземной парковкой",
+                "uz": "Bolalar maydonchasi va yer usti avtoturargohidan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Пользование террасой и открытой кухней на крыше",
+                "uz": "Tomdagi terrasa va ochiq oshxonadan foydalanish"
+              },
+              "included": true
+            },
+            {
+              "item": {
+                "ru": "Место на подземной парковке",
+                "uz": "Yer osti avtoturargohidagi joy"
+              },
+              "included": false
+            }
+          ]
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 12,
+          "sort": 10
+        },
+        {
+          "type": "installment",
+          "method": "tiers",
+          "tiers": [
+            {
+              "min_down_pct": 20,
+              "discount_pct": 0,
+              "min_months": 12,
+              "max_months": 18
+            }
+          ],
+          "presetMonths": [
+            12
+          ],
+          "allowCustomMonths": true,
+          "sort": 20
+        }
+      ],
+      "details": {
+        "about": {
+          "ru": "Chinor Residence — жилой комплекс комфорт+ класса в центре Ферганы, напротив Центрального парка. Г-образный 12-этажный дом в классическом стиле из 5 блоков, всего 407 квартир. Цоколь и 1-й этаж — коммерция, квартиры со 2-го этажа. Во дворе — частный детский сад на 80–100 детей, на крыше надземной парковки — детская и спортивная площадка более 1500 м², на крыше дома — открытая кухня и терраса. Подземная и надземная парковка — более 200 мест.\nЧасть визуализаций показывает первоначальный проект двора.",
+          "uz": "Chinor Residence — Farg‘ona markazida, Markaziy bog‘ qarshisidagi komfort+ klassdagi turar-joy majmuasi. Klassik uslubdagi G shaklidagi 12 qavatli uy 5 ta blokdan iborat, jami 407 xonadon. Sokol va 1-qavatda tijorat joylari, xonadonlar 2-qavatdan boshlanadi. Hovlida 80–100 bolaga mo‘ljallangan xususiy bolalar bog‘chasi, yer usti avtoturargohining tomida 1500 m² dan ortiq bolalar va sport maydonchasi, uy tomida esa ochiq oshxona va terrasa bor. Yer osti va yer usti avtoturargohi — 200 dan ortiq joy.\nAyrim vizualizatsiyalar hovlining dastlabki loyihasini ko‘rsatadi."
+        },
+        "quality": {
+          "ru": "Фасад в классическом стиле: светлая облицовка с пилястрами и карнизами, кованые ограждения балконов, мансардная крыша с арочными окнами. Цоколь и 1-й этаж — в тёмном цвете, с витринами на улицу. У входов в подъезды — портики с колоннами.\nПо проекту: цоколь — керамогранит, стены утеплены минватой, декоративная штукатурка «под травертин»; окна — пластиковый и алюминиевый профиль; входные двери в квартиры — металлические утеплённые.",
+          "uz": "Fasad klassik uslubda: och rangli qoplama, pilyastr va karnizlar, naqshli temir balkon panjaralari, arkali derazali mansard tom. Sokol va 1-qavat to‘q rangda, ko‘cha tomonda vitrinalar. Podyezd kirishlarida ustunli ayvonlar.\nLoyiha bo‘yicha: sokol — keramogranit, devorlar minvata bilan isitilgan, «travertin» dekorativ shtukaturkasi; derazalar — plastik va alyuminiy profil; xonadonga kirish eshiklari — issiqlik saqlovchi metall."
+        },
+        "landscaping": {
+          "ru": "Во дворе — частный детский сад на 80–100 детей, беседки, уличные тренажёры, газоны и открытая парковка. На 2-м уровне, на крыше надземной парковки, — детская площадка более 1500 м², мини-футбольное поле и баскетбольное кольцо.",
+          "uz": "Hovlida — 80–100 bolaga mo‘ljallangan xususiy bolalar bog‘chasi, shiyponlar, trenajyorlar, maysazor va ochiq avtoturargoh. 2-sathda, yer usti avtoturargohining tomida — 1500 m² dan ortiq bolalar maydonchasi, mini-futbol maydoni va basketbol halqasi."
+        },
+        "amenities": {
+          "ru": "На крыше — открытая кухня общего пользования: казан-очаг, зона барбекю, открытая и крытая терраса. Здесь можно устроить праздник, большой или камерный, или отдохнуть с семьёй.\nЛифты: по проекту 2 пассажирских лифта.",
+          "uz": "Tomda — umumiy foydalanish uchun ochiq oshxona: qozon-o‘choq, barbekyu zonasi, ochiq va usti yopiq terrasa. Bu yerda katta-kichik tadbirlar o‘tkazish yoki oila bilan dam olish mumkin.\nLiftlar: loyiha bo‘yicha 2 ta yo‘lovchi lifti."
+        },
+        "location": {
+          "ru": "В центре Ферганы, напротив Центрального парка. Пешком: Центральный парк, школа № 2, Центр госуслуг и спорткомплекс Samo — 1 минута; Ферганский госуниверситет, супермаркет Korzinka и ТЦ ЦУМ — 2 минуты; Центральный дехканский рынок — 4 минуты.",
+          "uz": "Farg‘ona markazida, Markaziy bog‘ qarshisida. Piyoda: Markaziy bog‘, 2-maktab, Davlat xizmatlari markazi va Samo sport majmuasi — 1 daqiqa; Farg‘ona davlat universiteti, Korzinka supermarketi va TSUM savdo markazi — 2 daqiqa; Markaziy dehqon bozori — 4 daqiqa."
+        },
+        "engineering": {
+          "ru": "Фундамент — монолитная плита толщиной 1,4 м; каркас — монолитный железобетон (B30); сейсмостойкость — 8 баллов.\nОтопление — в каждой квартире свой электрокотёл (одно- или двухконтурный).\nЭлектричество, вода и канализация будут подключены. Газа нет — отопление и горячая вода на электричестве.",
+          "uz": "Poydevor — qalinligi 1,4 m bo‘lgan monolit plita; karkas — monolit temirbeton (B30); seysmik mustahkamlik — 8 ball.\nIsitish — har bir xonadonda alohida elektr qozon (bir yoki ikki konturli).\nElektr, suv va kanalizatsiya ulanadi. Gaz yo‘q — isitish va issiq suv elektrda."
+        }
+      }
+    },
+    {
+      "slug": "garant-avenue",
+      "name": "Garant Avenue",
+      "developer": "garant-avenue",
+      "photos": [
+        "garant-avenue/fasad-1-front.jpg",
+        "garant-avenue/fasad-2-corner.jpg"
+      ],
+      "facade": "garant-avenue/fasad-1-front.jpg",
+      "class": "premium",
+      "houseType": "monolith",
+      "ceilingHeight": 3.3,
+      "parking": "ground",
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Алишер Навои, ул. Сохибкирон Темур, 29",
+        "uz": "Alisher Navoiy MFY, Sohibqiron Temur ko‘chasi, 29"
+      },
+      "landmark": {
+        "ru": "напротив чайханы «Риштон»",
+        "uz": "«Rishton» choyxonasi ro‘parasida"
+      },
+      "minutesToCenter": 21,
+      "point": [
+        40.37318,
+        71.791058
+      ],
+      "nearby": [
+        {
+          "kind": "clinic",
+          "name": {
+            "ru": "Роддом «Ойбек»",
+            "uz": "«Oybek» tug‘ruqxonasi"
+          },
+          "minutes": 2
+        }
+      ],
+      "visitedOn": "2026-10-20",
+      "documents": {
+        "checkedOn": "2026-10-26",
+        "types": [
+          "permit",
+          "expertise"
+        ]
+      },
+      "blocks": [
+        {
+          "name": "A",
+          "status": "building",
+          "floorsTotal": 12,
+          "deadline": [
+            2027,
+            1
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ],
+          "layouts": [
+            {
+              "rooms": 2,
+              "area": 49.27,
+              "priceFrom": 394160000
+            },
+            {
+              "rooms": 2,
+              "area": 49.51,
+              "priceFrom": 396080000
+            },
+            {
+              "rooms": 2,
+              "area": 50.31,
+              "priceFrom": 402480000
+            },
+            {
+              "rooms": 2,
+              "area": 51.41,
+              "priceFrom": 411280000
+            },
+            {
+              "rooms": 2,
+              "area": 51.93,
+              "priceFrom": 415440000
+            },
+            {
+              "rooms": 2,
+              "area": 54.01,
+              "priceFrom": 432080000
+            },
+            {
+              "rooms": 2,
+              "area": 63.74,
+              "priceFrom": 509920000
+            },
+            {
+              "rooms": 3,
+              "area": 63.74,
+              "priceFrom": 509920000
+            },
+            {
+              "rooms": 3,
+              "area": 66.2,
+              "priceFrom": 529600000
+            },
+            {
+              "rooms": 3,
+              "area": 75.21,
+              "priceFrom": 601680000
+            },
+            {
+              "rooms": 3,
+              "area": 82.95,
+              "priceFrom": 663600000
+            }
+          ]
+        },
+        {
+          "name": "Б",
+          "status": "building",
+          "floorsTotal": 12,
+          "deadline": [
+            2027,
+            1
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        }
+      ],
+      "details": {
+        "quality": {
+          "ru": "По проекту (рендеры): белый фасад с вертикальными золотистыми акцентами, нижние этажи в тёмном цвете. Гостиничный блок — со стеклянным фасадом и вывеской «HOTEL». На 1-м этаже со стороны улицы — магазины с большими витринами.",
+          "uz": "Loyiha bo‘yicha (renderlar): oq fasad, vertikal oltinrang chiziqlar, pastki qavatlar to‘q rangda. Mehmonxona bloki — shisha fasadli, «HOTEL» yozuvi bilan. 1-qavatda ko‘cha tomonda katta vitrinali do‘konlar."
+        },
+        "landscaping": {
+          "ru": "Участок 3 300 м²: под зданиями 1 621 м², дороги и дорожки 1 060 м² (асфальт и брусчатка, освещение), озеленение 620 м².\nНа рендерах: беседки, детская площадка, озеленённые дорожки, открытая и крытая парковка; на верхнем этаже — терраса (настольный теннис, шезлонги, стеклянное ограждение).",
+          "uz": "Hudud 3 300 m²: bino osti 1 621 m², yo‘llar va yo‘laklar 1 060 m² (asfaltbeton va bruschatka, sun’iy yoritish), ko‘kalamzor 620 m².\nRenderlarda: shiyponlar, bolalar maydonchasi, ko‘kalamzor yo‘laklar, ochiq va usti yopiq avtoturargoh; yuqori qavatda umumiy terrasa (stol tennisi, shezlonglar, shisha to‘siq)."
+        },
+        "amenities": {
+          "ru": "Дизайн подъездов (по рендерам застройщика): лобби на 1-м этаже — деревянные панели, камень под травертин, узорная плитка на полу, светодиодная подсветка, зеркала и растения; над дверями лифтов — каменный портал. Коридоры 2–12 этажей — деревянные панели, пол под серый мрамор, номера квартир с подсветкой. У каждого подъезда свой дизайн-проект.",
+          "uz": "Podezd dizayni (quruvchi renderlari bo‘yicha): 1-qavat lobbisi — yog‘och panellar, travertin uslubidagi tosh, naqshli pol plitkasi, LED yoritish, ko‘zgular va gullar; lift eshiklari ustida tosh portal. 2–12-qavat koridorlari — yog‘och panellar, kulrang marmar uslubidagi pol, yoritilgan xonadon raqamlari. Har bir podezdning o‘z dizayni bor."
+        },
+        "location": {
+          "ru": "Фергана, напротив чайханы «Риштон», рядом с футбольной школой. До роддома «Ойбек» — 2 минуты пешком, до центра города — 21 минута пешком.",
+          "uz": "Farg‘onada, «Rishton» choyxonasi ro‘parasida, futbol maktabi yaqinida. «Oybek» tug‘ruqxonasigacha piyoda — 2 daqiqa, shahar markazigacha piyoda — 21 daqiqa."
+        },
+        "engineering": {
+          "ru": "По проекту: отопление — двухконтурный электрокотёл 10 кВт, биметаллические радиаторы, счётчик тепла в каждой квартире. В подъездах, лифтах и подвале — свет по датчику движения, дополнительное питание от солнечных панелей. Повысительные насосы, пожарная и охранная сигнализация. Сейсмостойкость 8 баллов. Газа нет: отопление и горячая вода на электричестве.",
+          "uz": "Loyiha bo‘yicha: isitish — elektr bilan ishlaydigan ikki konturli 10 kVt qozon, bimetall radiatorlar, har xonadonda issiqlik hisoblagichi. Umumiy joylarda harakat sensorli yoritish; kirish, podval va lift yoritishi uchun quyosh panellari. Suv bosimi uchun nasoslar, yong‘in va qo‘riqlash signalizatsiyasi. Seysmiklik 8 ball. Gaz yo‘q: isitish va issiq suv elektrda."
+        }
+      }
+    },
+    {
+      "slug": "ibrat-building-14-qavat",
+      "name": "Ibrat Building 14 qavat",
+      "developer": "ibrat-building",
+      "photos": [],
+      "class": "econom",
+      "houseType": "monolith",
+      "ceilingHeight": 3,
+      "parking": "ground",
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Шакаркишлок, ул. Тарона, 18/6",
+        "uz": "Shakarqishloq MFY, Tarona ko‘chasi, 18/6"
+      },
+      "landmark": {
+        "ru": "за хокимиятом, рядом со школой № 42",
+        "uz": "shahar hokimiyati orqasida, 42-maktab yaqinida"
+      },
+      "minutesToCenter": 36,
+      "point": [
+        40.36756,
+        71.810003
+      ],
+      "nearby": [
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Минимаркеты",
+            "uz": "Minimarketlar"
+          },
+          "minutes": 4
+        },
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Школа № 42",
+            "uz": "42-maktab"
+          },
+          "minutes": 3
+        },
+        {
+          "kind": "kindergarten",
+          "name": {
+            "ru": "Детский сад «Yulduzcha»",
+            "uz": "«Yulduzcha» bolalar bog‘chasi"
+          },
+          "minutes": 5
+        },
+        {
+          "kind": "park",
+          "name": {
+            "ru": "Парк «Санъат саройи»",
+            "uz": "San’at saroyi bog‘i"
+          },
+          "minutes": 7
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka",
+            "uz": "Korzinka supermarketi"
+          },
+          "minutes": 9
+        },
+        {
+          "kind": "mosque",
+          "name": {
+            "ru": "Мечеть Шакаркишлок",
+            "uz": "Shakarqishloq masjidi"
+          },
+          "minutes": 14
+        }
+      ],
+      "blocks": [
+        {
+          "name": "4–5",
+          "status": "delivered",
+          "floorsTotal": 14,
+          "deadline": [
+            2026,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "done",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ],
+          "layouts": [
+            {
+              "rooms": 2,
+              "area": 60.91,
+              "priceFrom": 395915000,
+              "available": true
+            },
+            {
+              "rooms": 2,
+              "area": 62.56,
+              "available": false
+            },
+            {
+              "rooms": 2,
+              "area": 65.15,
+              "priceFrom": 423475000,
+              "available": true
+            }
+          ]
+        }
+      ],
+      "programs": [
+        {
+          "type": "installment",
+          "method": "tiers",
+          "tiers": [
+            {
+              "min_down_pct": 30,
+              "discount_pct": 0,
+              "min_months": 1,
+              "max_months": 18
+            }
+          ],
+          "presetMonths": [
+            12
+          ],
+          "allowCustomMonths": true,
+          "sort": 10
+        }
+      ],
+      "details": {
+        "location": {
+          "ru": "За зданием хокимията Ферганы, рядом со школой № 42. Пешком: минимаркеты — 2–4 минуты, школа № 42 — 3, детсад «Yulduzcha» — 5, парк «Санъат саройи» — 7, Korzinka — 9, мечеть Шакаркишлок — 14 минут. До Центрального парка — 11 минут на машине.",
+          "uz": "Farg‘ona shahar hokimiyati orqasida, 42-maktab yonida. Piyoda: minimarketlar — 2–4 daqiqa, 42-maktab — 3, «Yulduzcha» bog‘chasi — 5, San’at saroyi bog‘i — 7, Korzinka — 9, Shakarqishloq masjidi — 14 daqiqa. Markaziy bog‘gacha mashinada 11 daqiqa."
+        },
+        "engineering": {
+          "ru": "Монолитный каркас, внутренние стены — автоклавный газоблок. В каждой квартире счётчики газа, электричества и воды.",
+          "uz": "Monolit karkas, ichki devorlar — avtoklav gazoblok. Har bir xonadonda gaz, elektr va suv hisoblagichlari."
+        }
+      }
+    },
+    {
+      "slug": "dubai",
+      "name": "Dubai",
+      "developer": "ibrat-building",
+      "photos": [],
+      "class": "econom",
+      "houseType": "monolith",
+      "ceilingHeight": 3.05,
+      "parking": "ground",
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Янгисой, ул. Янги Турон, 162–165",
+        "uz": "Yangisoy MFY, Yangi Turon ko‘chasi, 162–165"
+      },
+      "landmark": {
+        "ru": "за хокимиятом, рядом со школой № 42",
+        "uz": "shahar hokimiyati orqasida, 42-maktab yaqinida"
+      },
+      "minutesToCenter": 37,
+      "point": [
+        40.371985,
+        71.810515
+      ],
+      "nearby": [
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Школа № 42",
+            "uz": "42-maktab"
+          },
+          "minutes": 3
+        },
+        {
+          "kind": "kindergarten",
+          "name": {
+            "ru": "Детский сад «Yulduzcha»",
+            "uz": "«Yulduzcha» bolalar bog‘chasi"
+          },
+          "minutes": 5
+        },
+        {
+          "kind": "park",
+          "name": {
+            "ru": "Парк «Санъат саройи»",
+            "uz": "San’at saroyi bog‘i"
+          },
+          "minutes": 7
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka",
+            "uz": "Korzinka supermarketi"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Филиал Ферганского госуниверситета",
+            "uz": "Farg‘ona davlat universiteti filiali"
+          },
+          "minutes": 9
+        },
+        {
+          "kind": "mosque",
+          "name": {
+            "ru": "Мечеть Шакаркишлок",
+            "uz": "Shakarqishloq masjidi"
+          },
+          "minutes": 14
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Ansor Milliy Taomlari",
+            "uz": "Ansor Milliy Taomlari"
+          },
+          "minutes": 15
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Кафе Besh Bola lavash",
+            "uz": "Besh Bola lavash kafesi"
+          },
+          "minutes": 17
+        },
+        {
+          "kind": "park",
+          "name": {
+            "ru": "Центральный парк",
+            "uz": "Markaziy bog‘"
+          },
+          "minutes": 37
+        }
+      ],
+      "documents": {
+        "checkedOn": "2026-10-26",
+        "types": [
+          "permit",
+          "expertise"
+        ]
+      },
+      "blocks": [
+        {
+          "name": "A",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2028,
+            4
+          ],
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": []
+        },
+        {
+          "name": "B",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2028,
+            4
+          ],
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": []
+        },
+        {
+          "name": "C",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2028,
+            4
+          ],
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": []
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 7,
+          "sort": 20
+        },
+        {
+          "type": "installment",
+          "method": "tiers",
+          "tiers": [
+            {
+              "min_down_pct": 30,
+              "discount_pct": 0,
+              "min_months": 1,
+              "max_months": 18
+            }
+          ],
+          "presetMonths": [
+            12
+          ],
+          "allowCustomMonths": true,
+          "sort": 30
+        }
+      ],
+      "details": {
+        "quality": {
+          "ru": "По проекту фасад: цоколь — гранитная плитка, стены утеплены минватой и покрыты декоративной штукатуркой «под травертин».",
+          "uz": "Loyiha bo‘yicha fasad: sokol — granit plita, devorlar minvata bilan isitilgan va «travertin» dekorativ shtukaturkasi bilan qoplangan."
+        },
+        "landscaping": {
+          "ru": "По проекту: во дворе детские площадки, парковка, озеленение, дорожки из асфальта и брусчатки, освещение. Площадь участка — 4 176 м².",
+          "uz": "Loyiha bo‘yicha: hovlida bolalar maydonchalari, avtoturargoh, ko‘kalamzorlashtirish, asfalt va bruschatka yo‘laklar, kechki yoritish. Hudud maydoni — 4 176 m²."
+        },
+        "amenities": {
+          "ru": "По проекту: 2 пассажирских лифта.",
+          "uz": "Loyiha bo‘yicha: 2 ta yo‘lovchi lifti."
+        },
+        "location": {
+          "ru": "За хокимиятом Ферганы, «Бахт уйи» и гостиницей Grand Hotel. Пешком: школа № 42 — 3 минуты, детсад «Yulduzcha» — 5, парк «Санъат саройи» — 7, Korzinka — 8, филиал ФерГУ — 9, мечеть Шакаркишлок — 14 минут. До Центрального парка — 37 минут пешком.",
+          "uz": "Farg‘ona shahar hokimiyati, «Baxt uyi» va Grand Hotel orqasida. Piyoda: 42-maktab — 3 daqiqa, «Yulduzcha» bog‘chasi — 5, San’at saroyi bog‘i — 7, Korzinka — 8, FarDU filiali — 9, Shakarqishloq masjidi — 14 daqiqa. Markaziy bog‘gacha piyoda 37 daqiqa."
+        },
+        "engineering": {
+          "ru": "По проекту: в каждой квартире двухконтурный газовый котёл 14 кВт на кухне, биметаллические радиаторы. Горячая вода — солнечные водонагреватели на крыше, при нехватке солнца автоматически включается электронагрев. Солнечные панели 10 кВт, насосная станция для давления воды. Сейсмостойкость 8 баллов, фундамент — монолитная плита 0,9 м.",
+          "uz": "Loyiha bo‘yicha: har bir xonadonda oshxonaga o‘rnatiladigan 14 kVt ikki konturli gaz qozoni, bimetall radiatorlar. Issiq suv — tomdagi quyosh suv isitgichlari, quyosh yetmaganda elektr isitgich avtomatik yoqiladi. 10 kVt quyosh panellari, suv bosimi uchun nasos stansiyasi. Seysmik mustahkamlik 8 ball, poydevor — 0,9 m monolit plita."
+        }
+      }
+    },
+    {
+      "slug": "sanat-saroyi",
+      "name": "San’at Saroyi",
+      "developer": "fayz-akira",
+      "photos": [],
+      "class": "econom",
+      "houseType": "monolith",
+      "ceilingHeight": 3,
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Фергана, ул. Кашкар, 120",
+        "uz": "Farg‘ona MFY, Qashqar ko‘chasi, 120"
+      },
+      "landmark": {
+        "ru": "у San’at Saroyi, за Центральным банком",
+        "uz": "San’at Saroyi oldida, Markaziy bank ortida"
+      },
+      "minutesToCenter": 25,
+      "point": [
+        40.374088,
+        71.797513
+      ],
+      "nearby": [
+        {
+          "kind": "park",
+          "name": {
+            "ru": "San’at Saroyi",
+            "uz": "San’at Saroyi"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Чайхана «Меркурий»",
+            "uz": "Merkuriy choyxonasi"
+          },
+          "minutes": 2
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Havas маркет",
+            "uz": "Havas market"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "sport",
+          "name": {
+            "ru": "Фитнес-зал Cross Fit",
+            "uz": "Cross Fit fitnes zali"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "clinic",
+          "name": {
+            "ru": "Аптека Grand Pharm",
+            "uz": "Grand Pharm dorixonasi"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Кафе Besh Bola Lavash",
+            "uz": "Besh Bola Lavash kafesi"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "ТРЦ Atlas",
+            "uz": "Atlas ko‘ngilochar savdo markazi"
+          },
+          "minutes": 9
+        }
+      ],
+      "visitedOn": "2026-10-26",
+      "documents": {
+        "checkedOn": "2026-10-26",
+        "types": [
+          "permit",
+          "expertise"
+        ]
+      },
+      "blocks": [
+        {
+          "name": "1",
+          "status": "building",
+          "floorsTotal": 6,
+          "floorsBuilt": 6,
+          "deadline": [
+            2028,
+            1
+          ],
+          "cadastre": "in_progress",
+          "cadastreExpectedOn": "2027-03-31",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 3,
+          "sort": 10
+        }
+      ],
+      "details": {
+        "quality": {
+          "ru": "Фасад: цоколь — керамогранит, стены утеплены минватой 50 мм и покрыты декоративной штукатуркой «под травертин».",
+          "uz": "Fasad: sokol — keramogranit, devorlar 50 mm minvata bilan utepleniye va «travertin» dekorativ shtukaturkasi."
+        },
+        "landscaping": {
+          "ru": "Участок 898 м²: под домом 507,8 м², озеленение 175,5 м², зоны отдыха, дорожки из асфальта и брусчатки.",
+          "uz": "Hudud 898 m²: bino osti 507,8 m², ko‘kalamzor 175,5 m², dam olish joylari, asfalt va bruschatka yo‘laklar."
+        },
+        "engineering": {
+          "ru": "По проекту: в каждой квартире тепловой насос, биметаллические радиаторы; горячая вода — солнечные водонагреватели на крыше и резервный нагреватель в квартире; на крыше солнечная электростанция 10 кВт; насосная станция в цоколе, автоматическая пожарная сигнализация. Сейсмостойкость 8 баллов.",
+          "uz": "Loyiha bo‘yicha: har bir xonadonda issiqlik nasosi, bimetall radiatorlar; issiq suv — tomdagi quyosh suv isitgichlari va xonadonlarda zaxira isitgich; tomda 10 kVt quyosh elektr stansiyasi; yerto‘lada nasos stansiyasi, avtomatik yong‘in signalizatsiyasi. Seysmiklik 8 ball."
+        }
+      }
+    },
     {
       "slug": "alliance-avenue",
       "name": "Alliance Avenue",
       "developer": "qadrdonlar-developments",
-      "photos": ["alliance-avenue/fasad-2-front.jpg", "alliance-avenue/fasad-1-corner.jpg"],
-      "facade": "alliance-avenue/fasad-2-front.jpg"
+      "photos": [
+        "alliance-avenue/fasad-2-front.jpg",
+        "alliance-avenue/fasad-1-corner.jpg"
+      ],
+      "facade": "alliance-avenue/fasad-2-front.jpg",
+      "class": "business",
+      "houseType": "monolith",
+      "ceilingHeight": 3.2,
+      "parking": "underground",
+      "location": "fergana",
+      "address": {
+        "ru": "ул. Кувасой, 30",
+        "uz": "Quvasoy ko‘chasi, 30"
+      },
+      "landmark": {
+        "ru": "рядом с гипермаркетом Korzinka",
+        "uz": "Korzinka gipermarketi yonida"
+      },
+      "documents": null,
+      "blocks": [
+        {
+          "name": "1",
+          "status": "building",
+          "progressPct": 70,
+          "floorsTotal": 9,
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": [],
+          "layouts": [
+            {
+              "rooms": 2,
+              "area": 36.52,
+              "available": false
+            },
+            {
+              "rooms": 2,
+              "area": 54.03,
+              "available": false
+            },
+            {
+              "rooms": 3,
+              "area": 56.55,
+              "available": false
+            },
+            {
+              "rooms": 3,
+              "area": 62.7,
+              "available": false
+            },
+            {
+              "rooms": 3,
+              "area": 85.67,
+              "available": true
+            },
+            {
+              "rooms": 3,
+              "area": 90.93,
+              "available": true
+            },
+            {
+              "rooms": 4,
+              "area": 97.07,
+              "available": true
+            }
+          ]
+        },
+        {
+          "name": "2",
+          "status": "building",
+          "progressPct": 70,
+          "floorsTotal": 9,
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": [],
+          "layouts": [
+            {
+              "rooms": 2,
+              "area": 36.52,
+              "available": false
+            },
+            {
+              "rooms": 2,
+              "area": 54.01,
+              "available": false
+            },
+            {
+              "rooms": 2,
+              "area": 56.31,
+              "available": false
+            },
+            {
+              "rooms": 2,
+              "area": 59.46,
+              "available": false
+            },
+            {
+              "rooms": 3,
+              "area": 85.56,
+              "available": true
+            },
+            {
+              "rooms": 3,
+              "area": 91.11,
+              "available": true
+            },
+            {
+              "rooms": 4,
+              "area": 97.07,
+              "available": true
+            }
+          ]
+        },
+        {
+          "name": "3",
+          "status": "building",
+          "progressPct": 70,
+          "floorsTotal": 9,
+          "finishing": "white-box",
+          "currency": "UZS",
+          "includes": []
+        }
+      ],
+      "programs": [
+        {
+          "type": "full",
+          "discountPct": 17,
+          "sort": 10
+        }
+      ],
+      "details": {
+        "about": {
+          "ru": "Alliance Avenue — дом бизнес-класса от Qadrdonlar Developments: 9 этажей, 152 квартиры (2-, 3- и 4-комнатные, есть евро-планировки), 11 коммерческих помещений. Фасад из керамогранита, башня с часами диаметром 3,6 м. Подземный паркинг, двор без машин, зарядки для электромобилей. Сдача в White Box.",
+          "uz": "Alliance Avenue — Qadrdonlar Developments’ning biznes klassdagi uyi: 9 qavat, 152 ta xonadon (2, 3 va 4 xonali, evro planirovkalar ham bor), 11 ta tijorat xonasi. Fasad keramogranitdan, burchakda diametri 3,6 m soatli minora. Yer osti avtoturargohi, mashinasiz hovli, elektromobillar uchun quvvatlash. White Box holatida topshiriladi."
+        },
+        "quality": {
+          "ru": "Отделка фасада — керамогранит. Витражные окна с тройным термостеклопакетом. Металлические решётки для кондиционеров в терракотовом цвете. На угловой башне — часы диаметром 3,6 м, смотрят в сторону города. У каждой квартиры своя лоджия.",
+          "uz": "Fasad keramogranit bilan qoplangan. Vitraj derazalar uch qavatli termo-paketli. Konditsionerlar uchun terrakota rangidagi metall panjaralar. Burchakdagi minorada diametri 3,6 m soat — shahar tomonga qaragan. Har bir xonadonda lodjiya."
+        },
+        "landscaping": {
+          "ru": "Закрытый двор без машин, с охраной. Детские площадки (деревянный городок, сетчатый купол для лазания), workout-зона под открытым небом, мини-футбольное поле, BBQ-зона и lounge-зона, перголы, скамейки, озеленение.",
+          "uz": "Mashinasiz yopiq hovli, qo‘riqlanadi. Bolalar maydonchalari (yog‘och shaharcha, to‘rli gumbaz), ochiq havodagi workout zonasi, mini-futbol maydoni, BBQ zona va lounge zona, pergolalar, o‘rindiqlar, ko‘kalamzorlashtirish."
+        },
+        "amenities": {
+          "ru": "Современные скоростные лифты подключены к генератору — работают и при отключении света. Просторное лобби в современном стиле. На каждом этаже у лифтового холла — комната для колясок и велосипедов.",
+          "uz": "Zamonaviy tezyurar liftlar generatorga ulangan — elektr o‘chganda ham ishlaydi. Zamonaviy uslubdagi keng lobbi. Har bir qavatda lift xolli yonida aravacha va velosiped xonasi."
+        },
+        "location": {
+          "ru": "Рядом с гипермаркетом Korzinka, у главной дороги. Вокруг: школы № 5 и № 42, частные детсады «Zakiytoshka» и «Yulduzcha», ТЦ Атлас, кафе (Dodo pizza, KFC, Aile, Ansor Milliy Taomlari), 1-я семейная поликлиника, Дворец искусств и Дворец водного спорта.",
+          "uz": "Korzinka gipermarketi yonida, katta yo‘l bo‘yida. Atrofida: 5- va 42-maktablar, «Zakiytoshka» va «Yulduzcha» xususiy bog‘chalari, Atlas savdo markazi, kafelar (Dodo pizza, KFC, Aile, Ansor Milliy Taomlari), 1-oilaviy poliklinika, San’at saroyi va Suv sport saroyi."
+        },
+        "engineering": {
+          "ru": "Отопление — тёплый пол, в котельной смонтировано инженерное оборудование. Счётчики газа, электричества и воды. Генератор для лифта. Окна с тройным термостеклопакетом.",
+          "uz": "Isitish — issiq pol, qozonxonada muhandislik uskunalari o‘rnatilgan. Gaz, elektr va suv hisoblagichlari. Lift uchun generator. Uch qavatli termo-paketli derazalar."
+        }
+      }
+    },
+    {
+      "slug": "dream-residence",
+      "name": "Dream Residence",
+      "developer": "jba-group",
+      "photos": [],
+      "class": "premium",
+      "houseType": "frame",
+      "ceilingHeight": 3,
+      "parking": "ground",
+      "location": "fergana",
+      "address": {
+        "ru": "махалля Мададкорлар, ул. Саида Ахмада, 41",
+        "uz": "Madadkorlar MFY, Said Ahmad ko‘chasi, 41"
+      },
+      "landmark": {
+        "ru": "за ватной фабрикой",
+        "uz": "vata fabrikasi orqasida"
+      },
+      "minutesToCenter": 30,
+      "point": [
+        40.380261,
+        71.811642
+      ],
+      "nearby": [
+        {
+          "kind": "kindergarten",
+          "name": {
+            "ru": "Детский сад AIS Kids",
+            "uz": "AIS Kids bolalar bog‘chasi"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "school",
+          "name": {
+            "ru": "Academia International School",
+            "uz": "Academia International School"
+          },
+          "minutes": 1
+        },
+        {
+          "kind": "cafe",
+          "name": {
+            "ru": "Ansor Milliy Taomlari",
+            "uz": "Ansor Milliy Taomlari"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "sport",
+          "name": {
+            "ru": "Фитнес-зал Casl Fit",
+            "uz": "Casl Fit fitnes zali"
+          },
+          "minutes": 8
+        },
+        {
+          "kind": "shop",
+          "name": {
+            "ru": "Супермаркет Korzinka",
+            "uz": "Korzinka supermarketi"
+          },
+          "minutes": 9
+        },
+        {
+          "kind": "park",
+          "name": {
+            "ru": "Парк «Санъат саройи»",
+            "uz": "San’at saroyi bog‘i"
+          },
+          "minutes": 10
+        }
+      ],
+      "visitedOn": "2026-10-19",
+      "blocks": [
+        {
+          "name": "A-1",
+          "status": "delivered",
+          "floorsTotal": 8,
+          "finishing": "white-box",
+          "cadastre": "done",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "A-2",
+          "status": "delivered",
+          "floorsTotal": 8,
+          "finishing": "white-box",
+          "cadastre": "done",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "A-3",
+          "status": "delivered",
+          "floorsTotal": 8,
+          "finishing": "white-box",
+          "cadastre": "done",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "A-4",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ],
+          "layouts": [
+            {
+              "rooms": 3,
+              "area": 69.4,
+              "priceFrom": 485800000
+            }
+          ]
+        },
+        {
+          "name": "B-1",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ],
+          "layouts": [
+            {
+              "rooms": 1,
+              "area": 38.6,
+              "priceFrom": 270200000
+            }
+          ]
+        },
+        {
+          "name": "B-2",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "B-3",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "B-4",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "B-5",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "B-6",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ],
+          "layouts": [
+            {
+              "rooms": 2,
+              "area": 52.9,
+              "priceFrom": 370300000
+            }
+          ]
+        },
+        {
+          "name": "C-1",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2026,
+            4
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C-2",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2026,
+            4
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C-3",
+          "status": "building",
+          "floorsTotal": 9,
+          "floorsBuilt": 8,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C-4",
+          "status": "building",
+          "floorsTotal": 9,
+          "floorsBuilt": 0,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C-5",
+          "status": "building",
+          "floorsTotal": 9,
+          "floorsBuilt": 0,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        },
+        {
+          "name": "C-6",
+          "status": "building",
+          "floorsTotal": 9,
+          "deadline": [
+            2029,
+            2
+          ],
+          "finishing": "white-box",
+          "cadastre": "after_delivery",
+          "currency": "UZS",
+          "includes": [
+            {
+              "item": {
+                "ru": "Квартира",
+                "uz": "Xonadon"
+              },
+              "included": true
+            }
+          ]
+        }
+      ],
+      "details": {
+        "location": {
+          "ru": "Фергана, за ватной фабрикой. Пешком: детсад AIS Kids и Academia International School — 1 минута, Ansor Milliy Taomlari и фитнес-зал Casl Fit — 8, Korzinka — 9, парк «Санъат саройи» — 10 минут. До Центрального парка — 30 минут пешком.",
+          "uz": "Farg‘onada, vata fabrikasi orqasida. Piyoda: AIS Kids bog‘chasi va Academia International School — 1 daqiqa, Ansor Milliy Taomlari va Casl Fit fitnes zali — 8, Korzinka — 9, San’at saroyi bog‘i — 10 daqiqa. Markaziy bog‘gacha piyoda 30 daqiqa."
+        }
+      }
     },
     {
       "slug": "sokin",
       "name": "Sokin",
       "developer": "qadrdonlar-developments",
-      "photos": ["sokin/fasad-1-front.jpg", "sokin/fasad-2-corner.jpg"],
-      "facade": "sokin/fasad-1-front.jpg"
+      "photos": [
+        "sokin/fasad-1-front.jpg",
+        "sokin/fasad-2-corner.jpg"
+      ],
+      "facade": "sokin/fasad-1-front.jpg",
+      "class": "comfort",
+      "houseType": "monolith",
+      "ceilingHeight": 3.2,
+      "parking": "ground",
+      "location": "fergana",
+      "address": {
+        "ru": "ул. Шарк, 30",
+        "uz": "Sharq ko‘chasi, 30"
+      },
+      "point": [
+        40.389514,
+        71.767892
+      ],
+      "blocks": [
+        {
+          "name": "1",
+          "status": "delivered",
+          "floorsTotal": 9,
+          "deadline": [
+            2026,
+            3
+          ],
+          "finishing": "white-box",
+          "cadastre": "done",
+          "currency": "UZS",
+          "includes": []
+        }
+      ],
+      "details": {
+        "about": {
+          "ru": "Дом комфорт-класса, сдан в сентябре 2026 года, кадастр оформлен. Закрытый двор с въездом через арку со шлагбаумом: детская площадка, мини-футбольное поле, зона отдыха и летняя кухня. На 1-м этаже со стороны улицы — коммерческие помещения. Есть лифт.",
+          "uz": "Komfort klassdagi uy, 2026-yil sentyabrda topshirilgan, kadastr rasmiylashtirilgan. Shlagbaumli ravoqli yopiq hovli: bolalar maydonchasi, mini-futbol maydoni, dam olish joyi va ochiq oshxona. Ko‘cha tomonda 1-qavatda tijorat xonalari. Lift bor."
+        },
+        "quality": {
+          "ru": "Фасад в белом и тёмно-сером цвете. Кондиционеры спрятаны в белые декоративные короба. Балконы с чёрными металлическими ограждениями, часть — со стеклянными. Со стороны двора 1-й этаж облицован серой плиткой под камень, у подъездов — козырьки на колоннах и пандусы с перилами.",
+          "uz": "Fasad oq va to‘q kulrang. Konditsionerlar oq bezak qutilarga yashirilgan. Balkonlarda qora metall panjaralar, ayrimlarida shisha. Hovli tomonda 1-qavat kulrang tosh ko‘rinishidagi plitka bilan qoplangan, podyezdlar oldida ustunli soyabonlar va panjarali pandus."
+        },
+        "landscaping": {
+          "ru": "Закрытый двор с въездом через арку со шлагбаумом. Детская площадка на искусственном газоне (горки, турники), мини-футбольное поле в сетчатом ограждении, зона отдыха под перголой, летняя кухня с печью и мойкой, настенная роспись. Парковка с разметкой, скамейки, фонари, озеленение.",
+          "uz": "Shlagbaumli ravoq orqali kiriladigan yopiq hovli. Sun’iy maysali bolalar maydonchasi (sirpanchiqlar, turniklar), to‘r bilan o‘ralgan mini-futbol maydoni, pergola ostida dam olish joyi, o‘choq va rakovinali ochiq oshxona, devoriy rasm. Belgilangan avtoturargoh joylari, o‘rindiqlar, chiroqlar, ko‘kalamzorlashtirish."
+        },
+        "amenities": {
+          "ru": "Есть лифт. Входная группа: логотип SOKIN, стены из крупноформатной плитки, лестница с металлическими перилами, декоративные панно и растения.",
+          "uz": "Lift bor. Kirish xolli: SOKIN logotipi, devorlar katta formatli plitka bilan qoplangan, metall panjarali zinapoya, bezak panellar va o‘simliklar."
+        }
+      }
     }
   ]
 }

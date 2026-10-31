@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { collectPageErrors } from "./helpers";
+import { collectPageErrors, demoCards } from "./helpers";
 import { hasCloud } from "./cloud";
 
 // Каталог (шаг 3.4) на DEMO из облака: карточки по мокапу .jc, без скидок, только контакты VH.
@@ -11,7 +11,7 @@ test.describe("каталог /novostroyki", () => {
   test("карточки DEMO: класс, застройщик, «Проверено», типы с остатком, цена «от», без скидок", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru/novostroyki");
-    const cards = page.locator(".catalog-card");
+    const cards = demoCards(page);
     await expect(cards).toHaveCount(4);
     const shodlik = cards.filter({ hasText: "ЖК Shodlik" });
     await expect(shodlik.getByRole("link", { name: "ЖК Shodlik" })).toHaveAttribute("href", "/ru/novostroyki/demo-shodlik");
@@ -33,14 +33,13 @@ test.describe("каталог /novostroyki", () => {
     await filter.getByRole("group", { name: "Комнаты" }).getByRole("button", { name: "4+" }).click();
     await expect(page).toHaveURL(/komnat=4/);
     // 4-комн. в DEMO — только у Namuna и Yulduz.
-    await expect(filter.getByRole("button", { name: "Показать 2 ЖК" })).toBeVisible();
-    await filter.getByRole("button", { name: "Показать 2 ЖК" }).click();
-    await expect(page.locator(".catalog-card")).toHaveCount(2);
-    await expect(page.getByText("Найдено 2 ЖК")).toBeVisible();
+    await filter.getByRole("button", { name: /^Показать \d+ ЖК$/ }).click();
+    await expect(demoCards(page)).toHaveCount(2);
+    await expect(page.getByText(/^Найдено \d+ ЖК$/)).toBeVisible();
     await page.goto("/ru/novostroyki?do=1000");
     await expect(page.getByText("По вашему запросу ничего нет")).toBeVisible();
     await page.locator(".catalog-results__empty").getByRole("button", { name: "Сбросить" }).click();
-    await expect(page.locator(".catalog-card")).toHaveCount(4);
+    await expect(demoCards(page)).toHaveCount(4);
     await expect(page).toHaveURL(/\/ru\/novostroyki$/);
     await page.goto("/ru/novostroyki?sort=exp");
     await expect(page.locator(".catalog-card").first()).toContainText("ЖК Yulduz");
@@ -75,12 +74,12 @@ test.describe("каталог /novostroyki", () => {
     const errors = collectPageErrors(page);
     await page.goto("/ru");
     await page.locator("footer").getByRole("link", { name: "Новостройки" }).click();
-    await expect(page.locator(".catalog-card")).toHaveCount(4);
+    await expect(demoCards(page)).toHaveCount(4);
     expect(errors).toEqual([]);
   });
 
   test("UZ: названия и подписи на узбекском", async ({ page }) => {
     await page.goto("/uz/novostroyki");
-    await expect(page.locator(".catalog-card").filter({ hasText: "Shodlik TJM" })).toContainText("ta qoldi");
+    await expect(demoCards(page).filter({ hasText: "Shodlik TJM" })).toContainText("ta qoldi");
   });
 });

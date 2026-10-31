@@ -38,7 +38,7 @@ test.describe("страницы 3.11", () => {
     const errors = collectPageErrors(page);
     await page.goto("/ru/o-nas");
     await expect(page.getByRole("heading", { level: 1, name: "О Vodiy House" })).toBeVisible();
-    await expect(page.locator(".about-hero__stat").first()).toContainText("4");
+    await expect(page.locator(".about-hero__stat").first()).toContainText(/\d/);
     await page.screenshot({ path: shot("about"), fullPage: true, caret: "initial" });
     await page.getByRole("button", { name: "Записаться на встречу" }).click();
     const dialog = page.getByRole("dialog", { name: "Запись на просмотр" });

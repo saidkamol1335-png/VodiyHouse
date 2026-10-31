@@ -628,7 +628,6 @@
       "mapTitle": "Xarita: {name}",
       "convenience": "Joylashuv qulayligi",
       "center": "Shahar markazi",
-      "byCar": "mashinada",
       "walk": "piyoda {n} daq.",
       "car": "mashinada {n} daq.",
       "meters": "{n} m",

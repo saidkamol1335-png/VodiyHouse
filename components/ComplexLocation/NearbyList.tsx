@@ -1,4 +1,4 @@
-import { Car } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/lib/i18n/routing";
 import { distanceOf } from "@/lib/site/complex/location";
@@ -25,8 +25,8 @@ export function NearbyList({ places, minutesToCenter, city }: NearbyListProps) {
         ))}
         {minutesToCenter ? (
           <li className="complex-location__item">
-            <span className="complex-location__icon complex-location__icon--car" aria-hidden="true">
-              <Car size={16} strokeWidth={2} />
+            <span className="complex-location__icon" aria-hidden="true">
+              <MapPin size={16} strokeWidth={2} />
             </span>
             <span className="complex-location__label">
               <b>{t("center")}</b>
@@ -34,7 +34,6 @@ export function NearbyList({ places, minutesToCenter, city }: NearbyListProps) {
             </span>
             <span className="complex-location__value">
               <b>{t("minutes", { n: minutesToCenter })}</b>
-              <small>{t("byCar")}</small>
             </span>
           </li>
         ) : null}
@@ -50,10 +49,15 @@ function NearbyItem({ place }: { place: NearbyPlace }) {
   const locale = useLocale() as Locale;
   const Icon = KIND_ICONS[place.kind];
   const distance = place.meters ? distanceOf(place.meters) : null;
-  const time = place.minutes ? t(place.mode === "car" ? "car" : "walk", { n: place.minutes }) : null;
+  const time = place.minutes
+    ? t(place.mode === "car" ? "car" : "walk", { n: place.minutes })
+    : null;
   return (
     <li className="complex-location__item">
-      <span className={`complex-location__icon complex-location__icon--${place.kind}`} aria-hidden="true">
+      <span
+        className={`complex-location__icon complex-location__icon--${place.kind}`}
+        aria-hidden="true"
+      >
         <Icon size={16} strokeWidth={2} />
       </span>
       <span className="complex-location__label">

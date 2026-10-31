@@ -12,6 +12,10 @@ export function collectPageErrors(page: Page): string[] {
 
 export const PUBLIC_PAGES = ["/uz", "/ru", "/ru/podbor", "/uz/podbor"] as const;
 
+/** Карточки DEMO-ЖК: в облаке рядом с ними теперь и настоящие ЖК (npm run content:import). */
+export const demoCards = (page: Page) =>
+  page.locator(".catalog-card").filter({ has: page.locator('a[href*="/novostroyki/demo-"]') });
+
 // Картинки для загрузки рисуются прямо в браузере — фикстуры в git не нужны.
 export type ImageSpec = {
   width: number;

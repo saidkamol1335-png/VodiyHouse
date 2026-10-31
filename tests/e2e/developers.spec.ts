@@ -15,7 +15,8 @@ test.describe("застройщики", () => {
     const errors = collectPageErrors(page);
     await page.goto("/ru/zastroyshchiki");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Застройщики");
-    const rows = page.locator(".developers-list__row");
+    // В облаке рядом с DEMO — настоящие застройщики (npm run content:import): считаем только DEMO.
+    const rows = page.locator('.developers-list__row[href*="/zastroyshchiki/demo-"]');
     await expect(rows).toHaveCount(3);
     await expect(rows.first()).toContainText("Farg‘ona Sifat Qurilish");
     await expect(rows.first()).toContainText("1 новостройка на сайте");
@@ -56,7 +57,7 @@ test.describe("застройщики", () => {
     await expect(page.locator(".developer-delivered__table tbody tr")).toHaveCount(2);
     await expect(page.locator(".developer-delivered__table")).toContainText("Перенос на 3 мес.");
     await expect(page.locator(".developer-programs__calc").first()).toHaveAttribute("href", /\/ru\/kalkulyator\?developer=demo-sifat&program=/);
-    await expect(page.locator(".developer-others__card")).toHaveCount(2);
+    await expect(page.locator('.developer-others__card[href*="/zastroyshchiki/demo-"]')).toHaveCount(2);
     await shot(page, "page");
     await page.getByRole("button", { name: "Получить консультацию" }).first().click();
     const dialog = page.getByRole("dialog");

@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { collectPageErrors } from "./helpers";
+import { collectPageErrors, demoCards } from "./helpers";
 import { hasCloud } from "./cloud";
 
 // Блок E (шаги 3.9–3.10): главная по мокапу, избранное без входа, «Поделиться» и /podborka.
@@ -16,8 +16,8 @@ test.describe("главная, избранное, подборка", () => {
     await expect(page.getByRole("link", { name: /Подобрать квартиру/ }).first()).toHaveAttribute("href", /#katalog$/);
     await expect(page.locator("#katalog .catalog-card").first()).toBeVisible();
     const complexes = page.locator(".home-hero__stat").first();
-    await expect(complexes.locator("dt")).toHaveText("жилых комплекса");
-    await expect(complexes.locator("dd")).toHaveText("4");
+    await expect(complexes.locator("dt")).toHaveText(/^жилых комплекс/);
+    await expect(complexes.locator("dd")).toHaveText(/^\d+$/);
     await expect(page.locator(".home-partner").getByRole("link", { name: /Стать партнёром/ })).toBeVisible();
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s39-home.png`, fullPage: true, caret: "initial" });
@@ -27,9 +27,10 @@ test.describe("главная, избранное, подборка", () => {
   test("сердце на карточке → счётчик в шапке → /izbrannoe → «Поделиться подборкой» → /podborka", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru/novostroyki");
-    await page.getByRole("button", { name: "В избранное: ЖК Shodlik" }).click();
+    const shodlikHeart = demoCards(page).getByRole("button", { name: "В избранное: ЖК Shodlik" });
+    await shodlikHeart.click();
     await page.getByRole("button", { name: "В избранное: ЖК Orzu" }).click();
-    await expect(page.getByRole("button", { name: "В избранное: ЖК Shodlik" })).toHaveAttribute("aria-pressed", "true");
+    await expect(shodlikHeart).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("link", { name: "Избранное · 2" })).toBeVisible();
     await page.goto("/ru/izbrannoe");
     await expect(page.getByRole("heading", { name: "В подборке 2 ЖК" })).toBeVisible();
@@ -71,7 +72,7 @@ test.describe("главная, избранное, подборка", () => {
     await built.click();
     await expect(page).toHaveURL(/\/ru$/);
     await expect(applied).toHaveCount(0);
-    await expect(page.locator(".catalog-card")).toHaveCount(4);
+    await expect(demoCards(page)).toHaveCount(4);
     // Подборка вручную — только её ЖК; правка фильтра снимает подборку, адрес — без podborka.
     await row.getByRole("button", { name: /Центр Ферганы/ }).click();
     await expect(page).toHaveURL(/\?podborka=demo-tsentr-fergany$/);
@@ -84,7 +85,7 @@ test.describe("главная, избранное, подборка", () => {
     await expect(applied).toHaveCount(0);
     // Бейдж спецпредложения на карточке ЖК — «Подарок» у Shodlik (DEMO).
     await page.goto("/ru/novostroyki");
-    await expect(page.locator(".catalog-card").filter({ hasText: "ЖК Shodlik" }).locator(".catalog-card__promo")).toHaveText("Подарок");
+    await expect(demoCards(page).filter({ hasText: "ЖК Shodlik" }).locator(".catalog-card__promo")).toHaveText("Подарок");
     await expect(page.locator(".collections")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
