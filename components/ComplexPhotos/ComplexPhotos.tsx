@@ -84,6 +84,7 @@ function SelectedPanel({ gallery, selected, onRemoved }: SelectedPanelProps) {
       moveLocked={gallery.uploading}
       onMove={(to) => void gallery.move(current.id, to)}
       onFocus={(focus) => gallery.setFocus(current.id, focus)}
+      onCategory={(category) => void gallery.setCategory(current.id, category)}
       onRemove={async () => {
         if (await gallery.remove(current.id)) onRemoved();
       }}

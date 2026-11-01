@@ -15,7 +15,7 @@ import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import { canOpenComplex, complexAccess, complexTabs } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
-import { getComplex, getComplexReadiness } from "@/lib/admin/server/complexPage";
+import { getComplex, getComplexCompleteness, getComplexReadiness } from "@/lib/admin/server/complexPage";
 import { readComplexFiles } from "@/lib/admin/server/complexes";
 import { mediaSrc } from "@/lib/admin/server/developerPage";
 import { requireSection } from "@/lib/admin/session";
@@ -61,7 +61,7 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
     <AdminTopbar
       title={t("complexes.namePrefixed", { name: complex.name.ru })}
       subtitle={t("complexes.entitySubtitle", {
-        developer: complex.developerName,
+        developer: complex.developerName || t("complexes.noDeveloper"),
         address: `${ROUTES.catalog}/${complex.slug}`,
       })}
       person={person}
@@ -82,8 +82,9 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
 /** Статус публикации с готовностью (И8, И9) и вкладки — руководителю. */
 async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard: boolean }) {
   const t = await getTranslations("admin.complexes");
-  const [readiness, files] = await Promise.all([
+  const [readiness, completeness, files] = await Promise.all([
     getComplexReadiness(complex.id),
+    getComplexCompleteness(complex.id),
     readComplexFiles(await createSupabaseServerClient(), complex.id),
   ]);
   const base = `${ADMIN_ROUTES.complexes}/${complex.id}`;
@@ -105,13 +106,18 @@ async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard
           complex={{ ...complex, name: complex.name.ru }}
           action={setComplexStatusAction}
           readiness={readiness}
+          completeness={completeness}
           files={files.map((file) => ({ id: file.id, kind: file.kind, src: mediaSrc(file.path) }))}
           base={base}
-          developer={{
-            name: complex.developerName,
-            published: complex.developerStatus === "published",
-            href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
-          }}
+          developer={
+            complex.developerId
+              ? {
+                  name: complex.developerName,
+                  published: complex.developerStatus === "published",
+                  href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
+                }
+              : null
+          }
         />
       }
     />

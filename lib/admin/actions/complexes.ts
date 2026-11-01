@@ -1,5 +1,6 @@
 "use server";
 
+import { SITE_CONTACTS_KEY } from "@/lib/contacts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
@@ -132,6 +133,12 @@ const statusError = (
   missing,
 });
 
+/** На странице «Скоро» единственная связь — общий номер: без него публиковать нечего показать. */
+async function hasSitePhone(supabase: SupabaseClient): Promise<boolean> {
+  const { data } = await supabase.from("settings").select("value").eq("key", SITE_CONTACTS_KEY).maybeSingle();
+  return Boolean((data?.value as { phone?: string | null } | null)?.phone);
+}
+
 /**
  * Можно ли перевести (null — можно): переход разрешён, архив подтверждён названием (RU или UZ),
  * для публикации — отметка правила 1.2 и все условия PLAN 3а. Базу это не заменяет.
@@ -161,7 +168,8 @@ async function statusMoveError(
   const readiness = await supabase.rpc("complex_readiness", { p_complex: id });
   if (readiness.error) return statusError(contentDbErrorCode(readiness.error));
   const missing = missingOf(parseReadiness((readiness.data ?? []) as ReadinessRecord[]));
-  return missing.length > 0 ? statusError("notReady", missing) : null;
+  if (missing.length > 0) return statusError("notReady", missing);
+  return (await hasSitePhone(supabase)) ? null : statusError("phoneRequired");
 }
 
 /** Опубликовать (с проверкой файлов по правилу 1.2, И8) · Скрыть · В архив · Восстановить. */

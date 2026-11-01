@@ -80,7 +80,7 @@ export function demoComplex(id: string): ComplexRecord | null {
     status: row.status,
     archivedAt: row.archivedAt,
     developerId: row.developerId,
-    developerName: row.developerName,
+    developerName: row.developerName ?? "",
     developerStatus: row.developerStatus,
     shortDescription: null,
     locationId: facts.address ? FERGANA_ID : null,

@@ -58,6 +58,8 @@ async function fetchPreviewPage(slug: string): Promise<ComplexPage | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc("site_complex", { p_slug: slug });
   if (error) throw new Error("site-complex-preview-unavailable", { cause: error });
+  // Черновик без застройщика: страницы ещё нет, у неё обязателен раздел застройщика.
+  if (data && !(data as ComplexPageRecord).developer) return null;
   return data ? withPicker(supabase, complexPageFrom(data as ComplexPageRecord)) : null;
 }
 

@@ -23,6 +23,23 @@
   gap: 8px;
 }
 
+.photo-panel__category {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-small);
+}
+
+.photo-panel__category > select {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-m, 12px);
+  background: var(--card-bg);
+  color: var(--fg);
+}
+
 .photo-panel__note,
 .photo-panel__confirm {
   display: inline-flex;

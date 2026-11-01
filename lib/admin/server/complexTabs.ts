@@ -1,3 +1,5 @@
+import type { PhotoCategory } from "../complexes/photos";
+import { complexCompleteness, type ComplexCompletenessRecord, type LayoutGap } from "../complexes/completeness";
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { blockDraftsFrom, type BlockDraft, type BlockRecord } from "../complexes/blocks";
@@ -74,7 +76,7 @@ export async function readBlockLayouts(
   complexId: string,
   src: (path: string) => string,
 ): Promise<BlockLayouts[]> {
-  const [blocks, offers] = await Promise.all([
+  const [blocks, offers, completeness] = await Promise.all([
     supabase
       .from("blocks")
       .select(
@@ -84,12 +86,17 @@ export async function readBlockLayouts(
       .order("sort")
       .order("name"),
     supabase.rpc("layout_availability", { target_complex: complexId }),
+    supabase.rpc("complex_completeness", { p_complex: complexId }),
   ]);
   if (blocks.error) unavailable("block-layouts", blocks.error);
   if (offers.error) unavailable("layout-offers", offers.error);
+  if (completeness.error) unavailable("complex-completeness", completeness.error);
   const offerOf = new Map(((offers.data ?? []) as OfferRow[]).map((row) => [row.layout_id, row]));
+  const gapsOf = new Map(
+    (completeness.data ? complexCompleteness(completeness.data as ComplexCompletenessRecord).layouts : []).map((row) => [row.id, row.missing]),
+  );
   return ((blocks.data ?? []) as unknown as BlockLayoutsRow[]).map((block) =>
-    blockLayouts(block, offerOf, src),
+    blockLayouts(block, offerOf, gapsOf, src),
   );
 }
 
@@ -97,11 +104,12 @@ export async function readBlockLayouts(
 function blockLayouts(
   block: BlockLayoutsRow,
   offerOf: ReadonlyMap<string, OfferRow>,
+  gapsOf: ReadonlyMap<string, readonly LayoutGap[]>,
   src: (path: string) => string,
 ): BlockLayouts {
   const hasUnits = (block.units[0]?.count ?? 0) > 0;
   const layouts = block.layouts.map((layout) =>
-    layoutDraft(layout, hasUnits ? offerOf.get(layout.id) : undefined, src),
+    ({ ...layoutDraft(layout, hasUnits ? offerOf.get(layout.id) : undefined, src), gaps: gapsOf.get(layout.id) ?? [], savedDrawingId: layout.drawing_id }),
   );
   return {
     blockId: block.id,
@@ -142,6 +150,7 @@ type PhotoRow = {
   path: string;
   width: number;
   height: number;
+  photo_category: PhotoCategory;
   focus_x: number;
   focus_y: number;
 };
@@ -154,7 +163,7 @@ export async function readComplexPhotos(
 ): Promise<PhotoItem[]> {
   const { data, error } = await supabase
     .from("media_assets")
-    .select("id, path, width, height, focus_x, focus_y")
+    .select("id, path, width, height, focus_x, focus_y, photo_category")
     .eq("complex_id", complexId)
     .eq("kind", "photo")
     .order("sort")
@@ -167,5 +176,6 @@ export async function readComplexPhotos(
     width: row.width,
     height: row.height,
     focus: { x: row.focus_x, y: row.focus_y },
+    category: row.photo_category,
   }));
 }

@@ -160,9 +160,8 @@ function parseValues(fields: ComplexMainFields) {
   const limits = COMPLEX_LIMITS;
   return {
     name: text(fields.name, limits.nameMax, true),
-    developerId: fields.developerId
-      ? { value: fields.developerId }
-      : { value: null, issue: "developerRequired" as const },
+    // Обязателен только для публикации: это проверяет минимум ЖК.
+    developerId: { value: fields.developerId || null, issue: undefined },
     class: choice(COMPLEX_CLASSES, fields.class),
     houseType: choice(HOUSE_TYPES, fields.houseType),
     ceilingHeight: numberIn(

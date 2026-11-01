@@ -109,7 +109,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
     const rows = page.getByTestId("layout-row");
     await expect(rows).toHaveCount(4);
     await expect(rows.first()).toContainText("от $31 000 · свободно 2");
-    await expect(rows.first()).toContainText("нет чертежа — на сайте не покажется");
+    await expect(rows.first()).toContainText(/Не хватает:.*чертёж/);
     await expect(rows.first().getByRole("button", { name: "Удалить планировку" })).toBeDisabled();
     await page
       .getByRole("group", { name: "Блок" })
@@ -134,7 +134,7 @@ test.describe("кабинет · ЖК · блоки и планировки", ()
       await imageFile(page, { width: 1600, height: 1200, type: "image/png" }),
     );
     await expect(row.getByRole("button", { name: "Открыть чертёж крупно" })).toBeVisible();
-    await expect(row).not.toContainText("нет чертежа");
+    await expect(row).not.toContainText(/Не хватает:.*чертёж/);
     await row.getByRole("button", { name: "Открыть чертёж крупно" }).click();
     await expect(page.getByRole("dialog", { name: "Чертёж планировки" })).toBeVisible();
   });

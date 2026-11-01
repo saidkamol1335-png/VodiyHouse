@@ -1,5 +1,6 @@
 "use client";
 
+import { layoutGaps } from "@/lib/admin/complexes/layouts";
 import { Copy, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -186,15 +187,14 @@ function RowBadges({
   variant,
 }: Pick<LayoutRowProps, "row" | "hasUnits" | "variant">) {
   const t = useTranslations("admin.complexes.layouts");
-  const priced = hasUnits ? row.offer?.priceFrom != null : Boolean(row.priceFrom.trim());
+  const gaps = layoutGaps(row, hasUnits);
   return (
     <span className="layout-row__badges">
-      {row.drawingSrc ? null : (
+      {gaps.length > 0 ? (
         <Badge tone="amber" size="sm">
-          {t("noDrawing")}
+          {t("missing", { list: gaps.map((gap) => t(`gaps.${gap}`)).join(" · ") })}
         </Badge>
-      )}
-      {priced ? null : <Badge size="sm">{t("noPrice")}</Badge>}
+      ) : null}
       {/* Двойник (те же комнаты и площадь) — тот же «вариант N», что в списках «Квартир». */}
       {variant ? <Badge size="sm">{t("variant", { n: variant })}</Badge> : null}
       {/* «Нет в наличии» ставят на «Квартирах» (Н7) — здесь только видно, почему сайт так пишет. */}

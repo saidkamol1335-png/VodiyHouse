@@ -1,5 +1,6 @@
 "use client";
 
+import { layoutGaps } from "@/lib/admin/complexes/layouts";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
@@ -20,6 +21,7 @@ type LayoutRowsProps = {
   blocks: readonly BlockLayouts[];
   draft: LayoutsDraft;
   drawings: ReturnType<typeof useDrawingUpload>;
+  onlyIncomplete?: boolean;
 };
 
 // Сохранённые двойники — «вариант N», как в списках «Квартир» (новые строки id ещё не имеют).
@@ -29,7 +31,7 @@ const savedVariants = (rows: LayoutDraft[]) =>
   );
 
 /** Строки блока; у пустого — «Скопировать из блока …» с планировками других блоков. */
-export function LayoutRows({ block, blocks, draft, drawings }: LayoutRowsProps) {
+export function LayoutRows({ block, blocks, draft, drawings, onlyIncomplete = false }: LayoutRowsProps) {
   const others = blocks.filter((item) => item.blockId !== block.blockId && item.layouts.length > 0);
   const variants = savedVariants(draft.rows);
   return (
@@ -41,7 +43,8 @@ export function LayoutRows({ block, blocks, draft, drawings }: LayoutRowsProps) 
         />
       ) : null}
       <ul className="complex-layouts__rows">
-        {draft.rows.map((row) => (
+        {/* Фильтр только прячет строки: форма шлёт все, иначе база удалила бы скрытые. */}
+        {draft.rows.filter((row) => !onlyIncomplete || layoutGaps(row, block.hasUnits).length > 0).map((row) => (
           <LayoutRow
             key={row.key}
             row={row}

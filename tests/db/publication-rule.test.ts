@@ -220,6 +220,24 @@ describe("правило публикации v2", () => {
     });
   });
 
+  it("главная кабинета считает только полные планировки; посетителю закрыто", async () => {
+    const ready = await newReady("site-stock");
+    await addUnit(ready.blockId, ready.layoutId, "1", "free", 40000);
+    const stock = async () =>
+      (
+        await db.as(user(head), (tx) =>
+          tx.query<{ free_count: number; available: boolean }>("select * from site_block_stock($1)", [[ready.id]]),
+        )
+      ).rows[0];
+    expect(await stock()).toMatchObject({ free_count: 1, available: true });
+    await db.admin.query("update layouts set drawing_id = null where id = $1", [ready.layoutId]);
+    expect(await stock()).toMatchObject({ free_count: 0, available: false });
+    const rooms = await db.as(user(head), (tx) => tx.query("select * from site_room_stock($1)", [[ready.id]]));
+    expect(rooms.rows).toEqual([]);
+    await expectDenied(db.as(anon, (tx) => tx.query("select * from site_block_stock($1)", [[ready.id]])));
+    await expectDenied(db.as(anon, (tx) => tx.query("select * from site_room_stock($1)", [[ready.id]])));
+  });
+
   it("кабинет: состояние и «Полных квартир: k из n»; посетителю закрыто", async () => {
     const ready = await newReady("cabinet-state");
     const states = await db.as(user(head), (tx) =>

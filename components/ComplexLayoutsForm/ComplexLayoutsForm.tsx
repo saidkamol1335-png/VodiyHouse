@@ -61,6 +61,7 @@ function BlockLayoutsForm(props: BlockFormProps) {
   const t = useTranslations("admin.complexes.layouts");
   const draft = useLayoutsDraft(props);
   const drawings = useDrawingUpload({ complexId, attach, published, onUploaded: draft.update });
+  const [onlyIncomplete, setOnlyIncomplete] = useState(false);
   return (
     <AdminPanel title={t("title")} wide>
       {/* Отметка 1.2 — не правка вкладки: вне формы, иначе «Уйти без сохранения?» без правок. */}
@@ -80,7 +81,11 @@ function BlockLayoutsForm(props: BlockFormProps) {
           unitsHref={props.unitsHref}
           onSwitch={draft.switchTo}
         />
-        <LayoutRows block={block} blocks={blocks} draft={draft} drawings={drawings} />
+        <label className="complex-layouts__only-incomplete">
+          <input type="checkbox" checked={onlyIncomplete} onChange={(event) => setOnlyIncomplete(event.target.checked)} />
+          {t("onlyIncomplete")}
+        </label>
+        <LayoutRows block={block} blocks={blocks} draft={draft} drawings={drawings} onlyIncomplete={onlyIncomplete} />
         <LayoutsActions draft={draft} uploading={drawings.uploading} />
       </form>
     </AdminPanel>

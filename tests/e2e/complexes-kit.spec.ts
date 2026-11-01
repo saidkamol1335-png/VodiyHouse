@@ -78,11 +78,11 @@ test.describe("кабинет · ЖК · список", () => {
     await expect(page.locator(".complex-list__row")).toHaveCount(6);
   });
 
-  test("«+ Добавить ЖК»: застройщик и название; UZ подставляется латиницей", async ({ page }) => {
+  test("«+ Добавить ЖК»: нужно только название, застройщик необязателен; UZ подставляется латиницей", async ({ page }) => {
     await open(page, LIST);
     await page.getByRole("button", { name: "Добавить ЖК" }).click();
     await page.getByRole("button", { name: "Создать черновик" }).click();
-    await expect(page.locator(".field__error", { hasText: "Выберите застройщика" })).toBeVisible();
+    await expect(page.locator(".field__error", { hasText: "Выберите застройщика" })).toHaveCount(0);
     await expect(page.locator(".field__error", { hasText: "Заполните поле" })).toBeVisible();
 
     await page.getByLabel("Название · RU").fill("Шодлик Сити");

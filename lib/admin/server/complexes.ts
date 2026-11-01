@@ -1,3 +1,4 @@
+import type { ComplexStateRow } from "../complexes/list";
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ComplexFileKind } from "../complexes/types";
@@ -27,23 +28,40 @@ function unavailable(what: string, cause: unknown): never {
  * Строки списка «ЖК» с остатками по комнатам и свободными без планировки (три запроса на весь
  * список): правило пилюли — то же, что на главной.
  */
+type ComplexStateRecord = {
+  complex_id: string;
+  state: ComplexStateRow["state"];
+  done: number;
+  total: number;
+  complete_layouts: number;
+  layouts: number;
+};
+
 export async function readComplexRows(supabase: SupabaseClient): Promise<ComplexListRow[]> {
   const rows = await supabase.rpc("complex_rows");
   if (rows.error) unavailable("complex-rows", rows.error);
   const records = (rows.data ?? []) as ComplexRowRecord[];
   if (records.length === 0) return [];
   const complexIds = records.map((record) => record.id);
-  const [stock, blocks] = await Promise.all([
+  const [stock, blocks, states] = await Promise.all([
     supabase.rpc("room_availability", { complex_ids: complexIds }),
     supabase.rpc("block_availability", { complex_ids: complexIds }),
+    supabase.rpc("complex_states"),
   ]);
   if (stock.error) unavailable("room-availability", stock.error);
   if (blocks.error) unavailable("block-availability", blocks.error);
+  if (states.error) unavailable("complex-states", states.error);
+  const stateOf = new Map(
+    ((states.data ?? []) as ComplexStateRecord[]).map((row) => [
+      row.complex_id,
+      { state: row.state, done: row.done, total: row.total, completeLayouts: row.complete_layouts, layouts: row.layouts },
+    ]),
+  );
   return parseComplexRows(
     records,
     stockByComplex((stock.data ?? []) as RoomAvailabilityRecord[]),
     unassignedByComplex((blocks.data ?? []) as { complex_id: string; free_unassigned: number }[]),
-  );
+  ).map((row) => ({ ...row, siteState: stateOf.get(row.id) }));
 }
 
 /** Застройщики для «+ Добавить ЖК» и вкладки «Основное»: в порядке списка, без архивных. */

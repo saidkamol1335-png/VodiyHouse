@@ -86,7 +86,7 @@ function DeveloperClassRow({ fields, issue, developers }: SectionProps) {
         id="complex-developer"
         name="developerId"
         label={t("fields.developer")}
-        options={developers.map((developer) => ({ value: developer.id, label: developer.name }))}
+        options={[{ value: "", label: t("noDeveloper") }, ...developers.map((developer) => ({ value: developer.id, label: developer.name }))]}
         defaultValue={fields.developerId}
         error={issue("developerId")}
       />

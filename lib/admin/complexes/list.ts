@@ -18,13 +18,24 @@ export type ComplexListRow = {
   name: BilingualValue;
   status: PublicationStatus;
   archivedAt: string | null;
-  developerId: string;
-  developerName: string;
+  /** null — черновик без застройщика (обязателен только для публикации). */
+  developerId: string | null;
+  developerName: string | null;
   developerStatus: PublicationStatus;
   locationName: string | null;
+  /** Состояние по правилу публикации; нет — данные не прочитаны (служебный стенд). */
+  siteState?: ComplexStateRow;
   stock: ComplexStock;
   /** Свободные без планировки: в типах их нет, но ЖК не распродан. */
   unassigned: number;
+};
+
+export type ComplexStateRow = {
+  state: "draft" | "soon" | "full";
+  done: number;
+  total: number;
+  completeLayouts: number;
+  layouts: number;
 };
 
 export type ComplexRowRecord = {
@@ -33,8 +44,8 @@ export type ComplexRowRecord = {
   name: unknown;
   status: string;
   archived_at: string | null;
-  developer_id: string;
-  developer_name: string;
+  developer_id: string | null;
+  developer_name: string | null;
   developer_status: string;
   location_name: string | null;
 };
@@ -81,7 +92,7 @@ export type ComplexListQuery = {
 
 function matchesQuery(row: ComplexListRow, needle: string): boolean {
   if (!needle) return true;
-  const haystack = [row.name.ru, row.name.uz, row.locationName ?? "", row.developerName, row.slug];
+  const haystack = [row.name.ru, row.name.uz, row.locationName ?? "", row.developerName ?? "", row.slug];
   return haystack.some((text) => searchableText(text).includes(needle));
 }
 
@@ -118,7 +129,7 @@ export function complexListScope(
   if (option) return { developer: option, archived: false };
   const row = rows.find((item) => item.developerId === scopeId);
   return row
-    ? { developer: { id: row.developerId, name: row.developerName }, archived: true }
+    ? { developer: { id: scopeId, name: row.developerName ?? "" }, archived: true }
     : { developer: null, archived: false };
 }
 

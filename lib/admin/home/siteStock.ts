@@ -143,7 +143,7 @@ export function siteStockFrom(
         id: complex.id,
         name: complex.name.ru,
         locationName: complex.locationName,
-        developerName: complex.developerName,
+        developerName: complex.developerName ?? "",
         stock,
         offers: offersOf(stock, roomsOf.get(complex.id) ?? []),
         blocks: blockRecords.map(blockStockOf),

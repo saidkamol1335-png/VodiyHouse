@@ -20,6 +20,15 @@
   font-size: var(--fs-label);
 }
 
+.complex-layouts__only-incomplete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
 .complex-layouts__lead {
   margin: 0;
   color: var(--fg-2);

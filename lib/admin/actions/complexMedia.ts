@@ -1,5 +1,6 @@
 "use server";
 
+import { PHOTO_CATEGORIES } from "@/lib/admin/complexes/photos";
 import { requirementsFromDetail } from "@/lib/admin/complexes/readiness";
 import type { ComplexMediaResult } from "@/lib/admin/complexes/types";
 import { readText, readUuid } from "@/lib/admin/credentials";
@@ -122,6 +123,20 @@ export async function removeComplexPhotoAction(formData: FormData): Promise<Comp
 }
 
 /** Поля: id (ЖК), photo, focusX, focusY — кадры 16:9 / 4:3 / 4:5 считаются от точки (в. 4). */
+/** Тип фото: минимум ЖК считает только общие рендеры, база не даст потерять обязательное. */
+export async function setComplexPhotoCategoryAction(formData: FormData): Promise<ComplexMediaResult> {
+  const guard = await headGuard();
+  if (!guard.ok) return fail(guard.code);
+  const id = readUuid(formData);
+  const photo = readUuid(formData, "photo");
+  const category = readText(formData, "category");
+  if (!id || !photo || !category || !(PHOTO_CATEGORIES as readonly string[]).includes(category)) return fail("invalid");
+  const { error } = await guard.supabase.rpc("set_complex_photo_category", { p_media: photo, p_category: category });
+  if (error) return fail(contentDbErrorCode(error), error);
+  expireComplex(id);
+  return { status: "done", id: photo };
+}
+
 export async function setComplexPhotoFocusAction(formData: FormData): Promise<ComplexMediaResult> {
   const guard = await headGuard();
   if (!guard.ok) return fail(guard.code);

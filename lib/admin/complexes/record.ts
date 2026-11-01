@@ -20,7 +20,8 @@ export type ComplexRecord = {
   name: BilingualValue;
   status: PublicationStatus;
   archivedAt: string | null;
-  developerId: string;
+  /** null — черновик без застройщика. */
+  developerId: string | null;
   developerName: string;
   developerStatus: PublicationStatus;
   shortDescription: BilingualValue | null;
@@ -47,7 +48,7 @@ export type ComplexDbRow = {
   name: unknown;
   status: string;
   archived_at: string | null;
-  developer_id: string;
+  developer_id: string | null;
   short_description: unknown;
   class: string | null;
   house_type: string | null;

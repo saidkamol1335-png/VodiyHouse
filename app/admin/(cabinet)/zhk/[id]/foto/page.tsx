@@ -4,6 +4,7 @@ import {
   removeComplexPhotoAction,
   reorderComplexPhotosAction,
   setComplexPhotoFocusAction,
+  setComplexPhotoCategoryAction,
 } from "@/lib/admin/actions/complexMedia";
 import type { PhotoActions } from "@/lib/admin/complexes/photos";
 import { complexForTab } from "@/lib/admin/server/complexPage";
@@ -18,6 +19,7 @@ const PHOTO_ACTIONS: PhotoActions = {
   reorder: reorderComplexPhotosAction,
   remove: removeComplexPhotoAction,
   setFocus: setComplexPhotoFocusAction,
+  setCategory: setComplexPhotoCategoryAction,
 };
 
 /** Вкладка «Фото» (И6): галерея, первое — обложка; сохраняется сразу. */

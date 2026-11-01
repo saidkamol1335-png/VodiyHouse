@@ -26,8 +26,8 @@ export async function readSiteStock(supabase: SupabaseClient): Promise<SiteStock
   if (complexes.length === 0) return { complexes: [] };
   const complexIds = complexes.map((complex) => complex.id);
   const [rooms, blocks] = await Promise.all([
-    supabase.rpc("room_availability", { complex_ids: complexIds }),
-    supabase.rpc("block_availability", { complex_ids: complexIds }),
+    supabase.rpc("site_room_stock", { complex_ids: complexIds }),
+    supabase.rpc("site_block_stock", { complex_ids: complexIds }),
   ]);
   if (rooms.error) unavailable("room-availability", rooms.error);
   if (blocks.error) unavailable("block-availability", blocks.error);

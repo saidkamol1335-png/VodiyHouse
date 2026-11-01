@@ -1,5 +1,6 @@
 "use client";
 
+import { PHOTO_CATEGORIES, type PhotoCategory } from "@/lib/admin/complexes/photos";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import { canBeCover, type PhotoItem } from "@/lib/admin/complexes/photos";
 import { MEDIA_LIMITS, type FocusPoint } from "@/lib/media";
 
 type PhotoPanelProps = {
+  onCategory: (category: PhotoCategory) => void;
   photo: PhotoItem;
   index: number;
   count: number;
@@ -48,6 +50,16 @@ export function PhotoPanel(props: PhotoPanelProps) {
           {t("notCover", { min: MEDIA_LIMITS.complexCoverMinLongSide })}
         </p>
       ) : null}
+      <label className="photo-panel__category">
+        {t("category.label")}
+        <select value={photo.category ?? "general"} onChange={(event) => props.onCategory(event.target.value as PhotoCategory)}>
+          {PHOTO_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {t(`category.${category}`)}
+            </option>
+          ))}
+        </select>
+      </label>
       <p className="field__meta">{t("size", { width: photo.width, height: photo.height })}</p>
     </section>
   );

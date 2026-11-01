@@ -151,7 +151,7 @@ describe("список ЖК", () => {
 
   it("«ЖК застройщика →» у застройщика в архиве: имя из его ЖК, список — на «Архиве»", () => {
     const [row] = DEMO_COMPLEX_ROWS;
-    const options = [{ id: row!.developerId, name: row!.developerName }];
+    const options = [{ id: row!.developerId!, name: row!.developerName! }];
     expect(complexListScope(row!.developerId, options, DEMO_COMPLEX_ROWS)).toEqual({
       developer: options[0],
       archived: false,
@@ -192,11 +192,11 @@ describe("«+ Добавить ЖК»", () => {
     expect(MIGRATION).toContain(`length(name ->> 'ru') <= ${COMPLEX_NAME_MAX}`);
   });
 
-  it("без застройщика и без UZ — ошибки по полям; «ЖК» в начале убирается", () => {
+  it("без UZ — ошибка поля, застройщик необязателен; «ЖК» в начале убирается", () => {
     const parsed = parseComplexCreate(form({ "name.ru": "ЖК  Шодлик", "name.uz": "" }));
     expect(parsed).toMatchObject({
       ok: false,
-      fieldErrors: { developerId: "developerRequired", name: "missingUz" },
+      fieldErrors: { name: "missingUz" },
       fields: { name: { ru: "Шодлик", uz: "" } },
     });
     expect(normalizeComplexName("jk Orzu")).toBe("Orzu");

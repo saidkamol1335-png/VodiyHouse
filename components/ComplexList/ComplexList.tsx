@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/Badge";
 import { ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -209,7 +210,7 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
         </span>
         {publication ? (
           <span className="complex-list__status">
-            <PublicationBadge status={row.status} />
+            <ComplexStateBadge row={row} />
           </span>
         ) : null}
         <ChevronRight className="complex-list__chevron" size={18} aria-hidden="true" />
@@ -218,9 +219,26 @@ function ComplexRow({ row, href, publication }: ComplexRowProps) {
   );
 }
 
+/** Статус-колонка (правило публикации v2): Черновик (N из M) · Скоро · Опубликован · Скрыт · Архив. */
+function ComplexStateBadge({ row }: { row: ComplexListRow }) {
+  const t = useTranslations("admin.complexes.siteState");
+  const state = row.siteState;
+  if (row.status === "draft" && state) {
+    return <Badge size="sm">{t("draft", { done: state.done, total: state.total })}</Badge>;
+  }
+  if (row.status === "published" && state?.state === "soon") {
+    return (
+      <Badge tone="amber" size="sm">
+        {t("soon")}
+      </Badge>
+    );
+  }
+  return <PublicationBadge status={row.status} />;
+}
+
 /** «Фергана · Farg‘ona Sifat Qurilish»; у архива — дата окончательного удаления. */
 function metaLine(row: ComplexListRow, t: Translate): string {
-  const parts = [row.locationName ?? t("noLocation"), row.developerName];
+  const parts = [row.locationName ?? t("noLocation"), row.developerName ?? t("noDeveloper")];
   if (row.status === "archived" && row.archivedAt) {
     parts.push(t("archivedUntil", { date: formatDate(deletionDate(row.archivedAt)) }));
   }

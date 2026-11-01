@@ -16,6 +16,14 @@ export async function saveContactsAction(formData: FormData): Promise<ContactsAc
   if (!parsed.ok) {
     return { status: "error", error: null, fieldErrors: parsed.fieldErrors, fields: parsed.fields };
   }
+  // Общий номер — единственная связь на странице ЖК «Скоро»: у опубликованных его не убрать.
+  if (!parsed.value.phone) {
+    const { count } = await guard.supabase
+      .from("complexes")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "published");
+    if (count) return { status: "error", error: "phoneRequired", fieldErrors: {}, fields: contactsFieldsFrom(formData) };
+  }
   const { error } = await guard.supabase
     .from("settings")
     .upsert({ key: SITE_CONTACTS_KEY, value: parsed.value, is_public: true });

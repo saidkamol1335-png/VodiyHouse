@@ -1,5 +1,6 @@
 "use client";
 
+import type { PhotoCategory } from "./photos";
 import {
   useCallback,
   useEffect,
@@ -146,5 +147,14 @@ function usePhotoEdits(params: Params, { photos, setPhotos, setError, locked }: 
     setPhotos((current) => current.map((photo) => (photo.id === id ? { ...photo, focus } : photo)));
     queueFocus(id, focus);
   };
-  return { move, remove, setFocus };
+  const setCategory = async (id: string, category: PhotoCategory) => {
+    const save = actions?.setCategory;
+    if (save) {
+      const result = await settle(() => save(form({ id: complexId, photo: id, category })), NETWORK);
+      refused(result);
+      if (result.status === "error") return;
+    }
+    setPhotos((current) => current.map((photo) => (photo.id === id ? { ...photo, category } : photo)));
+  };
+  return { move, remove, setFocus, setCategory };
 }

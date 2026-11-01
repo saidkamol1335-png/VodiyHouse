@@ -16,7 +16,7 @@ export type ComplexCreateFields = { developerId: string; name: BilingualValue };
 export type ComplexCreateErrors = { developerId?: "developerRequired"; name?: BilingualIssue };
 
 export type ComplexCreateParse =
-  | { ok: true; value: { developerId: string; name: BilingualValue }; fields: ComplexCreateFields }
+  | { ok: true; value: { developerId: string | null; name: BilingualValue }; fields: ComplexCreateFields }
   | { ok: false; fields: ComplexCreateFields; fieldErrors: ComplexCreateErrors };
 
 /** Название без «ЖК» в начале: слово «ЖК» сайт добавляет сам (мокап: «ЖК Shodlik»). */
@@ -31,9 +31,8 @@ export function parseComplexCreate(formData: FormData): ComplexCreateParse {
   const fields = { developerId: developerId ?? "", name };
   const nameIssue = bilingualIssue(name, { max: COMPLEX_NAME_MAX, required: true });
   const fieldErrors: ComplexCreateErrors = {
-    ...(developerId ? {} : { developerId: "developerRequired" as const }),
     ...(nameIssue ? { name: nameIssue } : {}),
   };
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fields, fieldErrors };
-  return { ok: true, fields, value: { developerId: developerId!, name } };
+  return { ok: true, fields, value: { developerId, name } };
 }

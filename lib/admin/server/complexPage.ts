@@ -5,6 +5,7 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { requireSection } from "@/lib/admin/session";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { complexCompleteness, type ComplexCompleteness, type ComplexCompletenessRecord } from "../complexes/completeness";
 import type { ComplexRecord } from "../complexes/record";
 import {
   canOpenComplex,
@@ -29,6 +30,14 @@ export const getComplex = cache(async (id: string) => {
 export const getComplexReadiness = cache(async (id: string) =>
   readReadiness(await createSupabaseServerClient(), id),
 );
+
+/** Полнота ЖК и планировок (правило публикации v2); null — ЖК не виден этой роли. */
+export const getComplexCompleteness = cache(async (id: string): Promise<ComplexCompleteness | null> => {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("complex_completeness", { p_complex: id });
+  if (error) throw new Error("complex-completeness-unavailable", { cause: error });
+  return data ? complexCompleteness(data as ComplexCompletenessRecord) : null;
+});
 
 /**
  * Вкладка ЖК сама проверяет сотрудника: переход между вкладками не перерисовывает layout.

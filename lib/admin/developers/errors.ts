@@ -31,6 +31,7 @@ export const CONTENT_ERRORS = [
   "developerArchived",
   "developerHasPublished",
   "rateRequired",
+  "phoneRequired",
   "galleryFull",
   "contacts",
   "invalidProgram",

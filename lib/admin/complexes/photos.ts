@@ -15,7 +15,12 @@ export type PhotoItem = {
   width: number;
   height: number;
   focus: FocusPoint;
+  /** Минимум ЖК считает только общие рендеры; нет — общий. */
+  category?: PhotoCategory;
 };
+
+export const PHOTO_CATEGORIES = ["general", "apartment", "real"] as const;
+export type PhotoCategory = (typeof PHOTO_CATEGORIES)[number];
 
 /** Действия вкладки; null — без облака (служебный стенд): всё остаётся в браузере. */
 export type PhotoActions = {
@@ -23,6 +28,7 @@ export type PhotoActions = {
   reorder: FormAction<ComplexMediaResult>;
   remove: FormAction<ComplexMediaResult>;
   setFocus: FormAction<ComplexMediaResult>;
+  setCategory?: FormAction<ComplexMediaResult>;
 };
 
 /** Обложкой встаёт только фото от 2400 px (PLAN 3а). */

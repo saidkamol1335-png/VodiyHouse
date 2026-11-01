@@ -1,3 +1,4 @@
+import type { LayoutGap } from "./completeness";
 import { readText } from "../credentials";
 import { parsePriceInput, PRICE_MAX } from "@/lib/format";
 import type { Currency } from "./blocks";
@@ -37,7 +38,21 @@ export type LayoutDraft = {
   /** Только чтение: квартир с этой планировкой — удалить нельзя. */
   units: number;
   offer: LayoutOffer | null;
+  /** Чего не хватает по базе (правило публикации v2); у новой строки нет. */
+  gaps?: readonly LayoutGap[];
+  /** Чертёж, к которому относятся gaps: после замены метка «чертёж» снимается сразу. */
+  savedDrawingId?: string | null;
 };
+
+/**
+ * «Не хватает: цена · чертёж». Чертёж и ручную цену правят здесь же — видно сразу; цену из квартир и
+ * слишком маленький чертёж знает только база. Новый чертёж прошёл порог при загрузке.
+ */
+export function layoutGaps(row: LayoutDraft, hasUnits: boolean): LayoutGap[] {
+  const price = hasUnits ? (row.gaps ?? []).includes("price") : !row.priceFrom.trim();
+  const drawing = !row.drawingSrc || (row.drawingId === row.savedDrawingId && (row.gaps ?? []).includes("drawing"));
+  return [...(price ? (["price"] as const) : []), ...(drawing ? (["drawing"] as const) : [])];
+}
 
 export type BlockLayouts = {
   blockId: string;

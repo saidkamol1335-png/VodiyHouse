@@ -35,7 +35,7 @@ function fieldsOf(complex: ComplexRecord): ComplexMainFields {
   const empty = { ru: "", uz: "" };
   return {
     name: complex.name,
-    developerId: complex.developerId,
+    developerId: complex.developerId ?? "",
     class: complex.class ?? "",
     houseType: complex.houseType ?? "",
     ceilingHeight: complex.ceilingHeight === null ? "" : CEILING.format(complex.ceilingHeight),

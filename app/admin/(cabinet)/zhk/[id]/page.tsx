@@ -22,7 +22,7 @@ export default async function ComplexMainPage({ params }: { params: Promise<{ id
     readDictionary(supabase, "locations"),
     readFloorsRange(supabase, complex.id),
   ]);
-  const current = developers.some((developer) => developer.id === complex.developerId)
+  const current = !complex.developerId || developers.some((developer) => developer.id === complex.developerId)
     ? developers
     : [{ id: complex.developerId, name: complex.developerName }, ...developers];
   const floorsText = floors
