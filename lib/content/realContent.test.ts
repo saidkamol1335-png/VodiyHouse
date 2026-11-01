@@ -32,7 +32,13 @@ type Block = {
   deadline?: [number, number];
   currency: string;
   includes?: { item: Text; included: boolean; price?: number }[];
-  layouts?: { rooms: number; area: number; priceFrom?: number; available?: boolean }[];
+  layouts?: {
+    rooms: number;
+    area: number;
+    priceFrom?: number;
+    available?: boolean;
+    drawing?: string;
+  }[];
 };
 type Complex = {
   slug: string;
@@ -270,16 +276,17 @@ describe("настоящие ЖК из материалов заказчика",
         complex.blocks.some((block) => block.deadline),
         complex.slug,
       ).toBe(true);
-      const file = unitsOf(complex)!;
-      const free = complex.blocks.flatMap((block) =>
-        file.blocks[block.name]
-          ? unitRows(file.blocks[block.name]!).filter((row) => row.status === "free")
-          : [],
+      const file = unitsOf(complex);
+      const free = file
+        ? complex.blocks.flatMap((block) =>
+            siteUnitRows(file, block.name).filter((row) => row.status === "free"),
+          )
+        : [];
+      const withUnits = free.some((row) => row.layout && file?.layouts[row.layout]?.drawing);
+      const withPrice = complex.blocks.some((block) =>
+        block.layouts?.some((layout) => layout.drawing && layout.priceFrom),
       );
-      expect(
-        free.some((row) => row.layout && file.layouts[row.layout]?.drawing),
-        complex.slug,
-      ).toBe(true);
+      expect(withUnits || withPrice, complex.slug).toBe(true);
       const developer = content.developers.find((item) => item.slug === complex.developer)!;
       expect(developer.publish && developer.about && developer.logo, developer.slug).toBeTruthy();
     }
@@ -288,6 +295,26 @@ describe("настоящие ЖК из материалов заказчика",
       if (!file) continue;
       for (const block of complex.blocks)
         expect(Array.isArray(blockLayoutKeys(file, block.name))).toBe(true);
+    }
+  });
+
+  it("чертежи планировок блоков и логотипы — файлы на месте, не мельче порогов", async () => {
+    for (const complex of content.complexes) {
+      for (const block of complex.blocks) {
+        for (const layout of block.layouts ?? []) {
+          if (!layout.drawing) continue;
+          expect(existsSync(path.join(ZHK_DIR, layout.drawing)), layout.drawing).toBe(true);
+          expect(await longSide(layout.drawing), layout.drawing).toBeGreaterThanOrEqual(
+            MEDIA_RULES.drawing.minLongSide,
+          );
+        }
+      }
+    }
+    for (const developer of content.developers) {
+      if (developer.logo)
+        expect(await longSide(developer.logo), developer.slug).toBeGreaterThanOrEqual(
+          MEDIA_RULES.logo.minLongSide,
+        );
     }
   });
 

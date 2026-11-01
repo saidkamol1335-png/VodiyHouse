@@ -54,6 +54,9 @@ const CLOUD_PAGES = [
   "/ru/novostroyki/shodlik",
   "/uz/novostroyki/sayilgoh",
   "/ru/zastroyshchiki/myb-development",
+  "/ru/novostroyki/chinor-residence",
+  "/uz/novostroyki/garant-avenue",
+  "/ru/zastroyshchiki/ukasset",
 ];
 
 test.describe("правило ТЗ 1.2", () => {

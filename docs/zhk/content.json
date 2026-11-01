@@ -45,6 +45,8 @@
       "name": "UKASSET",
       "foundedYear": 2018,
       "flatsDelivered": 500,
+      "logo": "../developers/ukasset/logo.png",
+      "publish": true,
       "about": {
         "ru": "UKASSET — «Прочные и надёжные дома». С 2018 года компания построила и в срок сдала 10 домов в Фергане и Маргилане — 500 квартир. С 2025 года строит в центре Ферганы жилой комплекс Chinor Residence: 5 блоков, 12 этажей, 407 квартир.",
         "uz": "UKASSET — «Mustahkam va ishonchli uylar». Kompaniya 2018-yildan beri Farg‘ona va Marg‘ilonda 10 ta uyni o‘z vaqtida qurib topshirdi — jami 500 ta xonadon. 2025-yildan Farg‘ona markazida 5 blokli, 12 qavatli, 407 xonadonli Chinor Residence turar-joy majmuasini qurmoqda."
@@ -108,7 +110,13 @@
     },
     {
       "slug": "garant-avenue",
-      "name": "Garant Avenue"
+      "name": "Garant Avenue",
+      "logo": "../developers/garant-avenue/logo.png",
+      "publish": true,
+      "about": {
+        "ru": "Garant Avenue — застройщик одноимённого жилого комплекса премиум-класса в Фергане на улице Сохибкирон Темур: 12-этажный дом с квартирами и гостиничным блоком.",
+        "uz": "Garant Avenue — Farg‘onadagi Sohibqiron Temur ko‘chasida joylashgan shu nomli premium klass turar-joy majmuasining quruvchisi: xonadonlar va mehmonxona blokidan iborat 12 qavatli bino."
+      }
     },
     {
       "slug": "fayz-akira",
@@ -704,9 +712,15 @@
       "slug": "chinor-residence",
       "name": "Chinor Residence",
       "developer": "ukasset",
+      "publish": true,
       "photos": [
         "chinor-residence/fasad-2-front.jpg",
-        "chinor-residence/fasad-1-aerial.jpg"
+        "chinor-residence/fasad-1-aerial.jpg",
+        "chinor-residence/render-02.jpg",
+        "chinor-residence/render-07.jpg",
+        "chinor-residence/render-08.jpg",
+        "chinor-residence/render-10.jpg",
+        "chinor-residence/render-12.jpg"
       ],
       "facade": "chinor-residence/fasad-1-aerial.jpg",
       "class": "comfort",
@@ -1074,9 +1088,17 @@
       "slug": "garant-avenue",
       "name": "Garant Avenue",
       "developer": "garant-avenue",
+      "publish": true,
       "photos": [
         "garant-avenue/fasad-1-front.jpg",
-        "garant-avenue/fasad-2-corner.jpg"
+        "garant-avenue/fasad-2-corner.jpg",
+        "garant-avenue/render-17.jpg",
+        "garant-avenue/render-19.jpg",
+        "garant-avenue/render-21.jpg",
+        "garant-avenue/render-24.jpg",
+        "garant-avenue/render-26.jpg",
+        "garant-avenue/render-27.jpg",
+        "garant-avenue/render-08.jpg"
       ],
       "facade": "garant-avenue/fasad-1-front.jpg",
       "class": "premium",
@@ -1140,57 +1162,68 @@
             {
               "rooms": 2,
               "area": 49.27,
-              "priceFrom": 394160000
+              "priceFrom": 394160000,
+              "drawing": "garant-avenue/plan-kv-2-49.png"
             },
             {
               "rooms": 2,
               "area": 49.51,
-              "priceFrom": 396080000
+              "priceFrom": 396080000,
+              "drawing": "garant-avenue/plan-kv-2-49-5.png"
             },
             {
               "rooms": 2,
               "area": 50.31,
-              "priceFrom": 402480000
+              "priceFrom": 402480000,
+              "drawing": "garant-avenue/plan-kv-2-50.png"
             },
             {
               "rooms": 2,
               "area": 51.41,
-              "priceFrom": 411280000
+              "priceFrom": 411280000,
+              "drawing": "garant-avenue/plan-kv-2-51-4.png"
             },
             {
               "rooms": 2,
               "area": 51.93,
-              "priceFrom": 415440000
+              "priceFrom": 415440000,
+              "drawing": "garant-avenue/plan-kv-2-51-9.png"
             },
             {
               "rooms": 2,
               "area": 54.01,
-              "priceFrom": 432080000
+              "priceFrom": 432080000,
+              "drawing": "garant-avenue/plan-kv-2-54.png"
             },
             {
               "rooms": 2,
               "area": 63.74,
-              "priceFrom": 509920000
+              "priceFrom": 509920000,
+              "drawing": "garant-avenue/plan-kv-2-63.png"
             },
             {
               "rooms": 3,
               "area": 63.74,
-              "priceFrom": 509920000
+              "priceFrom": 509920000,
+              "drawing": "garant-avenue/plan-kv-3-63.png"
             },
             {
               "rooms": 3,
               "area": 66.2,
-              "priceFrom": 529600000
+              "priceFrom": 529600000,
+              "drawing": "garant-avenue/plan-kv-3-66.png"
             },
             {
               "rooms": 3,
               "area": 75.21,
-              "priceFrom": 601680000
+              "priceFrom": 601680000,
+              "drawing": "garant-avenue/plan-kv-3-75.png"
             },
             {
               "rooms": 3,
               "area": 82.95,
-              "priceFrom": 663600000
+              "priceFrom": 663600000,
+              "drawing": "garant-avenue/plan-kv-3-82.png"
             }
           ]
         },
@@ -1338,18 +1371,21 @@
               "rooms": 2,
               "area": 60.91,
               "priceFrom": 395915000,
-              "available": true
+              "available": true,
+              "drawing": "ibrat-building-14-qavat/plan-kv-2-60.png"
             },
             {
               "rooms": 2,
               "area": 62.56,
-              "available": false
+              "available": false,
+              "drawing": "ibrat-building-14-qavat/plan-kv-2-62.png"
             },
             {
               "rooms": 2,
               "area": 65.15,
               "priceFrom": 423475000,
-              "available": true
+              "available": true,
+              "drawing": "ibrat-building-14-qavat/plan-kv-2-65.png"
             }
           ]
         }
@@ -1713,7 +1749,11 @@
       "developer": "qadrdonlar-developments",
       "photos": [
         "alliance-avenue/fasad-2-front.jpg",
-        "alliance-avenue/fasad-1-corner.jpg"
+        "alliance-avenue/fasad-1-corner.jpg",
+        "alliance-avenue/render-2.jpg",
+        "alliance-avenue/render-4.jpg",
+        "alliance-avenue/render-5.jpg",
+        "alliance-avenue/render-7.jpg"
       ],
       "facade": "alliance-avenue/fasad-2-front.jpg",
       "class": "business",
@@ -1743,37 +1783,44 @@
             {
               "rooms": 2,
               "area": 36.52,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-2-36.png"
             },
             {
               "rooms": 2,
               "area": 54.03,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-2-54.png"
             },
             {
               "rooms": 3,
               "area": 56.55,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-3-56.png"
             },
             {
               "rooms": 3,
               "area": 62.7,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-3-62.png"
             },
             {
               "rooms": 3,
               "area": 85.67,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-3-85-6.png"
             },
             {
               "rooms": 3,
               "area": 90.93,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-3-90.png"
             },
             {
               "rooms": 4,
               "area": 97.07,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-4-97.png"
             }
           ]
         },
@@ -1789,7 +1836,8 @@
             {
               "rooms": 2,
               "area": 36.52,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-2-36.png"
             },
             {
               "rooms": 2,
@@ -1804,22 +1852,26 @@
             {
               "rooms": 2,
               "area": 59.46,
-              "available": false
+              "available": false,
+              "drawing": "alliance-avenue/plan-kv-2-59.png"
             },
             {
               "rooms": 3,
               "area": 85.56,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-3-85-5.png"
             },
             {
               "rooms": 3,
               "area": 91.11,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-3-91.png"
             },
             {
               "rooms": 4,
               "area": 97.07,
-              "available": true
+              "available": true,
+              "drawing": "alliance-avenue/plan-kv-4-97-b.png"
             }
           ]
         },
@@ -2304,7 +2356,14 @@
       "developer": "qadrdonlar-developments",
       "photos": [
         "sokin/fasad-1-front.jpg",
-        "sokin/fasad-2-corner.jpg"
+        "sokin/fasad-2-corner.jpg",
+        "sokin/render-2.jpg",
+        "sokin/render-6.jpg",
+        "sokin/render-8.jpg",
+        "sokin/foto-30.jpg",
+        "sokin/foto-37.jpg",
+        "sokin/foto-43.jpg",
+        "sokin/foto-47.jpg"
       ],
       "facade": "sokin/fasad-1-front.jpg",
       "class": "comfort",

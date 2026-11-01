@@ -2,29 +2,30 @@
   "note": "Свободные квартиры Chinor Residence из чек-листа, раздел «Наличие» (шахматка застройщика на 26.10.2026). Строка: номер, этаж, стояк (порядковый на этаже: настоящего в чек-листе нет), планировка, цена за м² из шахматки (заметка к пункту «Цена»: 9 900 000 сум на всех этажах; «от 8 900 000» — вопрос заказчику), статус. Проданных в чек-листе нет — в базе только свободные.",
   "currency": "UZS",
   "layouts": {
-    "a48": { "rooms": 2, "area": 48 },
+    "a48": { "rooms": 2, "area": 48, "drawing": "chinor-residence/plan-kv-a-48.png" },
     "a60": { "rooms": 2, "area": 60.7 },
-    "a62": { "rooms": 2, "area": 62.4 },
-    "a81": { "rooms": 3, "area": 81.2 },
-    "b59": { "rooms": 2, "area": 59 },
-    "b59b": { "rooms": 2, "area": 59.2 },
+    "a62": { "rooms": 2, "area": 62.4, "drawing": "chinor-residence/plan-kv-a-62.png" },
+    "a81": { "rooms": 3, "area": 81.2, "drawing": "chinor-residence/plan-kv-a-81.png" },
+    "b59": { "rooms": 2, "area": 59, "drawing": "chinor-residence/plan-kv-b-59.png" },
+    "b59b": { "rooms": 2, "area": 59.2, "drawing": "chinor-residence/plan-kv-b-59-2.png" },
     "b65": { "rooms": 3, "area": 65.6 },
     "b68": { "rooms": 3, "area": 68.6 },
-    "b79": { "rooms": 3, "area": 79 },
+    "b79": { "rooms": 3, "area": 79, "drawing": "chinor-residence/plan-kv-b-79.png" },
     "b102": { "rooms": 4, "area": 102 },
-    "c31": { "rooms": 1, "area": 31.6 },
-    "c47": { "rooms": 2, "area": 47.6 },
+    "c31": { "rooms": 1, "area": 31.6, "drawing": "chinor-residence/plan-kv-c-31.png" },
+    "c47": { "rooms": 2, "area": 47.6, "drawing": "chinor-residence/plan-kv-c-47.png" },
     "c48": { "rooms": 2, "area": 48 },
-    "c60": { "rooms": 2, "area": 60.7 },
-    "c62": { "rooms": 2, "area": 62.4 },
-    "c81": { "rooms": 3, "area": 81.2 }
+    "c60": { "rooms": 2, "area": 60.7, "drawing": "chinor-residence/plan-kv-c-60.png" },
+    "c60b": { "rooms": 2, "area": 60.7, "drawing": "chinor-residence/plan-kv-c-60-b.png" },
+    "c62": { "rooms": 2, "area": 62.4, "drawing": "chinor-residence/plan-kv-c-62.png" },
+    "c81": { "rooms": 3, "area": 81.2, "drawing": "chinor-residence/plan-kv-c-81.png" }
   },
   "blockLayouts": {
     "A": ["a48", "a60", "a62", "a81"],
     "B": ["b59", "b59b", "b65", "b68", "b79", "b102"],
     "C1": ["c31", "c47", "c48", "c60", "c62", "c81"],
-    "C2": ["c31", "c47", "c48", "c60", "c62", "c81"],
-    "C3": ["c31", "c47", "c48", "c60", "c62", "c81"]
+    "C2": ["c31", "c47", "c48", "c60", "c60b", "c62", "c81"],
+    "C3": ["c31", "c47", "c48", "c60b", "c62", "c81"]
   },
   "blocks": {
     "A": {
@@ -60,11 +61,11 @@
     "C2": {
       "rows": [
         ["14", 2, 1, "c47", null, 9900000, "f"],
-        ["67", 10, 1, "c60", null, 9900000, "f"],
+        ["67", 10, 1, "c60b", null, 9900000, "f"],
         ["68", 10, 2, "c60", null, 9900000, "f"],
         ["79", 12, 1, "c62", null, 9900000, "f"],
         ["80", 12, 2, "c81", null, 9900000, "f"],
-        ["81", 12, 3, "c60", null, 9900000, "f"],
+        ["81", 12, 3, "c60b", null, 9900000, "f"],
         ["82", 12, 4, "c60", null, 9900000, "f"]
       ]
     },
@@ -72,7 +73,7 @@
       "rows": [
         ["72", 11, 1, "c62", null, 9900000, "f"],
         ["73", 11, 2, "c81", null, 9900000, "f"],
-        ["74", 11, 3, "c60", null, 9900000, "f"],
+        ["74", 11, 3, "c60b", null, 9900000, "f"],
         ["76", 11, 4, "c31", null, 9900000, "f"],
         ["79", 12, 1, "c62", null, 9900000, "f"],
         ["80", 12, 2, "c81", null, 9900000, "f"]

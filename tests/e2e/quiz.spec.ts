@@ -9,7 +9,10 @@ import { collectPageErrors } from "./helpers";
 // во весь экран и счётчиком внизу. Скриншоты — test-results/screens/<проект>/s317-*.png.
 
 const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `test-results/screens/${test.info().project.name}/s317-${name}.png`, caret: "initial" });
+  page.screenshot({
+    path: `test-results/screens/${test.info().project.name}/s317-${name}.png`,
+    caret: "initial",
+  });
 /** Местный номер оператора 90 (не «98…»: маска не примет его за код страны). */
 const phoneOf = (seed: number) => `90${String(seed % 10_000_000).padStart(7, "0")}`;
 
@@ -18,7 +21,10 @@ test.use({ extraHTTPHeaders: { "x-nf-client-connection-ip": `e2e-${crypto.random
 test.describe("квиз «Подбор за 1 минуту»", () => {
   test.skip(!hasCloud, NO_CLOUD);
 
-  test("1440: раздел главной — ответы меняют счётчик, контакты → заявка с номером, «Показать N ЖК» открывает ровно N", async ({ page, isMobile }) => {
+  test("1440: раздел главной — ответы меняют счётчик, контакты → заявка с номером, «Показать N ЖК» открывает ровно N", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "на телефоне анкета живёт на /podbor");
     const errors = collectPageErrors(page);
     await page.goto("/ru?motion=lite#podbor");
@@ -30,7 +36,10 @@ test.describe("квиз «Подбор за 1 минуту»", () => {
     // Комнаты — несколько; без выбора — «Пропустить».
     await expect(quiz.getByRole("button", { name: "Пропустить" })).toBeVisible();
     await quiz.getByRole("button", { name: "2-комн." }).click();
-    await expect(quiz.getByRole("button", { name: "2-комн." })).toHaveAttribute("aria-pressed", "true");
+    await expect(quiz.getByRole("button", { name: "2-комн." })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     await quiz.getByRole("button", { name: "Дальше" }).click();
     await expect(quiz.locator(".quiz__step")).toHaveText("Вопрос 2 из 5");
     // Один вариант — сразу следующий вопрос; «Назад» возвращает.
@@ -71,11 +80,16 @@ test.describe("квиз «Подбор за 1 минуту»", () => {
     await expect(page).toHaveURL(/\/ru\/novostroyki\?/);
     // Прошлая страница остаётся в DOM скрытой (кэш маршрутов Next) — считаем только видимые карточки.
     await expect(page.locator("main:visible .catalog-card")).toHaveCount(total);
-    await expect(page.locator("main:visible .catalog-results__count")).toHaveText(`Найден ${total} ЖК`);
+    await expect(page.locator("main:visible .catalog-results__count")).toHaveText(
+      new RegExp(`^Найден[оы]? ${total} ЖК$`),
+    );
     expect(errors).toEqual([]);
   });
 
-  test("390: на главной — вступление и «Начать подбор»; /podbor — анкета во весь экран, счётчик внизу, без горизонтальной прокрутки", async ({ page, isMobile }) => {
+  test("390: на главной — вступление и «Начать подбор»; /podbor — анкета во весь экран, счётчик внизу, без горизонтальной прокрутки", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(!isMobile, "телефонная анкета");
     const errors = collectPageErrors(page);
     await page.goto("/ru?motion=lite#podbor");
@@ -94,15 +108,22 @@ test.describe("квиз «Подбор за 1 минуту»", () => {
     await quiz.getByRole("button", { name: "Дальше" }).click();
     await expect(quiz.locator(".quiz__step")).toHaveText("Вопрос 2 из 5");
     await shot(page, "podbor");
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
     expect(overflow).toBe(0);
     expect(errors).toEqual([]);
   });
 
-  test("UZ /podbor: тексты на узбекском, заголовок страницы; обе страницы в карте сайта", async ({ page, request }) => {
+  test("UZ /podbor: тексты на узбекском, заголовок страницы; обе страницы в карте сайта", async ({
+    page,
+    request,
+  }) => {
     await page.goto("/uz/podbor");
     await expect(page).toHaveTitle("1 daqiqada kvartira tanlash — Vodiy House");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("1 daqiqada tanlab beramiz");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "1 daqiqada tanlab beramiz",
+    );
     await expect(page.getByRole("heading", { name: "Necha xona kerak?" })).toBeVisible();
     const xml = await (await request.get("/sitemap.xml")).text();
     expect(xml).toMatch(/<loc>[^<]+\/ru\/podbor<\/loc>/);

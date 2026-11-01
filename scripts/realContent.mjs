@@ -250,22 +250,23 @@ async function fillPhotos(id, complex) {
   counts.photos += 1;
 }
 
+/** Чертёж ЖК: один файл на все планировки, которые на него ссылаются. */
+async function drawingOf(complexId, file, drawings) {
+  const known = drawings.get(file);
+  if (known) return known;
+  const image = await preparePng(file);
+  const objectPath = await store(`complexes/${complexId}`, image, "png");
+  const { rows } = await client.query(
+    "insert into public.media_assets (complex_id, kind, path, width, height) values ($1, 'drawing', $2, $3, $4) returning id",
+    [complexId, objectPath, image.width, image.height],
+  );
+  drawings.set(file, rows[0].id);
+  counts.drawings += 1;
+  return rows[0].id;
+}
+
 async function insertLayout(complexId, blockId, layout, sort, drawings) {
-  let drawingId = null;
-  if (layout.drawing) {
-    drawingId = drawings.get(layout.drawing) ?? null;
-    if (!drawingId) {
-      const image = await preparePng(layout.drawing);
-      const objectPath = await store(`complexes/${complexId}`, image, "png");
-      const { rows } = await client.query(
-        "insert into public.media_assets (complex_id, kind, path, width, height) values ($1, 'drawing', $2, $3, $4) returning id",
-        [complexId, objectPath, image.width, image.height],
-      );
-      drawingId = rows[0].id;
-      drawings.set(layout.drawing, drawingId);
-      counts.drawings += 1;
-    }
-  }
+  const drawingId = layout.drawing ? await drawingOf(complexId, layout.drawing, drawings) : null;
   const { rows } = await client.query(
     `insert into public.layouts (block_id, rooms, area, drawing_id, price_from, available, sort)
      values ($1, $2, $3, $4, $5, $6, $7) returning id`,
@@ -390,6 +391,33 @@ async function fillBlocks(id, complex, developers) {
     await insertPrograms(developers.get(complex.developer), blockIds, complex.programs);
 }
 
+/** Чертежи появились после блоков: только планировкам черновика без чертежа — по блоку, комнатам и площади. */
+async function fillDrawings(id, complex) {
+  const unitsFile = complex.units
+    ? JSON.parse(await readFile(path.join(ZHK_DIR, complex.units), "utf8"))
+    : null;
+  const drawings = new Map();
+  for (const block of complex.blocks ?? []) {
+    const fromUnits = unitsFile
+      ? blockLayoutKeys(unitsFile, block.name).map((key) => unitsFile.layouts[key])
+      : [];
+    for (const layout of [...fromUnits, ...(block.layouts ?? [])]) {
+      if (!layout.drawing) continue;
+      const empty = await client.query(
+        `select l.id from public.layouts l join public.blocks b on b.id = l.block_id
+         where b.complex_id = $1 and b.name = $2 and l.rooms = $3 and l.area = $4 and l.drawing_id is null`,
+        [id, block.name, layout.rooms, layout.area],
+      );
+      if (!empty.rowCount) continue;
+      const drawingId = await drawingOf(id, layout.drawing, drawings);
+      await client.query("update public.layouts set drawing_id = $1 where id = any($2::uuid[])", [
+        drawingId,
+        empty.rows.map((row) => row.id),
+      ]);
+    }
+  }
+}
+
 async function fillContent(id, complex) {
   for (const [topic, text] of Object.entries(complex.details ?? {})) {
     const { rowCount } = await client.query(
@@ -452,6 +480,16 @@ async function publish(table, id) {
     [id],
   );
   counts.published += rowCount;
+  return rowCount > 0;
+}
+
+/** Программы черновика выключены: на сайт они выходят вместе с ЖК. Программы на блоки других ЖК не трогает. */
+async function activatePrograms(complexId) {
+  await client.query(
+    `update public.payment_programs p set is_active = true
+     where not p.is_active and p.block_ids <> '{}' and p.block_ids <@ array(select b.id from public.blocks b where b.complex_id = $1)`,
+    [complexId],
+  );
 }
 
 await client.connect();
@@ -477,6 +515,7 @@ try {
     await fillMain(id, complex);
     await fillPhotos(id, complex);
     await fillBlocks(id, complex, developers);
+    await fillDrawings(id, complex);
     await fillContent(id, complex);
     await fillProgress(id, complex);
   }
@@ -484,7 +523,8 @@ try {
     if (developer.publish) await publish("developers", developers.get(developer.slug));
   }
   for (const complex of content.complexes) {
-    if (complex.publish) await publish("complexes", ids.get(complex.slug));
+    if (complex.publish && (await publish("complexes", ids.get(complex.slug))))
+      await activatePrograms(ids.get(complex.slug));
   }
   await client.query(
     `insert into public.settings (key, value) values ($1, $2::jsonb)
