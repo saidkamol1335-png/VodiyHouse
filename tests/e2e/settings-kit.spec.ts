@@ -106,23 +106,20 @@ test.describe("кабинет · справочники и журнал", () => 
     }
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты · ${theme}`, async ({ page }, testInfo) => {
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      const folder = `test-results/screens/${testInfo.project.name}`;
-      for (const [name, path] of [
-        ["dictionaries", DICTIONARIES],
-        ["journal", JOURNAL],
-      ] as const) {
-        await page.goto(path);
-        await page.waitForLoadState("networkidle");
-        await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({
-          caret: "initial",
-          path: `${folder}/s10-settings-${name}-${theme}.png`,
-          fullPage: true,
-        });
-      }
-    });
-  }
+  test(`скриншоты`, async ({ page }, testInfo) => {
+    const folder = `test-results/screens/${testInfo.project.name}`;
+    for (const [name, path] of [
+      ["dictionaries", DICTIONARIES],
+      ["journal", JOURNAL],
+    ] as const) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        caret: "initial",
+        path: `${folder}/s10-settings-${name}.png`,
+        fullPage: true,
+      });
+    }
+  });
 });

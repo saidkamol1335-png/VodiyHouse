@@ -24,8 +24,8 @@ const TITLE_ID = "home-hero-title";
 
 /**
  * Первый экран главной: полёт дрона над стройкой на весь экран (ЖК справа), слева текст и кнопки
- * мокапа Main под тёмной пеленой, внизу «бесплатно», цифры и «Найдено сейчас». Тёмный в обеих темах
- * (островок data-theme-island). Режим — tier сайта: full — лента кадров по прокрутке, как в артефакте
+ * мокапа Main под тёмной пеленой, внизу «бесплатно», цифры и «Найдено сейчас». Экран тёмный: свою
+ * палитру задаёт токенами на себе (HomeHero.css). Режим — tier сайта: full — лента кадров по прокрутке, как в артефакте
  * «Закат» (текст гаснет, на последних кадрах — финал «Дом сдан»); lite — ролик один раз (с паузой
  * кнопкой), затем постер «вечер»; none — только постер.
  */
@@ -45,7 +45,6 @@ export function HeroScreen({ text, stats, ctaHref, quiz, found, toggleLabels }: 
     <section
       ref={sectionRef}
       className={hero.className}
-      data-theme-island="dark"
       aria-labelledby={TITLE_ID}
     >
       <HeroMedia mode={hero.mode} media={mediaRef} video={videoRef} canvas={canvasRef} />

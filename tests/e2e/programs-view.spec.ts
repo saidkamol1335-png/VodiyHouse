@@ -74,7 +74,7 @@ test.describe("кабинет · программы оплаты: просмот
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
   });
 
-  test("скриншоты s24: экран, правка, новая программа, менеджер, тёмная тема", async ({
+  test("скриншоты s24: экран, правка, новая программа, менеджер", async ({
     page,
   }, testInfo) => {
     const dir = `test-results/screens/${testInfo.project.name}`;
@@ -103,11 +103,5 @@ test.describe("кабинет · программы оплаты: просмот
 
     await open(page, MANAGER);
     await page.screenshot({ path: `${dir}/s24-manager.png`, caret: "initial" });
-    // Ключ — как у приложения (THEME_STORAGE_KEY), атрибут — чтобы не перезагружать страницу.
-    await page.evaluate(() => {
-      localStorage.setItem("vh-theme", "dark");
-      document.documentElement.dataset.theme = "dark";
-    });
-    await page.screenshot({ path: `${dir}/s24-manager-dark.png`, caret: "initial" });
   });
 });

@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useMotion } from "@/lib/motion";
-import { useTheme } from "@/lib/theme";
 
 // Подпись — ключ admin.dev.preview.tokens.colors; статусы квартир — подписи журнала.
 const COLOR_TOKENS = [
@@ -81,44 +80,32 @@ export function TokenPreview({ children }: { children?: ReactNode }) {
   );
 }
 
-/** Верхняя строка: тема и режим анимации сейчас, переключатель темы, ?motion= для проверки. */
+/** Верхняя строка: режим анимации сейчас, ?motion= для проверки. */
 function TokenBar() {
-  const { theme, toggleTheme } = useTheme();
   const motion = useMotion();
   const t = useTranslations("admin.dev.preview.tokens");
-  const header = useTranslations("header");
   return (
     <header className="token-preview__bar">
       <strong>{t("title")}</strong>
       <span className="token-preview__mono">
         {t.rich("status", {
-          theme,
           motion,
           b: (chunks) => <b data-testid="motion-tier">{chunks}</b>,
         })}
       </span>
-      <button type="button" className="token-preview__button" onClick={toggleTheme}>
-        {theme === "dark" ? `☀ ${header("themeLight")}` : `☾ ${header("themeDark")}`}
-      </button>
       <a className="token-preview__button" href="?motion=full">?motion=full</a>
       <a className="token-preview__button" href="?motion=lite">?motion=lite</a>
     </header>
   );
 }
 
-/** Цвета темы страницы и тёмного островка рядом. */
 function ColorSection() {
   const t = useTranslations("admin.dev.preview.tokens");
   return (
     <section className="token-preview__section">
       <h2 className="heading heading--h3">{t("sections.colors")}</h2>
-      <div className="token-preview__themes">
-        <div className="token-preview__panel">
-          <Swatches />
-        </div>
-        <div className="token-preview__panel" data-theme-island="dark">
-          <Swatches />
-        </div>
+      <div className="token-preview__panel">
+        <Swatches />
       </div>
     </section>
   );

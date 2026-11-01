@@ -48,12 +48,6 @@
   gap: 20px;
 }
 
-.token-preview__themes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
-}
-
 .token-preview__panel {
   padding: 20px;
   border: 1px solid var(--line);

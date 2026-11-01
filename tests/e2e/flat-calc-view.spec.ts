@@ -60,7 +60,7 @@ test.describe("сайт · расчёт квартиры: раскладка", (
     await expect(flat(page).locator(".calc-total--plain")).toHaveCount(1);
   });
 
-  test("скриншоты s27: панель 1440 / шторка 390, банк, свой срок, узбекский, тёмная", async ({
+  test("скриншоты s27: панель 1440 / шторка 390, банк, свой срок, узбекский", async ({
     page,
   }, testInfo) => {
     const dir = `test-results/screens/${testInfo.project.name}`;
@@ -82,12 +82,5 @@ test.describe("сайт · расчёт квартиры: раскладка", (
     await page.goto(`${STAND}/uz?plan=${LAYOUT_78}`);
     await settle(page);
     await page.screenshot({ path: `${dir}/s27-flat-uz.png`, caret: "initial" });
-    await page.evaluate(() => {
-      localStorage.setItem("vh-theme", "dark");
-      document.documentElement.dataset.theme = "dark";
-    });
-    await settle(page);
-    await page.screenshot({ path: `${dir}/s27-flat-dark.png`, caret: "initial" });
-    await page.evaluate(() => localStorage.setItem("vh-theme", "light"));
   });
 });

@@ -2,7 +2,7 @@ import { initialsOf } from "@/lib/format";
 
 type AvatarProps = {
   name: string;
-  /** sm — рядом с кнопкой ☀/☾ в верхней строке (её размер: 34 px, на телефоне 40 px). */
+  /** sm — в верхней строке кабинета: 34 px, на телефоне 40 px. */
   size?: "md" | "sm";
   /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
   className?: string;

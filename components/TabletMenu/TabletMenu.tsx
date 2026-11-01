@@ -5,7 +5,6 @@ import { isActivePath } from "@/components/HeaderNav";
 import { useNavItems } from "@/components/HiddenNav";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { useSiteContacts } from "@/components/SiteContacts";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { formatPhone, phoneHref } from "@/lib/contacts";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { MENU_NAV } from "@/lib/routes";
@@ -41,7 +40,6 @@ export function TabletMenu({ id, onNavigate }: TabletMenuProps) {
       ) : null}
       <div className="tablet-menu__tools">
         <LanguageSwitch onNavigate={onNavigate} />
-        <ThemeToggle />
       </div>
     </nav>
   );

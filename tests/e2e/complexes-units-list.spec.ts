@@ -607,7 +607,7 @@ test.describe("кабинет · ЖК · список квартир", () => {
     testInfo.annotations.push({ type: "поиск в 5000", description: `${Date.now() - started} мс` });
   });
 
-  test("скриншоты: список, выбор статуса и полоса, фильтры, тёмная тема", async ({
+  test("скриншоты: список, выбор статуса и полоса, фильтры", async ({
     page,
   }, testInfo) => {
     const dir = `test-results/screens/${testInfo.project.name}`;
@@ -625,12 +625,6 @@ test.describe("кабинет · ЖК · список квартир", () => {
       await openFilters(page);
       await page.screenshot({ caret: "initial", path: `${dir}/s12-list-filters.png`, fullPage: false });
     }
-    // Ключ — как у приложения (THEME_STORAGE_KEY), атрибут — чтобы не перезагружать страницу.
-    await page.evaluate(() => {
-      localStorage.setItem("vh-theme", "dark");
-      document.documentElement.dataset.theme = "dark";
-    });
-    await page.screenshot({ caret: "initial", path: `${dir}/s12-list-dark.png`, fullPage: false });
   });
 
   // Ноутбук 1366 и 1280 — таблица: «Планировке» остаётся место, строка не рвётся по буквам

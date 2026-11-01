@@ -3,9 +3,6 @@
 @import "../styles/base.css";
 @import "../styles/glass.css";
 
-/* Тёмная тема — атрибут data-theme на <html>, а не системная настройка (PLAN 3.7). */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 /* Tailwind знает только наши токены: без стандартной палитры случайный bg-blue-500 не соберётся.
    Имена ниже — те, что ждёт shadcn/ui. */
 @theme inline {

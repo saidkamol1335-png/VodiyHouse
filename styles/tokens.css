@@ -1,8 +1,8 @@
 /* =====================================================================
    Токены Vodiy House. Источник — CSS мокапа (docs/mockup/source/_blob/a8c8…, 64c3…).
    Имена как в мокапе (--bg, --fg, --amber…), чтобы CSS мокапа переносился почти дословно.
-   Решения фазы 0 (PROGRESS.md): тёмная тема — набор телефона, мелкий янтарный текст —
-   #A35704, радиусы — 6 ступеней. Компоненты не знают про тему: меняются только токены.
+   Тема одна — светлая. Решения фазы 0 (PROGRESS.md): мелкий янтарный текст — #A35704,
+   радиусы — 6 ступеней.
    ===================================================================== */
 
 :root {
@@ -96,7 +96,7 @@
   --gutter: 32px;
   --header-h: 68px;
   /* Шапка над первым экраном главной (tone="dark", SiteHeader.css) подменяет свои токены этими —
-     экран тёмный в обеих темах. */
+     экран тёмный. */
   --hero-fg: #fafafa;
   --hero-muted: #a1a1aa;
   --hero-line: rgba(255, 255, 255, 0.08);
@@ -107,7 +107,7 @@
   --hero-glass-2: rgba(250, 250, 250, 0.06);
   --hero-glass-3: rgba(250, 250, 250, 0.12);
   --special-badge-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
-  /* Экран загрузки при входе на главную (артефакт «Закат»): тёмный в обеих темах. */
+  /* Экран загрузки при входе на главную (артефакт «Закат»): тёмный. */
   --preloader-bg: #050505;
   --preloader-fg: #f4efe7;
   --preloader-muted: #8f877c;
@@ -119,7 +119,7 @@
   --z-preloader: 1000;
 
   /* Первый экран главной (30.10.2026): ролик стройки на весь экран под тёмной пеленой; тексты и
-     кнопки — в токенах тёмной темы (data-theme-island). Пелена на десктопе — слева под текст, сверху
+     кнопки — в светлых тонах: --home-hero-* ниже, подменяет .home-hero. Пелена на десктопе — слева под текст, сверху
      под шапку, снизу под цифры; на планшете и телефоне — снизу под текст. */
   --home-hero-bg: #0b0a09;
   --home-hero-min-h: 640px;
@@ -127,6 +127,16 @@
   --home-hero-copy-w: 640px;
   --home-hero-bottom: clamp(24px, 4.5vh, 44px);
   --home-hero-focus: 30% 50%; /* ЖК правее центра: экран уже 16:9 режет кадр справа, а не по ЖК */
+  --home-hero-fg: #f4efe7;
+  --home-hero-fg-2: #b1aaa0;
+  --home-hero-line: rgba(255, 240, 220, 0.09);
+  --home-hero-dash: rgba(255, 237, 215, 0.2);
+  --home-hero-amber-light: #ffb547;
+  --home-hero-amber-line: rgba(248, 155, 13, 0.46);
+  --home-hero-on-amber: #0b0a09;
+  --home-hero-glow-amber: 0 0 0 1px rgba(255, 208, 138, 0.5) inset, 0 8px 28px rgba(248, 155, 13, 0.22);
+  --home-hero-gold: #f2c27e;
+  --home-hero-ok: #5bd48c;
   --home-hero-lead: rgba(244, 239, 231, 0.84);
   --home-hero-glass: rgba(255, 255, 255, 0.08); /* «Подбор за 1 минуту» */
   --home-hero-glass-hover: rgba(255, 255, 255, 0.14);
@@ -178,7 +188,7 @@
   --quiz-bar-bg: rgba(255, 255, 255, 0.94);
   --quiz-bar-glow: 0 0 12px rgba(248, 155, 13, 0.33);
   --quiz-thumb-bg: rgba(255, 255, 255, 0.54);
-  /* Страница застройщика (3.15, мокап SiteDev / MobDev): тень на обложке и карточка над фото — одни и те же в обеих темах */
+  /* Страница застройщика (3.15, мокап SiteDev / MobDev): тень на обложке и карточка над фото */
   --developer-hero-shade: linear-gradient(90deg, rgba(23, 20, 15, 0.72) 0%, rgba(23, 20, 15, 0.35) 55%, rgba(23, 20, 15, 0.1) 100%);
   --developer-hero-shade-phone: linear-gradient(180deg, rgba(23, 20, 15, 0.35) 0%, rgba(23, 20, 15, 0) 40%);
   --developer-hero-card-bg: rgba(23, 20, 15, 0.62);
@@ -244,7 +254,7 @@
   --glass-saturate: 1.4;
   --glass-filter: saturate(var(--glass-saturate)) blur(var(--glass-blur));
 
-  /* ---------- цвета: светлая тема (основная) ---------- */
+  /* ---------- цвета ---------- */
   color-scheme: light;
   --bg: #f4f1eb;
   --bg-2: #ffffff;
@@ -262,9 +272,9 @@
   --line-3: rgba(40, 28, 12, 0.26);
   --dash: rgba(40, 28, 12, 0.2);
   --cols-line: rgba(40, 28, 12, 0.055);
-  /* Чертёж планировки — на белом листе в обеих темах: подписи площадей читаются как на бумаге. */
+  /* Чертёж планировки — на белом листе: подписи площадей читаются как на бумаге. */
   --drawing-bg: #ffffff;
-  /* Затемнение под окном (чертёж крупно) — в обеих темах. */
+  /* Затемнение под окном (чертёж крупно). */
   --scrim: rgba(14, 13, 12, 0.6);
   --scrim-blur: 6px; /* размытие под окном заявки — только full */
   --favorites-loading-h: 480px; /* /izbrannoe до чтения избранного: заголовок и ряд карточек */
@@ -300,7 +310,7 @@
   --switch-knob: #fff;
   --switch-knob-shadow: 0 1px 3px rgba(40, 28, 12, 0.12);
   --switch-on-glow: 0 0 18px rgba(91, 212, 140, 0.22);
-  /* итог калькулятора на телефоне — тёмная панель мокапа MobFlat (Р9), в обеих темах */
+  /* итог калькулятора на телефоне — тёмная панель мокапа MobFlat (Р9) */
   --calc-dark-bg: #1f1b15;
   --calc-dark-fg: #f6efe4;
   --calc-dark-fg-2: rgba(246, 239, 228, 0.66);
@@ -333,9 +343,8 @@
   --s-sold-b: rgba(201, 64, 47, 0.26);
   --s-sold-t: #9e3a2e;
   /* «Выбрать квартиру» (фаза 4, мокап .vis / .fplan): подложка плана этажа, рамка фасада; подписи
-     поверх фото — тёмное стекло в обеих темах (фото-блоки мокапа тёмные всегда). */
-  /* Монограммы застройщиков без логотипа (мокап SiteDevs): плитка цветом застройщика, буквы белые;
-     одинаковые в обеих темах. */
+     поверх фото — тёмное стекло (фото-блоки мокапа тёмные всегда). */
+  /* Монограммы застройщиков без логотипа (мокап SiteDevs): плитка цветом застройщика, буквы белые. */
   --developer-mark-1: #1e3a5f;
   --developer-mark-2: #4a2a7a;
   --developer-mark-3: #0f5a4a;
@@ -363,9 +372,8 @@
   --picker-glass-fg-2: rgba(255, 255, 255, 0.7);
   --picker-light-on-bg: #ffffff;
   --picker-light-on-fg: #17140f;
-  /* Квартиры на плане: картинка плана — белый лист в обеих темах, поэтому и цвета статусов светлые
-     (в тёмной теме не переопределяются, иначе светлый текст ляжет на белое); значения — как у
-     светлых --s-*: цвета статусов те же, что в кабинете. */
+  /* Квартиры на плане: картинка плана — белый лист; значения — как у --s-*: цвета статусов те же,
+     что в кабинете. */
   --picker-unit-free: rgba(26, 143, 76, 0.11);
   --picker-unit-free-b: rgba(26, 143, 76, 0.42);
   --picker-unit-free-t: #0f5a33;
@@ -469,7 +477,7 @@
   /* ---------- экран входа (К1) ---------- */
   --login-card-w: 440px;
   --login-card-bg: linear-gradient(180deg, rgba(253, 251, 247, 0.88), rgba(253, 251, 247, 0.92));
-  /* Фото стройки — тёмный островок в обеих темах (PLAN §3.7): затемнение 40–55 % под карточкой. */
+  /* Фото стройки — тёмный островок (PLAN §3.7): затемнение 40–55 % под карточкой. */
   --login-shade:
     radial-gradient(120% 90% at 50% 50%, rgba(10, 8, 6, 0.38), rgba(10, 8, 6, 0.6)),
     linear-gradient(180deg, rgba(10, 8, 6, 0.45), rgba(10, 8, 6, 0.4));
@@ -495,7 +503,7 @@
   --dur-collections-hint: 1.9s;
 
   /* ---------- страница ЖК (шаг 3.5) ---------- */
-  /* Тёмная плашка и пилюля навигатора телефона (мокап .avb, .jn .is-on): в тёмной теме — светлая. */
+  /* Тёмная плашка и пилюля навигатора телефона (мокап .avb, .jn .is-on). */
   --inv: #17140f;
   --on-inv: #f7f3ec;
   --inv-3: rgba(247, 243, 236, 0.52);
@@ -507,7 +515,7 @@
   --map-road: rgba(255, 255, 255, 0.75);
   --map-chip-shadow: 0 2px 10px rgba(23, 20, 15, 0.16);
   --map-pin-shadow: 0 6px 18px rgba(23, 20, 15, 0.3);
-  /* Цвета мест рядом (мокап .jloc__ic--*): белая иконка на цветном квадрате в обеих темах. */
+  /* Цвета мест рядом (мокап .jloc__ic--*): белая иконка на цветном квадрате. */
   --poi-school: #2a66cc;
   --poi-kindergarten: #b8306f;
   --poi-mosque: #0f7a73;
@@ -536,7 +544,7 @@
   /* главная (шаг 3.9, мокап .marq): бегущая строка */
   --home-marquee-stroke: rgba(40, 28, 12, 0.22);
   --home-bento-olive: linear-gradient(160deg, #3b3a24, #24251a);
-  /* Текст оливковой плитки — светлый в обеих темах (мокап .bn--olive): 11:1 и 7:1 к фону. */
+  /* Текст оливковой плитки — светлый (мокап .bn--olive): 11:1 и 7:1 к фону. */
   --home-bento-olive-fg: #fdfbf7;
   --home-bento-olive-kicker: #ffb547;
   --home-why-pills-h: 132px; /* лента услуг на телефоне — полосой над текстом плитки */
@@ -545,152 +553,6 @@
   --fs-home-big: 180px;
   --fs-home-band: clamp(26px, 2.4vw, 34px);
   --dur-home-marquee: 38s;
-}
-
-/* ---------- тёмная тема: набор телефона (контраст приглушённого текста 5,3:1) ---------- */
-[data-theme="dark"],
-[data-theme-island="dark"] {
-  --about-card-bg: #1c1915;
-  --about-card-line: rgba(247, 243, 236, 0.1);
-  /* Квиз (3.17): карточка и варианты на тёмном фоне (ревью блока G) */
-  --quiz-glow: radial-gradient(700px 360px at 0% 0%, rgba(248, 155, 13, 0.08), transparent 70%);
-  --quiz-card-bg: linear-gradient(180deg, #1c1915, #151311);
-  --quiz-option-bg: rgba(255, 240, 220, 0.045);
-  --quiz-option-hover: rgba(255, 240, 220, 0.09);
-  --quiz-bar-bg: rgba(255, 240, 220, 0.1);
-  --quiz-thumb-bg: rgba(255, 240, 220, 0.06);
-  --home-marquee-stroke: rgba(255, 237, 215, 0.26);
-  color-scheme: dark;
-  --bg: #0b0a09;
-  --bg-2: #151311;
-  --bg-3: #1a1815;
-  --bg-4: #24211d;
-  --row-alt: rgba(255, 240, 220, 0.025);
-  --toast-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  --fg: #f4efe7;
-  --fg-2: #b1aaa0;
-  --fg-3: #938c82;
-  --fg-heading: #f4efe7;
-
-  --line: rgba(255, 240, 220, 0.09);
-  --line-2: rgba(255, 240, 220, 0.15);
-  --line-3: rgba(255, 240, 220, 0.27);
-  --dash: rgba(255, 237, 215, 0.2);
-  --cols-line: rgba(255, 240, 220, 0.05);
-
-  --glass: rgba(11, 10, 9, 0.72);
-  --glass-solid: rgba(11, 10, 9, 0.95);
-  --glass-2: rgba(255, 240, 220, 0.045);
-  --glass-3: rgba(255, 240, 220, 0.08);
-
-  --amber-hover: #ffb547;
-  --amber-2: #ffb547;
-  --amber-3: #ffd08a;
-  --amber-soft: rgba(248, 155, 13, 0.15);
-  --amber-line: rgba(248, 155, 13, 0.46);
-  --on-amber: #0b0a09;
-  --gold: #f2c27e;
-
-  --ok: #5bd48c;
-  --ok-strong: #5bd48c;
-  --ok-soft: rgba(91, 212, 140, 0.13);
-  --switch-off-bg: rgba(255, 240, 220, 0.14);
-  --switch-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --switch-on-glow: 0 0 18px rgba(91, 212, 140, 0.4);
-  --bad: #ff7a6b;
-  --bad-soft: rgba(255, 122, 107, 0.12);
-  --blue: #7cb4ff;
-  --blue-soft: rgba(124, 180, 255, 0.13);
-  --violet: #b9a2ff;
-  --violet-soft: rgba(185, 162, 255, 0.13);
-  --teal: #62d6d0;
-  --teal-soft: rgba(98, 214, 208, 0.13);
-
-  --s-free: rgba(91, 212, 140, 0.16);
-  --s-free-b: rgba(91, 212, 140, 0.45);
-  --s-free-t: #c6f7da;
-  --s-res: rgba(248, 155, 13, 0.26);
-  --s-res-b: rgba(255, 181, 71, 0.7);
-  --s-res-t: #ffe2b3;
-  --s-sold: rgba(255, 122, 107, 0.08);
-  --s-sold-b: rgba(255, 122, 107, 0.26);
-  --s-sold-t: #eba89f;
-  --picker-frame-bg: #0d0c0b;
-  --picker-unit-pending: rgba(190, 190, 190, 0.1);
-  --picker-unit-pending-b: rgba(190, 190, 190, 0.36);
-  --picker-unit-pending-t: #c4c0ba;
-  --picker-contour: rgba(248, 155, 13, 0.12);
-  --picker-contour-line: rgba(255, 214, 150, 0.92);
-
-  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px rgba(0, 0, 0, 0.42);
-  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 50px rgba(0, 0, 0, 0.45);
-  --shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 60px rgba(0, 0, 0, 0.55);
-  --shadow-3: 0 30px 90px rgba(0, 0, 0, 0.6);
-  --shadow-sheet: 0 -20px 60px rgba(0, 0, 0, 0.6);
-  --glow-amber: 0 0 0 1px rgba(255, 208, 138, 0.5) inset, 0 8px 28px rgba(248, 155, 13, 0.22);
-
-  --page-glow:
-    radial-gradient(900px 520px at 8% -6%, rgba(248, 155, 13, 0.1), transparent 62%),
-    radial-gradient(700px 600px at 100% 110%, rgba(220, 80, 0, 0.08), transparent 60%);
-
-  --control-bg: rgba(255, 240, 220, 0.045);
-  --control-border: rgba(255, 240, 220, 0.15);
-  --control-shadow: none;
-  --seg-bg: rgba(255, 240, 220, 0.045);
-  --seg-border: rgba(255, 240, 220, 0.09);
-  --seg-on-bg: rgba(248, 155, 13, 0.12);
-  --seg-on-shadow: 0 0 0 1px #f89b0d inset, 0 0 18px rgba(248, 155, 13, 0.35);
-  --logo-glow: drop-shadow(0 0 10px rgba(248, 155, 13, 0.35));
-  --footer-pixel-glow: drop-shadow(0 0 6px rgba(248, 155, 13, 0.35));
-
-  --admin-side-bg: #0e0d0c;
-  --admin-nav-fg: var(--fg-2);
-  --admin-nav-hover: var(--glass-2);
-  --admin-nav-on-bg: rgba(248, 155, 13, 0.1);
-  --admin-nav-on-ring: rgba(248, 155, 13, 0.35);
-  --admin-nav-on-icon: var(--amber-2);
-  --admin-pill-on-glow: 0 0 16px rgba(248, 155, 13, 0.3);
-  --admin-mark-bg: #2f4560;
-  --admin-mark-fg: #f3eee6;
-  --badge-bg: var(--glass-3);
-  --badge-fg: var(--fg);
-  --badge-amber-bg: var(--amber-soft);
-  --badge-amber-fg: var(--amber-3);
-  --badge-amber-border: rgba(248, 155, 13, 0.28);
-  --badge-ok-fg: var(--ok);
-  --badge-ok-border: rgba(91, 212, 140, 0.25);
-  --badge-bad-fg: var(--bad);
-  --badge-bad-border: rgba(255, 122, 107, 0.25);
-  --badge-blue-fg: var(--blue);
-  --badge-blue-border: rgba(124, 180, 255, 0.25);
-  --badge-line-fg: var(--fg-2);
-  --chip-bg: var(--glass-2);
-  --chip-border: var(--line-2);
-  --chip-fg: var(--fg-2);
-  --chip-on-bg: rgba(248, 155, 13, 0.1);
-  --chip-on-border: var(--amber);
-  --chip-on-ring: 0 0 0 1px rgba(248, 155, 13, 0.25) inset, 0 0 22px rgba(248, 155, 13, 0.3);
-  --panel-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.04), rgba(255, 240, 220, 0.012));
-  --card-bg: linear-gradient(180deg, rgba(255, 240, 220, 0.045), rgba(255, 240, 220, 0.012));
-  --card-border: var(--line);
-  --card-shadow: none;
-  --card-shadow-hover: 0 22px 44px rgba(0, 0, 0, 0.35);
-  --card-chip-bg: rgba(15, 12, 8, 0.62);
-  --live-dot: var(--ok);
-  --live-dot-glow: 0 0 10px var(--ok);
-
-  --inv: #f4efe7;
-  --on-inv: #14110e;
-  --inv-3: rgba(20, 17, 14, 0.6);
-  --ok-line: rgba(91, 212, 140, 0.32);
-  --map-bg: #131110;
-  --map-road: rgba(255, 240, 220, 0.06);
-  --map-chip-shadow: 0 0 0 1px var(--line-2), 0 4px 14px rgba(0, 0, 0, 0.5);
-  --poi-car: #3a342d;
-
-  --login-card-bg: linear-gradient(180deg, rgba(28, 26, 23, 0.88), rgba(16, 15, 13, 0.92));
-  --field-bg: rgba(255, 240, 220, 0.03);
-  --field-ring-error: 0 0 0 4px rgba(255, 122, 107, 0.12);
 }
 
 /* ---------- режимы анимации (CLAUDE.md §3): компоненты читают только токены ---------- */

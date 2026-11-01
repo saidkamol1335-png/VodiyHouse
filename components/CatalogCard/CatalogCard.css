@@ -39,7 +39,7 @@
   scroll-snap-align: start;
 }
 
-/* Подпись кадра стройки (мокап .jc__track figcaption): над точками, белым по затемнению в обеих темах. */
+/* Подпись кадра стройки (мокап .jc__track figcaption): над точками, белым по затемнению. */
 .catalog-card__caption {
   position: absolute;
   bottom: 28px;

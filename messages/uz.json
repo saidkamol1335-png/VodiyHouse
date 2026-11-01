@@ -27,11 +27,6 @@
     "language": "Til",
     "languageRu": "Русский",
     "languageUz": "O‘zbekcha",
-    "theme": "Mavzu",
-    "themeLight": "Yorug‘",
-    "themeDark": "Qorong‘i",
-    "themeToDark": "Qorong‘i mavzuni yoqish",
-    "themeToLight": "Yorug‘ mavzuni yoqish",
     "favoritesCount": "Saralangan · {count}"
   },
   "contacts": {
@@ -1231,7 +1226,7 @@
     },
     "s4": {
       "title": "Brauzerda nima saqlanadi",
-      "text": "Tanlangan TJMlar, sayt tili va mavzusi, birinchi tashrif belgilari — brauzeringiz xotirasida. Ularni brauzer sozlamalarida o‘chirish mumkin."
+      "text": "Tanlangan TJMlar, sayt tili, birinchi tashrif belgilari — brauzeringiz xotirasida. Ularni brauzer sozlamalarida o‘chirish mumkin."
     },
     "s5": {
       "title": "Qancha saqlaymiz",

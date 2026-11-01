@@ -12,7 +12,6 @@ import { PhoneButton } from "@/components/PhoneButton";
 import { PhoneMenu } from "@/components/PhoneMenu";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { TabletMenu } from "@/components/TabletMenu";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { phoneHref } from "@/lib/contacts";
 import { ROUTES } from "@/lib/routes";
 import { useMenu, useScrolledPast } from "./useHeaderState";
@@ -101,7 +100,6 @@ function HeaderTools({ menuOpen, onToggleMenu, ref }: HeaderToolsProps) {
     <div className="site-header__tools">
       <div className="site-header__wide-only">
         <LanguageSwitch />
-        <ThemeToggle />
       </div>
       <IconButton
         className="site-header__icon"

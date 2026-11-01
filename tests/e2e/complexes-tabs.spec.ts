@@ -267,18 +267,15 @@ test.describe("кабинет · ЖК · фото и журнал", () => {
     expect(await noHorizontalScroll(page)).toBe(0);
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`журнал квартир · скриншот · ${theme}`, async ({ page }, testInfo) => {
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      await open(page, `${SHODLIK}/zhurnal`);
-      await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({
-        caret: "initial",
-        path: `test-results/screens/${testInfo.project.name}/s12-journal-${theme}.png`,
-        fullPage: true,
-      });
+  test(`журнал квартир · скриншот`, async ({ page }, testInfo) => {
+    await open(page, `${SHODLIK}/zhurnal`);
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({
+      caret: "initial",
+      path: `test-results/screens/${testInfo.project.name}/s12-journal.png`,
+      fullPage: true,
     });
-  }
+  });
 
   test("вкладки не шире экрана", async ({ page }) => {
     for (const url of [`${SHODLIK}/foto`, `${SHODLIK}/kvartiry`, `${SHODLIK}/zhurnal`]) {

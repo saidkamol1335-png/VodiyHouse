@@ -14,7 +14,7 @@ type SegmentedProps = {
   className?: string;
 };
 
-/** Сегмент из двух-трёх вариантов: RU | UZ, Светлая | Тёмная. */
+/** Сегмент из двух-трёх вариантов: RU | UZ, $ | сум. */
 export function Segmented({
   label,
   children,

@@ -1,7 +1,7 @@
 /* Первый экран главной (30.10.2026, вместо «Чертёж → стройка»): полёт дрона над стройкой на весь
    экран — ЖК справа, слева текст и кнопки мокапа Main под тёмной пеленой, внизу «бесплатно», цифры
-   каталога и «Найдено сейчас». Тёмный в обеих темах: data-theme-island="dark" подменяет токены темы на
-   тёмные. Шапка лежит поверх (margin-top) и в его тонах — SiteHeader.css по html[data-hero-dark].
+   каталога и «Найдено сейчас». Экран тёмный: палитру задаёт токенами на себе, вложенные блоки берут
+   её сами. Шапка лежит поверх (margin-top) и в его тонах — SiteHeader.css по html[data-hero-dark].
    full — лента кадров по прокрутке на холсте (раздел в конце файла); lite — ролик проявляется поверх
    постера «вечер» за 200 мс и играет один раз; none — только постер. Планшет и телефон: кадр — первый
    экран целиком, текст внизу, а «бесплатно», цифры и «Найдено сейчас» — полосой под ним (мокап Mobile). */
@@ -9,6 +9,20 @@
 .home-hero {
   /* Край текста — по краю логотипа шапки: поле контейнера плюс его внутренний отступ. */
   --home-hero-edge: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+  --fg: var(--home-hero-fg);
+  --fg-heading: var(--home-hero-fg);
+  --fg-2: var(--home-hero-fg-2);
+  --line: var(--home-hero-line);
+  --dash: var(--home-hero-dash);
+  --amber-hover: var(--home-hero-amber-light);
+  --amber-2: var(--home-hero-amber-light);
+  --amber-line: var(--home-hero-amber-line);
+  --on-amber: var(--home-hero-on-amber);
+  --glow-amber: var(--home-hero-glow-amber);
+  --gold: var(--home-hero-gold);
+  --ok: var(--home-hero-ok);
+  --live-dot: var(--home-hero-ok);
+  --live-dot-glow: 0 0 10px var(--home-hero-ok);
 
   position: relative;
   display: grid;

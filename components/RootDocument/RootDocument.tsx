@@ -18,13 +18,12 @@ type RootDocumentProps = {
 
 /**
  * Общая оболочка <html> для корневых layout сайта, кабинета и /dev.
- * Сервер всегда рендерит светлую тему и lite; скрипт в <head> поправит до первой отрисовки.
+ * Сервер всегда рендерит lite; скрипт в <head> поправит до первой отрисовки.
  */
 export function RootDocument({ lang, children, withColumns = false, messages }: RootDocumentProps) {
   return (
     <html
       lang={lang}
-      data-theme="light"
       data-motion="lite"
       className={fontVariables}
       suppressHydrationWarning

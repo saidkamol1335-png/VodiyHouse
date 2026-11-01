@@ -86,14 +86,6 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(beam).toBeHidden();
   });
 
-  test("К1.4: ☀/☾ в шапке экрана, по умолчанию светлая", async ({ page }) => {
-    await page.goto("/admin/vhod");
-    const html = page.locator("html");
-    await expect(html).toHaveAttribute("data-theme", "light");
-    await page.getByRole("button", { name: "Включить тёмную тему" }).click();
-    await expect(html).toHaveAttribute("data-theme", "dark");
-  });
-
   test("К1.2: карточка не мигает, когда режим переключается lite → full (первый заход)", async ({
     page,
   }, testInfo) => {

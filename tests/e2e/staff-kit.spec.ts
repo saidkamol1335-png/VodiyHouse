@@ -54,16 +54,13 @@ test.describe("«Сотрудники» — список", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBe(0);
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты списка · ${theme}`, async ({ page }, testInfo) => {
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      await page.goto(PAGE);
-      await page.waitForLoadState("networkidle");
-      await page.evaluate(() => document.fonts.ready);
-      const folder = `test-results/screens/${testInfo.project.name}`;
-      await page.screenshot({ caret: "initial", path: `${folder}/staff-list-${theme}.png`, fullPage: true });
-    });
-  }
+  test(`скриншоты списка`, async ({ page }, testInfo) => {
+    await page.goto(PAGE);
+    await page.waitForLoadState("networkidle");
+    await page.evaluate(() => document.fonts.ready);
+    const folder = `test-results/screens/${testInfo.project.name}`;
+    await page.screenshot({ caret: "initial", path: `${folder}/staff-list.png`, fullPage: true });
+  });
 });
 
 test.describe("«Сотрудники» — действия", () => {

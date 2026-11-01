@@ -1,6 +1,6 @@
-// Скрипт в <head>, до первой отрисовки: тема и режим анимации из localStorage / ?motion.
-// Без него тёмная тема мигала бы светлой, а сохранённый full — стартовым lite.
-// Сервер всегда рендерит data-theme="light" data-motion="lite". data-js — скрипты работают: только
+// Скрипт в <head>, до первой отрисовки: режим анимации из localStorage / ?motion.
+// Без него сохранённый full мигал бы стартовым lite.
+// Сервер всегда рендерит data-motion="lite". data-js — скрипты работают: только
 // тогда CSS прячет то, что потом проявит useReveal (без JS всё видно сразу). Ссылка на каталог с
 // фильтром — выдача ждёт его (lib/site/catalog/pending.ts); отдельным try: хранилище и matchMedia
 // бывают недоступны, а это от них не зависит.
@@ -15,14 +15,12 @@ import {
   CATALOG_PENDING_ATTRIBUTE,
   CATALOG_PENDING_TIMEOUT_MS,
 } from "@/lib/site/catalog/pending";
-import { THEME_STORAGE_KEY } from "@/lib/theme/theme";
 
 const PENDING = JSON.stringify(CATALOG_PENDING_ATTRIBUTE);
 
 export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");setTimeout(function(){if(!d.hasAttribute("${HYDRATED_ATTRIBUTE}"))d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")},${REVEAL_FAILSAFE_MS});if(location.hash.length>1){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}try{
 var n=performance.getEntriesByType("navigation")[0];if(n&&(n.type==="reload"||n.type==="back_forward")&&Number(sessionStorage.getItem(${JSON.stringify(SCROLL_MEMORY_KEY)}+location.pathname))>0){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}}catch(e){}try{
 var p=new URLSearchParams(location.search);if(/\\/novostroyki\\/?$/.test(location.pathname)&&${JSON.stringify(CATALOG_FILTER_PARAMS)}.some(function(k){return p.has(k)})){d.setAttribute(${PENDING},"");setTimeout(function(){d.removeAttribute(${PENDING})},${CATALOG_PENDING_TIMEOUT_MS});}}catch(e){}try{
-var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==="dark"||t==="light")d.setAttribute("data-theme",t);
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});
 var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)});
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";

@@ -425,48 +425,41 @@ test.describe("кабинет · главная · остатки по ЖК", ()
     await expect(details(page, "Shodlik").getByRole("link", { name: "Квартиры" })).toBeFocused();
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты главной · ${theme}`, async ({ page }, testInfo) => {
-      const dir = `test-results/screens/${testInfo.project.name}`;
-      const suffix = theme === "dark" ? "-dark" : "";
-      // Раскрытие и уход наведения — без середины перехода на снимке.
-      const shoot = (name: string) =>
-        page.screenshot({ caret: "initial", path: `${dir}/${name}.png`, fullPage: true, animations: "disabled" });
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      await page.clock.setFixedTime(new Date("2026-10-22T09:46:00Z"));
-      await open(page);
-      await page.evaluate(() => document.fonts.ready);
-      await shoot(`s13-home${suffix}`);
-      await toggle(page, "Shodlik").click();
-      await expect(details(page, "Shodlik")).toBeVisible();
-      await page.mouse.move(0, 0);
-      await shoot(`s13-home-open${suffix}`);
-      if (theme === "dark") return;
-      await open(page, `${HEAD}?demo=variety`);
-      await toggle(page, "Namuna").click();
-      await page.mouse.move(0, 0);
-      await shoot("s13-home-variety");
-      await open(page, `${HEAD}?demo=layouts`);
-      await shoot("s13-home-layouts");
-      await open(page, MANAGER);
-      await shoot("s13-home-manager");
-      await open(page, `${HEAD}?demo=empty`);
-      await shoot("s13-home-empty");
-    });
+  test(`скриншоты главной`, async ({ page }, testInfo) => {
+    const dir = `test-results/screens/${testInfo.project.name}`;
+    // Раскрытие и уход наведения — без середины перехода на снимке.
+    const shoot = (name: string) =>
+      page.screenshot({ caret: "initial", path: `${dir}/${name}.png`, fullPage: true, animations: "disabled" });
+    await page.clock.setFixedTime(new Date("2026-10-22T09:46:00Z"));
+    await open(page);
+    await page.evaluate(() => document.fonts.ready);
+    await shoot("s13-home");
+    await toggle(page, "Shodlik").click();
+    await expect(details(page, "Shodlik")).toBeVisible();
+    await page.mouse.move(0, 0);
+    await shoot("s13-home-open");
+    await open(page, `${HEAD}?demo=variety`);
+    await toggle(page, "Namuna").click();
+    await page.mouse.move(0, 0);
+    await shoot("s13-home-variety");
+    await open(page, `${HEAD}?demo=layouts`);
+    await shoot("s13-home-layouts");
+    await open(page, MANAGER);
+    await shoot("s13-home-manager");
+    await open(page, `${HEAD}?demo=empty`);
+    await shoot("s13-home-empty");
+  });
 
-    test(`скриншоты: сбой и вспышка · ${theme}`, async ({ page }, testInfo) => {
-      const dir = `test-results/screens/${testInfo.project.name}`;
-      const suffix = theme === "dark" ? "-dark" : "";
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      await page.clock.install({ time: new Date("2026-10-22T09:46:00Z") });
-      await open(page, `${HEAD}?demo=fail`);
-      await page.clock.runFor(185_000);
-      await expect(live(page)).toHaveClass(/live-status--stale/);
-      await page.screenshot({ caret: "initial", path: `${dir}/s13-home-stale${suffix}.png` });
-      await open(page, `${HEAD}?demo=change&motion=full`);
-      await page.clock.runFor(65_000);
-      await expect(badge(page, "Shodlik")).toHaveClass(/--flash/);
-      await page.screenshot({ caret: "initial", path: `${dir}/s13-home-flash${suffix}.png` });
-    });
-  }
+  test(`скриншоты: сбой и вспышка`, async ({ page }, testInfo) => {
+    const dir = `test-results/screens/${testInfo.project.name}`;
+    await page.clock.install({ time: new Date("2026-10-22T09:46:00Z") });
+    await open(page, `${HEAD}?demo=fail`);
+    await page.clock.runFor(185_000);
+    await expect(live(page)).toHaveClass(/live-status--stale/);
+    await page.screenshot({ caret: "initial", path: `${dir}/s13-home-stale.png` });
+    await open(page, `${HEAD}?demo=change&motion=full`);
+    await page.clock.runFor(65_000);
+    await expect(badge(page, "Shodlik")).toHaveClass(/--flash/);
+    await page.screenshot({ caret: "initial", path: `${dir}/s13-home-flash.png` });
+  });
 });

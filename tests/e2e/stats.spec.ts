@@ -163,13 +163,6 @@ test.describe("кабинет · статистика · руководител�
       page.getByRole("group", { name: "Период" }).getByRole("link", { name: "Сегодня" }),
     ).toHaveAttribute("aria-current", "page");
   });
-
-  test("тёмная тема — скриншот", async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem("vh-theme", "dark"));
-    await page.goto(`${STATS}?motion=none`);
-    await expect(page.locator(".stats-chart__line")).toHaveCount(1);
-    await shot(page, "30-dark");
-  });
 });
 
 for (const persona of ["manager", "videographer"] as const) {

@@ -94,29 +94,11 @@ test.describe("режимы анимации в кабинете", () => {
 });
 
 test.describe("тема", () => {
-  test("по умолчанию светлая", async ({ page }) => {
-    await page.goto("/uz");
-    await expect(html(page)).toHaveAttribute("data-theme", "light");
-  });
-
-  test.describe("без скриптов приложения", () => {
-    // Чанки заблокированы — страница нарочно не оживёт: общий переход (fixtures.ts) её не ждёт.
-    test.use({ hydration: false });
-
-    test("сохранённая тёмная ставится до гидрации — без мигания", async ({ page }) => {
-      await page.addInitScript(() => localStorage.setItem("vh-theme", "dark"));
-      // Блокируем JS-чанки приложения: работать может только скрипт в <head>.
-      await page.route("**/_next/static/chunks/**", (route) => route.abort());
-      await page.goto("/uz");
-      await expect(html(page)).toHaveAttribute("data-theme", "dark");
-    });
-  });
-
-  test("кнопка на /dev/preview переключает тему и запоминает выбор", async ({ page }) => {
-    await page.goto("/dev/preview");
-    await page.getByRole("button", { name: /Тёмная/ }).click();
-    await expect(html(page)).toHaveAttribute("data-theme", "dark");
-    await page.reload();
-    await expect(html(page)).toHaveAttribute("data-theme", "dark");
+  test("одна светлая: старый выбор «тёмная» из хранилища не действует, переключателя нет", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("vh-theme", "dark"));
+    await page.goto("/ru");
+    await expect(html(page)).not.toHaveAttribute("data-theme", /.*/);
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(244, 241, 235)");
+    await expect(page.getByRole("button", { name: /тёмн|светл/i })).toHaveCount(0);
   });
 });

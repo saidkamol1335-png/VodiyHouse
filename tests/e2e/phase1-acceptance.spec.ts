@@ -60,30 +60,27 @@ test.describe("приёмка фазы 1 · руководитель с теле
     await expect(formStatus(page, "Сохранено")).toBeVisible();
   });
 
-  // Сверка 390 / 1440 с мокапом и решениями интервью (шаг 14): экраны ЖК руководителя в обеих темах.
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты экранов ЖК руководителя · ${theme}`, async ({ page }, testInfo) => {
-      const dir = `test-results/screens/${testInfo.project.name}`;
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      const screens = [
-        ["s14-complexes", "/dev/zhk"],
-        ["s14-complex-main", complexUrl(1)],
-        ["s14-complex-blocks", `${complexUrl(1)}/bloki`],
-        ["s14-complex-layouts", `${complexUrl(1)}/planirovki`],
-        ["s14-complex-photos", `${complexUrl(1)}/foto`],
-      ] as const;
-      for (const [name, url] of screens) {
-        await open(page, url);
-        await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({
-          path: `${dir}/${name}-${theme}.png`,
-          fullPage: true,
-          caret: "initial",
-          animations: "disabled",
-        });
-      }
-    });
-  }
+  // Сверка 390 / 1440 с мокапом и решениями интервью (шаг 14): экраны ЖК руководителя.
+  test(`скриншоты экранов ЖК руководителя`, async ({ page }, testInfo) => {
+    const dir = `test-results/screens/${testInfo.project.name}`;
+    const screens = [
+      ["s14-complexes", "/dev/zhk"],
+      ["s14-complex-main", complexUrl(1)],
+      ["s14-complex-blocks", `${complexUrl(1)}/bloki`],
+      ["s14-complex-layouts", `${complexUrl(1)}/planirovki`],
+      ["s14-complex-photos", `${complexUrl(1)}/foto`],
+    ] as const;
+    for (const [name, url] of screens) {
+      await open(page, url);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        path: `${dir}/${name}.png`,
+        fullPage: true,
+        caret: "initial",
+        animations: "disabled",
+      });
+    }
+  });
 
   test("блок 16 эт. × 3 подъезда × 4 кв. — генератором меньше чем за минуту", async ({ page }) => {
     const started = Date.now();

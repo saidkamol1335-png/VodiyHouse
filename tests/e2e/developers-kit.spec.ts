@@ -273,26 +273,23 @@ test.describe("кабинет · застройщики", () => {
     }
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты · ${theme}`, async ({ page }, testInfo) => {
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      const folder = `test-results/screens/${testInfo.project.name}`;
-      for (const [name, path] of [
-        ["list", LIST],
-        ["main", SIFAT],
-        ["projects", `${SIFAT}/obyekty`],
-        ["journal", `${SIFAT}/zhurnal`],
-      ] as const) {
-        await page.goto(path);
-        // Снимок до гидратации прячет курсор в полях раньше React, и тот видит чужую разметку.
-        await page.waitForLoadState("networkidle");
-        await page.evaluate(() => document.fonts.ready);
-        await page.screenshot({
-          caret: "initial",
-          path: `${folder}/s10-developers-${name}-${theme}.png`,
-          fullPage: true,
-        });
-      }
-    });
-  }
+  test(`скриншоты`, async ({ page }, testInfo) => {
+    const folder = `test-results/screens/${testInfo.project.name}`;
+    for (const [name, path] of [
+      ["list", LIST],
+      ["main", SIFAT],
+      ["projects", `${SIFAT}/obyekty`],
+      ["journal", `${SIFAT}/zhurnal`],
+    ] as const) {
+      await page.goto(path);
+      // Снимок до гидратации прячет курсор в полях раньше React, и тот видит чужую разметку.
+      await page.waitForLoadState("networkidle");
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        caret: "initial",
+        path: `${folder}/s10-developers-${name}.png`,
+        fullPage: true,
+      });
+    }
+  });
 });

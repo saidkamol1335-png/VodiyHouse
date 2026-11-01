@@ -71,15 +71,12 @@ test.describe("первая смена пароля", () => {
     await expect(page).toHaveURL(/\/admin$/);
   });
 
-  for (const theme of ["light", "dark"] as const) {
-    test(`скриншоты · ${theme}`, async ({ page }, testInfo) => {
-      await page.addInitScript((value) => localStorage.setItem("vh-theme", value), theme);
-      await page.goto(PAGE);
-      await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "короткий", "короткий");
-      await expect(fieldErrors(page)).toHaveCount(1);
-      await page.evaluate(() => document.fonts.ready);
-      const folder = `test-results/screens/${testInfo.project.name}`;
-      await page.screenshot({ caret: "initial", path: `${folder}/password-change-${theme}.png`, fullPage: true });
-    });
-  }
+  test(`скриншоты`, async ({ page }, testInfo) => {
+    await page.goto(PAGE);
+    await fillPasswords(page, DEMO_TEMPORARY_PASSWORD, "короткий", "короткий");
+    await expect(fieldErrors(page)).toHaveCount(1);
+    await page.evaluate(() => document.fonts.ready);
+    const folder = `test-results/screens/${testInfo.project.name}`;
+    await page.screenshot({ caret: "initial", path: `${folder}/password-change.png`, fullPage: true });
+  });
 });

@@ -15,7 +15,7 @@ const MENU_COUNT = NAV_COUNT + 1;
 test.describe("шапка · десктоп 1440", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "только десктоп");
 
-  test("пункты шапки, RU/UZ, тема, избранное; кнопки меню нет", async ({ page }) => {
+  test("пункты шапки, RU/UZ, избранное; кнопки меню нет", async ({ page }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru");
     const nav = page.locator(".header-nav");
@@ -70,13 +70,6 @@ test.describe("шапка · десктоп 1440", () => {
     const phone = page.getByRole("banner").getByRole("link", { name: "+998 90 000 00 00" });
     await expect(phone).toHaveAttribute("href", "tel:+998900000000");
   });
-
-  test("☾ переключает тему", async ({ page }) => {
-    await page.goto("/ru");
-    await page.getByRole("button", { name: "Включить тёмную тему" }).click();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await shot(page, "1440-dark");
-  });
 });
 
 test.describe("шапка · планшет 1100", () => {
@@ -103,7 +96,7 @@ test.describe("шапка · планшет 1100", () => {
 test.describe("шапка · телефон 390", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) > 760, "только телефон");
 
-  test("Ш5: меню на весь экран — 01–05 (06 — «Спецпредложения» с витриной, 07 — «Подбор за 1 минуту»), офис, язык, тема", async ({ page }) => {
+  test("Ш5: меню на весь экран — 01–05 (06 — «Спецпредложения» с витриной, 07 — «Подбор за 1 минуту»), офис, язык", async ({ page }) => {
     await page.goto("/ru");
     await shot(page, "390-top");
     await page.getByRole("button", { name: "Открыть меню" }).click();
@@ -116,7 +109,6 @@ test.describe("шапка · телефон 390", () => {
     await expect(quiz).toHaveAttribute("href", "/ru/podbor");
     await expect(menu).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(menu.getByRole("link", { name: "O‘zbekcha" })).toBeVisible();
-    await expect(menu.getByRole("button", { name: "Тёмная" })).toBeVisible();
     await expect(page.locator("html")).toHaveCSS("overflow", "hidden");
     await shot(page, "390-menu");
     await menu.getByRole("button", { name: "Закрыть меню" }).click();

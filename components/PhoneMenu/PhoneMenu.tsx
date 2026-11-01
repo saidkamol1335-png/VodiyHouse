@@ -6,7 +6,6 @@ import NextLink from "next/link";
 import { useEffect, useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { LogoMark } from "@/components/Logo";
-import { ThemeSegmented } from "@/components/ThemeToggle";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { formatPhone, instagramHref, phoneHref, telegramHref } from "@/lib/contacts";
 import { isActivePath } from "@/components/HeaderNav";
@@ -38,7 +37,7 @@ function ContactRow({ icon, label, value, href }: ContactRowProps) {
   return href ? <a className="phone-menu__contact" href={href}>{content}</a> : <div className="phone-menu__contact">{content}</div>;
 }
 
-/** Меню телефона на весь экран (решение Ш5): пункты 01–0N, контакты Vodiy House, язык, тема. */
+/** Меню телефона на весь экран (решение Ш5): пункты 01–0N, контакты Vodiy House, язык. */
 export function PhoneMenu({ id, onClose }: PhoneMenuProps) {
   const t = useTranslations();
   // Любая ссылка внутри меню уводит со страницы — меню закрываем.
@@ -53,7 +52,6 @@ export function PhoneMenu({ id, onClose }: PhoneMenuProps) {
         <PhoneMenuContacts />
         <div className="phone-menu__settings">
           <LanguageSwitch variant="full" />
-          <ThemeSegmented />
         </div>
         <div className="phone-menu__footer">
           {/* Кабинет — без префикса языка, поэтому обычный Link Next.js. */}

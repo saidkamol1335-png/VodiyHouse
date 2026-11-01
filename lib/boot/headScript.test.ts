@@ -17,20 +17,18 @@ describe("HEAD_BOOT_SCRIPT", () => {
     sessionStorage.clear();
     document.documentElement.removeAttribute(PRELOADER_ATTRIBUTE);
     document.documentElement.removeAttribute("data-anchor-start");
-    document.documentElement.setAttribute("data-theme", "light");
     document.documentElement.setAttribute("data-motion", "lite");
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it("без сохранённого выбора — светлая тема и lite (как отрендерил сервер)", () => {
-    const html = runBootScript();
-    expect(html.getAttribute("data-theme")).toBe("light");
-    expect(html.getAttribute("data-motion")).toBe("lite");
+  it("без сохранённого выбора — lite (как отрендерил сервер)", () => {
+    expect(runBootScript().getAttribute("data-motion")).toBe("lite");
   });
 
-  it("сохранённая тёмная тема ставится до отрисовки", () => {
+  it("старый выбор темы в хранилище не действует", () => {
+    document.documentElement.removeAttribute("data-theme");
     localStorage.setItem("vh-theme", "dark");
-    expect(runBootScript().getAttribute("data-theme")).toBe("dark");
+    expect(runBootScript().hasAttribute("data-theme")).toBe(false);
   });
 
   it("сохранённый full и ?motion=lite — побеждает параметр", () => {
@@ -69,11 +67,8 @@ describe("HEAD_BOOT_SCRIPT", () => {
   });
 
   it("мусор в хранилище не ломает атрибуты", () => {
-    localStorage.setItem("vh-theme", "purple");
     localStorage.setItem("vh-motion", "turbo");
-    const html = runBootScript();
-    expect(html.getAttribute("data-theme")).toBe("light");
-    expect(html.getAttribute("data-motion")).toBe("lite");
+    expect(runBootScript().getAttribute("data-motion")).toBe("lite");
   });
 });
 

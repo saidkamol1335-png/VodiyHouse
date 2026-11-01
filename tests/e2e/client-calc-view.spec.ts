@@ -64,7 +64,7 @@ test.describe("кабинет · расчёт для клиента: раскл�
     await expect(bar).toHaveAttribute("data-hidden", "");
   });
 
-  test("скриншоты s25: расчёт кв. 88, банк в сумах, сравнение, тёмная тема", async ({
+  test("скриншоты s25: расчёт кв. 88, банк в сумах, сравнение", async ({
     page,
   }, testInfo) => {
     const dir = `test-results/screens/${testInfo.project.name}`;
@@ -88,11 +88,5 @@ test.describe("кабинет · расчёт для клиента: раскл�
     await page.screenshot({ path: `${dir}/s25-bank-schedule.png`, caret: "initial" });
     await page.locator(".calc-compare").scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${dir}/s25-compare.png`, caret: "initial" });
-    await page.evaluate(() => {
-      localStorage.setItem("vh-theme", "dark");
-      document.documentElement.dataset.theme = "dark";
-      window.scrollTo(0, 0);
-    });
-    await page.screenshot({ path: `${dir}/s25-calc-dark.png`, caret: "initial" });
   });
 });

@@ -19,7 +19,7 @@ const ORDER: readonly Locale[] = ["ru", "uz"];
  * /kalkulyator, фильтры) переходят вместе с языком — их читаем в момент нажатия: страница меняет
  * их сама (history.replaceState), а шапка на сервере их не знает. Другой язык — всегда обычный
  * переход страницы: смена языка пересобирает корневой layout, и клиентский переход ругается на
- * его скрипт темы («Encountered a script tag…»).
+ * его скрипт в <head> («Encountered a script tag…»).
  */
 export function LanguageSwitch({ variant = "short", onNavigate }: LanguageSwitchProps) {
   const t = useTranslations("header");

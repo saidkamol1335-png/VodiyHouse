@@ -16,7 +16,7 @@ const hasMenuButton = (page: Page) => (page.viewportSize()?.width ?? 0) < 1280;
 const noHorizontalScroll = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
-/** Дождаться конца появления и смены темы; бесконечные (луч итога в full) не ждём. */
+/** Дождаться конца появления; бесконечные (луч итога в full) не ждём. */
 const settle = (page: Page) =>
   page.waitForFunction(() =>
     document
@@ -165,7 +165,7 @@ test.describe("сайт · страница калькулятора", () => {
     await expect(page.getByTestId("calc-total").locator(".beam")).toHaveCSS("display", "none");
   });
 
-  test("скриншоты s26: стенд (ru, uz, тёмная), пример банка, окно заявки, публичная страница", async ({
+  test("скриншоты s26: стенд (ru, uz), пример банка, окно заявки, публичная страница", async ({
     page,
   }, testInfo) => {
     const dir = `test-results/screens/${testInfo.project.name}`;
@@ -190,14 +190,6 @@ test.describe("сайт · страница калькулятора", () => {
     await page.goto(`${STAND}/uz`);
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: `${dir}/s26-calc-uz.png`, caret: "initial" });
-    await page.evaluate(() => {
-      localStorage.setItem("vh-theme", "dark");
-      document.documentElement.dataset.theme = "dark";
-    });
-    // Кнопки и сегменты меняют цвет плавно — снимок после перехода, а не посреди него.
-    await settle(page);
-    await page.screenshot({ path: `${dir}/s26-calc-dark.png`, caret: "initial" });
-    await page.evaluate(() => localStorage.setItem("vh-theme", "light"));
     await page.goto("/ru/kalkulyator");
     await page.waitForLoadState("networkidle");
     await page.screenshot({ path: `${dir}/s26-public.png`, caret: "initial" });

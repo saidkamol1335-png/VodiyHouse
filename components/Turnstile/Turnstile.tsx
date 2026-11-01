@@ -61,7 +61,7 @@ export function Turnstile({ label, attempt }: TurnstileProps) {
         widget.current = api.render(node, {
           sitekey: TURNSTILE_SITE_KEY,
           language: "ru",
-          theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+          theme: "light",
           size: "flexible",
         });
       })
