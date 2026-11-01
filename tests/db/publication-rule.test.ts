@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { makeComplexReady, seedContent, type ContentIds } from "./content-fixtures";
 import { anon, createStaff, createTestDb, expectDenied, expectHint, user, type TestDb } from "./harness";
@@ -257,5 +259,77 @@ describe("правило публикации v2", () => {
     expect(detail.rows[0]!.data.state).toBe("draft");
     await expectDenied(db.as(anon, (tx) => tx.query("select * from complex_states()")));
     await expectDenied(db.as(anon, (tx) => tx.query("select complex_completeness($1)", [ready.id])));
+  });
+});
+
+// DEMO для экранов правила (supabase/demo/publication.sql): без него e2e нечего показывать.
+describe("DEMO правила публикации", () => {
+  let db: TestDb;
+  const DEMO_DIR = path.resolve(import.meta.dirname, "../../supabase/demo");
+  const stateOf = async (slug: string) =>
+    (
+      await db.as(anon, (tx) =>
+        tx.query<{ data: { complex: { state: string }; layouts: { id: string }[] } | null }>(
+          "select site_complex($1) as data",
+          [slug],
+        ),
+      )
+    ).rows[0]!.data;
+
+  beforeAll(async () => {
+    db = await createTestDb();
+    for (const file of ["seed.sql", "publication.sql"]) {
+      await db.admin.exec(await readFile(path.join(DEMO_DIR, file), "utf8"));
+    }
+    // Чертёж только у первой планировки блока 1, как у scripts/demoMedia.mjs.
+    await db.admin.exec(`
+      with target as (
+        select l.id as layout_id, c.id as complex_id
+        from public.layouts l
+        join public.blocks b on b.id = l.block_id
+        join public.complexes c on c.id = b.complex_id
+        where c.slug = 'demo-seryy' and b.name = '1' and l.sort = 1
+      ), drawn as (
+        insert into public.media_assets (complex_id, kind, path, width, height)
+        select complex_id, 'drawing', 'complexes/' || complex_id || '/plan.png', 1200, 912 from target
+        returning id
+      )
+      update public.layouts set drawing_id = (select id from drawn) where id = (select layout_id from target);
+    `);
+  });
+  afterAll(() => db.close());
+
+  it("Скоро — без планировок; серый — только полная планировка; черновика на сайте нет", async () => {
+    const soon = await stateOf("demo-skoro");
+    expect(soon?.complex.state).toBe("soon");
+    expect(soon?.layouts).toEqual([]);
+    const full = await stateOf("demo-seryy");
+    expect(full?.complex.state).toBe("full");
+    expect(full?.layouts).toHaveLength(1);
+    expect(await stateOf("demo-chernovik")).toBeNull();
+  });
+
+  it("каталог: Скоро есть, черновика нет; квартиры неполной планировки серые", async () => {
+    const { rows } = await db.as(anon, (tx) => tx.query<{ data: { complexes: { slug: string; state: string }[] } }>("select site_catalog() as data"));
+    const slugs = rows[0]!.data.complexes.map((item) => item.slug);
+    expect(slugs).toContain("demo-skoro");
+    expect(slugs).not.toContain("demo-chernovik");
+    const blocks = await db.admin.query<{ id: string; name: string }>(
+      "select b.id, b.name from public.blocks b join public.complexes c on c.id = b.complex_id where c.slug = 'demo-seryy' order by b.sort",
+    );
+    const units = await db.as(anon, (tx) =>
+      tx.query<{ position: number; status: string; sellable: boolean; price: string | null }>(
+        'select "position", status, sellable, price from block_units($1) where floor = 2 order by "position"',
+        [blocks.rows[0]!.id],
+      ),
+    );
+    expect(units.rows.map((unit) => unit.sellable)).toEqual([true, true, false, false]);
+    expect(units.rows[2]!.price).toBeNull();
+  });
+
+  it("demo:remove убирает и эти ЖК", async () => {
+    await db.admin.exec(await readFile(path.join(DEMO_DIR, "remove.sql"), "utf8"));
+    const { rows } = await db.admin.query<{ n: number }>("select count(*)::int as n from public.complexes where slug like 'demo-%'");
+    expect(rows[0]!.n).toBe(0);
   });
 });

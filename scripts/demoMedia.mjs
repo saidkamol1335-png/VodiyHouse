@@ -17,6 +17,7 @@ const PROGRESS_VIDEO_BUCKET = "progress-video";
 const JPEG_QUALITY = 82;
 const COVER_LONG_SIDE = 2400;
 const DRAWING_WIDTH = 1200;
+const STORAGE_ATTEMPTS = 5;
 // Заглушка, пока грузится фото: ~16 px по ширине — несколько сотен байт data URL (лимит базы 4000).
 const BLUR_WIDTH = 16;
 
@@ -33,6 +34,9 @@ const MOCKUP_SETS = {
   lola: ["28383744bf084483b961861af9b579b7", "9a2e9b35b3f6a176633ae0834ff88dde", "0c8a807024312e8771d56110be1ba913"],
   dostlik: ["511707cf0ef92e0340c7bb57ab7f3f1a", "4d04d7cf39e678c9e7d26c7f1992e56d", "8678c9ca5af85cdb569b69a140013d03"],
   mehr: ["634f8b7a205c614e4bb38a2394fedbb3", "7757b282190f86bc31353c418d460edd", "294cd0246c46125eb9eecfb02cdfca17"],
+  // Правило публикации v2 (supabase/demo/publication.sql): у черновика рендеров нет.
+  skoro: ["ca48e25088e67b413eee7bd5057026e7", "822c8297bac35358d4069e46fa0a3872", "b8618d0a2800d570062f94b232010bb6", "47fcd99ae8b4ebf2447a692dc30673e6", "795fdb12ceb53738f9aaac91d4743f3d"],
+  seryy: ["28383744bf084483b961861af9b579b7", "9a2e9b35b3f6a176633ae0834ff88dde", "0c8a807024312e8771d56110be1ba913", "511707cf0ef92e0340c7bb57ab7f3f1a", "4d04d7cf39e678c9e7d26c7f1992e56d"],
   sayhun: ["e8f08b3666eb53ec7c8ee5da2eb362e8", "2409d91699490a6171c9fa26bdd5fd35", "f43aefdedd19496e0fd494a9182de5fd"],
 };
 const LOAD_SETS = ["bahor", "gulzor", "nur", "lola", "dostlik", "mehr", "sayhun", "shodlik", "namuna", "yulduz", "orzu"];
@@ -54,7 +58,18 @@ function storageClient(bucket = BUCKET) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) throw new Error("Нет NEXT_PUBLIC_SUPABASE_URL или SUPABASE_SECRET_KEY в .env.local.");
-  return createClient(url, key, { auth: { persistSession: false } }).storage.from(bucket);
+  const storage = createClient(url, key, { auth: { persistSession: false } }).storage.from(bucket);
+  // Сбой связи посреди сида оставил бы файлы DEMO без строк в базе: каждый вызов повторяем.
+  const retried = (method) => async (...args) => {
+    let result;
+    for (let attempt = 1; attempt <= STORAGE_ATTEMPTS; attempt += 1) {
+      result = await storage[method](...args);
+      if (!result.error) return result;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+    }
+    return result;
+  };
+  return { list: retried("list"), upload: retried("upload"), remove: retried("remove") };
 }
 
 async function demoComplexIds(db) {
@@ -144,6 +159,8 @@ const PLAN_SETS = {
   shodlik: ["b80fffaf0f9ed249866b4634c49bfba2", "3394e9026d59401f326357647df46f61", "dc10f4956102957c5fa8a8cf2a8321cc", "979219668d03f3e667d2d6a3c81e5fe7", "53e82257a70a9f9532230dee948891d5", "78749704750e54c17127972206266ce2", "c54e08513d25eb8550df0990149085a7", "f0ae1cde7d4a09078118a4916e2cf6c2"],
   namuna: ["cfe37a9e621fc12835b7de887b6c1643", "5e209d1f74ff4bd6b2e6e82610727838", "d799dc37b6484fb516482220435e8ba1", "d465c412f049da95a57f47fb429e7a8d", "d97841127d5d5c04d0c503a5b7d2ee04", "16a0b6042b9f48aeec155730f4ab857e", "f6ee94f78e5462db2881f9f158e1963e"],
   yulduz: ["8f6741f77a5a4168561f8cbff39505bd", "4f9c8e68060e7142a2f91889e92243b6", "558c13d93e2eaa1c304131eddd757466", "b9ce6591db60c3768d189c7b1d56a9b9"],
+  // Чертёж только у первой планировки: остальные неполные (правило публикации v2).
+  seryy: ["6ed4908db6b4d1999fab03e61f8e5e3f"],
   orzu: ["6ed4908db6b4d1999fab03e61f8e5e3f", "1bd1298c378b8f8a77ddb07b1574a57b", "fc042a24418426dcc496b17c104c1e95", "6cf69bb6facecfeefe50f484ad9ecddf", "9d3c5cfda54721c9f36d0bad659ffe30", "24765b55bbeaf5a869f26b67748dfc36", "6b8b1415a3611aa81ce4a14b5b25fd32"],
 };
 

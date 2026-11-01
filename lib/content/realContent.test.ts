@@ -41,6 +41,7 @@ type Block = {
   }[];
 };
 type Complex = {
+  programs?: unknown[];
   slug: string;
   name: string;
   developer: string;
@@ -89,7 +90,8 @@ describe("настоящие ЖК из материалов заказчика",
       expect(complex.slug, complex.name).toBe(slugify(complex.name));
       expect(complex.slug).not.toMatch(/^demo/);
       expect(complex.name.length).toBeLessThanOrEqual(COMPLEX_NAME_MAX);
-      expect(developers.has(complex.developer), complex.slug).toBe(true);
+      // Пустой застройщик допустим только у черновика (docs/publication-rule.md).
+      if (complex.developer || complex.publish) expect(developers.has(complex.developer!), complex.slug).toBe(true);
     }
     expect(new Set(content.complexes.map((complex) => complex.slug)).size).toBe(
       content.complexes.length,
@@ -269,7 +271,11 @@ describe("настоящие ЖК из материалов заказчика",
 
   it("ЖК к публикации готов: рендеры, срок, планировка с чертежом и ценой, застройщик с текстом и логотипом", () => {
     for (const complex of content.complexes.filter((item) => item.publish)) {
-      expect(complex.photos.length, complex.slug).toBeGreaterThanOrEqual(5);
+      // Минимум ЖК: обложка и ещё 4 общих рендера; настоящие фото «foto-…» не считаются и обложкой не бывают.
+      const renders = complex.photos.filter((file) => !/\/foto-[^/]*$/.test(file));
+      expect(renders.length, complex.slug).toBeGreaterThanOrEqual(5);
+      expect(renders[0], complex.slug).toBe(complex.photos[0]);
+      expect(complex.programs?.length, complex.slug).toBeGreaterThan(0);
       expect(complex.address, complex.slug).toBeDefined();
       expect(complex.point, complex.slug).toBeDefined();
       expect(

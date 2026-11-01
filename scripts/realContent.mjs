@@ -173,7 +173,8 @@ async function ensureComplex(complex, developers) {
     `insert into public.complexes (developer_id, name, slug, sort)
      values ($1, $2::public.i18n_text, $3, (select coalesce(max(c.sort), 0) + 10 from public.complexes c))
      returning id, status`,
-    [developers.get(complex.developer), json({ ru: complex.name, uz: complex.name }), complex.slug],
+    // Застройщик у черновика может быть пустым: обязателен только для публикации (docs/publication-rule.md).
+    [developers.get(complex.developer) ?? null, json({ ru: complex.name, uz: complex.name }), complex.slug],
   );
   counts.complexes += 1;
   return rows[0];
@@ -214,6 +215,30 @@ async function fillMain(id, complex) {
   );
 }
 
+/** Минимум ЖК считает только общие рендеры: «foto-…» — настоящие фото стройки. */
+const photoCategory = (file) => (/\/foto-[^/]*$/.test(file) ? "real" : "general");
+
+/**
+ * Фото, загруженные до типа фото: настоящие — по их месту в журнале загрузок. Только если в галерее ровно
+ * те файлы, что в журнале, и только «общий → настоящее»: правки кабинета не затираются.
+ */
+async function markRealPhotos(id, complex) {
+  const loaded = photosLedger[complex.slug] ?? complex.photos;
+  const real = loaded.flatMap((file, index) => (photoCategory(file) === "real" ? [index + 1] : []));
+  if (real.length === 0) return;
+  await client.query(
+    `with gallery as (
+       select m.id, m.photo_category, row_number() over (order by m.sort, m.created_at, m.id) as place,
+              count(*) over () as total
+       from public.media_assets m where m.complex_id = $1 and m.kind = 'photo'
+     )
+     update public.media_assets m set photo_category = 'real'
+     from gallery g
+     where m.id = g.id and g.total = $2 and g.place = any ($3::bigint[]) and g.photo_category = 'general'`,
+    [id, loaded.length, real],
+  );
+}
+
 /** Фото — только те, что ещё не загружали. Загрузки до журнала шли по порядку списка. */
 async function fillPhotos(id, complex) {
   const { rows } = await client.query(
@@ -229,9 +254,9 @@ async function fillPhotos(id, complex) {
     const objectPath = await store(`complexes/${id}`, image, "jpg");
     sort += 1;
     await client.query(
-      `insert into public.media_assets (complex_id, kind, path, width, height, blur, focus_x, focus_y, sort)
-       values ($1, 'photo', $2, $3, $4, $5, 0.5, 0.5, $6)`,
-      [id, objectPath, image.width, image.height, image.blur, sort],
+      `insert into public.media_assets (complex_id, kind, path, width, height, blur, focus_x, focus_y, sort, photo_category)
+       values ($1, 'photo', $2, $3, $4, $5, 0.5, 0.5, $6, $7)`,
+      [id, objectPath, image.width, image.height, image.blur, sort, photoCategory(file)],
     );
     counts.photos += 1;
   }
@@ -387,7 +412,7 @@ async function fillBlocks(id, complex, developers) {
   for (const [index, block] of complex.blocks.entries()) {
     blockIds.push(await insertBlock(id, block, index + 1, unitsFile, drawings));
   }
-  if (complex.programs?.length)
+  if (complex.programs?.length && developers.has(complex.developer))
     await insertPrograms(developers.get(complex.developer), blockIds, complex.programs);
 }
 
@@ -510,10 +535,12 @@ try {
     ids.set(complex.slug, id);
     if (status !== "draft") {
       photosLedger[complex.slug] ??= complex.photos;
+      await markRealPhotos(id, complex);
       continue;
     }
     await fillMain(id, complex);
     await fillPhotos(id, complex);
+    await markRealPhotos(id, complex);
     await fillBlocks(id, complex, developers);
     await fillDrawings(id, complex);
     await fillContent(id, complex);
@@ -523,8 +550,16 @@ try {
     if (developer.publish) await publish("developers", developers.get(developer.slug));
   }
   for (const complex of content.complexes) {
-    if (complex.publish && (await publish("complexes", ids.get(complex.slug))))
-      await activatePrograms(ids.get(complex.slug));
+    if (!complex.publish) continue;
+    // Программа входит в минимум ЖК: включаем до публикации, иначе база её отклонит. Уже публиковавшийся
+    // ЖК не трогаем: программы мог выключить руководитель.
+    const { rows } = await client.query(
+      "select 1 from public.complexes where id = $1 and status = 'draft' and files_checked_at is null",
+      [ids.get(complex.slug)],
+    );
+    if (rows.length === 0) continue;
+    await activatePrograms(ids.get(complex.slug));
+    await publish("complexes", ids.get(complex.slug));
   }
   await client.query(
     `insert into public.settings (key, value) values ($1, $2::jsonb)

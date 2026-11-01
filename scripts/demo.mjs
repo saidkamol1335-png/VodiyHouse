@@ -16,8 +16,8 @@ const DEMO_DIR = path.join(import.meta.dirname, "..", "supabase", "demo");
 // `demo:seed -- stress` — плюс «худший», «лучший» и 30 ЖК для нагрузки (stress.sql, приёмка 3а).
 // stats.sql — 60 дней DEMO-посещений и заявок для «Статистики сайта» (фаза 6).
 const STEPS = {
-  seed: ["remove.sql", "seed.sql", "stats.sql"],
-  stress: ["remove.sql", "seed.sql", "stats.sql", "stress.sql"],
+  seed: ["remove.sql", "seed.sql", "stats.sql", "publication.sql"],
+  stress: ["remove.sql", "seed.sql", "stats.sql", "publication.sql", "stress.sql"],
   remove: ["remove.sql"],
 };
 

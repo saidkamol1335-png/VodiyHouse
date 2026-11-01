@@ -8,13 +8,13 @@
 |---|---|---|---|---|
 | [Shodlik](shodlik/README.md) | MYB Development | ✓ 3000 px | ✗ | планы этажей по блокам A и B |
 | [Sayilgoh](sayilgoh/README.md) | MYB Development | ✓ 4800 px (исходник 14000 px) | ✓ блок A (3–10, 11, 12), блоки C-D (3–9, 10, 11) | план блока B (по шахматке те же площади, что у A, — подтвердить); 1–2 этажи |
-| [Chinor Residence](chinor-residence/README.md) | — (папка «5. UKASSET») | ✓ 3000 px | ✓ блоки A, B, C (типовой этаж), с красной меткой | планы без метки; какие этажи типовые; буквы блоков A, B, V, G, D ↔ A, B, C1–C3 |
-| [Garant Avenue](garant-avenue/README.md) | — | ✓ 4800 px (исходник 7680 px) | ✗ | планы этажей по 3 подъездам (в папке — только интерьеры коридоров) |
+| [Chinor Residence](chinor-residence/README.md) | UKASSET | ✓ 3000 px | ✓ блоки A, B, C (типовой этаж), с красной меткой | планы без метки; какие этажи типовые; буквы блоков A, B, V, G, D ↔ A, B, C1–C3 |
+| [Garant Avenue](garant-avenue/README.md) | Garant Avenue (TODO-заказчик) | ✓ 4800 px (исходник 7680 px) | ✗ | планы этажей по 3 подъездам (в папке — только интерьеры коридоров) |
 | [Ibrat Building 14 qavat](ibrat-building-14-qavat/README.md) | Ibrat Building | ✗ | ✗ | рендер фасада; кадастровый PDF «Планировка-20-4» на Drive не загружен |
 | [Dubai](dubai/README.md) | Ibrat Building | ✗ | ✗ | рендеры и планы этажей — на Drive нет вовсе |
-| [San'at Saroyi](sanat-saroyi/README.md) | — | ✗ | ✗ | рендеры и планы — в чек-листе нет ссылок |
+| [San'at Saroyi](sanat-saroyi/README.md) | FAYZ-AKIRA (TODO-заказчик) | ✗ | ✗ | рендеры и планы — в чек-листе нет ссылок |
 | [Alliance Avenue](alliance-avenue/README.md) | Qadrdonlar Developments | ✓ 4800 px (исходник 7680 px) | ✗ | планы этажей блоков 1 и 2 |
-| [Dream Residence](dream-residence/README.md) | — | ✗ | ✗ | рендеры и планы — в чек-листе нет ссылок |
+| [Dream Residence](dream-residence/README.md) | JBA Group | ✗ | ✗ | рендеры и планы — в чек-листе нет ссылок |
 | [Sokin](sokin/README.md) | Qadrdonlar Developments | ✓ 3840 px | ✗ | план этажа (папка «Планировка» на Drive пустая) |
 | [Soy Bo'yi Avenue](soy-boyi-avenue/README.md) | — | ✗ | ✗ | в чек-листе пусто |
 
@@ -24,7 +24,7 @@
 
 ## На сайте (31.10.2026)
 
-Решение исполнителя 01.11.2026: размещаем только Shodlik, Sayilgoh и Chinor Residence; остальные ЖК клиент заполнит сам после сдачи. В `content.json` — только эти три ЖК и их застройщики (MYB Development, UKASSET). Материалы остальных лежат в `<slug>/`, их карточки в тестовом облаке — черновики, на сайте не видны, в проект заказчика импорт их не перенесёт.
+Правило публикации v2 (решение заказчика 01.11.2026, `docs/publication-rule.md`, заменяет решение о трёх ЖК): `npm run content:import` заливает черновиками все ЖК из `content.json`; опубликованы Shodlik, Sayilgoh и Chinor Residence. Застройщики черновиков — из чек-листов: San'at Saroyi — FAYZ-AKIRA (в документах «заказчик», TODO-заказчик), Dream Residence — JBA Group, Garant Avenue — «Garant Avenue» (заказчик ООО, застройщик ли это — TODO-заказчик). Soy Bo'yi Avenue — черновик с одним названием, застройщика нет.
 
 Данные — из «Чек-листа данных ЖК» (выгрузка в `<slug>/checklist.md`, вместе с заметками и частыми вопросами), файлы — из Drive. Загрузка: `npm run content:import`, данные — `content.json` и `<slug>/units.json`. Повторный запуск дополняет только черновики и не перезаписывает заполненное; опубликованные, скрытые и архивные не трогает: правка `content.json` на них не влияет, их ведут в кабинете.
 
