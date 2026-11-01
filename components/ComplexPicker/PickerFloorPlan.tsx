@@ -130,7 +130,7 @@ function UnitTile({ item, selected, onPick }: { item: Placed; selected: boolean;
     >
       <span className="complex-picker__unit-number">№{unit.number}</span>
       {unit.rooms !== null ? <span className="complex-picker__unit-rooms">{t("roomsShort", { rooms: unit.rooms })}</span> : null}
-      {unit.status === "free" ? (price ? <span className="complex-picker__unit-price">{price}</span> : null) : <span className="complex-picker__unit-tag">{tLegend(unit.status)}</span>}
+      {unit.status === "free" ? (price ? <span className="complex-picker__unit-price">{price}</span> : null) : <span className="complex-picker__unit-tag">{unit.status === "pending" ? t("pendingTag") : tLegend(unit.status)}</span>}
     </button>
   );
 }

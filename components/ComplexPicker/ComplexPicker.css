@@ -144,7 +144,7 @@
   opacity: 0.82;
 }
 
-.complex-picker__tag--soon > small {
+.complex-picker__tag.complex-picker__tag--soon > small {
   color: var(--picker-glass-fg);
 }
 

@@ -54,7 +54,7 @@ export function collectionFilter(collection: ShowcaseCollection): CatalogFilter 
 /** Выдача каталога с применённой подборкой: по фильтру — как обычно, вручную — только её ЖК. */
 export function collectionResults(catalog: SiteCatalog, collection: ShowcaseCollection, filter: CatalogFilter): CatalogComplex[] {
   const found = filterCatalog(catalog, filter);
-  return collection.mode === "manual" ? found.filter((complex) => collection.complexIds.includes(complex.id)) : found;
+  return collection.mode === "manual" ? found.filter((complex) => collection.complexIds.includes(complex.id)) : withoutSoon(found);
 }
 
 /** «?podborka=slug&komnat=2» — подборка первой, дальше параметры фильтра (как у ссылки менеджера). */

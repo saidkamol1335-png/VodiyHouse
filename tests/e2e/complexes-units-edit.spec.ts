@@ -316,7 +316,7 @@ test.describe("кабинет · ЖК · квартиры: правки руко
     await step(page, "Цена");
     await bulk(page).getByText("без цены", { exact: true }).click();
     await bulk(page).getByRole("button", { name: "Снять цену" }).click();
-    await expect(bulk(page)).toContainText("Нельзя: опубликованный ЖК потерял бы");
+    await expect(bulk(page)).toContainText("Обязательный пункт опубликованного ЖК нельзя убрать");
   });
 
   test("фокус не падает на body: «×» панели, «Выбрать все» и «Снять выделение»", async ({

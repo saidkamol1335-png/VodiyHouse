@@ -748,7 +748,8 @@
       "telegram": "Telegramda yozish",
       "soon": "Tez kunda",
       "layouts": "Rejalarni ko‘rish",
-      "pendingNote": "Narx aniqlanmoqda — Vodiy House’ga qo‘ng‘iroq qiling"
+      "pendingNote": "Narx aniqlanmoqda — Vodiy House’ga qo‘ng‘iroq qiling",
+      "pendingTag": "Aniqlanmoqda"
     },
     "layouts": {
       "title": "Rejalar",

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { NO_FILTER } from "./filter";
 import type { CatalogBlock, CatalogComplex, SiteCatalog } from "./records";
+import { collectionResults } from "@/lib/site/showcase/model";
+import type { ShowcaseCollection } from "@/lib/site/showcase/records";
 import { filterCatalog, withoutSoon } from "./sort";
 
 // ЖК «Скоро» в каталоге (docs/publication-rule.md): в конце выдачи, фильтры цены и комнат его не показывают.
@@ -68,6 +70,13 @@ describe("ЖК «Скоро» в каталоге", () => {
   it("срок сдачи к ней применяется", () => {
     expect(ids(filterCatalog(catalog, { ...NO_FILTER, deadline: 2027 }))).toContain("soon");
     expect(ids(filterCatalog(catalog, { ...NO_FILTER, deadline: "built" }))).not.toContain("soon");
+  });
+
+  it("подборка по фильтру её не показывает, ручная — показывает", () => {
+    const byFilter = { mode: "filter", complexIds: [], filter: NO_FILTER } as unknown as ShowcaseCollection;
+    const manual = { mode: "manual", complexIds: ["soon"], filter: NO_FILTER } as unknown as ShowcaseCollection;
+    expect(ids(collectionResults(catalog, byFilter, NO_FILTER))).toEqual(["full-a", "full-b"]);
+    expect(ids(collectionResults(catalog, manual, NO_FILTER))).toEqual(["soon"]);
   });
 
   it("для главной и подборок по фильтру её можно убрать", () => {

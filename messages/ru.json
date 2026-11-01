@@ -3304,7 +3304,8 @@
       "telegram": "Написать в Telegram",
       "soon": "Скоро",
       "layouts": "Смотреть планировки",
-      "pendingNote": "Цена уточняется — позвоните в Vodiy House"
+      "pendingNote": "Цена уточняется — позвоните в Vodiy House",
+      "pendingTag": "Уточняется"
     },
     "layouts": {
       "title": "Планировки",

@@ -1,6 +1,5 @@
 "use client";
 
-import { layoutGaps } from "@/lib/admin/complexes/layouts";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
@@ -44,7 +43,7 @@ export function LayoutRows({ block, blocks, draft, drawings, onlyIncomplete = fa
       ) : null}
       <ul className="complex-layouts__rows">
         {/* Фильтр только прячет строки: форма шлёт все, иначе база удалила бы скрытые. */}
-        {draft.rows.filter((row) => !onlyIncomplete || layoutGaps(row, block.hasUnits).length > 0).map((row) => (
+        {draft.rows.filter((row) => !onlyIncomplete || !row.id || (row.gaps ?? []).length > 0).map((row) => (
           <LayoutRow
             key={row.key}
             row={row}

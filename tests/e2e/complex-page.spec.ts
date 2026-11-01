@@ -36,7 +36,7 @@ test.describe("страница ЖК", () => {
     await expect(main.locator("#nalichie")).toContainText(/обновлено \d{2}\.\d{2}, \d{2}:\d{2}/i);
     await expect(main.locator("#planirovki h3")).toHaveCount(8);
     await expect(main.locator("#zastroyshchik")).toContainText("Farg‘ona Sifat Qurilish");
-    await expect(main.locator("#zastroyshchik")).toContainText("Строится 1 ЖК");
+    await expect(main.locator("#zastroyshchik")).toContainText("Строится 2 ЖК");
     await expect(main.locator("#dokumenty")).toContainText("Разрешение на строительство");
     await expect(main).not.toContainText(/скидк|−\d+\s?%|-\d+\s?%/i);
     await scrollThrough(page);

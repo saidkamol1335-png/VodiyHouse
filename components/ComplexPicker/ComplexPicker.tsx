@@ -65,7 +65,7 @@ export function ComplexPicker({ id, title, lead, picker, blocks, complexSlug, co
             />
           )}
         </div>
-        {block && choice.unit ? (
+        {block && choice.unit && choice.unit.status !== "pending" ? (
           <PickerUnit
             key={choice.unit.id}
             unit={choice.unit}

@@ -108,6 +108,7 @@ function cadastreText(t: Translator, cadastre: BlockCardModel["cadastre"]): stri
 }
 
 function inSaleText(t: Translator, block: BlockCardModel["block"]): string | null {
+  if (block.offers.length === 0) return null;
   const free = blockFree(block);
   if (free === 0) return t("blocks.noFree");
   return free === null ? t("blocks.inStock") : t("blocks.flats", { n: free });

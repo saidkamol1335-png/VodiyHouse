@@ -64,7 +64,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
   });
   const found = useMemo(() => {
     const complexes = collection ? collectionResults(catalog, collection, filter) : filterCatalog(catalog, filter);
-    return hideSoon ? withoutSoon(complexes) : complexes;
+    return hideSoon && collection?.mode !== "manual" ? withoutSoon(complexes) : complexes;
   }, [catalog, collection, filter, hideSoon]);
   useSheetLock(open, closeSheet);
   const showResults = () => {

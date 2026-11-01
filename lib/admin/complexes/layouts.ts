@@ -49,7 +49,7 @@ export type LayoutDraft = {
  * слишком маленький чертёж знает только база. Новый чертёж прошёл порог при загрузке.
  */
 export function layoutGaps(row: LayoutDraft, hasUnits: boolean): LayoutGap[] {
-  const price = hasUnits ? (row.gaps ?? []).includes("price") : !row.priceFrom.trim();
+  const price = hasUnits ? !row.id || (row.gaps ?? []).includes("price") : !row.priceFrom.trim();
   const drawing = !row.drawingSrc || (row.drawingId === row.savedDrawingId && (row.gaps ?? []).includes("drawing"));
   return [...(price ? (["price"] as const) : []), ...(drawing ? (["drawing"] as const) : [])];
 }

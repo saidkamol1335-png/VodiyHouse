@@ -19,7 +19,7 @@ test.describe("застройщики", () => {
     const rows = page.locator('.developers-list__row[href*="/zastroyshchiki/demo-"]');
     await expect(rows).toHaveCount(3);
     await expect(rows.first()).toContainText("Farg‘ona Sifat Qurilish");
-    await expect(rows.first()).toContainText("1 новостройка на сайте");
+    await expect(rows.first()).toContainText("2 новостройки на сайте");
     await expect(rows.first()).toContainText("с 2012 года");
     // Shodlik прошёл все проверки — галочка «Проверено» (подпись только диктору).
     await expect(rows.first().getByText("Проверено Vodiy House")).toBeAttached();
@@ -42,18 +42,18 @@ test.describe("застройщики", () => {
     await expect(page.getByText("Основан в 2012 году")).toBeVisible();
     await expect(page.getByText("Сдано квартир: 2 140")).toBeVisible();
     // На сайте у Sifat только Shodlik, и он строится: «Сдано» не пишем.
-    await expect(page.getByText("Строится 1 ЖК")).toBeVisible();
+    await expect(page.getByText("Строится 2 ЖК")).toBeVisible();
     // Shodlik прошёл всё, сданные объекты проверены — плашка целиком, четыре пункта с датами.
     const checks = page.locator(".developer-about__checks");
     await expect(checks.locator("li")).toHaveCount(4);
     await expect(checks).toContainText("Проверено 12.09.2026");
     const tabs = page.getByRole("tablist", { name: "Объекты застройщика" });
     await expect(tabs.getByRole("tab", { name: /^Все/ })).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator(".catalog-card")).toHaveCount(1);
+    await expect(page.locator(".catalog-card")).toHaveCount(2);
     await tabs.getByRole("tab", { name: /^Сдано/ }).click();
     await expect(page.locator(".catalog-card")).toHaveCount(0);
     await tabs.getByRole("tab", { name: /^Строится/ }).click();
-    await expect(page.locator(".catalog-card")).toHaveCount(1);
+    await expect(page.locator(".catalog-card")).toHaveCount(2);
     await expect(page.locator(".developer-delivered__table tbody tr")).toHaveCount(2);
     await expect(page.locator(".developer-delivered__table")).toContainText("Перенос на 3 мес.");
     await expect(page.locator(".developer-programs__calc").first()).toHaveAttribute("href", /\/ru\/kalkulyator\?developer=demo-sifat&program=/);

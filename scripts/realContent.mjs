@@ -107,6 +107,8 @@ client.on("error", () => {});
 // Какие фото из content.json уже загружены: удалённое руководителем не вернётся, его фото не мешают.
 const PHOTOS_LEDGER_KEY = "content.imported_photos";
 let photosLedger = {};
+const REAL_PHOTOS_KEY = "content.real_photos_marked";
+let realPhotosMarked = [];
 
 async function importDeveloper(developer) {
   const inserted = await client.query(
@@ -181,9 +183,10 @@ async function ensureComplex(complex, developers) {
 }
 
 /** Поля вкладки «Основное»: только пустые, заполненное в кабинете остаётся. */
-async function fillMain(id, complex) {
+async function fillMain(id, complex, developers) {
   await client.query(
     `update public.complexes set
+       developer_id = coalesce(developer_id, $14),
        class = coalesce(class, $2::public.complex_class),
        house_type = coalesce(house_type, $3::public.house_type),
        ceiling_height = coalesce(ceiling_height, $4),
@@ -211,6 +214,7 @@ async function fillMain(id, complex) {
       complex.point?.[1] ?? null,
       JSON.stringify(complex.nearby ?? []),
       complex.visitedOn ?? null,
+      developers.get(complex.developer) ?? null,
     ],
   );
 }
@@ -223,6 +227,8 @@ const photoCategory = (file) => (/\/foto-[^/]*$/.test(file) ? "real" : "general"
  * те файлы, что в журнале, и только «общий → настоящее»: правки кабинета не затираются.
  */
 async function markRealPhotos(id, complex) {
+  if (realPhotosMarked.includes(complex.slug)) return;
+  realPhotosMarked.push(complex.slug);
   const loaded = photosLedger[complex.slug] ?? complex.photos;
   const real = loaded.flatMap((file, index) => (photoCategory(file) === "real" ? [index + 1] : []));
   if (real.length === 0) return;
@@ -526,6 +532,8 @@ try {
     PHOTOS_LEDGER_KEY,
   ]);
   photosLedger = ledger.rows[0]?.value ?? {};
+  const marked = await client.query("select value from public.settings where key = $1", [REAL_PHOTOS_KEY]);
+  realPhotosMarked = marked.rows[0]?.value ?? [];
   const developers = new Map();
   for (const developer of content.developers)
     developers.set(developer.slug, await importDeveloper(developer));
@@ -538,7 +546,7 @@ try {
       await markRealPhotos(id, complex);
       continue;
     }
-    await fillMain(id, complex);
+    await fillMain(id, complex, developers);
     await fillPhotos(id, complex);
     await markRealPhotos(id, complex);
     await fillBlocks(id, complex, developers);
@@ -565,6 +573,11 @@ try {
     `insert into public.settings (key, value) values ($1, $2::jsonb)
      on conflict (key) do update set value = excluded.value`,
     [PHOTOS_LEDGER_KEY, JSON.stringify(photosLedger)],
+  );
+  await client.query(
+    `insert into public.settings (key, value) values ($1, $2::jsonb)
+     on conflict (key) do update set value = excluded.value`,
+    [REAL_PHOTOS_KEY, JSON.stringify(realPhotosMarked)],
   );
   await client.query("commit");
   console.log(
