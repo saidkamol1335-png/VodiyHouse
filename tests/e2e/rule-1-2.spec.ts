@@ -55,7 +55,6 @@ const CLOUD_PAGES = [
   "/uz/novostroyki/sayilgoh",
   "/ru/zastroyshchiki/myb-development",
   "/ru/novostroyki/chinor-residence",
-  "/uz/novostroyki/garant-avenue",
   "/ru/zastroyshchiki/ukasset",
 ];
 

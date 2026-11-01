@@ -196,7 +196,7 @@ test.describe("менеджер и видеограф", () => {
     await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
     await expect(page.locator(".complex-list__status")).toHaveCount(0);
     // DEMO-сид: у Shodlik оба блока со списком — проверяем, что видно после чтения списка. Застройщик —
-    // DEMO: настоящий черновик Shodlik (npm run content:import) — у MYB Development.
+    // DEMO: настоящий Shodlik (npm run content:import) — у MYB Development.
     const shodlik = page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" }).filter({ hasText: /Sifat Qurilish/ });
     await expect(shodlik).toHaveAttribute("href", /\/admin\/zhk\/[0-9a-f-]{36}\/kvartiry$/);
     const units = (await shodlik.getAttribute("href"))!;
