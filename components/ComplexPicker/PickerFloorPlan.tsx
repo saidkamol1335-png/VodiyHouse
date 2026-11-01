@@ -3,7 +3,9 @@
 import { Hand } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
+import { useSiteContacts } from "@/components/SiteContacts";
+import { formatPhone, phoneHref } from "@/lib/contacts";
 import { formatPriceShort, formatUsdThousands } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
@@ -19,7 +21,7 @@ type PickerFloorPlanProps = {
   onUnit: (unitId: string) => void;
 };
 
-const STATUS_CLASS = { free: "free", reserved: "reserved", sold: "sold" } as const;
+const STATUS_CLASS = { free: "free", reserved: "reserved", sold: "sold", pending: "pending" } as const;
 
 /**
  * План этажа (мокап .fplan / .fpw): картинка плана, поверх — контуры квартир цветом статуса и плитка
@@ -28,13 +30,17 @@ const STATUS_CLASS = { free: "free", reserved: "reserved", sold: "sold" } as con
  */
 export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUnit }: PickerFloorPlanProps) {
   const t = useTranslations("complex.pick");
-  const [note, setNote] = useState<string | null>(null);
+  const { phone } = useSiteContacts();
+  const [note, setNote] = useState<ReactNode>(null);
   const placed = placeUnits(plan, floor, units).filter((item): item is PlacedUnit & { unit: PickerUnit } => item.unit !== null);
   const free = placed.filter((item) => item.unit.status === "free").length;
   const pick = ({ unit }: { unit: PickerUnit }) => {
     if (unit.status === "free") {
       setNote(null);
       return onUnit(unit.id);
+    }
+    if (unit.status === "pending") {
+      return setNote(<PendingNote phone={phone} />);
     }
     setNote(`${t(unit.status === "reserved" ? "reservedNote" : "soldNote", { number: unit.number })}. ${t("seeGreen")}`);
   };
@@ -54,6 +60,24 @@ export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUni
         {t("tapHint")}
       </p>
     </div>
+  );
+}
+
+/** Квартира неполной планировки: только общий номер Vodiy House, без формы (правило публикации v2). */
+function PendingNote({ phone }: { phone: string | null }) {
+  const t = useTranslations("complex.pick");
+  return (
+    <>
+      {t("pendingNote")}
+      {phone ? (
+        <>
+          {": "}
+          <a href={phoneHref(phone)} data-track="phone_click">
+            {formatPhone(phone)}
+          </a>
+        </>
+      ) : null}
+    </>
   );
 }
 

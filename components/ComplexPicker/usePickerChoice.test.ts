@@ -5,7 +5,7 @@ import { usePickerChoice } from "./usePickerChoice";
 
 const image = { path: "complexes/x/y.png", width: 1600, height: 1200, blur: null, alt: null, focus: { x: 0.5, y: 0.5 } };
 const plan: FloorPlan = { id: "p", blockId: "A", entrance: 1, floorFrom: 2, floorTo: 3, image, contours: [] };
-const picker: ComplexPicker = { facade: image, blocks: [{ id: "A", contour: [[0, 0], [1, 0], [1, 1]] }], plans: [plan] };
+const picker: ComplexPicker = { facade: image, blocks: [{ id: "A", contour: [[0, 0], [1, 0], [1, 1]], state: "open" }], plans: [plan] };
 
 const unit = (id: string, floor: number, status: PickerUnit["status"]): PickerUnit => ({
   id,

@@ -16,7 +16,7 @@ import { formatMonthName } from "@/lib/format";
 import { complexRoute } from "@/lib/routes";
 import { cardDeadline, cardPays, cardPrice, cardRoomTypes } from "@/lib/site/catalog/card";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
-import { CardFacts, CardPayChips, CardPriceRow, CardTypes } from "./CardDetails";
+import { CardFacts, CardPayChips, CardPriceRow, CardSoonRow, CardTypes } from "./CardDetails";
 import { CardMedia, type CardFrame } from "./CardMedia";
 
 type CatalogCardProps = {
@@ -51,6 +51,7 @@ export function CatalogCard({ complex, catalog, preload = false, badge = null }:
   const verified = Boolean(complex.checked.permit && complex.checked.land);
   const floors = Math.max(0, ...complex.blocks.map((block) => block.floorsTotal ?? 0)) || null;
   const finishings = [...new Set(complex.blocks.flatMap((block) => (block.finishing ? [block.finishing.name[locale]] : [])))];
+  const soon = complex.state === "soon";
   return (
     <article className="catalog-card" data-track-entity={`complex:${complex.id}`}>
       <CardMedia photos={cardFrames(complex, t("progressCaption", { month: formatMonthName(complex.progress?.month ?? "", locale) }))} alt={name} preload={preload} badges={<CardBadges complex={complex} badge={badge} />} tools={<CardTools complex={complex} name={name} />} />
@@ -70,10 +71,10 @@ export function CatalogCard({ complex, catalog, preload = false, badge = null }:
         </h3>
         <CardPlace complex={complex} />
         <CardFacts deadline={cardDeadline(complex)} floors={floors} finishings={finishings} />
-        <CardTypes types={cardRoomTypes(complex)} />
+        {soon ? null : <CardTypes types={cardRoomTypes(complex)} />}
         <CardPayChips pays={cardPays(complex, developer)} />
         <div className="catalog-card__bottom">
-          <CardPriceRow price={cardPrice(complex, catalog)} />
+          {soon ? <CardSoonRow phone={phone} /> : <CardPriceRow price={cardPrice(complex, catalog)} />}
           <CardButtons phone={phone} intent={{ type: "callback", object: { complex: complex.slug }, context: name }} />
         </div>
       </div>
@@ -87,6 +88,7 @@ function CardBadges({ complex, badge }: { complex: CatalogComplex; badge: Locali
   const locale = useLocale() as Locale;
   return (
     <>
+      {complex.state === "soon" ? <span className="catalog-card__soon">{t("soonBadge")}</span> : null}
       {badge ? <span className="catalog-card__promo">{badge[locale]}</span> : null}
       {complex.class ? <span className="catalog-card__class">{t(`class.${complex.class}`)}</span> : null}
     </>

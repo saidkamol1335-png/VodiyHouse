@@ -17,6 +17,8 @@ type ComplexOfferProps = {
   name: string;
   /** Адрес ЖК — заявка «Записаться на просмотр» знает, о каком ЖК (база проверит сама). */
   slug: string;
+  /** ЖК «Скоро»: планировок и цен на сайте ещё нет. */
+  soon?: boolean;
   summary: ComplexSummary;
   /** Контакты Vodiy House (Ф9) — единственные на сайте (правило ТЗ 1.2). */
   contacts: SiteContacts;
@@ -29,7 +31,7 @@ type ComplexOfferProps = {
  * «Подарок» из витрины, срок сдачи, проверенные документы, «Записаться на просмотр» (форма 10.1),
  * связь с Vodiy House и плашка «Для вас бесплатно». Без скидок (PLAN §3.13).
  */
-export async function ComplexOffer({ name, slug, summary, contacts, gift = null }: ComplexOfferProps) {
+export async function ComplexOffer({ name, slug, soon = false, summary, contacts, gift = null }: ComplexOfferProps) {
   const t = await getTranslations("complex.offer");
   const locale = (await getLocale()) as Locale;
   const { price } = summary;
@@ -40,8 +42,8 @@ export async function ComplexOffer({ name, slug, summary, contacts, gift = null 
       <Beam />
       <div className="complex-offer__top">
         <div className="complex-offer__price">
-          <OfferLive free={summary.free} />
-          <p className="complex-offer__amount">{price ? t("priceFrom", { price: money(price.amount) }) : t("priceOnRequest")}</p>
+          {soon ? <p className="complex-offer__live">{t("soon")}</p> : <OfferLive free={summary.free} />}
+          <p className="complex-offer__amount">{soon ? t("soonPrice") : price ? t("priceFrom", { price: money(price.amount) }) : t("priceOnRequest")}</p>
           {price?.perM2 ? <p className="complex-offer__per-m2">{t("perM2From", { price: money(price.perM2) })}</p> : null}
           {gift ? (
             <p className="complex-offer__gift">

@@ -45,7 +45,7 @@ export async function ComplexJsonLd({ page, locale }: { page: ComplexPage; local
     point: page.point,
     images: page.photos.slice(0, LD_PHOTOS).map((photo) => mediaPublicUrl(supabaseUrl, photo.path)),
     price: summary.price,
-    free: summary.free,
+    free: page.state === "soon" ? null : summary.free,
   });
   const crumbs = breadcrumbLd([
     { name: SITE_NAME, url: `${origin}${localizedPath(locale, ROUTES.home)}` },

@@ -37,6 +37,7 @@ export async function HomeCatalog({ id, catalog, pageSize, showcase }: HomeCatal
             preloadFirst={false}
             collections={visibleCollections(catalog, showcase)}
             collectionsRow
+            hideSoon
             badges={cardBadges(showcase)}
           />
         </NextIntlClientProvider>

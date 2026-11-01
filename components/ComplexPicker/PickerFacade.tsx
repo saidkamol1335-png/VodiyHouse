@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { mediaPublicUrl } from "@/lib/media";
 import { boxOf, polygonPoints, type Box } from "@/lib/site/picker/model";
-import type { PickerUnit, Point } from "@/lib/site/picker/records";
+import { COMPLEX_ANCHORS } from "@/lib/site/complex/sections";
+import type { PickerBlockState, PickerUnit, Point } from "@/lib/site/picker/records";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
 import { freeByRooms, useBlockLabels } from "./blockLabels";
 import type { PickerBlockView } from "./ComplexPicker";
@@ -18,7 +19,7 @@ const LIGHT_ICONS = { day: Sun, dusk: Sunset, night: Moon } as const;
 
 type PickerFacadeProps = {
   facade: CatalogPhoto;
-  contours: { id: string; contour: Point[] }[];
+  contours: { id: string; contour: Point[]; state: PickerBlockState }[];
   blocks: PickerBlockView[];
   units: Record<string, PickerUnit[]>;
   light: FacadeLight;
@@ -32,7 +33,13 @@ type PickerFacadeProps = {
 const freeOf = (units: readonly PickerUnit[] | undefined) =>
   units ? units.filter((unit) => unit.status === "free").length : null;
 
-type Placed = { block: PickerBlockView; contour: Point[]; box: Box; free: number | null };
+type Placed = { block: PickerBlockView; contour: Point[]; state: PickerBlockState; box: Box; free: number | null };
+
+const LAYOUTS_HREF = `#${COMPLEX_ANCHORS.layouts}`;
+
+function goToLayouts() {
+  window.location.hash = COMPLEX_ANCHORS.layouts;
+}
 
 /**
  * Фасад (мокап .vis__stage): контуры блоков с подписью «Блок A · свободно 12», освещение День / Закат
@@ -48,8 +55,8 @@ export function PickerFacade({ facade, contours, blocks, units, light, onLight, 
     [...targets].find((target) => target.offsetParent !== null)?.focus();
   }, [focusBlock]);
   const placed: Placed[] = blocks.flatMap((block) => {
-    const contour = contours.find((item) => item.id === block.id)?.contour;
-    return contour ? [{ block, contour, box: boxOf(contour), free: freeOf(units[block.id]) }] : [];
+    const item = contours.find((entry) => entry.id === block.id);
+    return item ? [{ block, contour: item.contour, state: item.state, box: boxOf(item.contour), free: freeOf(units[block.id]) }] : [];
   });
   return (
     <div ref={root} className="complex-picker__facade">
@@ -83,20 +90,24 @@ type PlacedProps = { placed: Placed[]; hover: string | null; onHover: (id: strin
 function FacadeContours({ placed, hover, onHover, onPick }: PlacedProps) {
   return (
     <svg className="complex-picker__contours" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      {placed.map(({ block, contour, free }) => (
-        <polygon
-          key={block.id}
-          points={polygonPoints(contour)}
-          className={[
-            "complex-picker__contour",
-            hover === block.id ? "complex-picker__contour--hover" : "",
-            free === 0 ? "complex-picker__contour--empty" : "",
-          ].join(" ")}
-          onClick={() => onPick(block.id)}
-          onMouseEnter={() => onHover(block.id)}
-          onMouseLeave={() => onHover(null)}
-        />
-      ))}
+      {placed.map(({ block, contour, state, free }) =>
+        state === "soon" ? (
+          <polygon key={block.id} points={polygonPoints(contour)} className="complex-picker__contour complex-picker__contour--soon" />
+        ) : (
+          <polygon
+            key={block.id}
+            points={polygonPoints(contour)}
+            className={[
+              "complex-picker__contour",
+              hover === block.id ? "complex-picker__contour--hover" : "",
+              free === 0 ? "complex-picker__contour--empty" : "",
+            ].join(" ")}
+            onClick={() => (state === "layouts" ? goToLayouts() : onPick(block.id))}
+            onMouseEnter={() => onHover(block.id)}
+            onMouseLeave={() => onHover(null)}
+          />
+        ),
+      )}
     </svg>
   );
 }
@@ -105,13 +116,31 @@ function FacadeContours({ placed, hover, onHover, onPick }: PlacedProps) {
 function FacadeTags({ placed, hover, onHover, onPick }: PlacedProps) {
   const t = useTranslations("complex.pick");
   const labels = useBlockLabels();
-  return placed.map(({ block, box, free }) => (
+  return placed.map(({ block, box, free, state }) => {
+    const style = { left: `${Math.min(Math.max(box.cx, 14), 86)}%`, top: `${Math.max(4, box.y0 + 3)}%` };
+    if (state === "soon") {
+      return (
+        <p key={block.id} className="complex-picker__tag complex-picker__tag--soon" style={style}>
+          <b>{labels.name(block)}</b>
+          <small>{t("soon")}</small>
+        </p>
+      );
+    }
+    if (state === "layouts") {
+      return (
+        <a key={block.id} href={LAYOUTS_HREF} data-block-id={block.id} className="complex-picker__tag" style={style}>
+          <b>{labels.name(block)}</b>
+          <small>{t("layouts")}</small>
+        </a>
+      );
+    }
+    return (
     <button
       key={block.id}
       type="button"
       data-block-id={block.id}
       className={hover === block.id ? "complex-picker__tag complex-picker__tag--on" : "complex-picker__tag"}
-      style={{ left: `${Math.min(Math.max(box.cx, 14), 86)}%`, top: `${Math.max(4, box.y0 + 3)}%` }}
+      style={style}
       onClick={() => onPick(block.id)}
       onMouseEnter={() => onHover(block.id)}
       onMouseLeave={() => onHover(null)}
@@ -121,7 +150,8 @@ function FacadeTags({ placed, hover, onHover, onPick }: PlacedProps) {
       <b>{labels.name(block)}</b>
       {free !== null ? <small className={free === 0 ? "complex-picker__tag-none" : undefined}>{t("free", { count: free })}</small> : null}
     </button>
-  ));
+    );
+  });
 }
 
 function FacadeHint() {
@@ -141,8 +171,20 @@ function FacadeList({ placed, onPick }: { placed: Placed[]; onPick: (id: string)
   const labels = useBlockLabels();
   return (
     <ul className="complex-picker__blocks">
-      {placed.map(({ block, free }) => (
+      {placed.map(({ block, free, state }) => (
         <li key={block.id}>
+          {state === "soon" ? (
+            <p className="complex-picker__block complex-picker__block--soon">
+              <b>{labels.name(block)}</b>
+              <span className="complex-picker__block-status">{t("soon")}</span>
+            </p>
+          ) : state === "layouts" ? (
+            <a href={LAYOUTS_HREF} data-block-id={block.id} className="complex-picker__block">
+              <b>{labels.name(block)}</b>
+              <span className="complex-picker__block-status">{t("layouts")}</span>
+              <ChevronRight size={18} aria-hidden="true" />
+            </a>
+          ) : (
           <button type="button" data-block-id={block.id} className="complex-picker__block" onClick={() => onPick(block.id)}>
             <b>{labels.name(block)}</b>
             <span className="complex-picker__block-status">{labels.status(block)}</span>
@@ -153,6 +195,7 @@ function FacadeList({ placed, onPick }: { placed: Placed[]; onPick: (id: string)
             ) : null}
             <ChevronRight size={18} aria-hidden="true" />
           </button>
+          )}
         </li>
       ))}
     </ul>

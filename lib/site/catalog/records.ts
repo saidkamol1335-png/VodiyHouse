@@ -49,6 +49,8 @@ export type ComplexRecord = {
   /** Класс не обязателен для публикации — без него на карточке нет плашки. */
   class: "econom" | "comfort" | "business" | "premium" | null;
   sort: number;
+  /** soon — минимум ЖК есть, полных планировок нет (docs/publication-rule.md); нет ключа — полный. */
+  state?: "soon" | "full";
   developer_id: string;
   location: { slug: string; kind: "city" | "district"; name: LocalizedText } | null;
   address: LocalizedText | null;

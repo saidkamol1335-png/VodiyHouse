@@ -83,6 +83,25 @@
   gap: 6px;
 }
 
+.catalog-card__soon {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--amber);
+  color: var(--on-amber, #1a1205);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+
+/* Над растянутой ссылкой карточки, как кнопки связи. */
+.catalog-card__soon-call {
+  position: relative;
+  z-index: 1;
+  color: var(--amber-text, var(--fg));
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .catalog-card__class {
   padding: 4px 10px;
   border-radius: var(--r-pill);

@@ -18,7 +18,7 @@ type PickerPlanProps = {
   onRetry: () => void;
 };
 
-const STATUSES = ["free", "reserved", "sold"] as const;
+const STATUSES = ["free", "reserved", "sold", "pending"] as const;
 
 /**
  * План (мокап .vis__plan / MobJkFloor): «Все корпуса» и блок, легенда; этажи сверху вниз с числом

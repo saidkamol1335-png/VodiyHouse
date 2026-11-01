@@ -46,9 +46,23 @@ function byNumber(direction: 1 | -1) {
 /** Подходящие ЖК в порядке сортировки; «Рекомендуемые» — порядок руководителя из базы. */
 export function filterCatalog(catalog: SiteCatalog, filter: CatalogFilter): CatalogComplex[] {
   const found = catalog.complexes.filter((complex) => complexMatches(complex, catalog, filter));
+  return soonLast(sorted(found, catalog, filter));
+}
+
+function sorted(found: CatalogComplex[], catalog: SiteCatalog, filter: CatalogFilter): CatalogComplex[] {
   if (filter.sort === "rec") return found;
   if (filter.sort === "dl") return [...found].sort((a, b) => byNumber(1)(deadlineRank(a), deadlineRank(b)));
   const price = new Map(found.map((complex) => [complex.id, matchingPriceUsd(complex, catalog, filter)]));
   const compare = byNumber(filter.sort === "cheap" ? 1 : -1);
   return [...found].sort((a, b) => compare(price.get(a.id) ?? null, price.get(b.id) ?? null));
+}
+
+/** ЖК «Скоро» — в конце выдачи при любой сортировке. */
+function soonLast(found: CatalogComplex[]): CatalogComplex[] {
+  return [...withoutSoon(found), ...found.filter((complex) => complex.state === "soon")];
+}
+
+/** Главная, подборки и реклама по фильтру, квиз: ЖК «Скоро» там нет (правило публикации v2). */
+export function withoutSoon(complexes: readonly CatalogComplex[]): CatalogComplex[] {
+  return complexes.filter((complex) => complex.state !== "soon");
 }

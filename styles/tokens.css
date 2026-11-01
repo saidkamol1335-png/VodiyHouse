@@ -351,6 +351,8 @@
   --picker-contour: rgba(198, 126, 16, 0.12);
   --picker-contour-line: rgba(119, 75, 6, 0.92);
   --picker-contour-hover: rgba(248, 155, 13, 0.32);
+  --picker-contour-soon: rgba(120, 120, 120, 0.42);
+  --picker-contour-soon-line: rgba(235, 235, 235, 0.6);
   --picker-contour-empty: rgba(11, 10, 9, 0.38);
   --picker-contour-empty-line: rgba(255, 240, 220, 0.38);
   --picker-contour-night: rgba(255, 196, 110, 0.16);
@@ -370,6 +372,9 @@
   --picker-unit-res: rgba(248, 155, 13, 0.22);
   --picker-unit-res-b: rgba(207, 115, 0, 0.58);
   --picker-unit-res-t: #6e3d00;
+  --picker-unit-pending: rgba(110, 110, 110, 0.14);
+  --picker-unit-pending-b: rgba(110, 110, 110, 0.45);
+  --picker-unit-pending-t: #55524d;
   --picker-unit-sold: rgba(201, 64, 47, 0.065);
   --picker-unit-sold-b: rgba(201, 64, 47, 0.26);
   --picker-unit-sold-t: #9e3a2e;
@@ -611,6 +616,9 @@
   --s-sold-b: rgba(255, 122, 107, 0.26);
   --s-sold-t: #eba89f;
   --picker-frame-bg: #0d0c0b;
+  --picker-unit-pending: rgba(190, 190, 190, 0.1);
+  --picker-unit-pending-b: rgba(190, 190, 190, 0.36);
+  --picker-unit-pending-t: #c4c0ba;
   --picker-contour: rgba(248, 155, 13, 0.12);
   --picker-contour-line: rgba(255, 214, 150, 0.92);
 

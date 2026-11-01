@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Badge, type BadgeTone } from "@/components/Badge";
+import { phoneHref } from "@/lib/contacts";
 import { formatArea, formatPrice } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/routing";
 import type { CardDeadline, CardPays, CardPrice, CardRoomType } from "@/lib/site/catalog/card";
@@ -81,6 +82,21 @@ export function CardPayChips({ pays }: { pays: CardPays }) {
           {chip}
         </Badge>
       ))}
+    </p>
+  );
+}
+
+/** ЖК «Скоро»: вместо цены и «Платёж от» — «Цены скоро · позвонить» на общий номер Vodiy House. */
+export function CardSoonRow({ phone }: { phone: string | null }) {
+  const t = useTranslations("catalog.card");
+  return (
+    <p className="catalog-card__price">
+      <span className="catalog-card__amount">{t("soonPrice")}</span>
+      {phone ? (
+        <a className="catalog-card__soon-call" href={phoneHref(phone)} data-track="phone_click">
+          {t("soonCall")}
+        </a>
+      ) : null}
     </p>
   );
 }

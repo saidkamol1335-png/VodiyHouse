@@ -54,7 +54,7 @@ export type LayoutRecord = {
   drawing: PhotoRecord | null;
 };
 
-export type PageComplexRecord = Pick<ComplexRecord, "id" | "slug" | "name" | "class" | "location" | "address" | "landmark" | "minutes_to_center" | "checked"> & {
+export type PageComplexRecord = Pick<ComplexRecord, "id" | "state" | "slug" | "name" | "class" | "location" | "address" | "landmark" | "minutes_to_center" | "checked"> & {
   status: "draft" | "published" | "hidden" | "archived";
   on_site: boolean;
   short_description: LocalizedText | null;
@@ -219,7 +219,7 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
     id: complex.id,
     slug: complex.slug,
     name: complex.name,
-    status: complex.status,
+    ...{ status: complex.status, state: complex.state ?? "full" },
     onSite: complex.on_site === true,
     class: complex.class,
     location: complex.location,

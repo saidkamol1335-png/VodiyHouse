@@ -7,12 +7,15 @@ import type { UnitStatus } from "@/lib/units/status";
 
 export type Point = [number, number];
 
+/** open — есть квартиры; layouts — блок без списка, ведёт к планировкам; soon — серый, не кликается. */
+export type PickerBlockState = "open" | "layouts" | "soon";
+
 export type UnitContour = { entrance: number; position: number; points: Point[] };
 
 export type PickerRecord = {
   complex_id: string;
   facade: PhotoRecord | null;
-  blocks: { id: string; contour: Point[] }[];
+  blocks: { id: string; contour: Point[]; state?: PickerBlockState }[];
   plans: {
     id: string;
     block_id: string;
@@ -37,14 +40,14 @@ export type FloorPlan = {
 
 export type ComplexPicker = {
   facade: CatalogPhoto;
-  /** Блоки с контуром на фасаде и хотя бы одним планом этажа — по порядку блоков ЖК. */
-  blocks: { id: string; contour: Point[] }[];
+  /** Блоки с контуром на фасаде: с квартирами — только при плане этажа, остальные — всегда. */
+  blocks: { id: string; contour: Point[]; state: PickerBlockState }[];
   plans: FloorPlan[];
 };
 
 /**
- * Раздел есть, когда есть фасад и хотя бы один блок с контуром и планом (PLAN §7: «без фасада или
- * планов — раздел скрыт»). Блок без плана на фасад не выводится: нажать на него было бы некуда.
+ * Раздел есть, когда есть фасад и хотя бы один блок, на который можно нажать (PLAN §7: «без фасада
+ * или планов — раздел скрыт»). Блок с квартирами без плана на фасад не выводится: нажать было бы некуда.
  */
 export function pickerFrom(record: PickerRecord | null): ComplexPicker | null {
   if (!record?.facade) return null;
@@ -57,8 +60,10 @@ export function pickerFrom(record: PickerRecord | null): ComplexPicker | null {
     image: photoFrom(plan.image),
     contours: plan.contours,
   }));
-  const blocks = record.blocks.filter((block) => plans.some((plan) => plan.blockId === block.id));
-  return blocks.length > 0 ? { facade: photoFrom(record.facade), blocks, plans } : null;
+  const blocks = record.blocks
+    .map((block) => ({ ...block, state: block.state ?? ("open" as const) }))
+    .filter((block) => block.state !== "open" || plans.some((plan) => plan.blockId === block.id));
+  return blocks.some((block) => block.state !== "soon") ? { facade: photoFrom(record.facade), blocks, plans } : null;
 }
 
 /** Строка block_units: цена — только у свободной. */
@@ -74,7 +79,12 @@ export type BlockUnitRecord = {
   status: UnitStatus;
   price: number | string | null;
   currency: Currency;
+  /** false — свободна, но неполная планировка или нет цены: на сайте серая. */
+  sellable?: boolean;
 };
+
+/** pending — свободная, которую пока нельзя выбрать: серая, без цены, «Цена уточняется». */
+export type PickerUnitStatus = UnitStatus | "pending";
 
 export type PickerUnit = {
   id: string;
@@ -85,7 +95,7 @@ export type PickerUnit = {
   layoutId: string | null;
   rooms: number | null;
   area: number | null;
-  status: UnitStatus;
+  status: PickerUnitStatus;
   price: number | null;
   currency: Currency;
 };
@@ -102,7 +112,7 @@ export function unitFrom(record: BlockUnitRecord): PickerUnit {
     layoutId: record.layout_id,
     rooms: record.rooms,
     area: numberOrNull(record.area),
-    status: record.status,
+    status: record.status === "free" && record.sellable === false ? "pending" : record.status,
     price: numberOrNull(record.price),
     currency: record.currency,
   };

@@ -1,7 +1,7 @@
 import { NO_FILTER, type CatalogFilter, type PaymentKind } from "@/lib/site/catalog/filter";
 import { countMatchingFlats } from "@/lib/site/catalog/flats";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
-import { filterCatalog, matchingPriceUsd } from "@/lib/site/catalog/sort";
+import { filterCatalog, matchingPriceUsd, withoutSoon } from "@/lib/site/catalog/sort";
 
 // Квиз «Подбор за 1 минуту» (3.17, мокап .qz / MobQuiz): четыре вопроса → фильтр каталога.
 // Живой счётчик считает по тем же правилам, что и выдача (filterCatalog), поэтому «Показать N ЖК»
@@ -69,7 +69,7 @@ export type QuizMatch = {
 };
 
 export function quizMatches(catalog: SiteCatalog, filter: CatalogFilter): QuizMatch {
-  const complexes = filterCatalog(catalog, { ...filter, sort: "cheap" });
+  const complexes = withoutSoon(filterCatalog(catalog, { ...filter, sort: "cheap" }));
   const { flats, partial } = countMatchingFlats(complexes, catalog, filter);
   const prices = new Map(complexes.map((complex) => [complex.id, matchingPriceUsd(complex, catalog, filter)]));
   return { complexes, flats, partial, prices };

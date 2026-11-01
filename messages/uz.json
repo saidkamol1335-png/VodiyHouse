@@ -378,7 +378,10 @@
       "photo": "{total} tadan {n}-surat",
       "prevPhoto": "Oldingi surat",
       "nextPhoto": "Keyingi surat",
-      "progressCaption": "Qurilish · {month}"
+      "progressCaption": "Qurilish · {month}",
+      "soonBadge": "Tez kunda",
+      "soonPrice": "Narxlar tez kunda",
+      "soonCall": "qo‘ng‘iroq qilish"
     },
     "page": {
       "eyebrow": "Loyihalar",
@@ -538,7 +541,9 @@
       "freePrice": "Narx quruvchinikidek — Vodiy House hech narsa qo‘shmaydi.",
       "freeBadge": "Siz uchun bepul",
       "soldOut": "Bo‘sh kvartiralar yo‘q",
-      "gift": "Sovg‘a"
+      "gift": "Sovg‘a",
+      "soon": "Tez kunda",
+      "soonPrice": "Narxlar tez kunda"
     },
     "nav": {
       "label": "Sahifa bo‘limlari",
@@ -551,7 +556,8 @@
       "details": "Loyiha tafsilotlari",
       "developer": "Quruvchi",
       "documents": "Hujjatlar",
-      "progress": "Qurilish jarayoni"
+      "progress": "Qurilish jarayoni",
+      "soon": "Rejalar va narxlar"
     },
     "about": {
       "title": "TJM haqida",
@@ -715,7 +721,8 @@
       "legend": {
         "free": "Bo‘sh",
         "reserved": "Band",
-        "sold": "Sotilgan"
+        "sold": "Sotilgan",
+        "pending": "Narx aniqlanmoqda"
       },
       "roomsShort": "{rooms, plural, =0 {St} other {#X}}",
       "tapHint": "Yashil — bo‘sh. Narx va to‘lovni ko‘rish uchun ustiga bosing.",
@@ -738,7 +745,10 @@
       "retry": "Qayta urinish",
       "entrances": "Kirish",
       "takenNow": "Bu kvartira hozirgina band qilindi — boshqa yashil kvartiralarni ko‘ring",
-      "telegram": "Telegramda yozish"
+      "telegram": "Telegramda yozish",
+      "soon": "Tez kunda",
+      "layouts": "Rejalarni ko‘rish",
+      "pendingNote": "Narx aniqlanmoqda — Vodiy House’ga qo‘ng‘iroq qiling"
     },
     "layouts": {
       "title": "Rejalar",
@@ -829,6 +839,11 @@
       "resume": "Ko‘rish",
       "frame": "{total} tadan {n}-kadr",
       "thumbs": "Barcha hisobotlar"
+    },
+    "soon": {
+      "badge": "Tez kunda",
+      "text": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling:",
+      "textNoPhone": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling."
     }
   },
   "showcase": {

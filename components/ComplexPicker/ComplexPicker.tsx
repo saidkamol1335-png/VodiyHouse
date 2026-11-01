@@ -41,7 +41,7 @@ export function ComplexPicker({ id, title, lead, picker, blocks, complexSlug, co
   const section = useRef<HTMLDivElement>(null);
   const [light, setLight] = useState<FacadeLight>("day");
   const shown = blocks.filter((block) => picker.blocks.some((item) => item.id === block.id));
-  const units = usePickerUnits(shown.map((block) => block.id), section);
+  const units = usePickerUnits(shown.filter((block) => picker.blocks.some((item) => item.id === block.id && item.state === "open")).map((block) => block.id), section);
   const choice = usePickerChoice(picker, units.byBlock);
   const block = shown.find((item) => item.id === choice.blockId) ?? null;
   const { lastBlock, back, closeUnit } = useReturnFocus(choice, section);

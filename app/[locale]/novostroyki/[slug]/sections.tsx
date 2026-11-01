@@ -10,6 +10,7 @@ import { ComplexPlans } from "@/components/ComplexPlans";
 import { ComplexProgress } from "@/components/ComplexProgress";
 import { ComplexLocation } from "@/components/ComplexLocation";
 import { ComplexSection } from "@/components/ComplexSection";
+import { ComplexSoon } from "@/components/ComplexSoon";
 import { ComplexStock } from "@/components/ComplexStock";
 import { ComplexVideos } from "@/components/ComplexVideos";
 import { LeadButton } from "@/components/LeadDialog";
@@ -47,6 +48,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("location") ? <LocationSection page={page} name={name} locale={locale} /> : null}
       {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("pick") && page.picker ? <PickSection page={page} name={name} /> : null}
+      {has("soon") ? <ComplexSoon id={COMPLEX_ANCHORS.soon} /> : null}
       {has("layouts") ? (
         <ComplexSection id={COMPLEX_ANCHORS.layouts} title={t("layouts.title")}>
           <ComplexPlans sectionId={COMPLEX_ANCHORS.layouts} cards={cards} hints={await readSiteCalcHints()} complexSlug={page.slug} complexName={name} leadEnabled={LEAD_FORM_ENABLED} />

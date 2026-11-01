@@ -12,6 +12,7 @@ export const COMPLEX_ANCHORS = {
   location: "raspolozhenie",
   stock: "nalichie",
   pick: "vybrat-kvartiru",
+  soon: "skoro",
   layouts: "planirovki",
   progress: "hod-stroitelstva",
   video: "video",
@@ -30,7 +31,9 @@ export function complexSections(page: ComplexPage): ComplexSectionKey[] {
     about: page.blocks.length > 0,
     location: hasLocation(page),
     stock: stockRows(page).length > 0,
-    pick: page.picker !== null,
+    // ЖК «Скоро»: вместо фасада, планировок и расчёта — блок с номером Vodiy House.
+    pick: page.picker !== null && page.state !== "soon",
+    soon: page.state === "soon",
     layouts: layoutCards(page).length > 0,
     progress: page.progress.length > 0,
     video: page.videos.length > 0,

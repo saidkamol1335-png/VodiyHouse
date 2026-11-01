@@ -87,16 +87,21 @@ function deadlineFits(block: CatalogBlock, deadline: DeadlineFilter) {
   return block.deadline !== null && block.deadline.year <= deadline;
 }
 
+/** Условия блока без квартир: отделка, срок, оплата. У ЖК «Скоро» других условий нет. */
+function blockTermsFit(block: CatalogBlock, developer: CatalogDeveloper | undefined, filter: CatalogFilter) {
+  if (filter.finishings.length > 0 && !filter.finishings.includes(block.finishing?.slug ?? "")) return false;
+  if (!deadlineFits(block, filter.deadline)) return false;
+  const types = blockProgramTypes(developer, block.id);
+  return filter.payments.every((kind) => types.has(PROGRAM_TYPE[kind]));
+}
+
 export function blockMatches(
   block: CatalogBlock,
   developer: CatalogDeveloper | undefined,
   filter: CatalogFilter,
   rate: ExchangeRate | null,
 ) {
-  if (filter.finishings.length > 0 && !filter.finishings.includes(block.finishing?.slug ?? "")) return false;
-  if (!deadlineFits(block, filter.deadline)) return false;
-  const types = blockProgramTypes(developer, block.id);
-  if (!filter.payments.every((kind) => types.has(PROGRAM_TYPE[kind]))) return false;
+  if (!blockTermsFit(block, developer, filter)) return false;
   return block.offers.some((offer) => offerMatches(offer, block.currency, filter, rate));
 }
 
@@ -104,5 +109,10 @@ export function complexMatches(complex: CatalogComplex, catalog: SiteCatalog, fi
   const developer = catalog.developers.find((entry) => entry.id === complex.developerId);
   if (filter.locations.length > 0 && !filter.locations.includes(complex.location?.slug ?? "")) return false;
   if (filter.developers.length > 0 && !filter.developers.includes(developer?.slug ?? "")) return false;
+  if (complex.state === "soon") {
+    // Цен и комнат у «Скоро» нет: такой фильтр её не показывает (правило публикации v2).
+    if (filter.rooms.length > 0 || filter.priceMin !== null || filter.priceMax !== null) return false;
+    return complex.blocks.some((block) => blockTermsFit(block, developer, filter));
+  }
   return complex.blocks.some((block) => blockMatches(block, developer, filter, catalog.rate));
 }

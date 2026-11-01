@@ -6,7 +6,7 @@ import { countMatchingFlats } from "@/lib/site/catalog/flats";
 import { searchFromFilter } from "@/lib/site/catalog/params";
 import { COLLECTION_PARAM } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
-import { filterCatalog } from "@/lib/site/catalog/sort";
+import { filterCatalog, withoutSoon } from "@/lib/site/catalog/sort";
 import type { ShowcaseAd, ShowcaseCollection, ShowcaseSpecial, SiteShowcase } from "./records";
 
 // Витрина на сайте (3.16б): всё считается из одного ответа каталога — страница статичная. Подборка
@@ -43,7 +43,7 @@ export function collectionComplexes(catalog: SiteCatalog, collection: ShowcaseCo
   if (collection.mode === "manual") {
     return catalog.complexes.filter((complex) => collection.complexIds.includes(complex.id));
   }
-  return filterCatalog(catalog, collection.filter);
+  return withoutSoon(filterCatalog(catalog, collection.filter));
 }
 
 /** Фильтр, который подборка ставит каталогу: вручную — пустой (выдачу ограничивает список ЖК). */
@@ -155,7 +155,7 @@ export function adFilter(ad: ShowcaseAd): CatalogFilter {
 
 function adViewOf(catalog: SiteCatalog, ad: ShowcaseAd): AdView | null {
   const byComplexes = ad.complexIds.length > 0;
-  const complexes = byComplexes ? byIds(catalog, ad.complexIds) : filterCatalog(catalog, adFilter(ad));
+  const complexes = byComplexes ? byIds(catalog, ad.complexIds) : withoutSoon(filterCatalog(catalog, adFilter(ad)));
   if (complexes.length === 0) return null;
   const filter = byComplexes ? NO_FILTER : adFilter(ad);
   const payments = complexes.flatMap((complex) => {

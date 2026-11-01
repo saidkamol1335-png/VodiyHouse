@@ -16,7 +16,7 @@ import { getMotionTier } from "@/lib/motion";
 import { describeFilter } from "@/lib/site/catalog/describe";
 import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSort } from "@/lib/site/catalog/filter";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
-import { filterCatalog } from "@/lib/site/catalog/sort";
+import { filterCatalog, withoutSoon } from "@/lib/site/catalog/sort";
 import { collectionResults } from "@/lib/site/showcase/model";
 import type { ShowcaseCollection } from "@/lib/site/showcase/records";
 import { useCatalogSelection } from "./collection";
@@ -33,6 +33,8 @@ type CatalogResultsProps = {
   collectionsRow?: boolean;
   /** Бейдж спецпредложения на карточке ЖК по id ЖК (cardBadges). */
   badges?: Record<string, LocalizedText>;
+  /** Главная: ЖК «Скоро» в ленте нет, он есть только в каталоге (правило публикации v2). */
+  hideSoon?: boolean;
 };
 
 /** Сколько групп фильтра задано — счётчик на кнопке «Фильтры» телефона. */
@@ -48,7 +50,7 @@ function activeGroups(filter: Filter): number {
  * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
  * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon = false }: CatalogResultsProps) {
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
   const results = useRef<HTMLDivElement>(null);
@@ -60,10 +62,10 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
     setShown(pageSize);
     trackFilter(next);
   });
-  const found = useMemo(
-    () => (collection ? collectionResults(catalog, collection, filter) : filterCatalog(catalog, filter)),
-    [catalog, collection, filter],
-  );
+  const found = useMemo(() => {
+    const complexes = collection ? collectionResults(catalog, collection, filter) : filterCatalog(catalog, filter);
+    return hideSoon ? withoutSoon(complexes) : complexes;
+  }, [catalog, collection, filter, hideSoon]);
   useSheetLock(open, closeSheet);
   const showResults = () => {
     setOpen(false);
