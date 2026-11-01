@@ -140,22 +140,23 @@ describe("кабинет ЖК", () => {
       const rows = await readiness(id);
       expect(rows.map((row) => row.requirement)).toEqual([
         "address",
-        "location",
         "point",
         "developer",
+        "renders",
         "blocks",
-        "layouts",
-        "photos",
-        "cover",
+        "payment",
       ]);
-      expect(rows.filter((row) => row.ok).map((row) => row.requirement)).toEqual(["developer"]);
-      expect(rows.find((row) => row.requirement === "photos")?.have).toBe(0);
-      expect(await readiness(id, videographer)).toHaveLength(8);
+      // Застройщик, его программа и курс общие для тестов этого файла — пункты самого ЖК не выполнены.
+      expect(rows.filter((row) => !row.ok).map((row) => row.requirement)).toEqual(
+        expect.arrayContaining(["address", "point", "renders", "blocks"]),
+      );
+      expect(rows.find((row) => row.requirement === "renders")?.have).toBe(0);
+      expect(await readiness(id, videographer)).toHaveLength(6);
     });
 
     it("не готовый — vh:not_ready со списком; готовый без отметки 1.2 — vh:rule12", async () => {
       const id = await createComplex("Mehr", "mehr");
-      await expect(publish(id)).rejects.toMatchObject({ hint: "vh:not_ready", detail: expect.stringContaining("photos") });
+      await expect(publish(id)).rejects.toMatchObject({ hint: "vh:not_ready", detail: expect.stringContaining("renders") });
       await makeComplexReady(db.admin, id);
       await expectHint(
         asHead((tx) => tx.query("update complexes set status = 'published' where id = $1", [id])),
@@ -252,7 +253,7 @@ describe("кабинет ЖК", () => {
       expect(await photoIds(id)).toEqual([first, second]);
       await reorder(id, [second, first]);
       expect(await photoIds(id)).toEqual([second, first]);
-      expect((await readiness(id)).find((row) => row.requirement === "cover")?.ok).toBe(false);
+      expect((await readiness(id)).find((row) => row.requirement === "renders")?.ok).toBe(false);
       expect(await removePhoto(id, second)).toMatch(/^complexes\//);
       await expectHint(reorder(id, [first, first]), "vh:invalid");
     });

@@ -122,8 +122,8 @@ describe("текст полосы правок руководителя", () => 
       ],
     ],
     [
-      { kind: "editFailed", what: "remove", subject: ONE, error: "notReady", broken: ["layouts"] },
-      ["Не удалили: кв. 41.", "Нельзя: опубликованный ЖК потерял бы планировка с чертежом и ценой"],
+      { kind: "editFailed", what: "remove", subject: ONE, error: "notReady", broken: ["blocks"] },
+      ["Не удалили: кв. 41.", "Нельзя: опубликованный ЖК потерял бы блок со сроком сдачи"],
     ],
   ])("%j", (message, expected) => {
     expect(edit(message)).toEqual(expected);

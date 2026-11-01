@@ -138,7 +138,7 @@ test.describe("кабинет · ЖК · страница", () => {
       "9. Предпросмотр",
       "Журнал",
     ]);
-    await expect(tabs.locator(".admin-tabs__dot")).toHaveCount(4);
+    await expect(tabs.locator(".admin-tabs__dot")).toHaveCount(3);
     await expect(tabs.getByRole("link", { name: /Фото/ })).toHaveAttribute(
       "href",
       `${GULZOR}/foto`,
@@ -149,18 +149,19 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(page.locator(".complex-readiness")).toHaveCount(0);
   });
 
-  test("готовность (И9): «1 из 8», список — ссылки на вкладки, «нужно ещё 5»", async ({ page }) => {
+  test("готовность (И9): «0 из 6», список — ссылки на вкладки, «рендеров нужно ещё 4»", async ({ page }) => {
     await open(page, GULZOR);
-    const toggle = page.getByRole("button", { name: /Для публикации: 1 из 8/ });
+    // Застройщик Gulzor не опубликован, а минимум теперь этого требует.
+    const toggle = page.getByRole("button", { name: /Для публикации: 0 из 6/ });
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     const list = page.locator(".complex-readiness__list");
-    await expect(list.locator("li")).toHaveCount(8);
+    await expect(list.locator("li")).toHaveCount(6);
     await expect(list.getByRole("link", { name: /Блок со сроком сдачи/ })).toHaveAttribute(
       "href",
       `${GULZOR}/bloki`,
     );
-    await expect(list).toContainText("нужно ещё 5");
+    await expect(list).toContainText("рендеров нужно ещё 4");
   });
 
   test("публикация (И8): панель с галочкой 1.2; без данных — чего не хватает", async ({ page }) => {

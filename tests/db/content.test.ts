@@ -68,7 +68,7 @@ describe("застройщики, ЖК и медиа", () => {
     expect(rows).toEqual([{ name: "Сданный дом" }]);
     // Аудит 29.10 (20261029070000): таблицу медиа посетитель напрямую не читает — сайт берёт фото из site_complex.
     await expectDenied(db.as(anon, (tx) => tx.query("select id from media_assets")));
-    expect(await idsVisible(user(videographer), "media_assets")).toHaveLength(2);
+    expect(await idsVisible(user(videographer), "media_assets")).toHaveLength(4);
   });
 
   it("менеджер не может создать, опубликовать или архивировать ЖК", async () => {

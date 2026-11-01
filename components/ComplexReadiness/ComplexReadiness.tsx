@@ -4,7 +4,7 @@ import { Check, ChevronDown, Circle } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { photosShort, REQUIREMENT_TAB, type ReadinessItem } from "@/lib/admin/complexes/readiness";
+import { rendersShort, REQUIREMENT_TAB, type ReadinessItem } from "@/lib/admin/complexes/readiness";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
 
 type ComplexReadinessProps = {
@@ -38,7 +38,7 @@ export function ComplexReadiness({ items, base }: ComplexReadinessProps) {
               key={item.requirement}
               item={item}
               base={base}
-              missingPhotos={photosShort(items)}
+              missingRenders={rendersShort(items)}
             />
           ))}
         </ul>
@@ -51,11 +51,11 @@ type ReadinessRowProps = {
   item: ReadinessItem;
   base: string;
   /** Сколько фото не хватает до публикации — подпись у пункта «Фото». */
-  missingPhotos: number;
+  missingRenders: number;
 };
 
 /** Пункт готовности — ссылка на вкладку, где его закрывают. */
-function ReadinessRow({ item, base, missingPhotos }: ReadinessRowProps) {
+function ReadinessRow({ item, base, missingRenders }: ReadinessRowProps) {
   const t = useTranslations("admin.complexes.readiness");
   return (
     <li
@@ -71,9 +71,9 @@ function ReadinessRow({ item, base, missingPhotos }: ReadinessRowProps) {
       <Link href={complexTabHref(base, REQUIREMENT_TAB[item.requirement])}>
         {t(`items.${item.requirement}`)}
       </Link>
-      {item.requirement === "photos" && !item.ok ? (
+      {item.requirement === "renders" && !item.ok && missingRenders > 0 ? (
         <span className="complex-readiness__note">
-          {t("photosShort", { count: missingPhotos })}
+          {t("rendersShort", { count: missingRenders })}
         </span>
       ) : null}
     </li>

@@ -11,6 +11,7 @@ import {
   user,
   type TestDb,
 } from "./harness";
+import { addDemoDrawings } from "./content-fixtures";
 
 // Шаг 2.5: «Расчёт для клиента» — client_calc_screen() на DEMO-сиде: застройщики с включёнными
 // программами, выбранный по адресу, его программы, ЖК с планировками и свободные квартиры с ценой.
@@ -49,6 +50,7 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
     manager = await createStaff(db.admin, "manager");
     videographer = await createStaff(db.admin, "videographer");
     await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+    await addDemoDrawings(db.admin);
   });
   afterAll(() => db.close());
 
@@ -97,6 +99,7 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
   });
 
   it("застройщик, у которого программы ни к одному блоку, — не в списке и не открывается", async () => {
+    await db.admin.exec("alter table payment_programs disable trigger payment_programs_guard_complex");
     const { rows } = await db.admin.query<{ id: string }>(
       `update payment_programs set blocks_scope = 'selected', block_ids = '{}'
         where developer_id = (select id from developers where slug = 'demo-kamalak') and is_active
@@ -108,6 +111,7 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
     await db.admin.query("update payment_programs set blocks_scope = 'all' where id = any($1)", [
       rows.map((row) => row.id),
     ]);
+    await db.admin.exec("alter table payment_programs enable trigger payment_programs_guard_complex");
   });
 
   it("свободные квартиры — с ценой целиком (цена или цена м² × площадь), без проданных", async () => {
@@ -132,9 +136,11 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
   it("планировки — «цена от» как у сайта; цена м² по умолчанию — как у карточек программ", async () => {
     const current = (await screen()).current!;
     const complexId = current.complexes[0]!.id;
-    const { rows } = await db.admin.query<{ layout_id: string; price_from: string | null }>(
-      "select layout_id, price_from::text from layout_availability($1)",
-      [complexId],
+    const { rows } = await db.as(user(manager), (tx) =>
+      tx.query<{ layout_id: string; price_from: string | null }>(
+        "select layout_id, price_from::text from layout_availability($1)",
+        [complexId],
+      ),
     );
     const site = new Map(rows.map((row) => [row.layout_id, row.price_from]));
     const layouts = current.complexes[0]!.blocks.flatMap((block) => block.layouts);

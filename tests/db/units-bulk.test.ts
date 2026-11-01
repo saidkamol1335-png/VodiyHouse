@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { riserChanges, toUnitLayoutItems, type Riser } from "@/lib/units";
-import { seedContent, type ContentIds } from "./content-fixtures";
+import { addDemoDrawings, seedContent, type ContentIds } from "./content-fixtures";
 import { createStaff, createTestDb, expectHint, user, type TestDb } from "./harness";
 import {
   SMALL_PLAN,
@@ -62,6 +62,7 @@ describe("квартиры: цена, отделка, стояки, удален
       });
       expect(entry?.changes).not.toHaveProperty("price");
 
+      await addDemoDrawings(db.admin);
       // Сайт: свободной — площадь × цена м² без округления, проданной — без цены.
       const site = await db.as(user(manager), (tx) =>
         tx.query<{ number: string; price: string | null }>(
@@ -228,7 +229,7 @@ describe("квартиры: цена, отделка, стояки, удален
       expect(entry[0]?.changes.summary).toMatchObject({ kind: "layouts", count: 2 });
     });
 
-    it("опубликованный ЖК: снять планировку со всех квартир с «ценой от» нельзя", async () => {
+    it("опубликованный ЖК: снять планировку со всех квартир можно — ЖК сам станет «Скоро»", async () => {
       const ready = await readyPublishedComplex(db.admin, ids.publicDeveloper, "ready-risers");
       await generate(db, head, ready.blockId, { ...SMALL_PLAN, unitsPerFloor: [1, 1] }, [
         ready.layoutId,
@@ -237,13 +238,14 @@ describe("квартиры: цена, отделка, стояки, удален
         id: unit.id,
         layout_id: null,
       }));
-      await expectHint(
-        callAs(db, head, "set_units_layouts($1, $2::jsonb)", [
-          ready.blockId,
-          JSON.stringify(items),
-        ]),
-        "vh:not_ready",
-      );
+      await callAs(db, head, "set_units_layouts($1, $2::jsonb)", [
+        ready.blockId,
+        JSON.stringify(items),
+      ]);
+      const { rows } = await db.admin.query<{ status: string }>("select status from complexes where id = $1", [
+        ready.complexId,
+      ]);
+      expect(rows[0]!.status).toBe("published");
     });
   });
 

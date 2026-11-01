@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { addDemoDrawings } from "./content-fixtures";
 import { anon, createStaff, createTestDb, expectHint, isRemoteTarget, user, type Db, type TestDb } from "./harness";
 
 // Шаг 3.5: страница ЖК — site_complex(slug) на DEMO-сиде и функции новых вкладок кабинета
@@ -70,6 +71,7 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
   beforeAll(async () => {
     db = await createTestDb();
     await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+    await addDemoDrawings(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
   });
@@ -155,6 +157,7 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     const layout = (
       await db.admin.query<{ id: string }>("insert into layouts (block_id, rooms, area, price_from) values ($1, 2, 60, 50000) returning id", [block])
     ).rows[0]!.id;
+    await addDemoDrawings(db.admin);
     // Копия действующей программы Sifat — только на блок черновика.
     const program = (
       await db.admin.query<{ id: string }>(

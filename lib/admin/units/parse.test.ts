@@ -114,8 +114,8 @@ describe("отказ базы → ответ формы", () => {
     });
     expect(unitsDbFailure({ code: "22023", hint: "vh:invalid", details: "3" }).field).toBeNull();
     expect(
-      unitsDbFailure({ code: "23514", hint: "vh:not_ready", details: "layouts" }).broken,
-    ).toEqual(["layouts"]);
+      unitsDbFailure({ code: "23514", hint: "vh:not_ready", details: "blocks" }).broken,
+    ).toEqual(["blocks"]);
     expect(unitsDbFailure({ code: "23505", hint: "vh:unit_taken", details: "slot" }).error).toBe(
       "unitSlotTaken",
     );

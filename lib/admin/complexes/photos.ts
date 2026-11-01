@@ -7,7 +7,7 @@ import type { ComplexMediaResult } from "./types";
 // как логотип застройщика: загрузка, порядок, удаление и точка фокуса — без «Сохранить вкладку».
 
 /** До 30 фото — как add_complex_photo (PLAN 3а: нагрузка «15 ЖК по 30 фото»). */
-export const PHOTO_LIMITS = { max: 30, minForPublish: PUBLISH_RULES.minPhotos } as const;
+export const PHOTO_LIMITS = { max: 30, minForPublish: PUBLISH_RULES.minOtherRenders + 1 } as const;
 
 export type PhotoItem = {
   id: string;

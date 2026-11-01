@@ -11,10 +11,7 @@ const DENIED = /permission denied|row-level security|руководитель|Т
 
 /** Функции, которые посетитель вправе вызывать: публичные данные сайта (SECURITY DEFINER, только чтение). */
 const ANON_FUNCTIONS = [
-  "block_availability",
   "block_units",
-  "layout_availability",
-  "room_availability",
   "site_calc_screen",
   "site_calculator_available",
   "site_catalog",

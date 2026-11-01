@@ -32,12 +32,12 @@ describe("блоки, планировки и квартиры", () => {
   it("сайт видит блоки только опубликованных ЖК; планировки — только через функции сайта", async () => {
     const blocks = await db.as(anon, (tx) => tx.query<{ id: string }>("select id from blocks"));
     expect(blocks.rows.map((row) => row.id)).toEqual([ids.publicBlock]);
-    // Аудит 29.10 (20261029070000): ручные price_from и available напрямую не видны — только layout_availability.
+    // Аудит 29.10 (20261029070000): ручные price_from и available напрямую не видны. Правило v2: неполных
+    // планировок нет и в функциях наличия, посетителю они закрыты — сайт читает site_catalog и site_complex.
     await expectDenied(db.as(anon, (tx) => tx.query("select id from layouts")));
-    const offers = await db.as(anon, (tx) =>
-      tx.query<{ layout_id: string }>("select layout_id from public.layout_availability($1)", [ids.publicComplex]),
+    await expectDenied(
+      db.as(anon, (tx) => tx.query("select layout_id from public.layout_availability($1)", [ids.publicComplex])),
     );
-    expect(offers.rows.map((row) => row.layout_id).sort()).toEqual([ids.oneRoomLayout, ids.twoRoomLayout].sort());
   });
 
   it("квартиры посетителю напрямую закрыты — ни строк, ни полей сотрудников", async () => {

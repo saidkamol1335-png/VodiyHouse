@@ -13,7 +13,7 @@ import { calculate } from "@/lib/calc/calculate";
 import { roundMoney } from "@/lib/calc/money";
 import { programFromRecord, rateFromRecord, type SiteProgramsRecord } from "@/lib/calc/records";
 import { generateUnits } from "@/lib/units";
-import { seedContent, type ContentIds } from "./content-fixtures";
+import { addDemoDrawings, seedContent, type ContentIds } from "./content-fixtures";
 import { anon, createStaff, createTestDb, isRemoteTarget, user, type TestDb } from "./harness";
 
 const DEMO_DIR = path.resolve(import.meta.dirname, "../../supabase/demo");
@@ -46,6 +46,7 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
   const seed = async () => {
     await db.admin.exec(await readDemo("remove.sql"));
     await db.admin.exec(await readDemo("seed.sql"));
+    await addDemoDrawings(db.admin);
   };
   const count = async (sql: string) => (await db.admin.query<{ n: number }>(sql)).rows[0]?.n;
   const demoCounts = async () => ({
@@ -81,7 +82,7 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
   it("свободные квартиры по типам — как в «Остатках по ЖК» мокапа, сайт их видит", async () => {
     for (const [slug, expected] of Object.entries(MOCKUP_FREE)) {
       const id = await complexId(slug);
-      const actual = await db.as(anon, (tx) =>
+      const actual = await db.as(user(manager), (tx) =>
         tx.query<{ rooms: number; free_count: number }>(
           "select rooms, free_count from room_availability($1) order by rooms",
           [[id]],
@@ -103,7 +104,7 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
     );
     const ids = complexes.map((complex) => complex.id);
     const query = <T>(sql: string) =>
-      db.as(anon, async (tx) => (await tx.query<T>(sql, [ids])).rows);
+      db.as(user(manager), async (tx) => (await tx.query<T>(sql, [ids])).rows);
     const fromSql = siteStockFrom(
       complexes,
       await query<RoomOfferRecord>("select * from room_availability($1)"),
@@ -121,7 +122,7 @@ describe.skipIf(isRemoteTarget)("DEMO-данные", () => {
 
   it("Shodlik по блокам — как в мокапе: «Бл. A: 12 · Бл. B: 29»", async () => {
     const shodlik = await complexId("demo-shodlik");
-    const blocks = await db.as(anon, (tx) =>
+    const blocks = await db.as(user(manager), (tx) =>
       tx.query<{ name: string; free_count: number }>(
         "select name, free_count from block_availability($1)",
         [[shodlik]],

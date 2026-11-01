@@ -3,6 +3,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { demoSiteCalc } from "@/lib/admin/calc/siteDemo";
 import { siteCalcFrom, type SiteCalcRecord, type SiteCalcScreen } from "@/lib/calc/siteScreen";
+import { addDemoDrawings } from "./content-fixtures";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 // Шаг 2.6: /kalkulyator — site_calc_screen() на DEMO-сиде: посетитель видит опубликованных
@@ -40,6 +41,7 @@ function comparable(screen: SiteCalcScreen) {
 async function seededDb() {
   const db = await createTestDb();
   await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+  await addDemoDrawings(db.admin);
   return db;
 }
 

@@ -1,40 +1,37 @@
 import { MEDIA_LIMITS } from "@/lib/media";
 import type { ComplexTabKey } from "./tabs";
 
-// Готовность ЖК к публикации (PLAN 3а, И7, И9): те же 8 пунктов и цифры, что считает база
-// (private.complex_requirements, тест сверяет), — строка «Для публикации: N из 8» и точки на вкладках.
+// Минимум ЖК (docs/publication-rule.md): те же 6 пунктов и цифры, что считает база
+// (private.complex_requirements, тест сверяет), — строка «Для публикации: N из 6» и точки на вкладках.
 
 export const COMPLEX_REQUIREMENTS = [
   "address",
-  "location",
   "point",
   "developer",
+  "renders",
   "blocks",
-  "layouts",
-  "photos",
-  "cover",
+  "payment",
 ] as const;
 
 export type ComplexRequirement = (typeof COMPLEX_REQUIREMENTS)[number];
 
-/** И7: 5 фото вместе с обложкой; обложка — первое фото, от 2400 px. */
+/** Обложка — первое фото, от 2400 px; ещё минимум 4 общих рендера. Рендеры квартир не считаются. */
 export const PUBLISH_RULES = {
-  minPhotos: 5,
+  minOtherRenders: 4,
   coverMinLongSide: MEDIA_LIMITS.complexCoverMinLongSide,
 } as const;
 
+// Застройщик выбирают на «Основном», программу и курс ведут в «Программах оплаты» (ссылка — блок C).
 export const REQUIREMENT_TAB: Record<ComplexRequirement, ComplexTabKey> = {
   address: "main",
-  location: "main",
   point: "main",
   developer: "main",
+  renders: "photos",
   blocks: "blocks",
-  layouts: "layouts",
-  photos: "photos",
-  cover: "photos",
+  payment: "main",
 };
 
-/** have — сколько фото уже есть (только у photos): «нужно ещё N». */
+/** have — сколько общих рендеров есть, кроме обложки (только у renders): «нужно ещё N». */
 export type ReadinessItem = { requirement: ComplexRequirement; ok: boolean; have: number | null };
 
 export type ReadinessRecord = { requirement: string; ok: boolean; have: number | null };
@@ -62,13 +59,13 @@ export function tabsNeedingAttention(items: readonly ReadinessItem[]): Set<Compl
   return new Set(missingOf(items).map((requirement) => REQUIREMENT_TAB[requirement]));
 }
 
-/** Сколько фото не хватает до публикации. */
-export function photosShort(items: readonly ReadinessItem[]): number {
-  const photos = items.find((item) => item.requirement === "photos");
-  return Math.max(0, PUBLISH_RULES.minPhotos - (photos?.have ?? 0));
+/** Сколько общих рендеров не хватает до публикации, кроме обложки. */
+export function rendersShort(items: readonly ReadinessItem[]): number {
+  const renders = items.find((item) => item.requirement === "renders");
+  return Math.max(0, PUBLISH_RULES.minOtherRenders - (renders?.have ?? 0));
 }
 
-/** Отказ базы vh:not_ready несёт пункты в detail: «photos,cover». */
+/** Отказ базы vh:not_ready несёт пункты в detail: «renders,payment». */
 export function requirementsFromDetail(detail: string | null | undefined): ComplexRequirement[] {
   return (detail ?? "")
     .split(",")

@@ -27,8 +27,8 @@ async function insertId(admin: Db, sql: string, params: unknown[]): Promise<stri
 }
 
 /**
- * Всё, что нужно ЖК для публикации (PLAN 3а, шаг 11): адрес, город, точка, блок со сроком,
- * планировка с чертежом и ценой, 5 фото, первое — от 2400 px. В обход RLS.
+ * Минимум ЖК (docs/publication-rule.md): адрес, точка, опубликованный застройщик, обложка от 2400 px
+ * и ещё 4 рендера, блок со сроком, программа и курс. Плюс полная планировка. В обход RLS.
  */
 export async function makeComplexReady(admin: Db, complexId: string): Promise<void> {
   await admin.query(
@@ -36,6 +36,31 @@ export async function makeComplexReady(admin: Db, complexId: string): Promise<vo
        location_id = (select id from locations order by sort limit 1), lat = 40.3864, lng = 71.7864
      where id = $1`,
     [complexId],
+  );
+  const { rows: owners } = await admin.query<{ developer_id: string }>(
+    "select developer_id from complexes where id = $1",
+    [complexId],
+  );
+  const developerId = owners[0]!.developer_id;
+  await admin.query(
+    "insert into media_assets (developer_id, kind, path, width, height) select $1, 'logo', $2, 400, 400 where not exists (select 1 from media_assets where developer_id = $1 and kind = 'logo')",
+    [developerId, `developers/${developerId}/${crypto.randomUUID()}.png`],
+  );
+  await admin.query(
+    `update developers set status = 'published', about = coalesce(about, '{"ru": "О компании", "uz": "Kompaniya haqida"}')
+     where id = $1`,
+    [developerId],
+  );
+  await admin.query(
+    `insert into payment_programs (developer_id, type, discount_pct, is_active)
+     select $1, 'full', 12, true
+     where not exists (select 1 from payment_programs where developer_id = $1 and is_active and blocks_scope = 'all')`,
+    [developerId],
+  );
+  await admin.query(
+    `insert into settings (key, value, is_public)
+     values ('exchange.usd_uzs', '{"cbu": {"usd_uzs": 12800, "date": "2026-11-01"}, "manual": null}', true)
+     on conflict (key) do nothing`,
   );
   const blockId = await insertId(
     admin,
@@ -132,6 +157,7 @@ export async function seedContent(admin: Db): Promise<ContentIds> {
   const publicPhoto = await photo(publicComplex);
   const draftPhoto = await photo(draftComplex);
 
+  await addDemoDrawings(admin);
   return {
     publicDeveloper,
     draftDeveloper,
@@ -147,4 +173,21 @@ export async function seedContent(admin: Db): Promise<ContentIds> {
     publicPhoto,
     draftPhoto,
   };
+}
+
+/** В seed.sql чертежей нет (их загружает scripts/demoMedia.mjs): без них планировки сида неполные. */
+export async function addDemoDrawings(admin: Db): Promise<void> {
+  await admin.exec(`
+    select set_config('vodiy.skip_audit', 'on', false);
+    with drawn as (
+      insert into public.media_assets (complex_id, kind, path, width, height)
+      select b.complex_id, 'drawing', 'complexes/' || b.complex_id || '/' || l.id || '.png', 1600, 1200
+      from public.layouts l join public.blocks b on b.id = l.block_id
+      where l.drawing_id is null
+      returning id, path
+    )
+    update public.layouts l set drawing_id = drawn.id
+    from drawn where drawn.path like '%/' || l.id || '.png';
+    select set_config('vodiy.skip_audit', 'off', false);
+  `);
 }

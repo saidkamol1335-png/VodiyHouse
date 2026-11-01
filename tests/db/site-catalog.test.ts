@@ -3,6 +3,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { blockPaymentFrom } from "@/lib/site/catalog/payment";
 import { catalogFrom, type SiteCatalogRecord } from "@/lib/site/catalog/records";
+import { addDemoDrawings } from "./content-fixtures";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 // Шаг 3.3: каталог сайта — site_catalog() ролью посетителя на DEMO-сиде. Опубликованные ЖК
@@ -29,6 +30,7 @@ describe.skipIf(isRemoteTarget)("каталог сайта: site_catalog()", () 
   beforeAll(async () => {
     db = await createTestDb();
     await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+    await addDemoDrawings(db.admin);
   });
   afterAll(() => db.close());
 
@@ -91,7 +93,7 @@ describe.skipIf(isRemoteTarget)("каталог сайта: site_catalog()", () 
   // Последним: вернуть «опубликован» без фото DEMO не даёт проверка публикации.
   it("снятый с сайта ЖК и неопубликованный застройщик в каталог не попадают", async () => {
     await db.admin.query("update complexes set status = 'hidden' where slug = 'demo-orzu'");
-    await db.admin.query("update developers set status = 'hidden' where slug = 'demo-margilan-invest'");
+    await db.admin.query("update developers set status = 'draft' where slug = 'demo-margilan-invest'");
     const data = await catalog();
     expect(data.complexes.map((c) => c.slug)).toEqual(["demo-shodlik"]);
     expect(data.developers.map((d) => d.slug)).toEqual(["demo-sifat"]);

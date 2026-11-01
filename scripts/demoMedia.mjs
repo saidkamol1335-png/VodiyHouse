@@ -1,7 +1,7 @@
 // Фото DEMO-ЖК в Storage (фаза 3, шаг 3.1): рендеры мокапа (docs/mockup/source/_blob) → JPEG в
 // бакет media + строки media_assets. Без чужих водяных знаков: рендеры мокапа — свои. Мокап даёт
-// 1200 × 900 — меньше порога загрузки кабинета (1600 px), растягивать их бессмысленно; настоящие фото
-// пройдут проверку кабинета. Удаление — по папкам DEMO-ЖК и застройщиков после remove.sql (строки
+// 1200 × 900, поэтому обложка растягивается до 2400 px, а чертёж — до 1200 px: DEMO должен проходить
+// минимум ЖК и полноту планировки (docs/publication-rule.md). Удаление — по папкам DEMO-ЖК и застройщиков после remove.sql (строки
 // уходят каскадом с ЖК): если его проверки остановят удаление, фото DEMO останутся на месте.
 
 import { readFile } from "node:fs/promises";
@@ -15,6 +15,8 @@ const BLOB_DIR = path.join(import.meta.dirname, "..", "docs", "mockup", "source"
 const BUCKET = "media";
 const PROGRESS_VIDEO_BUCKET = "progress-video";
 const JPEG_QUALITY = 82;
+const COVER_LONG_SIDE = 2400;
+const DRAWING_WIDTH = 1200;
 // Заглушка, пока грузится фото: ~16 px по ширине — несколько сотен байт data URL (лимит базы 4000).
 const BLUR_WIDTH = 16;
 
@@ -23,8 +25,8 @@ const BLUR_WIDTH = 16;
 const MOCKUP_SETS = {
   shodlik: ["c145502a1cf6ac3678cffe2188300f3c", "24210f66520c81c2a3ad603a18e14001", "7a7044d303a2ad30feb699bfe0f0e34a", "1cb4c474b6a0f467740c418d402ee94c", "0a0d2b6ae29517d673d188b631e5a022"],
   namuna: ["38f79d898f2214e12dbcc196213e11cf", "e410345be72e2d3d666e89b33ddbfc43", "3fd3cee8246a99a534122d3db4930af5", "cda3d3df9118a8cf390f5f7a700c5ee6", "be3b6a18349a4328f8e84d303f7631b8"],
-  yulduz: ["16e643b76ac17efe94df8f950b752f89", "e0fd2933d603da12f6531316925dcaf2", "046d599967e38c33a2d07bce443f95e4"],
-  orzu: ["6604a3149e89cb2236494b771f37248f", "e57b1ebddbcff9c023487dba871a0a8b", "e9070ed3ce52146f61afbc7b68875702"],
+  yulduz: ["16e643b76ac17efe94df8f950b752f89", "e0fd2933d603da12f6531316925dcaf2", "046d599967e38c33a2d07bce443f95e4", "37af1c4bfe13b9a68b3bcae3da35e7d1", "6a00f0bdac6664fdc3a91371a82f7a2e"],
+  orzu: ["6604a3149e89cb2236494b771f37248f", "e57b1ebddbcff9c023487dba871a0a8b", "e9070ed3ce52146f61afbc7b68875702", "ca48e25088e67b413eee7bd5057026e7", "822c8297bac35358d4069e46fa0a3872"],
   bahor: ["37af1c4bfe13b9a68b3bcae3da35e7d1", "6a00f0bdac6664fdc3a91371a82f7a2e", "b88ab82cbcacb2f5099de6a644f88b05"],
   gulzor: ["ca48e25088e67b413eee7bd5057026e7", "822c8297bac35358d4069e46fa0a3872", "b8618d0a2800d570062f94b232010bb6"],
   nur: ["47fcd99ae8b4ebf2447a692dc30673e6", "795fdb12ceb53738f9aaac91d4743f3d", "8fa9d5bc285bdb641cbafa7d70a001ff"],
@@ -70,10 +72,13 @@ async function cropTo(source, ratio) {
   return sharp(source).extract({ left, top, width: cropWidth, height: cropHeight }).toBuffer();
 }
 
-async function preparePhoto(blobId, ratio) {
+async function preparePhoto(blobId, ratio, isCover) {
   const raw = await readFile(path.join(BLOB_DIR, `${blobId}.webp`));
   const source = ratio ? await cropTo(raw, ratio) : raw;
-  const jpeg = await sharp(source).jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer();
+  const sized = isCover
+    ? sharp(source).resize({ width: COVER_LONG_SIDE, height: COVER_LONG_SIDE, fit: "inside" })
+    : sharp(source);
+  const jpeg = await sized.jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer();
   const { width, height } = await sharp(jpeg).metadata();
   const tiny = await sharp(source).resize({ width: BLUR_WIDTH }).jpeg({ quality: 50 }).toBuffer();
   return { jpeg, width, height, blur: `data:image/jpeg;base64,${tiny.toString("base64")}` };
@@ -122,7 +127,7 @@ async function uploadPhotos(complexes) {
   const rows = [];
   for (const { id: complexId, slug } of complexes) {
     for (const [sort, [blobId, ratio]] of photoPlan(slug).entries()) {
-      const { jpeg, width, height, blur } = await preparePhoto(blobId, ratio);
+      const { jpeg, width, height, blur } = await preparePhoto(blobId, ratio, sort === 0);
       const objectPath = `complexes/${complexId}/${crypto.randomUUID()}.jpg`;
       const { error } = await storage.upload(objectPath, jpeg, { contentType: "image/jpeg" });
       if (error) throw new Error(`Storage: загрузка ${objectPath}`, { cause: error });
@@ -159,7 +164,7 @@ async function uploadDrawings(db, complexes) {
     for (const [index, blobId] of (PLAN_SETS[slug.replace(/^demo-/, "")] ?? []).entries()) {
       if (!layouts[index]) break;
       const raw = await readFile(path.join(BLOB_DIR, `${blobId}.webp`));
-      const png = await sharp(raw).flatten({ background: "#ffffff" }).png().toBuffer();
+      const png = await sharp(raw).resize({ width: DRAWING_WIDTH }).flatten({ background: "#ffffff" }).png().toBuffer();
       const { width, height } = await sharp(png).metadata();
       const objectPath = `complexes/${complexId}/${crypto.randomUUID()}.png`;
       const { error } = await storage.upload(objectPath, png, { contentType: "image/png" });

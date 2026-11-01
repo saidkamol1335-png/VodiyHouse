@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { flatCalcFrom, type FlatCalcRecord } from "@/lib/calc/flatScreen";
+import { addDemoDrawings } from "./content-fixtures";
 import { anon, createTestDb, isRemoteTarget, type TestDb } from "./harness";
 
 // Шаг 2.7: «Расчёт для этой квартиры» — site_layout_calc() на DEMO-сиде: планировка опубликованного
@@ -26,6 +27,7 @@ describe.skipIf(isRemoteTarget)("расчёт квартиры: данные д�
   beforeAll(async () => {
     db = await createTestDb();
     await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+    await addDemoDrawings(db.admin);
     // Планировка опубликованного ЖК, у которой есть и свободные, и занятые квартиры.
     const { rows } = await db.admin.query<{ id: string }>(
       `select l.id from layouts l
@@ -91,7 +93,7 @@ describe.skipIf(isRemoteTarget)("расчёт квартиры: данные д�
       `with drawing as (
          insert into media_assets (complex_id, kind, path, width, height)
          select b.complex_id, 'drawing',
-                private.media_owner_folder(b.complex_id, null, null, null, null) || '/plan-test.png', 800, 600
+                private.media_owner_folder(b.complex_id, null, null, null, null) || '/plan-test.png', 1600, 600
            from layouts l join blocks b on b.id = l.block_id where l.id = $1
          returning id, path)
        update layouts set drawing_id = (select id from drawing) where id = $1

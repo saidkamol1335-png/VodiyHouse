@@ -328,12 +328,9 @@ describe("квартиры в кабинете: права, генератор, 
       await expectHint(generate(db, head, noFloors, SMALL_PLAN), "vh:invalid", "floors_total");
     });
 
-    it("опубликованный ЖК: список без стояков снял бы «цену от» — отказ; со стояками — можно", async () => {
+    it("опубликованный ЖК: список без стояков не мешает — ЖК остаётся опубликованным", async () => {
       const ready = await readyPublishedComplex(db.admin, ids.publicDeveloper, "ready-gen");
       const plan: BlockPlan = { ...SMALL_PLAN, unitsPerFloor: [1, 1] };
-      await expectHint(generate(db, head, ready.blockId, plan), "vh:not_ready");
-      expect(await unitsOf(db.admin, ready.blockId)).toHaveLength(0);
-
       expect(await generate(db, head, ready.blockId, plan, [ready.layoutId])).toMatchObject({
         created: 8,
         unassigned: 0,
@@ -508,7 +505,7 @@ describe("квартиры в кабинете: права, генератор, 
       expect(await unitsOf(db.admin, block)).toHaveLength(left.length);
     });
 
-    it("опубликованный ЖК: удаление, которое сняло бы «цену от», откатывается", async () => {
+    it("опубликованный ЖК: цена и планировка квартиры снимаются, ЖК остаётся опубликованным", async () => {
       const ready = await readyPublishedComplex(db.admin, ids.publicDeveloper, "ready-del");
       await generate(db, head, ready.blockId, { ...SMALL_PLAN, unitsPerFloor: [1, 1] }, [
         ready.layoutId,
@@ -520,25 +517,13 @@ describe("квартиры в кабинете: права, генератор, 
         [units[0]!.id],
       ]);
       const priced = units[0]!.id;
-      await expectHint(
-        callAs(db, head, "delete_units($1, $2)", [ready.blockId, [priced]]),
-        "vh:not_ready",
+      await callAs(db, head, "set_units_price($1, $2, 'none')", [ready.blockId, [priced]]);
+      const { rows: published } = await db.admin.query<{ status: string }>(
+        "select status from complexes where id = $1",
+        [ready.complexId],
       );
-      // Снять единственную цену или планировку этой квартиры — тоже «хуже».
-      await expectHint(
-        callAs(db, head, "set_units_price($1, $2, 'none')", [ready.blockId, [priced]]),
-        "vh:not_ready",
-      );
-      for (const patch of [{ price: { mode: "none", value: null } }, { layout_id: null }]) {
-        await expectHint(
-          callAs(db, head, "update_unit($1, $2, $3::jsonb)", [
-            ready.blockId,
-            priced,
-            JSON.stringify(patch),
-          ]),
-          "vh:not_ready",
-        );
-      }
+      expect(published[0]!.status).toBe("published");
+      await callAs(db, head, "set_units_price($1, $2, 'total', 35000)", [ready.blockId, [priced]]);
       expect(await unitsOf(db.admin, ready.blockId)).toHaveLength(units.length);
       expect((await unitsOf(db.admin, ready.blockId))[0]).toMatchObject({
         price: "35000.00",

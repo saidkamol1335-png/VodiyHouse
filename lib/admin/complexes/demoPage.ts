@@ -88,22 +88,20 @@ export function demoComplex(id: string): ComplexRecord | null {
   };
 }
 
-/** Готовность DEMO: у Shodlik и Namuna нет только фото и чертежей; у остальных — почти ничего. */
+/** Готовность DEMO: у Shodlik и Namuna не хватает только рендеров; у остальных — почти ничего. */
 export function demoReadiness(complex: ComplexRecord): ReadinessItem[] {
   const filled = complex.address !== null;
   const ok: Record<ComplexRequirement, boolean> = {
     address: filled,
-    location: complex.locationId !== null,
     point: complex.lat !== null,
-    developer: complex.developerStatus !== "archived",
+    developer: complex.developerStatus === "published",
+    renders: false,
     blocks: filled,
-    layouts: false,
-    photos: false,
-    cover: false,
+    payment: filled,
   };
   return COMPLEX_REQUIREMENTS.map((requirement) => ({
     requirement,
     ok: ok[requirement],
-    have: requirement === "photos" ? (filled ? 3 : 0) : null,
+    have: requirement === "renders" ? (filled ? 2 : 0) : null,
   }));
 }

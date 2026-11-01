@@ -8,7 +8,7 @@ import {
   COMPLEX_REQUIREMENTS,
   PUBLISH_RULES,
   parseReadiness,
-  photosShort,
+  rendersShort,
   requirementsFromDetail,
   tabsNeedingAttention,
 } from "./readiness";
@@ -16,6 +16,7 @@ import {
 const migration = (file: string) =>
   readFileSync(path.resolve(import.meta.dirname, "../../../supabase/migrations", file), "utf8");
 const ADMIN_MIGRATION = migration("20261021090000_complexes_admin.sql");
+const RULE_MIGRATION = migration("20261101120000_publication_rule_v2.sql");
 const SCHEMA_MIGRATION = migration("20261019170000_developers_complexes_media.sql");
 
 describe("точка на карте (И2)", () => {
@@ -61,22 +62,22 @@ describe("точка на карте (И2)", () => {
 describe("готовность к публикации (И7, И9)", () => {
   it("пункты и цифры — как в базе", () => {
     for (const requirement of COMPLEX_REQUIREMENTS) {
-      expect(ADMIN_MIGRATION).toContain(`'${requirement}'`);
+      expect(RULE_MIGRATION).toContain(`'${requirement}'`);
     }
-    expect(ADMIN_MIGRATION).toContain(`photo_count >= ${PUBLISH_RULES.minPhotos}`);
-    expect(ADMIN_MIGRATION).toContain(`cover_side >= ${PUBLISH_RULES.coverMinLongSide}`);
+    expect(RULE_MIGRATION).toContain(`others >= ${PUBLISH_RULES.minOtherRenders}`);
+    expect(RULE_MIGRATION).toContain(`greatest(cover.width, cover.height) >= ${PUBLISH_RULES.coverMinLongSide}`);
   });
 
   it("порядок вкладок, точки на вкладках, «нужно ещё N», пункты из отказа базы", () => {
     const items = parseReadiness([
-      { requirement: "photos", ok: false, have: 3 },
+      { requirement: "renders", ok: false, have: 2 },
       { requirement: "address", ok: true, have: null },
       { requirement: "point", ok: false, have: null },
       { requirement: "unknown", ok: false, have: null },
     ]);
-    expect(items.map((item) => item.requirement)).toEqual(["address", "point", "photos"]);
+    expect(items.map((item) => item.requirement)).toEqual(["address", "point", "renders"]);
     expect([...tabsNeedingAttention(items)]).toEqual(["main", "photos"]);
-    expect(photosShort(items)).toBe(2);
+    expect(rendersShort(items)).toBe(2);
     expect(requirementsFromDetail("address, point,nope")).toEqual(["address", "point"]);
     expect(requirementsFromDetail(null)).toEqual([]);
   });
