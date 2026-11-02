@@ -2,12 +2,30 @@
 
 Пока аккаунтов заказчика нет, боевой сайт живёт у исполнителя: отдельный проект Supabase и отдельный сайт Netlify. Код — ветка `release/project-1` (Проект-1: кабинет на `/admin`). Тестовое облако и vodiyhouse-test не трогаются: там DEMO для e2e.
 
-Ключи и пароли вводит только человек — в дашборде и в файле `apps/site/.env.prod` (в git не попадает: `.env*`). Агент запускает команды с этим файлом и значений не видит.
+## Быстрый путь (03.11.2026): вход человека + один скрипт
+
+Сайт Netlify `vodiyhouse-prod` уже создан и подключён к ветке `release/project-1` (сборка ждёт ключей Supabase, `SITE_NOINDEX=1` и `NODE_VERSION=24` заданы). Расход на проект Supabase (~$10/мес) подтверждён исполнителем 02.11.
+
+1. **Человек** входит в Supabase CLI (агент входить за человека не может):
+   ```bash
+   cd C:\Users\Alocomputers\Desktop\VH_release\apps\site
+   npx supabase login
+   ```
+   Enter → подтвердить в браузере → ввести код из браузера в терминал.
+2. Там же (или сказать агенту «вошёл» — он запустит сам):
+   ```bash
+   node scripts/prod-up.mjs
+   ```
+   Скрипт создаёт проект Франкфурт, сам генерирует пароль базы, ключи и секреты и пишет их только в `.env.prod`; настраивает Auth, применяет миграции, кладёт секрет в Vault, импортирует ЖК черновиками, задаёт переменные Netlify, собирает сайт с очисткой кэша и запускает `cloud:check --prod`. Значения не печатаются; журнал — `apps/site/prod-up.log`. Повторный запуск пропускает сделанное.
+
+Ниже — тот же путь руками (если скрипт остановился).
+
+Ключи и пароли вводит человек или генерирует скрипт — в дашборде и в файле `apps/site/.env.prod` (в git не попадает: `.env*`). Агент запускает команды с этим файлом и значений не видит.
 
 ## 1. Секреты (один раз, в своём терминале)
 
 ```bash
-node -e "for (const n of ['SITE_SIGNING_SECRET','NEXT_SERVER_ACTIONS_ENCRYPTION_KEY','CRON_SECRET']) console.log(n + '=' + require('crypto').randomBytes(48).toString('base64url'))"
+node -e "const c=require('crypto'); console.log('SITE_SIGNING_SECRET=' + c.randomBytes(48).toString('hex')); console.log('CRON_SECRET=' + c.randomBytes(32).toString('hex')); console.log('NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=' + c.randomBytes(32).toString('base64'))"
 ```
 
 Все три — в Netlify (п. 4); `SITE_SIGNING_SECRET` — ещё и в `.env.prod` (п. 3), тем же значением. В чат не присылать.
@@ -43,16 +61,16 @@ SITE_SIGNING_SECRET=<из п. 1>
 2. Branch to deploy: **`release/project-1`**. Base directory — пусто; Package directory — `apps/site`; Build command — `npm run build -w @vh/site`; Publish directory — `apps/site/.next`. Имя сайта — например `vodiyhouse-prod`.
 3. До первой сборки — Site configuration → Environment variables (все контексты):
 
-| Переменная                             | Значение                                 |
-| -------------------------------------- | ---------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | как в `.env.prod`                        |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | как в `.env.prod`                        |
-| `SUPABASE_SECRET_KEY`                  | как в `.env.prod`                        |
-| `SITE_SIGNING_SECRET`                  | из п. 1 (тот же, что в `.env.prod`)      |
-| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`   | из п. 1                                  |
-| `CRON_SECRET`                          | из п. 1                                  |
-| `SITE_NOINDEX`                         | `1` — до домена; на vodiyhouse.uz убрать |
-| `NODE_VERSION`                         | `24`                                     |
+| Переменная                             | Значение                                                                                              |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | как в `.env.prod`                                                                                     |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | как в `.env.prod`                                                                                     |
+| `SUPABASE_SECRET_KEY`                  | как в `.env.prod`                                                                                     |
+| `SITE_SIGNING_SECRET`                  | из п. 1 (тот же, что в `.env.prod`)                                                                   |
+| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`   | из п. 1 — **без** пометки «секрет»: Next кладёт его в сборку, сканер секретов Netlify остановил бы её |
+| `CRON_SECRET`                          | из п. 1                                                                                               |
+| `SITE_NOINDEX`                         | `1` — до домена; на vodiyhouse.uz убрать                                                              |
+| `NODE_VERSION`                         | `24`                                                                                                  |
 
 Не задавать до ответа заказчика: `SITE_URL` (до домена — адрес Netlify), `TELEGRAM_*`, `LEADS_SHEET_*`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_YANDEX_MAPS_KEY`. Без Telegram и Таблицы заявка сохраняется в кабинете («Заявки») — это нормально до бота заказчика.
 

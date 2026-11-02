@@ -27,6 +27,7 @@ playwright/.cache/
 .DS_Store
 *.pem
 npm-debug.log*
+prod-up.log
 
 # Скриншоты мокапа пересобираются docs/mockup/tools/capture.mjs (~40 МБ, 83 файла)
 docs/mockup/screens/

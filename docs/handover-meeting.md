@@ -24,12 +24,12 @@
 ## Сделать руками (исполнитель)
 
 **Перед встречей**
-- [ ] Supabase: проект `vodiyhouse-prod` (Frankfurt, Pro), настройки Auth — `docs/prod-setup.md` п. 2.
-- [ ] `apps/site/.env.prod` в `Desktop\VH_release` — п. 3.
-- [ ] Netlify: сайт из ветки `release/project-1`, переменные — п. 4.
-- [ ] Сказать агенту «прод создан» — дальше `db:push`, Vault, импорт черновиков, деплой, проверки делает он.
+
+- [ ] `npx supabase login` в `Desktop\VH_release\apps\site` (Enter → браузер → код) и `node scripts/prod-up.mjs` — или сказать агенту «вошёл» (`docs/prod-setup.md`, «Быстрый путь»). Сайт Netlify `vodiyhouse-prod` уже создан и подключён.
+- [ ] Агент: обход «нет выдумок» и Lighthouse (`docs/prod-check.md`).
 
 **Дашборды после передачи аккаунтов**
+
 - [ ] Supabase → Transfer project в организацию заказчика; Netlify → Transfer site в команду заказчика (`docs/prod-setup.md` п. 6).
 - [ ] Домен vodiyhouse.uz → Netlify заказчика, https; `SITE_URL=https://vodiyhouse.uz`, убрать `SITE_NOINDEX`, «Clear cache and deploy site».
 - [ ] Метрики: в потоке GA4 выключить «Смена страницы по истории браузера»; ключ Яндекс Карт ограничить по Referer (vodiyhouse.uz).
@@ -37,16 +37,20 @@
 - [ ] Токен Netlify CLI — отозвать (User settings → Applications).
 
 **BotFather и Telegram**
+
 - [ ] Бот заказчика в @BotFather → токен лично; две группы (менеджеры, руководитель), бот в обеих, `/start` → номера чатов.
 - [ ] В Netlify: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LEADS_CHAT_ID`, `TELEGRAM_ALERT_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET` → выкладка; после домена — `node --env-file=.env.prod scripts/bot-webhook.mjs` (в `.env.prod` — те же токен, секрет и `SITE_URL`).
 - [ ] Имя бота — руководитель в «Настройки → Контакты».
 
 **Google Таблица «Заявки»**
+
 - [ ] Таблица на аккаунте заказчика → Расширения → Apps Script → код из `docs/leads-sheet.md` → «Развернуть как веб-приложение» с аккаунта заказчика.
 - [ ] `LEADS_SHEET_URL` и `LEADS_SHEET_SECRET` → Netlify → выкладка.
 
 **Документы**
+
 - [ ] `docs/VodiyHouseKatalogTZ.md` — выгрузить из чата Claude («Чек-лист данных ЖК», артефакт заказчика: Chrome → «Скопировать текст») в `docs/` и закоммитить.
 
 **Курс ЦБ**
+
 - [ ] Задачу Планировщика на ноутбуке не трогать: она пишет курс в **тестовое** облако. В проде курс — вручную руководителем (head-guide, «Программы оплаты»).
