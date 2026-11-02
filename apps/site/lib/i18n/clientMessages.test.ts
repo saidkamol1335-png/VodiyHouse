@@ -57,7 +57,8 @@ describe("сообщения для браузера", () => {
   it("каждая страница сайта получает только тексты оболочки", () => {
     const picked = siteMessages(ru);
     expect(Object.keys(picked)).toEqual([...SITE_SHELL_MESSAGES]);
-    expect(JSON.stringify(picked).length).toBeLessThan(JSON.stringify(ru).length / 50);
+    // Бюджет в знаках, а не доля словаря: словарь сайта без текстов кабинета стал меньше (PLAN §10).
+    expect(JSON.stringify(picked).length).toBeLessThan(2_000);
   });
 
   // Новый раздел сайта с клиентскими текстами без своего провайдера сломал бы страницу — тест раньше.

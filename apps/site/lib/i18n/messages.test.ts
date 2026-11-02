@@ -6,7 +6,7 @@ import { CABINET_NAMESPACE } from "./clientMessages";
 
 // Сайт двуязычный (ТЗ 1.1): у каждого текста сайта есть узбекский двойник с теми же
 // подстановками — иначе /uz упадёт на t("…", { price }) или покажет «{price}» буквами.
-// Кабинет — на русском; из него по-узбекски только строки скидки для Telegram (admin.calcTelegram).
+// Раздел admin в словаре сайта — только подписи русских стендов /dev (кабинет — в apps/admin, PLAN §10).
 
 type Tree = { [key: string]: string | Tree };
 
@@ -57,12 +57,11 @@ describe("тексты ru и uz", () => {
     expect(differ.map(([key]) => key)).toEqual([]);
   });
 
-  it("строки скидки для Telegram из кабинета — на обоих языках", () => {
-    const telegramRu = leaves(ru.admin.calcTelegram);
-    const telegramUz = leaves((uz as { admin: { calcTelegram: Tree } }).admin.calcTelegram);
-    expect([...telegramUz.keys()]).toEqual([...telegramRu.keys()]);
-    for (const [key, text] of telegramRu)
-      expect(argumentsOf(telegramUz.get(key)!), key).toEqual(argumentsOf(text));
-    expect(Object.keys((uz as { admin: object }).admin)).toEqual(["calcTelegram"]);
+  // Проект-2 (PLAN §10): текстов кабинета и скидок на сайте нет — в admin только то, что берут стенды /dev.
+  it("раздел admin — только подписи стендов /dev, по-узбекски его нет", () => {
+    expect(Object.keys(ru.admin).sort()).toEqual(["complexes", "dev", "journal"]);
+    expect(Object.keys(ru.admin.complexes)).toEqual(["namePrefixed"]);
+    expect(Object.keys(ru.admin.journal)).toEqual(["unitStatus"]);
+    expect(CABINET_NAMESPACE in uz).toBe(false);
   });
 });

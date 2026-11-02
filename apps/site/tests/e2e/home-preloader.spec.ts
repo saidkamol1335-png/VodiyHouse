@@ -10,6 +10,8 @@ const preloader = (page: Page) => page.locator(".site-preloader");
 const hero = (page: Page) => page.locator(".home-hero");
 const html = (page: Page) => page.locator("html");
 const ENTRY = "/ru?e2e-preloader";
+/** Телефоны (PLAN §10, п. 17): первый экран — только постер, экрана загрузки нет. */
+const PHONES = ["mobile-390", "mobile-360", "webkit-390"];
 
 test.describe("экран загрузки при входе", () => {
   test("первый вход: экран виден, страница не листается, потом открывается и больше не показывается", async ({
@@ -31,7 +33,8 @@ test.describe("экран загрузки при входе", () => {
     expect(errors).toEqual([]);
   });
 
-  test("проценты растут до 100, под экраном первый экран уже готовится", async ({ page }) => {
+  test("проценты растут до 100, под экраном первый экран уже готовится", async ({ page }, testInfo) => {
+    test.skip(PHONES.includes(testInfo.project.name), "на телефоне экрана нет");
     await page.addInitScript(() => {
       const seen: string[] = [];
       (window as unknown as { __counts: string[] }).__counts = seen;
@@ -132,7 +135,23 @@ test.describe("экран загрузки при входе", () => {
     await saving.close();
   });
 
+  test("телефон: первый вход без экрана, постер сразу, ролик не качается", async ({ page }, testInfo) => {
+    test.skip(!PHONES.includes(testInfo.project.name), "телефон");
+    const videos: string[] = [];
+    page.on("request", (request) => {
+      if (/\/hero\/timelapse\/.*\.(webm|mp4)$/.test(request.url())) videos.push(request.url());
+    });
+    await page.goto(ENTRY);
+    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/);
+    await expect(preloader(page)).toBeHidden();
+    await expect(hero(page)).toHaveClass(/home-hero--none/);
+    await expect(page.getByRole("link", { name: /Подобрать квартиру/ }).first()).toBeVisible();
+    await page.waitForTimeout(1_000);
+    expect(videos).toEqual([]);
+  });
+
   test("сеть «3g»: движение не отключается", async ({ page }, testInfo) => {
+    test.skip(PHONES.includes(testInfo.project.name), "на телефоне первый экран — постер в любой сети");
     await page.addInitScript(() => {
       Object.defineProperty(Navigator.prototype, "connection", {
         configurable: true,

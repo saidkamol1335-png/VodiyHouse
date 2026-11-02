@@ -309,7 +309,8 @@ test.describe("первый экран главной — полёт над ст
     expect(requests.frames).toEqual([]);
   });
 
-  test("390, lite: 9:16, текст внизу первого экрана, факты полосой ниже, без горизонтальной прокрутки", async ({
+  // PLAN §10, п. 17: на телефоне первый экран — только постер (бюджет LCP), ролик не качается.
+  test("390, lite: постер 9:16 без ролика, текст внизу первого экрана, факты полосой ниже, без горизонтальной прокрутки", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -317,16 +318,12 @@ test.describe("первый экран главной — полёт над ст
       "телефон",
     );
     const errors = collectPageErrors(page);
+    const requests = heroRequests(page);
     await page.goto("/uz?motion=lite");
-    await expect(hero(page)).toHaveClass(/home-hero--lite/);
-    await expect(video(page)).toHaveAttribute(
-      "src",
-      /\/hero\/timelapse\/v3\/hero-portrait\.(webm|mp4)$/,
-      {
-        timeout: 10_000,
-      },
-    );
-    await expect(video(page)).toHaveAttribute("playsinline", "");
+    await expect(page.locator("html")).toHaveAttribute("data-motion", "lite");
+    await expect(hero(page)).toHaveClass(/home-hero--none/);
+    await expect(video(page)).toHaveCount(0);
+    await expect(canvas(page)).toHaveCount(0);
     expect(await posterSrc(page)).toMatch(/\/v3\/poster-portrait-last\.(avif|webp)$/);
     const viewport = page.viewportSize()!;
     const [copy, facts] = await Promise.all([
@@ -345,6 +342,8 @@ test.describe("первый экран главной — полёт над ст
     });
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+    expect(requests.videos).toEqual([]);
+    expect(requests.frames).toEqual([]);
     expect(errors).toEqual([]);
   });
 });

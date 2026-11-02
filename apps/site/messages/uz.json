@@ -317,14 +317,6 @@
       "open": "«{term}» nima degani?"
     }
   },
-  "admin": {
-    "calcTelegram": {
-      "listPrice": "Prays bo‘yicha narx",
-      "discountDown": "{pct} boshlang‘ich to‘lov uchun chegirma",
-      "discountFull": "100% to‘lov uchun chegirma",
-      "discountedPrice": "Chegirmali narx"
-    }
-  },
   "footer": {
     "promise": "Yangi uydan kvartirani <accent>bepul</accent> tanlab beramiz.",
     "tagline": "Farg‘ona viloyati yangi uylar agentligi. Xaridor uchun — bepul: komissiyani quruvchi to‘laydi.",

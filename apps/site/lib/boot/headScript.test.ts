@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HEAD_BOOT_SCRIPT } from "./headScript";
 import { PRELOADER_ATTRIBUTE } from "./preloader";
+import { POSTER_ONLY_QUERY } from "@/lib/site/timelapse/assets";
 
-function runBootScript({ search = "", reduced = false, path = "/uz" } = {}) {
+function runBootScript({ search = "", reduced = false, path = "/uz", phone = false } = {}) {
   window.history.replaceState(null, "", `${path}${search}`);
   vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query === "(prefers-reduced-motion: reduce)" && reduced,
+    matches:
+      (query === "(prefers-reduced-motion: reduce)" && reduced) ||
+      (query === POSTER_ONLY_QUERY && phone),
   }));
   new Function(HEAD_BOOT_SCRIPT)();
   return document.documentElement;
@@ -64,6 +67,13 @@ describe("HEAD_BOOT_SCRIPT", () => {
     sessionStorage.clear();
     document.documentElement.removeAttribute("data-anchor-start");
     expect(runBootScript({ reduced: true }).hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
+  });
+
+  // PLAN §10, п. 17: на телефоне первый экран — только постер, ждать экрану загрузки нечего.
+  it("экран загрузки: на телефоне — нет, режим анимации тот же", () => {
+    const html = runBootScript({ path: "/ru", phone: true });
+    expect(html.hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
+    expect(html.getAttribute("data-motion")).toBe("lite");
   });
 
   it("мусор в хранилище не ломает атрибуты", () => {

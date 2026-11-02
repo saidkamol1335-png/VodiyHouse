@@ -12,6 +12,13 @@ export const TIMELAPSE_BASE = `/hero/timelapse/${TIMELAPSE_VERSION}`;
 export const TIMELAPSE_FRAME = { width: 1920, height: 1080 } as const;
 export const TIMELAPSE_PHONE_FRAME = { width: 608, height: 1080 } as const;
 export const PHONE_QUERY = "(max-width: 767px)";
+/**
+ * Телефон в любой ориентации (PLAN §10, п. 17): на первом экране главной — только постер, без ролика и
+ * без экрана загрузки (ждать нечего). full на телефоне не бывает, так что это и есть «lite — только
+ * постер». Лёжа телефон шире 767 px, но ниже 500 px — по высоте только сенсорный экран: низкое окно
+ * или крупный масштаб на компьютере остаются с роликом, как раньше.
+ */
+export const POSTER_ONLY_QUERY = "(max-width: 767px), (max-height: 500px) and (pointer: coarse)";
 
 /** Постер — последний кадр ролика (вечер): на главной — первая картинка страницы во всех режимах (LCP). */
 export const TIMELAPSE_POSTER = {

@@ -19,7 +19,7 @@ type Refs = {
  * none — постер. Шапка над экраном — в его тёмных тонах.
  */
 export function useHeroScreen({ section, media, video, canvas }: Refs) {
-  const hero = useTimelapse({ host: media, video, portraitOnPhone: true, scrubInFull: true });
+  const hero = useTimelapse({ host: media, video, portraitOnPhone: true, scrubInFull: true, posterOnPhone: true });
   const [drawn, setDrawn] = useState(false);
   const [phase, setPhase] = useState<ScrubPhase>(START_PHASE);
   const onDrawn = useCallback(() => setDrawn(true), []);

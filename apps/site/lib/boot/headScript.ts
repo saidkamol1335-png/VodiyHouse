@@ -10,6 +10,7 @@ import { LOCALES } from "@/lib/i18n/routing";
 import { ANCHOR_START_ATTRIBUTE, REVEAL_FAILSAFE_MS, REVEAL_OFF_ATTRIBUTE, SCROLL_MEMORY_KEY } from "./anchorStart";
 import { HYDRATED_ATTRIBUTE } from "./hydrated";
 import { PRELOADER_ATTRIBUTE, PRELOADER_FAILSAFE_MS, PRELOADER_SEEN_KEY } from "./preloader";
+import { POSTER_ONLY_QUERY } from "@/lib/site/timelapse/assets";
 import {
   CATALOG_FILTER_PARAMS,
   CATALOG_PENDING_ATTRIBUTE,
@@ -26,4 +27,4 @@ var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringi
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";
 if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);
 var s=sessionStorage.getItem(${JSON.stringify(PRELOADER_SEEN_KEY)});sessionStorage.setItem(${JSON.stringify(PRELOADER_SEEN_KEY)},"1");
-if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}})();`;
+if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!matchMedia(${JSON.stringify(POSTER_ONLY_QUERY)}).matches&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}})();`;
