@@ -40,9 +40,6 @@ export function isRouteReady(pathname: string | null | undefined): boolean {
   return typeof pathname === "string" && (READY_ROUTES.has(pathname) || SLUG_PAGE.test(pathname));
 }
 
-/** Кабинет — без префикса языка. */
-export const ADMIN_ROUTE = "/admin";
-
 export type NavKey =
   "new" | "specials" | "developers" | "calculator" | "about" | "forDevelopers" | "quiz" | "howToBuy";
 

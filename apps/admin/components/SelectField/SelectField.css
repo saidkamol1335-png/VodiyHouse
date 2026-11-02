@@ -1,0 +1,20 @@
+/* Список выбора: поле мокапа со своей стрелкой — системная разная в каждом браузере. */
+.select-field {
+  position: relative;
+  display: block;
+}
+
+.select-field__select {
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select-field__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: var(--fg-3);
+  transform: translateY(-50%);
+  pointer-events: none;
+}

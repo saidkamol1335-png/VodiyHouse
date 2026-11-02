@@ -1,0 +1,4 @@
+/* Только стенды /dev (в продакшене их нет). Подключает app/dev/layout.tsx — после globals.css,
+   admin.css и cabinet.css: стенды кабинета (стенды сайта — в apps/site). */
+
+@import "../components/MediaLab/MediaLab.css";

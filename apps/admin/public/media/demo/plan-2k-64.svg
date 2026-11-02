@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="DEMO: схема 2-комн. 64,2 м²">
+  <!-- DEMO-чертёж для стенда «Расчёта для этой квартиры» (шаг 2.7): условная схема, не план реального дома. -->
+  <rect width="400" height="300" fill="#ffffff"/>
+  <g fill="none" stroke="#1b1712" stroke-width="6" stroke-linejoin="round">
+    <rect x="30" y="40" width="340" height="200"/>
+    <path d="M110 40v90M30 130h120M150 130v110M240 40v110M240 150h130M150 175h90"/>
+  </g>
+  <g fill="none" stroke="#1b1712" stroke-width="2">
+    <path d="M150 240h90v30h-90z"/>
+  </g>
+  <g fill="#8a8172" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">
+    <text x="70" y="90">3,7 м²</text>
+    <text x="175" y="90">8,2 м²</text>
+    <text x="305" y="100">18,3 м²</text>
+    <text x="90" y="190">11,8 м²</text>
+    <text x="195" y="160">2,6 м²</text>
+    <text x="195" y="210">15,2 м²</text>
+    <text x="305" y="200">2,0 м²</text>
+    <text x="195" y="262">4,4 м²</text>
+  </g>
+  <text x="370" y="290" fill="#c9c1b3" font-family="Arial, sans-serif" font-size="11" text-anchor="end">DEMO</text>
+</svg>

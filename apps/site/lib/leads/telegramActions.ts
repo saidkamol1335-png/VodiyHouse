@@ -1,7 +1,7 @@
 "use server";
 
 import { objectFrom, pagePathFrom, sourceFrom } from "./request";
-import { createTgStart } from "./server/telegram";
+import { createTgStart } from "./server/tgStart";
 
 // «Написать в Telegram» (Ф8): по нажатию — код перехода с ЖК, страницей и метками первого захода.
 // Данные из браузера — как у заявки: только адрес ЖК и uuid, путь сайта, известные метки.

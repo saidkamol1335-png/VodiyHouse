@@ -20,14 +20,17 @@ test.describe("подвал сайта", () => {
     await expect(root.getByRole("link", { name: "Как купить" })).toHaveAttribute("href", "/ru/kak-kupit");
     await expect(root.getByRole("link", { name: "Подбор за 1 минуту" })).toHaveAttribute("href", "/ru/podbor");
     await expect(root.getByRole("link", { name: "Стать партнёром" })).toHaveAttribute("href", "/ru/dlya-zastroyshchikov");
-    await expect(root.getByRole("link", { name: "Вход для сотрудников" })).toHaveAttribute("href", "/admin");
+    // Проект-2 (PLAN §10, п. 19): ни одна ссылка сайта не ведёт в кабинет.
+    await expect(root.getByRole("link", { name: "Вход для сотрудников" })).toHaveCount(0);
     await expect(root.getByRole("link", { name: "Политика конфиденциальности" })).toHaveAttribute("href", "/ru/privacy");
     await expect(root).toContainText("Фергана, ул. Сайилгох, 4");
     await expect(root).toContainText("© 2026 Vodiy House");
     // «Спецпредложения» (3.16б) — якорь главной, только при действующей витрине (с облаком — DEMO).
     if (hasCloud) await expect(root.getByRole("link", { name: "Спецпредложения" })).toHaveAttribute("href", "/ru#spetspredlozheniya");
     else await expect(root).not.toContainText("Спецпредложения");
-    await expect(root.locator('a[href^="tel:"]')).toHaveCount(0);
+    // Общий номер Vodiy House задаётся в «Настройки → Контакты» (в тестовом облаке — с 02.11): одна
+    // ссылка tel: или ни одной, но не номер застройщика (правило 1.2 — rule-1-2.spec).
+    expect(await root.locator('a[href^="tel:"]').count()).toBeLessThanOrEqual(1);
     // Снимок — когда знак проявился (full: клетки по диагонали до ~1,5 с); липкая шапка не мешает.
     await expect(root.locator(".site-footer__pixel").last()).toHaveCSS("opacity", "1", { timeout: 5000 });
     await expect(root.locator(".site-footer__pixels")).toHaveCSS("opacity", "1");

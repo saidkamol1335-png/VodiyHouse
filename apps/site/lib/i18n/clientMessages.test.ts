@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import ru from "@/messages/ru.json";
 import {
-  adminRootFiles,
   reachableClientModules,
   readSource,
   routeFiles,
 } from "@/tests/unit/importGraph";
 import {
-  ADMIN_ROOT_MESSAGES,
   CABINET_NAMESPACE,
   CATALOG_MESSAGES,
   CALC_NAMESPACE,
@@ -175,12 +173,5 @@ describe("сообщения для браузера", () => {
     expect(
       [...quizKeys, ...contactKeys].filter((key) => !covers(LEAD_CONTACT_MESSAGES, key)),
     ).toEqual([]);
-  });
-
-  it("корню /admin хватает разделов входа: каждый useTranslations вне кабинета ими покрыт", () => {
-    expect(() => pickMessages(ru, ADMIN_ROOT_MESSAGES)).not.toThrow();
-    const used = [...clientNamespaces(adminRootFiles())];
-    expect(used.length).toBeGreaterThan(0);
-    expect(used.filter((namespace) => !covers(ADMIN_ROOT_MESSAGES, namespace))).toEqual([]);
   });
 });

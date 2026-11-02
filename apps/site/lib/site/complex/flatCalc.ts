@@ -4,7 +4,7 @@ import { CATALOG_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import type { FlatCalcRecord } from "@vh/shared/calc/flatScreen";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePreviewClient } from "@/lib/supabase/preview";
 
 // «Расчёт для этой квартиры» на странице ЖК (шаг 2.7 → 3.5): site_layout_calc(планировка) ролью
 // посетителя, в кэше — свободные квартиры и цены сбрасывает CATALOG_TAG, программы и курс —
@@ -25,7 +25,7 @@ async function fetchLayoutCalc(layoutId: string): Promise<FlatCalcRecord | null>
 }
 
 async function fetchPreviewLayoutCalc(layoutId: string): Promise<FlatCalcRecord | null> {
-  const { data, error } = await (await createSupabaseServerClient()).rpc("site_layout_calc", { p_layout: layoutId });
+  const { data, error } = await (await createSupabasePreviewClient()).rpc("site_layout_calc", { p_layout: layoutId });
   if (error) throw new Error("site-layout-calc-preview-unavailable", { cause: error });
   return (data as FlatCalcRecord | null) ?? null;
 }

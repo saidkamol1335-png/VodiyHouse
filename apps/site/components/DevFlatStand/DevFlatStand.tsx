@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { FlatCalculator } from "@/components/FlatCalculator";
-import type { DemoFlatLayout } from "@/lib/admin/calc/flatDemo";
+import type { DemoFlatLayout } from "@/lib/devDemo/calc/flatDemo";
 import type { FlatCalcScreen } from "@vh/shared/calc/flatScreen";
 import { CALC_HINT_DRAFTS } from "@vh/shared/calc/hints";
 import type { CalcParams } from "@vh/shared/calc/params";

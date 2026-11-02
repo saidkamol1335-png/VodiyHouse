@@ -2,11 +2,10 @@ import { expect, test } from "./fixtures";
 
 // Базовые эффекты по решениям дизайн-интервью 19.10.2026 (docs/design-decisions.md).
 test.describe("базовые эффекты", () => {
-  test("Э1: линии колонок на сайте есть, в кабинете нет", async ({ page }) => {
+  // Кабинет — отдельное приложение (PLAN §10): там линий колонок нет, здесь проверяем сайт.
+  test("Э1: линии колонок на сайте есть", async ({ page }) => {
     await page.goto("/uz");
     await expect(page.locator(".bg-columns")).toHaveCount(1);
-    await page.goto("/admin");
-    await expect(page.locator(".bg-columns")).toHaveCount(0);
   });
 
   test("Э2: стекло в full с blur, в lite — без", async ({ page }) => {

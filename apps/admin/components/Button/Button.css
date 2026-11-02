@@ -1,0 +1,145 @@
+/* Кнопки-пилюли мокапа (.btn): 46 px, 14,5 px / 650. */
+.button {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 22px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-control-l);
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--dur-base) var(--ease),
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button--primary {
+  background: var(--amber);
+  color: var(--on-amber);
+  box-shadow: var(--glow-amber);
+}
+
+.button--primary:hover {
+  background: var(--amber-hover);
+}
+
+/* Блик пробегает по кнопке раз в 3,6 с — только в full, через transform (CLAUDE.md §3). */
+[data-motion="full"] .button--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(115deg, transparent 35%, var(--button-shine) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: button-shine var(--dur-shine) var(--ease-2) infinite;
+}
+
+/* Заливка поднимается снизу при наведении (мокап .rh), только full; в lite меняется лишь цвет. */
+@media (hover: hover) {
+  [data-motion="full"] .button--primary:not(:disabled)::before,
+  [data-motion="full"] .button--outline:not(:disabled)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--amber-hover);
+    transform: translateY(101%);
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  [data-motion="full"] .button--outline:not(:disabled)::before {
+    background: var(--glass-3);
+  }
+
+  [data-motion="full"] .button--primary:not(:disabled):hover {
+    background: var(--amber);
+  }
+
+  [data-motion="full"] .button--primary:not(:disabled):hover::before,
+  [data-motion="full"] .button--outline:not(:disabled):hover::before {
+    transform: translateY(0);
+  }
+}
+
+/* С рамкой — вторая кнопка рядом с главной (мокап: «Скопировать для Telegram» под «Получить
+   точный расчёт»). */
+.button--outline {
+  border-color: var(--line-2);
+  background: var(--bg-2);
+}
+
+.button--outline:hover {
+  border-color: var(--line-3);
+}
+
+.button--ghost:hover {
+  background: var(--glass-3);
+}
+
+.button--danger {
+  border-color: var(--badge-bad-border);
+  color: var(--badge-bad-fg);
+}
+
+.button--danger:hover {
+  background: var(--bad-soft);
+}
+
+.button--sm {
+  height: 36px;
+  padding: 0 15px;
+  font-size: var(--fs-small-l);
+}
+
+/* На касание — цель не меньше 44 px (приёмка «телефон»), вид кнопки тот же. */
+@media (pointer: coarse) {
+  .button--sm {
+    height: var(--touch-target);
+  }
+}
+
+.button--block {
+  width: 100%;
+}
+
+.button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: default;
+}
+
+.button:disabled:active {
+  transform: none;
+}
+
+.button--pending {
+  cursor: progress;
+}
+
+@keyframes button-shine {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  80%,
+  100% {
+    transform: translateX(120%);
+  }
+}

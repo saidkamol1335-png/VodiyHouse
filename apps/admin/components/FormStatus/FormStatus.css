@@ -1,0 +1,30 @@
+/* Плашка формы кабинета: ошибка сервера, уведомление или «готово». */
+.form-status {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-s);
+  color: var(--fg);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+}
+
+.form-status--error {
+  border-color: var(--badge-bad-border);
+  background: var(--bad-soft);
+  color: var(--badge-bad-fg);
+}
+
+/* Как прежняя .login-form__status мокапа: янтарная пунктирная рамка. */
+.form-status--notice {
+  border-style: dashed;
+  border-color: var(--amber-line);
+  background: var(--amber-soft);
+}
+
+.form-status--success {
+  border-color: var(--badge-ok-border);
+  background: var(--ok-soft);
+  color: var(--badge-ok-fg);
+}

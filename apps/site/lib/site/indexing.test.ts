@@ -17,7 +17,7 @@ describe("индексация: тестовый деплой закрыт (Ф2)
     vi.stubEnv("SITE_NOINDEX", "");
     vi.stubEnv("SITE_URL", "https://vodiyhouse.uz");
     expect(robots()).toEqual({
-      rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/dev"] },
+      rules: { userAgent: "*", allow: "/", disallow: ["/dev", "/preview"] },
       sitemap: "https://vodiyhouse.uz/sitemap.xml",
     });
   });

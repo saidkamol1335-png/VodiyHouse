@@ -7,7 +7,6 @@
 [build]
   command = "npm run build -w @vh/site"
   publish = "apps/site/.next"
-  functions = "apps/site/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "24"

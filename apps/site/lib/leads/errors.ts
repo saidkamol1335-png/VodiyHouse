@@ -1,4 +1,5 @@
-import type { DbErrorLike } from "@/lib/admin/authErrors";
+/** Ошибка базы через PostgREST: код Postgres и подсказка 'vh:…'. */
+export type DbErrorLike = { code?: string; hint?: string | null };
 import type { LeadErrorCode } from "./types";
 
 // Отказы submit_lead → коды формы сайта (messages: lead.errors). По hint 'vh:…', не по тексту.

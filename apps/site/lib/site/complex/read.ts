@@ -1,12 +1,11 @@
 import "server-only";
 import { cache } from "react";
 import { cacheLife, cacheTag } from "next/cache";
-import { draftMode } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
 import { CATALOG_TAG, complexTag, developerTag, DEVELOPERS_TAG, DICTIONARIES_TAG, PROGRAMS_TAG } from "@/lib/cache";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePreviewClient, isPreview } from "@/lib/supabase/preview";
 import { pickerFrom, type PickerRecord } from "@/lib/site/picker/records";
 import { progressReportsFrom, type ProgressReportRecord } from "@/lib/site/progress/records";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -51,11 +50,11 @@ async function fetchComplexPage(slug: string): Promise<ComplexPage | null> {
 }
 
 /**
- * Предпросмотр (шаг 3.6, draftMode): мимо кэша и сессией сотрудника — site_complex отдаёт черновик
- * только сотруднику. Кука предпросмотра одна черновик не открывает.
+ * Предпросмотр (шаг 3.6 → PLAN §10): мимо кэша и с токеном гранта кабинета — site_complex отдаёт
+ * черновик только по действующему гранту. Кука draftMode одна черновик не открывает.
  */
 async function fetchPreviewPage(slug: string): Promise<ComplexPage | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabasePreviewClient();
   const { data, error } = await supabase.rpc("site_complex", { p_slug: slug });
   if (error) throw new Error("site-complex-preview-unavailable", { cause: error });
   // Черновик без застройщика: страницы ещё нет, у неё обязателен раздел застройщика.
@@ -78,7 +77,7 @@ export const readComplexPage = cache(async (slug: string): Promise<ComplexPageRe
   if (!hasSupabaseEnv()) return { kind: "unavailable" };
   if (!SLUG.test(slug)) return { kind: "missing" };
   try {
-    const { isEnabled: preview } = await draftMode();
+    const preview = await isPreview();
     const page = preview ? await fetchPreviewPage(slug) : await fetchComplexPage(slug);
     return page ? { kind: "page", page } : { kind: "missing" };
   } catch (error) {

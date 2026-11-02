@@ -1,8 +1,5 @@
 import "server-only";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
-import { hasAuthCookie } from "@/lib/admin/gate";
-import { visitorKey } from "@/lib/leads/server/submit";
+import { callSigned, hasSignedWriteEnv, visitorKey } from "@/lib/supabase/signedWrite";
 import { EVENT_BATCH_MAX, EVENT_TYPES, type EventBatch, type SiteEvent } from "../types";
 import { deviceOf, isBot } from "../visitor";
 
@@ -48,25 +45,29 @@ const markOf = (value: unknown) => (typeof value === "string" ? value.trim().rep
 export type TrackRequest = { userAgent: string | null; cookies: Map<string, string>; body: unknown };
 export type TrackResult = { visitor: string; session: string } | null;
 
-/** null — не записываем (бот, сотрудник, нет ключа или пустая пачка); иначе — id для cookie. */
+/**
+ * null — не записываем (бот, нет подписи или пустая пачка); иначе — id для cookie. Сессию сотрудника
+ * сайт больше не видит (кабинет на своём домене) — его посещения считаются (PLAN §10, п. 18).
+ */
 export async function trackEvents({ userAgent, cookies, body }: TrackRequest): Promise<TrackResult> {
-  if (!hasSupabaseAdminEnv() || isBot(userAgent) || hasAuthCookie([...cookies.keys()])) return null;
+  if (!hasSignedWriteEnv() || isBot(userAgent)) return null;
   const batch = batchFrom(body);
   if (!batch) return null;
   // Без cookie посетителя (запрещены) — id вкладки из пачки: иначе каждая пачка — новый посетитель.
   const fallback = cookies.has(VISITOR_COOKIE) ? undefined : batch.tab;
   const visitor = idOr(cookies.get(VISITOR_COOKIE) ?? fallback);
   const session = idOr(cookies.get(SESSION_COOKIE) ?? fallback);
-  const { error } = await createSupabaseAdminClient().rpc("track_events", {
-    p_visitor: visitor,
-    p_session: session,
-    p_client_key: await visitorKey(),
-    p_device: deviceOf(userAgent),
-    p_lang: batch.lang,
-    p_source: batch.source,
-    p_events: batch.events,
-    p_medium: batch.medium ?? null,
-    p_content: batch.content ?? null,
+  // Подписанный вызов ролью посетителя (PLAN §10, п. 5): service-ключа у сайта нет.
+  const { error } = await callSigned("site_track_events", "events", {
+    visitor,
+    session,
+    client_key: await visitorKey(),
+    device: deviceOf(userAgent),
+    lang: batch.lang,
+    source: batch.source,
+    events: batch.events,
+    medium: batch.medium ?? null,
+    content: batch.content ?? null,
   });
   if (error) console.error("[events] пачка не записана", error.message);
   return { visitor, session };

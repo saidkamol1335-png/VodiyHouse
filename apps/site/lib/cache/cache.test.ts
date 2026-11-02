@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { updateTag, revalidateTag } = vi.hoisted(() => ({
@@ -60,80 +58,5 @@ describe("теги кэша сайта", () => {
     expect(complexIdFrom({ complex_id: "c1", changed: 2 })).toBe("c1");
     expect(complexIdFrom("c1")).toBeNull();
     expect(complexIdFrom(null)).toBeNull();
-  });
-});
-
-// Новое действие, которое меняет видимое на сайте, не должно забыть сбросить кэш. Без тега —
-// только черновики (сайт их не видит), чертёж до сохранения планировок и «Внутреннее».
-const ACTIONS_DIR = path.join("lib", "admin", "actions");
-const CONTENT_FILES = [
-  // Публикация и снятие отчёта хода строительства (фаза 5, 5D).
-  "progressReview.ts",
-  "complexes.ts",
-  "complexContent.ts",
-  // «Фасад и планы» (фаза 4): раздел «Выбрать квартиру» на странице ЖК.
-  "complexFacade.ts",
-  "complexMedia.ts",
-  "contacts.ts",
-  "developers.ts",
-  "developerMedia.ts",
-  "dictionaries.ts",
-  "hints.ts",
-  "programs.ts",
-  // «Витрина» (3.16а): спецпредложения, подборки, реклама и их обложки — на главной и карточках.
-  "showcase.ts",
-  "showcaseMedia.ts",
-  "units.ts",
-  "unitsMass.ts",
-  "unitsStatus.ts",
-];
-// Без контента сайта: вход, сотрудники, снимки расчётов, чтение журнала и списка квартир.
-const NO_CONTENT_FILES = [
-  "auth.ts",
-  "calculations.ts",
-  "journal.ts",
-  // Заявки (шаг 3.7) — только кабинет: на сайте их нет.
-  "leads.ts",
-  // Отчёт на проверке (фаза 5) на сайт не попадает — его публикует менеджер (5D, свой файл).
-  "progressReports.ts",
-  "siteNow.ts",
-  "siteStock.ts",
-  "staff.ts",
-  "unitsList.ts",
-];
-const WITHOUT_TAG = new Set([
-  "createComplexAction",
-  "createDeveloperAction",
-  "attachComplexDrawingAction",
-  "saveDeveloperPrivateAction",
-  // Возврат отчёта мобилографу (фаза 5): отчёт и так не на сайте.
-  "returnProgressReportAction",
-]);
-const EXPIRES =
-  /\b(expireCatalog|expireComplex|expireProgress|expireDeveloper|expireDictionaries|expirePrograms|expireShowcase|expireSiteSettings|markComplexStale|markDeveloperStale|markShowcaseStale)\(/;
-
-describe("действия контента сбрасывают кэш сайта", () => {
-  const all = readdirSync(ACTIONS_DIR).filter(
-    (file) => file.endsWith(".ts") && !file.endsWith(".test.ts"),
-  );
-  const files = all.filter((file) => CONTENT_FILES.includes(file));
-
-  // Новый файл действий без разбора валит тест: иначе его действия проверку бы не проходили.
-  it("каждый файл действий разобран: контент сайта или явно без него", () => {
-    expect(all.filter((file) => !NO_CONTENT_FILES.includes(file)).sort()).toEqual(
-      [...CONTENT_FILES].sort(),
-    );
-  });
-
-  it.each(files)("%s", (file) => {
-    const source = readFileSync(path.join(ACTIONS_DIR, file), "utf8").replace(/\r\n/g, "\n");
-    const actions = [
-      ...source.matchAll(/export async function (\w+)\([^)]*\)[^{]*\{\n([\s\S]*?)\n\}/g),
-    ];
-    expect(actions.length).toBeGreaterThan(0);
-    for (const [, name, body] of actions) {
-      if (WITHOUT_TAG.has(name!)) continue;
-      expect(body, name).toMatch(EXPIRES);
-    }
   });
 });

@@ -1,8 +1,7 @@
 import { useTranslations } from "next-intl";
-import NextLink from "next/link";
 import { Container } from "@/components/Container";
 import { Link } from "@/lib/i18n/navigation";
-import { ADMIN_ROUTE, ROUTES } from "@/lib/routes";
+import { ROUTES } from "@/lib/routes";
 import { FooterCatalog, FooterContacts, FooterCopyUrl } from "./FooterParts";
 import { PixelLogo } from "./PixelLogo";
 
@@ -37,11 +36,6 @@ export function SiteFooter() {
             <Link href={ROUTES.forDevelopers} className="site-footer__link">
               {t("footer.becomePartner")}
             </Link>
-            {/* Кабинет — без префикса языка, поэтому обычный Link Next.js. */}
-            {/* Без предзагрузки: /admin посетителю отвечает переходом на вход. */}
-            <NextLink href={ADMIN_ROUTE} prefetch={false} className="site-footer__link">
-              {t("contacts.staffLogin")}
-            </NextLink>
           </FooterColumn>
         </div>
         <div className="site-footer__bottom">

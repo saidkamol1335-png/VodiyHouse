@@ -2,7 +2,6 @@
 
 import { ArrowRight, AtSign, ChevronRight, Clock, MapPin, Phone, Send, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import NextLink from "next/link";
 import { useEffect, useRef, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { LogoMark } from "@/components/Logo";
@@ -12,7 +11,7 @@ import { isActivePath } from "@/components/HeaderNav";
 import { useNavItems } from "@/components/HiddenNav";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
-import { ADMIN_ROUTE, MENU_NAV, ROUTES } from "@/lib/routes";
+import { MENU_NAV, ROUTES } from "@/lib/routes";
 
 type PhoneMenuProps = {
   id: string;
@@ -54,8 +53,6 @@ export function PhoneMenu({ id, onClose }: PhoneMenuProps) {
           <LanguageSwitch variant="full" />
         </div>
         <div className="phone-menu__footer">
-          {/* Кабинет — без префикса языка, поэтому обычный Link Next.js. */}
-          <NextLink href={ADMIN_ROUTE} prefetch={false}>{t("contacts.staffLogin")}</NextLink>
           <Link href={ROUTES.privacy}>{t("contacts.privacy")}</Link>
         </div>
       </div>

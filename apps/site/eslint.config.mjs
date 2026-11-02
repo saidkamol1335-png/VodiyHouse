@@ -3,17 +3,12 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 
-// Клиент с секретным ключом обходит RLS — только серверные адаптеры кабинета. patterns, а не
-// paths: ловят и относительный импорт (../supabase/admin), и сам ключ из env.
+// Сайт без service-ключа и кабинета (PLAN §10): ни один модуль не берёт клиент service_role, его
+// ключ или код кабинета — без исключений. patterns, а не paths: ловят и относительный импорт.
 const secretImportPatterns = [
   {
-    group: ["**/supabase/admin", "**/supabase/admin.ts"],
-    message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
-  },
-  {
-    group: ["**/supabase/env", "**/supabase/env.ts", "./env"],
-    importNames: ["supabaseSecretKey"],
-    message: "Секретный ключ читают только lib/supabase/admin.ts и authForwarding.ts.",
+    group: ["**/supabase/admin", "**/supabase/admin.ts", "**/lib/admin/**", "@supabase/ssr"],
+    message: "У сайта нет service-ключа и кабинета (PLAN §10): чтение — функции site_*, запись — lib/supabase/signedWrite.ts.",
   },
 ];
 
@@ -23,19 +18,6 @@ const eslintConfig = defineConfig([
   prettier,
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: [
-      "lib/admin/server/**",
-      // Заявки посетителя без входа и расписание: прав сотрудника нет, проверяет база (submit_lead и
-      // очередь доставки открыты только серверу). В браузер модули не попадают (server-only).
-      "lib/leads/server/**",
-      // События сайта (3.12): посетитель без входа, track_events открыт только серверу.
-      "lib/events/server/**",
-      // Окончательное удаление архива (3.13): расписание без сотрудника, функции открыты только серверу.
-      "lib/archive/server/**",
-      "lib/supabase/admin.ts",
-      "lib/supabase/authForwarding.ts",
-      "lib/supabase/env.test.ts",
-    ],
     rules: {
       "no-restricted-imports": ["error", { patterns: secretImportPatterns }],
     },
@@ -57,24 +39,6 @@ const eslintConfig = defineConfig([
             },
           ],
           patterns: secretImportPatterns,
-        },
-      ],
-    },
-  },
-  {
-    // Пересылка IP в Auth берёт секретный ключ только для запросов сотрудника к Auth; клиент
-    // с правами service_role ей не нужен.
-    files: ["lib/supabase/authForwarding.ts"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: ["**/supabase/admin", "**/supabase/admin.ts", "./admin"],
-              message: "Ключ service_role — только в lib/admin/server/*: там проверены права сотрудника.",
-            },
-          ],
         },
       ],
     },

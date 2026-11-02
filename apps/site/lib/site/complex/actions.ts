@@ -1,23 +1,24 @@
 "use server";
 
-import { draftMode } from "next/headers";
+import { cacheLife, cacheTag } from "next/cache";
 import type { FlatCalcRecord } from "@vh/shared/calc/flatScreen";
-import { readOnlineVisitors } from "@/lib/events/server/online";
+import { CATALOG_TAG } from "@/lib/cache";
 import { unitFrom, type BlockUnitRecord, type PickerUnit } from "@/lib/site/picker/records";
-import { pickerRefreshMs } from "@/lib/site/picker/refresh";
+import { PICKER_REFRESH } from "@/lib/site/picker/refresh";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePreviewClient, isPreview } from "@/lib/supabase/preview";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { readLayoutCalc } from "./flatCalc";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * «Рассчитать платёж» у планировки: открытые данные сайта — без входа и без скидок (PLAN §3.13).
- * В предпросмотре — сессией руководителя (черновик база считает только ему).
+ * В предпросмотре — с токеном гранта кабинета (черновик база отдаёт только по нему).
  */
 export async function readLayoutCalcAction(layoutId: string): Promise<FlatCalcRecord | null> {
   if (typeof layoutId !== "string") return null;
-  const { isEnabled: preview } = await draftMode();
+  const preview = await isPreview();
   return readLayoutCalc(layoutId, preview);
 }
 
@@ -33,10 +34,28 @@ export async function readLayoutCalcWithoutUnitsAction(
   return record ? { ...record, units: [] } : null;
 }
 
+/** Квартиры блока ролью посетителя — в кэше; правка квартир в кабинете сбрасывает CATALOG_TAG (revalidate). */
+async function fetchBlockUnits(blockId: string): Promise<PickerUnit[]> {
+  "use cache";
+  cacheTag(CATALOG_TAG);
+  cacheLife("hours");
+  const { data, error } = await createSupabasePublicClient().rpc("block_units", { target_block: blockId });
+  if (error) throw new Error("block-units-unavailable", { cause: error });
+  return (data as BlockUnitRecord[]).map(unitFrom);
+}
+
+/** Предпросмотр: мимо кэша, с токеном гранта — черновик база отдаёт только по нему. */
+async function fetchPreviewBlockUnits(blockId: string): Promise<PickerUnit[]> {
+  const { data, error } = await (await createSupabasePreviewClient()).rpc("block_units", { target_block: blockId });
+  if (error) throw new Error("block-units-preview-unavailable", { cause: error });
+  return (data as BlockUnitRecord[]).map(unitFrom);
+}
+
 /**
- * «Выбрать квартиру» (фаза 4): квартиры блоков со статусами — мимо кэша, раздел перечитывает их,
- * пока он на экране. block_units отдаёт цену только свободной и только видимого ЖК (в предпросмотре —
- * сессией сотрудника). refreshMs — через сколько спросить снова: по числу посетителей онлайн.
+ * «Выбрать квартиру» (фаза 4): квартиры блоков со статусами. Сайт читает только при сборке и из кэша
+ * (PLAN §10, п. 4): статус квартиры в кабинете сбрасывает кэш через revalidate, раздел перечитывает
+ * кэш раз в PICKER_REFRESH.usual, пока он на экране. block_units отдаёт цену только свободной и
+ * только видимого ЖК.
  */
 export async function readComplexUnitsAction(
   blockIds: string[],
@@ -44,20 +63,17 @@ export async function readComplexUnitsAction(
   if (!Array.isArray(blockIds) || blockIds.length === 0 || blockIds.length > 20) return null;
   if (!blockIds.every((id) => typeof id === "string" && UUID.test(id)) || !hasSupabaseEnv())
     return null;
-  const supabase = await createSupabaseServerClient();
-  const [online, ...answers] = await Promise.all([
-    readOnlineVisitors(),
-    ...blockIds.map((id) => supabase.rpc("block_units", { target_block: id })),
-  ]);
-  const failed = answers.find((answer) => answer.error);
-  if (failed) {
-    console.error("[novostroyki/zhk] квартиры блоков недоступны", failed.error);
+  const preview = await isPreview();
+  try {
+    const lists = await Promise.all(
+      blockIds.map((id) => (preview ? fetchPreviewBlockUnits(id.toLowerCase()) : fetchBlockUnits(id.toLowerCase()))),
+    );
+    return {
+      units: Object.fromEntries(blockIds.map((id, index) => [id, lists[index]!])),
+      refreshMs: PICKER_REFRESH.usual,
+    };
+  } catch (error) {
+    console.error("[novostroyki/zhk] квартиры блоков недоступны", error);
     return null;
   }
-  return {
-    units: Object.fromEntries(
-      blockIds.map((id, index) => [id, (answers[index]!.data as BlockUnitRecord[]).map(unitFrom)]),
-    ),
-    refreshMs: pickerRefreshMs(online),
-  };
 }

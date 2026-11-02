@@ -3,7 +3,7 @@ import { type AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 import { Container } from "@/components/Container";
 import { DevFlatStand } from "@/components/DevFlatStand";
 import { SiteHeader } from "@/components/SiteHeader";
-import { demoFlatCalc, demoFlatLayouts } from "@/lib/admin/calc/flatDemo";
+import { demoFlatCalc, demoFlatLayouts } from "@/lib/devDemo/calc/flatDemo";
 import { flatCalcFrom } from "@vh/shared/calc/flatScreen";
 import { readCalcParams } from "@vh/shared/calc/params";
 import { CALC_MESSAGES, pickMessages, siteMessages } from "@/lib/i18n/clientMessages";

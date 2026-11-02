@@ -93,10 +93,6 @@ export function routeFiles(dir: string): string[] {
   });
 }
 
-/** Корень /admin вне кабинета: вход, смена пароля, ошибка — свои CSS и сообщения. */
-export const adminRootFiles = () =>
-  routeFiles("app/admin").filter((file) => !/[\\/]\(cabinet\)[\\/]/.test(file));
-
 /** Папка компонента (components/<Имя>/…) или null. */
 export function componentOf(file: string): string | null {
   return /components[\\/]([^\\/]+)[\\/]/.exec(path.relative(ROOT, file))?.[1] ?? null;

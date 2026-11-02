@@ -38,11 +38,8 @@ test("заголовки безопасности: сайт — только с�
     expect(headers["referrer-policy"], path).toBe("strict-origin-when-cross-origin");
     expect(headers["permissions-policy"], path).toContain("camera=()");
   }
-  const admin = (await request.get("/admin/vhod")).headers();
-  expect(admin["x-frame-options"]).toBe("DENY");
-  expect(admin["content-security-policy"]).toBe("frame-ancestors 'none'");
-  expect(admin["referrer-policy"]).toBe("same-origin");
-  expect(admin["x-content-type-options"]).toBe("nosniff");
+  // Кабинета на сайте нет (PLAN §10, п. 19): /admin — страница «не найдено».
+  expect((await request.get("/admin")).status()).toBe(404);
 });
 
 // Шаг 3.14: robots.txt с картой сайта, sitemap.xml с парами языков, schema.org агентства и ЖК,
@@ -50,7 +47,7 @@ test("заголовки безопасности: сайт — только с�
 
 test("robots.txt и sitemap.xml: кабинет закрыт, карта с языками; избранного и подборки нет", async ({ request }) => {
   const robots = await (await request.get("/robots.txt")).text();
-  expect(robots).toContain("Disallow: /admin");
+  expect(robots).toContain("Disallow: /preview");
   expect(robots).toMatch(/Sitemap: https?:\/\/\S+\/sitemap\.xml/);
   const sitemap = await request.get("/sitemap.xml");
   expect(sitemap.status()).toBe(200);

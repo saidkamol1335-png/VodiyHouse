@@ -8,14 +8,6 @@ import type { AbstractIntlMessages } from "next-intl";
 /** Тексты кабинета — только в кабинете и на стендах; сайту они не нужны. */
 export const CABINET_NAMESPACE = "admin";
 
-/** Клиентские компоненты корня /admin вне кабинета: вход, смена пароля, «кабинет недоступен». */
-export const ADMIN_ROOT_MESSAGES = [
-  "header",
-  "admin.login",
-  "admin.password",
-  "admin.unavailable",
-] as const;
-
 /** Разделы по путям с точкой («admin.login»): остальные ветки дерева не копируются. */
 export function pickMessages(
   messages: AbstractIntlMessages,

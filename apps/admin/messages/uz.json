@@ -1,0 +1,1332 @@
+{
+  "meta": {
+    "title": "Vodiy House — Farg‘ona viloyati yangi uylari",
+    "description": "Farg‘ona viloyati yangi uylar agentligi. Xaridor uchun — bepul: komissiyani quruvchi to‘laydi."
+  },
+  "nav": {
+    "new": "Yangi uylar",
+    "specials": "Maxsus takliflar",
+    "developers": "Quruvchilar",
+    "calculator": "Kalkulyator",
+    "about": "Biz haqimizda",
+    "forDevelopers": "Quruvchilarga",
+    "quiz": "1 daqiqada tanlash",
+    "howToBuy": "Qanday sotib olish"
+  },
+  "header": {
+    "close": "Yopish",
+    "home": "Vodiy House — bosh sahifa",
+    "navLabel": "Sayt bo‘limlari",
+    "menu": "Menyu",
+    "openMenu": "Menyuni ochish",
+    "closeMenu": "Menyuni yopish",
+    "back": "Orqaga",
+    "favorites": "Saralangan",
+    "showPhone": "Telefonni ko‘rsatish",
+    "call": "Qo‘ng‘iroq",
+    "language": "Til",
+    "languageRu": "Русский",
+    "languageUz": "O‘zbekcha",
+    "favoritesCount": "Saralangan · {count}"
+  },
+  "contacts": {
+    "phone": "Vodiy House telefoni",
+    "telegram": "Telegram",
+    "officeLabel": "Ofis",
+    "office": "Farg‘ona, Sayilgoh ko‘chasi, 4",
+    "staffLogin": "Xodimlar uchun kirish",
+    "privacy": "Maxfiylik siyosati",
+    "instagram": "Instagram",
+    "hours": "Ish vaqti"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Yangi uylar · Farg‘ona",
+      "titleLead": "Farg‘onadagi yangi binolarda kvartiralar —",
+      "titleAccent": "quruvchi narxida",
+      "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
+      "cta": "Kvartira tanlash",
+      "scrollCue": "Pastga suring",
+      "loading": "Qurilish videosi yuklanmoqda",
+      "finaleTitle": "Uy topshirildi.",
+      "finaleText": "Topshirilgan yoki qurilayotgan TJMdan kvartira tanlab beramiz — quruvchi narxida.",
+      "finaleCta": "Kvartiralarni ko‘rish",
+      "free": {
+        "price": "Narx — quruvchinikidek",
+        "service": "Tanlash va ko‘rsatish — bepul",
+        "docs": "TJM hujjatlari tekshirilgan"
+      },
+      "stats": {
+        "label": "Vodiy House raqamlarda",
+        "complexes": "{count, plural, other {turar-joy majmuasi}}",
+        "developers": "{count, plural, other {quruvchi}}",
+        "flats": "{count, plural, other {kvartira sotuvda}}"
+      },
+      "found": {
+        "label": "Hozir topildi",
+        "query": "2 xonali $45 000 gacha",
+        "value": "{complexes} TJM · {flats} kv.",
+        "some": "{complexes} TJM · kvartiralar bor",
+        "partial": "{complexes} TJM · {flats}+ kv."
+      }
+    },
+    "marquee": "Vodiy House · Farg‘ona · Marg‘ilon · Qo‘qon · Quvasoy · Yangi uylar",
+    "catalog": {
+      "eyebrow": "Filtr",
+      "title": "Kvartirani ",
+      "titleAccent": "parametrlar bo‘yicha tanlang"
+    },
+    "manifesto": {
+      "eyebrow": "Vodiy House qisqacha",
+      "text": "Farg‘ona viloyatidagi barcha yangi uylarni bir joyga to‘pladik. <a>Hujjatlar tekshirilgan, muddatlar halol,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
+    },
+    "why": {
+      "eyebrow": "Nega Vodiy House orqali",
+      "title": "Narx o‘sha. ",
+      "titleAccent": "Xizmat — bepul.",
+      "priceKicker": "Ustama",
+      "priceTitle": "Narx — quruvchinikidek",
+      "priceText": "Komissiyani siz emas, quruvchi to‘laydi. Narx sotuv bo‘limidagi bilan bir xil.",
+      "docsKicker": "Tekshiruv",
+      "docsTitle": "Har bir TJM hujjatlari tekshirilgan",
+      "docsText": "Ruxsatnoma, yer, ekspertiza — TJM sahifasida tekshiruv sanasi bilan.",
+      "freeKicker": "Bepul",
+      "freeTitle": "Tanlash, ko‘rsatish va bankda yordam",
+      "freeText": "Menejer birinchi qo‘ng‘iroqdan kalitgacha yoningizda.",
+      "pills": "TJM tanlash · Obyekt ko‘rsatish · Hujjat tekshiruvi · Ipoteka · Muddatli to‘lov · Kadastr · Kalitlar",
+      "stockKicker": "Mavjudlik",
+      "stockTitle": "Har bir TJM qoldiqlari",
+      "stockText": "«3 xonali — 5 ta qoldi» kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
+      "stockCta": "Mavjudlikni ko‘rish",
+      "priceBig": "0%",
+      "videoKicker": "Qurilish videosi",
+      "videoTitle": "Har oy har bir qurilishni suratga olamiz",
+      "videoText": "Obyektga borish shart emas — kvartira hozir qanday ko‘rinishini ko‘ring.",
+      "videoCta": "Namunani ko‘rish",
+      "videoRec": "REC · {complex} · {block}-blok"
+    },
+    "partner": {
+      "eyebrow": "Quruvchilar uchun",
+      "title": "Quruvchimisiz?",
+      "text": "Saytda reklama va Vodiy House rieltorlari bilan birgalikda sotuv.",
+      "cta": "Hamkor bo‘lish"
+    }
+  },
+  "timelapse": {
+    "pause": "Rolikni to‘xtatish",
+    "play": "Rolikni davom ettirish"
+  },
+  "calc": {
+    "page": {
+      "metaTitle": "Muddatli to‘lov va ipoteka kalkulyatori — Vodiy House",
+      "metaDescription": "Farg‘ona yangi uylaridagi kvartira uchun oylik to‘lov, ortiqcha to‘lov va yakuniy narxni hisoblang: quruvchidan va bank orqali muddatli to‘lov, ipoteka.",
+      "eyebrow": "Kalkulyator",
+      "title": "Kalkulyator:",
+      "titleAccent": "muddatli to‘lov va ipoteka",
+      "lead": "Quruvchi va dasturni tanlang — oylik to‘lov, ortiqcha to‘lov va yakuniy narx darhol hisoblanadi.",
+      "examples": "Hisob-kitob namunalari",
+      "example": "{area} m² · {term}",
+      "empty": "Kalkulyator quruvchilar to‘lov dasturlarini qo‘shganda ishlaydi. Hozircha birga hisoblaymiz — Vodiy House’ga yozing."
+    },
+    "steps": {
+      "developer": "Quruvchi",
+      "program": "To‘lov dasturi",
+      "price": "Kvartira narxi",
+      "downTerm": "Boshlang‘ich to‘lov va muddat"
+    },
+    "kinds": {
+      "full": "100% to‘lov",
+      "scheme": "Quruvchidan muddatli to‘lov",
+      "markup": "Ustama bilan muddatli to‘lov",
+      "bank": "Bank orqali muddatli to‘lov",
+      "mortgage": "Ipoteka"
+    },
+    "currency": {
+      "usd": "$",
+      "uzs": "so‘m"
+    },
+    "programs": {
+      "title": "To‘lov dasturi",
+      "full": "butun summa birdaniga, to‘lovlarsiz",
+      "scheme": "kamida {down} · {term}gacha · ustamasiz",
+      "markup": "kamida {down} · {term}gacha · ustama {rate}gacha",
+      "bank": "kamida {down} · {term}gacha · yillik {rate}",
+      "blocks": "{complex}, {block} blok",
+      "empty": "Bu narx uchun dasturlar yo‘q — shartlarni Vodiy House aniqlaydi",
+      "noRate": "Kurs mavjud emas — ayrim bank dasturlari hozir ko‘rsatilmaydi"
+    },
+    "price": {
+      "title": "Kvartira narxi",
+      "modesLabel": "Narx qayerdan",
+      "modes": {
+        "unit": "Kvartira",
+        "area": "Maydon × m² narxi",
+        "layout": "Planirovka",
+        "sum": "Summa"
+      },
+      "unit": "Kvartira · bo‘sh: {count}",
+      "unitOption": "{number}-kv. · {floor}-qavat · {rooms} · {area} m² · {price}",
+      "unitNoPrice": "{number}-kv. · {floor}-qavat · narxi so‘rov bo‘yicha",
+      "unitGroup": "{complex}, {block} blok",
+      "noUnits": "Narxi bor bo‘sh kvartiralar yo‘q — maydon bo‘yicha hisoblang",
+      "layout": "Planirovka",
+      "layoutOption": "{rooms} · {area} m² · {price}dan",
+      "layoutNoPrice": "{rooms} · {area} m² · narxi so‘rov bo‘yicha",
+      "noLayouts": "Narxi bor planirovkalar yo‘q — maydon bo‘yicha hisoblang",
+      "area": "Maydon",
+      "areaUnit": "m²",
+      "perM2": "1 m² narxi",
+      "perM2Unit": "{currency}/m²",
+      "sum": "Summa",
+      "currency": "Narx valyutasi",
+      "total": "Narxi",
+      "approx": "≈ {amount}",
+      "empty": "Narxni kiriting",
+      "rooms": "{count, plural, =0 {studiya} other {#-xonali}}"
+    },
+    "down": {
+      "title": "Boshlang‘ich to‘lov",
+      "min": "kamida {pct}",
+      "value": "{pct} · {amount}",
+      "slider": "Boshlang‘ich to‘lov, %",
+      "options": "Boshlang‘ich to‘lov variantlari",
+      "upTo": "{term}gacha",
+      "now": "darhol"
+    },
+    "term": {
+      "title": "Muddat",
+      "scheme": "ustamasiz",
+      "markup": "ustama {rate}",
+      "bank": "yillik {rate}",
+      "custom": "Boshqa",
+      "customNote": "muddat",
+      "input": "Muddat, oy",
+      "less": "Bir oy kamroq",
+      "more": "Bir oy ko‘proq",
+      "unit": "oy",
+      "hint": "Istalgan butun oylar soni: {min}–{max} oy, boshlang‘ich to‘lov {down} bo‘lganda",
+      "aboveMax": "{down} boshlang‘ich to‘lovda ko‘pi bilan {max} oy — {max} oyga hisoblaymiz",
+      "suggest": "{months} oy — {from}–{to} boshlang‘ich to‘lovda. Hozir {max} oyga hisoblaymiz",
+      "suggestButton": "Boshlang‘ich to‘lov: {from}",
+      "lead": "{down} boshlang‘ich to‘lovda {max} oydan ko‘p — quruvchidan aniqlaymiz",
+      "belowMin": "Kamida {min} oy — {min} oyga hisoblaymiz"
+    },
+    "total": {
+      "currency": "Natija valyutasi",
+      "monthly": "Oylik to‘lov",
+      "first": "Birinchi to‘lov",
+      "now": "Darhol to‘lanadi",
+      "approx": "≈ {amount}",
+      "price": "Narxi",
+      "programPrice": "Dastur bo‘yicha narx",
+      "down": "Boshlang‘ich to‘lov · {pct}",
+      "rest": "Qoldiq",
+      "restNote": "ustamasiz · {term}",
+      "markup": "Ustama",
+      "markupNote": "muddat uchun {rate} · {term}",
+      "loan": "Kredit summasi",
+      "interest": "Bank foizlari",
+      "interestNote": "yillik {rate} · {term}",
+      "fees": {
+        "appraisal": "Kvartirani baholash",
+        "commission": "Bank komissiyasi",
+        "insurance": "Sug‘urta"
+      },
+      "overpayment": "Ortiqcha to‘lov",
+      "total": "Yakuniy narx",
+      "disclaimer": "Hisob-kitob taxminiy va bank taklifi hisoblanmaydi.",
+      "actual": "Shartlar {date} holatiga ko‘ra.",
+      "rate": "{source, select, manual {Kurs} other {MB kursi}}: 1 $ = {rate} so‘m, {date}.",
+      "noRate": "Kurs mavjud emas — boshqa valyutadagi bank dasturini hozir hisoblab bo‘lmaydi",
+      "noPrice": "Narxni kiriting — to‘lovni hisoblaymiz",
+      "noTerms": "Dasturda muddatlar yo‘q — shartlarni Vodiy House aniqlaydi"
+    },
+    "schedule": {
+      "show": "To‘lov jadvalini ko‘rsatish",
+      "hide": "To‘lov jadvalini yashirish",
+      "caption": "To‘lov jadvali",
+      "month": "Oy",
+      "payment": "To‘lov",
+      "principal": "Asosiy qarz",
+      "interest": "Foizlar",
+      "markup": "Ustama",
+      "balance": "Qoldiq",
+      "total": "Jami",
+      "more": "Hammasini ko‘rsatish ({count})",
+      "less": "Yig‘ish"
+    },
+    "compare": {
+      "title": "Barcha dasturlar",
+      "titleUnit": "Shu kvartira uchun barcha dasturlar",
+      "program": "Dastur",
+      "down": "Boshlang‘ich to‘lov",
+      "term": "Muddat",
+      "payment": "Oylik to‘lov",
+      "total": "Yakuniy narx",
+      "overpayment": "Ortiqcha to‘lov",
+      "cheapest": "eng foydali",
+      "lowest": "kichikroq to‘lov",
+      "totalShort": "jami {amount}",
+      "perMonth": "{amount}/oy",
+      "now": "Darhol to‘lanadi",
+      "none": "—",
+      "unavailable": "Kurssiz hisoblab bo‘lmaydi: {names}"
+    },
+    "telegram": {
+      "copy": "Telegram uchun nusxalash",
+      "copied": "Nusxalandi — Telegramga joylang",
+      "failed": "Nusxalab bo‘lmadi — quyidagi matnni belgilab, qo‘lda nusxalang",
+      "term": "Muddat: {term}",
+      "line": "{label}: {value}",
+      "signature": "Vodiy House",
+      "unit": "{place} · {number}-kv., {floor}-qavat, {area} m²",
+      "area": "{area} m² × {perM2}",
+      "layout": "{place} · {rooms}, {area} m²",
+      "link": "Hisob-kitob: {url}",
+      "unitNoArea": "{place} · {number}-kv., {floor}-qavat",
+      "copiedShort": "Nusxalandi",
+      "failedShort": "Nusxalanmadi — matn natijada"
+    },
+    "sticky": {
+      "monthly": "Oylik to‘lov",
+      "toTotal": "Hisob-kitobga"
+    },
+    "months": "{count} oy",
+    "years": "{count} yil",
+    "flat": {
+      "eyebrow": "Shu kvartira uchun hisob-kitob",
+      "title": "{rooms} · {area} m²",
+      "place": "{complex} TJM · {block} blok · {developer}",
+      "plan": "Reja: {title}",
+      "close": "Hisob-kitobni yopish",
+      "price": "Narxi",
+      "priceFrom": "Narxi (dan)",
+      "unit": "{number}-kv. · {floor}-qavat",
+      "perM2": "{amount}/m²",
+      "units": "Shu planirovkadagi bo‘sh kvartiralar · {count}",
+      "unitOption": "{number}-kv. · {floor}-qavat · {price}",
+      "unitNoPrice": "{number}-kv. · {floor}-qavat · narxi so‘rov bo‘yicha",
+      "unitChip": "№ {number}",
+      "unitChipNote": "{floor}-qavat · {price}",
+      "unitChipNoPrice": "{floor}-qavat · so‘rov bo‘yicha",
+      "open": "To‘lovni hisoblash",
+      "standTitle": "Stend: shu kvartira uchun hisob-kitob",
+      "standBlock": "Shodlik TJM · {block} blok"
+    },
+    "hint": {
+      "open": "«{term}» nima degani?"
+    }
+  },
+  "admin": {
+    "calcTelegram": {
+      "listPrice": "Prays bo‘yicha narx",
+      "discountDown": "{pct} boshlang‘ich to‘lov uchun chegirma",
+      "discountFull": "100% to‘lov uchun chegirma",
+      "discountedPrice": "Chegirmali narx"
+    }
+  },
+  "footer": {
+    "promise": "Yangi uydan kvartirani <accent>bepul</accent> tanlab beramiz.",
+    "tagline": "Farg‘ona viloyati yangi uylar agentligi. Xaridor uchun — bepul: komissiyani quruvchi to‘laydi.",
+    "catalog": "Katalog",
+    "contacts": "Aloqa",
+    "becomePartner": "Hamkor bo‘lish",
+    "copyUrl": "Nusxalash",
+    "copied": "Nusxalandi",
+    "copyFailed": "Nusxalanmadi"
+  },
+  "catalog": {
+    "card": {
+      "name": "{name} TJM",
+      "class": {
+        "econom": "Ekonom",
+        "comfort": "Komfort",
+        "business": "Biznes",
+        "premium": "Premium"
+      },
+      "verified": "Vodiy House tekshirgan",
+      "landmark": "Mo‘ljal: {mark}",
+      "toCenter": "markazgacha {n} daq.",
+      "deadline": "Topshirish",
+      "built": "Topshirilgan",
+      "quarter": "{year}-yil {q}-chorak",
+      "partBuilt": "Topshirilganlari bor · qolganlari {q} gacha",
+      "floors": "{n} qavat",
+      "rooms": {
+        "0": "Studiya",
+        "1": "1 xonali",
+        "2": "2 xonali",
+        "3": "3 xonali",
+        "4": "4 xonali",
+        "more": "{n} xonali"
+      },
+      "typeFrom": "{rooms} {area} dan",
+      "left": "{n} ta qoldi",
+      "leftUnknown": "sotuvda bor",
+      "leftNone": "mavjud emas",
+      "payFull": "100% to‘lov",
+      "installmentUpTo": "{n} oygacha muddatli to‘lov",
+      "priceFrom": "{price} dan",
+      "perM2From": "{price}/m² dan",
+      "priceOnRequest": "Narxi so‘rov bo‘yicha",
+      "monthlyFrom": "To‘lov oyiga {price} dan",
+      "photo": "{total} tadan {n}-surat",
+      "prevPhoto": "Oldingi surat",
+      "nextPhoto": "Keyingi surat",
+      "progressCaption": "Qurilish · {month}",
+      "soonBadge": "Tez kunda",
+      "soonPrice": "Narxlar tez kunda",
+      "soonCall": "qo‘ng‘iroq qilish"
+    },
+    "page": {
+      "eyebrow": "Loyihalar",
+      "title": "Barcha ",
+      "titleAccent": "yangi uylar",
+      "metaTitle": "Farg‘ona viloyati yangi uylari — TJM katalogi · Vodiy House",
+      "metaDescription": "Farg‘ona va viloyatdagi barcha yangi uylar: quruvchi narxlari, bo‘sh kvartiralar, muddatli to‘lov va ipoteka. Xaridor uchun — bepul.",
+      "found": "{n} ta TJM topildi",
+      "unavailable": "Katalog tez orada paydo bo‘ladi. Kvartirani qo‘lda tanlab beramiz — Vodiy House bilan bog‘laning."
+    },
+    "filter": {
+      "label": "Filtrlar",
+      "rooms": "Xonalar",
+      "price": "Kvartira narxi, $",
+      "priceFrom": "dan",
+      "priceTo": "gacha",
+      "location": "Shahar va tuman",
+      "locationAll": "Butun viloyat",
+      "payment": "To‘lov usuli",
+      "payments": {
+        "full": "100% to‘lov",
+        "inst": "Muddatli to‘lov",
+        "bank": "Bank orqali",
+        "mort": "Ipoteka"
+      },
+      "deadline": "Topshirish muddati",
+      "deadlineAny": "Istalgan",
+      "deadlineBuilt": "Topshirilgan",
+      "deadlineUpTo": "{year} gacha",
+      "developer": "Quruvchi",
+      "developerAll": "Barcha quruvchilar",
+      "finishing": "Pardozlash",
+      "reset": "Tozalash",
+      "show": "{n, plural, =0 {Hech narsa topilmadi} other {# ta TJMni ko‘rsatish}}",
+      "close": "Filtrlarni yopish",
+      "sort": "Saralash",
+      "sorts": {
+        "rec": "Tavsiya etilgan",
+        "cheap": "Avval arzonlari",
+        "exp": "Avval qimmatlari",
+        "dl": "Topshirish muddati bo‘yicha"
+      },
+      "more": "Yana {n} ta TJMni ko‘rsatish",
+      "nothing": "So‘rovingiz bo‘yicha hech narsa topilmadi",
+      "nothingHint": "Filtrlarni o‘zgartiring yoki Vodiy House bilan bog‘laning — menejer variantlarni qo‘lda tanlab beradi."
+    }
+  },
+  "developers": {
+    "metaTitle": "Farg‘ona viloyati quruvchilari — Vodiy House",
+    "metaDescription": "Vodiy House sotadigan yangi uylarning quruvchilari: tekshirilgan hujjatlar, topshirilgan obyektlar, to‘lov dasturlari. Quruvchilar kontaktlarini e’lon qilmaymiz — barcha savollarni menejeringiz hal qiladi.",
+    "eyebrow": "Quruvchilar",
+    "title": "<accent>Farg‘ona viloyati</accent> quruvchilari",
+    "lead": "Vodiy House sotadigan TJMlarning kompaniyalari. Quruvchilar kontaktlarini e’lon qilmaymiz: barcha savollarni menejeringiz bepul hal qiladi.",
+    "search": "Nomi bo‘yicha qidirish",
+    "count": "saytda {n} ta quruvchi",
+    "complexes": "{n, plural, =0 {saytda hali yangi uylar yo‘q} other {saytda # ta yangi uy}}",
+    "since": "{year} yildan",
+    "verified": "Vodiy House tekshirgan",
+    "open": "Sahifani ochish: {name}",
+    "nothing": "Hech narsa topilmadi",
+    "unavailable": "Quruvchilar ro‘yxati vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz.",
+    "page": {
+      "metaTitle": "{name} quruvchisi — yangi uylar, to‘lov shartlari",
+      "metaDescription": "{name}: Vodiy House saytidagi yangi uylar, topshirilgan obyektlar, hujjatlar tekshiruvi va to‘lov dasturlari. Maslahat — Vodiy House menejeri orqali, bepul.",
+      "crumbs": "Siz shu yerdasiz",
+      "role": "Quruvchi",
+      "founded": "{year} yilda tashkil etilgan",
+      "countBuilt": "Topshirilgan: {n}",
+      "countBuilding": "Qurilmoqda: {n}",
+      "complexesN": "{n} ta TJM",
+      "flats": "Topshirilgan kvartiralar: {n}",
+      "note": "Quruvchi bo‘yicha savollar — Vodiy House menejerlari orqali. Siz uchun bepul.",
+      "consultContext": "{name} quruvchisi bo‘yicha maslahat",
+      "about": "Kompaniya haqida",
+      "founders": "Asoschilar",
+      "checks": "Vodiy House tekshirgan",
+      "checkedOn": "Tekshirilgan: {date}",
+      "permit": "Qurilish ruxsatnomasi tekshirilgan",
+      "land": "Yer rasmiylashtirilgan",
+      "delivered": "Topshirilgan obyektlari bor",
+      "visit": "Vodiy House xodimi obyektda bo‘lgan",
+      "objects": "Obyektlar",
+      "tabs": {
+        "label": "Quruvchi obyektlari",
+        "all": "Barchasi",
+        "built": "Topshirilgan",
+        "building": "Qurilmoqda"
+      },
+      "noObjects": "Bu quruvchining yangi uylari saytda hali yo‘q.",
+      "projects": "Topshirilgan obyektlar",
+      "project": "Obyekt",
+      "planned": "Reja",
+      "deliveredOn": "Amalda",
+      "onTime": "O‘z vaqtida topshirilgan",
+      "delayed": "{months} oyga kechikkan",
+      "quarter": "{quarter}-chorak {year}",
+      "terms": "Xarid shartlari",
+      "termsLead": "Quruvchi va hamkor banklarning to‘lov dasturlari.",
+      "calculate": "To‘lovni hisoblash",
+      "others": "Boshqa quruvchilar",
+      "unavailable": "Quruvchi sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz.",
+      "readMore": "To‘liq o‘qish",
+      "collapse": "Yig‘ish"
+    }
+  },
+  "complex": {
+    "metaTitle": "{name} TJM — kvartiralar, narxlar va rejalar",
+    "metaDescription": "{name} TJM{place}{price}: kvartiralar mavjudligi, quruvchi narxlari, rejalar va to‘lov hisobi. Tanlash, ko‘rsatish va hujjatlarni tekshirish — bepul.",
+    "metaPlace": " · {place}",
+    "metaPrice": " — kvartiralar {price} dan",
+    "unavailable": "TJM sahifasi vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — TJM haqida aytib beramiz va kvartira tanlaymiz.",
+    "name": "{name} TJM",
+    "crumbs": "Siz shu yerdasiz",
+    "verified": "Vodiy House tekshirgan",
+    "landmark": "Mo‘ljal: {mark}",
+    "toCenter": "markazgacha {n} daq.",
+    "class": {
+      "econom": "Ekonom",
+      "comfort": "Komfort",
+      "business": "Biznes",
+      "premium": "Premium"
+    },
+    "rooms": {
+      "0": "Studiya",
+      "1": "1 xonali",
+      "2": "2 xonali",
+      "3": "3 xonali",
+      "4": "4 xonali",
+      "more": "{n} xonali"
+    },
+    "quarter": "{year}-yil {q}-chorak",
+    "gallery": {
+      "label": "Suratlar: {name}",
+      "photo": "{total} tadan {n}-surat",
+      "counter": "{n} / {total}",
+      "prev": "Oldingi surat",
+      "next": "Keyingi surat",
+      "thumb": "{n}-suratni ko‘rsatish",
+      "open": "Suratni kattalashtirish",
+      "close": "Yopish"
+    },
+    "offer": {
+      "inSale": "Sotuvda",
+      "flats": "{n, plural, one {# ta kvartira} other {# ta kvartira}}",
+      "priceFrom": "{price} dan",
+      "perM2From": "{price}/m² dan",
+      "priceOnRequest": "Narxi so‘rov bo‘yicha",
+      "monthly": "Oylik to‘lov",
+      "monthlyFrom": "oyiga {price} dan",
+      "deadline": "Topshirish muddati",
+      "built": "Topshirilgan",
+      "partBuilt": "Topshirilganlari bor · qolganlari {q} gacha",
+      "documents": "Hujjatlar",
+      "documentsChecked": "{n} ta tekshirilgan",
+      "call": "Qo‘ng‘iroq",
+      "telegram": "Telegramda yozish",
+      "freePrice": "Narx quruvchinikidek — Vodiy House hech narsa qo‘shmaydi.",
+      "freeBadge": "Siz uchun bepul",
+      "soldOut": "Bo‘sh kvartiralar yo‘q",
+      "gift": "Sovg‘a",
+      "soon": "Tez kunda",
+      "soonPrice": "Narxlar tez kunda"
+    },
+    "nav": {
+      "label": "Sahifa bo‘limlari",
+      "about": "TJM haqida",
+      "location": "Joylashuv",
+      "stock": "Mavjudlik",
+      "pick": "Kvartira tanlash",
+      "layouts": "Rejalar",
+      "video": "Videosharh",
+      "details": "Loyiha tafsilotlari",
+      "developer": "Quruvchi",
+      "documents": "Hujjatlar",
+      "progress": "Qurilish jarayoni",
+      "soon": "Rejalar va narxlar"
+    },
+    "about": {
+      "title": "TJM haqida",
+      "facts": {
+        "class": "Sinf",
+        "floors": "Qavatlar",
+        "houseType": "Uy turi",
+        "ceilings": "Shiftlar",
+        "finishing": "Pardozlash",
+        "parking": "Avtoturargoh",
+        "toCenter": "Markazgacha",
+        "blocks": "Bloklar"
+      },
+      "floorsValue": "{n, plural, one {# qavat} other {# qavat}}",
+      "ceilingsValue": "{n} m",
+      "toCenterValue": "{n} daq.",
+      "houseType": {
+        "monolith": "Monolit",
+        "brick": "G‘isht",
+        "frame": "Karkas"
+      },
+      "parking": {
+        "underground": "Yer osti",
+        "ground": "Yer usti",
+        "mixed": "Yer osti va yer usti"
+      }
+    },
+    "blocks": {
+      "title": "Bloklar va xarid shartlari",
+      "block": "{name} blok",
+      "built": "Topshirilgan",
+      "building": "Qurilmoqda",
+      "buildingPct": "Qurilmoqda · {pct}%",
+      "floors": "{total} qavatdan {built} tasi",
+      "deadline": "Topshirish muddati",
+      "builtIn": "Topshirilgan · {quarter}",
+      "shifted": "{quarter} dan ko‘chirilgan",
+      "history": "Muddatlar tarixi",
+      "historyItem": "edi {from} → bo‘ldi {to} · {date}",
+      "finishing": "Pardozlash",
+      "cadastre": "Kadastr",
+      "cadastreDone": "Rasmiylashtirilgan",
+      "cadastreInProgress": "Rasmiylashtirilmoqda",
+      "cadastreExpected": "Rasmiylashtirilmoqda, {quarter} kutilmoqda",
+      "cadastreAfter": "Uy topshirilgandan keyin",
+      "inSale": "Sotuvda",
+      "flats": "{n, plural, one {# ta kvartira} other {# ta kvartira}}",
+      "inStock": "bor",
+      "howToBuy": "Qanday sotib olish mumkin",
+      "includes": "Narxga nimalar kiradi",
+      "included": "kiradi",
+      "extra": "alohida",
+      "extraFrom": "alohida, {price} dan",
+      "monthlyFrom": "To‘lov oyiga {price} dan",
+      "calculate": "To‘lovni hisoblash",
+      "hint": "«{term}» nimani anglatadi?",
+      "program": {
+        "full": "100% to‘lov",
+        "scheme": "Quruvchidan muddatli to‘lov: {down} dan, {months} oygacha",
+        "markup": "Quruvchidan muddatli to‘lov: {down} dan, {months} oygacha · ustama {rate}",
+        "bank": "{bank}: bank orqali muddatli to‘lov, {down} dan, {months} oygacha · yillik {rate}",
+        "mortgage": "{bank}: {years, plural, one {# yilgacha} other {# yilgacha}} ipoteka, {down} dan · yillik {rate}",
+        "mortgageMonths": "{bank}: {months} oygacha ipoteka, {down} dan · yillik {rate}"
+      },
+      "noFree": "bo‘sh yo‘q"
+    },
+    "location": {
+      "title": "Joylashuv",
+      "lead": "{address} · markazgacha {n} daq.",
+      "question": "Tekshirib ko‘ring, {name}ga yetib borish qulaymi",
+      "route": "Yo‘lni ko‘rsatish",
+      "openMap": "Yandex Xaritalarda ochish",
+      "showMap": "Xaritada ko‘rsatish",
+      "mapTitle": "Xarita: {name}",
+      "convenience": "Joylashuv qulayligi",
+      "center": "Shahar markazi",
+      "walk": "piyoda {n} daq.",
+      "car": "mashinada {n} daq.",
+      "meters": "{n} m",
+      "km": "{n} km",
+      "minutes": "{n} daq.",
+      "note": "Masofalar — to‘g‘ri chiziq bo‘yicha, piyoda vaqti — taxminiy.",
+      "landmark": "Mo‘ljal:",
+      "nearbyLabel": "Xaritada yaqin joylarni topish",
+      "kinds": {
+        "school": "Maktab",
+        "kindergarten": "Bolalar bog‘chasi",
+        "mosque": "Masjid",
+        "clinic": "Poliklinika",
+        "shop": "Do‘kon",
+        "cafe": "Kafe",
+        "stop": "Bekat",
+        "park": "Bog‘",
+        "sport": "Sport"
+      },
+      "chips": {
+        "school": "Maktablar",
+        "kindergarten": "Bog‘chalar",
+        "mosque": "Masjidlar",
+        "clinic": "Tibbiyot",
+        "shop": "Do‘konlar",
+        "cafe": "Kafelar",
+        "stop": "Bekatlar"
+      },
+      "search": {
+        "school": "maktab",
+        "kindergarten": "bolalar bog‘chasi",
+        "mosque": "masjid",
+        "clinic": "poliklinika",
+        "shop": "do‘kon",
+        "cafe": "kafe",
+        "stop": "bekat"
+      }
+    },
+    "stock": {
+      "title": "Kvartiralar mavjudligi",
+      "lead": "Kvartira band qilinishi yoki sotilishi bilan bu yerdagi raqamlar yangilanadi.",
+      "updated": "yangilandi: {date}",
+      "inSale": "hozir sotuvda",
+      "blockFree": "{name} blok: {n}",
+      "blockFreeUnknown": "{name} blok: bor",
+      "type": "Turi",
+      "area": "Maydon",
+      "price": "Narx",
+      "byBlocks": "Bloklar bo‘yicha",
+      "left": "Qoldi",
+      "leftCount": "{n} ta qoldi",
+      "leftUnknown": "sotuvda bor",
+      "leftNone": "mavjud emas",
+      "areaFrom": "{area} dan",
+      "priceFrom": "{price} dan",
+      "rowSub": "{area} dan · {price} dan",
+      "toLayouts": "Rejalar: {type}"
+    },
+    "pick": {
+      "title": "Kvartirani <accent>fasadda</accent> tanlang",
+      "lead": "Korpusga olib boring, qavatni oching va bo‘sh kvartirani bosing — narx va to‘lov hisobi darhol chiqadi. Mavjudlik jonli yangilanadi.",
+      "leadPhone": "Korpusni bosing — qavatlar ochiladi. Qavatni tanlang va yashil kvartirani bosing: narx va to‘lov hisobi darhol chiqadi.",
+      "live": "yangilandi: {time}",
+      "hint": "Korpusga olib boring — qoldiqlar ko‘rinadi. Bosing — qavatlar va reja ochiladi.",
+      "hintPhone": "Korpusni bosing",
+      "light": "Yoritish",
+      "lights": {
+        "day": "Kunduzi",
+        "dusk": "Kechki",
+        "night": "Tungi"
+      },
+      "free": "{count, plural, =0 {bo‘sh yo‘q} other {# ta bo‘sh}}",
+      "total": "Jami kvartiralar",
+      "freeLabel": "Bo‘sh",
+      "roomsCount": "{count} ta",
+      "go": "Bosing — qavatlar",
+      "back": "Barcha korpuslar",
+      "floor": "Qavat",
+      "floorFree": "{count, plural, =0 {yo‘q} other {# bo‘sh}}",
+      "floorAria": "{floor}-qavat, {count} ta bo‘sh",
+      "entrance": "{n}-kirish",
+      "planTitle": "{floor}-qavat · {block}",
+      "planEntrance": "{n}-kirish",
+      "planFree": "{total} tadan {free} bo‘sh",
+      "legend": {
+        "free": "Bo‘sh",
+        "reserved": "Band",
+        "sold": "Sotilgan",
+        "pending": "Narx aniqlanmoqda"
+      },
+      "roomsShort": "{rooms, plural, =0 {St} other {#X}}",
+      "tapHint": "Yashil — bo‘sh. Narx va to‘lovni ko‘rish uchun ustiga bosing.",
+      "unitAria": "{number}-kvartira",
+      "reservedNote": "{number}-kvartira band qilingan",
+      "soldNote": "{number}-kvartira sotilgan",
+      "seeGreen": "Shu qavatdagi yashil kvartiralar bo‘sh",
+      "picked": "Rejada tanlandi",
+      "unitTitle": "{number}-kvartira",
+      "unitSub": "{block} · {floor}-qavat",
+      "perM2": "{price}/m²",
+      "noPrice": "Narxni menejer aytadi",
+      "book": "Shu kvartirani band qilish",
+      "calculate": "To‘lovni hisoblash",
+      "calculating": "Hisoblanmoqda…",
+      "calcFailed": "Hisobni ochib bo‘lmadi — yana urinib ko‘ring",
+      "close": "Yopish",
+      "loading": "Kvartiralar yuklanmoqda…",
+      "failed": "Kvartiralarni yuklab bo‘lmadi.",
+      "retry": "Qayta urinish",
+      "entrances": "Kirish",
+      "takenNow": "Bu kvartira hozirgina band qilindi — boshqa yashil kvartiralarni ko‘ring",
+      "telegram": "Telegramda yozish",
+      "soon": "Tez kunda",
+      "layouts": "Rejalarni ko‘rish",
+      "pendingNote": "Narx aniqlanmoqda — Vodiy House’ga qo‘ng‘iroq qiling",
+      "pendingTag": "Aniqlanmoqda"
+    },
+    "layouts": {
+      "title": "Rejalar",
+      "blocksLabel": "Blok",
+      "allBlocks": "Barcha bloklar",
+      "block": "{name} blok",
+      "roomsLabel": "Xonalar",
+      "allRooms": "Barchasi",
+      "hint": "Har bir kvartirada kalkulyator bor: quyida rejani tanlang.",
+      "card": "{rooms} · {area}",
+      "meta": "{block} blok",
+      "metaFloors": "{block} blok · {from}–{to} qavatlar",
+      "metaFloor": "{block} blok · {floor}-qavat",
+      "left": "{n} ta qoldi",
+      "inStock": "sotuvda bor",
+      "none": "mavjud emas",
+      "priceFrom": "{price} dan",
+      "perM2From": "{price}/m² dan",
+      "priceOnRequest": "Narxi so‘rov bo‘yicha",
+      "monthlyFrom": "To‘lov oyiga {price} dan",
+      "calculate": "To‘lovni hisoblash",
+      "calculateShort": "Hisoblash",
+      "loading": "Hisoblanmoqda…",
+      "failed": "Hisobni ochib bo‘lmadi. Yana urinib ko‘ring.",
+      "zoom": "«{title}» chizmasini kattalashtirish",
+      "zoomClose": "Chizmani yopish",
+      "empty": "Bunday parametrli rejalar yo‘q",
+      "collapse": "Yig‘ish",
+      "noneTitle": "Mavjud emas"
+    },
+    "video": {
+      "title": "TJM videosharhi",
+      "play": "«{title}» ni ko‘rish",
+      "fallbackTitle": "{name} TJM videosharhi",
+      "list": "Boshqa videolar"
+    },
+    "details": {
+      "title": "Loyiha tafsilotlari",
+      "readMore": "Batafsil o‘qish",
+      "close": "Yopish",
+      "prev": "Orqaga",
+      "next": "Oldinga"
+    },
+    "developer": {
+      "title": "Quruvchi haqida",
+      "role": "Quruvchi",
+      "since": "Quruvchi · {year} yildan",
+      "complexes": "{n} ta TJM",
+      "others": "Quruvchining boshqa TJMlari",
+      "otherPrice": "{price} dan",
+      "checks": "Vodiy House tekshirgan",
+      "permit": "Qurilish ruxsatnomasi tekshirilgan",
+      "land": "Yer rasmiylashtirilgan",
+      "delivered": "Topshirilgan obyektlari bor",
+      "visit": "Vodiy House xodimi obyektda bo‘lgan",
+      "checkedOn": "Tekshirilgan: {date}",
+      "countBuilt": "Topshirilgan: {n}",
+      "countBuilding": "Qurilmoqda: {n}",
+      "more": "Quruvchi haqida batafsil"
+    },
+    "documents": {
+      "title": "TJM hujjatlari",
+      "lead": "Faqat Vodiy House tekshirgan hujjatlarni ko‘rsatamiz. Nusxalarni menejer beradi — bu bepul.",
+      "checkedOn": "Tekshirilgan: {date}",
+      "hint": "«{name}» nimani anglatadi?"
+    },
+    "preview": {
+      "label": "Oldindan ko‘rish",
+      "published": "e’lon qilingan — tashrif buyuruvchilar shunday ko‘radi",
+      "hidden": "e’lon qilinmagan — tashrif buyuruvchilar sahifani ko‘rmaydi",
+      "exit": "Chiqish",
+      "developerHidden": "TJM e’lon qilingan, lekin quruvchi — yo‘q: tashrif buyuruvchilar sahifani ko‘rmaydi"
+    },
+    "progress": {
+      "title": "Qurilish jarayoni",
+      "lead": "Vodiy House mobilografi har bir TJMni oyiga bir marta suratga oladi. Yangi hisobotlar — yuqorida.",
+      "updated": "Yangilangan: {date}",
+      "months": "Hisobot oylari",
+      "stampVideo": "{month} videosi",
+      "stampPhotos": "{month} suratlari",
+      "block": "{name}-blok",
+      "shot": "Suratga olingan: {date} · Vodiy House",
+      "ready": "{name}-blok tayyorligi",
+      "readyNoName": "Blok tayyorligi",
+      "floors": "{total} qavatdan {built} tasi",
+      "play": "{month} hisobotini ko‘rish",
+      "pause": "Pauza",
+      "resume": "Ko‘rish",
+      "frame": "{total} tadan {n}-kadr",
+      "thumbs": "Barcha hisobotlar"
+    },
+    "soon": {
+      "badge": "Tez kunda",
+      "text": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling:",
+      "textNoPhone": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling."
+    }
+  },
+  "showcase": {
+    "complex": "{name} TJM",
+    "collections": {
+      "eyebrow": "Tayyor tanlovlar",
+      "title": "TJM tanlovlari — ",
+      "titleAccent": "bir bosishda",
+      "lead": "Tanlovni bosing — quyidagi katalog darhol mos TJMlarni ko‘rsatadi. Filtrli havolani Telegramga yuborish mumkin.",
+      "label": "TJM tanlovlari",
+      "prev": "Oldingi tanlovlar",
+      "next": "Keyingi tanlovlar",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "flats": "{n, plural, one {# ta kvartira sotuvda} other {# ta kvartira sotuvda}}",
+      "flatsMin": "sotuvda {n} tadan ko‘p kvartira",
+      "applied": "«{title}» tanlovi qo‘llandi",
+      "appliedHint": "Shu filtrli havolani mijozga yuborish mumkin",
+      "reset": "Bekor qilish",
+      "flatsUnknown": "Mavjudlikni menejerdan bilib oling"
+    },
+    "offers": {
+      "eyebrow": "Maxsus takliflar",
+      "title": "Quruvchilardan ",
+      "titleAccent": "takliflar",
+      "lead": "Hamkor quruvchilarning reklamasi va shartlari: muddatli to‘lov, sovg‘alar, savdo boshlanishi. Kartochkadagi sanagacha amal qiladi.",
+      "place": "Reklama joylashtirish"
+    },
+    "ad": {
+      "tag": "Reklama",
+      "label": "Reklama · {title}",
+      "inSale": "Sotuvda",
+      "flats": "{n, plural, one {# ta kvartira} other {# ta kvartira}}",
+      "flatsMin": "{n} tadan ko‘p kvartira",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "price": "Narx",
+      "payment": "To‘lov",
+      "from": "{price} dan",
+      "monthly": "oyiga {price} dan",
+      "onRequest": "so‘rov bo‘yicha",
+      "show": "{n, plural, one {# ta kvartirani ko‘rsatish} other {# ta kvartirani ko‘rsatish}}",
+      "showComplexes": "{n, plural, one {# ta TJMni ko‘rsatish} other {# ta TJMni ko‘rsatish}}",
+      "more": "yana {n}"
+    },
+    "special": {
+      "label": "Maxsus takliflar",
+      "daysLeft": "{n, plural, one {yana # kun} other {yana # kun}}",
+      "lastDay": "oxirgi kun",
+      "complexes": "{n, plural, one {# ta TJM} other {# ta TJM}}",
+      "priceFrom": "{price} dan",
+      "until": "{date} gacha",
+      "slide": "{total} tadan {n}-taklif"
+    }
+  },
+  "siteError": {
+    "title": "Sahifa vaqtincha mavjud emas",
+    "text": "Ma’lumotlarni yuklab bo‘lmadi. Bir daqiqadan so‘ng sahifani yangilang — yoki bizga qo‘ng‘iroq qiling, TJM haqida aytib beramiz.",
+    "retry": "Yangilash",
+    "toCatalog": "Yangi uylarni ko‘rish",
+    "leadLoading": "Ariza shakli ochilmoqda…",
+    "leadOffline": "Aloqa yo‘q — shakl ochilmadi. Yana urinib ko‘ring."
+  },
+  "lead": {
+    "titles": {
+      "callback": "{minutes} daqiqada qo‘ng‘iroq qilamiz",
+      "callbackPlain": "Qo‘ng‘iroq qiling",
+      "view": "Ko‘rishga yozilish",
+      "documents": "TJM hujjatlari nusxalari",
+      "consult": "Quruvchi bo‘yicha maslahat",
+      "calc": "Aniq hisob-kitob",
+      "layout": "Mavjudligini bilish",
+      "pick": "Qo‘lda tanlab beramiz",
+      "complex": "TJM bo‘yicha ariza",
+      "partner": "Quruvchi arizasi",
+      "promo": "Maxsus taklif",
+      "tg": "Telegramda yozish",
+      "quiz": "1 daqiqada tanlash"
+    },
+    "buttons": {
+      "view": "Ko‘rishga yozilish",
+      "callback": "Qo‘ng‘iroq qiling",
+      "layout": "Mavjudligini bilish",
+      "documents": "Hujjatlar nusxasini so‘rash",
+      "consult": "Maslahat olish",
+      "pick": "Qo‘lda tanlab beramiz",
+      "calc": "Aniq hisob-kitobni olish",
+      "complex": "Ariza qoldirish",
+      "partner": "Ariza qoldirish",
+      "tg": "Telegramda yozish",
+      "quiz": "Tanlovni olish",
+      "promo": "Shu shartni xohlayman",
+      "telegram": "Telegramda yozish"
+    },
+    "name": "Ism",
+    "phone": "Telefon",
+    "phonePlaceholder": "+998 XX XXX XX XX",
+    "lang": "Qulay muloqot tili",
+    "langs": {
+      "ru": "Rus tili",
+      "uz": "O‘zbek tili"
+    },
+    "what": "Nimani ko‘rish",
+    "targets": {
+      "complex": "Shu TJM",
+      "delivered": "Quruvchining topshirilgan obyekti",
+      "office": "Vodiy House ofisi"
+    },
+    "day": "Qulay kun",
+    "days": {
+      "today": "Bugun",
+      "tomorrow": "Ertaga",
+      "weekend": "Dam olish kunlari"
+    },
+    "time": "Qulay vaqt — ixtiyoriy",
+    "times": {
+      "morning": "Ertalab",
+      "afternoon": "Kunduzi",
+      "evening": "Kechqurun"
+    },
+    "send": "Yuborish",
+    "sending": "Yuborilmoqda…",
+    "consent": "«Yuborish» tugmasini bosib, <privacy>shaxsiy ma’lumotlarni qayta ishlashga</privacy> rozilik bildirasiz.",
+    "trap": "Bu maydonni to‘ldirmang",
+    "fieldErrors": {
+      "name": "Ismingizni kiriting",
+      "phone": "Raqam +998 XX XXX XX XX formatida",
+      "phoneRequired": "Telefon raqamini kiriting",
+      "company": "Kompaniyani kiriting"
+    },
+    "errors": {
+      "invalid": "Ism va telefon raqamini tekshiring.",
+      "rateLimited": "Juda ko‘p ariza ketma-ket yuborildi. 10 daqiqadan keyin urinib ko‘ring yoki bizga qo‘ng‘iroq qiling.",
+      "unavailable": "Hozir arizalar qabul qilinmayapti. Bizga qo‘ng‘iroq qiling yoki Telegramda yozing.",
+      "network": "Aloqa yo‘q. Internetni tekshirib, qayta yuboring.",
+      "unknown": "Yuborib bo‘lmadi. Qayta urinib ko‘ring."
+    },
+    "next": "Keyin: menejer qo‘ng‘iroq qilib, tafsilotlarni aniqlaydi va ko‘rish uchun qulay vaqt taklif qiladi.",
+    "nextMinutes": "Keyin: menejer {minutes} daqiqa ichida qo‘ng‘iroq qiladi, savollarga javob beradi va ko‘rish uchun qulay vaqt taklif qiladi.",
+    "nextView": "Keyin: menejer qo‘ng‘iroq qilib, vaqtni tasdiqlaydi.",
+    "nextCalc": "Keyin: menejer shartlarni quruvchi bilan solishtirib, aniq hisob-kitobni yuboradi.",
+    "nextPick": "Keyin: menejer shartlaringizga mos variantlarni tanlab, qo‘ng‘iroq qiladi.",
+    "nextDocuments": "Keyin: menejer qo‘ng‘iroq qilib, TJM hujjatlarini yuboradi.",
+    "done": "Ariza yuborildi",
+    "doneNumber": "Ariza raqami #{number}",
+    "doneCall": "Vodiy House menejeri ish vaqtida {minutes} daqiqa ichida qo‘ng‘iroq qiladi.",
+    "doneCallPlain": "Vodiy House menejeri ish vaqtida qo‘ng‘iroq qiladi.",
+    "close": "Yopish",
+    "more": {
+      "title": "<accent>Batafsil</accent> bilishni xohlaysizmi?",
+      "text": "Kontaktlaringizni qoldiring — Vodiy House menejeri loyiha haqida aytib beradi va kvartira tanlaydi."
+    },
+    "partner": {
+      "company": "Quruvchi kompaniya",
+      "companyRequired": "Kompaniyani kiriting",
+      "name": "Aloqa uchun shaxs",
+      "city": "Shahar",
+      "format": "Nima qiziqtiradi",
+      "formats": {
+        "sales": "Birgalikdagi sotuv",
+        "ads": "Saytda reklama",
+        "listing": "TJMni joylashtirish"
+      },
+      "projects": "Sotuvdagi TJM va kvartiralar",
+      "projectsPlaceholder": "masalan, 2 TJM, ~180 kvartira",
+      "comment": "Izoh",
+      "commentPlaceholder": "TJM nomi, muddatlar, savollar",
+      "send": "Ariza yuborish",
+      "again": "Yana bitta yuborish"
+    },
+    "donePartner": "Ish kuni davomida javob beramiz.",
+    "nextPartner": "Keyin nima: qo‘ng‘iroq qilamiz, uchrashuvni kelishamiz va hujjatlar hamda obyektni ko‘ramiz."
+  },
+  "bot": {
+    "greeting": "Assalomu alaykum! Bu Vodiy House — Farg‘ona yangi binolaridan xaridor uchun bepul kvartira tanlab beramiz.",
+    "complex": "Sizni {name} TJM qiziqtirmoqda.",
+    "ask": "Pastdagi «Raqamni ulashish» tugmasini bosing — Vodiy House menejeri shu yerda yozadi yoki qo‘ng‘iroq qiladi.",
+    "share": "📱 Raqamni ulashish",
+    "thanks": "Rahmat! #{number} ariza qabul qilindi — Vodiy House menejeri tez orada siz bilan bog‘lanadi.",
+    "repeat": "Rahmat! Raqamingizni oldik — Vodiy House menejeri tez orada siz bilan bog‘lanadi.",
+    "hint": "Menejer siz bilan bog‘lanishi uchun pastdagi «Raqamni ulashish» tugmasini bosing.",
+    "ownContact": "Iltimos, o‘z raqamingizni «Raqamni ulashish» tugmasi orqali yuboring.",
+    "foreignPhone": "Biz O‘zbekiston raqamlarini (+998) qabul qilamiz. Raqamni +998 XX XXX XX XX ko‘rinishida xabar qilib yozing.",
+    "failed": "Arizani qabul qilib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring yoki bizga qo‘ng‘iroq qiling."
+  },
+  "share": {
+    "title": "Havolani ulashish",
+    "preview": "Messenjerda havola shunday ko‘rinadi",
+    "link": "Havola",
+    "copy": "Nusxalash",
+    "copied": "Havola nusxalandi",
+    "copyFailed": "Havolani maydondan qo‘lda nusxalang.",
+    "telegram": "Telegramga yuborish",
+    "close": "Yopish",
+    "button": "Ulashish: {name}",
+    "favorite": "Saralanganga: {name}"
+  },
+  "favorites": {
+    "metaTitle": "Saralangan — Vodiy House",
+    "metaDescription": "Yurakcha bilan belgilangan TJMlar. Tanlovni o‘zingizga yoki yaqinlaringizga yuboring.",
+    "eyebrow": "Saralangan",
+    "title": "{count, plural, =0 {Saralangan hozircha bo‘sh} other {Tanlovda # ta TJM}}",
+    "lead": "Yurakcha bilan belgilangan TJMlar. Tanlovni o‘zingizga yoki yaqinlaringizga yuboring — u istalgan telefonda ochiladi.",
+    "empty": "TJM kartochkasidagi yurakchani bosing — u shu yerda paydo bo‘ladi. Tanlovni Telegramga yuborish mumkin.",
+    "toCatalog": "Yangi uylarni ko‘rish",
+    "share": "Tanlovni ulashish",
+    "shareTitle": "Tanlov: {count} ta TJM",
+    "podborka": {
+      "metaTitle": "Tanlov: {count} ta TJM — Vodiy House",
+      "metaDescription": "{names}. Quruvchi narxlari, kvartiralar mavjudligi, tanlash va ko‘rsatish — bepul.",
+      "eyebrow": "Vodiy House tanlovi",
+      "title": "Tanlov: {count} ta TJM",
+      "lead": "Bu TJMlar siz uchun tanlandi. Raqamingizni qoldiring — Vodiy House menejeri batafsil aytib beradi va kvartiralarni ko‘rsatadi.",
+      "empty": "Tanlov bo‘sh yoki undagi TJMlar sotuvdan olingan. Barcha yangi uylarni ko‘ring — yoki raqam qoldiring, qo‘lda tanlab beramiz.",
+      "context": "Tanlov: {names}",
+      "metaEmpty": "Vodiy House TJM to‘plami: quruvchi narxlari, mavjud kvartiralar, tanlash va ko‘rsatish — bepul.",
+      "toCatalog": "Yangi uylarni ko‘rish"
+    }
+  },
+  "partners": {
+    "metaTitle": "Quruvchilarga — Vodiy House",
+    "metaDescription": "TJMni Vodiy House katalogiga joylashtiring, saytda reklama qiling yoki sotuvni rieltorlarimizga topshiring.",
+    "hero": {
+      "eyebrow": "Quruvchilar uchun",
+      "title": "Kvartiralarni ",
+      "titleAccent": "Vodiy House bilan birga soting",
+      "lead": "TJMni katalogga joylashtiring, saytda reklama qiling yoki sotuvni rieltorlarimizga topshiring. Siz natija uchun to‘laysiz — va’da uchun emas.",
+      "cta": "Ariza qoldirish",
+      "statsLabel": "Vodiy House raqamlarda",
+      "complexes": "{count, plural, other {TJM saytda}}",
+      "developers": "{count, plural, other {quruvchi biz bilan}}",
+      "flats": "{count, plural, other {kvartira sotuvda}}"
+    },
+    "formats": {
+      "eyebrow": "Formatlar",
+      "title": "Birga ishlashning ",
+      "titleAccent": "uch yo‘li",
+      "pick": "Tanlash",
+      "sales": {
+        "name": "Birgalikdagi sotuv",
+        "price": "bitim uchun komissiya",
+        "text": "Vodiy House rieltorlari TJMni ko‘rsatadi, mijozni bitimgacha olib boradi va bank bilan yordam beradi.",
+        "points": {
+          "p1": "Menejer TJMlaringiz bo‘yicha ko‘rsatuvlar va bitimlar hisobotini yuboradi",
+          "p2": "Har oy qurilish videosi",
+          "p3": "Mijozga bank va hujjatlar bilan yordam beramiz"
+        }
+      },
+      "ads": {
+        "name": "Saytda reklama",
+        "price": "davr uchun to‘lov",
+        "text": "TJMingizning «Reklama» belgili reklama kartochkasi — bosh sahifada va katalogda.",
+        "points": {
+          "p1": "Sizning ma’lumotlaringizdan kartochka: foto, narx «dan», to‘lov",
+          "p2": "Xaridor uchun halol «Reklama» belgisi",
+          "p3": "Ko‘rishlar va arizalar bo‘yicha hisobot"
+        }
+      },
+      "listing": {
+        "name": "TJMni joylashtirish",
+        "price": "bepul",
+        "text": "Mavjud kvartiralar, rejalar, hujjatlar va kalkulyatorli TJM sahifasi — hujjatlar tekshirilgandan keyin.",
+        "points": {
+          "p1": "TJM sahifasida mavjud kvartiralar",
+          "p2": "Sizning dasturlaringiz bilan kalkulyator",
+          "p3": "«Vodiy House tekshirgan» belgisi"
+        }
+      },
+      "picked": "Tanlandi"
+    },
+    "steps": {
+      "eyebrow": "Qanday boshlaymiz",
+      "title": "Arizadan birinchi sotuvgacha — ",
+      "titleAccent": "taxminan ikki hafta",
+      "s1": {
+        "title": "Ariza",
+        "text": "Kontaktlaringizni qoldirasiz — ish kuni davomida qo‘ng‘iroq qilamiz"
+      },
+      "s2": {
+        "title": "Uchrashuv va tekshiruv",
+        "text": "Hujjatlar va obyektni ko‘ramiz, format va shartlarni kelishamiz"
+      },
+      "s3": {
+        "title": "Ishga tushirish",
+        "text": "Mavjud kvartiralar, foto, rejalar va to‘lov dasturlarini yuklaymiz"
+      },
+      "s4": {
+        "title": "Sotuv va hisobotlar",
+        "text": "Menejer TJMlaringiz bo‘yicha ko‘rsatuvlar va bitimlar hisobotini yuboradi"
+      }
+    },
+    "request": {
+      "title": "Hamkorlik ",
+      "titleAccent": "uchun ariza",
+      "lead": "Ish kuni davomida javob beramiz. Kontaktlar uchinchi shaxslarga berilmaydi.",
+      "defaultCity": "Farg‘ona"
+    }
+  },
+  "about": {
+    "metaTitle": "Biz haqimizda — Vodiy House",
+    "metaDescription": "Farg‘ona viloyati yangi uylar agentligi: kvartira tanlash, obyektlarni ko‘rsatish va quruvchilar hujjatlarini tekshirish. Xaridor uchun — bepul.",
+    "hero": {
+      "eyebrow": "Kompaniya haqida",
+      "title": "Vodiy House haqida",
+      "lead": "Farg‘ona viloyati yangi uylar agentligi. Kvartira tanlaymiz, obyektlarni ko‘rsatamiz va quruvchilar hujjatlarini tekshiramiz. Xaridor uchun — bepul: bizga quruvchi to‘laydi.",
+      "complexes": "{count, plural, other {turar-joy majmuasi ishda}}",
+      "freeValue": "0 so‘m",
+      "free": "xaridor tanlash va ko‘rsatish uchun to‘laydi",
+      "videoValue": "Har oy",
+      "video": "har bir qurilish haqida video olamiz"
+    },
+    "office": {
+      "eyebrow": "Vodiy House ofisi",
+      "title": "Sizni ",
+      "titleAccent": "ofisda kutamiz",
+      "lead": "{address}. Keling — birga TJM tanlaymiz va muddatli to‘lovni hisoblaymiz.",
+      "check": "Bizgacha borish qulayligini tekshiring",
+      "route": "Yo‘nalish chizish",
+      "open": "Yandex Xaritalarda ochish"
+    },
+    "cta": {
+      "title": "Ofisga keling — barcha loyihalarni bitta uchrashuvda ko‘rsatamiz",
+      "text": "Uchrashuv bepul.",
+      "button": "Uchrashuvga yozilish",
+      "context": "Vodiy House ofisida uchrashuv"
+    }
+  },
+  "howToBuy": {
+    "metaTitle": "Xarid qanday o‘tadi — Vodiy House",
+    "metaDescription": "Birinchi qo‘ng‘iroqdan kalitgacha: tanlash, ko‘rsatish, hujjatlarni tekshirish va muddatli to‘lovda yordam. Xaridor uchun — bepul.",
+    "eyebrow": "Xaridorlarga",
+    "title": "Kvartira xaridi ",
+    "titleAccent": "qanday o‘tadi",
+    "lead": "Birinchi qo‘ng‘iroqdan kalitgacha — Vodiy House menejeri bilan. Tanlash, ko‘rsatish va bank bilan yordam siz uchun bepul: komissiyani quruvchi to‘laydi.",
+    "s1": {
+      "title": "Tanlash",
+      "text": "Nima izlayotganingizni ayting: tuman, xonalar, byudjet va to‘lov usuli. Katalogdan TJM tanlab, to‘plam yuboramiz."
+    },
+    "s2": {
+      "title": "Ko‘rish",
+      "text": "Qurilishni, quruvchining topshirilgan uylarini va kvartiralarni ko‘rsatamiz. Kun va vaqtni siz tanlaysiz."
+    },
+    "s3": {
+      "title": "Hujjatlar va to‘lov",
+      "text": "Qurilish ruxsatnomasi va yer hujjatlarini tekshiramiz, muddatli to‘lov yoki ipotekani hisoblaymiz va bank bilan yordam beramiz."
+    },
+    "s4": {
+      "title": "Shartnoma",
+      "text": "Shartnomani to‘g‘ridan-to‘g‘ri quruvchi bilan tuzasiz — quruvchi narxida."
+    },
+    "s5": {
+      "title": "Kalitlar",
+      "text": "Qurilish muddatlarini kuzatamiz va kvartira topshirilguncha yordam beramiz."
+    },
+    "q1": {
+      "title": "Vodiy House xizmati qancha turadi",
+      "text": "Xaridor uchun — 0 so‘m. Agentlik mukofotini quruvchi to‘laydi, kvartira narxi bundan o‘zgarmaydi."
+    },
+    "q2": {
+      "title": "Qaysi hujjatlarni tekshiramiz",
+      "text": "Qurilish ruxsatnomasi, yer hujjatlari va topshirish muddatlari. Tekshirilgan TJMlar saytda «Vodiy House tekshirgan» belgisi bilan."
+    },
+    "q3": {
+      "title": "Muddatli to‘lov va ipoteka",
+      "text": "Quruvchilar va banklar dasturlari shartlari — saytdagi kalkulyatorda. Kvartirangiz bo‘yicha aniq hisobni menejer yuboradi."
+    },
+    "cta": "Savollar qoldimi? Menejer qo‘ng‘iroq qilib, hammasini aytib beradi."
+  },
+  "privacy": {
+    "metaTitle": "Maxfiylik siyosati — Vodiy House",
+    "metaDescription": "Vodiy House vodiyhouse.uz sayti tashrifchilari ma’lumotlarini qanday qayta ishlaydi.",
+    "eyebrow": "Hujjatlar",
+    "title": "Maxfiylik siyosati",
+    "lead": "Vodiy House vodiyhouse.uz sayti tashrifchilari ma’lumotlarini qanday qayta ishlaydi.",
+    "s1": {
+      "title": "Qanday ma’lumotlarni olamiz",
+      "text": "Ism, telefon raqami va qulay til — ariza qoldirganingizda. Ariza bilan birga — qaysi TJM yoki kvartira haqida savol, sayt sahifasi va siz kelgan reklama belgilari.\n\nVodiy House Telegram-botiga yozsangiz — Telegramdagi ism va nik hamda siz ulashgan raqam."
+    },
+    "s2": {
+      "title": "Nima uchun",
+      "text": "Vodiy House menejeri siz bilan bog‘lanishi, savollarga javob berishi, kvartira tanlashi va ko‘rsatuvni tashkil qilishi uchun. Reklama belgilari — qaysi reklama ishlayotganini bilish uchun."
+    },
+    "s3": {
+      "title": "Kimga beramiz",
+      "text": "Arizani faqat Vodiy House xodimlari ko‘radi. Kontaktlaringiz roziligingizsiz quruvchilarga va uchinchi shaxslarga berilmaydi."
+    },
+    "s4": {
+      "title": "Brauzerda nima saqlanadi",
+      "text": "Tanlangan TJMlar, sayt tili, birinchi tashrif belgilari — brauzeringiz xotirasida. Ularni brauzer sozlamalarida o‘chirish mumkin."
+    },
+    "s5": {
+      "title": "Qancha saqlaymiz",
+      "text": "Arizalar siz bilan ishlash uchun kerak bo‘lguncha saqlanadi. Ma’lumotlaringizni so‘rov bo‘yicha o‘chirish mumkin."
+    },
+    "s6": {
+      "title": "Qanday bog‘lanish mumkin",
+      "text": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — Vodiy House telefoni yoki Telegrami orqali: kontaktlar sahifa pastida."
+    },
+    "edition": "Tahrir: 25.10.2026"
+  },
+  "quiz": {
+    "metaTitle": "1 daqiqada kvartira tanlash — Vodiy House",
+    "metaDescription": "To‘rtta savol — Farg‘onaning qaysi yangi uylari mos kelishi darhol ko‘rinadi. Menejer rejalar bilan tanlovni Telegramga yuboradi.",
+    "eyebrow": "1 daqiqada tanlash",
+    "title": "Nimani tanlashni bilmaysizmi? ",
+    "titleAccent": "1 daqiqada tanlab beramiz",
+    "lead": "To‘rtta savol — mos TJMlar darhol ko‘rinadi. Menejer rejalar bilan tanlovni Telegramga yuboradi.",
+    "start": "Tanlashni boshlash",
+    "time": "≈ 40 soniya",
+    "step": "{a}-savol, jami {b}",
+    "questions": {
+      "rooms": "Necha xona kerak?",
+      "budget": "Byudjet qancha?",
+      "payment": "Qanday to‘lamoqchisiz?",
+      "when": "Qachon ko‘chib o‘tmoqchisiz?",
+      "contact": "Tanlovni qayerga yuboraylik?"
+    },
+    "multi": "Bir nechtasini tanlash mumkin",
+    "rooms": {
+      "0": "Studiya",
+      "1": "1 xonali",
+      "2": "2 xonali",
+      "3": "3 xonali",
+      "4": "4+ xonali"
+    },
+    "upTo": "{price} gacha",
+    "any": "Farqi yo‘q",
+    "payments": {
+      "full": "100% to‘lov",
+      "inst": "Muddatli to‘lov",
+      "bank": "Bank orqali",
+      "mort": "Ipoteka",
+      "unsure": "Hali bilmayman"
+    },
+    "when": {
+      "now": "Darhol — topshirilgan uyga",
+      "year": "Bir yil ichida",
+      "later": "1–2 yildan keyin",
+      "any": "Farqi yo‘q"
+    },
+    "answers": {
+      "budgetAny": "byudjet istalgan",
+      "paymentUnsure": "to‘lov — aniq emas",
+      "whenAny": "muddat — farqi yo‘q"
+    },
+    "next": "Keyingi",
+    "skip": "O‘tkazib yuborish",
+    "back": "Orqaga",
+    "live": "Hozir mos keladi",
+    "fits": "{count, plural, other {ta TJM mos keladi}}",
+    "flats": "{count, plural, other {{n} ta kvartira sotuvda}}",
+    "none": "Hozircha bunday variant yo‘q — menejer qo‘lda tanlaydi",
+    "priceFrom": "{price} dan",
+    "more": "+{n}",
+    "yourAnswers": "Javoblaringiz",
+    "send": "Tanlovni olish",
+    "doneTitle": "Tanlov tayyor",
+    "doneMinutes": "Menejer uni {minutes, plural, other {# daqiqa}} ichida Telegramga yuboradi. Hozircha variantlarni ko‘ring:",
+    "done": "Menejer uni Telegramga yuboradi. Hozircha variantlarni ko‘ring:",
+    "doneNone": "Menejer variantlarni qo‘lda tanlab, Telegramga yuboradi.",
+    "show": "{count, plural, other {# ta TJMni ko‘rsatish}}",
+    "showAll": "Barcha yangi uylar",
+    "again": "Qaytadan"
+  },
+  "unitVideo": {
+    "metaTitle": "Kvartira videosi · {name} TJM",
+    "metaDescription": "{name} TJMdagi kvartira hozir qanday ko‘rinadi: Vodiy House videosi va suratlari, to‘lov hisobi.",
+    "back": "{name} TJM",
+    "eyebrow": "Siz uchun kvartira videosi",
+    "title": "Kvartira <accent>hozir</accent> qanday ko‘rinadi",
+    "floor": "{n}-qavat",
+    "levelUnit": "Shu kvartira videosi",
+    "levelBlock": "{name}-blok videosi",
+    "levelComplex": "TJM videosi",
+    "state": "{month} holatiga",
+    "shot": "{date} kuni Vodiy House mobilografi suratga olgan",
+    "done": "Bir oyda nima qilindi",
+    "history": "Oldingi oylar",
+    "ready": "Blok tayyorligi",
+    "deadline": "Topshirish: {quarter}",
+    "cta": "Jonli ko‘rmoqchimisiz?",
+    "ctaText": "Vodiy House menejeri kvartirani va uyning o‘zini bepul ko‘rsatadi.",
+    "toComplex": "TJM sahifasi",
+    "calcTitle": "<accent>Shu kvartira</accent> uchun qancha to‘lanadi",
+    "calcLead": "Narx va to‘lov dasturlari — shu kvartira uchun. Bank, boshlang‘ich to‘lov va muddatni o‘zgartirish mumkin.",
+    "calcButton": "To‘lovni hisoblash",
+    "calcPending": "Hisoblanmoqda…",
+    "calcFailed": "Hisob yuklanmadi — qayta urinib ko‘ring",
+    "fromVideo": "videodan",
+    "telegram": "Telegramda yozish"
+  }
+}

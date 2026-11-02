@@ -2,7 +2,6 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  adminRootFiles,
   componentOf,
   reachableModules,
   readSource,
@@ -12,7 +11,8 @@ import {
 // CSS по разделам (шаг 14в): сайт не грузит кабинет, вход — только своё. Компонент, который
 // попадёт на страницу без своего CSS, выглядел бы сломанным только там — тест ловит это сразу.
 
-const BUNDLES = ["globals", "site", "admin", "cabinet", "calc", "complex", "dev"] as const;
+// Кабинет — своё приложение (apps/admin, PLAN §10): разделов admin и cabinet на сайте нет.
+const BUNDLES = ["globals", "site", "calc", "complex", "dev"] as const;
 type Bundle = (typeof BUNDLES)[number];
 
 const siteFiles = routeFiles("app/[locale]");
@@ -39,11 +39,6 @@ const ROOTS: Record<string, { entries: string[]; bundles: Bundle[] }> = {
     entries: siteFiles.filter(isComplexRoute),
     bundles: ["globals", "site", "calc", "complex"],
   },
-  adminRoot: { entries: adminRootFiles(), bundles: ["globals", "admin"] },
-  cabinet: {
-    entries: routeFiles("app/admin/(cabinet)"),
-    bundles: ["globals", "admin", "cabinet", "calc"],
-  },
   dev: { entries: routeFiles("app/dev"), bundles: [...BUNDLES] },
 };
 
@@ -54,8 +49,6 @@ const LAYOUT_CSS: Record<string, Bundle[]> = {
   "app/[locale]/novostroyki/[slug]/layout.tsx": ["complex"],
   "app/[locale]/video/[id]/layout.tsx": ["complex"],
   "app/global-not-found.tsx": ["globals", "site"],
-  "app/admin/layout.tsx": ["globals", "admin"],
-  "app/admin/(cabinet)/layout.tsx": ["cabinet", "calc"],
   "app/dev/layout.tsx": [...BUNDLES],
 };
 

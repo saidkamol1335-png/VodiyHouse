@@ -1,0 +1,130 @@
+/* Поля мокапа (.field, .inp). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* В ряду полей на общей сетке (subgrid): подпись, поле и строка под ним стоят по рядам —
+   у соседей с подписью в две строки поля всё равно на одной линии. */
+.field--subgrid {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.field--subgrid .field__label {
+  align-self: end;
+}
+
+.field__label {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.field__control {
+  position: relative;
+}
+
+.field__input {
+  width: 100%;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-s);
+  outline: none;
+  background: var(--field-bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-input);
+  font-weight: 600;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease);
+}
+
+.field__input::placeholder {
+  color: var(--fg-3);
+}
+
+.field__input:hover {
+  border-color: var(--line-3);
+}
+
+.field__input:focus {
+  border-color: var(--amber);
+  box-shadow: var(--field-ring);
+}
+
+.field__input--error,
+.field__input--error:focus {
+  border-color: var(--bad);
+  box-shadow: var(--field-ring-error);
+}
+
+.field__control--with-trailing .field__input {
+  padding-right: 52px;
+}
+
+.field__trailing {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: flex;
+  transform: translateY(-50%);
+}
+
+.field__error {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+/* Многострочное поле (мокап: textarea.inp). Высота — по тексту («О компании» на 600 знаков не
+   обрезается на 4 строках), до ~14 строк; где field-sizing нет — 4 строки и ручной resize. */
+.field__input--multiline {
+  height: auto;
+  min-height: 84px;
+  max-height: var(--field-multiline-max);
+  padding: 12px 15px;
+  line-height: 1.45;
+  field-sizing: content;
+  resize: vertical;
+}
+
+/* Второй язык пуст, а первый заполнен — подсказка, не ошибка (решение Д3). */
+.field__input--missing {
+  border-style: dashed;
+  border-color: var(--amber-line);
+}
+
+/* Строка под полем: подсказка слева, счётчик символов справа. */
+.field__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 16px;
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.field__note--missing {
+  color: var(--amber-2);
+  font-weight: 600;
+}
+
+.field__counter {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.field__counter--near {
+  color: var(--amber-2);
+}

@@ -3,8 +3,8 @@
 
 import { DEFAULT_LOCALE, isLocale, type Locale } from "./routing";
 
-/** Разделы без языкового префикса: кабинет, служебные страницы, API, файлы Next.js. */
-const UNPREFIXED_SECTIONS = ["admin", "dev", "api", "_next", "_vercel"];
+/** Разделы без языкового префикса: предпросмотр по гранту кабинета, стенды, API, файлы Next.js. */
+const UNPREFIXED_SECTIONS = ["preview", "dev", "api", "_next", "_vercel"];
 
 export function localeOfPath(pathname: string): Locale | null {
   const first = pathname.split("/")[1];

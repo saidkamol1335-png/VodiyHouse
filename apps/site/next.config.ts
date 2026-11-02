@@ -65,20 +65,10 @@ const nextConfig: NextConfig = {
       // Тестовый деплой (Ф2) — noindex на каждом ответе, и страницах, и картинках.
       ...(isIndexingClosed() ? [{ source: "/:path*", headers: [NOINDEX_HEADER] }] : []),
       { source: "/:path*", headers: SECURITY_HEADERS },
-      {
-        // Кабинет строже: ни в каком фрейме, адрес не уходит наружу. Правило ниже общего — с тем же
-        // заголовком побеждает последнее (docs Next.js, headers).
-        source: "/admin/:path*",
-        headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
-          { key: "Referrer-Policy", value: "same-origin" },
-        ],
-      },
     ];
   },
   experimental: {
-    // Несколько корневых layout (/[locale], /admin, /dev) — общий 404 собирается отдельно.
+    // Несколько корневых layout (/[locale], /dev) — общий 404 собирается отдельно.
     globalNotFound: true,
   },
   turbopack: {

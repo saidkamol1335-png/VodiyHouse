@@ -6,7 +6,7 @@ import { Container } from "@/components/Container";
 import { HiddenNavProvider } from "@/components/HiddenNav";
 import { SiteCalculator } from "@/components/SiteCalculator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { demoSiteCalc } from "@/lib/admin/calc/siteDemo";
+import { demoSiteCalc } from "@/lib/devDemo/calc/siteDemo";
 import { CALC_EXAMPLES, exampleSearch, exampleYears } from "@vh/shared/calc/examples";
 import { CALC_HINT_DRAFTS } from "@vh/shared/calc/hints";
 import { readCalcParams } from "@vh/shared/calc/params";

@@ -1,4 +1,5 @@
-import { CLIENT_IP_HEADER } from "@/lib/supabase/authForwarding";
+/** Адрес посетителя, который Netlify ставит в запрос (у сайта — только для лимита частоты). */
+export const CLIENT_IP_HEADER = "x-nf-client-connection-ip";
 
 // Адрес посетителя для лимитов частоты: заявки, бот, события, вход в кабинет. Только заголовок
 // Netlify (его ставит край сети): x-forwarded-for и x-real-ip посетитель подделывает.

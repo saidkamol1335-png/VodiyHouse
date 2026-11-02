@@ -1,0 +1,8 @@
+/* Стекло — микс для шапки, нижней панели телефона и меню кабинета.
+   В full: полупрозрачный фон + blur 18 px (мокап). В lite и none токены дают
+   непрозрачный фон без blur (tokens.css), поэтому здесь режимов нет. */
+.glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+}

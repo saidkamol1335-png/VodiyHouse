@@ -1,54 +1,25 @@
 import "server-only";
-import { createHmac } from "node:crypto";
-import { headers } from "next/headers";
-import { after } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { visitorAddress } from "@/lib/clientAddress";
-import { hasSupabaseAdminEnv, supabaseSecretKey } from "@/lib/supabase/env";
+import { callSigned, hasSignedWriteEnv, visitorKey } from "@/lib/supabase/signedWrite";
 import { leadDbErrorCode } from "../errors";
 import type { LeadPayload } from "../request";
 import type { LeadSubmitResult } from "../types";
-import { configuredChannels } from "./channels";
-import { deliverLead } from "./deliver";
 
-// Заявка посетителя без входа — секретным ключом: прав сотрудника нет, проверяет всё база
-// (submit_lead открыт только серверу: лимит частоты, снимок объекта, повтор за 24 часа). Без
-// секретного ключа сервер заявок не принимает: посетитель видит «позвоните нам», а не ложное «отправлено».
+// Заявка посетителя (PLAN §10, п. 5): подписанный вызов site_submit_lead ролью посетителя — у сайта
+// нет service-ключа. Проверяет всё база (лимит частоты, снимок объекта, повтор за 24 часа); каналы
+// доставки задаёт настройка leads.channels, доставляет админка (Database Webhook на новую заявку).
+// Без секрета подписи сервер заявок не принимает: посетитель видит «позвоните нам», а не ложное «отправлено».
 
-/** Ключ лимита частоты: хэш с секретом — ни адрес посетителя, ни номер чата не хранятся. */
-export function rateKey(kind: "ip" | "tg", value: string): string {
-  return createHmac("sha256", supabaseSecretKey()).update(`lead-rate:${kind}:${value}`).digest("hex");
-}
-
-/**
- * Адрес посетителя для лимитов (lib/clientAddress.ts): заголовок Netlify, IPv6 — сетью /64. Без
- * заголовка — null: база пропускает лимит по адресу, остаются лимиты по номеру и чату.
- */
-export function visitorIp(list: Pick<Headers, "get">): string | null {
-  return visitorAddress(list);
-}
-
-export async function visitorKey(): Promise<string | null> {
-  const ip = visitorIp(await headers());
-  return ip ? rateKey("ip", ip) : null;
-}
-
-/** Заявка сайта (ключ — адрес посетителя) или бота (ключ — его чат). */
-export async function submitLead(lead: LeadPayload, clientKey?: string | null): Promise<LeadSubmitResult> {
-  if (!hasSupabaseAdminEnv()) return { status: "error", error: "unavailable" };
-  const admin = createSupabaseAdminClient();
-  const { data, error } = await admin.rpc("submit_lead", {
-    p_lead: lead,
-    p_channels: configuredChannels(),
-    p_client_key: clientKey === undefined ? await visitorKey() : clientKey,
-  });
-  if (error) {
-    const code = leadDbErrorCode(error);
-    if (code !== "rateLimited") console.error("[leads] заявка не сохранилась", error.code, error.message);
+export async function submitLead(lead: LeadPayload): Promise<LeadSubmitResult> {
+  if (!hasSignedWriteEnv()) return { status: "error", error: "unavailable" };
+  const { data, error } = await callSigned<{ id: string; number: number; repeat_of: number | null }>(
+    "site_submit_lead",
+    "lead",
+    { lead, client_key: await visitorKey() },
+  );
+  if (error || !data) {
+    const code = error ? leadDbErrorCode(error) : "unknown";
+    if (code !== "rateLimited") console.error("[leads] заявка не сохранилась", error?.code, error?.message);
     return { status: "error", error: code };
   }
-  const saved = data as { id: string; number: number; repeat_of: number | null };
-  // Доставка — после ответа посетителю: Telegram и Таблица не задерживают «Заявка отправлена».
-  after(() => deliverLead(admin, saved.id));
-  return { status: "sent", number: saved.number, repeat: saved.repeat_of !== null, id: saved.id };
+  return { status: "sent", number: data.number, repeat: data.repeat_of !== null, id: data.id };
 }

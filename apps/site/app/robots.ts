@@ -9,7 +9,8 @@ import { siteOrigin } from "@/lib/site/metadata";
 export default function robots(): MetadataRoute.Robots {
   if (isIndexingClosed()) return { rules: { userAgent: "*", allow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/dev"] },
+    // Кабинета на сайте нет (PLAN §10); стенды и предпросмотр по гранту — не для поиска.
+    rules: { userAgent: "*", allow: "/", disallow: ["/dev", "/preview"] },
     sitemap: `${siteOrigin()}/sitemap.xml`,
   };
 }

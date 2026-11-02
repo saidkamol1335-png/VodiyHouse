@@ -83,7 +83,9 @@ test.describe("шапка · планшет 1100", () => {
     await toggle.click();
     const menu = page.locator(".tablet-menu");
     await expect(menu).toBeVisible();
-    await expect(menu.locator(".tablet-menu__link")).toHaveCount(MENU_COUNT);
+    // С заданным общим номером VH в меню ещё «Позвонить» (tel:).
+    const tabletPhone = await menu.locator('a.tablet-menu__link[href^="tel:"]').count();
+    await expect(menu.locator(".tablet-menu__link")).toHaveCount(MENU_COUNT + tabletPhone);
     await expect(menu.getByRole("link", { name: "Подбор за 1 минуту" })).toHaveAttribute("href", "/ru/podbor");
     await expect(page.locator(".phone-menu")).toBeHidden();
     await shot(page, "1100-menu");

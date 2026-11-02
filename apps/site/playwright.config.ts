@@ -14,11 +14,11 @@ const BASE_URL = `http://localhost:${PORT}`;
 // `npx playwright install webkit`).
 const SITE_SPECS = /(home|home-hero|home-preloader|motion-reveal|quiz|picker|catalog|complex-page|pages|header|footer|leads|events|seo-meta|rule-1-2|publication-rule|site-calc-view)\.spec\.ts/;
 const EXTRA_PROJECTS = [
-  { name: "mobile-360", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Pixel 7"], viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 } },
-  { name: "tablet-768", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1024 }, deviceScaleFactor: 1 } },
+  { name: "mobile-360", testMatch: SITE_SPECS, use: { ...devices["Pixel 7"], viewport: { width: 360, height: 780 }, deviceScaleFactor: 1 } },
+  { name: "tablet-768", testMatch: SITE_SPECS, use: { ...devices["Desktop Chrome"], viewport: { width: 768, height: 1024 }, deviceScaleFactor: 1 } },
 ];
 const WEBKIT_PROJECTS = [
-  { name: "webkit-390", dependencies: ["setup"], testMatch: SITE_SPECS, use: { ...devices["iPhone 13"], viewport: { width: 390, height: 844 } } },
+  { name: "webkit-390", testMatch: SITE_SPECS, use: { ...devices["iPhone 13"], viewport: { width: 390, height: 844 } } },
 ];
 // Запуск с --project=mobile-360 / tablet-768 / webkit-390 включает их сам (и на Windows, без «VAR=1 …»);
 // через окружение флаг доходит и до воркеров — они читают этот же файл.
@@ -45,9 +45,6 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
-  // Тестовые сотрудники в облаке: создать до прогона, удалить после (без ключей — ничего).
-  globalSetup: "./tests/e2e/global-setup.ts",
-  globalTeardown: "./tests/e2e/global-teardown.ts",
   use: {
     baseURL: BASE_URL,
     trace: "retain-on-failure",
@@ -55,11 +52,8 @@ export default defineConfig({
     timezoneId: "Asia/Tashkent",
   },
   projects: [
-    // Вход руководителем, менеджером и мобилографом — сессии для тестов кабинета (auth.setup.ts).
-    { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "mobile-390",
-      dependencies: ["setup"],
       // Спеки без телефонной раскладки и скриншотов: на 390 они повторяли бы 1440 (CLAUDE.md, 25.10.2026).
       // Спеке с веткой для телефона или скриншотом — место не здесь.
       testIgnore: [
@@ -84,7 +78,6 @@ export default defineConfig({
     },
     {
       name: "desktop-1440",
-      dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 900 },

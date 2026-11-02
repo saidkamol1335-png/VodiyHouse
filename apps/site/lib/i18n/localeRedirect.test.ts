@@ -18,7 +18,7 @@ describe("localeRedirectTarget", () => {
     expect(localeRedirectTarget("/novostroyki/shodlik", "ru")).toBe("/ru/novostroyki/shodlik");
   });
 
-  it.each(["/uz", "/ru/novostroyki", "/admin", "/admin/leads", "/dev/preview", "/api/leads", "/robots.txt"])(
+  it.each(["/uz", "/ru/novostroyki", "/preview/zhk/shodlik", "/dev/preview", "/api/leads", "/robots.txt"])(
     "не трогаем %s",
     (path) => {
       expect(localeRedirectTarget(path, undefined)).toBeNull();
@@ -30,6 +30,13 @@ describe("localeOfPath", () => {
   it("достаёт язык из первого сегмента", () => {
     expect(localeOfPath("/ru/novostroyki")).toBe("ru");
     expect(localeOfPath("/uz")).toBe("uz");
-    expect(localeOfPath("/admin")).toBeNull();
+    expect(localeOfPath("/dev")).toBeNull();
+  });
+});
+
+// Проект-2 (PLAN §10, п. 19): кабинета на сайте нет — /admin как обычный адрес без языка, ведёт на 404.
+describe("кабинет не на сайте", () => {
+  it("/admin получает язык, как любая страница, — и там 404", () => {
+    expect(localeRedirectTarget("/admin", undefined)).toBe("/uz/admin");
   });
 });

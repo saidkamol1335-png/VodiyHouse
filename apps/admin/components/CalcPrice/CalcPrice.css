@@ -1,0 +1,66 @@
+/* Стоимость квартиры (мокап /kalkulyator «03 Стоимость квартиры», r1 «Квартира · свободно: 2»):
+   сегмент режима, поля в ряд, справа внизу — «Стоимость $84 000 / ≈ … сум». */
+
+.calc-price {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.calc-price__title {
+  margin: 0;
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 400;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.calc-price__modes,
+.calc-price__currency {
+  justify-self: start;
+}
+
+.calc-price__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  gap: 12px 16px;
+}
+
+.calc-price__unit {
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+}
+
+.calc-price__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+}
+
+.calc-price__total {
+  color: var(--fg-heading);
+  font-size: var(--fs-h3);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-price__approx {
+  grid-column: 2;
+  justify-self: end;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.calc-price__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
