@@ -142,7 +142,8 @@ test.describe.serial("кабинет мобилографа", () => {
     expect(errors).toEqual([]);
   });
 
-  test("менеджер: «Ждут проверки» → ящик отчёта, «Опубликовать» — только с отметкой правила 1.2", async ({
+  // Проект-2 (PLAN §10, п. 6; 20261102170000): ящик видят руководитель и менеджер, публикует руководитель.
+  test("менеджер видит ящик отчёта без публикации; руководитель публикует только с отметкой правила 1.2", async ({
     browser,
   }) => {
     const context = await browser.newContext({ storageState: cabinetState("manager") });
@@ -161,6 +162,25 @@ test.describe.serial("кабинет мобилографа", () => {
 
     const drawer = page.getByRole("dialog");
     await expect(drawer).toContainText("Видео квартиры");
+    await expect(drawer).toContainText("E2E · Переснято без вывески");
+    await expect(drawer.getByRole("button", { name: "Опубликовать на сайте" })).toHaveCount(0);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("руководитель: «Опубликовать» — только с отметкой правила 1.2; матрица и видео для клиентов", async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({ storageState: cabinetState("head") });
+    const page = await context.newPage();
+    const errors = collectPageErrors(page);
+    await page.goto("/admin/video");
+    const row = page
+      .locator(".progress-review__item", { hasText: "ЖК Yulduz" })
+      .filter({ hasText: /кв\. / })
+      .first();
+    await row.getByRole("link", { name: "Проверить" }).click();
+    const drawer = page.getByRole("dialog");
     await expect(drawer).toContainText("E2E · Переснято без вывески");
     const publish = drawer.getByRole("button", { name: "Опубликовать на сайте" });
     await expect(publish).toBeDisabled();
