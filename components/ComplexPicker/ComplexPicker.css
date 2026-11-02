@@ -673,6 +673,11 @@ a.complex-picker__tag {
   font-weight: 600;
 }
 
+/* Номер Vodiy House в строке неполной квартиры не рвётся на телефоне. */
+.complex-picker__note a {
+  white-space: nowrap;
+}
+
 .complex-picker__tap {
   display: flex;
   align-items: center;

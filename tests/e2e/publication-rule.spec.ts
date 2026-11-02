@@ -57,6 +57,10 @@ test.describe("сайт · правило публикации", () => {
     await expect(card.locator(".catalog-card__soon")).toHaveText("Скоро");
     await expect(card).toContainText("Цены скоро");
     await expect(card).not.toContainText(/от \$\d/);
+    const phone = await sitePhone();
+    if (phone) {
+      expect((await card.locator(".catalog-card__soon-call").getAttribute("href"))?.replace(/\D/g, "")).toBe(phone);
+    }
     await card.scrollIntoViewIfNeeded();
     await shot(page, "catalog-soon");
 
@@ -141,8 +145,15 @@ test.describe("сайт · правило публикации", () => {
     await expect(pending.first().locator(".complex-picker__unit-price")).toHaveCount(0);
     await expect(pending.first().locator(".complex-picker__unit-rooms")).toHaveCount(0);
     await pending.first().click();
-    await expect(section.locator(".complex-picker__note")).toContainText("Цена уточняется — позвоните в Vodiy House");
+    const note = section.locator(".complex-picker__note");
+    await expect(note).toContainText("Цена уточняется — позвоните в Vodiy House");
+    const phone = await sitePhone();
+    if (phone) {
+      expect((await note.locator('a[href^="tel:"]').getAttribute("href"))?.replace(/\D/g, "")).toBe(phone);
+    }
     await expect(section.locator(".complex-picker__flat")).toHaveCount(0);
+    // На снимке — строка с номером под планом.
+    if (process.env.PUBLICATION_SHOTS) await note.scrollIntoViewIfNeeded();
     await shot(page, "facade-gray-units");
     // Полная планировка рядом выбирается как обычно, продано — как раньше.
     await expect(section.locator(".complex-picker__unit--free").first()).toBeVisible();
