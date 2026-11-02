@@ -1,0 +1,9 @@
+# Кабинет admin.vodiyhouse.uz (PLAN §10). Сайт Netlify: Base directory — корень репозитория,
+# Package directory — apps/admin (монорепо npm workspaces: зависимости ставятся из корня).
+# Переменные окружения — в настройках этого сайта Netlify (apps/admin/.env.example).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"

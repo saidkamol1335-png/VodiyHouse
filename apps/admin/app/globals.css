@@ -1,0 +1,27 @@
+@import "tailwindcss";
+/* Токены и база — общие с сайтом (packages/shared/styles): одна светлая тема (CLAUDE.md «Дизайн»). */
+@import "../../../packages/shared/styles/tokens.css";
+@import "../../../packages/shared/styles/base.css";
+
+/* Tailwind знает только наши токены — как у сайта (apps/site/app/globals.css). */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-border: var(--line-2);
+  --color-primary: var(--amber);
+  --color-primary-foreground: var(--on-amber);
+  --color-muted-foreground: var(--fg-2);
+
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+
+  --radius-md: var(--r-m);
+  --radius-lg: var(--r-l);
+  --radius-2xl: var(--r-2xl);
+}
+
+/* Компоненты кабинета (БЭМ) — по файлу на блок. */
+@import "../components/AdminLogin/AdminLogin.css";

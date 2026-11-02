@@ -1,19 +1,19 @@
 # зависимости
-/node_modules
+node_modules/
 
 # next.js
-/.next/
-/out/
-/build
+.next/
+out/
+build/
 next-env.d.ts
 *.tsbuildinfo
 
 # тесты
-/coverage
-/playwright-report/
-/test-results/
-/blob-report/
-/playwright/.cache/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
 
 # секреты: в git только .env.example
 .env*

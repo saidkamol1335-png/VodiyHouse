@@ -1,0 +1,24 @@
+{
+  "name": "@vh/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Общий код сайта и админки: деньги и расчёт, форматы, квартиры, языки (PLAN §10).",
+  "exports": {
+    "./units": "./src/units/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "eslint-config-prettier": "^10.1.8",
+    "@types/node": "^24.19.2",
+    "typescript": "^5",
+    "vitest": "^5.0.5"
+  }
+}

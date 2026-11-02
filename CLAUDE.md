@@ -36,7 +36,7 @@ Vodiy House — агентство новостроек в Фергане. Дв�
 
 ## Код
 - БЭМ: .block, .block__el, .block--mod. Один компонент — папка с .tsx, .css, index.ts; CSS подключается через @import в app/globals.css своего приложения. Tailwind — только раскладка и отступы.
-- Токены — styles/tokens.css. Деньги — `@vh/shared/calc` и `@vh/shared/format`. Тексты — messages/ru.json, messages/uz.json своего приложения (админка — только ru).
+- Токены и база — packages/shared/styles (tokens.css, base.css), общие для обоих приложений. Деньги — `@vh/shared/calc` и `@vh/shared/format`. Тексты — messages/ru.json, messages/uz.json своего приложения (админка — только ru).
 - Код сайта не импортирует код админки и наоборот; общее — только через `packages/shared`. service-ключ Supabase — только в `apps/admin`.
 - Имена предметные, на английском. Лимиты длины функций и файлов — предупреждение ESLint, не повод для рефакторинга до запуска.
 - prettier — только по изменённым файлам, никогда по папке.
