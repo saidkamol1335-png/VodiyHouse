@@ -10,9 +10,13 @@ const PROJECT_URL = /^https:\/\/([a-z0-9]+)\.supabase\.co\/?$/;
 const MIN_PASSWORD_LENGTH = 10;
 const KEYS_PAGE = "Project Settings → API Keys";
 
-const ok = (text: string): CheckLine => ({ status: "ok", text });
-const fail = (text: string, hint?: string): CheckLine => ({ status: "fail", text, hint });
-const manual = (text: string, hint?: string): CheckLine => ({ status: "manual", text, hint });
+export const ok = (text: string): CheckLine => ({ status: "ok", text });
+export const fail = (text: string, hint?: string): CheckLine => ({ status: "fail", text, hint });
+export const manual = (text: string, hint?: string): CheckLine => ({
+  status: "manual",
+  text,
+  hint,
+});
 
 export function projectRefFromUrl(url: string | undefined): string | null {
   return PROJECT_URL.exec(url?.trim() ?? "")?.[1] ?? null;
@@ -72,7 +76,14 @@ function checkDbUrl(value: string | undefined, ref: string | null): CheckLine {
   return ok("SUPABASE_DB_URL");
 }
 
-function checkE2eRef(value: string | undefined, ref: string | null): CheckLine {
+function checkE2eRef(value: string | undefined, ref: string | null, prod: boolean): CheckLine {
+  if (prod)
+    return ref && value?.trim() === ref
+      ? fail(
+          "E2E_SUPABASE_PROJECT_REF = прод",
+          "убрать: global-setup e2e создал бы сотрудников в проде",
+        )
+      : ok("E2E_SUPABASE_PROJECT_REF не указывает на прод");
   if (!value)
     return fail(
       "E2E_SUPABASE_PROJECT_REF — пусто",
@@ -84,13 +95,13 @@ function checkE2eRef(value: string | undefined, ref: string | null): CheckLine {
 }
 
 /** Ключи в .env.local. */
-export function checkEnv(env: EnvValues): CheckLine[] {
+export function checkEnv(env: EnvValues, prod = false): CheckLine[] {
   const ref = projectRefFromUrl(env.NEXT_PUBLIC_SUPABASE_URL);
   return [
     checkUrl(env),
     ...checkKeys(env),
     checkDbUrl(env.SUPABASE_DB_URL, ref),
-    checkE2eRef(env.E2E_SUPABASE_PROJECT_REF, ref),
+    checkE2eRef(env.E2E_SUPABASE_PROJECT_REF, ref, prod),
   ];
 }
 
@@ -203,8 +214,29 @@ export type DatabaseState = {
   activeHeads: number | null;
 };
 
+/** Облако и файлы миграций разошлись: лишние версии в облаке или правка применённой. */
+function driftLines(state: DatabaseState): CheckLine[] {
+  const extra = state.applied.filter((version) => !state.local.includes(version));
+  const lines: CheckLine[] = [];
+  if (extra.length > 0)
+    lines.push(
+      fail(
+        `в облаке миграции, которых нет в этой ветке: ${extra.join(", ")}`,
+        "код и база разошлись — проверять из ветки, с которой выкладывали",
+      ),
+    );
+  if (state.edited.length > 0)
+    lines.push(
+      fail(
+        `миграции изменены после применения: ${state.edited.join(", ")}`,
+        "применённую не правим — исправление новым файлом миграции",
+      ),
+    );
+  return lines;
+}
+
 /** Что уже сделано в базе: миграции → DEMO → первый руководитель. null — таблиц ещё нет. */
-export function checkDatabase(state: DatabaseState): CheckLine[] {
+export function checkDatabase(state: DatabaseState, prod = false): CheckLine[] {
   const missing = state.local.filter((version) => !state.applied.includes(version));
   const lines = [
     missing.length === 0
@@ -214,14 +246,17 @@ export function checkDatabase(state: DatabaseState): CheckLine[] {
           "npm run db:push",
         ),
   ];
-  if (state.edited.length > 0)
-    lines.push(
-      fail(
-        `миграции изменены после применения: ${state.edited.join(", ")}`,
-        "применённую не правим — исправление новым файлом миграции",
-      ),
-    );
+  lines.push(...driftLines(state));
   if (state.demoComplexes === null || state.activeHeads === null) return lines;
+  if (prod) {
+    // DEMO на проде — в checkProd; руководителя заводит человек на встрече (handover п. 3).
+    lines.push(
+      state.activeHeads > 0
+        ? ok(`активных руководителей: ${state.activeHeads}`)
+        : manual("руководителя ещё нет", "staff:create-head — человек в своём терминале"),
+    );
+    return lines;
+  }
   lines.push(
     state.demoComplexes > 0
       ? ok(`DEMO: ЖК ${state.demoComplexes}`)

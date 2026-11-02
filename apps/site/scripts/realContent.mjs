@@ -4,7 +4,8 @@
 // строительства. Опубликованные, скрытые и архивные не трогает: их ведёт руководитель, снятое им не
 // вернётся. Повторный запуск ничего не дублирует; publish: true — публикует черновик, который ещё не
 // публиковали (файлы просмотрены по правилу 1.2, условия публикации проверяет база). В облако заказчика
-// на «Запуске» — тем же скриптом.
+// на «Запуске» — тем же скриптом. `-- --drafts` — всё черновиками, publish: true не действует
+// (прод перед сдачей: публикует руководитель сам, решение 02.11).
 // Строка подключения — SUPABASE_DB_URL, Storage — NEXT_PUBLIC_SUPABASE_URL и SUPABASE_SECRET_KEY.
 
 import { readFile } from "node:fs/promises";
@@ -22,6 +23,7 @@ const MAX_LONG_SIDE = 3200;
 const LOGO_MAX_LONG_SIDE = 1600;
 const JPEG_QUALITY = 82;
 const BLUR_WIDTH = 16;
+const DRAFTS_ONLY = process.argv.includes("--drafts");
 
 const content = JSON.parse(await readFile(path.join(ZHK_DIR, "content.json"), "utf8"));
 
@@ -176,7 +178,11 @@ async function ensureComplex(complex, developers) {
      values ($1, $2::public.i18n_text, $3, (select coalesce(max(c.sort), 0) + 10 from public.complexes c))
      returning id, status`,
     // Застройщик у черновика может быть пустым: обязателен только для публикации (docs/publication-rule.md).
-    [developers.get(complex.developer) ?? null, json({ ru: complex.name, uz: complex.name }), complex.slug],
+    [
+      developers.get(complex.developer) ?? null,
+      json({ ru: complex.name, uz: complex.name }),
+      complex.slug,
+    ],
   );
   counts.complexes += 1;
   return rows[0];
@@ -532,7 +538,9 @@ try {
     PHOTOS_LEDGER_KEY,
   ]);
   photosLedger = ledger.rows[0]?.value ?? {};
-  const marked = await client.query("select value from public.settings where key = $1", [REAL_PHOTOS_KEY]);
+  const marked = await client.query("select value from public.settings where key = $1", [
+    REAL_PHOTOS_KEY,
+  ]);
   realPhotosMarked = marked.rows[0]?.value ?? [];
   const developers = new Map();
   for (const developer of content.developers)
@@ -555,10 +563,11 @@ try {
     await fillProgress(id, complex);
   }
   for (const developer of content.developers) {
-    if (developer.publish) await publish("developers", developers.get(developer.slug));
+    if (developer.publish && !DRAFTS_ONLY)
+      await publish("developers", developers.get(developer.slug));
   }
   for (const complex of content.complexes) {
-    if (!complex.publish) continue;
+    if (!complex.publish || DRAFTS_ONLY) continue;
     // Программа входит в минимум ЖК: включаем до публикации, иначе база её отклонит. Уже публиковавшийся
     // ЖК не трогаем: программы мог выключить руководитель.
     const { rows } = await client.query(
