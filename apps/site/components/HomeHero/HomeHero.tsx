@@ -55,7 +55,7 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
  * показываем (решение 02.11.2026): пустой каталог — экран без цифр, а не «0 жилых комплексов».
  */
 function heroStats(t: HeroTranslator, stats: HomeStats, locale: string): HeroStat[] {
-  return allHeroStats(t, stats, locale).filter((item) => item.value !== "0");
+  return allHeroStats(t, stats, locale).filter((item) => !/^0\+?$/.test(item.value));
 }
 
 function allHeroStats(t: HeroTranslator, stats: HomeStats, locale: string): HeroStat[] {

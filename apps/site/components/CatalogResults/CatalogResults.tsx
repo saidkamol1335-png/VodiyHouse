@@ -50,7 +50,9 @@ function activeGroups(filter: Filter): number {
  * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
  * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon = false }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false }: CatalogResultsProps) {
+  // Все опубликованные — «Скоро» (первая публикация): на главной показываем их, а не «скоро появятся».
+  const hideSoon = hideSoonWanted && withoutSoon(catalog.complexes).length > 0;
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
   const results = useRef<HTMLDivElement>(null);
@@ -68,7 +70,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
   }, [catalog, collection, filter, hideSoon]);
   useSheetLock(open, closeSheet);
   // Каталог ещё пуст (до первой публикации): без фильтра и «Найдено 0» — «скоро» и подбор вручную.
-  if ((hideSoon ? withoutSoon(catalog.complexes) : catalog.complexes).length === 0) return <CatalogComingSoon catalog={catalog} />;
+  if (catalog.complexes.length === 0) return <CatalogComingSoon catalog={catalog} />;
   const showResults = () => {
     setOpen(false);
     results.current?.scrollIntoView({ behavior: getMotionTier() === "full" ? "smooth" : "auto", block: "start" });

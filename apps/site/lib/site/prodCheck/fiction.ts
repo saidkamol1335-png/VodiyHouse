@@ -43,14 +43,21 @@ export const PLACEHOLDER_MARKERS: readonly RegExp[] = [
 
 /** Нули вместо данных: «0 ЖК», «Найдено 0», «0 жилых комплексов», «0 ta TJM» и т. п. */
 export const ZERO_COUNTS: readonly RegExp[] = [
-  /(^|[^\d\s.,])\s*0\s+(ЖК|TJM|жил|застройщ|квартир|кв\.|ta\b)/,
+  /(^|[^\d\s.,])\s*0\+?\s+(ЖК|TJM|жил|застройщ|квартир|кв\.|ta\b)/,
   /Найден[оа]?\s+0\b/,
   /\b0 ta\b/,
 ];
 
-/** Телефоны Узбекистана: +998 90 123 45 67, (90) 123-45-67, 901234567. */
+/**
+ * Телефоны Узбекистана: +998 73 244 12 34 (после +998 — любой код), без +998 — мобильные (20, 33, 50,
+ * 55, 77, 87, 88, 9x) и городские (61–79: Фергана 73, Андижан 74, Наманган 69…): (90) 123-45-67, 901234567.
+ */
 const PHONE =
-  /(?:\+?998[\s-]?)?\(?\b(?:33|50|55|77|88|90|91|93|94|95|97|98|99|71)\)?[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}\b/g;
+  /(?:\+?998[\s-]?\(?\d{2}\)?|\(?\b(?:20|33|50|55|6[1-9]|7\d|87|88|9\d)\)?)[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}\b/g;
+
+/** Ссылки-контакты: звонок и мессенджеры. «Поделиться» (t.me/share) — не контакт. */
+const CONTACT_LINK =
+  /href="(tel:[^"]+|https?:\/\/(?:t\.me\/(?!share)|telegram\.me\/|wa\.me\/|api\.whatsapp\.com\/|(?:www\.)?instagram\.com\/|viber:)[^"]*)"/g;
 
 export const phoneDigits = (value: string) => value.replace(/\D/g, "").replace(/^998/, "");
 
@@ -77,6 +84,26 @@ export function findFiction(text: string, allowedPhones: readonly string[] = [])
   const allowed = new Set(allowedPhones.map(phoneDigits));
   for (const match of text.matchAll(PHONE)) {
     if (!allowed.has(phoneDigits(match[0]))) hits.push({ rule: "телефон", match: match[0].trim() });
+  }
+  return hits;
+}
+
+/**
+ * Ссылки «Позвонить» и мессенджеров в HTML: разрешены только контакты Vodiy House — номер
+ * (allowedPhones) и адреса из «Настройки → Контакты» (allowedLinks, например t.me/vodiyhouse).
+ */
+export function findContactLinks(
+  html: string,
+  allowedPhones: readonly string[] = [],
+  allowedLinks: readonly string[] = [],
+): FictionHit[] {
+  const phones = new Set(allowedPhones.map(phoneDigits));
+  const hits: FictionHit[] = [];
+  for (const [, href] of html.matchAll(CONTACT_LINK)) {
+    const allowed = href!.startsWith("tel:")
+      ? phones.has(phoneDigits(href!))
+      : allowedLinks.some((link) => href!.toLowerCase().includes(link.toLowerCase()));
+    if (!allowed) hits.push({ rule: "ссылка-контакт не Vodiy House", match: href! });
   }
   return hits;
 }

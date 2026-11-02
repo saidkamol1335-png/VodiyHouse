@@ -16,7 +16,14 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"]],
   outputDir: "test-results/prod",
-  use: { baseURL: PROD_URL, trace: "off", locale: "ru-RU", timezoneId: "Asia/Tashkent" },
+  use: {
+    baseURL: PROD_URL,
+    trace: "off",
+    locale: "ru-RU",
+    timezoneId: "Asia/Tashkent",
+    // Запросы Service Worker обошли бы page.route — запрещаем.
+    serviceWorkers: "block",
+  },
   projects: [
     { name: "mobile-390", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
     {

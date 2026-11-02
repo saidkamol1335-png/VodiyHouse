@@ -166,10 +166,16 @@ async function databaseLines(connectionString) {
     return [
       ...lines,
       ...checkProd({
-        demoComplexes,
+        // Как demo:remove: застройщики и ЖК demo-…, заявки «DEMO · …».
+        demo: await countOrNull(
+          client,
+          `select ((select count(*) from public.complexes where slug like 'demo-%')
+                 + (select count(*) from public.developers where slug like 'demo-%')
+                 + (select count(*) from public.leads where name like 'DEMO · %'))::int as count`,
+        ),
         e2eUsers: await countOrNull(
           client,
-          "select count(*)::int as count from auth.users where email like 'e2e-%@example.com'",
+          "select count(*)::int as count from auth.users where email like '%@example.com'",
         ),
         leads: await countOrNull(client, "select count(*)::int as count from public.leads"),
         nextLeadNumber: next?.[0]?.count ?? null,

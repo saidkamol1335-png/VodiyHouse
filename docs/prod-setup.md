@@ -10,7 +10,7 @@
 node -e "for (const n of ['SITE_SIGNING_SECRET','NEXT_SERVER_ACTIONS_ENCRYPTION_KEY','CRON_SECRET']) console.log(n + '=' + require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
-Три строки — в `.env.prod` (п. 3) и в Netlify (п. 4). В чат не присылать.
+Все три — в Netlify (п. 4); `SITE_SIGNING_SECRET` — ещё и в `.env.prod` (п. 3), тем же значением. В чат не присылать.
 
 ## 2. Supabase — новый проект (человек, ~10 мин)
 
@@ -62,7 +62,7 @@ SITE_SIGNING_SECRET=<из п. 1>
 
 Из `Desktop\VH_release\apps\site`, все команды — с `--env-file=.env.prod`:
 
-1. `node --env-file=.env.prod scripts/cloud-check.mjs --prod` — ключи и Auth.
+1. `node --env-file=.env.prod scripts/cloud-check.mjs --prod` — ключи и Auth (точная команда — `docs/prod-check.md`).
 2. `node --env-file=.env.prod scripts/db-push.mjs` — схема (74 миграции ветки).
 3. `node --env-file=.env.prod scripts/vault-signing-secret.mjs` — секрет подписи в Vault.
 4. `node --env-file=.env.prod scripts/realContent.mjs --drafts` — ЖК и застройщики из материалов **черновиками**, на сайте 0 опубликованных.

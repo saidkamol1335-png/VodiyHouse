@@ -1,9 +1,11 @@
 // Проверка прода (`cloud:check -- --prod`): DEMO и следы проверок — ошибка (решение 02.11.2026).
-import { fail, manual, ok, type CheckLine } from "./cloudCheck";
+// Только `import type`: скрипт грузит файл в Node без сборщика, а он не подставляет расширение .ts.
+import type { CheckLine } from "./cloudCheck";
 
 export type ProdState = {
-  demoComplexes: number | null;
-  /** Сотрудники e2e-…@example.com в Auth. */
+  /** DEMO: ЖК и застройщики со slug demo-…, заявки «DEMO · …». */
+  demo: number | null;
+  /** Сотрудники …@example.com в Auth (e2e и спеки). */
   e2eUsers: number | null;
   leads: number | null;
   /** Следующий номер заявки (счётчик identity). */
@@ -13,17 +15,21 @@ export type ProdState = {
   rate: boolean | null;
 };
 
+const ok = (text: string): CheckLine => ({ status: "ok", text });
+const fail = (text: string, hint?: string): CheckLine => ({ status: "fail", text, hint });
+const manual = (text: string, hint?: string): CheckLine => ({ status: "manual", text, hint });
+
 type Rule<K extends keyof ProdState> = (value: NonNullable<ProdState[K]>) => CheckLine;
 
 const RULES: { [K in keyof ProdState]: Rule<K> } = {
-  demoComplexes: (n) =>
+  demo: (n) =>
     n === 0
       ? ok("DEMO нет")
-      : fail(`DEMO в проде: ЖК ${n}`, "npm run demo:remove — с «да» исполнителя"),
+      : fail(`DEMO в проде: записей ${n}`, "npm run demo:remove — с «да» исполнителя"),
   e2eUsers: (n) =>
     n === 0
-      ? ok("сотрудников e2e нет")
-      : fail(`сотрудники e2e в проде: ${n}`, "удалить в Authentication → Users"),
+      ? ok("сотрудников …@example.com нет")
+      : fail(`тестовые сотрудники в проде: ${n}`, "удалить в Authentication → Users"),
   leads: (n) =>
     n === 0
       ? ok("заявок нет")
@@ -38,20 +44,25 @@ const RULES: { [K in keyof ProdState]: Rule<K> } = {
       : fail(`опубликованы без минимума: ${slugs.join(", ")}`, "снять с публикации в кабинете"),
   rate: (has) =>
     has
-      ? ok("курс ЦБ записан")
+      ? ok("курс записан (ЦБ или ручной)")
       : manual(
-          "курса ЦБ нет",
+          "курса нет",
           "«Программы оплаты» → «Зафиксировать курс» — без него ЖК не опубликовать",
         ),
 };
 
 /**
- * Прод: DEMO и следы проверок — ошибка, а не норма тестового облака.
- * null — таблиц ещё нет (до db:push), строка пропускается.
+ * Прод: DEMO и следы проверок — ошибка, а не норма тестового облака. null — запрос не прошёл (до
+ * db:push или нет прав): на проде это ✗, а не пропуск — иначе «готово» без проверки.
  */
 export function checkProd(state: ProdState): CheckLine[] {
-  return (Object.keys(RULES) as (keyof ProdState)[]).flatMap((key) => {
+  return (Object.keys(RULES) as (keyof ProdState)[]).map((key) => {
     const value = state[key];
-    return value === null ? [] : [(RULES[key] as Rule<typeof key>)(value as never)];
+    if (value === null)
+      return fail(
+        `не удалось проверить: ${key}`,
+        "сначала db:push; доступ к базе — SUPABASE_DB_URL",
+      );
+    return (RULES[key] as Rule<typeof key>)(value as never);
   });
 }

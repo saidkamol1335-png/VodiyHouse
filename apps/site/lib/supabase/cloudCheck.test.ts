@@ -191,7 +191,7 @@ describe("база", () => {
 
 describe("прод (--prod)", () => {
   const clean = {
-    demoComplexes: 0,
+    demo: 0,
     e2eUsers: 0,
     leads: 0,
     nextLeadNumber: 1001,
@@ -205,7 +205,7 @@ describe("прод (--prod)", () => {
 
   it("DEMO, сотрудники e2e и неполный опубликованный ЖК — ✗; заявки, счётчик и курс — ?", () => {
     const lines = checkProd({
-      demoComplexes: 3,
+      demo: 3,
       e2eUsers: 2,
       leads: 1,
       nextLeadNumber: 1002,
@@ -216,17 +216,16 @@ describe("прод (--prod)", () => {
     expect(lines[4]?.text).toContain("shodlik");
   });
 
-  it("до db:push строки пропускаются", () => {
-    expect(
-      checkProd({
-        demoComplexes: null,
-        e2eUsers: null,
-        leads: null,
-        nextLeadNumber: null,
-        incompletePublished: null,
-        rate: null,
-      }),
-    ).toEqual([]);
+  it("запрос не прошёл (до db:push, нет прав) — ✗, а не пропуск строки", () => {
+    const lines = checkProd({
+      demo: null,
+      e2eUsers: null,
+      leads: null,
+      nextLeadNumber: null,
+      incompletePublished: null,
+      rate: null,
+    });
+    expect(statuses(lines)).toEqual(["fail", "fail", "fail", "fail", "fail", "fail"]);
   });
 
   it("E2E_SUPABASE_PROJECT_REF прода — ✗, пусто — ✓", () => {
