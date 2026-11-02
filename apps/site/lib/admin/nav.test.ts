@@ -35,8 +35,8 @@ describe("меню кабинета", () => {
       "programs",
       "video",
     ]);
-    // Фаза 5 (5B): видеограф — сразу в «Видео и ход стройки».
-    expect(visibleNav("videographer").map((item) => item.key)).toEqual(["video"]);
+    // Фаза 5 (5B): мобилограф — сразу в «Видео и ход стройки».
+    expect(visibleNav("mobilographer").map((item) => item.key)).toEqual(["video"]);
     expect(isSectionOpen("manager", "complexes")).toBe(true);
     expect(isSectionOpen("manager", "developers")).toBe(false);
   });
@@ -74,8 +74,8 @@ describe("меню кабинета", () => {
     expect(keysFor("manager")).toEqual(["home", "leads", "complexes", "programs", "video"]);
   });
 
-  it("видеограф видит только видео", () => {
-    expect(keysFor("videographer")).toEqual(["video"]);
+  it("мобилограф видит только видео", () => {
+    expect(keysFor("mobilographer")).toEqual(["video"]);
   });
 
   it("менеджеру «Программы оплаты» открываются «Расчётом для клиента», пункт активен во всём разделе", () => {
@@ -96,19 +96,19 @@ describe("меню кабинета", () => {
 });
 
 describe("доступ к разделам", () => {
-  it("canOpen: настройки — только руководителю; Главная — не видеографу; готовность не важна", () => {
+  it("canOpen: настройки — только руководителю; Главная — не мобилографу; готовность не важна", () => {
     expect(canOpen("head", "settings")).toBe(true);
     expect(canOpen("manager", "settings")).toBe(false);
-    expect(canOpen("videographer", "settings")).toBe(false);
+    expect(canOpen("mobilographer", "settings")).toBe(false);
     expect(canOpen("manager", "home")).toBe(true);
-    expect(canOpen("videographer", "home")).toBe(false);
-    expect(canOpen("videographer", "video")).toBe(true);
+    expect(canOpen("mobilographer", "home")).toBe(false);
+    expect(canOpen("mobilographer", "video")).toBe(true);
   });
 
   it("после входа — первый пункт меню роли; нет пунктов — Главная", () => {
     expect(landingPath("head")).toBe("/admin");
-    expect(landingPath("videographer")).toBe(ADMIN_ROUTES.video);
-    expect(landingPath("videographer", allReady)).toBe(ADMIN_ROUTES.video);
+    expect(landingPath("mobilographer")).toBe(ADMIN_ROUTES.video);
+    expect(landingPath("mobilographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 
   it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Журнал — отдельные адреса", () => {

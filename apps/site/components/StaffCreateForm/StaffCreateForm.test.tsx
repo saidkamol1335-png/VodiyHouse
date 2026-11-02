@@ -71,11 +71,11 @@ describe("добавить сотрудника", () => {
       status: "error",
       error: null,
       fieldErrors: { email: "emailTaken" },
-      fields: { fullName: "Азиз Рахимов", email: "aziz@vodiyhouse.uz", role: "videographer" },
+      fields: { fullName: "Азиз Рахимов", email: "aziz@vodiyhouse.uz", role: "mobilographer" },
     }));
     submit();
     expect(await screen.findByText("Сотрудник с таким email уже есть")).toBeTruthy();
     expect((screen.getByLabelText("Имя и фамилия") as HTMLInputElement).value).toBe("Азиз Рахимов");
-    expect((screen.getByLabelText("Роль") as HTMLSelectElement).value).toBe("videographer");
+    expect((screen.getByLabelText("Роль") as HTMLSelectElement).value).toBe("mobilographer");
   });
 });

@@ -820,7 +820,7 @@
     },
     "progress": {
       "title": "Qurilish jarayoni",
-      "lead": "Vodiy House videografi har bir TJMni oyiga bir marta suratga oladi. Yangi hisobotlar — yuqorida.",
+      "lead": "Vodiy House mobilografi har bir TJMni oyiga bir marta suratga oladi. Yangi hisobotlar — yuqorida.",
       "updated": "Yangilangan: {date}",
       "months": "Hisobot oylari",
       "stampVideo": "{month} videosi",
@@ -1313,7 +1313,7 @@
     "levelBlock": "{name}-blok videosi",
     "levelComplex": "TJM videosi",
     "state": "{month} holatiga",
-    "shot": "{date} kuni Vodiy House videografi suratga olgan",
+    "shot": "{date} kuni Vodiy House mobilografi suratga olgan",
     "done": "Bir oyda nima qilindi",
     "history": "Oldingi oylar",
     "ready": "Blok tayyorligi",

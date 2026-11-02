@@ -15,14 +15,14 @@ describe("сотрудники и роли", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
   let inactive: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     inactive = await createStaff(db.admin, "manager", { isActive: false });
   });
   afterAll(() => db.close());
@@ -40,7 +40,7 @@ describe("сотрудники и роли", () => {
   });
 
   it("сотрудник видит всю команду", async () => {
-    const { rows } = await db.as(user(videographer), (tx) => tx.query("select id from profiles"));
+    const { rows } = await db.as(user(mobilographer), (tx) => tx.query("select id from profiles"));
     expect(rows).toHaveLength(4);
   });
 
@@ -77,7 +77,7 @@ describe("сотрудники и роли", () => {
   });
 
   it("руководитель меняет роль и отключает сотрудника", async () => {
-    const someone = await createStaff(db.admin, "videographer");
+    const someone = await createStaff(db.admin, "mobilographer");
     await db.as(user(head), (tx) =>
       tx.query("update profiles set role = 'manager', is_active = false where id = $1", [someone]),
     );

@@ -55,7 +55,7 @@ export default defineConfig({
     timezoneId: "Asia/Tashkent",
   },
   projects: [
-    // Вход руководителем, менеджером и видеографом — сессии для тестов кабинета (auth.setup.ts).
+    // Вход руководителем, менеджером и мобилографом — сессии для тестов кабинета (auth.setup.ts).
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "mobile-390",

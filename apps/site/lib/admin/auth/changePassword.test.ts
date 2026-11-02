@@ -109,9 +109,9 @@ describe("первая смена пароля", () => {
     expect(fake.signOutOthers).not.toHaveBeenCalled();
   });
 
-  it("видеограф после смены — в «Видео и ход стройки» (фаза 5)", async () => {
+  it("мобилограф после смены — в «Видео и ход стройки» (фаза 5)", async () => {
     const { fake } = deps();
-    expect(await changeFirstPassword(fake, { ...INPUT, role: "videographer" })).toEqual({
+    expect(await changeFirstPassword(fake, { ...INPUT, role: "mobilographer" })).toEqual({
       kind: "redirect",
       to: "/admin/video",
     });

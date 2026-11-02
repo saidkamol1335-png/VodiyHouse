@@ -42,13 +42,13 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
     await addDemoDrawings(db.admin);
   });
@@ -61,9 +61,9 @@ describe.skipIf(isRemoteTarget)("«Расчёт для клиента»: дан�
     return rows[0]!.data;
   };
 
-  it("права: руководитель и менеджер; видеографу — отказ, посетителю — нет функции", async () => {
+  it("права: руководитель и менеджер; мобилографу — отказ, посетителю — нет функции", async () => {
     expect((await screen(null, user(head))).current).not.toBeNull();
-    await expectHint(screen(null, user(videographer)), "vh:forbidden");
+    await expectHint(screen(null, user(mobilographer)), "vh:forbidden");
     await expectDenied(screen(null, anon));
   });
 

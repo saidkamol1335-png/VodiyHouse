@@ -106,7 +106,7 @@ const WITHOUT_TAG = new Set([
   "createDeveloperAction",
   "attachComplexDrawingAction",
   "saveDeveloperPrivateAction",
-  // Возврат отчёта видеографу (фаза 5): отчёт и так не на сайте.
+  // Возврат отчёта мобилографу (фаза 5): отчёт и так не на сайте.
   "returnProgressReportAction",
 ]);
 const EXPIRES =

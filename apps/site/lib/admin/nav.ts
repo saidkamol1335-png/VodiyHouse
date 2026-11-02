@@ -47,7 +47,7 @@ export type AdminNavItem = {
 };
 
 // Порядок и доступ — PLAN §7 и §3а: менеджер видит заявки, наличие квартир (ЖК) и расчёт
-// (программы оплаты); видеограф — только видео; остальное — руководитель.
+// (программы оплаты); мобилограф — только видео; остальное — руководитель.
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { key: "home", href: ADMIN_ROUTES.home, roles: ["head", "manager"], ready: true },
   { key: "leads", href: ADMIN_ROUTES.leads, roles: ["head", "manager"], ready: true },
@@ -62,11 +62,11 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     ready: true,
     hrefFor: { manager: ADMIN_ROUTES.programsCalc },
   },
-  // «Видео и ход стройки» (фаза 5): видеограф — свои отчёты, руководитель и менеджер — проверка и публикация.
+  // «Видео и ход стройки» (фаза 5): мобилограф — свои отчёты, руководитель и менеджер — проверка и публикация.
   {
     key: "video",
     href: ADMIN_ROUTES.video,
-    roles: ["head", "manager", "videographer"],
+    roles: ["head", "manager", "mobilographer"],
     ready: true,
   },
   // «Статистика сайта» (фаза 6): только руководитель (PLAN §7).

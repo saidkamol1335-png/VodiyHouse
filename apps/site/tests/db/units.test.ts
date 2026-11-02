@@ -11,14 +11,14 @@ describe("блоки, планировки и квартиры", () => {
   let ids: ContentIds;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
   });
   afterAll(() => db.close());
 
@@ -29,9 +29,9 @@ describe("блоки, планировки и квартиры", () => {
       ])
     ).rows[0];
 
-  it("сайт видит блоки только опубликованных ЖК; планировки — только через функции сайта", async () => {
-    const blocks = await db.as(anon, (tx) => tx.query<{ id: string }>("select id from blocks"));
-    expect(blocks.rows.map((row) => row.id)).toEqual([ids.publicBlock]);
+  // Проект-2, фаза B: таблицы посетителю закрыты целиком — блоки сайт берёт из site_complex.
+  it("посетитель не читает блоки и планировки напрямую — только через функции сайта", async () => {
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from blocks")));
     // Аудит 29.10 (20261029070000): ручные price_from и available напрямую не видны. Правило v2: неполных
     // планировок нет и в функциях наличия, посетителю они закрыты — сайт читает site_catalog и site_complex.
     await expectDenied(db.as(anon, (tx) => tx.query("select id from layouts")));
@@ -46,7 +46,7 @@ describe("блоки, планировки и квартиры", () => {
   });
 
   it("сотрудники читают квартиры", async () => {
-    for (const id of [head, manager, videographer]) {
+    for (const id of [head, manager, mobilographer]) {
       const { rows } = await db.as(user(id), (tx) => tx.query("select id from units"));
       expect(rows).toHaveLength(4);
     }
@@ -99,13 +99,13 @@ describe("блоки, планировки и квартиры", () => {
     expect(changed.rows[0]?.changed).toBe(0);
   });
 
-  it("видеограф и посетитель статус не меняют", async () => {
+  it("мобилограф и посетитель статус не меняют", async () => {
     const call = "select set_units_status($1, $2, 'sold')";
     const args = [ids.publicBlock, [ids.units[0]]];
-    await expect(db.as(user(videographer), (tx) => tx.query(call, args))).rejects.toThrow(
+    await expect(db.as(user(mobilographer), (tx) => tx.query(call, args))).rejects.toThrow(
       /руководитель и менеджер/,
     );
-    await expectHint(db.as(user(videographer), (tx) => tx.query(call, args)), "vh:forbidden");
+    await expectHint(db.as(user(mobilographer), (tx) => tx.query(call, args)), "vh:forbidden");
     await expectDenied(db.as(anon, (tx) => tx.query(call, args)));
   });
 
@@ -152,15 +152,18 @@ describe("блоки, планировки и квартиры", () => {
     expect(rows[0]).toEqual({ complex_id: ids.publicComplex, actor_id: head });
   });
 
-  it("менеджер не создаёт и не удаляет блоки, планировки и квартиры", async () => {
+  // Проект-2 (PLAN §10, п. 6): блоки правит и менеджер; квартиры напрямую — никто, только функции.
+  it("мобилограф не создаёт блоки; квартиры напрямую не удаляет ни менеджер, ни мобилограф", async () => {
     await expectDenied(
-      db.as(user(manager), (tx) =>
+      db.as(user(mobilographer), (tx) =>
         tx.query("insert into blocks (complex_id, name) values ($1, 'C')", [ids.publicComplex]),
       ),
     );
-    await expectDenied(
-      db.as(user(manager), (tx) => tx.query("delete from units where block_id = $1", [ids.publicBlock])),
-    );
+    for (const actor of [manager, mobilographer]) {
+      await expectDenied(
+        db.as(user(actor), (tx) => tx.query("delete from units where block_id = $1", [ids.publicBlock])),
+      );
+    }
   });
 
   it("удаление блока удаляет его квартиры и планировки", async () => {

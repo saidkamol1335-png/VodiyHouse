@@ -6,6 +6,7 @@ import {
   createStaff,
   createTestDb,
   expectDenied,
+  expectHint,
   user,
   type Actor,
   type TestDb,
@@ -18,14 +19,14 @@ describe("застройщики, ЖК и медиа", () => {
   let ids: ContentIds;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
   });
   afterAll(() => db.close());
 
@@ -36,19 +37,25 @@ describe("застройщики, ЖК и медиа", () => {
     return rows.map((row) => row.id);
   };
 
-  it("сайт видит только опубликованные ЖК опубликованных застройщиков", async () => {
-    expect(await idsVisible(anon, "complexes")).toEqual([ids.publicComplex]);
-    expect(await idsVisible(anon, "developers")).toEqual([ids.publicDeveloper]);
+  /** На сайте ли ЖК: посетитель видит его только через функции site_* (Проект-2, фаза B). */
+  const isPublic = async (id: string) =>
+    (await db.admin.query<{ v: boolean }>("select private.is_public_complex($1) as v", [id])).rows[0]!.v;
+
+  it("сайт видит только опубликованные ЖК опубликованных застройщиков — через функции, не таблицы", async () => {
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from complexes")));
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from developers")));
+    expect(await isPublic(ids.publicComplex)).toBe(true);
+    expect(await isPublic(ids.draftComplex)).toBe(false);
   });
 
-  it("сотрудники, включая видеографа, видят и черновики", async () => {
-    for (const id of [head, manager, videographer]) {
+  it("сотрудники, включая мобилографа, видят и черновики", async () => {
+    for (const id of [head, manager, mobilographer]) {
       expect(await idsVisible(user(id), "complexes")).toHaveLength(4);
       expect(await idsVisible(user(id), "developers")).toHaveLength(2);
     }
   });
 
-  it("внутренние контакты застройщика: сайту закрыто, видеографу пусто, менеджеру и руководителю видно", async () => {
+  it("внутренние контакты застройщика: сайту закрыто, мобилографу пусто, менеджеру и руководителю видно", async () => {
     await expectDenied(db.as(anon, (tx) => tx.query("select * from developer_private")));
     const contacts = async (id: string) =>
       (
@@ -56,35 +63,35 @@ describe("застройщики, ЖК и медиа", () => {
           tx.query<{ contacts: string }>("select contacts from developer_private"),
         )
       ).rows;
-    expect(await contacts(videographer)).toEqual([]);
+    expect(await contacts(mobilographer)).toEqual([]);
     expect(await contacts(manager)).toEqual([{ contacts: "+998 90 000-00-00" }]);
     expect(await contacts(head)).toHaveLength(1);
   });
 
   it("сданные объекты видны сайту только у опубликованных; фото — только через функции сайта", async () => {
-    const { rows } = await db.as(anon, (tx) =>
-      tx.query<{ name: string }>("select name ->> 'ru' as name from developer_past_projects"),
-    );
-    expect(rows).toEqual([{ name: "Сданный дом" }]);
+    // Проект-2, фаза B: таблицы посетителю закрыты — сданные объекты сайт берёт из site_developer.
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from developer_past_projects")));
     // Аудит 29.10 (20261029070000): таблицу медиа посетитель напрямую не читает — сайт берёт фото из site_complex.
     await expectDenied(db.as(anon, (tx) => tx.query("select id from media_assets")));
-    expect(await idsVisible(user(videographer), "media_assets")).toHaveLength(4);
+    expect(await idsVisible(user(mobilographer), "media_assets")).toHaveLength(4);
   });
 
-  it("менеджер не может создать, опубликовать или архивировать ЖК", async () => {
-    await expectDenied(
-      db.as(user(manager), (tx) =>
-        tx.query(
-          `insert into complexes (developer_id, slug, name) values ($1, 'new', '{"ru": "Новый", "uz": "Yangi"}')`,
-          [ids.publicDeveloper],
-        ),
+  // Проект-2 (PLAN §10, п. 6): менеджер заводит черновик, но не публикует и не архивирует.
+  it("менеджер создаёт черновик, но не может опубликовать или архивировать ЖК", async () => {
+    const created = await db.as(user(manager), (tx) =>
+      tx.query<{ id: string }>(
+        `insert into complexes (developer_id, slug, name) values ($1, 'new', '{"ru": "Новый", "uz": "Yangi"}') returning id`,
+        [ids.publicDeveloper],
       ),
     );
+    await db.admin.query("delete from complexes where id = $1", [created.rows[0]!.id]);
     for (const status of ["published", "archived"]) {
-      const result = await db.as(user(manager), (tx) =>
-        tx.query("update complexes set status = $1 where id = $2", [status, ids.draftComplex]),
+      await expectHint(
+        db.as(user(manager), (tx) =>
+          tx.query("update complexes set status = $1 where id = $2", [status, ids.draftComplex]),
+        ),
+        "vh:head_only",
       );
-      expect(result.affectedRows).toBe(0);
     }
     const draftExists = await db.admin.query<{ status: string }>(
       "select status from complexes where id = $1",
@@ -121,10 +128,10 @@ describe("застройщики, ЖК и медиа", () => {
     await db.as(user(head), (tx) =>
       tx.query("update complexes set status = 'published', files_checked_at = now() where id = $1", [id]),
     );
-    expect(await idsVisible(anon, "complexes")).toContain(id);
+    expect(await isPublic(id)).toBe(true);
     await setStatus("archived");
     expect(await statusOf(id)).toEqual({ status: "archived", archived: true });
-    expect(await idsVisible(anon, "complexes")).not.toContain(id);
+    expect(await isPublic(id)).toBe(false);
     await setStatus("draft");
     expect(await statusOf(id)).toEqual({ status: "draft", archived: false });
   });
@@ -142,12 +149,15 @@ describe("застройщики, ЖК и медиа", () => {
       [developerId],
     );
     // Приёмка фазы 1: менеджер не архивирует ни застройщика (и каскадом его ЖК), ни сам ЖК.
-    await db.as(user(manager), async (tx) => {
-      await tx.query("update developers set status = 'archived' where id = $1", [developerId]);
-      await tx.query("update complexes set status = 'archived' where developer_id = $1", [
-        developerId,
-      ]);
-    });
+    await db.as(user(manager), (tx) =>
+      tx.query("update developers set status = 'archived' where id = $1", [developerId]),
+    );
+    await expectHint(
+      db.as(user(manager), (tx) =>
+        tx.query("update complexes set status = 'archived' where developer_id = $1", [developerId]),
+      ),
+      "vh:head_only",
+    );
     const untouched = await db.admin.query<{ status: string }>(
       `select status from developers where id = $1
        union all select status from complexes where developer_id = $1 order by status`,

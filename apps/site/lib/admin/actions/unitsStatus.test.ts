@@ -87,7 +87,7 @@ describe("действия менеджера на «Квартирах»", () =
   it("чтение списка — без сброса тега; ответ разбирается в записи", async () => {
     db.reply.data = [];
     expect(await readBlockUnitsAction({ blockId: BLOCK })).toEqual({ status: "done", units: [] });
-    expect(db.roles).toEqual([["head", "manager", "videographer"]]);
+    expect(db.roles).toEqual([["head", "manager", "mobilographer"]]);
     expect(db.calls).toEqual([["block_unit_rows", { p_block: BLOCK }]]);
     expect(updateTag).not.toHaveBeenCalled();
     db.reply.data = [{ id: "не квартира" }];

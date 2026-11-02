@@ -13,7 +13,7 @@ import { removeProgressFilesAsServer } from "@/lib/admin/server/mediaFiles";
 import { requireActionViewer } from "@/lib/admin/session";
 import { PROGRESS_VIDEO_PATH_PATTERN } from "@/lib/media";
 
-// «Видео и ход стройки» (фаза 5, 5B): видеограф и руководитель отправляют отчёт на проверку. Фото и видео
+// «Видео и ход стройки» (фаза 5, 5B): мобилограф и руководитель отправляют отчёт на проверку. Фото и видео
 // уже в бакетах — их положил браузер сессией сотрудника (политики Storage, папка ЖК). Здесь — проверка
 // формы и submit_progress_report: правила отчёта (месяц, 3–15 фото, комментарий RU и UZ) решает база.
 
@@ -63,7 +63,7 @@ function readVideo(
 export async function readProgressUnitsAction(
   blockId: string,
 ): Promise<ProgressUnitOption[] | null> {
-  const guard = await requireActionViewer(["head", "videographer"]);
+  const guard = await requireActionViewer(["head", "mobilographer"]);
   if (!guard.ok || typeof blockId !== "string") return null;
   const [units, layouts] = await Promise.all([
     guard.supabase
@@ -98,7 +98,7 @@ export async function submitProgressReportAction(
   formData: FormData,
 ): Promise<ProgressSubmitResult> {
   // Сессию проверяет сам Auth (fresh): дальше файлы удаляет секретный ключ сервера.
-  const guard = await requireActionViewer(["head", "videographer"], { fresh: true });
+  const guard = await requireActionViewer(["head", "mobilographer"], { fresh: true });
   if (!guard.ok) return fail(guard.code);
   const blockId = readUuid(formData, "blockId");
   const unitId = readText(formData, "unitId") ? readUuid(formData, "unitId") : null;
@@ -124,7 +124,7 @@ export async function submitProgressReportAction(
   });
   if (error) {
     const code = contentDbErrorCode(error);
-    // Один отчёт по блоку за месяц: общий «Такое значение уже есть» видеографу ничего не скажет.
+    // Один отчёт по блоку за месяц: общий «Такое значение уже есть» мобилографу ничего не скажет.
     return fail(code === "duplicate" ? "reportDuplicate" : code);
   }
   const result = data as { id: string; removed: string[] };

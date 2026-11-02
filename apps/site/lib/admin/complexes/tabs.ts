@@ -56,7 +56,7 @@ export type ComplexAccess = { manage: boolean; tabs: readonly ComplexTabKey[] };
 const ACCESS: Record<StaffRole, ComplexAccess> = {
   head: { manage: true, tabs: COMPLEX_TABS.map((tab) => tab.key) },
   manager: { manage: false, tabs: ["units"] },
-  videographer: { manage: false, tabs: [] },
+  mobilographer: { manage: false, tabs: [] },
 };
 
 export function complexAccess(role: StaffRole): ComplexAccess {

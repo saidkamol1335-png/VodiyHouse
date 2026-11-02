@@ -23,7 +23,7 @@ type ComplexPhotosProps = {
   actions: PhotoActions | null;
 };
 
-/** Вкладка «Фото» (И6): плитки как «Фото · 0 из 3–15» у видеографа, первое — обложка. */
+/** Вкладка «Фото» (И6): плитки как «Фото · 0 из 3–15» у мобилографа, первое — обложка. */
 export function ComplexPhotos({ complexId, published, photos, actions }: ComplexPhotosProps) {
   const t = useTranslations("admin");
   const [rule12, setRule12] = useState(false);

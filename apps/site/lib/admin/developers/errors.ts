@@ -6,6 +6,7 @@ import type { DbErrorLike } from "../authErrors";
 
 export const CONTENT_ERRORS = [
   "forbidden",
+  "headOnly",
   "session",
   "notFound",
   "notReady",
@@ -59,6 +60,9 @@ export type ContentErrorCode = (typeof CONTENT_ERRORS)[number];
 
 const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:forbidden": "forbidden",
+  // Проект-2: менеджер правит ЖК, но публикует, скрывает, архивирует и ставит порядок руководитель.
+  "vh:head_only": "headOnly",
+  "vh:status_move": "statusMove",
   "vh:not_found": "notFound",
   "vh:not_ready": "notReady",
   "vh:invalid": "invalid",

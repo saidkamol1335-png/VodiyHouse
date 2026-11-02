@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { addDemoDrawings } from "./content-fixtures";
-import { anon, createStaff, createTestDb, expectHint, isRemoteTarget, user, type Db, type TestDb } from "./harness";
+import { anon, createStaff, createTestDb, expectDenied, expectHint, isRemoteTarget, user, type Db, type TestDb } from "./harness";
 
 // Шаг 3.5: страница ЖК — site_complex(slug) на DEMO-сиде и функции новых вкладок кабинета
 // (миграция 20261025180000_complex_page.sql): документы, видео, детали, перенос срока, «Удобство
@@ -138,8 +138,8 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     );
     expect(await page("zhk-draft")).toBeNull();
     // Предпросмотр — только руководителю, как маршрут /api/predprosmotr (ревью блока C).
-    const videographer = await createStaff(db.admin, "videographer");
-    expect(await page("zhk-draft", user(videographer))).toBeNull();
+    const mobilographer = await createStaff(db.admin, "mobilographer");
+    expect(await page("zhk-draft", user(mobilographer))).toBeNull();
     expect(await page("zhk-draft", user(manager))).toBeNull();
     const draft = (await page("zhk-draft", user(head)))!;
     expect(draft.complex).toMatchObject({ status: "draft", on_site: false });
@@ -202,19 +202,16 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
       complex_details: (c) => [`insert into complex_details (complex_id, topic_id, text) values ($1, $2, '{"ru": "a", "uz": "b"}')`, [c, topic]],
       deadline_changes: (c) => ["insert into deadline_changes (complex_id, block_id, from_year, from_quarter, to_year, to_quarter) values ($1, $2, 2027, 1, 2027, 2)", [c, block]],
     };
+    const mobilographer = await createStaff(db.admin, "mobilographer");
     for (const [table, insert] of Object.entries(rows)) {
       const [sql, params] = insert(draftId);
-      for (const actor of [manager, await createStaff(db.admin, "videographer")]) {
-        await expect(db.as(user(actor), (tx) => tx.query(sql, params)), `${table}: ${actor}`).rejects.toThrow();
-      }
+      // Проект-2 (PLAN §10, п. 6): пишут руководитель и менеджер; мобилограф — нет.
+      await expect(db.as(user(mobilographer), (tx) => tx.query(sql, params)), `${table}: мобилограф`).rejects.toThrow();
       await db.as(user(head), (tx) => tx.query(sql, params));
-      const visible = async (complex: string) =>
-        Number((await db.as(anon, (tx) => tx.query<{ n: string }>(`select count(*) as n from ${table} where complex_id = $1`, [complex]))).rows[0]!.n);
-      expect(await visible(draftId), table).toBe(0);
-      // У Shodlik в сиде есть документы и перенос срока; видео и деталей нет.
-      if (table === "complex_documents" || table === "deadline_changes") expect(await visible(shodlik), table).toBeGreaterThan(0);
-      // Менеджер удалить не может: политика прячет строки — удалено ноль.
-      await db.as(user(manager), (tx) => tx.query(`delete from ${table} where complex_id = $1`, [draftId]));
+      // Проект-2, фаза B: посетитель таблицы не читает — документы и сроки сайт берёт из site_complex.
+      await expectDenied(db.as(anon, (tx) => tx.query(`select count(*) from ${table} where complex_id = $1`, [shodlik])));
+      // Мобилограф удалить не может: политика прячет строки — удалено ноль.
+      await db.as(user(mobilographer), (tx) => tx.query(`delete from ${table} where complex_id = $1`, [draftId]));
       expect(Number((await db.admin.query<{ n: string }>(`select count(*) as n from ${table} where complex_id = $1`, [draftId])).rows[0]!.n), table).toBe(1);
     }
   });
@@ -237,7 +234,7 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     await expectHint(save([{ type_id: typeId("permit"), checked_on: "2999-01-01" }]), "vh:future_date");
     await expectHint(save([{ type_id: 32000, checked_on: "2026-01-01" }]), "vh:invalid");
     await expectHint(save([{ type_id: "x", checked_on: "2026-01-01" }]), "vh:invalid");
-    await expectHint(save([], manager), "vh:forbidden");
+    await expectHint(save([], await createStaff(db.admin, "mobilographer")), "vh:forbidden");
   });
 
   it("видео и детали: порядок, правка, удаление; фото детали — только из галереи этого ЖК", async () => {
@@ -308,8 +305,9 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
       },
     ]);
     const change = (await db.admin.query<{ id: string }>("select id from deadline_changes where complex_id = $1", [id])).rows[0]!.id;
+    const mobilographer = await createStaff(db.admin, "mobilographer");
     await expectHint(
-      db.as(user(manager), (tx) => tx.query("select remove_deadline_change($1)", [change])),
+      db.as(user(mobilographer), (tx) => tx.query("select remove_deadline_change($1)", [change])),
       "vh:forbidden",
     );
     const owner = await asHead((tx) => tx.query<{ owner: string }>("select remove_deadline_change($1) as owner", [change]));

@@ -1,6 +1,6 @@
 import type { ContentErrorCode } from "@/lib/admin/developers/errors";
 
-// Кабинет «Видео и ход стройки» (фаза 5, мокап CabVideo): данные экрана видеографа и ответы действий.
+// Кабинет «Видео и ход стройки» (фаза 5, мокап CabVideo): данные экрана мобилографа и ответы действий.
 
 /** ЖК для «Нового отчёта»: только с хотя бы одним строящимся блоком (мокап — не сданные ЖК). */
 export type ProgressFormComplex = {
@@ -79,7 +79,7 @@ export type ProgressFix = {
   returnNote: string;
 };
 
-/** «Ждут проверки · N» (мокап CabReview): отчёт видеографа на проверке, старые сверху. */
+/** «Ждут проверки · N» (мокап CabReview): отчёт мобилографа на проверке, старые сверху. */
 export type ReviewItem = {
   id: string;
   complexName: string;
@@ -112,7 +112,7 @@ export type ReportDetail = {
   returnNote: string | null;
 };
 
-/** Ответ «Опубликовать» и «Вернуть видеографу». */
+/** Ответ «Опубликовать» и «Вернуть мобилографу». */
 export type ReviewActionResult = { status: "done" } | { status: "error"; error: ContentErrorCode };
 
 /** Ячейка матрицы (мокап CabReview): опубликован (дата), на проверке, дом сдан, ждём (этот месяц), нет. */

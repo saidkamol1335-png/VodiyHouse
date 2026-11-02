@@ -25,7 +25,8 @@ describe("справочники", () => {
     expect(await count("select count(*) as n from finishings")).toBe(4);
   });
 
-  it("посетитель читает справочник, скрытые строки видят только сотрудники", async () => {
+  // Проект-2, фаза B: справочники сайт берёт готовыми из функций site_*; таблицы посетителю закрыты.
+  it("посетитель таблицу справочника не читает; скрытые строки видят только сотрудники", async () => {
     await db.admin.query("update locations set is_active = false where slug = 'kuvasay'");
     const visibleTo = async (id: string | null) => {
       const actor = id ? user(id) : anon;
@@ -34,9 +35,9 @@ describe("справочники", () => {
       );
       return rows.map((row) => row.slug);
     };
-    expect(await visibleTo(null)).toHaveLength(18);
-    expect(await visibleTo(null)).not.toContain("kuvasay");
+    await expectDenied(visibleTo(null));
     expect(await visibleTo(manager)).toContain("kuvasay");
+    expect(await visibleTo(manager)).toHaveLength(19);
     await db.admin.query("update locations set is_active = true where slug = 'kuvasay'");
   });
 
@@ -71,13 +72,13 @@ describe("настройки", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     await db.admin.exec(`
       insert into settings (key, value, is_public) values
         ('contacts.phone', '"TODO-заказчик"', true),
@@ -86,16 +87,18 @@ describe("настройки", () => {
   });
   afterAll(() => db.close());
 
+  // Сайт (anon) читает публичные настройки представлением public_settings (Проект-2, фаза B).
   const keysFor = async (id: string | null) => {
+    const source = id ? "settings" : "public_settings";
     const { rows } = await db.as(id ? user(id) : anon, (tx) =>
-      tx.query<{ key: string }>("select key from settings order by key"),
+      tx.query<{ key: string }>(`select key from ${source} order by key`),
     );
     return rows.map((row) => row.key);
   };
 
-  it("сайт видит только публичные настройки, видеограф — тоже", async () => {
+  it("сайт видит только публичные настройки, мобилограф — тоже", async () => {
     expect(await keysFor(null)).toEqual(["contacts.phone"]);
-    expect(await keysFor(videographer)).toEqual(["contacts.phone"]);
+    expect(await keysFor(mobilographer)).toEqual(["contacts.phone"]);
   });
 
   it("руководитель и менеджер видят все настройки", async () => {

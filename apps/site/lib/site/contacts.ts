@@ -5,7 +5,8 @@ import { contactsFrom, NO_CONTACTS, SITE_CONTACTS_KEY, type SiteContacts } from 
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-// Контакты Vodiy House на сайте (Ф9): публичная запись settings ролью посетителя, в кэше оболочки;
+// Контакты Vodiy House на сайте (Ф9): представление public_settings ролью посетителя (таблица ему
+// закрыта, Проект-2 фаза B), в кэше оболочки;
 // «Сохранить» в «Настройки → Контакты» сбрасывает SITE_SETTINGS_TAG.
 
 async function fetchSiteContacts(): Promise<SiteContacts> {
@@ -13,10 +14,9 @@ async function fetchSiteContacts(): Promise<SiteContacts> {
   cacheTag(SITE_SETTINGS_TAG);
   cacheLife("days");
   const { data, error } = await createSupabasePublicClient()
-    .from("settings")
+    .from("public_settings")
     .select("value")
     .eq("key", SITE_CONTACTS_KEY)
-    .eq("is_public", true)
     .maybeSingle();
   if (error) throw new Error("site-contacts-unavailable", { cause: error });
   return contactsFrom(data?.value);

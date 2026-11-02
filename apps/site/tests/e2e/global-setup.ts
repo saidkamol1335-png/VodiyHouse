@@ -5,12 +5,12 @@ import { assertE2eProject, hasCloud, type Persona, type StaffCredentials } from 
 // Перед прогоном против облака: тестовые сотрудники e2e-<прогон>-<роль>@example.com.
 // Пароли — только в памяти (process.env наследуют процессы тестов), в файлы не пишутся.
 
-type PersonaSpec = { role: "head" | "manager" | "videographer"; fullName: string; changed: boolean; active: boolean };
+type PersonaSpec = { role: "head" | "manager" | "mobilographer"; fullName: string; changed: boolean; active: boolean };
 
 const PERSONAS: Record<Persona, PersonaSpec> = {
   head: { role: "head", fullName: "E2E Руководитель", changed: true, active: true },
   manager: { role: "manager", fullName: "E2E Менеджер", changed: true, active: true },
-  videographer: { role: "videographer", fullName: "E2E Видеограф", changed: true, active: true },
+  mobilographer: { role: "mobilographer", fullName: "E2E Мобилограф", changed: true, active: true },
   newcomer: { role: "manager", fullName: "E2E Новичок", changed: false, active: true },
   disabled: { role: "manager", fullName: "E2E Отключённый", changed: true, active: false },
 };

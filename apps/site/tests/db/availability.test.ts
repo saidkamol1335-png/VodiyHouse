@@ -42,7 +42,7 @@ type BlockRow = {
 describe("наличие квартир для сайта", () => {
   let db: TestDb;
   let ids: ContentIds;
-  let videographer: string;
+  let mobilographer: string;
   let generatedBlock: string;
   let manualBlock: string;
   let unassignedUnit: string;
@@ -50,7 +50,7 @@ describe("наличие квартир для сайта", () => {
   beforeAll(async () => {
     db = await createTestDb();
     ids = await seedContent(db.admin);
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     ({ generatedBlock, unassignedUnit } = await seedGeneratedBlock(db, ids.publicComplex));
     manualBlock = await seedManualBlock(db, ids.publicComplex);
   });
@@ -74,7 +74,7 @@ describe("наличие квартир для сайта", () => {
       [ids.publicComplex, manualBlock],
     );
     const actual = new Map(
-      (await layouts(user(videographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
+      (await layouts(user(mobilographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
     );
     expect(expected.rows.length).toBeGreaterThan(4);
     for (const row of expected.rows) {
@@ -93,7 +93,7 @@ describe("наличие квартир для сайта", () => {
        group by l.rooms`,
       [ids.publicComplex],
     );
-    const actual = (await rooms(user(videographer), [ids.publicComplex])).filter((row) => row.currency === "USD");
+    const actual = (await rooms(user(mobilographer), [ids.publicComplex])).filter((row) => row.currency === "USD");
     expect(actual.map((row) => [row.rooms, row.free_count])).toEqual(
       expected.rows.map((row) => [row.rooms, row.free]).sort(([a], [b]) => Number(a) - Number(b)),
     );
@@ -109,7 +109,7 @@ describe("наличие квартир для сайта", () => {
       [generatedBlock],
     );
     const actual = new Map(
-      (await layouts(user(videographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
+      (await layouts(user(mobilographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
     );
     // 1-комн. и обе 2-комн. — с ценами; 3-комн. без цен проверяется отдельно (цена планировки).
     expect(expected.rows).toHaveLength(3);
@@ -120,7 +120,7 @@ describe("наличие квартир для сайта", () => {
 
   it("малый блок посчитан вручную: распроданный тип — «нет в наличии» без цены", async () => {
     const byLayout = new Map(
-      (await layouts(user(videographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
+      (await layouts(user(mobilographer), ids.publicComplex)).map((row) => [row.layout_id, row]),
     );
     expect(byLayout.get(ids.oneRoomLayout)).toMatchObject({
       free_count: 2,
@@ -135,14 +135,14 @@ describe("наличие квартир для сайта", () => {
   });
 
   it("свободные квартиры без цены — «цена от» берётся у планировки", async () => {
-    const threeRoom = (await layouts(user(videographer), ids.publicComplex)).find(
+    const threeRoom = (await layouts(user(mobilographer), ids.publicComplex)).find(
       (row) => row.block_id === generatedBlock && row.rooms === 3,
     );
     expect(threeRoom?.price_from).toBe("70000.00");
   });
 
   it("блок без списка квартир: ручной флаг и цена, без числа", async () => {
-    const manual = (await layouts(user(videographer), ids.publicComplex)).filter(
+    const manual = (await layouts(user(mobilographer), ids.publicComplex)).filter(
       (row) => row.block_id === manualBlock,
     );
     expect(
@@ -157,7 +157,7 @@ describe("наличие квартир для сайта", () => {
       { rooms: 1, free_count: null, available: true, price_from: "350000000.00", currency: "UZS" },
       { rooms: 4, free_count: null, available: false, price_from: null, currency: "UZS" },
     ]);
-    const uzs = (await rooms(user(videographer), [ids.publicComplex])).filter((row) => row.currency === "UZS");
+    const uzs = (await rooms(user(mobilographer), [ids.publicComplex])).filter((row) => row.currency === "UZS");
     expect(uzs).toMatchObject([
       { rooms: 1, free_count: null, available: true },
       { rooms: 4, free_count: 0, available: false, price_from: null },
@@ -172,7 +172,7 @@ describe("наличие квартир для сайта", () => {
       [generatedBlock],
     );
     expect(expected.rows[0]?.unassigned).toBe(1);
-    const blocks = await blockRows(user(videographer), [ids.publicComplex]);
+    const blocks = await blockRows(user(mobilographer), [ids.publicComplex]);
     const byBlock = new Map(blocks.map((row) => [row.block_id, row]));
     expect(byBlock.get(generatedBlock)).toMatchObject({
       complex_id: ids.publicComplex,
@@ -201,7 +201,7 @@ describe("наличие квартир для сайта", () => {
       [ids.publicComplex],
     );
     expect(listed.rows[0]?.free).toBeGreaterThan(0);
-    const before = (await rooms(user(videographer), [ids.publicComplex])).find(
+    const before = (await rooms(user(mobilographer), [ids.publicComplex])).find(
       (row) => row.currency === "USD" && row.rooms === 2,
     );
     expect(before).toMatchObject({
@@ -218,7 +218,7 @@ describe("наличие квартир для сайта", () => {
       "insert into layouts (block_id, rooms, area, price_from, available) values ($1, 2, 55, 39000, true)",
       [unlisted],
     );
-    const mixed = (await rooms(user(videographer), [ids.publicComplex])).find(
+    const mixed = (await rooms(user(mobilographer), [ids.publicComplex])).find(
       (row) => row.currency === "USD" && row.rooms === 2,
     );
     expect(mixed).toMatchObject({ free_count: null, listed_free: listed.rows[0]?.free });
@@ -228,13 +228,13 @@ describe("наличие квартир для сайта", () => {
   it("по блокам — сразу для нескольких ЖК (главная кабинета, Г4): посетителю закрыто", async () => {
     const all = [ids.publicComplex, ids.draftComplex, ids.hiddenComplex, ids.orphanComplex];
     await expectDenied(blockRows(anon, all));
-    const forStaff = await blockRows(user(videographer), all);
+    const forStaff = await blockRows(user(mobilographer), all);
     expect(forStaff.map((row) => row.block_id)).toContain(ids.draftBlock);
   });
 
   it("блок без списка, где все планировки «нет в наличии», — не «по планировкам»", async () => {
     await db.admin.query("update layouts set available = false where block_id = $1", [manualBlock]);
-    const manual = (await blockRows(user(videographer), [ids.publicComplex])).find(
+    const manual = (await blockRows(user(mobilographer), [ids.publicComplex])).find(
       (row) => row.block_id === manualBlock,
     );
     expect(manual).toMatchObject({ free_count: null, available: false });
@@ -271,15 +271,15 @@ describe("наличие квартир для сайта", () => {
     await db.admin.query("insert into layouts (block_id, rooms, area) values ($1, 2, 60)", [
       ids.draftBlock,
     ]);
-    expect(await layouts(user(videographer), ids.draftComplex)).toHaveLength(1);
+    expect(await layouts(user(mobilographer), ids.draftComplex)).toHaveLength(1);
   });
 
   it("смена статуса сразу меняет «осталось N»", async () => {
-    const before = (await layouts(user(videographer), ids.publicComplex)).find(
+    const before = (await layouts(user(mobilographer), ids.publicComplex)).find(
       (row) => row.layout_id === ids.oneRoomLayout,
     );
     await db.admin.query("update units set status = 'sold' where id = $1", [ids.units[0]]);
-    const after = (await layouts(user(videographer), ids.publicComplex)).find(
+    const after = (await layouts(user(mobilographer), ids.publicComplex)).find(
       (row) => row.layout_id === ids.oneRoomLayout,
     );
     expect(after?.free_count).toBe((before?.free_count ?? 0) - 1);

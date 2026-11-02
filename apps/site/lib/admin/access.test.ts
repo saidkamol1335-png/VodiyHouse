@@ -27,7 +27,7 @@ describe("кабинет без входа", () => {
 
 describe("роли", () => {
   it("три роли базы — да; HEAD, admin, пусто и не строка — нет", () => {
-    for (const role of ["head", "manager", "videographer"]) expect(isStaffRole(role)).toBe(true);
+    for (const role of ["head", "manager", "mobilographer"]) expect(isStaffRole(role)).toBe(true);
     for (const value of ["HEAD", "admin", "", null, 1]) expect(isStaffRole(value)).toBe(false);
   });
 });
@@ -52,9 +52,9 @@ describe("resolveViewer", () => {
   });
 
   it("активный → ok: id, роль и имя — из профиля", () => {
-    expect(resolveViewer(ID, profile({ role: "videographer" }))).toEqual({
+    expect(resolveViewer(ID, profile({ role: "mobilographer" }))).toEqual({
       kind: "ok",
-      viewer: { id: ID, role: "videographer", name: "Дилноза Юсупова", mustChangePassword: false },
+      viewer: { id: ID, role: "mobilographer", name: "Дилноза Юсупова", mustChangePassword: false },
     });
   });
 });

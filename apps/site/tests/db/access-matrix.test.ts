@@ -9,7 +9,10 @@ import { anon, createAuthUser, createStaff, createTestDb, expectHint, service, u
 
 const DENIED = /permission denied|row-level security|руководитель|Только|доступ/i;
 
-/** Функции, которые посетитель вправе вызывать: публичные данные сайта (SECURITY DEFINER, только чтение). */
+/**
+ * Функции, которые посетитель вправе вызывать: публичные данные сайта (SECURITY DEFINER, только чтение)
+ * и три записи сайта с подписью сервера (Проект-2, 20261102130000: заявка, «Написать в Telegram», события).
+ */
 const ANON_FUNCTIONS = [
   "block_units",
   "site_calc_screen",
@@ -18,6 +21,7 @@ const ANON_FUNCTIONS = [
   "site_complex",
   "site_complex_picker",
   "site_complex_progress",
+  "site_create_tg_start",
   "site_developer",
   "site_developer_slug_state",
   "site_developers",
@@ -26,6 +30,8 @@ const ANON_FUNCTIONS = [
   "site_progress_frames",
   "site_showcase",
   "site_slug_state",
+  "site_submit_lead",
+  "site_track_events",
   "site_unit_video",
 ];
 
@@ -34,7 +40,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
   let ids: ContentIds;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
   let archivedComplex: string;
   let archivedDeveloper: string;
 
@@ -66,7 +72,7 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
 
     const insertId = async (sql: string, params: unknown[]) =>
       (await db.admin.query<{ id: string }>(`${sql} returning id`, params)).rows[0]!.id;
@@ -162,16 +168,16 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
 
   // Пункты 3–10 аудита 29.10 (20261029070000_audit_access.sql).
   describe("сверх PLAN §5 — ничего лишнего", () => {
-    it("посетитель напрямую читает только опубликованный контент; витрина, планировки и медиа — через функции", async () => {
-      const { rows } = await db.admin.query<{ name: string }>(
-        `select c.relname as name from pg_class c join pg_namespace n on n.oid = c.relnamespace
-         where n.nspname = 'public' and c.relkind = 'r' and has_table_privilege('anon', c.oid, 'SELECT')
+    // Проект-2, фаза B: таблицы посетителю закрыты целиком; прямое чтение — два представления.
+    it("посетитель напрямую не читает ни одной таблицы; публичные настройки и подсказки — представления", async () => {
+      const { rows } = await db.admin.query<{ name: string; kind: string }>(
+        `select c.relname as name, c.relkind::text as kind from pg_class c join pg_namespace n on n.oid = c.relnamespace
+         where n.nspname = 'public' and c.relkind in ('r', 'v', 'm') and has_table_privilege('anon', c.oid, 'SELECT')
          order by 1`,
       );
-      expect(rows.map((row) => row.name)).toEqual([
-        "banks", "blocks", "complex_details", "complex_documents", "complex_videos", "complexes", "deadline_changes",
-        "detail_topics", "developer_past_projects", "developers", "document_types", "finishings", "floor_plans",
-        "hints", "locations", "settings",
+      expect(rows).toEqual([
+        { name: "public_hints", kind: "v" },
+        { name: "public_settings", kind: "v" },
       ]);
     });
 
@@ -183,11 +189,11 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
           expect(await visible(actor, `select id from public.${table}`), table).toBe(0);
         }
       }
-      expect(await visible(user(videographer), "select id from public.media_assets")).toBe(await total("media_assets"));
+      expect(await visible(user(mobilographer), "select id from public.media_assets")).toBe(await total("media_assets"));
     });
 
     it("коллеги видят имя, роль и активность; флаг пароля и закрытие сессий — только свои через own_profile", async () => {
-      for (const actor of [user(manager), user(videographer), user(head)]) {
+      for (const actor of [user(manager), user(mobilographer), user(head)]) {
         expect(await visible(actor, "select must_change_password from public.profiles")).toBe(0);
         expect(await visible(actor, "select sessions_revoked_at from public.profiles")).toBe(0);
         expect(await visible(actor, "select id, full_name, role, is_active from public.profiles")).toBe(await total("profiles"));
@@ -215,12 +221,12 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       expect(rows).toEqual([{ name: "Свежая", client_key: "b".repeat(64) }, { name: "Старая", client_key: null }]);
     });
 
-    it("выключенные банки видят руководитель и менеджер, видеограф — как посетитель", async () => {
+    it("выключенные банки видят руководитель и менеджер, мобилограф — как посетитель", async () => {
       await db.admin.query(`insert into banks (slug, name, is_active) values ('audit-hidden', '{"ru": "Скрытый банк", "uz": "Yashirin bank"}', false)`);
       const hiddenBank = "select id from public.banks where not is_active";
       expect(await visible(user(head), hiddenBank)).toBeGreaterThan(0);
       expect(await visible(user(manager), hiddenBank)).toBeGreaterThan(0);
-      expect(await visible(user(videographer), hiddenBank)).toBe(0);
+      expect(await visible(user(mobilographer), hiddenBank)).toBe(0);
       expect(await visible(anon, hiddenBank)).toBe(0);
     });
 
@@ -263,13 +269,21 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
   });
 
   describe("менеджер", () => {
-    it("не создаёт ЖК и застройщика — ни функцией, ни вставкой", async () => {
+    // Проект-2 (PLAN §10, п. 6): менеджер заводит ЖК — только черновиком; застройщиков — нет.
+    it("создаёт ЖК черновиком, но не опубликованным; застройщика не создаёт", async () => {
       const name = JSON.stringify({ ru: "Новый", uz: "Yangi" });
-      await expect(db.as(user(manager), (tx) => tx.query("select public.create_complex($1, $2, 'novyy')", [ids.publicDeveloper, name]))).rejects.toThrow(DENIED);
+      const created = await db.as(user(manager), (tx) =>
+        tx.query<{ id: string }>("select public.create_complex($1, $2, 'novyy') as id", [ids.publicDeveloper, name]),
+      );
+      expect(await statusOf("complexes", created.rows[0]!.id)).toBe("draft");
+      await db.admin.query("delete from public.complexes where id = $1", [created.rows[0]!.id]);
       await expect(db.as(user(manager), (tx) => tx.query("select public.create_developer('Yangi', 'yangi')"))).rejects.toThrow(DENIED);
-      expect(
-        await writes(user(manager), `insert into public.complexes (developer_id, slug, name) values ($1, 'mgr-zhk', $2)`, [ids.publicDeveloper, name]),
-      ).toBe(0);
+      await expectHint(
+        db.as(user(manager), (tx) =>
+          tx.query(`insert into public.complexes (developer_id, slug, name, status) values ($1, 'mgr-zhk', $2, 'published')`, [ids.publicDeveloper, name]),
+        ),
+        "vh:head_only",
+      );
       expect(await writes(user(manager), "insert into public.developers (slug, name) values ('mgr-dev', 'mgr-dev')")).toBe(0);
     });
 
@@ -292,19 +306,19 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
     });
   });
 
-  describe("видеограф", () => {
+  describe("мобилограф", () => {
     it("не читает заявки и расчёты — ни таблицы, ни экраны заявок", async () => {
-      expect(await visible(user(videographer), "select * from public.leads")).toBe(0);
-      expect(await visible(user(videographer), "select * from public.lead_deliveries")).toBe(0);
-      expect(await visible(user(videographer), "select * from public.calculations")).toBe(0);
-      expect(await visible(user(videographer), "select * from public.developer_private")).toBe(0);
-      await expect(db.as(user(videographer), (tx) => tx.query("select public.leads_screen(null, null, null)"))).rejects.toThrow();
-      await expect(db.as(user(videographer), (tx) => tx.query("select public.lead_card(1001)"))).rejects.toThrow();
+      expect(await visible(user(mobilographer), "select * from public.leads")).toBe(0);
+      expect(await visible(user(mobilographer), "select * from public.lead_deliveries")).toBe(0);
+      expect(await visible(user(mobilographer), "select * from public.calculations")).toBe(0);
+      expect(await visible(user(mobilographer), "select * from public.developer_private")).toBe(0);
+      await expect(db.as(user(mobilographer), (tx) => tx.query("select public.leads_screen(null, null, null)"))).rejects.toThrow();
+      await expect(db.as(user(mobilographer), (tx) => tx.query("select public.lead_card(1001)"))).rejects.toThrow();
     });
 
-    it("статистику сайта (фаза 6) видит только руководитель — ни видеограф, ни менеджер", async () => {
+    it("статистику сайта (фаза 6) видит только руководитель — ни мобилограф, ни менеджер", async () => {
       for (const call of ["select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())", "select public.site_today()"]) {
-        for (const actor of [user(videographer), user(manager), anon]) {
+        for (const actor of [user(mobilographer), user(manager), anon]) {
           await expect(db.as(actor, (tx) => tx.query(call)), call).rejects.toThrow(DENIED);
         }
         await expect(db.as(user(head), (tx) => tx.query(call))).resolves.toBeTruthy();
@@ -313,13 +327,13 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
 
     it("не читает служебное и не меняет квартиры: статус и цена — руководителю и менеджеру", async () => {
       for (const table of ["audit_log", "payment_programs", "events", "tg_starts", "login_failures", "archive_notices", "showcase_notices", "progress_notices"]) {
-        expect(await visible(user(videographer), `select * from public.${table}`), table).toBe(0);
+        expect(await visible(user(mobilographer), `select * from public.${table}`), table).toBe(0);
       }
       const unit = ids.units[0];
       const before = (await db.admin.query("select status::text, price from public.units where id = $1", [unit])).rows[0];
-      expect(await writes(user(videographer), "update public.units set status = 'sold', price = 1 where id = $1", [unit])).toBe(0);
+      expect(await writes(user(mobilographer), "update public.units set status = 'sold', price = 1 where id = $1", [unit])).toBe(0);
       await expect(
-        db.as(user(videographer), (tx) => tx.query("select public.set_units_status($1, $2::uuid[], 'sold')", [ids.publicBlock, [unit]])),
+        db.as(user(mobilographer), (tx) => tx.query("select public.set_units_status($1, $2::uuid[], 'sold')", [ids.publicBlock, [unit]])),
       ).rejects.toThrow();
       expect((await db.admin.query("select status::text, price from public.units where id = $1", [unit])).rows[0]).toEqual(before);
     });
@@ -336,12 +350,12 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
         });
       const submit = (actor: string, unit: string) =>
         db.as(user(actor), (tx) => tx.query<{ r: { id: string } }>("select public.submit_progress_report($1) as r", [body(unit)])).then((r) => r.rows[0]!.r.id);
-      const own = await submit(videographer, ids.units[0]!);
+      const own = await submit(mobilographer, ids.units[0]!);
       const others = await submit(head, ids.units[1]!);
-      expect(await visible(user(videographer), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(1);
+      expect(await visible(user(mobilographer), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(1);
       expect(await visible(user(manager), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(2);
-      await expectHint(db.as(user(videographer), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
-      expect(await writes(user(videographer), "update public.progress_reports set status = 'published', published_at = now() where id = $1", [own])).toBe(0);
+      await expectHint(db.as(user(mobilographer), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
+      expect(await writes(user(mobilographer), "update public.progress_reports set status = 'published', published_at = now() where id = $1", [own])).toBe(0);
     });
   });
 

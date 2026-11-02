@@ -26,7 +26,7 @@ describe("программы оплаты", () => {
   let head: string;
   let manager: string;
   let otherManager: string;
-  let videographer: string;
+  let mobilographer: string;
   let content: ContentIds;
   let bankId: number;
 
@@ -35,7 +35,7 @@ describe("программы оплаты", () => {
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
     otherManager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     content = await seedContent(db.admin);
     const { rows } = await db.admin.query<{ id: number }>(
       `insert into banks (slug, name) values ('ipoteka', '{"ru": "Ipoteka Bank", "uz": "Ipoteka Bank"}') returning id`,
@@ -123,17 +123,17 @@ describe("программы оплаты", () => {
       expect((await programRow(second))!.sort).toBeGreaterThan((await programRow(first))!.sort);
     });
 
-    it("менеджер и видеограф не правят; посетитель не читает таблицу", async () => {
+    it("менеджер и мобилограф не правят; посетитель не читает таблицу", async () => {
       await expectHint(save(manager, full()), "vh:forbidden");
-      await expectHint(save(videographer, full()), "vh:forbidden");
+      await expectHint(save(mobilographer, full()), "vh:forbidden");
       await expectDenied(db.as(anon, (tx) => tx.query("select * from payment_programs")));
     });
 
-    it("читают руководитель и менеджер; видеограф не видит ни одной", async () => {
+    it("читают руководитель и менеджер; мобилограф не видит ни одной", async () => {
       const visible = async (actor: string) =>
         (await db.as(user(actor), (tx) => tx.query("select id from payment_programs"))).rows.length;
       expect(await visible(manager)).toBeGreaterThan(0);
-      expect(await visible(videographer)).toBe(0);
+      expect(await visible(mobilographer)).toBe(0);
     });
   });
 
@@ -472,12 +472,12 @@ describe("программы оплаты", () => {
       expect(saved.rows[0]!.rate).toEqual((await sitePrograms()).rate);
     });
 
-    it("посетитель и видеограф не сохраняют; чужая программа — «не найдена»", async () => {
+    it("посетитель и мобилограф не сохраняют; чужая программа — «не найдена»", async () => {
       const programId = await save(head, full());
       await expectDenied(
         db.as(anon, (tx) => tx.query("select save_calculation($1, null, '{}', '{}')", [programId])),
       );
-      await expectHint(saveCalculation(videographer, programId), "vh:forbidden");
+      await expectHint(saveCalculation(mobilographer, programId), "vh:forbidden");
       await expectHint(saveCalculation(manager, crypto.randomUUID()), "vh:not_found");
     });
   });

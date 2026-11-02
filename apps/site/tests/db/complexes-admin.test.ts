@@ -13,14 +13,14 @@ describe("кабинет ЖК", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
   let developer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head", { fullName: "Бахтиёр Каримов" });
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     developer = (
       await db.admin.query<{ id: string }>(
         "insert into developers (slug, name, status) values ('zhk-dev', 'Zhk Dev', 'published') returning id",
@@ -70,9 +70,14 @@ describe("кабинет ЖК", () => {
       expect((await complexRow(second)).sort).toBeGreaterThan((await complexRow(first)).sort);
     });
 
-    it("менеджер, адрес demo-… и застройщик в архиве — отказ", async () => {
+    // Проект-2 (PLAN §10, п. 6): ЖК заводит и менеджер — черновиком; мобилограф — нет.
+    it("менеджер — черновик; мобилограф, адрес demo-… и застройщик в архиве — отказ", async () => {
+      const byManager = await db.as(user(manager), (tx) =>
+        tx.query<{ id: string }>("select create_complex($1, $2, 'menejer-zhk') as id", [developer, name("Menejer")]),
+      );
+      expect((await complexRow(byManager.rows[0]!.id)).status).toBe("draft");
       await expectHint(
-        db.as(user(manager), (tx) =>
+        db.as(user(mobilographer), (tx) =>
           tx.query("select create_complex($1, $2, 'lola')", [developer, name("Lola")]),
         ),
         "vh:forbidden",
@@ -106,18 +111,18 @@ describe("кабинет ЖК", () => {
       expect(await setSlug(id, "lola")).toBe("lola");
     });
 
-    it("адрес demo-… не выдаётся и не меняется; менеджер — отказ", async () => {
+    it("адрес demo-… не выдаётся и не меняется; мобилограф — отказ", async () => {
       const id = await createComplex("Orzu Park", "orzu-park");
       expect(await setSlug(id, "demo-orzu")).toBe("orzu-park");
       await expectHint(
-        db.as(user(manager), (tx) => tx.query("select set_complex_slug($1, 'x')", [id])),
+        db.as(user(mobilographer), (tx) => tx.query("select set_complex_slug($1, 'x')", [id])),
         "vh:forbidden",
       );
     });
   });
 
   describe("список", () => {
-    it("строки в порядке каталога с застройщиком; видеографу — пусто", async () => {
+    it("строки в порядке каталога с застройщиком; мобилографу — пусто", async () => {
       const id = await createComplex("Gulzor", "gulzor");
       const rows = await db.as(user(manager), async (tx) =>
         (
@@ -127,10 +132,10 @@ describe("кабинет ЖК", () => {
         ).rows,
       );
       expect(rows.at(-1)).toMatchObject({ id, developer_name: "Zhk Dev", status: "draft" });
-      const forVideographer = await db.as(user(videographer), async (tx) =>
+      const forMobilographer = await db.as(user(mobilographer), async (tx) =>
         (await tx.query("select id from complex_rows()")).rows,
       );
-      expect(forVideographer).toEqual([]);
+      expect(forMobilographer).toEqual([]);
     });
   });
 
@@ -151,7 +156,7 @@ describe("кабинет ЖК", () => {
         expect.arrayContaining(["address", "point", "renders", "blocks"]),
       );
       expect(rows.find((row) => row.requirement === "renders")?.have).toBe(0);
-      expect(await readiness(id, videographer)).toHaveLength(6);
+      expect(await readiness(id, mobilographer)).toHaveLength(6);
     });
 
     it("не готовый — vh:not_ready со списком; готовый без отметки 1.2 — vh:rule12", async () => {
@@ -268,7 +273,7 @@ describe("кабинет ЖК", () => {
       await expectHint(removePhoto(id, ids[1]!), "vh:not_ready");
     });
 
-    it("не больше 30; менеджер — отказ", async () => {
+    it("не больше 30; мобилограф — отказ", async () => {
       const id = await createComplex("Bog", "bog");
       for (let index = 0; index < 30; index += 1) {
         await db.admin.query(
@@ -277,7 +282,7 @@ describe("кабинет ЖК", () => {
         );
       }
       await expectHint(addPhoto(id), "vh:too_many");
-      await expectHint(addPhoto(id, 2400, false, manager), "vh:forbidden");
+      await expectHint(addPhoto(id, 2400, false, mobilographer), "vh:forbidden");
     });
   });
 
@@ -313,13 +318,15 @@ describe("кабинет ЖК", () => {
       expect((await blockRows(id)).map((row) => row.name)).toEqual(["A", "B"]);
     });
 
-    it("без этажности, длинное имя и менеджер — отказ", async () => {
+    it("без этажности, длинное имя и мобилограф — отказ; менеджер сохраняет", async () => {
       const id = await createComplex("Ko‘k", "kok");
       await expectHint(save(id, [{ name: "A" }]), "vh:invalid");
       await expect(save(id, [{ name: "1-я очередь", floors_total: 9 }])).rejects.toMatchObject({
         code: "23514",
       });
-      await expectHint(save(id, [{ name: "A", floors_total: 9 }], manager), "vh:forbidden");
+      await expectHint(save(id, [{ name: "A", floors_total: 9 }], mobilographer), "vh:forbidden");
+      await save(id, [{ name: "A", floors_total: 9 }], manager);
+      expect((await blockRows(id)).map((row) => row.name)).toEqual(["A"]);
     });
 
     it("блок со списком квартир не удаляется; у опубликованного — последний со сроком", async () => {

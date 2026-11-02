@@ -58,9 +58,12 @@ describe("фасад и планы этажей: права, правила и �
     JSON.stringify(positions.map((position) => ({ entrance, position, points: RECT })));
 
   describe("фасад и контуры блоков", () => {
-    it("фасад и контур ставит руководитель; менеджер и посетитель — отказ; без 1.2 у опубликованного — отказ", async () => {
+    // Проект-2 (PLAN §10, п. 6): фасад ставит и менеджер; мобилограф — нет.
+    it("фасад и контур ставят руководитель и менеджер; мобилограф и посетитель — отказ; без 1.2 у опубликованного — отказ", async () => {
       await expectHint(asHead((tx) => setFacade(tx, ids.publicComplex, false)), "vh:rule12");
-      await expectHint(db.as(user(manager), (tx) => setFacade(tx)), "vh:forbidden");
+      const mobilographer = await createStaff(db.admin, "mobilographer");
+      await expectHint(db.as(user(mobilographer), (tx) => setFacade(tx)), "vh:forbidden");
+      await expectHint(db.as(user(manager), (tx) => setFacade(tx, ids.publicComplex, false)), "vh:rule12");
       await expectDenied(db.as(anon, (tx) => setFacade(tx)));
       const first = await asHead((tx) => setFacade(tx));
       expect(first).toEqual({ complex_id: ids.publicComplex, old_path: null });
@@ -69,7 +72,7 @@ describe("фасад и планы этажей: права, правила и �
       );
       expect(contour).toEqual({ complex_id: ids.publicComplex });
       await expectHint(
-        db.as(user(manager), (tx) => call(tx, "public.set_block_contour($1, $2::jsonb)", [ids.publicBlock, null])),
+        db.as(user(mobilographer), (tx) => call(tx, "public.set_block_contour($1, $2::jsonb)", [ids.publicBlock, null])),
         "vh:forbidden",
       );
     });
@@ -128,7 +131,8 @@ describe("фасад и планы этажей: права, правила и �
       );
       // Блок A — 16 этажей.
       await expectHint(asHead((tx) => savePlan(tx, null, 1, 10, 17)), "vh:invalid");
-      await expectHint(db.as(user(manager), (tx) => savePlan(tx, null, 1, 2, 3)), "vh:forbidden");
+      const mobilographer = await createStaff(db.admin, "mobilographer");
+      await expectHint(db.as(user(mobilographer), (tx) => savePlan(tx, null, 1, 2, 3)), "vh:forbidden");
     });
 
     it("контуры квартир: свой подъезд, место один раз; новая картинка сбрасывает контуры", async () => {
@@ -268,10 +272,8 @@ describe("фасад и планы этажей: права, правила и �
       expect(picker.plans).toHaveLength(1);
       expect(picker.plans[0]!.contours).toHaveLength(2);
       expect(await db.as(anon, (tx) => call(tx, "public.site_complex_picker($1)", [ids.draftComplex]))).toBeNull();
-      const visible = await db.as(anon, (tx) =>
-        tx.query<{ n: number }>("select count(*)::int as n from floor_plans where complex_id = $1", [ids.publicComplex]),
-      );
-      expect(visible.rows[0]!.n).toBe(1);
+      // Проект-2, фаза B: таблицу планов посетитель напрямую не читает — только site_complex_picker.
+      await expectDenied(db.as(anon, (tx) => tx.query("select id from floor_plans")));
       await db.admin.query("delete from floor_plans");
     });
   });

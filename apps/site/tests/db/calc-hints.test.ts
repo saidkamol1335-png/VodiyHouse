@@ -16,7 +16,8 @@ describe.skipIf(isRemoteTarget)("подсказки «?» калькулятор
   const visible = async () => {
     const { rows } = await db.as(anon, (tx) =>
       tx.query<{ slug: string; term: unknown; text: unknown }>(
-        "select slug, term, text from hints order by slug",
+        // Проект-2, фаза B: сайт читает подсказки представлением, таблица посетителю закрыта.
+        "select slug, term, text from public_hints order by slug",
       ),
     );
     return rows;

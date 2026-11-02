@@ -15,8 +15,8 @@ const NOTE_MAX = 300;
 
 /**
  * Решение по отчёту (мокап CabReview): «Проверено по правилу 1.2…» — без отметки «Опубликовать»
- * неактивна (и база без неё не опубликует); «Вернуть видеографу» — с причиной (в мокапе её не было:
- * видеограф не знал бы, что исправить).
+ * неактивна (и база без неё не опубликует); «Вернуть мобилографу» — с причиной (в мокапе её не было:
+ * мобилограф не знал бы, что исправить).
  */
 export function ReviewDecision({ id, onDone }: { id: string; onDone: () => void }) {
   const t = useTranslations("admin.video.review");
@@ -63,7 +63,7 @@ export function ReviewDecision({ id, onDone }: { id: string; onDone: () => void 
 
 type ReturnFormProps = { id: string; pending: boolean; action: (data: FormData) => void };
 
-/** «Что исправить» и «Вернуть видеографу». */
+/** «Что исправить» и «Вернуть мобилографу». */
 function ReturnForm({ id, pending, action }: ReturnFormProps) {
   const t = useTranslations("admin.video.review");
   return (

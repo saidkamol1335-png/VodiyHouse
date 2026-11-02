@@ -98,3 +98,13 @@ grant usage on schema public to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
+-- Vault (Проект-2, фаза B): в облаке — расширение supabase_vault; здесь только представление,
+-- которое читают наши функции (private.site_signing_secret). Секреты кладёт тест, как исполнитель
+-- в облаке — vault.create_secret.
+create schema vault;
+create table vault.decrypted_secrets (
+  name text primary key,
+  decrypted_secret text not null
+);
+revoke all on schema vault from public;

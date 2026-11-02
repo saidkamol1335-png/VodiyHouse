@@ -15,8 +15,8 @@ import { parseUnitRecords } from "@vh/shared/units";
  * строках. Чужой или удалённый блок — пустой список (экран тогда перечитает страницу).
  */
 export async function readBlockUnitsAction(input: BlockUnitsInput): Promise<BlockUnitsResult> {
-  // Видеограф по PLAN §5 тоже читает наличие (раздел «ЖК» ему пока закрыт): слои не расходятся.
-  const guard = await requireActionViewer(["head", "manager", "videographer"]);
+  // Мобилограф по PLAN §5 тоже читает наличие (раздел «ЖК» ему пока закрыт): слои не расходятся.
+  const guard = await requireActionViewer(["head", "manager", "mobilographer"]);
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId)) return unitsFailure("notFound");
 

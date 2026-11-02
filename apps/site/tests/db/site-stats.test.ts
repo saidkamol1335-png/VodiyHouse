@@ -352,7 +352,7 @@ describe.skipIf(isRemoteTarget)("статистика сайта: site_stats", (
   });
 
   it("только руководитель; период — не в будущем, не длиннее хранения событий (400 дней)", async () => {
-    for (const role of ["manager", "videographer"] as const) {
+    for (const role of ["manager", "mobilographer"] as const) {
       const staff = await createStaff(db.admin, role);
       await expectHint(
         db.as(user(staff), (tx) =>

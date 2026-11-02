@@ -9,7 +9,7 @@ import type {
   ReviewItem,
 } from "@/lib/admin/progress/types";
 
-// «Видео и ход стройки» (фаза 5): чтение экрана сессией сотрудника — права решает база (видеограф видит
+// «Видео и ход стройки» (фаза 5): чтение экрана сессией сотрудника — права решает база (мобилограф видит
 // ЖК и блоки как сотрудник, отчёты — только свои).
 
 type ComplexRow = {
@@ -55,7 +55,7 @@ type ReportRow = {
   photos: { path: string; sort: number }[];
 };
 
-/** «Мои отчёты»: последние свои (у видеографа RLS отдаёт только свои) — новые сверху. */
+/** «Мои отчёты»: последние свои (у мобилографа RLS отдаёт только свои) — новые сверху. */
 export async function readMyProgressReports(
   supabase: SupabaseClient,
   limit = 5,
@@ -97,7 +97,7 @@ type FixRow = {
   photos: { path: string; width: number; height: number; blur: string | null; sort: number }[];
 };
 
-/** Возвращённый отчёт для «Исправить» (видеографу RLS отдаёт только свой); иначе null. */
+/** Возвращённый отчёт для «Исправить» (мобилографу RLS отдаёт только свой); иначе null. */
 export async function readProgressReportForFix(
   supabase: SupabaseClient,
   id: string,
@@ -194,7 +194,7 @@ export async function readReviewQueue(supabase: SupabaseClient): Promise<ReviewI
   }));
 }
 
-/** Ящик отчёта: любой статус (видеограф — только свой, по RLS); нет — null. */
+/** Ящик отчёта: любой статус (мобилограф — только свой, по RLS); нет — null. */
 export async function readReportDetail(
   supabase: SupabaseClient,
   id: string,

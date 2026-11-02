@@ -47,8 +47,8 @@ describe("ЖК по ролям (Н2)", () => {
     expect(steps.at(-1)).toEqual({ segment: "predprosmotr", href: `${BASE}/predprosmotr`, next: "9:preview" });
   });
 
-  it("видеограф: вкладок нет — перекидывать некуда (раздел ему закрыт целиком)", () => {
-    expect(complexAccess("videographer")).toEqual({ manage: false, tabs: [] });
-    expect(complexTabRedirect("videographer", BASE, "units")).toBeNull();
+  it("мобилограф: вкладок нет — перекидывать некуда (раздел ему закрыт целиком)", () => {
+    expect(complexAccess("mobilographer")).toEqual({ manage: false, tabs: [] });
+    expect(complexTabRedirect("mobilographer", BASE, "units")).toBeNull();
   });
 });

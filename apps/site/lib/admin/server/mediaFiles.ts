@@ -47,7 +47,7 @@ export async function floorPlanFilesOfGoneBlocks(
 
 /**
  * Файлы отчёта хода строительства (фаза 5), которые вернула база после отправки или удаления: фото —
- * в бакете media, видео (.mp4) — в progress-video. Удаляет сервер секретным ключом: у видеографа в
+ * в бакете media, видео (.mp4) — в progress-video. Удаляет сервер секретным ключом: у мобилографа в
  * хранилище права удалять нет, а пути уже проверила функция отчёта (только файлы этого отчёта).
  */
 export async function removeProgressFiles(admin: SupabaseClient, paths: unknown): Promise<void> {
@@ -69,7 +69,7 @@ export async function removeProgressFiles(admin: SupabaseClient, paths: unknown)
   }
 }
 
-/** То же секретным ключом сервера — для действий видеографа (его сессии удалять файлы нельзя). */
+/** То же секретным ключом сервера — для действий мобилографа (его сессии удалять файлы нельзя). */
 export async function removeProgressFilesAsServer(paths: unknown): Promise<void> {
   await removeProgressFiles(createSupabaseAdminClient(), paths);
 }

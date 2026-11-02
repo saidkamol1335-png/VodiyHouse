@@ -311,11 +311,11 @@ describe.skipIf(isRemoteTarget)("заявки: доставка и тревог�
     const lead = await submit(db, { phone: nextPhone() });
     for (let i = 0; i < 10; i++) await record(lead.id, "sheet", false);
     const manager = await createStaff(db.admin, "manager");
-    const videographer = await createStaff(db.admin, "videographer");
+    const mobilographer = await createStaff(db.admin, "mobilographer");
     await expectDenied(db.as(user(manager), (tx) => tx.query("select lead_deliveries_due(5)")));
     const retry = (actor: string) =>
       db.as(user(actor), (tx) => tx.query("select retry_lead_delivery($1, 'sheet')", [lead.id]));
-    await expectHint(retry(videographer), "vh:forbidden");
+    await expectHint(retry(mobilographer), "vh:forbidden");
     await retry(manager);
     expect(
       (await db.admin.query("select state, attempts from lead_deliveries where lead_id = $1 and channel = 'sheet'", [lead.id])).rows[0],
@@ -332,13 +332,13 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await seededDb();
     head = await createStaff(db.admin, "head", { fullName: "Нигора Руководитель" });
     manager = await createStaff(db.admin, "manager", { fullName: "Азиз Менеджер" });
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
   });
   afterAll(() => db.close());
 
@@ -350,12 +350,12 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
       )).rows[0]!.v,
     );
 
-  it("видеограф заявок не видит; руководитель и менеджер — список, счётчики, поиск", async () => {
+  it("мобилограф заявок не видит; руководитель и менеджер — список, счётчики, поиск", async () => {
     const slug = await scalar<string>(db, "select slug as v from complexes where status = 'published' limit 1");
     const a = await submit(db, { phone: "+998901112233", name: "Тимур", complex: slug }, "{}");
     await submit(db, { phone: "+998935556677", name: "Феруза" }, "{}");
-    await expectHint(screen(videographer), "vh:forbidden");
-    const visible = await db.as(user(videographer), (tx) =>
+    await expectHint(screen(mobilographer), "vh:forbidden");
+    const visible = await db.as(user(mobilographer), (tx) =>
       tx.query<{ n: number }>("select count(*)::int as n from leads"),
     );
     expect(visible.rows[0]!.n).toBe(0);
@@ -368,16 +368,16 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
     expect((await screen(head, null, `#${a.number}`)).rows.map((row) => row.number)).toEqual([a.number]);
   });
 
-  it("ответственный: новая → «В работе»; видеографу заявку не поручить; статус меняется", async () => {
+  it("ответственный: новая → «В работе»; мобилографу заявку не поручить; статус меняется", async () => {
     const lead = await submit(db, { phone: nextPhone() }, "{}");
     const run = (actor: string, sql: string, params: unknown[]) => db.as(user(actor), (tx) => tx.query(sql, params));
-    await expectHint(run(manager, "select assign_lead($1, $2)", [lead.id, videographer]), "vh:invalid");
+    await expectHint(run(manager, "select assign_lead($1, $2)", [lead.id, mobilographer]), "vh:invalid");
     await run(manager, "select assign_lead($1, $2)", [lead.id, manager]);
     expect(
       (await db.admin.query("select status::text, assigned_to, updated_by from leads where id = $1", [lead.id])).rows[0],
     ).toEqual({ status: "work", assigned_to: manager, updated_by: manager });
     await run(head, "select set_lead_status($1, 'meeting')", [lead.id]);
-    await expectHint(run(videographer, "select set_lead_status($1, 'deal')", [lead.id]), "vh:forbidden");
+    await expectHint(run(mobilographer, "select set_lead_status($1, 'deal')", [lead.id]), "vh:forbidden");
     expect(await scalar(db, "select status::text as v from leads where id = $1", [lead.id])).toBe("meeting");
   });
 
@@ -426,6 +426,6 @@ describe.skipIf(isRemoteTarget)("заявки: кабинет", () => {
     expect(home.new).toBe(await count("new"));
     expect(home.work).toBe(await count("work"));
     expect(home.meetings).toBe(await count("meeting"));
-    await expectHint(db.as(user(videographer), (tx) => tx.query("select leads_home()")), "vh:forbidden");
+    await expectHint(db.as(user(mobilographer), (tx) => tx.query("select leads_home()")), "vh:forbidden");
   });
 });

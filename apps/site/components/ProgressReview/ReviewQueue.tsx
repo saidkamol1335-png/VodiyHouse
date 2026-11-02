@@ -10,7 +10,7 @@ import { formatMonthYear } from "@vh/shared/format";
 import { mediaPublicUrl } from "@/lib/media";
 
 /**
- * «Ждут проверки · N» (фаза 5, мокап CabReview): отчёты видеографов — старые сверху; «Проверить»
+ * «Ждут проверки · N» (фаза 5, мокап CabReview): отчёты мобилографов — старые сверху; «Проверить»
  * открывает ящик отчёта (?report=<id>). Пусто — панели нет.
  */
 export async function ReviewQueue({ items }: { items: readonly ReviewItem[] }) {

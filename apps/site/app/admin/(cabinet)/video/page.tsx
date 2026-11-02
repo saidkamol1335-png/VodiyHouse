@@ -29,7 +29,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const idFrom = (raw: string | string[] | undefined) =>
   typeof raw === "string" && UUID.test(raw) ? raw : null;
 
-/** Видеограф: ЖК для формы, «Мои отчёты» и возвращённый отчёт из ?fix. */
+/** Мобилограф: ЖК для формы, «Мои отчёты» и возвращённый отчёт из ?fix. */
 async function readReporterScreen(supabase: SupabaseClient, fixId: string | null) {
   const [complexes, mine, found] = await Promise.all([
     readProgressFormComplexes(supabase),
@@ -43,10 +43,10 @@ async function readReporterScreen(supabase: SupabaseClient, fixId: string | null
   return { complexes, mine, fix, months };
 }
 
-/** Экран роли: видеограф — свои отчёты (CabVideo); менеджер и руководитель — проверка (CabReview). */
+/** Экран роли: мобилограф — свои отчёты (CabVideo); менеджер и руководитель — проверка (CabReview). */
 async function RoleScreen({ role, fixId }: { role: StaffRole; fixId: string | null }) {
   const supabase = await createSupabaseServerClient();
-  if (role !== "videographer") return <ReviewQueue items={await readReviewQueue(supabase)} />;
+  if (role !== "mobilographer") return <ReviewQueue items={await readReviewQueue(supabase)} />;
   const { complexes, mine, fix, months } = await readReporterScreen(supabase, fixId);
   return (
     <VideoScreen
@@ -71,7 +71,7 @@ async function Overview({ role }: { role: StaffRole }) {
   );
   return (
     <>
-      <ProgressMatrixPanel matrix={matrix} linked={role !== "videographer"} />
+      <ProgressMatrixPanel matrix={matrix} linked={role !== "mobilographer"} />
       <ClientVideos videos={videos} />
     </>
   );
@@ -82,19 +82,19 @@ async function OpenReport({ id, role }: { id: string | null; role: StaffRole }) 
   if (!id) return null;
   const report = await readReportDetail(await createSupabaseServerClient(), id);
   return report ? (
-    <ReportDrawer key={report.id} report={report} canReview={role !== "videographer"} />
+    <ReportDrawer key={report.id} report={report} canReview={role !== "mobilographer"} />
   ) : null;
 }
 
 /**
- * «Видео и ход стройки» (фаза 5): видеограф — «Новый отчёт», «Как снимать», «Мои отчёты» (мокап
+ * «Видео и ход стройки» (фаза 5): мобилограф — «Новый отчёт», «Как снимать», «Мои отчёты» (мокап
  * CabVideo); менеджер и руководитель — «Ждут проверки» и ящик отчёта с публикацией (CabReview).
  */
 export default async function VideoPage({ searchParams }: PageProps<"/admin/video">) {
   const { viewer, allowed } = await requireSection("video");
   const person = await cabinetPerson(viewer);
   const t = await getTranslations("admin");
-  const title = viewer.role === "videographer" ? t("video.titleVideographer") : t("video.title");
+  const title = viewer.role === "mobilographer" ? t("video.titleMobilographer") : t("video.title");
   const topbar = <AdminTopbar title={title} subtitle={t("video.subtitle")} person={person} />;
   if (!allowed) {
     return (

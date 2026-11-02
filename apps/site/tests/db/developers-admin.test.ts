@@ -399,16 +399,16 @@ describe("кабинет застройщиков", () => {
       ]);
     });
 
-    it("весь журнал видит менеджер; видеограф — нет", async () => {
-      const videographer = await createStaff(db.admin, "videographer");
+    it("весь журнал видит менеджер; мобилограф — нет", async () => {
+      const mobilographer = await createStaff(db.admin, "mobilographer");
       const forManager = await db.as(user(manager), (tx) =>
         tx.query("select id from journal_entries()"),
       );
       expect(forManager.rows.length).toBeGreaterThan(0);
-      const forVideographer = await db.as(user(videographer), (tx) =>
+      const forMobilographer = await db.as(user(mobilographer), (tx) =>
         tx.query("select id from journal_entries()"),
       );
-      expect(forVideographer.rows).toEqual([]);
+      expect(forMobilographer.rows).toEqual([]);
     });
   });
 });

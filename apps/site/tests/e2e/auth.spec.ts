@@ -161,7 +161,7 @@ test.describe("руководитель", () => {
   });
 });
 
-test.describe("менеджер и видеограф", () => {
+test.describe("менеджер и мобилограф", () => {
   test("менеджер: «Настроек» в меню нет; адрес напрямую — «Раздел доступен руководителю»", async ({
     browser,
   }) => {
@@ -225,13 +225,13 @@ test.describe("менеджер и видеограф", () => {
     await context.close();
   });
 
-  test("видеограф: «Видео и ход стройки» — единственный раздел, Главной и заявок нет (фаза 5)", async ({
+  test("мобилограф: «Видео и ход стройки» — единственный раздел, Главной и заявок нет (фаза 5)", async ({
     browser,
   }) => {
-    const context = await browser.newContext({ storageState: cabinetState("videographer") });
+    const context = await browser.newContext({ storageState: cabinetState("mobilographer") });
     const page = await context.newPage();
     await page.goto("/admin/video");
-    await expect(page.getByRole("heading", { level: 1, name: "Отчёты видеографа" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Отчёты мобилографа" })).toBeVisible();
     await expect(
       page
         .getByRole("navigation", { name: "Разделы кабинета" })

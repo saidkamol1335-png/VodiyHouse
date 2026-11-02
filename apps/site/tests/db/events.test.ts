@@ -100,7 +100,7 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
     expect(feed.find((item) => item.type === "filter")).toMatchObject({ detail: null, path: "/ru/novostroyki?komnat=2" });
   });
 
-  it("«Сейчас на сайте»: онлайн за 5 минут, лента без просмотров страниц с названием ЖК; видеографу — нет", async () => {
+  it("«Сейчас на сайте»: онлайн за 5 минут, лента без просмотров страниц с названием ЖК; мобилографу — нет", async () => {
     const visitor = crypto.randomUUID();
     await track(visitor, [
       { type: "page_view", path: "/ru" },
@@ -116,8 +116,8 @@ describe.skipIf(isRemoteTarget)("события сайта", () => {
     expect(now.feed[0]).toMatchObject({ type: "favorite", source: "instagram" });
     expect(now.feed[0]!.complex?.ru).toBeTruthy();
     expect(now.feed.some((item) => item.type === "page_view")).toBe(false);
-    const videographer = await createStaff(db.admin, "videographer");
-    await expectHint(db.as(user(videographer), (tx) => tx.query("select site_now()")), "vh:forbidden");
+    const mobilographer = await createStaff(db.admin, "mobilographer");
+    await expectHint(db.as(user(mobilographer), (tx) => tx.query("select site_now()")), "vh:forbidden");
 
     // «Выбрать квартиру» (ответ 29.10): то же число онлайн — серверу; посетителю и сотруднику — нет.
     const count = await db.as(service, async (tx) =>

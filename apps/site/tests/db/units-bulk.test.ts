@@ -357,7 +357,9 @@ describe("квартиры: цена, отделка, стояки, удален
       );
       expect(subject).toBe("Блок M · 4-комн. · 120 м²");
 
-      const direct = await db.as(user(manager), (tx) =>
+      // Проект-2: планировки напрямую правит и менеджер (как руководитель); мобилограф — нет.
+      const mobilographer = await createStaff(db.admin, "mobilographer");
+      const direct = await db.as(user(mobilographer), (tx) =>
         tx.query("update layouts set available = true where id = $1", [layout]),
       );
       expect(direct.affectedRows ?? 0).toBe(0);

@@ -26,7 +26,7 @@ type VideoScreenProps = {
 };
 
 /**
- * Экран видеографа (фаза 5, мокап CabVideo .grid-main 1.6fr / 1fr): слева «Новый отчёт», справа «Как
+ * Экран мобилографа (фаза 5, мокап CabVideo .grid-main 1.6fr / 1fr): слева «Новый отчёт», справа «Как
  * снимать» и «Мои отчёты»; до 1180 px — колонкой. Матрица и «Видео для клиентов» — в 5D.
  */
 export async function VideoScreen({ form, mine }: VideoScreenProps) {

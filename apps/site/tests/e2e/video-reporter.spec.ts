@@ -4,7 +4,7 @@ import { expect, test } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors, imageFile } from "./helpers";
 
-// Кабинет видеографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото, ссылка Shorts,
+// Кабинет мобилографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото, ссылка Shorts,
 // комментарий RU и UZ, «Отправить на проверку» → «Мои отчёты» с «На проверке». У блока Yulduz отчёт за
 // прошлый месяц уже есть (DEMO-сид) — понятный отказ; отчёт по квартире за месяц — сколько угодно. После
 // теста строка удаляется (файлы — в папке DEMO-ЖК, их уберёт demo:seed). Скриншот — test-results/screens/<проект>/p5-reporter.png.
@@ -40,9 +40,9 @@ async function returnE2eReport(note: string): Promise<void> {
   }
 }
 
-test.describe.serial("кабинет видеографа", () => {
+test.describe.serial("кабинет мобилографа", () => {
   test.skip(!hasCloud || !process.env.SUPABASE_DB_URL, NO_CLOUD);
-  test.use({ storageState: cabinetState("videographer") });
+  test.use({ storageState: cabinetState("mobilographer") });
   test.beforeAll(removeE2eReports);
   test.afterAll(removeE2eReports);
 
@@ -51,9 +51,9 @@ test.describe.serial("кабинет видеографа", () => {
   }) => {
     const errors = collectPageErrors(page);
     await page.goto("/admin/video");
-    await expect(page.getByRole("heading", { level: 1, name: "Отчёты видеографа" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Отчёты мобилографа" })).toBeVisible();
     await expect(page.getByText("Как снимать")).toBeVisible();
-    // Матрица у видеографа та же, но чужие отчёты из неё не открываются.
+    // Матрица у мобилографа та же, но чужие отчёты из неё не открываются.
     const matrix = page.getByRole("table", { name: "Отчёты по ЖК · последние 6 месяцев" });
     await expect(matrix.getByRole("row", { name: /^Yulduz/ })).toBeVisible();
     await expect(matrix.getByRole("link")).toHaveCount(0);

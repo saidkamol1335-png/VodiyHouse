@@ -37,7 +37,7 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
   const t = await getTranslations("admin");
   const access = complexAccess(viewer.role);
   if (!allowed || isCabinetOpenWithoutLogin || !hasSupabaseEnv()) {
-    // Подпись наличия — только тому, кому раздел открыт (менеджеру); видеографу — общая.
+    // Подпись наличия — только тому, кому раздел открыт (менеджеру); мобилографу — общая.
     const subtitle = t(
       allowed && !access.manage ? "complexes.subtitleStock" : "complexes.subtitle",
     );

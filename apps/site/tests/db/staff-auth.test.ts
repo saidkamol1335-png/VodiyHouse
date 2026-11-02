@@ -17,14 +17,14 @@ describe("вход сотрудников и «Сотрудники»", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
   let inactiveHead: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head", { fullName: "Бахтиёр Каримов", mustChangePassword: false });
     manager = await createStaff(db.admin, "manager", { fullName: "Дилноза Юсупова" });
-    videographer = await createStaff(db.admin, "videographer", { fullName: "Сардор Алиев" });
+    mobilographer = await createStaff(db.admin, "mobilographer", { fullName: "Сардор Алиев" });
     inactiveHead = await createStaff(db.admin, "head", { fullName: "Нигора Саидова", isActive: false });
   });
   afterAll(() => db.close());
@@ -88,8 +88,8 @@ describe("вход сотрудников и «Сотрудники»", () => {
     expect(await privilege("full_name")).toBe(true);
   });
 
-  it("менеджер, видеограф, отключённый руководитель и посетитель профиль не добавляют", async () => {
-    for (const actor of [user(manager), user(videographer), user(inactiveHead), anon]) {
+  it("менеджер, мобилограф, отключённый руководитель и посетитель профиль не добавляют", async () => {
+    for (const actor of [user(manager), user(mobilographer), user(inactiveHead), anon]) {
       const id = await createAuthUser(db.admin);
       await expectDenied(db.as(actor, (tx) => tx.query(insertProfile, [id])));
     }
@@ -122,7 +122,7 @@ describe("вход сотрудников и «Сотрудники»", () => {
   it("«Новый пароль»: себе — vh:self; менеджеру и отключённому — vh:forbidden; неизвестный — vh:not_found", async () => {
     const call = "select public.require_password_change($1)";
     await expectHint(db.as(user(head), (tx) => tx.query(call, [head])), "vh:self");
-    await expectHint(db.as(user(manager), (tx) => tx.query(call, [videographer])), "vh:forbidden");
+    await expectHint(db.as(user(manager), (tx) => tx.query(call, [mobilographer])), "vh:forbidden");
     await expectHint(db.as(user(inactiveHead), (tx) => tx.query(call, [manager])), "vh:forbidden");
     await expectHint(db.as(user(head), (tx) => tx.query(call, [crypto.randomUUID()])), "vh:not_found");
     await expectDenied(db.as(anon, (tx) => tx.query(call, [manager])));

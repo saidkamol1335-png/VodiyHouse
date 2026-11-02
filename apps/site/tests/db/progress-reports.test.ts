@@ -33,8 +33,8 @@ describe("отчёты хода строительства: права и пра
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    video = await createStaff(db.admin, "videographer");
-    otherVideo = await createStaff(db.admin, "videographer");
+    video = await createStaff(db.admin, "mobilographer");
+    otherVideo = await createStaff(db.admin, "mobilographer");
     const { rows } = await db.admin.query<{ m: string; p: string; l: string }>(
       `select to_char(date_trunc('month', private.tashkent_today()), 'YYYY-MM-DD') as m,
               to_char(date_trunc('month', private.tashkent_today()) - interval '1 month', 'YYYY-MM-DD') as p,
@@ -73,7 +73,7 @@ describe("отчёты хода строительства: права и пра
       )
     ).rows[0]?.status;
 
-  it("видеограф отправляет отчёт блока за месяц; второй за тот же месяц — отказ, за прошлый — можно", async () => {
+  it("мобилограф отправляет отчёт блока за месяц; второй за тот же месяц — отказ, за прошлый — можно", async () => {
     const first = await submit(video, report());
     expect(first.complex_id).toBe(ids.publicComplex);
     expect(await status(first.id)).toBe("review");
@@ -145,7 +145,7 @@ describe("отчёты хода строительства: права и пра
     });
   });
 
-  it("видят: руководитель и менеджер — все, видеограф — свои (и их фото); посетитель — ничего", async () => {
+  it("видят: руководитель и менеджер — все, мобилограф — свои (и их фото); посетитель — ничего", async () => {
     const mine = await submit(otherVideo, report({ unit_id: ids.units[0] }));
     const column = { progress_reports: "id", progress_photos: "report_id" };
     const count = (actor: string, table: keyof typeof column) =>
@@ -201,7 +201,7 @@ describe("отчёты хода строительства: права и пра
     expect(await status(id)).toBe("review");
   });
 
-  it("возврат с причиной → видеограф исправляет и отправляет снова; лишние файлы — серверу на удаление", async () => {
+  it("возврат с причиной → мобилограф исправляет и отправляет снова; лишние файлы — серверу на удаление", async () => {
     const kept = photos(3);
     const { id } = await submit(
       video,

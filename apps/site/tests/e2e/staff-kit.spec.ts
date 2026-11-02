@@ -25,7 +25,7 @@ test.describe("«Сотрудники» — список", () => {
 
     await expect(row(page, "Азиз Рахимов")).toContainText("Ждёт первого входа");
     await expect(row(page, "Азиз Рахимов")).toContainText("Ещё не входил");
-    await expect(row(page, "Сардор Алиев")).toContainText("Видеограф");
+    await expect(row(page, "Сардор Алиев")).toContainText("Мобилограф");
     await expect(row(page, "Нигора Саидова")).toContainText("Отключён");
     await expect(row(page, "Нигора Саидова").locator(".staff-list__warning")).toHaveCount(0);
     await expect(row(page, "Жасур Тошматов").locator(".staff-list__warning")).toHaveText(
@@ -93,7 +93,7 @@ test.describe("«Сотрудники» — действия", () => {
     await openCreate(page);
     await page.getByLabel("Имя и фамилия").fill("  Азиз   Рахимов ");
     await page.getByLabel("Email для входа").fill("Aziz.New@Example.com");
-    await page.getByLabel("Роль").selectOption("videographer");
+    await page.getByLabel("Роль").selectOption("mobilographer");
     await expect(page.getByText("Загружает ежемесячные видео и фото стройки")).toBeVisible();
     await page.getByRole("button", { name: "Создать и показать пароль" }).click();
 

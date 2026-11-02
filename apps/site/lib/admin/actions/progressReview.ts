@@ -7,7 +7,7 @@ import { requireActionViewer } from "@/lib/admin/session";
 import { expireProgress } from "@/lib/cache";
 
 // Проверка отчётов хода строительства (фаза 5, 5D, мокап CabReview): менеджер и руководитель публикуют
-// отчёт только с отметкой правила 1.2 (её проверяет и база) или возвращают видеографу с причиной.
+// отчёт только с отметкой правила 1.2 (её проверяет и база) или возвращают мобилографу с причиной.
 
 const fail = (error: ContentErrorCode): ReviewActionResult => ({ status: "error", error });
 
@@ -26,7 +26,7 @@ export async function publishProgressReportAction(formData: FormData): Promise<R
   return { status: "done" };
 }
 
-/** «Вернуть видеографу» с причиной: он исправит и отправит снова. */
+/** «Вернуть мобилографу» с причиной: он исправит и отправит снова. */
 export async function returnProgressReportAction(formData: FormData): Promise<ReviewActionResult> {
   const guard = await requireActionViewer(["head", "manager"]);
   if (!guard.ok) return fail(guard.code);

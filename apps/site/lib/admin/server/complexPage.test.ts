@@ -68,7 +68,7 @@ describe("complexForTab: вкладки ЖК по роли (Н2)", () => {
   });
 
   it("раздел закрыт роли или ЖК нет — вкладке показывать нечего / 404", async () => {
-    session.role = "videographer";
+    session.role = "mobilographer";
     session.allowed = false;
     await expect(open("units")).resolves.toBeNull();
     session.role = "manager";

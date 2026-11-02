@@ -1,4 +1,4 @@
-/* RU и UZ рядом (мокап: .form__two в форме видеографа); поля — блок .field. */
+/* RU и UZ рядом (мокап: .form__two в форме мобилографа); поля — блок .field. */
 .bilingual-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

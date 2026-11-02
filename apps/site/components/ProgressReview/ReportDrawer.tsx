@@ -13,7 +13,7 @@ import { ReviewDecision } from "./ReviewDecision";
 
 type ReportDrawerProps = {
   report: ReportDetail;
-  /** Менеджер и руководитель решают («Опубликовать», «Вернуть»), видеограф — только смотрит. */
+  /** Менеджер и руководитель решают («Опубликовать», «Вернуть»), мобилограф — только смотрит. */
   canReview: boolean;
 };
 

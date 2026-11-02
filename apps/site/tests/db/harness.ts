@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
+import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 import { expect } from "vitest";
 import type { StaffRole } from "@/lib/admin/access";
 
@@ -55,7 +56,8 @@ export async function createTestDb(): Promise<TestDb> {
     const { createRemoteTestDb } = await import("./remote");
     return createRemoteTestDb();
   }
-  const admin = await PGlite.create();
+  // pgcrypto — как в облаке Supabase (схема extensions): подпись запросов сайта, 20261102130000.
+  const admin = await PGlite.create({ extensions: { pgcrypto } });
   await admin.exec(await readFile(SHIM_FILE, "utf8"));
   for (const file of await migrationFiles()) {
     const sql = await readFile(path.join(MIGRATIONS_DIR, file), "utf8");

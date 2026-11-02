@@ -26,14 +26,14 @@ describe("хранилище фото", () => {
   let ids: ContentIds;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
   });
   afterAll(() => db.close());
 
@@ -79,46 +79,47 @@ describe("хранилище фото", () => {
     expect(sql).toContain(`object_name ~ '${MEDIA_PATH_PATTERN.source.replaceAll("\\/", "/")}'`);
   });
 
-  it("менеджер и посетитель загружать не могут; видеограф — только JPEG в папку ЖК (фото отчётов, фаза 5)", async () => {
-    for (const actor of [user(manager), anon]) {
-      await expectDenied(upload(actor, complexFile(ids.publicComplex)));
-    }
-    await upload(user(videographer), complexFile(ids.publicComplex));
+  // Проект-2 (PLAN §10, п. 6): менеджер загружает фото ЖК, но не застройщика.
+  it("посетитель загружать не может; менеджер — фото ЖК; мобилограф — только JPEG в папку ЖК (фото отчётов, фаза 5)", async () => {
+    await expectDenied(upload(anon, complexFile(ids.publicComplex)));
+    await upload(user(manager), complexFile(ids.publicComplex));
+    await expectDenied(upload(user(manager), `developers/${ids.publicDeveloper}/${crypto.randomUUID()}.jpg`));
+    await upload(user(mobilographer), complexFile(ids.publicComplex));
     for (const name of [
       complexFile(ids.publicComplex, "png"),
       complexFile(crypto.randomUUID()),
       `developers/${ids.publicDeveloper}/${crypto.randomUUID()}.jpg`,
       `specials/${ids.publicComplex}/${crypto.randomUUID()}.jpg`,
     ]) {
-      await expectDenied(upload(user(videographer), name));
+      await expectDenied(upload(user(mobilographer), name));
     }
   });
 
-  it("видео отчётов: бакет progress-video, только MP4 в папку ЖК — видеограф и руководитель; удаляет руководитель", async () => {
+  it("видео отчётов: бакет progress-video, только MP4 в папку ЖК — мобилограф и руководитель; удаляет руководитель", async () => {
     const { rows } = await db.admin.query(
       "select public, allowed_mime_types from storage.buckets where id = 'progress-video'",
     );
     expect(rows).toEqual([{ public: true, allowed_mime_types: ["video/mp4"] }]);
     const video = (complexId: string, ext = "mp4") => complexFile(complexId, ext);
-    await upload(user(videographer), video(ids.publicComplex), "progress-video");
+    await upload(user(mobilographer), video(ids.publicComplex), "progress-video");
     await upload(user(head), video(ids.draftComplex), "progress-video");
     for (const actor of [user(manager), anon]) {
       await expectDenied(upload(actor, video(ids.publicComplex), "progress-video"));
     }
     for (const name of [video(ids.publicComplex, "mov"), video(crypto.randomUUID()), complexFile(ids.publicComplex)]) {
-      await expectDenied(upload(user(videographer), name, "progress-video"));
+      await expectDenied(upload(user(mobilographer), name, "progress-video"));
     }
     // MP4 в бакет фото не попадает: там только картинки.
-    await expectDenied(upload(user(videographer), video(ids.publicComplex), "media"));
+    await expectDenied(upload(user(mobilographer), video(ids.publicComplex), "media"));
 
     const name = video(ids.publicComplex);
-    await upload(user(videographer), name, "progress-video");
+    await upload(user(mobilographer), name, "progress-video");
     const remove = (actor: Actor) =>
       db.as(actor, async (tx) => {
         await tx.query("select set_config('storage.allow_delete_query', 'true', true)");
         return tx.query("delete from storage.objects where bucket_id = 'progress-video' and name = $1", [name]);
       });
-    expect((await remove(user(videographer))).affectedRows).toBe(0);
+    expect((await remove(user(mobilographer))).affectedRows).toBe(0);
     expect((await remove(user(head))).affectedRows).toBe(1);
   });
 
@@ -148,22 +149,39 @@ describe("хранилище фото", () => {
     const visible = (actor: Actor) =>
       db.as(actor, (tx) => tx.query("select name from storage.objects where name = $1", [name]));
     expect((await visible(anon)).rows).toEqual([]);
-    for (const id of [head, manager, videographer]) {
+    for (const id of [head, manager, mobilographer]) {
       expect((await visible(user(id))).rows).toEqual([{ name }]);
     }
   });
 
-  it("удаляет файл только руководитель", async () => {
-    const name = complexFile(ids.publicComplex);
-    await upload(user(head), name);
-    const remove = (actor: Actor) =>
+  it("файл фото удаляет руководитель; менеджер — только сироту без строки фото; мобилограф — нет", async () => {
+    const remove = (actor: Actor, name: string) =>
       db.as(actor, async (tx) => {
         // Так удаляет сервис Storage: в облаке прямое удаление строк без флага запрещено.
         await tx.query("select set_config('storage.allow_delete_query', 'true', true)");
         return tx.query("delete from storage.objects where name = $1", [name]);
       });
-    expect((await remove(user(manager))).affectedRows).toBe(0);
-    expect((await remove(user(head))).affectedRows).toBe(1);
+    const used = complexFile(ids.publicComplex);
+    await upload(user(head), used);
+    await db.admin.query(
+      "insert into media_assets (complex_id, kind, path, width, height) values ($1, 'photo', $2, 1600, 1000)",
+      [ids.publicComplex, used],
+    );
+    expect((await remove(user(manager), used)).affectedRows).toBe(0);
+    expect((await remove(user(mobilographer), used)).affectedRows).toBe(0);
+    expect((await remove(user(head), used)).affectedRows).toBe(1);
+    await db.admin.query("delete from media_assets where path = $1", [used]);
+
+    const orphan = complexFile(ids.publicComplex);
+    await upload(user(manager), orphan);
+    // Владельца файла ставит сервис Storage; заглушка — нет: ставим как он.
+    await db.admin.query("update storage.objects set owner = $1 where name = $2", [manager, orphan]);
+    const foreign = complexFile(ids.publicComplex);
+    await upload(user(head), foreign);
+    await db.admin.query("update storage.objects set owner = $1 where name = $2", [head, foreign]);
+    expect((await remove(user(manager), foreign)).affectedRows).toBe(0);
+    expect((await remove(user(mobilographer), orphan)).affectedRows).toBe(0);
+    expect((await remove(user(manager), orphan)).affectedRows).toBe(1);
   });
 
   it("запись media_assets указывает только на файл из папки своего владельца", async () => {

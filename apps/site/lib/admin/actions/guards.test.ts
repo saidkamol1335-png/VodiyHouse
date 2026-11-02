@@ -47,7 +47,7 @@ describe("Server Actions кабинета", () => {
   // должен расшириться молча.
   it("квартиры: роли действий — по Н2, Н7 и PLAN §5", () => {
     const guards: Record<string, string> = {
-      readBlockUnitsAction: 'requireActionViewer(["head", "manager", "videographer"])',
+      readBlockUnitsAction: 'requireActionViewer(["head", "manager", "mobilographer"])',
       setUnitsStatusAction: 'requireActionViewer(["head", "manager"])',
       revertUnitsStatusAction: 'requireActionViewer(["head", "manager"])',
       setLayoutAvailableAction: 'requireActionViewer(["head", "manager"])',
@@ -72,7 +72,7 @@ describe("Server Actions кабинета", () => {
       readSiteStockAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Сейчас на сайте» (шаг 3.12) — на главной у обоих, как остатки.
       readSiteNowAction: /requireActionViewer\(\["head", "manager"\]\)/,
-      readBlockUnitsAction: /requireActionViewer\(\["head", "manager", "videographer"\]\)/,
+      readBlockUnitsAction: /requireActionViewer\(\["head", "manager", "mobilographer"\]\)/,
       setUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       revertUnitsStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       setLayoutAvailableAction: /requireActionViewer\(\["head", "manager"\]\)/,
@@ -83,10 +83,10 @@ describe("Server Actions кабинета", () => {
       setLeadStatusAction: /requireActionViewer\(\["head", "manager"\]\)/,
       assignLeadAction: /requireActionViewer\(\["head", "manager"\]\)/,
       retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\], \{ fresh: true \}\)/,
-      // Отчёты хода строительства (фаза 5): отправляют видеограф и руководитель; файлы удаляет сервер.
-      readProgressUnitsAction: /requireActionViewer\(\["head", "videographer"\]\)/,
+      // Отчёты хода строительства (фаза 5): отправляют мобилограф и руководитель; файлы удаляет сервер.
+      readProgressUnitsAction: /requireActionViewer\(\["head", "mobilographer"\]\)/,
       submitProgressReportAction:
-        /requireActionViewer\(\["head", "videographer"\], \{ fresh: true \}\)/,
+        /requireActionViewer\(\["head", "mobilographer"\], \{ fresh: true \}\)/,
       // Проверку и публикацию ведут менеджер и руководитель (мокап CabReview).
       publishProgressReportAction: /requireActionViewer\(\["head", "manager"\]\)/,
       returnProgressReportAction: /requireActionViewer\(\["head", "manager"\]\)/,

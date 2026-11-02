@@ -162,8 +162,8 @@ test.describe("кабинет · заявки", () => {
     });
   });
 
-  test.describe("видеограф", () => {
-    test.use({ storageState: cabinetState("videographer") });
+  test.describe("мобилограф", () => {
+    test.use({ storageState: cabinetState("mobilographer") });
 
     test("заявок не видит: раздел закрыт", async ({ page }) => {
       await page.goto("/admin/zayavki");

@@ -2,10 +2,10 @@ import { hasSupabaseEnv } from "@/lib/supabase/env";
 
 // Без server-only: тип роли нужен тестам базы (tests/db/harness.ts) и клиентским компонентам.
 
-/** Роли кабинета (PLAN §3.3): руководитель, менеджер, видеограф. Совпадают с enum staff_role. */
-export type StaffRole = "head" | "manager" | "videographer";
+/** Роли кабинета (PLAN §3.3): руководитель, менеджер, мобилограф. Совпадают с enum staff_role. */
+export type StaffRole = "head" | "manager" | "mobilographer";
 
-export const STAFF_ROLES: readonly StaffRole[] = ["head", "manager", "videographer"];
+export const STAFF_ROLES: readonly StaffRole[] = ["head", "manager", "mobilographer"];
 
 export function isStaffRole(value: unknown): value is StaffRole {
   return typeof value === "string" && (STAFF_ROLES as readonly string[]).includes(value);

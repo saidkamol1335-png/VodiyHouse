@@ -49,18 +49,13 @@ const WRITE_FUNCTIONS: Record<string, string> = {
   revert_units_status: "revert_units_status($1, 'sold', '[]'::jsonb)",
   set_layout_available: "set_layout_available($1, false)",
 };
-const MANAGER_FUNCTIONS = new Set([
-  "set_units_status",
-  "revert_units_status",
-  "set_layout_available",
-]);
 
 describe("квартиры в кабинете: права, генератор, правка списка", () => {
   let db: TestDb;
   let ids: ContentIds;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
   let inactiveManager: string;
   let noProfile: string;
 
@@ -69,7 +64,7 @@ describe("квартиры в кабинете: права, генератор, 
     ids = await seedContent(db.admin);
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager", { fullName: "Дилноза Юсупова" });
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
     inactiveManager = await createStaff(db.admin, "manager", { isActive: false });
     noProfile = await createAuthUser(db.admin);
   });
@@ -113,8 +108,8 @@ describe("квартиры в кабинете: права, генератор, 
       expect(old.rows[0]?.old).toBeNull();
     });
 
-    it("видеограф, отключённый и пользователь без профиля — отказ во всех функциях записи", async () => {
-      for (const actor of [videographer, inactiveManager, noProfile]) {
+    it("мобилограф, отключённый и пользователь без профиля — отказ во всех функциях записи", async () => {
+      for (const actor of [mobilographer, inactiveManager, noProfile]) {
         for (const [name, expr] of Object.entries(WRITE_FUNCTIONS)) {
           const target = name === "set_layout_available" ? ids.oneRoomLayout : ids.publicBlock;
           await expectHint(callAs(db, actor, expr, [target]), "vh:forbidden");
@@ -122,10 +117,23 @@ describe("квартиры в кабинете: права, генератор, 
       }
     });
 
-    it("менеджер — только статус, «Отменить» и наличие планировки (Н2, Н7)", async () => {
+    // Проект-2 (PLAN §10, п. 6): менеджер правит квартиры наравне с руководителем. Вызов — с откатом:
+    // проверяется только, что роль пропускает (отказ по данным — не vh:forbidden), данные не меняются.
+    it("менеджер проходит проверку роли во всех функциях записи", async () => {
       for (const [name, expr] of Object.entries(WRITE_FUNCTIONS)) {
-        if (MANAGER_FUNCTIONS.has(name)) continue;
-        await expectHint(callAs(db, manager, expr, [ids.publicBlock]), "vh:forbidden");
+        const target = name === "set_layout_available" ? ids.oneRoomLayout : ids.publicBlock;
+        const hint = await db.as(user(manager), async (tx) => {
+          await tx.query("savepoint probe");
+          try {
+            await tx.query(`select ${expr} as result`, [target]);
+            return null;
+          } catch (error) {
+            return (error as { hint?: string }).hint ?? null;
+          } finally {
+            await tx.query("rollback to savepoint probe");
+          }
+        });
+        expect(hint, name).not.toBe("vh:forbidden");
       }
     });
 
@@ -569,7 +577,7 @@ describe("квартиры в кабинете: права, генератор, 
 
       const rows = await callAs<
         { number: string; updated_by_name: string | null; status: string }[]
-      >(db, videographer, "block_unit_rows($1)", [block]);
+      >(db, mobilographer, "block_unit_rows($1)", [block]);
       expect(rows.map((row) => row.number)).toEqual([
         ...Array.from({ length: 12 }, (_, i) => String(i + 1)),
         "12А",

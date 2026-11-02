@@ -6,6 +6,9 @@ import type { LeadErrorCode } from "./types";
 const BY_HINT: Record<string, LeadErrorCode> = {
   "vh:rate_limited": "rateLimited",
   "vh:invalid": "invalid",
+  // Проект-2, фаза B: подпись сервера сайта не сошлась или не настроена — для посетителя «недоступно».
+  "vh:bad_signature": "unavailable",
+  "vh:unavailable": "unavailable",
 };
 
 /** Ошибка базы через PostgREST; без кода Postgres — ответа не было (сеть). */

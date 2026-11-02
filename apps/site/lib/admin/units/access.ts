@@ -22,7 +22,7 @@ export function unitsActionsFor(role: StaffRole, all: UnitsTabActions): UnitsTab
         saveRisers: null,
         layoutAvailable: all.layoutAvailable,
       };
-    case "videographer":
+    case "mobilographer":
       return {
         list: { read: all.list.read, status: null, edit: null },
         create: null,

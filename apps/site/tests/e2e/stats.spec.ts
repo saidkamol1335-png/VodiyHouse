@@ -3,7 +3,7 @@ import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors } from "./helpers";
 
 // Фаза 6, 6B: «Статистика сайта» /admin/statistika (мокап CabStats) против облака с DEMO-посещениями
-// (supabase/demo/stats.sql). Только руководитель; менеджеру и видеографу — «Раздел доступен
+// (supabase/demo/stats.sql). Только руководитель; менеджеру и мобилографу — «Раздел доступен
 // руководителю», CSV — 403. Скриншоты — test-results/screens/<проект>/p6-stats-*.png.
 
 const STATS = "/admin/statistika";
@@ -165,7 +165,7 @@ test.describe("кабинет · статистика · руководител�
   });
 });
 
-for (const persona of ["manager", "videographer"] as const) {
+for (const persona of ["manager", "mobilographer"] as const) {
   test.describe(`кабинет · статистика · ${persona}`, () => {
     test.skip(!hasCloud, NO_CLOUD);
     test.use({ storageState: cabinetState(persona) });

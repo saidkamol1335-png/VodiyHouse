@@ -5,15 +5,15 @@ import { CALC_HINT_SLUGS, calcHintsFrom, type CalcHints } from "@vh/shared/calc/
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 
-// Подсказки «?» калькулятора на сайте (шаг 2.8): справочник hints ролью посетителя (видны только
-// включённые — RLS), в кэше страницы; «Сохранить» в «Справочниках» сбрасывает DICTIONARIES_TAG.
+// Подсказки «?» калькулятора на сайте (шаг 2.8): представление public_hints ролью посетителя (только
+// включённые; таблица посетителю закрыта, Проект-2 фаза B), в кэше страницы; «Сохранить» в «Справочниках» сбрасывает DICTIONARIES_TAG.
 
 async function fetchCalcHints(): Promise<CalcHints> {
   "use cache";
   cacheTag(DICTIONARIES_TAG);
   cacheLife("days");
   const { data, error } = await createSupabasePublicClient()
-    .from("hints")
+    .from("public_hints")
     .select("slug, term, text")
     .in("slug", [...CALC_HINT_SLUGS]);
   if (error) throw new Error("hints-unavailable", { cause: error });

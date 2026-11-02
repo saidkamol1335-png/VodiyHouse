@@ -78,9 +78,9 @@ describe("новый сотрудник", () => {
   });
 
   it("при ошибке введённое возвращается, чтобы форма не очищалась", () => {
-    expect(staff("Азиз", "", "videographer")).toMatchObject({
+    expect(staff("Азиз", "", "mobilographer")).toMatchObject({
       ok: false,
-      fields: { fullName: "Азиз", email: "", role: "videographer" },
+      fields: { fullName: "Азиз", email: "", role: "mobilographer" },
     });
   });
 

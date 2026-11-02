@@ -49,7 +49,7 @@ export const DEMO_STAFF: readonly StaffMember[] = [
     id: "00000000-0000-4000-8000-000000000004",
     login: "sardor",
     fullName: "Сардор Алиев",
-    role: "videographer",
+    role: "mobilographer",
     isActive: true,
     mustChangePassword: false,
     lastSignInAt: "2026-10-17T11:05:00Z",

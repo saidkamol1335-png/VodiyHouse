@@ -9,7 +9,7 @@ import { formatMonthShort } from "@vh/shared/format";
 
 type PanelProps = {
   matrix: ProgressMatrix;
-  /** Ячейка открывает ящик отчёта (?report=<id>) — у менеджера и руководителя; видеографу чужие отчёты не открываются. */
+  /** Ячейка открывает ящик отчёта (?report=<id>) — у менеджера и руководителя; мобилографу чужие отчёты не открываются. */
   linked: boolean;
 };
 

@@ -22,13 +22,13 @@ describe("журнал изменений", () => {
   let db: TestDb;
   let head: string;
   let manager: string;
-  let videographer: string;
+  let mobilographer: string;
 
   beforeAll(async () => {
     db = await createTestDb();
     head = await createStaff(db.admin, "head");
     manager = await createStaff(db.admin, "manager");
-    videographer = await createStaff(db.admin, "videographer");
+    mobilographer = await createStaff(db.admin, "mobilographer");
   });
   afterAll(() => db.close());
 
@@ -107,12 +107,12 @@ describe("журнал изменений", () => {
     expect(rows.map((row) => row.relname)).toEqual(["profiles", "settings"]);
   });
 
-  it("читают руководитель и менеджер; видеограф ничего не видит, посетителю закрыто", async () => {
+  it("читают руководитель и менеджер; мобилограф ничего не видит, посетителю закрыто", async () => {
     const visible = async (id: string) =>
       (await db.as(user(id), (tx) => tx.query("select id from audit_log"))).rows.length;
     expect(await visible(head)).toBeGreaterThan(0);
     expect(await visible(manager)).toBe(await visible(head));
-    expect(await visible(videographer)).toBe(0);
+    expect(await visible(mobilographer)).toBe(0);
     await expectDenied(db.as(anon, (tx) => tx.query("select id from audit_log")));
   });
 
