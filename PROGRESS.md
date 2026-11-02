@@ -37,4 +37,5 @@
 
 ## Облако и деплой
 - 02.11 сделано: 5 миграций фазы B в тестовом облаке (расхождений состояния 0, anon не читает ни одной таблицы); Vault `site_signing_secret` + `SITE_SIGNING_SECRET` в apps/site/.env.local и Netlify (production); `leads.channels` = telegram, sheet; Netlify vodiyhouse-test: base — корень, Package directory `apps/site`, сборка `npm run build -w @vh/site`, публикация `apps/site/.next`.
+- 02.11 после выкладки: e2e на 1440 нашёл, что в облаке любая правка квартир и ЖК из кабинета падала — Data API Supabase держит safeupdate (DELETE без WHERE запрещён), а пересчёт состояния чистил временную таблицу без WHERE; в PGlite safeupdate нет. Исправлено миграцией `20261102150000_state_refresh_safeupdate` (в облаке), добавлен страж-тест «нет DELETE / UPDATE без WHERE ни в одной функции». Деплой 4c0622f на Netlify — ready; /uz, каталог, /admin/vhod — 200, телефон VH из public_settings на месте.
 - Ждёт: второй сайт Netlify для `apps/admin` — создать в фазе D, когда в админке будет что показать (Package directory — только в UI или через API, как у сайта).

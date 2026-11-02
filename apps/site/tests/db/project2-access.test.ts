@@ -79,6 +79,25 @@ describe.skipIf(isRemoteTarget)("хранимое состояние ЖК (PLAN 
     expect((await db.admin.query<{ v: string }>(stamp)).rows[0]!.v).toBe(before);
   });
 
+  // В облаке Data API работает с safeupdate: DELETE / UPDATE без WHERE отклоняются (в PGlite — нет).
+  // Страж по телам всех функций: такой оператор упал бы только после выкладки (случай 02.11).
+  it("нет DELETE / UPDATE без WHERE ни в одной функции public и private", async () => {
+    const { rows } = await db.admin.query<{ name: string; body: string }>(
+      `select n.nspname || '.' || p.proname as name, pg_get_functiondef(p.oid) as body
+       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname in ('public', 'private') and p.prokind = 'f' and p.prolang <> 13`,
+    );
+    // «delete from x …;» и «update x [alias] set …;» — до точки с запятой должен быть where.
+    // «on conflict do update set» сюда не попадает: после update нет имени таблицы перед set.
+    const statement = /\b(?:delete\s+from\s+[\w."]+|update\s+[\w."]+\s+(?:\w+\s+)?set\b)[^;]*;/gi;
+    const unsafe = rows.flatMap(({ name, body }) =>
+      [...body.replace(/--[^\n]*/g, "").matchAll(statement)]
+        .filter((match) => !/\bwhere\b/i.test(match[0]))
+        .map((match) => `${name}: ${match[0].slice(0, 60)}`),
+    );
+    expect(unsafe).toEqual([]);
+  });
+
   it("пересчёт не пишет журнал: в audit_log нет полей состояния", async () => {
     const { rows } = await db.admin.query<{ n: number }>(
       `select count(*)::int as n from public.audit_log
