@@ -5,6 +5,7 @@ import { AdminUser } from "@/components/AdminUser";
 import type { CabinetViewer } from "@/lib/admin/access";
 import { visibleNav } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
+import { siteOrigin } from "@/lib/site/metadata";
 
 type AdminShellProps = {
   viewer: CabinetViewer;
@@ -15,15 +16,16 @@ type AdminShellProps = {
 export async function AdminShell({ viewer, children }: AdminShellProps) {
   const person = await cabinetPerson(viewer);
   const items = visibleNav(viewer.role).map(({ key, href, section }) => ({ key, href, section }));
+  const siteHref = `${siteOrigin()}/ru`;
   return (
     <div className="admin-shell">
       <aside className="admin-shell__side">
         <AdminBrand />
-        <AdminNav items={items} variant="side" />
+        <AdminNav items={items} variant="side" siteHref={siteHref} />
         <AdminUser person={person} />
       </aside>
       <div className="admin-shell__main">
-        <AdminNav items={items} variant="strip" />
+        <AdminNav items={items} variant="strip" siteHref={siteHref} />
         {children}
       </div>
     </div>

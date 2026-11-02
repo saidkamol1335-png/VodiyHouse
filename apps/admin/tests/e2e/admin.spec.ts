@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { cabinetState, hasCloud } from "./cloud";
 import { collectPageErrors } from "./helpers";
+import { site } from "./site";
 
 // Вход и оболочка кабинета по решениям К1–К4 (docs/design-decisions.md, 19.10.2026).
 const isPhone = (projectName: string) => projectName === "mobile-390";
@@ -13,7 +14,7 @@ test.describe("экран входа /admin/vhod", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page.getByRole("heading", { level: 1, name: "Кабинет сотрудника" })).toBeVisible();
     await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
-    await expect(page.getByRole("link", { name: "На сайт" })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "На сайт" })).toHaveAttribute("href", site("/ru"));
     await expect(page.getByText("Забыли пароль? Обратитесь к руководителю.")).toBeVisible();
     expect(errors).toEqual([]);
   });
@@ -161,7 +162,8 @@ test.describe("оболочка кабинета /admin", () => {
     await expect(links.nth(6)).toHaveAttribute("href", "/video");
     await expect(links.nth(7)).toHaveAttribute("href", "/statistika");
     await expect(links.nth(8)).toHaveAttribute("href", "/nastroyki");
-    await expect(links.last()).toHaveAttribute("href", "/");
+    // Сайт — отдельное приложение (PLAN §10): «/» здесь — главная кабинета.
+    await expect(links.last()).toHaveAttribute("href", site("/ru"));
     await expect(
       page.locator(isPhone(testInfo.project.name) ? ".admin-nav--strip" : ".admin-shell__side"),
     ).toBeVisible();

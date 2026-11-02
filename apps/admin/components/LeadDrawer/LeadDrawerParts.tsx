@@ -9,7 +9,6 @@ import type { LeadCard, LeadCardDelivery } from "@/lib/admin/leads/card";
 import { sourceText } from "@/lib/admin/leads/screen";
 import { formatPhone } from "@/lib/contacts";
 import { formatDate, formatDayTime } from "@vh/shared/format";
-import { complexRoute } from "@/lib/routes";
 import { LEAD_CHANNELS, LEAD_STATUSES, type LeadChannel } from "@/lib/leads/types";
 import type { LeadDrawerActions } from "./LeadDrawer";
 import type { CopyPhone } from "./useCopyPhone";
@@ -52,12 +51,12 @@ export function LeadContactCard({ card, copy }: { card: LeadCard; copy: CopyPhon
 /** «Что интересует»: ЖК ссылкой на сайт, объект и данные заявки — как в Telegram-чате. */
 export function LeadInterest({ card }: { card: LeadCard }) {
   const t = useTranslations("admin.leads.card");
-  const { slug } = card.subject;
+  const { complexUrl } = card.texts;
   return (
     <section className="lead-drawer__section">
       <h3 className="lead-drawer__section-title">{t("interest")}</h3>
-      {slug ? (
-        <a className="lead-drawer__link" href={`/${card.siteLang}${complexRoute(slug)}`} target="_blank" rel="noopener">
+      {complexUrl ? (
+        <a className="lead-drawer__link" href={complexUrl} target="_blank" rel="noopener">
           {card.texts.subject ?? t("openComplex")}
           <ExternalLink size={14} aria-hidden="true" />
         </a>

@@ -17,6 +17,7 @@ import { readSiteNow } from "@/lib/admin/server/siteNow";
 import { readSiteStock } from "@/lib/admin/server/siteStock";
 import { readSiteToday } from "@/lib/admin/server/stats";
 import { requireSection } from "@/lib/admin/session";
+import { siteOrigin } from "@/lib/site/metadata";
 import { formatWeekdayDate } from "@vh/shared/format";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -103,7 +104,7 @@ async function HomeStock({ role }: { role: StaffRole }) {
           ) : (
             <AdminPanel title={t("leads.home.latest")}>{t("leads.home.unavailable")}</AdminPanel>
           )}
-          <SiteNowPanel initial={now} read={readSiteNowAction} siteHref="/" />
+          <SiteNowPanel initial={now} read={readSiteNowAction} siteHref={`${siteOrigin()}/ru`} />
         </div>
       }
       initial={initial}

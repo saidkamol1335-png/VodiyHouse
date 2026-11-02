@@ -4,6 +4,7 @@ import { buildMatrix, type MatrixComplex, type MatrixReport } from "@/lib/admin/
 import { matrixMonths, type ClientVideo, type ProgressMatrix } from "@/lib/admin/progress/types";
 import { complexRoute } from "@/lib/routes";
 import { COMPLEX_ANCHORS } from "@/lib/site/complex/sections";
+import { siteOrigin } from "@/lib/site/metadata";
 
 type OverviewVideo = {
   id: string;
@@ -30,11 +31,14 @@ type Overview = {
   videos: OverviewVideo[];
 };
 
-/** Ссылка клиенту (как в мокапе — /ru): видео квартиры — его страница, отчёт блока — «Ход строительства» ЖК. */
-const clientPath = (video: OverviewVideo) =>
+/**
+ * Ссылка клиенту (как в мокапе — /ru): видео квартиры — его страница, отчёт блока — «Ход строительства»
+ * ЖК. Полный адрес: сайт — отдельное приложение (PLAN §10).
+ */
+const clientUrl = (video: OverviewVideo) =>
   video.is_unit
-    ? `/ru/video/${video.id}`
-    : `/ru${complexRoute(video.slug)}#${COMPLEX_ANCHORS.progress}`;
+    ? `${siteOrigin()}/ru/video/${video.id}`
+    : `${siteOrigin()}/ru${complexRoute(video.slug)}#${COMPLEX_ANCHORS.progress}`;
 
 /**
  * Обзор для всех ролей (мокап CabReview): матрица «Отчёты по ЖК · последние 6 месяцев» и «Видео для
@@ -66,7 +70,7 @@ export async function readProgressOverview(
       shotAt: video.shot_at,
       author: video.author,
       thumb: video.thumb,
-      path: clientPath(video),
+      url: clientUrl(video),
     })),
   };
 }

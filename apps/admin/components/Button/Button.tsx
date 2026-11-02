@@ -97,7 +97,11 @@ type ButtonLinkProps = Pick<ButtonProps, "children" | "download" | "aria-label" 
   href: string;
 };
 
-/** Ссылка-кнопка: переход Next (Link) или файл — обычная <a download> без предзагрузки. */
+/**
+ * Ссылка-кнопка: переход Next (Link); файл — обычная <a download> без предзагрузки; другой адрес
+ * (сайт — отдельное приложение, PLAN §10) — обычная <a>: роутер кабинета его не знает.
+ */
 function ButtonLink({ download, ...props }: ButtonLinkProps) {
-  return download ? <a {...props} download /> : <Link {...props} />;
+  if (download) return <a {...props} download />;
+  return /^https?:\/\//.test(props.href) ? <a {...props} /> : <Link {...props} />;
 }

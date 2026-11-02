@@ -20,7 +20,11 @@ const barWidth = (rate: number | null) => `${Math.min(100, (rate ?? 0) * 25)}%`;
 export function StatsObjects({
   complexes,
   developers,
-}: Pick<SiteStats, "complexes" | "developers">) {
+  site,
+}: Pick<SiteStats, "complexes" | "developers"> & {
+  /** Адрес сайта (siteOrigin на сервере): сайт — отдельное приложение, PLAN §10. */
+  site: string;
+}) {
   const t = useTranslations("admin.stats.objects");
   const [tab, setTab] = useState<Tab>("complexes");
   const rows: Row[] =
@@ -28,7 +32,7 @@ export function StatsObjects({
       ? complexes.map((row) => ({
           ...row,
           name: t("complexName", { name: row.name.ru }),
-          href: `/ru/novostroyki/${row.slug}`,
+          href: `${site}/ru/novostroyki/${row.slug}`,
         }))
       : developers.map((row) => ({ ...row, href: null }));
   return (

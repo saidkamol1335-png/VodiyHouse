@@ -5,6 +5,7 @@ import { Beam } from "@/components/Beam";
 import { Button } from "@/components/Button";
 import { LogoMark } from "@/components/Logo";
 import { LogoutButton } from "@/components/LogoutButton";
+import { siteOrigin } from "@/lib/site/metadata";
 
 type LoginCardProps = {
   title: string;
@@ -33,7 +34,8 @@ export async function LoginCard({ title, lead, children, footer }: LoginCardProp
       {footer === "login" ? (
         <>
           <p className="login-card__forgot">{t("forgot")}</p>
-          <Button href="/" variant="ghost" size="sm" className="login-card__to-site">
+          {/* Сайт — отдельное приложение (PLAN §10): «/» здесь — сам кабинет. */}
+          <Button href={`${siteOrigin()}/ru`} variant="ghost" size="sm" className="login-card__to-site">
             <ArrowLeft size={16} strokeWidth={1.8} aria-hidden />
             {t("toSite")}
           </Button>

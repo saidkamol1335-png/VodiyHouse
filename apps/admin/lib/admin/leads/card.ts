@@ -46,6 +46,8 @@ export type LeadTexts = {
   details: string[];
   /** Сообщение бота в чате менеджеров (мокап «Сообщение бота в Telegram-чате»). */
   botMessage: string;
+  /** Страница ЖК заявки на сайте — полный адрес: сайт — отдельное приложение (PLAN §10). */
+  complexUrl: string | null;
 };
 
 type DeliveryRecord = {

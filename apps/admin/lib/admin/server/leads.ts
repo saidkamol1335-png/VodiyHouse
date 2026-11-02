@@ -4,6 +4,7 @@ import { payloadLines, subjectLine, telegramText, type LeadRecord } from "@/lib/
 import { deliverLead } from "@/lib/leads/server/deliver";
 import { ADMIN_ROUTES } from "../nav";
 import { adminOrigin } from "@/lib/admin/origin";
+import { complexRoute } from "@/lib/routes";
 import { siteOrigin } from "@/lib/site/metadata";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminEnv } from "@/lib/supabase/env";
@@ -52,6 +53,7 @@ function leadTexts(record: LeadCardRecord): LeadTexts {
     subject: subjectLine(lead.subject),
     details: payloadLines(lead.payload, site),
     botMessage: telegramText(lead, { site, cabinet: `${adminOrigin()}${ADMIN_ROUTES.leads}` }),
+    complexUrl: lead.subject.slug ? `${site}/${record.site_lang}${complexRoute(lead.subject.slug)}` : null,
   };
 }
 

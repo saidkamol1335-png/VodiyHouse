@@ -5,6 +5,7 @@ import { StatsChart } from "@/components/StatsChart";
 import { readSiteNowAction } from "@/lib/admin/actions/siteNow";
 import type { SiteNow } from "@/lib/admin/home/siteNow";
 import { formatTime } from "@vh/shared/format";
+import { siteOrigin } from "@/lib/site/metadata";
 import { daysIn, type StatsPeriod } from "@/lib/stats/period";
 import type { SiteStats } from "@/lib/stats/types";
 import { StatsKpis } from "./StatsKpis";
@@ -67,7 +68,7 @@ export async function StatsScreen({ stats, period, today, siteNow }: StatsScreen
           />
           <StatsBreakdown stats={stats} />
           <div className="stats-screen__grid">
-            <StatsObjects complexes={stats.complexes} developers={stats.developers} />
+            <StatsObjects complexes={stats.complexes} developers={stats.developers} site={siteOrigin()} />
             <StatsCreatives stats={stats} />
           </div>
         </>
@@ -76,7 +77,7 @@ export async function StatsScreen({ stats, period, today, siteNow }: StatsScreen
       )}
       <div className="stats-screen__grid">
         {stats ? <StatsFunnel stats={stats} /> : null}
-        <SiteNowPanel initial={siteNow} read={readSiteNowAction} siteHref="/" />
+        <SiteNowPanel initial={siteNow} read={readSiteNowAction} siteHref={`${siteOrigin()}/ru`} />
       </div>
     </div>
   );

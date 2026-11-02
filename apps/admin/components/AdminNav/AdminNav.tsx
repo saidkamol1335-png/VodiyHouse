@@ -33,6 +33,8 @@ type AdminNavProps = {
   items: readonly AdminNavEntry[];
   /** side — боковая панель (≥ 981 px), strip — лента пилюль сверху (≤ 980 px), решения К2 и К3. */
   variant: "side" | "strip";
+  /** Адрес сайта (siteOrigin на сервере): сайт — отдельное приложение, PLAN §10. */
+  siteHref: string;
 };
 
 const ICONS: Record<AdminNavKey, LucideIcon> = {
@@ -47,9 +49,7 @@ const ICONS: Record<AdminNavKey, LucideIcon> = {
   settings: Settings,
 };
 
-const SITE_HREF = "/";
-
-export function AdminNav({ items, variant }: AdminNavProps) {
+export function AdminNav({ items, variant, siteHref }: AdminNavProps) {
   const t = useTranslations("admin.nav");
   const pathname = usePathname();
   const track = useRef<HTMLDivElement>(null);
@@ -81,7 +81,7 @@ export function AdminNav({ items, variant }: AdminNavProps) {
           );
         })}
         <p className="admin-nav__section">{t("siteSection")}</p>
-        <a className="admin-nav__link" href={SITE_HREF} target="_blank" rel="noopener">
+        <a className="admin-nav__link" href={siteHref} target="_blank" rel="noopener">
           <Globe className="admin-nav__icon" size={iconSize} strokeWidth={1.7} aria-hidden />
           <span className="admin-nav__label">
             {variant === "strip" ? t("site") : t("openSite")}

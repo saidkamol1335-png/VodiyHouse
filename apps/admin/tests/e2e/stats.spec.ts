@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
 import { collectPageErrors } from "./helpers";
+import { site } from "./site";
 
 // Фаза 6, 6B: «Статистика сайта» /admin/statistika (мокап CabStats) против облака с DEMO-посещениями
 // (supabase/demo/stats.sql). Только руководитель; менеджеру и мобилографу — «Раздел доступен
@@ -58,7 +59,8 @@ test.describe("кабинет · статистика · руководител�
     }
     await expect(page.getByRole("link", { name: /^ЖК / }).first()).toHaveAttribute(
       "href",
-      /^\/ru\/novostroyki\/demo-/,
+      // Сайт — отдельное приложение (PLAN §10): ссылка — с его адресом.
+      new RegExp(`^${site("/ru/novostroyki/demo-")}`),
     );
     if (!isPhone(testInfo.project.name)) {
       await expect(

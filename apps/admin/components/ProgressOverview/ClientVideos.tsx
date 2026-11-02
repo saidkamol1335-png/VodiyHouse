@@ -5,7 +5,6 @@ import { Button } from "@/components/Button";
 import type { ClientVideo } from "@/lib/admin/progress/types";
 import { formatDate, formatMonthYear } from "@vh/shared/format";
 import { mediaPublicUrl } from "@/lib/media";
-import { siteOrigin } from "@/lib/site/metadata";
 import { CopyLinkButton } from "./CopyLinkButton";
 
 /**
@@ -64,8 +63,8 @@ async function VideoItem({ video }: { video: ClientVideo }) {
         <p className="progress-review__meta">{meta.filter(Boolean).join(" · ")}</p>
       </div>
       <div className="progress-overview__actions">
-        <CopyLinkButton url={`${siteOrigin()}${video.path}`} />
-        <Button href={video.path} variant="ghost" size="sm">
+        <CopyLinkButton url={video.url} />
+        <Button href={video.url} variant="ghost" size="sm">
           <Eye size={16} aria-hidden="true" />
           {t("clientVideos.open")}
         </Button>
