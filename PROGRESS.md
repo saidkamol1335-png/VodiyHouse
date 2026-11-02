@@ -4,7 +4,7 @@
 
 ## Сейчас
 
-- **02.11 — сдача Проекта-1 (ветка `release/project-1`, папка `Desktop\VH_release`):** прод без выдумок у исполнителя — `docs/prod-setup.md`; журнал и решения интервью — `docs/progress/project1-release.md`; встреча и «сделать руками» — `docs/handover-meeting.md`; от заказчика — `docs/handover-client.md`. Ждёт: проект Supabase и сайт Netlify (человек), затем прод-цепочка агентом.
+- **02.11 — сдача Проекта-1 (ветка `release/project-1`, папка `Desktop\VH_release`):** прод без выдумок у исполнителя — `docs/prod-setup.md`; журнал и решения интервью — `docs/progress/project1-release.md`; встреча и «сделать руками» — `docs/handover-meeting.md`; от заказчика — `docs/handover-client.md`. Ждёт: `npx supabase login` (человек) → `node scripts/prod-up.mjs` в `apps/site` (или «вошёл» агенту); сайт Netlify `vodiyhouse-prod` уже создан.
 - **Проект-2, фазы A–B** готовы 02.11 (интервью — `PLAN.md` §10, аудит — `docs/split-audit.md`); миграции A–B в тестовом облаке, деплой 82b68fd. Фаза C — в main у другой сессии.
 
 ## Журнал фазы A
