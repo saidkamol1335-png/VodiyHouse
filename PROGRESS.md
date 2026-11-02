@@ -4,10 +4,8 @@
 
 ## Сейчас
 
-- **02.11 — интервью перед фазой 0/A проведено:** аудит `docs/split-audit.md`, решения — `PLAN.md` §10 (исполнитель принял все рекомендации). `CLAUDE.md` переписан под Проект-2.
-- **Фаза A — монорепо и каркас** — готова локально 02.11 (d3d3aef), не запушена.
-- **02.11 — интервью фазы B:** рекомендации 1–3 приняты (PLAN §10, пп. 11–14); облако и Netlify (вопросы 4–5) ждут отдельного «да».
-- **Фаза B — схема и доступ** — готова (журнал ниже). 02.11 по слову исполнителя («сделай это всё сам»): миграции A–B в тестовом облаке, секрет подписи в Vault и Netlify, leads.channels = telegram, sheet; Netlify vodiyhouse-test — Package directory apps/site; push в origin.
+- **02.11 — сдача Проекта-1 (ветка `release/project-1`, папка `Desktop\VH_release`):** прод без выдумок у исполнителя — `docs/prod-setup.md`; журнал и решения интервью — `docs/progress/project1-release.md`; встреча и «сделать руками» — `docs/handover-meeting.md`; от заказчика — `docs/handover-client.md`. Ждёт: проект Supabase и сайт Netlify (человек), затем прод-цепочка агентом.
+- **Проект-2, фазы A–B** готовы 02.11 (интервью — `PLAN.md` §10, аудит — `docs/split-audit.md`); миграции A–B в тестовом облаке, деплой 82b68fd. Фаза C — в main у другой сессии.
 
 ## Журнал фазы A
 - Готова 02.11 (d3d3aef): монорепо, `@vh/shared`, каркас `apps/admin`, все проверки зелёные. Подробно — `docs/progress/project2-phase-a.md`.
@@ -26,6 +24,7 @@
 - `npm run mockup:*` — в корне (мокап в `docs/`). e2e сайта: порт dev-сервера берётся из `E2E_PORT` (порт 3000 на ноутбуке занят Acer PredatorSense — e2e на 3002: `E2E_PORT=3002 npm run e2e:1440 -w @vh/site -- <спека>`).
 
 ## Полировка
+- Релиз П-1: `home-preloader` «проценты растут до 100» и `complex-progress` «Смотреть пример» падают на холодном dev-сервере (предел экрана загрузки теперь 3 с, первая компиляция дольше) — на прогретом зелёные.
 - Старые артефакты в корне (`.next`, `out`, `coverage`, `test-results`, `tsconfig.tsbuildinfo`, `.env.local`) от сборок до переезда — в git их нет; удалить вручную, когда удобно. `.env.local` скопирован в `apps/site` и `apps/admin`.
 - e2e сайта: в логе dev-сервера ECONNRESET «aborted» при закрытии страниц — тесты зелёные, шум.
 - CSP админки — с `unsafe-inline`; script-src с nonce — в фазе D вместе с proxy кабинета.

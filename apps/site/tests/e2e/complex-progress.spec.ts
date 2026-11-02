@@ -78,7 +78,7 @@ test.describe("кадры стройки на главной и в катало�
     const errors = collectPageErrors(page);
     await page.goto("/ru?motion=none");
     const tile = page.locator(".home-why__tile--video");
-    await expect(tile).toContainText("Раз в месяц снимаем каждую стройку");
+    await expect(tile).toContainText("Снимаем, как идёт стройка");
     await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · \S+ · блок \S+$/);
     const section = page.locator(".home-why");
     await section.scrollIntoViewIfNeeded();

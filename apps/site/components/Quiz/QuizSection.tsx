@@ -16,10 +16,19 @@ type QuizSectionProps = {
 export async function QuizSection({ id, catalog, variant }: QuizSectionProps) {
   const messages = await getMessages();
   return (
-    <section id={id} className={`quiz-section quiz-section--${variant}`} aria-labelledby={`${id}-title`}>
+    <section
+      id={id}
+      className={`quiz-section quiz-section--${variant}`}
+      aria-labelledby={`${id}-title`}
+    >
       <Container>
         <NextIntlClientProvider messages={pickMessages(messages, QUIZ_MESSAGES)}>
-          <Quiz id={id} catalog={catalog} variant={variant} />
+          {/* Пустой каталог — без живого счётчика «0 подходит»: квиз остаётся заявкой на подбор. */}
+          <Quiz
+            id={id}
+            catalog={catalog && catalog.complexes.length > 0 ? catalog : null}
+            variant={variant}
+          />
         </NextIntlClientProvider>
       </Container>
     </section>

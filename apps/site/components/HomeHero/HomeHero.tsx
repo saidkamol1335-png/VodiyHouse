@@ -50,8 +50,15 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
   );
 }
 
-/** Цифры каталога: ЖК, застройщики, квартиры в продаже («+», если у части типов числа нет). */
+/**
+ * Цифры каталога: ЖК, застройщики, квартиры в продаже («+», если у части типов числа нет). Нулевые не
+ * показываем (решение 02.11.2026): пустой каталог — экран без цифр, а не «0 жилых комплексов».
+ */
 function heroStats(t: HeroTranslator, stats: HomeStats, locale: string): HeroStat[] {
+  return allHeroStats(t, stats, locale).filter((item) => item.value !== "0");
+}
+
+function allHeroStats(t: HeroTranslator, stats: HomeStats, locale: string): HeroStat[] {
   const number = new Intl.NumberFormat(locale === "uz" ? "uz-UZ" : "ru-RU");
   const flats = number.format(stats.flats);
   return [

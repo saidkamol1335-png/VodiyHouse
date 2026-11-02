@@ -178,7 +178,7 @@ describe("база", () => {
       activeHeads: 1,
     });
     expect(statuses(lines)).toEqual(["ok", "fail", "ok", "ok"]);
-    expect(lines[1].text).toContain("20261102190000");
+    expect(lines[1]?.text).toContain("20261102190000");
   });
 
   it("прод: DEMO не нужен, руководитель — ? до встречи", () => {
@@ -213,7 +213,7 @@ describe("прод (--prod)", () => {
       rate: false,
     });
     expect(statuses(lines)).toEqual(["fail", "fail", "manual", "manual", "fail", "manual"]);
-    expect(lines[4].text).toContain("shodlik");
+    expect(lines[4]?.text).toContain("shodlik");
   });
 
   it("до db:push строки пропускаются", () => {

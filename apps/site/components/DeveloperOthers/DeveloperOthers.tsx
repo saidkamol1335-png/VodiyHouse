@@ -23,10 +23,16 @@ export async function DeveloperOthers({ others }: { others: readonly OtherDevelo
         {others.map((other) => (
           <li key={other.slug}>
             <Link className="developer-others__card" href={developerRoute(other.slug)}>
-              <DeveloperMark name={other.name} logo={other.logo} className="developer-others__logo" />
+              <DeveloperMark
+                name={other.name}
+                logo={other.logo}
+                className="developer-others__logo"
+              />
               <span>
                 <b>{other.name}</b>
-                <small>{t("complexesN", { n: other.complexes })}</small>
+                {other.complexes > 0 ? (
+                  <small>{t("complexesN", { n: other.complexes })}</small>
+                ) : null}
               </span>
             </Link>
           </li>

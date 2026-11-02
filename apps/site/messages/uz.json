@@ -78,7 +78,7 @@
     },
     "manifesto": {
       "eyebrow": "Vodiy House qisqacha",
-      "text": "Farg‘ona viloyatidagi barcha yangi uylarni bir joyga to‘pladik. <a>Hujjatlar tekshirilgan, muddatlar halol,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
+      "text": "Farg‘ona viloyati yangi uylari — bitta katalogda. <a>TJM hujjatlarini tekshiramiz,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
     },
     "why": {
       "eyebrow": "Nega Vodiy House orqali",
@@ -96,11 +96,11 @@
       "pills": "TJM tanlash · Obyekt ko‘rsatish · Hujjat tekshiruvi · Ipoteka · Muddatli to‘lov · Kadastr · Kalitlar",
       "stockKicker": "Mavjudlik",
       "stockTitle": "Har bir TJM qoldiqlari",
-      "stockText": "«3 xonali — 5 ta qoldi» kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
+      "stockText": "Bo‘sh kvartiralar soni kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
       "stockCta": "Mavjudlikni ko‘rish",
       "priceBig": "0%",
       "videoKicker": "Qurilish videosi",
-      "videoTitle": "Har oy har bir qurilishni suratga olamiz",
+      "videoTitle": "Qurilish jarayonini suratga olamiz",
       "videoText": "Obyektga borish shart emas — kvartira hozir qanday ko‘rinishini ko‘ring.",
       "videoCta": "Namunani ko‘rish",
       "videoRec": "REC · {complex} · {block}-blok"
@@ -383,9 +383,13 @@
       "title": "Barcha ",
       "titleAccent": "yangi uylar",
       "metaTitle": "Farg‘ona viloyati yangi uylari — TJM katalogi · Vodiy House",
-      "metaDescription": "Farg‘ona va viloyatdagi barcha yangi uylar: quruvchi narxlari, bo‘sh kvartiralar, muddatli to‘lov va ipoteka. Xaridor uchun — bepul.",
+      "metaDescription": "Farg‘ona va viloyatdagi yangi uylar: quruvchi narxlari, bo‘sh kvartiralar, muddatli to‘lov va ipoteka. Xaridor uchun — bepul.",
       "found": "{n} ta TJM topildi",
       "unavailable": "Katalog tez orada paydo bo‘ladi. Kvartirani qo‘lda tanlab beramiz — Vodiy House bilan bog‘laning."
+    },
+    "empty": {
+      "title": "Tez orada bu yerda yangi uylar paydo bo‘ladi",
+      "text": "Katalog to‘ldirilmoqda. Ariza qoldiring — Vodiy House menejeri kvartirani qo‘lda tanlab beradi, xaridor uchun bepul."
     },
     "filter": {
       "label": "Filtrlar",
@@ -438,6 +442,7 @@
     "open": "Sahifani ochish: {name}",
     "nothing": "Hech narsa topilmadi",
     "unavailable": "Quruvchilar ro‘yxati vaqtincha mavjud emas. Qo‘ng‘iroq qiling yoki yozing — hammasini telefonda aytib beramiz.",
+    "soon": "Tez orada bu yerda Vodiy House bilan ishlaydigan quruvchilar paydo bo‘ladi.",
     "page": {
       "metaTitle": "{name} quruvchisi — yangi uylar, to‘lov shartlari",
       "metaDescription": "{name}: Vodiy House saytidagi yangi uylar, topshirilgan obyektlar, hujjatlar tekshiruvi va to‘lov dasturlari. Maslahat — Vodiy House menejeri orqali, bepul.",
@@ -1008,7 +1013,7 @@
       "send": "Ariza yuborish",
       "again": "Yana bitta yuborish"
     },
-    "donePartner": "Ish kuni davomida javob beramiz.",
+    "donePartner": "Vodiy House menejeri siz bilan bog‘lanadi.",
     "nextPartner": "Keyin nima: qo‘ng‘iroq qilamiz, uchrashuvni kelishamiz va hujjatlar hamda obyektni ko‘ramiz."
   },
   "bot": {
@@ -1082,7 +1087,7 @@
         "text": "Vodiy House rieltorlari TJMni ko‘rsatadi, mijozni bitimgacha olib boradi va bank bilan yordam beradi.",
         "points": {
           "p1": "Menejer TJMlaringiz bo‘yicha ko‘rsatuvlar va bitimlar hisobotini yuboradi",
-          "p2": "Har oy qurilish videosi",
+          "p2": "Xaridorlar uchun qurilish jarayoni videosi",
           "p3": "Mijozga bank va hujjatlar bilan yordam beramiz"
         }
       },
@@ -1110,11 +1115,11 @@
     },
     "steps": {
       "eyebrow": "Qanday boshlaymiz",
-      "title": "Arizadan birinchi sotuvgacha — ",
-      "titleAccent": "taxminan ikki hafta",
+      "title": "Arizadan ",
+      "titleAccent": "birinchi sotuvgacha",
       "s1": {
         "title": "Ariza",
-        "text": "Kontaktlaringizni qoldirasiz — ish kuni davomida qo‘ng‘iroq qilamiz"
+        "text": "Kontaktlaringizni qoldirasiz — Vodiy House menejeri qo‘ng‘iroq qiladi"
       },
       "s2": {
         "title": "Uchrashuv va tekshiruv",
@@ -1132,7 +1137,7 @@
     "request": {
       "title": "Hamkorlik ",
       "titleAccent": "uchun ariza",
-      "lead": "Ish kuni davomida javob beramiz. Kontaktlar uchinchi shaxslarga berilmaydi.",
+      "lead": "Vodiy House menejeri siz bilan bog‘lanadi. Kontaktlar uchinchi shaxslarga berilmaydi.",
       "defaultCity": "Farg‘ona"
     }
   },
@@ -1146,8 +1151,8 @@
       "complexes": "{count, plural, other {turar-joy majmuasi ishda}}",
       "freeValue": "0 so‘m",
       "free": "xaridor tanlash va ko‘rsatish uchun to‘laydi",
-      "videoValue": "Har oy",
-      "video": "har bir qurilish haqida video olamiz"
+      "videoValue": "Video",
+      "video": "xaridorlar uchun qurilish jarayoni"
     },
     "office": {
       "eyebrow": "Vodiy House ofisi",

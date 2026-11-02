@@ -55,7 +55,9 @@ export default async function DevelopersPage() {
       <main>
         <DevelopersHero count={developers ? developers.length : null} />
         <Container>
-          {developers ? (
+          {developers && developers.length === 0 ? (
+            <p className="pb-16 text-muted-foreground">{t("soon")}</p>
+          ) : developers ? (
             <NextIntlClientProvider messages={pickMessages(messages, DEVELOPERS_LIST_MESSAGES)}>
               <DevelopersList rows={developers.map((developer) => rowOf(developer, catalog))} />
             </NextIntlClientProvider>
