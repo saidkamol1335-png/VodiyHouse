@@ -6,14 +6,14 @@ import type { ReviewActionResult } from "@/lib/admin/progress/types";
 import { requireActionViewer } from "@/lib/admin/session";
 import { expireProgress } from "@/lib/cache";
 
-// Проверка отчётов хода строительства (фаза 5, 5D, мокап CabReview): менеджер и руководитель публикуют
-// отчёт только с отметкой правила 1.2 (её проверяет и база) или возвращают мобилографу с причиной.
+// Проверка отчётов хода строительства (фаза 5, 5D, мокап CabReview): руководитель (PLAN §10, п. 6) публикует
+// отчёт только с отметкой правила 1.2 (её проверяет и база) или возвращает мобилографу с причиной.
 
 const fail = (error: ContentErrorCode): ReviewActionResult => ({ status: "error", error });
 
 /** «Опубликовать на сайте»: раздел «Ход строительства» и страница видео квартиры обновляются сразу. */
 export async function publishProgressReportAction(formData: FormData): Promise<ReviewActionResult> {
-  const guard = await requireActionViewer(["head", "manager"]);
+  const guard = await requireActionViewer(["head"]);
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   if (!id) return fail("invalid");
@@ -28,7 +28,7 @@ export async function publishProgressReportAction(formData: FormData): Promise<R
 
 /** «Вернуть мобилографу» с причиной: он исправит и отправит снова. */
 export async function returnProgressReportAction(formData: FormData): Promise<ReviewActionResult> {
-  const guard = await requireActionViewer(["head", "manager"]);
+  const guard = await requireActionViewer(["head"]);
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   const note = readText(formData, "note")?.trim() ?? "";

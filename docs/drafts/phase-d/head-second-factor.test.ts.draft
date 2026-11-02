@@ -1,0 +1,54 @@
+// Черновик фазы D — не запускается (лежит вне apps/*). Переносится в apps/site/tests/db/project2-access.test.ts
+// (или тесты админки) вместе с миграцией head_second_factor.sql, когда выбран вариант 2FA.
+// Импорты — как в project2-access.test.ts: createStaff, createTestDb, user, Actor, TestDb из ./harness;
+// seedContent, ContentIds из ./content-fixtures. Стенд уже ставит aal (по умолчанию aal2) — harness.ts.
+//
+// Ревью 02.11 — учесть в фазе D:
+// - Механизм aal2 выбрать до кода: TOTP с секретом на сервере админки и кодом от бота (бесплатно), телефонный
+//   фактор Supabase через Send SMS Hook (платная надстройка Advanced MFA — спросить заказчика) или своя
+//   таблица подтверждённых сессий (session_id из JWT, verified_until = +30 дней) вместо aal.
+// - Next тоже должен знать про второй фактор: own_profile отдаёт сырой role, и requireActionViewer(["head"])
+//   пускает aal1-сессию к коду с service-ключом раньше отказа базы (createStaffAction → auth.admin.createUser
+//   до insert профиля — оракул «есть ли такой email»). Гард head — требовать aal2 / роль из staff_role().
+// - Стенд: по умолчанию aal2 у всех; добавить проверки мобилографа и менеджера при aal1 и снять skipIf(remote).
+// - e2e: персоне руководителя — фактор и код при входе (auth.setup), иначе все спеки head упадут.
+
+describe.skipIf(isRemoteTarget)("второй фактор руководителя в базе (PLAN §10, п. 8)", () => {
+  let db: TestDb;
+  let ids: ContentIds;
+  let head: string;
+  let manager: string;
+
+  beforeAll(async () => {
+    db = await createTestDb();
+    ids = await seedContent(db.admin);
+    head = await createStaff(db.admin, "head");
+    manager = await createStaff(db.admin, "manager");
+  });
+  afterAll(() => db.close());
+
+  const roleOf = async (actor: Actor) =>
+    (await db.as(actor, (tx) => tx.query<{ role: string | null }>("select private.staff_role()::text as role"))).rows[0]!.role;
+
+  it("руководитель без второго фактора (aal1) — без прав роли; со вторым (aal2) — руководитель", async () => {
+    expect(await roleOf(user(head, undefined, "aal1"))).toBeNull();
+    expect(await roleOf(user(head, undefined, "aal2"))).toBe("head");
+  });
+
+  it("aal1: настройки, заявки и публикация закрыты, свой профиль виден — админка спросит код", async () => {
+    const weak = user(head, undefined, "aal1");
+    const own = await db.as(weak, (tx) => tx.query<{ role: string }>("select role::text from profiles where id = $1", [head]));
+    expect(own.rows).toEqual([{ role: "head" }]);
+    expect((await db.as(weak, (tx) => tx.query("select key from settings where not is_public"))).rows).toEqual([]);
+    // Заявка должна быть: иначе «пусто» у aal1 ничего не доказывает (ревью 02.11).
+    await db.admin.query("insert into leads (type, name, phone, site_lang) values ('callback', 'Азиз', '+998901110000', 'ru')");
+    expect((await db.as(user(head), (tx) => tx.query("select id from leads"))).rows.length).toBe(1);
+    expect((await db.as(weak, (tx) => tx.query("select id from leads"))).rows).toEqual([]);
+    const hide = "update complexes set status = 'hidden' where id = $1";
+    expect((await db.as(weak, (tx) => tx.query(hide, [ids.publicComplex]))).affectedRows).toBe(0);
+  });
+
+  it("менеджеру второй фактор не нужен", async () => {
+    expect(await roleOf(user(manager, undefined, "aal1"))).toBe("manager");
+  });
+});

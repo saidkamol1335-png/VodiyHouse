@@ -1,6 +1,4 @@
 import { createHmac } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { makeComplexReady, seedContent, type ContentIds } from "./content-fixtures";
 import {
@@ -10,15 +8,16 @@ import {
   expectDenied,
   expectHint,
   isRemoteTarget,
+  service,
   user,
   type Actor,
   type TestDb,
 } from "./harness";
 
-// Проект-2, фаза B (PLAN §10, пп. 3–6, 10–13): хранимое состояние ЖК, записи сайта с подписью,
-// запросы руководителю и приватные загрузки мобилографа. Права по ролям в целом — access-matrix.
+// Проект-2, фаза B (PLAN §10, пп. 3–6, 10–13): чтение и записи сайта, каналы и тревога заявок,
+// запросы руководителю, приватные загрузки мобилографа.
+// Хранимое состояние ЖК — site-state.test.ts; права по ролям в целом — access-matrix.
 
-const DEMO_DIR = path.resolve(import.meta.dirname, "../../../../supabase/demo");
 const SECRET = "test-site-signing-secret-0123456789abcdef";
 
 /** Подпись сервера сайта: hex(HMAC-SHA256(secret, scope \n signed_at \n payload)) — 20261102130000. */
@@ -27,83 +26,33 @@ function sign(scope: string, payload: string, signedAt = Math.floor(Date.now() /
   return { signedAt, signature };
 }
 
-describe.skipIf(isRemoteTarget)("хранимое состояние ЖК (PLAN §10, п. 11)", () => {
+describe.skipIf(isRemoteTarget)("чтение сайта ролью посетителя (PLAN §10, п. 3)", () => {
   let db: TestDb;
 
   beforeAll(async () => {
     db = await createTestDb();
-    await db.admin.exec(await readFile(path.join(DEMO_DIR, "seed.sql"), "utf8"));
+    await db.admin.exec(`
+      insert into settings (key, value, is_public) values
+        ('site.contacts', '{"phone": "+998780000000"}', true),
+        ('leads.telegram_chat', '"секрет"', false)
+      on conflict (key) do update set value = excluded.value, is_public = excluded.is_public;
+    `);
   });
   afterAll(() => db.close());
 
-  /** ЖК, у которых хранимое расходится с посчитанным сейчас. Пусто — всё сходится. */
-  const drift = async () =>
-    (
-      await db.admin.query<{ slug: string }>(
-        `select c.slug from public.complexes c cross join lateral private.complex_state_now(c.id) s
-         where (c.missing_count, c.site_state) is distinct from (s.missing_count, s.site_state)
-         union all
-         select 'layout ' || l.id from public.layouts l join private.layout_completeness lc on lc.layout_id = l.id
-         where l.is_complete is distinct from lc.is_complete`,
-      )
-    ).rows.map((row) => row.slug);
-
-  // DEMO-сид пишет в обход стражей и без фото (фото кладёт demo.mjs) — минимум у него не выполнен;
-  // здесь важно только, что хранимое не разошлось с посчитанным.
-  it("после DEMO хранимое совпадает с посчитанным", async () => {
-    expect(await drift()).toEqual([]);
-    const { rows } = await db.admin.query<{ n: number }>("select count(*)::int as n from complexes where missing_count = 6");
-    expect(rows[0]!.n).toBeLessThan((await db.admin.query<{ n: number }>("select count(*)::int as n from complexes")).rows[0]!.n);
+  // Те же запросы, что lib/site/contacts.ts и lib/site/hints.ts шлют публичным ключом.
+  it("контакты Vodiy House и включённые подсказки читаются; закрытые настройки — нет", async () => {
+    const contacts = await db.as(anon, (tx) => tx.query<{ value: unknown }>("select value from public_settings where key = 'site.contacts'"));
+    expect(contacts.rows).toEqual([{ value: { phone: "+998780000000" } }]);
+    const secret = await db.as(anon, (tx) => tx.query("select value from public_settings where key = 'leads.telegram_chat'"));
+    expect(secret.rows).toEqual([]);
+    const hints = await db.as(anon, (tx) => tx.query<{ slug: string }>("select slug, term, text from public_hints"));
+    expect(hints.rows.length).toBeGreaterThan(0);
   });
 
-  it("правки цен, чертежей, фото, курса и застройщика пересчитывают состояние сами", async () => {
-    await db.admin.exec(`
-      update public.units set price = null, price_per_m2 = null
-        where block_id in (select b.id from public.blocks b join public.complexes c on c.id = b.complex_id where c.status = 'draft');
-      update public.layouts set drawing_id = null
-        where block_id in (select b.id from public.blocks b join public.complexes c on c.id = b.complex_id where c.status = 'draft');
-      delete from public.media_assets
-        where kind = 'photo' and complex_id in (select id from public.complexes where status = 'draft');
-      update public.settings set value = value where key = 'exchange.usd_uzs';
-      update public.developers set status = 'hidden'
-        where status = 'published' and not exists (
-          select 1 from public.complexes c where c.developer_id = developers.id and c.status = 'published');
-    `);
-    expect(await drift()).toEqual([]);
-  });
-
-  it("пересчёт не трогает «обновлено»: updated_at ЖК и планировок прежний", async () => {
-    const stamp = "select max(updated_at)::text as v from (select updated_at from complexes union all select updated_at from layouts) t";
-    const before = (await db.admin.query<{ v: string }>(stamp)).rows[0]!.v;
-    await db.admin.query("update public.settings set value = value where key = 'exchange.usd_uzs'");
-    expect((await db.admin.query<{ v: string }>(stamp)).rows[0]!.v).toBe(before);
-  });
-
-  // В облаке Data API работает с safeupdate: DELETE / UPDATE без WHERE отклоняются (в PGlite — нет).
-  // Страж по телам всех функций: такой оператор упал бы только после выкладки (случай 02.11).
-  it("нет DELETE / UPDATE без WHERE ни в одной функции public и private", async () => {
-    const { rows } = await db.admin.query<{ name: string; body: string }>(
-      `select n.nspname || '.' || p.proname as name, pg_get_functiondef(p.oid) as body
-       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname in ('public', 'private') and p.prokind = 'f' and p.prolang <> 13`,
-    );
-    // «delete from x …;» и «update x [alias] set …;» — до точки с запятой должен быть where.
-    // «on conflict do update set» сюда не попадает: после update нет имени таблицы перед set.
-    const statement = /\b(?:delete\s+from\s+[\w."]+|update\s+[\w."]+\s+(?:\w+\s+)?set\b)[^;]*;/gi;
-    const unsafe = rows.flatMap(({ name, body }) =>
-      [...body.replace(/--[^\n]*/g, "").matchAll(statement)]
-        .filter((match) => !/\bwhere\b/i.test(match[0]))
-        .map((match) => `${name}: ${match[0].slice(0, 60)}`),
-    );
-    expect(unsafe).toEqual([]);
-  });
-
-  it("пересчёт не пишет журнал: в audit_log нет полей состояния", async () => {
-    const { rows } = await db.admin.query<{ n: number }>(
-      `select count(*)::int as n from public.audit_log
-       where changes ?| array['site_state', 'missing_count', 'is_complete']`,
-    );
-    expect(rows[0]!.n).toBe(0);
+  it("таблицы настроек и подсказок посетителю закрыты", async () => {
+    await expectDenied(db.as(anon, (tx) => tx.query("select key from settings")));
+    await expectDenied(db.as(anon, (tx) => tx.query("select slug from hints")));
   });
 });
 
@@ -115,19 +64,46 @@ describe.skipIf(isRemoteTarget)("записи сайта с подписью с�
     db = await createTestDb();
     ids = await seedContent(db.admin);
     await db.admin.query("insert into vault.decrypted_secrets (name, decrypted_secret) values ('site_signing_secret', $1)", [SECRET]);
-    await db.admin.query(`insert into settings (key, value) values ('leads.channels', '["telegram"]')`);
   });
   afterAll(() => db.close());
 
   const call = (fn: string, payload: string, signed: { signedAt: number; signature: string }, actor: Actor = anon) =>
     db.as(actor, async (tx) => (await tx.query<{ v: unknown }>(`select public.${fn}($1, $2, $3) as v`, [payload, signed.signedAt, signed.signature])).rows[0]!.v);
 
-  it("заявка с верной подписью принята; каналы доставки — из настройки админки", async () => {
-    const payload = JSON.stringify({ lead: { type: "callback", name: "Азиз", phone: "+998901112233", site_lang: "ru" }, client_key: "k1" });
-    const lead = (await call("site_submit_lead", payload, sign("lead", payload))) as { id: string; number: number };
+  const submitLead = async (phone: string) => {
+    const payload = JSON.stringify({ lead: { type: "callback", name: "Азиз", phone, site_lang: "ru" }, client_key: `k-${phone}` });
+    return (await call("site_submit_lead", payload, sign("lead", payload))) as { id: string; number: number };
+  };
+  const channelsOf = async (lead: string) =>
+    (await db.admin.query<{ channel: string }>("select channel::text from lead_deliveries where lead_id = $1 order by channel", [lead])).rows.map(
+      (row) => row.channel,
+    );
+
+  it("заявка с верной подписью принята и уходит в Telegram и Таблицу (каналы по умолчанию — миграция)", async () => {
+    const lead = await submitLead("+998901112233");
     expect(lead.number).toBeGreaterThan(0);
-    const channels = await db.admin.query<{ channel: string }>("select channel::text from lead_deliveries where lead_id = $1", [lead.id]);
-    expect(channels.rows).toEqual([{ channel: "telegram" }]);
+    expect(await channelsOf(lead.id)).toEqual(["sheet", "telegram"]);
+  });
+
+  it("каналы задаёт админка: настройка leads.channels меняет доставку следующих заявок", async () => {
+    await db.admin.query(`update settings set value = '["telegram"]' where key = 'leads.channels'`);
+    expect(await channelsOf((await submitLead("+998901112277")).id)).toEqual(["telegram"]);
+    await db.admin.query(`update settings set value = '["telegram", "sheet"]' where key = 'leads.channels'`);
+  });
+
+  it("не дошла за 10 минут — тревога один раз; дошла хотя бы одним каналом — тревоги нет", async () => {
+    const lost = await submitLead("+998901112288");
+    const delivered = await submitLead("+998901112299");
+    await db.as(service, (tx) => tx.query("select public.record_lead_delivery($1, 'telegram', true, null)", [delivered.id]));
+    await db.admin.query("update leads set created_at = now() - interval '11 minutes' where id = any($1)", [[lost.id, delivered.id]]);
+    const alarm = async () =>
+      (await db.as(service, (tx) => tx.query<{ v: { id: string }[] }>("select public.take_undelivered_leads() as v"))).rows[0]!.v.map(
+        (lead) => lead.id,
+      );
+    const first = await alarm();
+    expect(first).toContain(lost.id);
+    expect(first).not.toContain(delivered.id);
+    expect(await alarm()).not.toContain(lost.id);
   });
 
   it("подпись одноразовая: повтор того же запроса — отказ", async () => {

@@ -185,16 +185,19 @@ describe("отчёты хода строительства: права и пра
     }
   });
 
-  it("публикует менеджер или руководитель — только с отметкой правила 1.2; снимает с публикации — руководитель", async () => {
+  // Одобряет только руководитель (PLAN §10, п. 6): менеджер видит отчёт, но не публикует и не возвращает.
+  it("публикует только руководитель и только с отметкой правила 1.2; снимает с публикации — тоже он", async () => {
     const { id } = await submit(video, report({ unit_id: ids.units[2] }));
     await expectHint(publish(video, id), "vh:forbidden");
-    await expectHint(publish(manager, id, false), "vh:rule12");
+    await expectHint(publish(manager, id), "vh:forbidden");
+    await expectHint(call(manager, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]), "vh:forbidden");
+    await expectHint(publish(head, id, false), "vh:rule12");
     expect(await status(id)).toBe("review");
-    expect((await publish(manager, id)).complex_id).toBe(ids.publicComplex);
+    expect((await publish(head, id)).complex_id).toBe(ids.publicComplex);
     const row = (
       await db.admin.query("select status, published_by from progress_reports where id = $1", [id])
     ).rows[0];
-    expect(row).toEqual({ status: "published", published_by: manager });
+    expect(row).toEqual({ status: "published", published_by: head });
     await expectHint(publish(head, id), "vh:stale");
     await expectHint(call(manager, "public.unpublish_progress_report($1)", [id]), "vh:forbidden");
     await call(head, "public.unpublish_progress_report($1)", [id]);
@@ -207,12 +210,12 @@ describe("отчёты хода строительства: права и пра
       video,
       report({ unit_id: ids.units[0], photos: [...kept, photo()] }),
     );
-    await expectHint(call(manager, "public.return_progress_report($1, $2)", [id, "  "]), "vh:note");
+    await expectHint(call(head, "public.return_progress_report($1, $2)", [id, "  "]), "vh:note");
     await expectHint(
       call(video, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]),
       "vh:forbidden",
     );
-    await call(manager, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]);
+    await call(head, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]);
     const returned = (
       await db.admin.query("select status, return_note from progress_reports where id = $1", [id])
     ).rows[0];
@@ -260,7 +263,7 @@ describe("отчёты хода строительства: права и пра
         video_path: `complexes/${ids.publicComplex}/${crypto.randomUUID()}.mp4`,
       }),
     );
-    await publish(manager, published.id);
+    await publish(head, published.id);
     await expectHint(
       call(video, "public.delete_progress_report($1)", [published.id]),
       "vh:forbidden",
@@ -320,7 +323,7 @@ describe("отчёты хода строительства: права и пра
 
   it("руководитель исправляет возвращённый отчёт сам; месяц возвращённого отчёта сохраняется", async () => {
     const { id } = await submit(video, report({ unit_id: ids.units[0], month: previous }));
-    await call(manager, "public.return_progress_report($1, $2)", [id, "Нет двора"]);
+    await call(head, "public.return_progress_report($1, $2)", [id, "Нет двора"]);
     await db.admin.query("update progress_reports set month = $2 where id = $1", [id, longAgo]);
     await submit(head, report({ id, unit_id: ids.units[0], month: longAgo }));
     expect(await status(id)).toBe("review");
@@ -375,8 +378,8 @@ describe("отчёты хода строительства: права и пра
         [ids.publicBlock, month],
       )
     ).rows[0]!.id;
-    await publish(manager, published);
-    await publish(manager, draft.id);
+    await publish(head, published);
+    await publish(head, draft.id);
     const items = (await site(ids.publicComplex))!;
     expect(items.length).toBe(before + 1);
     expect(items[0]).toMatchObject({ id: published, month, block: { name: expect.any(String) } });
@@ -414,7 +417,7 @@ describe("отчёты хода строительства: права и пра
         )
         .then((result) => result.rows[0]?.r ?? null);
     expect(await page(id)).toBeNull();
-    await publish(manager, id);
+    await publish(head, id);
     const video_ = (await page(id))!;
     expect(Object.keys(video_).sort()).toEqual(
       [

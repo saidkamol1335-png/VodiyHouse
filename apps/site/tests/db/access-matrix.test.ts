@@ -354,6 +354,8 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       const others = await submit(head, ids.units[1]!);
       expect(await visible(user(mobilographer), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(1);
       expect(await visible(user(manager), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(2);
+      // Одобряет отчёты только руководитель (PLAN §10, п. 6).
+      await expectHint(db.as(user(manager), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
       await expectHint(db.as(user(mobilographer), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
       expect(await writes(user(mobilographer), "update public.progress_reports set status = 'published', published_at = now() where id = $1", [own])).toBe(0);
     });

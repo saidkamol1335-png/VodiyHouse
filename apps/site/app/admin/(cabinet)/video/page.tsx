@@ -77,18 +77,18 @@ async function Overview({ role }: { role: StaffRole }) {
   );
 }
 
-/** Ящик отчёта из ?report: решение — у менеджера и руководителя. */
+/** Ящик отчёта из ?report: решение — у руководителя (PLAN §10, п. 6). */
 async function OpenReport({ id, role }: { id: string | null; role: StaffRole }) {
   if (!id) return null;
   const report = await readReportDetail(await createSupabaseServerClient(), id);
   return report ? (
-    <ReportDrawer key={report.id} report={report} canReview={role !== "mobilographer"} />
+    <ReportDrawer key={report.id} report={report} canReview={role === "head"} />
   ) : null;
 }
 
 /**
  * «Видео и ход стройки» (фаза 5): мобилограф — «Новый отчёт», «Как снимать», «Мои отчёты» (мокап
- * CabVideo); менеджер и руководитель — «Ждут проверки» и ящик отчёта с публикацией (CabReview).
+ * CabVideo); менеджер и руководитель — «Ждут проверки» и ящик отчёта, публикует руководитель (CabReview, PLAN §10, п. 6).
  */
 export default async function VideoPage({ searchParams }: PageProps<"/admin/video">) {
   const { viewer, allowed } = await requireSection("video");

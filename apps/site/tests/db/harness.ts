@@ -12,7 +12,9 @@ const SHIM_FILE = path.join(import.meta.dirname, "supabase-shim.sql");
 
 /** Кто выполняет запрос: как в облаке, роль Postgres и claims JWT задают RLS. */
 /** iat — когда выдан токен (секунды); без него токен «старше» любого закрытия сессий (20261029050000). */
-export type Actor = { kind: "anon" } | { kind: "user"; id: string; iat?: number } | { kind: "service" };
+/** aal — уровень входа Supabase Auth; по умолчанию aal2: права head — только со вторым фактором (20261102180000). */
+export type Aal = "aal1" | "aal2";
+export type Actor = { kind: "anon" } | { kind: "user"; id: string; iat?: number; aal?: Aal } | { kind: "service" };
 
 /** Общее у PGlite и облачной базы (pg): тесты не знают, где выполняются. */
 export type Db = {
@@ -39,7 +41,12 @@ export const PG_ROLE: Record<Actor["kind"], string> = {
 
 export const anon: Actor = { kind: "anon" };
 export const service: Actor = { kind: "service" };
-export const user = (id: string, iat?: number): Actor => ({ kind: "user", id, ...(iat === undefined ? {} : { iat }) });
+export const user = (id: string, iat?: number, aal?: Aal): Actor => ({
+  kind: "user",
+  id,
+  ...(iat === undefined ? {} : { iat }),
+  ...(aal === undefined ? {} : { aal }),
+});
 
 /** `npm run test:db:remote` — те же тесты против облачной базы (tests/db/remote.ts). */
 export const isRemoteTarget = process.env.DB_TEST_TARGET === "remote";
@@ -47,7 +54,8 @@ export const isRemoteTarget = process.env.DB_TEST_TARGET === "remote";
 export function claimsOf(actor: Actor): string {
   const role = PG_ROLE[actor.kind];
   if (actor.kind !== "user") return JSON.stringify({ role });
-  return JSON.stringify(actor.iat === undefined ? { sub: actor.id, role } : { sub: actor.id, role, iat: actor.iat });
+  const aal = actor.aal ?? "aal2";
+  return JSON.stringify(actor.iat === undefined ? { sub: actor.id, role, aal } : { sub: actor.id, role, aal, iat: actor.iat });
 }
 
 /** Чистая база: в PGlite — заглушка Supabase + все миграции, как `supabase db push`. */

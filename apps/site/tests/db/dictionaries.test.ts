@@ -83,6 +83,9 @@ describe("настройки", () => {
       insert into settings (key, value, is_public) values
         ('contacts.phone', '"TODO-заказчик"', true),
         ('leads.telegram_chat', '"секрет"', false);
+      -- Облачный прогон (remote.ts) чистит settings целиком — строку миграции 20261102160000 кладём сами.
+      insert into settings (key, value, is_public) values ('leads.channels', '["telegram", "sheet"]', false)
+        on conflict (key) do nothing;
     `);
   });
   afterAll(() => db.close());
@@ -102,8 +105,10 @@ describe("настройки", () => {
   });
 
   it("руководитель и менеджер видят все настройки", async () => {
-    expect(await keysFor(manager)).toEqual(["contacts.phone", "leads.telegram_chat"]);
-    expect(await keysFor(head)).toEqual(["contacts.phone", "leads.telegram_chat"]);
+    // leads.channels — каналы доставки заявок по умолчанию (20261102160000).
+    const all = ["contacts.phone", "leads.channels", "leads.telegram_chat"];
+    expect(await keysFor(manager)).toEqual(all);
+    expect(await keysFor(head)).toEqual(all);
   });
 
   it("правит только руководитель", async () => {
