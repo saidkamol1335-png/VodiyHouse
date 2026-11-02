@@ -1,11 +1,13 @@
-# Сайт vodiyhouse.uz (PLAN §10). Сайт Netlify: Base directory — корень репозитория, Package
+# Сайт vodiyhouse.uz (PLAN §10). Сайт Netlify: Base directory — пусто (корень репозитория), Package
 # directory — apps/site (монорепо npm workspaces). Кабинет — отдельный сайт Netlify из apps/admin.
+# Документация Netlify «Monorepos»: установка и команда сборки — из корня, пути здесь — от корня.
 # Netlify (тестовый деплой — решение фазы 3, Ф2; переезд к заказчику — шаг «Запуск»).
 # Адаптер Next.js (OpenNext) Netlify подключает сам; переменные окружения — в настройках сайта
 # Netlify, не здесь (.env.example: что нужно и откуда).
 [build]
-  command = "npm run build"
-  publish = ".next"
+  command = "npm run build -w @vh/site"
+  publish = "apps/site/.next"
+  functions = "apps/site/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "24"
