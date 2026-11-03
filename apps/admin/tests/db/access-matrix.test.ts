@@ -19,6 +19,7 @@ const ANON_FUNCTIONS = [
   "site_calculator_available",
   "site_catalog",
   "site_complex",
+  "site_complex_faq",
   "site_complex_picker",
   "site_complex_progress",
   "site_create_tg_start",

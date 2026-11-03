@@ -110,7 +110,7 @@ describe("Server Actions кабинета", () => {
           "createComplexAction", "saveComplexMainAction", "saveComplexBlocksAction", "saveBlockLayoutsAction",
           "saveComplexDocumentsAction", "saveComplexVideosAction", "removeDeadlineChangeAction", "saveComplexDetailsAction",
           "attachComplexPhotoAction", "attachComplexDrawingAction", "reorderComplexPhotosAction", "removeComplexPhotoAction",
-          "setComplexPhotoCategoryAction", "setComplexPhotoFocusAction",
+          "setComplexPhotoCategoryAction", "setComplexPhotoFocusAction", "saveComplexFaqAction",
           "setComplexFacadeAction", "removeComplexFacadeAction", "setBlockContourAction", "saveFloorPlanAction",
           "setFloorPlanContoursAction", "deleteFloorPlanAction",
           "createBlockUnitsAction", "addUnitAction", "updateUnitAction", "deleteBlockUnitsAction", "saveRisersAction",
