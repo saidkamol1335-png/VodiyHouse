@@ -55,6 +55,16 @@
   border-top: 1px dashed var(--line);
 }
 
+/* Менеджер (PLAN §10, п. 29): пункты без ручки и кнопок. */
+.dictionary-editor__row--readonly {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.dictionary-editor__readonly-hidden {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
 .dictionary-editor__row:first-child {
   border-top: 0;
 }

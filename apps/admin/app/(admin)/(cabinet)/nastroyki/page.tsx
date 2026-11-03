@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { AdminPanel } from "@/components/AdminPanel";
 import { StaffCreateForm } from "@/components/StaffCreateForm";
@@ -10,6 +11,7 @@ import {
   setStaffActiveAction,
 } from "@/lib/admin/actions/staff";
 import { readStaffDirectory } from "@/lib/admin/server/deps";
+import { settingsTabRedirect } from "@/lib/admin/nav";
 import { requireSection } from "@/lib/admin/session";
 import { staffState } from "@/lib/admin/staff/directory";
 import type { StaffRowActionSet } from "@/lib/admin/staff/types";
@@ -28,6 +30,8 @@ export default async function SettingsStaffPage() {
   // Layout не перерисовывается при переходах — страница проверяет доступ сама.
   const { viewer, allowed } = await requireSection("settings");
   if (!allowed) return null;
+  const elsewhere = settingsTabRedirect(viewer.role, "staff");
+  if (elsewhere) redirect(elsewhere);
   if (isCabinetOpenWithoutLogin || !hasSupabaseAdminEnv()) {
     const t = await getTranslations("admin.staff");
     return <AdminPanel title={t("title")}>{t("notConfigured")}</AdminPanel>;

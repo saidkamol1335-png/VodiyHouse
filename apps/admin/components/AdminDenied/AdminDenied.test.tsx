@@ -18,9 +18,9 @@ afterEach(cleanup);
 
 describe("«Раздел недоступен»", () => {
   it("раздел руководителя — «только роль «Руководитель»»", () => {
-    renderDenied({ section: "Настройки", sectionKey: "settings" });
+    renderDenied({ section: "Статистика сайта", sectionKey: "stats" });
     expect(screen.getByText("Раздел доступен руководителю")).toBeTruthy();
-    expect(screen.getByText("«Настройки» видит только роль «Руководитель».")).toBeTruthy();
+    expect(screen.getByText("«Статистика сайта» видит только роль «Руководитель».")).toBeTruthy();
   });
 
   it("«ЖК» мобилографу — руководитель и менеджер, а не «только руководитель»", () => {

@@ -12,6 +12,7 @@ import {
   readOrder,
   type DictionaryItemInput,
   type DictionaryKey,
+  MANAGER_DICTIONARY_KEYS,
 } from "@/lib/admin/dictionaries/definitions";
 import type { DictionaryActionResult } from "@/lib/admin/dictionaries/types";
 import { requireActionViewer } from "@/lib/admin/session";
@@ -78,9 +79,11 @@ async function insertItem(
 
 /** «+ Добавить» — в конец списка. */
 export async function addDictionaryItemAction(formData: FormData): Promise<DictionaryActionResult> {
-  const guard = await requireActionViewer(["head"]);
+  const guard = await requireActionViewer(["head", "manager"]);
   const at = target(guard, formData);
   if (!isTarget(at)) return at;
+  // Менеджер — только справочники заполнения ЖК (п. 29); база проверит то же.
+  if (guard.ok && guard.viewer.role !== "head" && !MANAGER_DICTIONARY_KEYS.includes(at.key)) return fail("forbidden");
   const parsed = parseDictionaryItem(at.key, formData);
   if (!parsed.ok) return { status: "error", error: null, fieldErrors: parsed.fieldErrors };
 

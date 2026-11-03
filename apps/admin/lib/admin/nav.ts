@@ -71,7 +71,14 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   },
   // «Статистика сайта» (фаза 6): только руководитель (PLAN §7).
   { key: "stats", href: ADMIN_ROUTES.stats, roles: ["head"], ready: true },
-  { key: "settings", href: ADMIN_ROUTES.settings, roles: ["head"], ready: true },
+  // Менеджеру — только «Справочники» (PLAN §10, п. 29): вкладки по роли — SETTINGS_TABS.
+  {
+    key: "settings",
+    href: ADMIN_ROUTES.settings,
+    roles: ["head", "manager"],
+    ready: true,
+    hrefFor: { manager: ADMIN_ROUTES.dictionaries },
+  },
 ];
 
 /** Раздел сделан для этой роли (готовность по шагам плана). */
@@ -130,18 +137,35 @@ export type SettingsTab = {
   segment: string | null;
   href: string;
   ready: boolean;
+  /** Кому вкладка открыта: менеджеру — только «Справочники» (PLAN §10, п. 29). */
+  roles: readonly StaffRole[];
 };
 
 /** Вкладки «Настроек» (решение Д6) — отдельные адреса. */
 export const SETTINGS_TABS: readonly SettingsTab[] = [
-  { key: "staff", segment: null, href: ADMIN_ROUTES.settings, ready: true },
-  { key: "dictionaries", segment: "spravochniki", href: ADMIN_ROUTES.dictionaries, ready: true },
-  { key: "contacts", segment: "kontakty", href: ADMIN_ROUTES.contacts, ready: true },
-  { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true },
+  { key: "staff", segment: null, href: ADMIN_ROUTES.settings, ready: true, roles: ["head"] },
+  {
+    key: "dictionaries",
+    segment: "spravochniki",
+    href: ADMIN_ROUTES.dictionaries,
+    ready: true,
+    roles: ["head", "manager"],
+  },
+  { key: "contacts", segment: "kontakty", href: ADMIN_ROUTES.contacts, ready: true, roles: ["head"] },
+  { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true, roles: ["head"] },
 ];
 
-export function readySettingsTabs(tabs: readonly SettingsTab[] = SETTINGS_TABS): SettingsTab[] {
-  return tabs.filter((tab) => tab.ready);
+export function readySettingsTabs(
+  role: StaffRole = "head",
+  tabs: readonly SettingsTab[] = SETTINGS_TABS,
+): SettingsTab[] {
+  return tabs.filter((tab) => tab.ready && tab.roles.includes(role));
+}
+
+/** Закрытая роли вкладка «Настроек» — адрес первой открытой; null — эта открыта. */
+export function settingsTabRedirect(role: StaffRole, key: SettingsTabKey): string | null {
+  const tabs = readySettingsTabs(role);
+  return tabs.some((tab) => tab.key === key) ? null : (tabs[0]?.href ?? ADMIN_ROUTES.home);
 }
 
 export type ShowcaseTabKey = "specials" | "collections" | "ads";

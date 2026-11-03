@@ -41,10 +41,12 @@ describe("справочники", () => {
     await db.admin.query("update locations set is_active = true where slug = 'kuvasay'");
   });
 
-  it("добавляет и правит только руководитель", async () => {
+  // Фаза D (PLAN §10, п. 29): менеджер добавляет пункты справочников заполнения ЖК; правит — руководитель.
+  it("добавляют руководитель и менеджер, правит только руководитель", async () => {
     const insert = `insert into finishings (slug, name) values ($1, '{"ru": "Тест", "uz": "Test"}')`;
     await expectDenied(db.as(anon, (tx) => tx.query(insert, ["anon-try"])));
-    await expectDenied(db.as(user(manager), (tx) => tx.query(insert, ["manager-try"])));
+    await db.as(user(manager), (tx) => tx.query(insert, ["manager-ok"]));
+    expect(await count("select count(*) as n from finishings where slug = 'manager-ok'")).toBe(1);
     await db.as(user(head), (tx) => tx.query(insert, ["head-ok"]));
     expect(await count("select count(*) as n from finishings where slug = 'head-ok'")).toBe(1);
 

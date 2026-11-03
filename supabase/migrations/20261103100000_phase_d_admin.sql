@@ -155,3 +155,17 @@ revoke all on function public.release_drafts_digest() from public, anon, authent
 grant execute on function public.take_publication_reminders() to service_role;
 grant execute on function public.take_drafts_digest() to service_role;
 grant execute on function public.release_drafts_digest() to service_role;
+
+-- ─── Справочники: менеджер добавляет пункты (п. 29) ──────────────────────────────────────
+-- Только справочники заполнения ЖК; правит, скрывает, удаляет и ставит порядок — руководитель.
+do $$
+declare
+  dictionary text;
+begin
+  foreach dictionary in array array['locations', 'document_types', 'detail_topics', 'finishings'] loop
+    execute format(
+      'create policy "%s: добавляет менеджер" on public.%I for insert to authenticated
+         with check ((select private.has_role(''manager'')))', dictionary, dictionary);
+  end loop;
+end;
+$$;

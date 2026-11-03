@@ -7,6 +7,7 @@ import {
   isSectionOpen,
   landingPath,
   readySettingsTabs,
+  settingsTabRedirect,
   visibleNav,
 } from "./nav";
 
@@ -34,6 +35,7 @@ describe("меню кабинета", () => {
       "complexes",
       "programs",
       "video",
+      "settings",
     ]);
     // Фаза 5 (5B): мобилограф — сразу в «Видео и ход стройки».
     expect(visibleNav("mobilographer").map((item) => item.key)).toEqual(["video"]);
@@ -53,6 +55,7 @@ describe("меню кабинета", () => {
       "leads",
       "programs",
       "video",
+      "settings",
     ]);
   });
 
@@ -70,8 +73,9 @@ describe("меню кабинета", () => {
     ]);
   });
 
-  it("менеджер: заявки, наличие квартир, расчёт и видео — без застройщиков, статистики, настроек", () => {
-    expect(keysFor("manager")).toEqual(["home", "leads", "complexes", "programs", "video"]);
+  it("менеджер: заявки, ЖК, расчёт, видео и «Справочники» — без застройщиков и статистики", () => {
+    expect(keysFor("manager")).toEqual(["home", "leads", "complexes", "programs", "video", "settings"]);
+    expect(visibleNav("manager").find((item) => item.key === "settings")!.href).toBe(ADMIN_ROUTES.dictionaries);
   });
 
   it("мобилограф видит только видео", () => {
@@ -96,9 +100,9 @@ describe("меню кабинета", () => {
 });
 
 describe("доступ к разделам", () => {
-  it("canOpen: настройки — только руководителю; Главная — не мобилографу; готовность не важна", () => {
+  it("canOpen: настройки — руководителю и менеджеру (вкладки по роли); Главная — не мобилографу", () => {
     expect(canOpen("head", "settings")).toBe(true);
-    expect(canOpen("manager", "settings")).toBe(false);
+    expect(canOpen("manager", "settings")).toBe(true);
     expect(canOpen("mobilographer", "settings")).toBe(false);
     expect(canOpen("manager", "home")).toBe(true);
     expect(canOpen("mobilographer", "home")).toBe(false);
@@ -118,5 +122,14 @@ describe("доступ к разделам", () => {
       ["contacts", "/nastroyki/kontakty", "kontakty"],
       ["journal", "/nastroyki/zhurnal", "zhurnal"],
     ]);
+  });
+
+  it("вкладки настроек менеджера (п. 29): только «Справочники», остальные ведут туда", () => {
+    expect(readySettingsTabs("manager").map((tab) => tab.key)).toEqual(["dictionaries"]);
+    for (const key of ["staff", "contacts", "journal"] as const) {
+      expect(settingsTabRedirect("manager", key)).toBe("/nastroyki/spravochniki");
+      expect(settingsTabRedirect("head", key)).toBeNull();
+    }
+    expect(settingsTabRedirect("manager", "dictionaries")).toBeNull();
   });
 });

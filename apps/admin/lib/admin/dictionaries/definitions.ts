@@ -21,6 +21,14 @@ export const DICTIONARY_KEYS = [
 ] as const;
 export type DictionaryKey = (typeof DICTIONARY_KEYS)[number];
 
+/** Справочники заполнения ЖК: менеджер добавляет в них пункты (PLAN §10, п. 29). */
+export const MANAGER_DICTIONARY_KEYS: readonly DictionaryKey[] = [
+  "locations",
+  "document_types",
+  "detail_topics",
+  "finishings",
+];
+
 export const LOCATION_KINDS = ["city", "district"] as const;
 export type LocationKind = (typeof LOCATION_KINDS)[number];
 

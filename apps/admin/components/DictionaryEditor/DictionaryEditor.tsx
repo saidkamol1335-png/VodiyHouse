@@ -23,10 +23,12 @@ type DictionaryEditorProps = {
   items: readonly DictionaryItem[];
   /** Server Actions; на служебном стенде — подделка (список DEMO не меняется). */
   actions: DictionaryActionSet;
+  /** Менеджер (PLAN §10, п. 29): список только для чтения и «+ Добавить». */
+  addOnly?: boolean;
 };
 
 /** Один справочник (Д6): правка на месте RU | UZ, «+ Добавить», порядок перетаскиванием, скрыть и удалить. */
-export function DictionaryEditor({ dictionary, items, actions }: DictionaryEditorProps) {
+export function DictionaryEditor({ dictionary, items, actions, addOnly = false }: DictionaryEditorProps) {
   const t = useTranslations("admin.dictionaries");
   const [rows, setRows] = useSyncedRows(items);
   const form = useDictionaryForm();
@@ -39,18 +41,37 @@ export function DictionaryEditor({ dictionary, items, actions }: DictionaryEdito
         </h2>
         <span className="dictionary-editor__count">{t("count", { count: rows.length })}</span>
       </header>
-      <DictionaryRows
-        dictionary={dictionary}
-        rows={rows}
-        form={form}
-        commands={commands}
-        onReorder={setRows}
-      />
+      {addOnly ? (
+        <ReadonlyRows rows={rows} />
+      ) : (
+        <DictionaryRows
+          dictionary={dictionary}
+          rows={rows}
+          form={form}
+          commands={commands}
+          onReorder={setRows}
+        />
+      )}
       <NewItemSlot dictionary={dictionary} form={form} commands={commands} />
       {form.feedback ? (
         <FormStatus tone={form.feedback.tone}>{form.feedback.text}</FormStatus>
       ) : null}
     </section>
+  );
+}
+
+/** Пункты без правки: менеджер видит, что уже есть, и добавляет недостающее. */
+function ReadonlyRows({ rows }: { rows: readonly DictionaryItem[] }) {
+  const t = useTranslations("admin.dictionaries");
+  return (
+    <ul className="dictionary-editor__rows">
+      {rows.map((item) => (
+        <li key={item.id} className="dictionary-editor__row dictionary-editor__row--readonly">
+          <span className="dictionary-editor__name">{item.name.ru}</span>
+          {item.isActive ? null : <span className="dictionary-editor__readonly-hidden">{t("hidden")}</span>}
+        </li>
+      ))}
+    </ul>
   );
 }
 

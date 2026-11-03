@@ -10,7 +10,7 @@ import { requireSection } from "@/lib/admin/session";
 
 export const instant = false;
 
-/** «Настройки» (Д6): вкладки-адреса Сотрудники · Справочники · Журнал; только руководителю. */
+/** «Настройки» (Д6): вкладки-адреса по роли — менеджеру только «Справочники» (PLAN §10, п. 29). */
 export default async function SettingsLayout({ children }: { children: ReactNode }) {
   const { viewer, allowed } = await requireSection("settings");
   const person = await cabinetPerson(viewer);
@@ -25,7 +25,7 @@ export default async function SettingsLayout({ children }: { children: ReactNode
       </AdminPage>
     );
   }
-  const tabs = readySettingsTabs().map((tab) => ({
+  const tabs = readySettingsTabs(viewer.role).map((tab) => ({
     segment: tab.segment,
     href: tab.href,
     label: t(`settings.tabs.${tab.key}`),

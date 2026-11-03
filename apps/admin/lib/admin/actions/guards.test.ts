@@ -92,6 +92,8 @@ describe("Server Actions кабинета", () => {
       // Публикует и возвращает отчёты только руководитель (PLAN §10, п. 6) — проверка headOnly ниже.
       // Журнал: менеджеру — только журнал ЖК (проверка scope в самом действии, п. 29).
       loadJournalAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // Справочники заполнения ЖК: менеджер добавляет пункты (п. 29) — ключ проверяет действие.
+      addDictionaryItemAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Запросить у руководителя» (п. 25): просит и отзывает менеджер, отклоняет руководитель.
       requestPublicationAction: /requireActionViewer\(\["manager"\]\)/,
       cancelPublicationRequestAction: /requireActionViewer\(\["manager"\]\)/,
