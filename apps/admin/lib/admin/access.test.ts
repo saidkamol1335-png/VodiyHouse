@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { cabinetOpenWithoutLogin, DEV_VIEWER, isStaffRole, resolveViewer, type OwnProfileRow } from "./access";
+import {
+  cabinetOpenWithoutLogin,
+  DEV_VIEWER,
+  headFactorFresh,
+  isStaffRole,
+  resolveViewer,
+  type OwnProfileRow,
+} from "./access";
 
 const ID = "6f1c2c1e-6b1f-4bb0-9d7e-0d2b9f1d1a01";
 const profile = (patch: Partial<OwnProfileRow> = {}): OwnProfileRow => ({
@@ -56,5 +63,26 @@ describe("resolveViewer", () => {
       kind: "ok",
       viewer: { id: ID, role: "mobilographer", name: "Дилноза Юсупова", mustChangePassword: false },
     });
+  });
+});
+
+describe("второй фактор руководителя (PLAN §10, п. 8)", () => {
+  const NOW = Date.UTC(2026, 10, 3);
+  const at = (days: number) => NOW / 1000 - days * 86_400;
+  const staff = (role: string) => ({ id: "u", full_name: "Имя", role, is_active: true, must_change_password: false });
+
+  it("свежий — aal2 и TOTP не старше 30 дней", () => {
+    expect(headFactorFresh({ aal: "aal2", amr: [{ method: "totp", timestamp: at(1) }] }, NOW)).toBe(true);
+    expect(headFactorFresh({ aal: "aal2", amr: [{ method: "totp", timestamp: at(31) }] }, NOW)).toBe(false);
+    expect(headFactorFresh({ aal: "aal1", amr: [{ method: "password", timestamp: at(0) }] }, NOW)).toBe(false);
+    expect(headFactorFresh({ aal: "aal2", amr: [{ method: "password", timestamp: at(0) }] }, NOW)).toBe(false);
+    expect(headFactorFresh(null, NOW)).toBe(false);
+  });
+
+  it("без фактора руководитель идёт на код, менеджер — нет", () => {
+    expect(resolveViewer("u", staff("head"), false).kind).toBe("secondFactor");
+    expect(resolveViewer("u", staff("head"), true).kind).toBe("ok");
+    expect(resolveViewer("u", staff("manager"), false).kind).toBe("ok");
+    expect(resolveViewer("u", { ...staff("head"), must_change_password: true }, false).kind).toBe("changePassword");
   });
 });

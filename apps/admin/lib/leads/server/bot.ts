@@ -1,4 +1,5 @@
 import "server-only";
+import { hashCode, LINK_TOKEN } from "@/lib/admin/secondFactor/codes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createTranslator } from "next-intl";
 import { formatPhone } from "@vh/shared/format";
@@ -55,6 +56,7 @@ export async function handleTelegramUpdate(update: TelegramUpdate, deps: BotDeps
   if (!message || message.chat.type !== "private") return;
   const chatId = message.chat.id;
   const start = /^\/start(?:\s+([A-Za-z0-9_-]{8,64}))?$/.exec(message.text?.trim() ?? "");
+  if (start?.[1] && LINK_TOKEN.test(start[1])) return linkStaff(chatId, start[1], deps);
   if (start) return greet(chatId, start[1] ?? null, message.from, deps);
   const text = message.text?.trim() ?? "";
   const phone = message.contact?.phone_number ?? (PHONE_TEXT.test(text) ? text : "");
@@ -67,6 +69,24 @@ export async function handleTelegramUpdate(update: TelegramUpdate, deps: BotDeps
   if (message.contact || phone) return takePhone(chatId, phone, message, deps);
   const lang = langOf(await startFor(chatId, deps).catch(() => null), message.from);
   await deps.reply(chatId, translator(lang)("hint"), shareKeyboard(lang));
+}
+
+/**
+ * /start h_<токен> — привязка Telegram руководителя для кодов входа (PLAN §10, п. 8). Ответ — по-русски:
+ * кабинет только на русском.
+ */
+async function linkStaff(chatId: number, token: string, deps: BotDeps) {
+  const { data, error } = await deps.admin.rpc("complete_staff_telegram_link", {
+    p_token_hash: hashCode(token),
+    p_chat: chatId,
+  });
+  if (error) console.error("[bot] привязка сотрудника не удалась", error.code, error.message);
+  await deps.reply(
+    chatId,
+    typeof data === "string"
+      ? "Готово: коды входа в кабинет Vodiy House будут приходить сюда. Вернитесь в кабинет и нажмите «Отправить код»."
+      : "Ссылка устарела. Откройте кабинет и нажмите «Привязать Telegram» ещё раз.",
+  );
 }
 
 type BoundStart = { site_lang: SiteLang; complex: { ru: string; uz: string } | null };

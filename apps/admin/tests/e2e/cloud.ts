@@ -1,4 +1,6 @@
 import { expect, type Page } from "@playwright/test";
+import { createClient } from "@supabase/supabase-js";
+import { backupCode, hashCode } from "../../lib/admin/secondFactor/codes";
 
 // e2e кабинета против облачного Supabase (шаг 8.13). Без ключей в .env.local эти тесты
 // пропускаются, а кабинет в разработке открыт без входа (lib/admin/access.ts).
@@ -56,3 +58,21 @@ export function assertE2eProject(): { url: string; secret: string } {
 }
 
 export const E2E_EMAIL = /^e2e-[a-z0-9]+-[a-z-]+@example\.com$/;
+
+/**
+ * Второй фактор руководителя (PLAN §10, п. 8) на e2e: Telegram тестового сотрудника не привязан —
+ * сервисным ключом выдаём один запасной код и входим им; затем экран 10 новых кодов → кабинет.
+ */
+export async function passSecondFactor(page: Page, userId: string): Promise<void> {
+  const { url, secret } = assertE2eProject();
+  const code = backupCode();
+  const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { error } = await admin.rpc("save_head_backup_codes", { p_user: userId, p_hashes: [hashCode(code)] });
+  if (error) throw new Error(`запасной код не выдан: ${error.message}`);
+  await page.goto("/kod");
+  await page.getByRole("button", { name: /Войти запасным кодом/ }).click();
+  await page.getByLabel("Запасной код").fill(code);
+  await page.getByRole("button", { name: "Войти", exact: true }).click();
+  await page.getByRole("link", { name: "Я сохранил коды — в кабинет" }).click({ timeout: 30_000 });
+  await expect(page).not.toHaveURL(/\/kod/, { timeout: 30_000 });
+}

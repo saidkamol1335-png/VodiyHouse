@@ -20,5 +20,24 @@ export function passwordPageTarget(result: ViewerResult): string | null {
       return landingPath(result.viewer.role);
     case "changePassword":
       return null;
+    // Пароль уже сменён — дальше код второго фактора руководителя.
+    case "secondFactor":
+      return ADMIN_ROUTES.secondFactor;
+  }
+}
+
+/** /kod: null — показать экран кода; иначе — куда перенаправить. */
+export function secondFactorPageTarget(result: ViewerResult): string | null {
+  switch (result.kind) {
+    case "login":
+      return ADMIN_ROUTES.login;
+    case "noAccess":
+      return DISABLED_LOGIN_PATH;
+    case "changePassword":
+      return ADMIN_ROUTES.password;
+    case "ok":
+      return landingPath(result.viewer.role);
+    case "secondFactor":
+      return null;
   }
 }

@@ -17,6 +17,8 @@ export const ADMIN_ROUTES = {
   home: "/",
   login: `${ADMIN_ROUTE}/vhod`,
   password: `${ADMIN_ROUTE}/parol`,
+  /** Код второго фактора руководителя (PLAN §10, п. 8). */
+  secondFactor: `${ADMIN_ROUTE}/kod`,
   leads: `${ADMIN_ROUTE}/zayavki`,
   complexes: `${ADMIN_ROUTE}/zhk`,
   developers: `${ADMIN_ROUTE}/zastroyshchiki`,

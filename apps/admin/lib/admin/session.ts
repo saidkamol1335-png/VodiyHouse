@@ -7,6 +7,7 @@ import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   DEV_VIEWER,
+  headFactorFresh,
   isCabinetOpenWithoutLogin,
   resolveViewer,
   type CabinetViewer,
@@ -47,11 +48,16 @@ export const getCabinetSession = cache(async (): Promise<CabinetSession> => {
   const userId = data?.claims.sub ?? null;
   const profile = userId ? await readOwnProfile(supabase, userId) : null;
   const email = typeof data?.claims.email === "string" ? data.claims.email : null;
-  return { result: resolveViewer(userId, profile), email };
+  return { result: resolveViewer(userId, profile, headFactorFresh(data?.claims)), email };
 });
 
-/** Сотрудник страницы кабинета; иначе редирект: на вход, на «доступ отключён» или на смену пароля. */
-export async function requireViewer(options: { allowPasswordChange?: boolean } = {}): Promise<CabinetViewer> {
+/**
+ * Сотрудник страницы кабинета; иначе редирект: на вход, на «доступ отключён», на смену пароля или
+ * на код второго фактора (руководитель, п. 8).
+ */
+export async function requireViewer(
+  options: { allowPasswordChange?: boolean; allowSecondFactor?: boolean } = {},
+): Promise<CabinetViewer> {
   const { result } = await getCabinetSession();
   switch (result.kind) {
     case "login":
@@ -61,6 +67,9 @@ export async function requireViewer(options: { allowPasswordChange?: boolean } =
     case "changePassword":
       if (options.allowPasswordChange) return result.viewer;
       redirect(ADMIN_ROUTES.password);
+    case "secondFactor":
+      if (options.allowSecondFactor) return result.viewer;
+      redirect(ADMIN_ROUTES.secondFactor);
     case "ok":
       return result.viewer;
   }
@@ -78,19 +87,25 @@ export type ActionGuard =
   | { ok: true; viewer: CabinetViewer; email: string | null; supabase: SupabaseClient }
   | { ok: false; code: ActionGuardCode };
 
-type CurrentUser = { id: string | null; email: string | null } | { code: "network" };
+type CurrentUser = { id: string | null; email: string | null; factorFresh: boolean } | { code: "network" };
 
-/** fresh — getUser() спрашивает Auth (видит отозванную сессию), иначе — подпись токена (getClaims). */
+/**
+ * fresh — getUser() спрашивает Auth (видит отозванную сессию), иначе — подпись токена (getClaims).
+ * Второй фактор — из claims токена в обоих случаях.
+ */
 async function currentUser(supabase: SupabaseClient, fresh: boolean): Promise<CurrentUser> {
-  if (fresh) {
-    const { data, error } = await supabase.auth.getUser();
-    if (error?.name === "AuthRetryableFetchError") return { code: "network" };
-    return { id: data.user?.id ?? null, email: data.user?.email ?? null };
-  }
   const { data, error } = await supabase.auth.getClaims();
   if (error?.name === "AuthRetryableFetchError") return { code: "network" };
   const claims = data?.claims;
-  return { id: claims?.sub ?? null, email: typeof claims?.email === "string" ? claims.email : null };
+  const factorFresh = headFactorFresh(claims);
+  if (fresh) {
+    const user = await supabase.auth.getUser();
+    if (user.error?.name === "AuthRetryableFetchError") return { code: "network" };
+    // Токен и Auth — про одного человека: иначе claims чужие.
+    const id = user.data.user?.id ?? null;
+    return { id, email: user.data.user?.email ?? null, factorFresh: factorFresh && id === (claims?.sub ?? null) };
+  }
+  return { id: claims?.sub ?? null, email: typeof claims?.email === "string" ? claims.email : null, factorFresh };
 }
 
 /**
@@ -99,7 +114,7 @@ async function currentUser(supabase: SupabaseClient, fresh: boolean): Promise<Cu
  */
 export async function requireActionViewer(
   roles: readonly StaffRole[],
-  options: { fresh?: boolean; allowPasswordChange?: boolean } = {},
+  options: { fresh?: boolean; allowPasswordChange?: boolean; allowSecondFactor?: boolean } = {},
 ): Promise<ActionGuard> {
   if (isCabinetOpenWithoutLogin || !hasSupabaseEnv()) return { ok: false, code: "notConfigured" };
   const supabase = await createSupabaseServerClient();
@@ -112,7 +127,10 @@ export async function requireActionViewer(
   } catch {
     return { ok: false, code: "network" };
   }
-  const decision = decideActionGuard(resolveViewer(user.id, profile), roles, options.allowPasswordChange ?? false);
+  const decision = decideActionGuard(resolveViewer(user.id, profile, user.factorFresh), roles, {
+    allowPasswordChange: options.allowPasswordChange ?? false,
+    allowSecondFactor: options.allowSecondFactor ?? false,
+  });
   if ("code" in decision) return { ok: false, code: decision.code };
   return { ok: true, viewer: decision.viewer, email: user.email, supabase };
 }
@@ -121,11 +139,13 @@ export async function requireActionViewer(
 export function decideActionGuard(
   result: ViewerResult,
   roles: readonly StaffRole[],
-  allowPasswordChange: boolean,
+  allow: { allowPasswordChange: boolean; allowSecondFactor?: boolean },
 ): { viewer: CabinetViewer } | { code: "session" | "forbidden" } {
   if (result.kind === "login") return { code: "session" };
   if (result.kind === "noAccess") return { code: "forbidden" };
-  if (result.kind === "changePassword" && !allowPasswordChange) return { code: "forbidden" };
+  if (result.kind === "changePassword" && !allow.allowPasswordChange) return { code: "forbidden" };
+  // Руководитель без второго фактора — только действия экрана кода (п. 8).
+  if (result.kind === "secondFactor" && !allow.allowSecondFactor) return { code: "forbidden" };
   if (!roles.includes(result.viewer.role)) return { code: "forbidden" };
   return { viewer: result.viewer };
 }

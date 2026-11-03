@@ -1,0 +1,43 @@
+/* Экран второго фактора руководителя (/kod, PLAN §10 п. 8) — в карточке входа. */
+.second-factor {
+  display: grid;
+  gap: 20px;
+}
+
+.second-factor__step {
+  display: grid;
+  gap: 12px;
+}
+
+.second-factor__lead,
+.second-factor__hint {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.second-factor__switch {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.second-factor__codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+  padding: 14px 14px 14px 34px;
+  border: 1px dashed var(--line-3);
+  border-radius: 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-body);
+  letter-spacing: 0.06em;
+}

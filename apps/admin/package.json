@@ -23,7 +23,8 @@
     "rate:update": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/rate-update.mjs",
     "staff:create-head": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-create-head.mjs",
     "format": "prettier --write .",
-    "bot:webhook": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/bot-webhook.mjs"
+    "bot:webhook": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/bot-webhook.mjs",
+    "staff:reset-2fa": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --env-file-if-exists=.env.local scripts/staff-reset-2fa.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

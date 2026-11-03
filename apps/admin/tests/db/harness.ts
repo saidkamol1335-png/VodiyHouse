@@ -14,7 +14,10 @@ const SHIM_FILE = path.join(import.meta.dirname, "supabase-shim.sql");
 /** iat — когда выдан токен (секунды); без него токен «старше» любого закрытия сессий (20261029050000). */
 /** aal — уровень входа Supabase Auth; по умолчанию aal2: права head — только со вторым фактором (20261102180000). */
 export type Aal = "aal1" | "aal2";
-export type Actor = { kind: "anon" } | { kind: "user"; id: string; iat?: number; aal?: Aal } | { kind: "service" };
+export type Actor =
+  | { kind: "anon" }
+  | { kind: "user"; id: string; iat?: number; aal?: Aal; totpAt?: number }
+  | { kind: "service" };
 
 /** Общее у PGlite и облачной базы (pg): тесты не знают, где выполняются. */
 export type Db = {
@@ -51,11 +54,17 @@ export const user = (id: string, iat?: number, aal?: Aal): Actor => ({
 /** `npm run test:db:remote` — те же тесты против облачной базы (tests/db/remote.ts). */
 export const isRemoteTarget = process.env.DB_TEST_TARGET === "remote";
 
+/**
+ * Токен сотрудника. По умолчанию — сессия со вторым фактором (aal2, TOTP только что, как после
+ * кода из Telegram): иначе руководитель стенда остался бы без прав (20261103110000).
+ */
 export function claimsOf(actor: Actor): string {
   const role = PG_ROLE[actor.kind];
   if (actor.kind !== "user") return JSON.stringify({ role });
   const aal = actor.aal ?? "aal2";
-  return JSON.stringify(actor.iat === undefined ? { sub: actor.id, role, aal } : { sub: actor.id, role, aal, iat: actor.iat });
+  const amr = aal === "aal2" ? [{ method: "totp", timestamp: actor.totpAt ?? Math.floor(Date.now() / 1000) }] : [];
+  const claims = { sub: actor.id, role, aal, amr };
+  return JSON.stringify(actor.iat === undefined ? claims : { ...claims, iat: actor.iat });
 }
 
 /** Чистая база: в PGlite — заглушка Supabase + все миграции, как `supabase db push`. */

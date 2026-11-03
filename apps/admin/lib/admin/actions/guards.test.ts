@@ -92,6 +92,12 @@ describe("Server Actions кабинета", () => {
       // Публикует и возвращает отчёты только руководитель (PLAN §10, п. 6) — проверка headOnly ниже.
       // Журнал: менеджеру — только журнал ЖК (проверка scope в самом действии, п. 29).
       loadJournalAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // Экран кода руководителя (п. 8): пускает без второго фактора, секретный ключ — после fresh.
+      ...Object.fromEntries(
+        ["telegramLinkAction", "sendLoginCodeAction", "verifyLoginCodeAction", "verifyBackupCodeAction"].map(
+          (name) => [name, /requireActionViewer\(\["head"\], \{ fresh: true, allowSecondFactor: true \}\)/],
+        ),
+      ),
       // Справочники заполнения ЖК: менеджер добавляет пункты (п. 29) — ключ проверяет действие.
       addDictionaryItemAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Запросить у руководителя» (п. 25): просит и отзывает менеджер, отклоняет руководитель.

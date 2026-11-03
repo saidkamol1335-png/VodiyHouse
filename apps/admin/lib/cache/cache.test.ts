@@ -100,6 +100,8 @@ const NO_CONTENT_FILES = [
   "publicationRequests.ts",
   // Отчёт на проверке (фаза 5) на сайт не попадает — его публикует менеджер (5D, свой файл).
   "progressReports.ts",
+  // Второй фактор руководителя (фаза D): сайт не меняется.
+  "secondFactor.ts",
   "siteNow.ts",
   "siteStock.ts",
   "staff.ts",
