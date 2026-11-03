@@ -22,7 +22,10 @@ const PRODUCTION_GUARD =
 
 describe("стенды /dev в продакшене закрыты", () => {
   it("корневой layout /dev — 404 в продакшене до всего остального", () => {
-    const body = readSource(path.join(DEV_DIR, "layout.tsx")).split("export default function")[1]!;
+    // async — layout читает nonce CSP (фаза F); защита по-прежнему первой строкой.
+    const body = readSource(path.join(DEV_DIR, "layout.tsx")).split(
+      /export default (?:async )?function/,
+    )[1]!;
     const firstLine = body
       .split("\n")
       .find((line) => line.trim().startsWith("if") || line.includes("return"));
