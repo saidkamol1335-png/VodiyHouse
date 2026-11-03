@@ -5,6 +5,7 @@ import { unitPricePerM2, unitTotalPrice } from "@vh/shared/calc/unitPrice";
 import { formatPrice, formatPricePerM2 } from "@vh/shared/format";
 import type { RoomsByLayout, UnitRecord } from "@vh/shared/units";
 import { layoutVariants } from "./layoutVariants";
+import { unitSiteGaps, type UnitSiteGap } from "./siteGaps";
 import type { UnitsBlock, UnitsFinishing, UnitsLayout } from "./types";
 
 export type UnitRowContext = {
@@ -38,7 +39,7 @@ export function unitRowContext(
       block.id,
       block.currency,
       block.finishingId,
-      layouts.map((layout) => `${layout.id}:${layout.rooms}:${layout.area}`).join(","),
+      layouts.map((layout) => `${layout.id}:${layout.rooms}:${layout.area}:${layout.drawingMissing ? 1 : 0}`).join(","),
       finishings.map((item) => `${item.id}:${item.name}`).join(","),
     ].join("|"),
   };
@@ -54,6 +55,8 @@ export type UnitRowView = {
   finishing: { name: string; inherited: boolean } | null;
   /** Цена брони и проданной — серым: сайт её не видит («Решаю сам» шага 12). */
   muted: boolean;
+  /** Чего не хватает до сайта (экран 4); пусто — квартира на сайте с ценой. */
+  siteGaps: UnitSiteGap[];
 };
 
 function finishingOf(unit: UnitRecord, ctx: UnitRowContext): UnitRowView["finishing"] {
@@ -77,5 +80,6 @@ export function unitRowView(unit: UnitRecord, ctx: UnitRowContext): UnitRowView 
     perM2: perM2 === null ? null : formatPricePerM2(perM2, ctx.currency),
     finishing: finishingOf(unit, ctx),
     muted: unit.status !== "free",
+    siteGaps: unitSiteGaps(unit, ctx.layouts),
   };
 }

@@ -38,6 +38,7 @@ describe("раскрытая строка в списке", () => {
       sticky: new Set<string>(),
       pinned: new Set<string>(),
       rooms: new Map<string, number>(),
+      offSite: new Set<string>(),
       onFilterChange: () => {},
       dirty: new EditDirty(),
     };

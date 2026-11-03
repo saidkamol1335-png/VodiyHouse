@@ -1,4 +1,5 @@
 import { ComplexUnitsTab } from "@/components/ComplexUnitsTab";
+import { UnitsScreenSwitch } from "@/components/UnitsScreenSwitch";
 import {
   addUnitAction,
   createBlockUnitsAction,
@@ -19,7 +20,7 @@ import {
 } from "@/lib/admin/actions/unitsStatus";
 import { complexTabHref } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import { complexForTab } from "@/lib/admin/server/complexPage";
+import { complexForTab, getComplexCompleteness } from "@/lib/admin/server/complexPage";
 import { readUnitsTab } from "@/lib/admin/server/unitsTab";
 import { requireViewer } from "@/lib/admin/session";
 import { unitsActionsFor } from "@/lib/admin/units/access";
@@ -53,17 +54,27 @@ const ACTIONS: UnitsTabActions = {
   layoutAvailable: setLayoutAvailableAction,
 };
 
-/** Вкладка «Квартиры» (шаг 12): блок из ?blok=, генератор или стояки и список (читает экран). */
+/** Экран «Квартиры» (экран 4, PLAN §10 п. 22): блок из ?blok=, генератор или стояки и список. */
 export default async function ComplexUnitsPage({ params, searchParams }: ComplexUnitsPageProps) {
   const complex = await complexForTab(params, "units");
   if (!complex) return null;
   const [{ blok }, viewer] = await Promise.all([searchParams, requireViewer()]);
   const supabase = await createSupabaseServerClient();
-  const tab = await readUnitsTab(supabase, complex.id, typeof blok === "string" ? blok : null);
+  const [tab, completeness] = await Promise.all([
+    readUnitsTab(supabase, complex.id, typeof blok === "string" ? blok : null),
+    getComplexCompleteness(complex.id),
+  ]);
+  // «На сайте» и «Только неполные» (экран 4): чертёж планировки знает только база.
+  const noDrawing = new Set(
+    (completeness?.layouts ?? []).filter((layout) => layout.missing.includes("drawing")).map((layout) => layout.id),
+  );
+  const layouts = tab.layouts.map((layout) => ({ ...layout, drawingMissing: noDrawing.has(layout.id) }));
   const base = `${ADMIN_ROUTES.complexes}/${complex.id}`;
   return (
-    <ComplexUnitsTab
-      view={unitsTabView(tab)}
+    <>
+      <UnitsScreenSwitch base={base} />
+      <ComplexUnitsTab
+      view={unitsTabView({ ...tab, layouts })}
       tabHref={complexTabHref(base, "units")}
       blocksHref={complexTabHref(base, "blocks")}
       layoutsHref={complexTabHref(base, "layouts")}
@@ -71,5 +82,6 @@ export default async function ComplexUnitsPage({ params, searchParams }: Complex
       actions={unitsActionsFor(viewer.role, ACTIONS)}
       viewerName={viewer.name}
     />
+    </>
   );
 }

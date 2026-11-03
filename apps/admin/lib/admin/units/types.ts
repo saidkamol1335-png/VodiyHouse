@@ -100,6 +100,8 @@ export type UnitsLayout = {
   /** Ручной флаг «доступна» — только у блока без списка квартир (Н7). */
   available: boolean;
   priceFrom: number | null;
+  /** Чертежа нет или он меньше 1200 px (правило публикации v2): квартира на сайт не выходит. */
+  drawingMissing?: boolean;
 };
 
 export type UnitsFinishing = { id: number; name: string; isActive: boolean };

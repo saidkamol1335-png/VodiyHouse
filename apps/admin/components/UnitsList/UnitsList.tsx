@@ -40,6 +40,7 @@ export function UnitsList({
         filter={view.filter}
         counts={view.counts}
         options={view.options}
+        incomplete={view.incomplete}
         onChange={view.changeFilter}
       />
       <SummaryRow view={view} selection={selection} summaryId={summaryId} />

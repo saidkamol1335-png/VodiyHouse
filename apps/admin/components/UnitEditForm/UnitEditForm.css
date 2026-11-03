@@ -3,7 +3,7 @@
 .unit-edit {
   display: grid;
   gap: 14px;
-  max-width: 760px;
+  max-width: 1120px;
   animation: unit-edit-reveal var(--dur-fast) var(--ease) both;
 }
 
@@ -46,5 +46,90 @@
 
   .unit-edit__action {
     flex: 1 1 0;
+  }
+}
+
+/* Экран 5: поля и рядом чек-лист с превью карточки; на узком — превью под полями. */
+.unit-edit__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  align-items: start;
+  gap: 18px;
+}
+
+.unit-edit__aside {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-3);
+}
+
+.unit-edit__aside-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.unit-edit__checklist {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-small);
+}
+
+.unit-edit__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-2);
+}
+
+.unit-edit__check--ok {
+  color: var(--ok-strong);
+}
+
+.unit-edit__card {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--bg-2);
+}
+
+.unit-edit__card p {
+  margin: 0;
+}
+
+.unit-edit__card-kicker {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.unit-edit__card-title {
+  font-weight: 700;
+}
+
+.unit-edit__card-price {
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+
+.unit-edit__card-state {
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.unit-edit__card-state--on {
+  color: var(--ok-strong);
+}
+
+@media (max-width: 900px) {
+  .unit-edit__body {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

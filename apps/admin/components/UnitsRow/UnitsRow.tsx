@@ -9,7 +9,7 @@ import { UnitsCheck } from "@/components/UnitsCheck";
 import { unitRowView, type UnitRowContext } from "@/lib/admin/units/rowView";
 import type { UnitRecord, UnitStatus } from "@vh/shared/units";
 import { UpdatedAgo } from "@/components/UpdatedAgo";
-import { FinishingCell, LayoutCell, PriceCell } from "./UnitsRowCells";
+import { FinishingCell, LayoutCell, PriceCell, SiteCell } from "./UnitsRowCells";
 
 export type UnitsRowOpen = "status" | "edit" | null;
 
@@ -140,7 +140,7 @@ function SelectCell({ unit, selected, onSelect }: UnitsRowProps) {
   );
 }
 
-/** Ячейки до статуса: № · подъезд · этаж · планировка · цена · отделка · обновлено. */
+/** Ячейки до статуса: № · подъезд · этаж · планировка · цена · отделка · обновлено · на сайте. */
 function UnitCells({ unit, rowContext }: Pick<UnitsRowProps, "unit" | "rowContext">) {
   const t = useTranslations("admin.complexes.units.list");
   const view = unitRowView(unit, rowContext);
@@ -159,11 +159,12 @@ function UnitCells({ unit, rowContext }: Pick<UnitsRowProps, "unit" | "rowContex
         {unit.floor}
       </td>
       <LayoutCell view={view} />
-      <PriceCell view={view} />
+      <PriceCell view={view} unit={unit} />
       <FinishingCell view={view} />
       <td className="units-row__updated" role="cell">
         <UpdatedAgo at={unit.updatedAt} by={unit.updatedByName} />
       </td>
+      <SiteCell view={view} />
     </>
   );
 }

@@ -234,3 +234,70 @@
     min-height: var(--touch-target);
   }
 }
+
+/* «На сайте» (экран 4): да — зелёным, чего не хватает — янтарём. */
+.units-row__site {
+  color: var(--amber-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.units-row__site--on {
+  color: var(--ok-strong);
+}
+
+/* Цена в строке (экран 4): кнопка без рамки, поле — по ширине колонки. */
+.units-row__price-inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.units-row__price-button {
+  padding: 2px 4px;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
+}
+
+.units-row__price-button:hover,
+.units-row__price-button:focus-visible {
+  border-color: var(--amber-line);
+}
+
+.units-row__price-input {
+  width: 100%;
+  min-width: 96px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  background: var(--bg-2);
+  font: inherit;
+}
+
+.units-row__price-undo {
+  color: var(--ok-strong);
+  font-size: var(--fs-caption);
+}
+
+.units-row__price-undo button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--amber-2);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.units-row__price-failed {
+  color: var(--badge-bad-fg);
+  font-size: var(--fs-caption);
+}

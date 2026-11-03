@@ -15,6 +15,7 @@ import { useLayoutLabel } from "@/lib/admin/units/useLayoutLabel";
 import { useFocusFirstInvalid } from "@/lib/ui/useFocusAfterRender";
 import { useRefocusAfter } from "@/lib/ui/useRefocus";
 import type { UnitRecord } from "@vh/shared/units";
+import { UnitCompleteness } from "./UnitCompleteness";
 import { useUnitEditForm, type UnitEditFormState } from "./useUnitEditForm";
 
 type UnitEditFormProps = {
@@ -23,7 +24,10 @@ type UnitEditFormProps = {
   onDone: () => void;
 };
 
-/** Правка квартиры (Н4) в раскрытии под строкой: номер, планировка, цена, отделка. Место не правится. */
+/**
+ * Форма квартиры (экран 5, Н4) в раскрытии под строкой: номер, планировка, цена, отделка; рядом —
+ * живой чек-лист «на сайте» и превью карточки (на телефоне — под полями). Место не правится.
+ */
 export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
   const t = useTranslations("admin.complexes.units.edit");
   const form = useUnitEditForm(unit, onDone);
@@ -48,7 +52,7 @@ export function UnitEditForm({ unit, onDone }: UnitEditFormProps) {
           position: initial.position,
         })}
       </p>
-      <EditFields form={form} />
+      <EditBody form={form} />
       {changedMeanwhile ? <FormStatus tone="notice">{t("changed")}</FormStatus> : null}
       {form.check.twin ? (
         <FormStatus tone="notice">{t("twin", { number: form.check.twin })}</FormStatus>
@@ -72,6 +76,22 @@ const OWN_FIELDS: ReadonlySet<UnitErrorField | null> = new Set([
   "layout_id",
   "finishing_id",
 ]);
+
+/** Поля и рядом чек-лист «на сайте» с превью карточки (экран 5). */
+function EditBody({ form }: { form: UnitEditFormState }) {
+  return (
+    <div className="unit-edit__body">
+      <EditFields form={form} />
+      <UnitCompleteness
+        unit={form.initial}
+        draft={form.draft}
+        layouts={form.context.layouts}
+        currency={form.context.block.currency}
+        blockName={form.context.block.name}
+      />
+    </div>
+  );
+}
 
 type EditT = ReturnType<typeof useTranslations<"admin.complexes.units.edit">>;
 

@@ -1689,11 +1689,13 @@
             "price": "Цена",
             "finishing": "Отделка",
             "updated": "Обновлено",
+            "site": "На сайте",
             "status": "Статус"
           },
           "card": {
             "entrance": "под.",
-            "floor": "эт."
+            "floor": "эт.",
+            "site": "На сайте:"
           },
           "noLayout": "без планировки",
           "noPrice": "без цены",
@@ -1720,7 +1722,8 @@
             "search": "Номер квартиры",
             "searchPlaceholder": "Например, 41",
             "toggle": "Фильтры{count, plural, =0 {} other { · #}}",
-            "reset": "Сбросить"
+            "reset": "Сбросить",
+            "incomplete": "Только неполные · {count, number}"
           },
           "bar": {
             "one": "Кв. {number}",
@@ -1769,7 +1772,15 @@
             "clear": "Снять выделение",
             "toActions": "К действиям · {count, number}"
           },
-          "statusButtonEdit": "Кв. {number}, {status}. Статус и правка"
+          "statusButtonEdit": "Кв. {number}, {status}. Статус и правка",
+          "site": {
+            "on": "да",
+            "gaps": {
+              "layout": "нет планировки",
+              "price": "нет цены",
+              "drawing": "нет чертежа"
+            }
+          }
         },
         "bulk": {
           "label": "Выбранные квартиры",
@@ -1887,6 +1898,34 @@
           "pending": "Удаляем…",
           "cancel": "Отмена",
           "done": "Список блока {name} удалён: {count, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}. Можно создать его заново генератором."
+        },
+        "inlinePrice": {
+          "edit": "Цена кв. {number} — изменить",
+          "label": "Цена кв. {number} целиком",
+          "labelPerM2": "Цена кв. {number} за м²",
+          "saved": "Сохранено ·",
+          "undo": "Отменить",
+          "failed": "Не сохранено — проверьте цену"
+        },
+        "checklist": {
+          "label": "Квартира на сайте",
+          "summary": "На сайт: {done} из {total}",
+          "done": "есть",
+          "todo": "не хватает",
+          "items": {
+            "layout": "Планировка выбрана",
+            "drawing": "Чертёж планировки от 1200 px — «Планировки»",
+            "roomsArea": "Комнаты и площадь планировки",
+            "price": "Цена квартиры",
+            "free": "Статус «в продаже»"
+          },
+          "preview": "Превью карточки",
+          "previewKicker": "Блок {block} · {floor}-й этаж",
+          "previewTitle": "{rooms, select, 0 {Студия} other {{rooms}-комн.}} · {area} м²",
+          "previewNoLayout": "Без планировки",
+          "previewNoPrice": "Цена уточняется",
+          "onSite": "Видна на сайте с ценой",
+          "offSite": "На сайте без цены — дополните пункты выше"
         }
       },
       "photos": {
@@ -2160,6 +2199,11 @@
           "deleted": "ЖК удалён"
         },
         "csvNotSent": "CSV квартир не ушёл в Telegram — ЖК не удалён. Попробуйте ещё раз."
+      },
+      "unitsScreen": {
+        "label": "Квартиры: вид",
+        "list": "Список",
+        "facade": "Фасад"
       }
     },
     "meta": {

@@ -8,6 +8,7 @@ export const UNITS_DATA_COLUMNS = [
   "price",
   "finishing",
   "updated",
+  "site",
   "status",
 ] as const;
 

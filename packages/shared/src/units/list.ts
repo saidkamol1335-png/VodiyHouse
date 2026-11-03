@@ -19,6 +19,8 @@ export type UnitFilter = {
   floorFrom: number | null;
   floorTo: number | null;
   query: string;
+  /** «Только неполные»: квартиры, которых на сайте нет с ценой (экран 4 кабинета). */
+  incomplete: boolean;
 };
 
 export const EMPTY_UNIT_FILTER: UnitFilter = {
@@ -28,6 +30,7 @@ export const EMPTY_UNIT_FILTER: UnitFilter = {
   floorFrom: null,
   floorTo: null,
   query: "",
+  incomplete: false,
 };
 
 /** Комнаты планировки по её id — у квартиры своих комнат нет (решение фазы 1). */
@@ -39,9 +42,10 @@ function roomFilterOf(unit: UnitRecord, roomsByLayout: RoomsByLayout): UnitRoomF
 }
 
 /** Все фильтры, кроме статуса; запрос сворачивается один раз на список, а не на квартиру. */
-function exceptStatus(filter: UnitFilter, roomsByLayout: RoomsByLayout) {
+function exceptStatus(filter: UnitFilter, roomsByLayout: RoomsByLayout, offSite: ReadonlySet<string>) {
   const wanted = foldUnitNumber(filter.query);
   return (unit: UnitRecord) =>
+    (!filter.incomplete || offSite.has(unit.id)) &&
     (filter.entrances.length === 0 || filter.entrances.includes(unit.entrance)) &&
     (filter.rooms.length === 0 || filter.rooms.includes(roomFilterOf(unit, roomsByLayout))) &&
     (filter.floorFrom === null || unit.floor >= filter.floorFrom) &&
@@ -57,15 +61,20 @@ const NO_IDS: ReadonlySet<string> = new Set();
  * выделенные после массового статуса так и остаются скрытыми. pinned — правленая или добавленная
  * квартира: проходит все фильтры (новый номер не пропадает под поиском).
  */
-export type UnitKeep = { sticky?: ReadonlySet<string>; pinned?: ReadonlySet<string> };
+export type UnitKeep = {
+  sticky?: ReadonlySet<string>;
+  pinned?: ReadonlySet<string>;
+  /** Квартиры, которых нет на сайте с ценой, — для «Только неполные». */
+  offSite?: ReadonlySet<string>;
+};
 
 export function filterUnits(
   units: readonly UnitRecord[],
   filter: UnitFilter,
   roomsByLayout: RoomsByLayout,
-  { sticky = NO_IDS, pinned = NO_IDS }: UnitKeep = {},
+  { sticky = NO_IDS, pinned = NO_IDS, offSite = NO_IDS }: UnitKeep = {},
 ): UnitRecord[] {
-  const matches = exceptStatus(filter, roomsByLayout);
+  const matches = exceptStatus(filter, roomsByLayout, offSite);
   return units.filter(
     (unit) =>
       pinned.has(unit.id) ||
@@ -80,7 +89,8 @@ export function activeFilterCount(filter: UnitFilter): number {
     filter.entrances.length +
     filter.rooms.length +
     (filter.floorFrom !== null || filter.floorTo !== null ? 1 : 0) +
-    (filter.query.trim() === "" ? 0 : 1)
+    (filter.query.trim() === "" ? 0 : 1) +
+    (filter.incomplete ? 1 : 0)
   );
 }
 
@@ -91,9 +101,10 @@ export function countUnitStatuses(
   units: readonly UnitRecord[],
   filter: UnitFilter,
   roomsByLayout: RoomsByLayout,
+  offSite: ReadonlySet<string> = NO_IDS,
 ): UnitStatusCounts {
   const counts: UnitStatusCounts = { all: 0, free: 0, reserved: 0, sold: 0 };
-  const matches = exceptStatus(filter, roomsByLayout);
+  const matches = exceptStatus(filter, roomsByLayout, offSite);
   for (const unit of units) {
     if (!matches(unit)) continue;
     counts.all += 1;

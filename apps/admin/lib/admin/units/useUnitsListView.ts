@@ -21,6 +21,8 @@ type Params = {
   sticky: ReadonlySet<string>;
   pinned: ReadonlySet<string>;
   rooms: RoomsByLayout;
+  /** Квартиры, которых нет на сайте с ценой (экран 4): «Только неполные». */
+  offSite: ReadonlySet<string>;
   onFilterChange: () => void;
   /** Несохранённая правка строки: смена фильтра и другая строка сначала спрашивают. */
   dirty: EditDirty;
@@ -31,14 +33,17 @@ type Params = {
  * порция «Показать ещё» и раскрытая строка. Смена фильтра закрывает раскрытие: иначе строка,
  * вернувшаяся в список, забрала бы фокус из поля поиска.
  */
-export function useUnitsListView({ units, sticky, pinned, rooms, onFilterChange, dirty }: Params) {
+export function useUnitsListView({ units, sticky, pinned, rooms, offSite, onFilterChange, dirty }: Params) {
   const [filter, setFilter] = useState<UnitFilter>(EMPTY_UNIT_FILTER);
   const [limit, setLimit] = useState(UNITS_PAGE_SIZE);
   const { open, setOpen, openRow } = useOpenRow(dirty);
   const deferred = useDeferredValue(filter);
   const options = useMemo(() => unitFilterOptions(units, rooms), [units, rooms]);
-  const counts = useMemo(() => countUnitStatuses(units, deferred, rooms), [units, deferred, rooms]);
-  const list = useShownUnits({ units, sticky, pinned, rooms, filter: deferred, open, limit });
+  const counts = useMemo(
+    () => countUnitStatuses(units, deferred, rooms, offSite),
+    [units, deferred, rooms, offSite],
+  );
+  const list = useShownUnits({ units, sticky, pinned, rooms, offSite, filter: deferred, open, limit });
   const changeFilter = (next: UnitFilter) => {
     if (!dirty.confirmLeave()) return;
     setFilter(next);
@@ -51,6 +56,7 @@ export function useUnitsListView({ units, sticky, pinned, rooms, onFilterChange,
     busy: filter !== deferred,
     options,
     counts,
+    incomplete: offSite.size,
     visible: list.visible,
     shown: list.shown,
     limit,
@@ -87,12 +93,12 @@ type ShownParams = Omit<Params, "onFilterChange" | "dirty"> & {
 };
 
 /** Видимые строки и порция; раскрытая строка держится и там, и там. */
-function useShownUnits({ units, sticky, pinned, rooms, filter, open, limit }: ShownParams) {
-  const keep = useMemo(() => ({ sticky, pinned }), [sticky, pinned]);
+function useShownUnits({ units, sticky, pinned, rooms, offSite, filter, open, limit }: ShownParams) {
+  const keep = useMemo(() => ({ sticky, pinned, offSite }), [sticky, pinned, offSite]);
   // Раскрытая строка не исчезает из-под руки, если её поменяли и список перечитали.
   const shownKeep = useMemo(
-    () => (open ? { sticky, pinned: new Set([...pinned, open.id]) } : keep),
-    [open, sticky, pinned, keep],
+    () => (open ? { sticky, offSite, pinned: new Set([...pinned, open.id]) } : keep),
+    [open, sticky, pinned, offSite, keep],
   );
   const visible = useMemo(
     () => filterUnits(units, filter, rooms, shownKeep),

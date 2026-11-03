@@ -19,6 +19,8 @@ type UnitsFiltersProps = {
   filter: UnitFilter;
   counts: UnitStatusCounts;
   options: UnitFilterOptions;
+  /** Сколько квартир блока нет на сайте с ценой — «Только неполные · N» (экран 4). */
+  incomplete: number;
   onChange: (next: UnitFilter) => void;
 };
 
@@ -30,12 +32,12 @@ const STATUS_PILLS: readonly StatusPill[] = ["all", "free", "reserved", "sold"];
  * комнаты — чипами, этаж «от — до». На узком экране чипы и этажи — под кнопкой «Фильтры · N», а
  * поиск остаётся снаружи: найти квартиру по номеру — самое частое действие.
  */
-export function UnitsFilters({ filter, counts, options, onChange }: UnitsFiltersProps) {
+export function UnitsFilters({ filter, counts, options, incomplete, onChange }: UnitsFiltersProps) {
   const t = useTranslations("admin.complexes.units.list.filters");
   const [open, setOpen] = useState(false);
   const panelId = useId();
   // Поиск — снаружи панели: на кнопке «Фильтры · N» считаются только чипы и этажи.
-  const inPanel = activeFilterCount({ ...filter, query: "" });
+  const inPanel = activeFilterCount({ ...filter, query: "", incomplete: false });
   const pills = STATUS_PILLS.map((key) => ({ key, label: t(key), count: counts[key] }));
   return (
     <div className={open ? "units-filters units-filters--open" : "units-filters"}>
@@ -45,6 +47,7 @@ export function UnitsFilters({ filter, counts, options, onChange }: UnitsFilters
         value={filter.status ?? "all"}
         onChange={(key) => onChange({ ...filter, status: key === "all" ? null : key })}
       />
+      <IncompleteToggle filter={filter} incomplete={incomplete} onChange={onChange} />
       <SearchRow
         filter={filter}
         onChange={onChange}
@@ -66,6 +69,22 @@ export function UnitsFilters({ filter, counts, options, onChange }: UnitsFilters
         ) : null}
       </div>
     </div>
+  );
+}
+
+/** «Только неполные · N» (экран 4): квартиры, которых нет на сайте с ценой. */
+function IncompleteToggle({ filter, incomplete, onChange }: Pick<UnitsFiltersProps, "filter" | "incomplete" | "onChange">) {
+  const t = useTranslations("admin.complexes.units.list.filters");
+  if (incomplete === 0 && !filter.incomplete) return null;
+  return (
+    <button
+      type="button"
+      className="units-filters__incomplete"
+      aria-pressed={filter.incomplete}
+      onClick={() => onChange({ ...filter, incomplete: !filter.incomplete })}
+    >
+      {t("incomplete", { count: incomplete })}
+    </button>
   );
 }
 

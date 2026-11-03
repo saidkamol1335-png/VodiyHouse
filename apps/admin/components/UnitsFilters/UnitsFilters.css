@@ -161,3 +161,21 @@
     height: var(--touch-target);
   }
 }
+
+/* «Только неполные · N» (экран 4): квартиры, которых нет на сайте с ценой. */
+.units-filters__incomplete {
+  justify-self: start;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px dashed var(--amber-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--amber-2);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.units-filters__incomplete[aria-pressed="true"] {
+  border-style: solid;
+  background: var(--amber-soft);
+}

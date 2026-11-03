@@ -7,6 +7,7 @@ import { withoutBlock } from "@/lib/admin/units/bar";
 import { EditDirty } from "@/lib/admin/units/editDirty";
 import { ReadyCache } from "@/lib/admin/units/readyCache";
 import { unitRowContext } from "@/lib/admin/units/rowView";
+import { offSiteUnits } from "@/lib/admin/units/siteGaps";
 import type {
   UnitsBlock,
   UnitsFinishing,
@@ -49,16 +50,14 @@ export function useUnitsBlock({
   const edit = useUnitsEdit(store, { ...where, actions: actions.edit, onListRemoved }, bar);
   const selection = useUnitsSelection(store.units);
   const dirty = useDirty();
-  const rowContext = useMemo(
-    () => unitRowContext(block, layouts, finishings),
-    [block, layouts, finishings],
-  );
+  const { rowContext, offSite } = useRowContext(block, layouts, finishings, store.units);
   const { dispatch } = store;
   const view = useUnitsListView({
     units: store.units,
     sticky: store.state.sticky,
     pinned: store.state.pinned,
     rooms: rowContext.rooms,
+    offSite,
     onFilterChange: useCallback(() => dispatch({ type: "filterChanged" }), [dispatch]),
     dirty,
   });
@@ -105,4 +104,16 @@ function useListRemovedHandler(
     },
     [block.id, block.name, setBar, setNotice],
   );
+}
+
+/** Подписи строк и квартиры без сайта (экран 4) — пересчёт только при смене данных. */
+function useRowContext(
+  block: UnitsBlock,
+  layouts: readonly UnitsLayout[],
+  finishings: readonly UnitsFinishing[],
+  units: readonly UnitRecord[],
+) {
+  const rowContext = useMemo(() => unitRowContext(block, layouts, finishings), [block, layouts, finishings]);
+  const offSite = useMemo(() => offSiteUnits(units, rowContext.layouts), [units, rowContext]);
+  return { rowContext, offSite };
 }
