@@ -3,8 +3,6 @@ export type FactorResult =
   | { status: "idle" }
   | { status: "sent"; at: number }
   | { status: "link"; url: string }
-  /** Первый вход со вторым фактором: 10 запасных кодов — показать один раз. */
-  | { status: "backup"; codes: string[] }
   | {
       status: "error";
       error:

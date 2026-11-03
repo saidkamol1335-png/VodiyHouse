@@ -15,8 +15,6 @@ type SecondFactorFormProps = {
   /** Запасные коды выданы — можно войти без Telegram. */
   hasBackup: boolean;
   actions: { link: FactorAction; send: FactorAction; verify: FactorAction; backup: FactorAction };
-  /** Куда после показа запасных кодов. */
-  next: string;
 };
 
 const IDLE: FactorResult = { status: "idle" };
@@ -27,12 +25,11 @@ function useFactor(action: FactorAction) {
 
 /**
  * Экран второго фактора руководителя (PLAN §10, пп. 8, 28): привязка Telegram при первом входе,
- * код из Telegram, запасной код. После первого подтверждения — 10 запасных кодов, один раз.
+ * код из Telegram, запасной код. После первого подтверждения — экран 10 запасных кодов (/kod/zapasnye).
  */
-export function SecondFactorForm({ telegram, hasBackup, actions, next }: SecondFactorFormProps) {
+export function SecondFactorForm({ telegram, hasBackup, actions }: SecondFactorFormProps) {
   const [backupMode, setBackupMode] = useState(false);
   const [verified, verifyAction, verifying] = useFactor(backupMode ? actions.backup : actions.verify);
-  if (verified.status === "backup") return <BackupCodes codes={verified.codes} next={next} />;
   return (
     <div className="second-factor">
       {telegram ? <SendCode action={actions.send} /> : <LinkTelegram action={actions.link} />}
@@ -125,23 +122,5 @@ function CodeForm({ backup, state, action, pending, onToggle }: CodeFormProps) {
         </button>
       ) : null}
     </form>
-  );
-}
-
-/** 10 запасных кодов — один раз (п. 28): сохранить и перейти в кабинет. */
-function BackupCodes({ codes, next }: { codes: readonly string[]; next: string }) {
-  const t = useTranslations("admin.secondFactor");
-  return (
-    <div className="second-factor second-factor__step">
-      <p className="second-factor__lead">{t("backupLead")}</p>
-      <ol className="second-factor__codes">
-        {codes.map((code) => (
-          <li key={code}>{code}</li>
-        ))}
-      </ol>
-      <Button href={next} block>
-        {t("backupDone")}
-      </Button>
-    </div>
   );
 }

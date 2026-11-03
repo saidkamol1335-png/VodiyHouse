@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { readText } from "@/lib/admin/credentials";
-import { landingPath } from "@/lib/admin/nav";
+import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
 import { normalizeCode } from "@/lib/admin/secondFactor/codes";
 import type { FactorResult } from "@/lib/admin/secondFactor/types";
 import {
@@ -10,7 +10,6 @@ import {
   confirmSecondFactor,
   factorState,
   redeemBackupCode,
-  renewBackupCodes,
   sendLoginCode,
   telegramLink,
 } from "@/lib/admin/server/secondFactor";
@@ -42,8 +41,9 @@ export async function sendLoginCodeAction(): Promise<FactorResult> {
 }
 
 /**
- * Код подтверждён — Auth поднимает сессию до aal2. Первый раз — 10 запасных кодов на экран (п. 28);
- * дальше — в кабинет.
+ * Код подтверждён — Auth поднимает сессию до aal2. Запасных кодов нет (первый вход или все
+ * израсходованы) — экран 10 новых кодов (п. 28); иначе — в кабинет. Отдельным адресом: после
+ * смены cookie Next перерисует /kod, и ответ действия до экрана бы не дошёл.
  */
 async function finish(
   session: Parameters<typeof confirmSecondFactor>[0],
@@ -56,8 +56,7 @@ async function finish(
     return fail("unknown");
   }
   const state = await factorState(userId);
-  if (state.backupLeft === 0) return { status: "backup", codes: await renewBackupCodes(userId) };
-  redirect(landingPath("head"));
+  redirect(state.backupLeft === 0 ? ADMIN_ROUTES.backupCodes : landingPath("head"));
 }
 
 export async function verifyLoginCodeAction(formData: FormData): Promise<FactorResult> {

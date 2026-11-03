@@ -19,6 +19,8 @@ export const ADMIN_ROUTES = {
   password: `${ADMIN_ROUTE}/parol`,
   /** Код второго фактора руководителя (PLAN §10, п. 8). */
   secondFactor: `${ADMIN_ROUTE}/kod`,
+  /** 10 запасных кодов — один раз, сразу после первого подтверждения (п. 28). */
+  backupCodes: `${ADMIN_ROUTE}/kod/zapasnye`,
   leads: `${ADMIN_ROUTE}/zayavki`,
   complexes: `${ADMIN_ROUTE}/zhk`,
   developers: `${ADMIN_ROUTE}/zastroyshchiki`,

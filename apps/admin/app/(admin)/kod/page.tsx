@@ -43,7 +43,6 @@ export default async function SecondFactorPage() {
           telegram={state.telegram}
           hasBackup={state.backupLeft > 0}
           actions={ACTIONS}
-          next={landingPath("head")}
         />
       </LoginCard>
     </LoginScreen>
