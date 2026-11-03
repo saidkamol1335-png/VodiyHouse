@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 // Вход и выход — без сессии по смыслу.
 const DIR = path.join("lib", "admin", "actions");
 const WITHOUT_SESSION = new Set(["signInAction", "signOutAction"]);
-const GUARD = /^\s*const guard = await (requireActionViewer|headGuard)\(/;
+const GUARD = /^\s*const guard = await (requireActionViewer|headGuard|editGuard)\(/;
 
 const files = readdirSync(DIR).filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"));
 
@@ -42,10 +42,10 @@ describe("Server Actions кабинета", () => {
     }
   });
 
-  // Квартиры (Н2, Н7, PLAN §5): читают все сотрудники; менеджеру ещё статус, «Отменить» и
-  // наличие планировки; остальное — руководителю. База проверит роль ещё раз, но этот слой не
-  // должен расшириться молча.
-  it("квартиры: роли действий — по Н2, Н7 и PLAN §5", () => {
+  // Квартиры (PLAN §10, п. 6): читают все сотрудники; генератор, правку, цены и удаление ведут
+  // руководитель и менеджер (editGuard). База проверит роль ещё раз, но этот слой не должен
+  // расшириться молча.
+  it("квартиры: роли действий — по PLAN §10, п. 6", () => {
     const guards: Record<string, string> = {
       readBlockUnitsAction: 'requireActionViewer(["head", "manager", "mobilographer"])',
       setUnitsStatusAction: 'requireActionViewer(["head", "manager"])',
@@ -55,10 +55,10 @@ describe("Server Actions кабинета", () => {
     for (const file of ["units.ts", "unitsList.ts", "unitsMass.ts", "unitsStatus.ts"]) {
       const source = readSource(file);
       for (const { name, body } of exportedFunctions(source)) {
-        const guard = guards[name] ?? "headGuard()";
+        const guard = guards[name] ?? "editGuard()";
         expect(body, name).toContain(`const guard = await ${guard};`);
-        if (guard === "headGuard()")
-          expect(source, file).toContain('const headGuard = () => requireActionViewer(["head"]);');
+        if (guard === "editGuard()")
+          expect(source, file).toContain('const editGuard = () => requireActionViewer(["head", "manager"]);');
       }
     }
   });
@@ -90,6 +90,25 @@ describe("Server Actions кабинета", () => {
       submitProgressReportAction:
         /requireActionViewer\(\["head", "mobilographer"\], \{ fresh: true \}\)/,
       // Публикует и возвращает отчёты только руководитель (PLAN §10, п. 6) — проверка headOnly ниже.
+      // Журнал: менеджеру — только журнал ЖК (проверка scope в самом действии, п. 29).
+      loadJournalAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // «Запросить у руководителя» (п. 25): просит и отзывает менеджер, отклоняет руководитель.
+      requestPublicationAction: /requireActionViewer\(\["manager"\]\)/,
+      cancelPublicationRequestAction: /requireActionViewer\(\["manager"\]\)/,
+      // ЖК, его вкладки, фото, фасад и квартиры правят руководитель и менеджер (PLAN §10, п. 6);
+      // статус, порядок каталога и удаление — руководитель.
+      ...Object.fromEntries(
+        [
+          "createComplexAction", "saveComplexMainAction", "saveComplexBlocksAction", "saveBlockLayoutsAction",
+          "saveComplexDocumentsAction", "saveComplexVideosAction", "removeDeadlineChangeAction", "saveComplexDetailsAction",
+          "attachComplexPhotoAction", "attachComplexDrawingAction", "reorderComplexPhotosAction", "removeComplexPhotoAction",
+          "setComplexPhotoCategoryAction", "setComplexPhotoFocusAction",
+          "setComplexFacadeAction", "removeComplexFacadeAction", "setBlockContourAction", "saveFloorPlanAction",
+          "setFloorPlanContoursAction", "deleteFloorPlanAction",
+          "createBlockUnitsAction", "addUnitAction", "updateUnitAction", "deleteBlockUnitsAction", "saveRisersAction",
+          "deleteUnitsAction", "setUnitsPriceAction", "setUnitsFinishingAction",
+        ].map((name) => [name, /requireActionViewer\(\["head", "manager"\]\)/]),
+      ),
     };
     const headOnly = /requireActionViewer\(\["head"\](, \{ fresh: true \})?\)/;
     for (const file of files) {
@@ -98,10 +117,16 @@ describe("Server Actions кабинета", () => {
         /const headGuard = \(\) => (requireActionViewer\([^\n]+\));|async function headGuard\(\) \{\n\s*const guard = await (requireActionViewer\([^;]+\));/.exec(
           source,
         );
+      const editGuard = /const editGuard = \(\) => (requireActionViewer\([^\n]+\));/.exec(source);
       for (const { name, body } of exportedFunctions(source)) {
         if (WITHOUT_SESSION.has(name)) continue;
         const call = /const guard = await ([^;]+);/.exec(body)?.[1] ?? "";
-        const resolved = call === "headGuard()" ? (headGuard?.[1] ?? headGuard?.[2] ?? "") : call;
+        const resolved =
+          call === "headGuard()"
+            ? (headGuard?.[1] ?? headGuard?.[2] ?? "")
+            : call === "editGuard()"
+              ? (editGuard?.[1] ?? "")
+              : call;
         expect(resolved, `${file}: ${name}`).toMatch(others[name] ?? headOnly);
       }
     }

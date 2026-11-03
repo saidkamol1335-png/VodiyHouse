@@ -12,22 +12,30 @@ import {
 
 const BASE = "/zhk/1";
 
-describe("ЖК по ролям (Н2)", () => {
-  it("руководитель: создание, статус и все вкладки; строка списка — «Основное»", () => {
+describe("ЖК по ролям (PLAN §10, п. 6)", () => {
+  it("руководитель: правит и публикует, все вкладки; строка списка — «Основное»", () => {
     const head = complexAccess("head");
-    expect(head.manage).toBe(true);
+    expect(head).toMatchObject({ manage: true, publish: true });
     expect(head.tabs).toEqual(COMPLEX_TABS.map((tab) => tab.key));
     expect(complexTabHref(BASE, head.tabs[0]!)).toBe(BASE);
     for (const tab of COMPLEX_TABS) expect(complexTabRedirect("head", BASE, tab.key)).toBeNull();
   });
 
-  it("менеджер: без создания и статусов, только «Квартиры»; другие вкладки — туда же", () => {
+  it("менеджер: те же вкладки и квартиры, но без публикации", () => {
     const manager = complexAccess("manager");
-    expect(manager).toEqual({ manage: false, tabs: ["units"] });
-    expect(complexTabRedirect("manager", BASE, "units")).toBeNull();
-    for (const key of ["main", "blocks", "layouts", "photos", "videos", "details", "documents", "preview", "log"] as const) {
-      expect(complexTabRedirect("manager", BASE, key)).toBe(`${BASE}/kvartiry`);
+    expect(manager).toMatchObject({ manage: true, publish: false });
+    expect(manager.tabs).toEqual(COMPLEX_TABS.map((tab) => tab.key));
+    for (const key of [...manager.tabs, "units", "facade"] as const) {
+      expect(complexTabRedirect("manager", BASE, key)).toBeNull();
     }
+  });
+
+  it("экран 3: восемь вкладок по описанию заказчика, квартиры и фасад — свой экран", () => {
+    expect(COMPLEX_TABS.map((tab) => tab.segment)).toEqual([
+      null, "o-zhk", "bloki", "planirovki", "foto", "raspolozhenie", "dokumenty", "publikatsiya",
+    ]);
+    expect(complexTabHref(BASE, "units")).toBe(`${BASE}/kvartiry`);
+    expect(complexTabHref(BASE, "facade")).toBe(`${BASE}/fasad`);
   });
 
   it("архивный ЖК — только руководителю: менеджеру его нет ни в списке, ни по ссылке", () => {
@@ -36,19 +44,20 @@ describe("ЖК по ролям (Н2)", () => {
     }
     expect(canOpenComplex(complexAccess("manager"), "archived")).toBe(false);
     expect(canOpenComplex(complexAccess("head"), "archived")).toBe(true);
+    expect(canOpenComplex(complexAccess("mobilographer"), "draft")).toBe(false);
   });
 
-  it("мастер (3.6): у черновика шаги с номером до «Предпросмотра», «Журнал» — без номера; «Далее» — по порядку", () => {
+  it("мастер: у черновика все восемь вкладок — шаги с номером, последний — «Публикация»", () => {
     const labels = complexTabs(BASE, (key) => key, new Set(), true).map((tab) => tab.label);
-    expect(labels).toEqual(["1. main", "2. blocks", "3. layouts", "4. units", "5. photos", "facade", "6. videos", "7. details", "8. documents", "9. preview", "log"]);
+    expect(labels).toEqual(["1. main", "2. about", "3. blocks", "4. layouts", "5. photos", "6. location", "7. documents", "8. publication"]);
     expect(complexTabs(BASE, (key) => key).map((tab) => tab.label)[0]).toBe("main");
     const steps = wizardSteps(BASE, (key, step) => `${step}:${key}`);
     expect(steps.map((step) => step.next)).toEqual(WIZARD_STEPS.map((key, index) => `${index + 1}:${key}`));
-    expect(steps.at(-1)).toEqual({ segment: "predprosmotr", href: `${BASE}/predprosmotr`, next: "9:preview" });
+    expect(steps.at(-1)).toEqual({ segment: "publikatsiya", href: `${BASE}/publikatsiya`, next: "8:publication" });
   });
 
   it("мобилограф: вкладок нет — перекидывать некуда (раздел ему закрыт целиком)", () => {
-    expect(complexAccess("mobilographer")).toEqual({ manage: false, tabs: [] });
+    expect(complexAccess("mobilographer")).toEqual({ manage: false, publish: false, tabs: [] });
     expect(complexTabRedirect("mobilographer", BASE, "units")).toBeNull();
   });
 });

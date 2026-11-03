@@ -23,6 +23,8 @@ type ComplexStatusProps = {
   base: string;
   /** Застройщик не опубликован — сайт ЖК не покажет (is_public_complex): ссылка на него. null — не выбран. */
   developer: { name: string; published: boolean; href: string } | null;
+  /** Во вкладке «Публикация» чек-лист — своей панелью, под капсулой его нет. */
+  withReadiness?: boolean;
 };
 
 /** «Полных квартир: k из n» — отдельно от минимума: на публикацию ЖК не влияет. */
@@ -45,9 +47,10 @@ export function ComplexStatus({
   files,
   base,
   developer,
+  withReadiness = true,
 }: ComplexStatusProps) {
   const t = useTranslations("admin.complexes");
-  const showReadiness = complex.status === "draft" || complex.status === "hidden";
+  const showReadiness = withReadiness && (complex.status === "draft" || complex.status === "hidden");
   return (
     <StatusCapsule
       entity={complex}
@@ -66,7 +69,7 @@ export function ComplexStatus({
       {showReadiness ? (
         <ComplexReadiness items={readiness} base={base} developerHref={developer?.href ?? null} completeness={completeness} />
       ) : null}
-      {completeness ? <CompletenessLine completeness={completeness} published={complex.status === "published"} /> : null}
+      {completeness && withReadiness ? <CompletenessLine completeness={completeness} published={complex.status === "published"} /> : null}
       {!developer || developer.published || complex.status === "archived" ? null : (
         <FormStatus tone="notice">
           {t("developerHidden", { name: developer.name })}{" "}

@@ -43,7 +43,7 @@ import {
 // руководителя, вход разбирается заново (lib/admin/units/parse), права и инварианты ещё раз
 // держат функции базы. Ответ функции называет ЖК — по нему сбрасывается кэш сайта.
 
-const headGuard = () => requireActionViewer(["head"]);
+const editGuard = () => requireActionViewer(["head", "manager"]);
 
 /** Блок для действия; null — нет (или ошибка базы: её отдаёт error). */
 async function readBlock(supabase: SupabaseClient, blockId: string) {
@@ -54,7 +54,7 @@ async function readBlock(supabase: SupabaseClient, blockId: string) {
 export async function createBlockUnitsAction(
   input: CreateBlockUnitsInput,
 ): Promise<CreateBlockUnitsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId)) return unitsFailure("notFound");
   const plan = readPlan(input.plan);
@@ -80,7 +80,7 @@ export async function createBlockUnitsAction(
 
 /** «+ Квартира» (Н4): свободная, без цены; номер — без пробелов и заглавными («12a» → «12A»). */
 export async function addUnitAction(input: AddUnitInput): Promise<UnitRowResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId)) return unitsFailure("notFound");
   const number = typeof input.number === "string" ? normalizeUnitNumber(input.number) : "";
@@ -105,7 +105,7 @@ export async function addUnitAction(input: AddUnitInput): Promise<UnitRowResult>
 
 /** Правка строки (Н4): только переданные поля — номер, планировка, цена, отделка. */
 export async function updateUnitAction(input: UpdateUnitInput): Promise<UnitRowResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId) || !isUuid(input.unitId)) return unitsFailure("notFound");
   const patch = readUnitPatch(input.patch);
@@ -125,7 +125,7 @@ export async function updateUnitAction(input: UpdateUnitInput): Promise<UnitRowR
 export async function deleteBlockUnitsAction(
   input: DeleteBlockUnitsInput,
 ): Promise<DeleteUnitsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId)) return unitsFailure("notFound");
   const block = await readBlock(guard.supabase, input.blockId);
@@ -149,7 +149,7 @@ export async function deleteBlockUnitsAction(
  * снимка, не трогаются (их номера — в skipped); стояк без планировки её снимает.
  */
 export async function saveRisersAction(input: SaveRisersInput): Promise<SaveRisersResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return unitsFailure(guard.code);
   if (!isUuid(input?.blockId)) return unitsFailure("notFound");
   const [block, rows] = await Promise.all([

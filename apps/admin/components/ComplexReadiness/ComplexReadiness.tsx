@@ -16,12 +16,14 @@ type ComplexReadinessProps = {
   /** Страница застройщика: пункт «застройщик» ведёт к его публикации. */
   developerHref?: string | null;
   completeness?: ComplexCompleteness | null;
+  /** Во вкладке «Публикация» чек-лист открыт сразу. */
+  defaultOpen?: boolean;
 };
 
 /** «Для публикации: 5 из 6 · показать» (И9): у черновика и скрытого ЖК, под капсулой статуса. */
-export function ComplexReadiness({ items, base, developerHref = null, completeness = null }: ComplexReadinessProps) {
+export function ComplexReadiness({ items, base, developerHref = null, completeness = null, defaultOpen = false }: ComplexReadinessProps) {
   const t = useTranslations("admin.complexes.readiness");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const done = items.filter((item) => item.ok).length;
   const ready = done === items.length;
   return (

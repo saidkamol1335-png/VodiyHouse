@@ -1,12 +1,3 @@
-import { MANAGER_STAND, redirectStandTab } from "../../../zhk/stand";
+export { default, instant } from "../../../zhk/[id]/page";
 
-export const instant = false;
-
-// «Основное» менеджеру закрыто — как у /admin/zhk/<id>: перекидывает на «Квартиры».
-export default async function DevManagerComplexPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  redirectStandTab(MANAGER_STAND, (await params).id, null);
-}
+// «Основное» менеджера — та же вкладка, что у руководителя (PLAN §10, п. 6: правит всё).

@@ -1,34 +1,40 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { AdminEntityHead } from "@/components/AdminEntityHead";
 import { AdminPage } from "@/components/AdminPage";
+import { Button } from "@/components/Button";
 import { AdminShell } from "@/components/AdminShell";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { CatalogOrder } from "@/components/CatalogOrder";
 import { ComplexCreateForm } from "@/components/ComplexCreateForm";
 import { ComplexList } from "@/components/ComplexList";
-import { ComplexStatus } from "@/components/ComplexStatus";
+import { ComplexPublication } from "@/components/ComplexPublication";
+import { ComplexStateBadge } from "@/components/ComplexStateBadge";
 import { ComplexWizardSteps } from "@/components/ComplexWizard";
 import { DEV_VIEWER, type CabinetViewer } from "@/lib/admin/access";
 import { DEMO_COMPLEX_ROWS, DEMO_DEVELOPER_OPTIONS } from "@/lib/admin/complexes/demo";
+import { DEMO_COMPLEX_JOURNAL } from "@/lib/admin/complexes/demoJournal";
 import { demoComplex, demoReadiness } from "@/lib/admin/complexes/demoPage";
 import { catalogOrderOf, complexListScope } from "@/lib/admin/complexes/list";
 import { tabsNeedingAttention } from "@/lib/admin/complexes/readiness";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import {
-  COMPLEX_TABS,
   canOpenComplex,
   complexAccess,
-  complexTabRedirect,
+  complexTabHref,
   complexTabs,
 } from "@/lib/admin/complexes/tabs";
+import { SEED_DICTIONARIES } from "@/lib/admin/dictionaries/seed";
+import { finishingNames, journalPage } from "@/lib/admin/journal/format";
 import { cabinetPerson } from "@/lib/admin/person";
-import { ROUTES } from "@/lib/routes";
-import { demoCreateComplexAction, demoSetComplexStatusAction } from "./actions";
+import { complexRoute, ROUTES } from "@/lib/routes";
+import { siteOrigin } from "@/lib/site/metadata";
+import { demoCreateComplexAction, demoRequestAction, demoSetComplexStatusAction } from "./actions";
+import { demoPreviewLinkAction } from "./previewActions";
 
 // Стенды «ЖК» на DEMO мокапа по ролям: /dev/zhk — руководитель, /dev/menedzher/zhk — менеджер
-// (Н2). Те же компоненты и те же правила роли (complexAccess, unitsActionsFor), что у /admin/zhk,
+// (PLAN §10, п. 6: правит всё, публикует руководитель). Те же компоненты и те же правила роли (complexAccess, unitsActionsFor), что у /admin/zhk,
 // без базы. В продакшене стендов нет.
 
 const DEV_MANAGER: CabinetViewer = {
@@ -47,21 +53,9 @@ export function devOnlyStand() {
   if (process.env.NODE_ENV === "production") notFound();
 }
 
-/**
- * Вкладка, закрытая роли стенда, перекидывает на открытую — как complexForTab у /admin (Н2).
- * segment null — «Основное»; неизвестная или открытая (у неё своя страница) — 404.
- */
-export function redirectStandTab(stand: ComplexStand, id: string, segment: string | null): never {
-  devOnlyStand();
-  const tab = COMPLEX_TABS.find((item) => item.segment === segment);
-  const target = tab ? complexTabRedirect(stand.viewer.role, `${stand.base}/${id}`, tab.key) : null;
-  if (!target) notFound();
-  redirect(target);
-}
-
 type ComplexesStandProps = { stand: ComplexStand; scopeId: unknown };
 
-/** Список «ЖК»: руководителю — с «+ Добавить ЖК» и статусами, менеджеру — только наличие. */
+/** Список «ЖК»: «+ Добавить ЖК» — обоим, «Порядок в каталоге» — руководителю. */
 export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
   devOnlyStand();
   const person = await cabinetPerson(stand.viewer);
@@ -91,7 +85,7 @@ export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
           initialFilter={scope.archived ? "archived" : "all"}
           access={access}
         />
-        {access.manage ? <CatalogOrder complexes={catalogOrderOf(DEMO_COMPLEX_ROWS)} action={null} /> : null}
+        {access.publish ? <CatalogOrder complexes={catalogOrderOf(DEMO_COMPLEX_ROWS)} action={null} /> : null}
       </AdminPage>
     </AdminShell>
   );
@@ -99,7 +93,7 @@ export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
 
 type ComplexStandLayoutProps = { stand: ComplexStand; id: string; children: ReactNode };
 
-/** Страница ЖК: у руководителя — статус, готовность и вкладки; у менеджера — только вкладка. */
+/** Страница ЖК: значок состояния, «Квартиры» и вкладки — у руководителя и менеджера одинаково. */
 export async function ComplexStandLayout({ stand, id, children }: ComplexStandLayoutProps) {
   devOnlyStand();
   const complex = demoComplex(id);
@@ -122,9 +116,7 @@ export async function ComplexStandLayout({ stand, id, children }: ComplexStandLa
   return (
     <AdminShell viewer={stand.viewer}>
       <AdminPage topbar={topbar}>
-        {access.manage ? (
-          <StandHead complex={complex} base={`${stand.base}/${complex.id}`} />
-        ) : null}
+        <StandHead complex={complex} base={`${stand.base}/${complex.id}`} />
         {children}
         {access.manage && complex.status === "draft" ? <ComplexWizardSteps base={`${stand.base}/${complex.id}`} /> : null}
       </AdminPage>
@@ -142,6 +134,7 @@ async function StandHead({ complex, base }: { complex: ComplexRecord; base: stri
     unpublished ? tabsNeedingAttention(readiness) : undefined,
     complex.status === "draft",
   );
+  const done = readiness.filter((item) => item.ok).length;
   return (
     <AdminEntityHead
       status={complex.status}
@@ -149,19 +142,56 @@ async function StandHead({ complex, base }: { complex: ComplexRecord; base: stri
       tabs={tabs}
       attentionLabel={t("attention")}
       statusControls={
-        <ComplexStatus
-          complex={{ ...complex, name: complex.name.ru }}
-          action={demoSetComplexStatusAction}
-          readiness={readiness}
-          files={[]}
-          base={base}
-          developer={{
-            name: complex.developerName,
-            published: complex.developerStatus === "published",
-            href: `/dev/zastroyshchiki/${complex.developerId}`,
-          }}
-        />
+        <div className="admin-entity-head__state">
+          <ComplexStateBadge
+            status={complex.status}
+            siteState={{ state: done === readiness.length ? "full" : "draft", done, total: readiness.length }}
+            developerPublished={complex.developerStatus === "published"}
+            size="md"
+          />
+          <Button size="sm" variant="outline" href={complexTabHref(base, "units")}>
+            {t("tabs.units")}
+          </Button>
+        </div>
       }
+    />
+  );
+}
+
+/** «Публикация» на DEMO: тот же экран, что у кабинета; кнопки — по роли стенда. */
+export async function StandPublication({ stand, id }: { stand: ComplexStand; id: string }) {
+  devOnlyStand();
+  const complex = demoComplex(id);
+  const access = complexAccess(stand.viewer.role);
+  if (!complex || !canOpenComplex(access, complex.status)) notFound();
+  const readiness = demoReadiness(complex);
+  return (
+    <ComplexPublication
+      complex={complex}
+      access={access}
+      viewerId={stand.viewer.id}
+      base={`${stand.base}/${complex.id}`}
+      readiness={readiness}
+      completeness={null}
+      state={readiness.every((item) => item.ok) ? "full" : "draft"}
+      files={[]}
+      requests={[]}
+      journal={journalPage(complex.slug === "demo-shodlik" ? DEMO_COMPLEX_JOURNAL : [])}
+      finishings={finishingNames(SEED_DICTIONARIES.finishings)}
+      developer={{
+        name: complex.developerName,
+        published: complex.developerStatus === "published",
+        href: `/dev/zastroyshchiki/${complex.developerId}`,
+      }}
+      siteHref={`${siteOrigin()}/ru${complexRoute(complex.slug)}`}
+      actions={{
+        setStatus: demoSetComplexStatusAction,
+        requests: access.publish
+          ? { request: null, cancel: null, decline: demoRequestAction }
+          : { request: demoRequestAction, cancel: demoRequestAction, decline: null },
+        preview: demoPreviewLinkAction,
+        loadJournal: null,
+      }}
     />
   );
 }

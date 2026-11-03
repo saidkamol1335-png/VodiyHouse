@@ -18,7 +18,7 @@ const MAX_SIDE = 10_000;
 const BLUR_MAX = 4000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const headGuard = () => requireActionViewer(["head"]);
+const editGuard = () => requireActionViewer(["head", "manager"]);
 
 const failMedia = (error: ContentErrorCode): ComplexMediaResult => ({ status: "error", error, broken: [] });
 const failed = (error: ContentErrorCode): FacadeResult => ({ status: "error", error });
@@ -53,7 +53,7 @@ async function settle(supabase: Parameters<typeof removeMediaFiles>[0], data: un
 
 /** Фасад ЖК. Поля: id (ЖК), path, width, height, blur, rule12. Ответ — id ЖК. */
 export async function setComplexFacadeAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failMedia(guard.code);
   const file = readFile(formData);
   if (!file) return failMedia("invalid");
@@ -72,7 +72,7 @@ export async function setComplexFacadeAction(formData: FormData): Promise<Comple
 }
 
 export async function removeComplexFacadeAction(complexId: string): Promise<FacadeResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code);
   if (typeof complexId !== "string" || !UUID.test(complexId)) return failed("invalid");
   const { data, error } = await guard.supabase.rpc("remove_complex_facade", { p_complex: complexId });
@@ -84,7 +84,7 @@ export async function removeComplexFacadeAction(complexId: string): Promise<Faca
 
 /** Контур блока на фасаде; null — снять. */
 export async function setBlockContourAction(blockId: string, contour: Point[] | null): Promise<FacadeResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code);
   const points = contour === null ? null : parseContour(contour);
   if (typeof blockId !== "string" || !UUID.test(blockId) || (contour !== null && !points)) return failed("invalid");
@@ -99,7 +99,7 @@ export async function setBlockContourAction(blockId: string, contour: Point[] | 
  * весь этаж), from, to; с новой картинкой — id (ЖК), path, width, height, blur, rule12. Ответ — id плана.
  */
 export async function saveFloorPlanAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failMedia(guard.code);
   const plan = readText(formData, "plan") || null;
   const block = readText(formData, "block") ?? "";
@@ -139,7 +139,7 @@ export async function setFloorPlanContoursAction(
   entrance: number | null,
   contours: UnitContour[],
 ): Promise<FacadeResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code);
   const parsed = parseUnitContours(contours, entrance);
   if (typeof planId !== "string" || !UUID.test(planId) || !parsed) return failed("invalid");
@@ -150,7 +150,7 @@ export async function setFloorPlanContoursAction(
 }
 
 export async function deleteFloorPlanAction(planId: string): Promise<FacadeResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code);
   if (typeof planId !== "string" || !UUID.test(planId)) return failed("invalid");
   const { data, error } = await guard.supabase.rpc("delete_floor_plan", { p_plan: planId });

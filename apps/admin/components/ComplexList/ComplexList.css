@@ -3,7 +3,7 @@
 .complex-list {
   /* Колонки строки: у списка наличия (--stock) те же, только без статуса. */
   --complex-list-stock-col: 132px;
-  --complex-list-status-col: 128px;
+  --complex-list-status-col: 176px;
   --complex-list-chevron-col: 18px;
   display: grid;
   gap: 16px;
@@ -149,6 +149,49 @@
 
 .complex-list__stock {
   justify-self: end;
+}
+
+/* Значок состояния и «Ожидает руководителя» (экран 2) — столбиком в колонке статуса. */
+.complex-list__status {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+/* Действия руководителя (пп. 23–24) — строкой под ссылкой, не внутри неё. */
+.complex-list__actions {
+  display: grid;
+  gap: 10px;
+  padding: 0 4px 12px;
+}
+
+.complex-list__buttons,
+.complex-list__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.complex-list__confirm {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: var(--bg-3);
+}
+
+.complex-list__confirm-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.complex-list__confirm-lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
 }
 
 .complex-list__chevron {

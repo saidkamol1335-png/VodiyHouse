@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
 import { parseComplexCreate } from "@/lib/admin/complexes/create";
 import { parseLayouts } from "@/lib/admin/complexes/layouts";
-import { complexMainRow, parseComplexMain } from "@/lib/admin/complexes/mainForm";
+import { complexMainRow, isMainSection, parseComplexMain } from "@/lib/admin/complexes/mainForm";
 import {
   missingOf,
   parseReadiness,
@@ -17,6 +17,7 @@ import {
 import type {
   ComplexStatusResult,
   CreateComplexResult,
+  DeleteNowResult,
   SaveComplexMainResult,
   SaveRowsResult,
 } from "@/lib/admin/complexes/types";
@@ -29,6 +30,9 @@ import type { PublicationStatus } from "@/lib/admin/publication";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { floorPlanFilesOfGoneBlocks, removeMediaFiles } from "@/lib/admin/server/mediaFiles";
 import { requireActionViewer } from "@/lib/admin/session";
+import type { ArchiveUnit } from "@/lib/archive/csv";
+import { sendDeletedUnits } from "@/lib/archive/server/purge";
+import { removeDeletedComplexFiles } from "@/lib/admin/server/archiveNow";
 import { expireComplex } from "@/lib/cache";
 import { contentSlug } from "@/lib/slug";
 
@@ -39,10 +43,11 @@ import { contentSlug } from "@/lib/slug";
 const SLUG_FALLBACK = "zhk";
 
 const headGuard = () => requireActionViewer(["head"]);
+const editGuard = () => requireActionViewer(["head", "manager"]);
 
 /** «+ Добавить ЖК»: черновик с адресом из UZ-названия → его страница, вкладка «Основное». */
 export async function createComplexAction(formData: FormData): Promise<CreateComplexResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   const parsed = parseComplexCreate(formData);
   const fail = (error: ContentErrorCode | null, fieldErrors = {}): CreateComplexResult => ({
     status: "error",
@@ -87,10 +92,11 @@ async function complexOfBlock(
 const brokenOf = (error: DbError): ComplexRequirement[] =>
   error.hint === "vh:not_ready" ? requirementsFromDetail(error.details) : [];
 
-/** «Сохранить вкладку» на «Основном» (И1–И3). */
+/** «Сохранить» на «Основном», «О ЖК», «Расположении», «Документах и проверках»: поля своей вкладки. */
 export async function saveComplexMainAction(formData: FormData): Promise<SaveComplexMainResult> {
-  const guard = await headGuard();
-  const parsed = parseComplexMain(formData);
+  const guard = await editGuard();
+  const section = readText(formData, "section");
+  const parsed = parseComplexMain(formData, isMainSection(section) ? section : "main");
   const fail = (
     error: ContentErrorCode | null,
     broken: ComplexRequirement[] = [],
@@ -113,13 +119,14 @@ export async function saveComplexMainAction(formData: FormData): Promise<SaveCom
     .select("id");
   if (error) return fail(contentDbErrorCode(error), brokenOf(error));
   if (!data?.length) return fail("notFound");
+  expireComplex(id);
+  if (!parsed.value.name) return { status: "saved", at: Date.now() };
   // Пока ЖК не публиковался, адрес на сайте — по UZ-названию (база не тронет опубликованный).
   // Поля уже сохранены: при отказе повторное «Сохранить» безопасно повторит смену адреса.
   const slug = await guard.supabase.rpc("set_complex_slug", {
     p_complex: id,
     p_slug: contentSlug(parsed.value.name.uz, SLUG_FALLBACK),
   });
-  expireComplex(id);
   if (slug.error) return fail(contentDbErrorCode(slug.error));
   return { status: "saved", at: Date.now() };
 }
@@ -195,7 +202,7 @@ export async function setComplexStatusAction(formData: FormData): Promise<Comple
 
 /** «Сохранить вкладку» на «Блоках» (И4): все карточки одним вызовом базы. */
 export async function saveComplexBlocksAction(formData: FormData): Promise<SaveRowsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   const fail = (
     error: ContentErrorCode | null,
     extra: Partial<SaveRowsResult> = {},
@@ -229,7 +236,7 @@ export async function saveComplexBlocksAction(formData: FormData): Promise<SaveR
 
 /** «Сохранить вкладку» на «Планировках» (И5): планировки одного блока одним вызовом базы. */
 export async function saveBlockLayoutsAction(formData: FormData): Promise<SaveRowsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   const fail = (
     error: ContentErrorCode | null,
     extra: Partial<SaveRowsResult> = {},
@@ -256,4 +263,35 @@ export async function saveBlockLayoutsAction(formData: FormData): Promise<SaveRo
   await removeMediaFiles(guard.supabase, data);
   expireComplex(owner.id);
   return { status: "saved", at: Date.now() };
+}
+
+/**
+ * «Удалить сейчас» (PLAN §10, п. 24): только архивный ЖК и только руководитель, подтверждение —
+ * название. Как ночная очистка: CSV квартир руководителю в Telegram (бот есть, а файл не ушёл —
+ * не удаляем), строки (база ещё раз проверит роль и архив), файлы Storage — секретным ключом.
+ */
+export async function deleteComplexNowAction(formData: FormData): Promise<DeleteNowResult> {
+  const guard = await requireActionViewer(["head"], { fresh: true });
+  if (!guard.ok) return { status: "error", error: guard.code };
+  const id = readUuid(formData);
+  if (!id) return { status: "error", error: "invalid" };
+  const { data, error } = await guard.supabase.from("complexes").select("status, name, slug").eq("id", id).maybeSingle();
+  if (error) return { status: "error", error: contentDbErrorCode(error) };
+  if (!data) return { status: "error", error: "notFound" };
+  if (data.status !== "archived") return { status: "error", error: "statusMove" };
+  const confirm = readText(formData, "confirm") ?? "";
+  const names = Object.values((data.name ?? {}) as Record<string, string>);
+  if (!names.some((name) => archiveConfirmed(confirm, name))) return { status: "error", error: "confirmName" };
+
+  const units = await guard.supabase.rpc("archived_complex_units", { p_complex: id });
+  if (units.error) return { status: "error", error: contentDbErrorCode(units.error) };
+  const name = names[0] ?? data.slug;
+  const sent = await sendDeletedUnits(data.slug, (units.data ?? []) as ArchiveUnit[], `ЖК «${name}» удалён из архива руководителем. Квартиры — в файле.`);
+  if (!sent) return { status: "error", error: "csvNotSent" };
+  const purged = await guard.supabase.rpc("purge_complex_now", { p_complex: id });
+  if (purged.error) return { status: "error", error: contentDbErrorCode(purged.error) };
+  const media = ((purged.data ?? {}) as { media?: string[] }).media ?? [];
+  await removeDeletedComplexFiles(id, media);
+  expireComplex(id);
+  return { status: "done", at: Date.now() };
 }

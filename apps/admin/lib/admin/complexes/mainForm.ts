@@ -83,7 +83,7 @@ export type ComplexFieldIssue =
   | NearbyIssue;
 export type ComplexMainErrors = Partial<Record<keyof ComplexMainFields, ComplexFieldIssue>>;
 export type ComplexMainParse =
-  | { ok: true; value: ComplexMainInput; fields: ComplexMainFields }
+  | { ok: true; value: Partial<ComplexMainInput>; fields: ComplexMainFields }
   | { ok: false; fields: ComplexMainFields; fieldErrors: ComplexMainErrors };
 
 const TEXT_FIELDS = [
@@ -182,41 +182,71 @@ function parseValues(fields: ComplexMainFields) {
   };
 }
 
-/** «Сохранить вкладку»: значения для базы или ошибки по полям (введённое возвращается в форму). */
-export function parseComplexMain(formData: FormData): ComplexMainParse {
+/**
+ * Поля «Основного» по вкладкам экрана 3 (PLAN §10, п. 21): каждая вкладка сохраняет только свои
+ * колонки — правка «Расположения» не перезапишет то, что коллега поменял в «Основном».
+ */
+export const MAIN_SECTIONS = {
+  main: ["name", "developerId", "class", "houseType", "ceilingHeight", "parking"],
+  about: ["shortDescription"],
+  location: ["locationId", "address", "landmark", "minutesToCenter", "point", "nearby"],
+  checks: ["staffVisitedAt"],
+} as const satisfies Record<string, readonly (keyof ComplexMainFields)[]>;
+
+export type ComplexMainSection = keyof typeof MAIN_SECTIONS;
+
+export const isMainSection = (value: unknown): value is ComplexMainSection =>
+  typeof value === "string" && Object.hasOwn(MAIN_SECTIONS, value);
+
+const ALL_FIELDS = Object.values(MAIN_SECTIONS).flat() as (keyof ComplexMainFields)[];
+
+/**
+ * «Сохранить»: значения для базы или ошибки по полям (введённое возвращается в форму). section —
+ * только поля этой вкладки; без него — вся форма (служебный стенд, тесты).
+ */
+export function parseComplexMain(formData: FormData, section?: ComplexMainSection): ComplexMainParse {
   const fields = readFields(formData);
-  const parsed = parseValues(fields);
+  const keys: readonly string[] = section ? MAIN_SECTIONS[section] : ALL_FIELDS;
+  const parsed = Object.entries(parseValues(fields)).filter(([key]) => keys.includes(key));
   const fieldErrors = Object.fromEntries(
-    Object.entries(parsed).flatMap(([key, result]) => (result.issue ? [[key, result.issue]] : [])),
+    parsed.flatMap(([key, result]) => (result.issue ? [[key, result.issue]] : [])),
   ) as ComplexMainErrors;
   if (Object.keys(fieldErrors).length > 0) return { ok: false, fields, fieldErrors };
   const value = Object.fromEntries(
-    Object.entries(parsed).map(([key, result]) => [key, result.value]),
-  ) as unknown as ComplexMainInput;
+    parsed.map(([key, result]) => [key, result.value]),
+  ) as unknown as Partial<ComplexMainInput>;
   return { ok: true, fields, value };
 }
 
 /** Точка вне Ферганской области — подсказка (обычно перепутаны числа), не ошибка. */
-export const pointOutsideRegion = (point: GeoPoint | null) =>
+export const pointOutsideRegion = (point: GeoPoint | null | undefined) =>
   Boolean(point && !isInFerganaRegion(point));
 
-/** Строка для update complexes. */
-export function complexMainRow(input: ComplexMainInput) {
-  return {
-    name: input.name,
-    developer_id: input.developerId,
-    class: input.class,
-    house_type: input.houseType,
-    ceiling_height: input.ceilingHeight,
-    parking: input.parking,
-    short_description: input.shortDescription,
-    location_id: input.locationId,
-    address: input.address,
-    landmark: input.landmark,
-    minutes_to_center: input.minutesToCenter,
-    lat: input.point?.lat ?? null,
-    lng: input.point?.lng ?? null,
-    nearby: input.nearby.map(nearbyRecord),
-    staff_visited_at: input.staffVisitedAt,
-  };
+type ColumnsOf = { [K in keyof ComplexMainInput]-?: (value: ComplexMainInput[K]) => Record<string, unknown> };
+
+const COLUMNS: ColumnsOf = {
+  name: (name) => ({ name }),
+  developerId: (developer_id) => ({ developer_id }),
+  class: (value) => ({ class: value }),
+  houseType: (house_type) => ({ house_type }),
+  ceilingHeight: (ceiling_height) => ({ ceiling_height }),
+  parking: (parking) => ({ parking }),
+  shortDescription: (short_description) => ({ short_description }),
+  locationId: (location_id) => ({ location_id }),
+  address: (address) => ({ address }),
+  landmark: (landmark) => ({ landmark }),
+  minutesToCenter: (minutes_to_center) => ({ minutes_to_center }),
+  point: (point) => ({ lat: point?.lat ?? null, lng: point?.lng ?? null }),
+  nearby: (nearby) => ({ nearby: nearby.map(nearbyRecord) }),
+  staffVisitedAt: (staff_visited_at) => ({ staff_visited_at }),
+};
+
+/** Строка для update complexes — только разобранные поля. */
+export function complexMainRow(input: Partial<ComplexMainInput>): Record<string, unknown> {
+  return Object.assign(
+    {},
+    ...Object.entries(input).map(([key, value]) =>
+      (COLUMNS[key as keyof ComplexMainInput] as (value: unknown) => Record<string, unknown>)(value),
+    ),
+  );
 }

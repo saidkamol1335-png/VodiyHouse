@@ -2,33 +2,37 @@ import type { AdminTab } from "@/components/AdminTabs";
 import type { StaffRole } from "../access";
 import type { PublicationStatus } from "../publication";
 
-// Вкладки ЖК (решение в. 6) — отдельные адреса: работает «назад», ссылку на вкладку можно отправить.
+// Вкладки ЖК (экран 3, PLAN §10 п. 21) — отдельные адреса: работает «назад», ссылку на вкладку
+// можно отправить.
 export const COMPLEX_TABS = [
   { key: "main", segment: null },
+  // Описание RU/UZ, детали проекта, видео, частые вопросы.
+  { key: "about", segment: "o-zhk" },
   { key: "blocks", segment: "bloki" },
   { key: "layouts", segment: "planirovki" },
-  { key: "units", segment: "kvartiry" },
   { key: "photos", segment: "foto" },
-  // Фаза 4: фасад с контурами блоков и планы этажей — раздел «Выбрать квартиру» на сайте.
-  { key: "facade", segment: "fasad" },
-  // Шаг 3.5 (Ф4): разделы страницы ЖК сверх мокапа — в порядке страницы; без данных их не видно.
-  { key: "videos", segment: "video" },
-  { key: "details", segment: "detali" },
+  // Карта, адрес, «Что рядом».
+  { key: "location", segment: "raspolozhenie" },
+  // Документы с датами проверки и визит сотрудника.
   { key: "documents", segment: "dokumenty" },
-  // Шаг 3.6: настоящая страница ЖК в режиме предпросмотра (draftMode) — последний шаг мастера.
-  { key: "preview", segment: "predprosmotr" },
-  { key: "log", segment: "zhurnal" },
+  // Чек-лист 6 пунктов, состояние на сайте, кнопки по роли, предпросмотр 390/1440, журнал.
+  { key: "publication", segment: "publikatsiya" },
 ] as const;
 
 export type ComplexTabKey = (typeof COMPLEX_TABS)[number]["key"];
 
 /**
- * Мастер «Новый ЖК» (решение фазы 3): у черновика вкладки — шаги с номером и «Далее →», после
- * предпросмотра — «Опубликовать» в шапке. «Журнал» — не шаг; «Фасад и планы» (фаза 4) — тоже:
- * раздел необязательный, без него ЖК публикуется.
+ * Квартиры (экран 4, п. 22) — не вкладка, а свой экран ЖК: список ↔ фасад с переключателем
+ * блоков. Адреса — сегменты страницы ЖК.
  */
-const NOT_STEPS: readonly ComplexTabKey[] = ["facade", "log"];
-export const WIZARD_STEPS: readonly ComplexTabKey[] = COMPLEX_TABS.map((tab) => tab.key).filter((key) => !NOT_STEPS.includes(key));
+export const UNITS_SCREEN = { list: "kvartiry", facade: "fasad" } as const;
+export type ComplexScreenKey = ComplexTabKey | "units" | "facade";
+
+/**
+ * Мастер «Новый ЖК» (решение фазы 3): у черновика вкладки — шаги с номером и «Далее →»;
+ * последний шаг — «Публикация» с чек-листом и кнопкой по роли.
+ */
+export const WIZARD_STEPS: readonly ComplexTabKey[] = COMPLEX_TABS.map((tab) => tab.key);
 
 export type WizardStep = { segment: string | null; href: string; next: string };
 
@@ -41,22 +45,26 @@ export function wizardSteps(base: string, next: (key: ComplexTabKey, step: numbe
   }));
 }
 
-export function complexTabHref(base: string, key: ComplexTabKey): string {
+export function complexTabHref(base: string, key: ComplexScreenKey): string {
+  if (key === "units") return `${base}/${UNITS_SCREEN.list}`;
+  if (key === "facade") return `${base}/${UNITS_SCREEN.facade}`;
   const tab = COMPLEX_TABS.find((item) => item.key === key)!;
   return tab.segment ? `${base}/${tab.segment}` : base;
 }
 
 /**
- * Что роль делает с ЖК (Н2). manage — создание, статус публикации и все вкладки (руководитель);
- * менеджер ведёт только наличие: тот же список без создания и статусов → сразу «Квартиры».
- * tabs[0] — куда ведёт строка списка; закрытая вкладка по адресу перекидывает туда же.
+ * Что роль делает с ЖК (PLAN §10, п. 6). manage — создаёт ЖК и правит все вкладки и квартиры
+ * (руководитель и менеджер); publish — публикует, скрывает, архивирует, удаляет, ставит порядок
+ * каталога и отвечает на запросы (руководитель). tabs[0] — куда ведёт строка списка.
  */
-export type ComplexAccess = { manage: boolean; tabs: readonly ComplexTabKey[] };
+export type ComplexAccess = { manage: boolean; publish: boolean; tabs: readonly ComplexTabKey[] };
+
+const ALL_TABS = COMPLEX_TABS.map((tab) => tab.key);
 
 const ACCESS: Record<StaffRole, ComplexAccess> = {
-  head: { manage: true, tabs: COMPLEX_TABS.map((tab) => tab.key) },
-  manager: { manage: false, tabs: ["units"] },
-  mobilographer: { manage: false, tabs: [] },
+  head: { manage: true, publish: true, tabs: ALL_TABS },
+  manager: { manage: true, publish: false, tabs: ALL_TABS },
+  mobilographer: { manage: false, publish: false, tabs: [] },
 };
 
 export function complexAccess(role: StaffRole): ComplexAccess {
@@ -64,28 +72,29 @@ export function complexAccess(role: StaffRole): ComplexAccess {
 }
 
 /**
- * Архив — корзина руководителя (30 дней): без manage архивный ЖК не открывается и по ссылке —
- * в списке его нет (М1), а без капсулы статуса менеджер не узнал бы, что правит архив.
+ * Архив — корзина руководителя (30 дней): без publish архивный ЖК не открывается и по ссылке —
+ * в списке у менеджера архива нет (М1).
  */
 export function canOpenComplex(access: ComplexAccess, status: PublicationStatus): boolean {
-  return access.manage || status !== "archived";
+  return access.publish || (access.manage && status !== "archived");
 }
 
-/** Адрес вкладки, которую роль может открыть вместо этой; null — эта открыта (или нет ни одной). */
+/** Адрес экрана, который роль может открыть вместо этого; null — этот открыт (или нет ни одного). */
 export function complexTabRedirect(
   role: StaffRole,
   base: string,
-  key: ComplexTabKey,
+  key: ComplexScreenKey,
 ): string | null {
   const { tabs } = complexAccess(role);
   const first = tabs[0];
-  if (!first || tabs.includes(key)) return null;
-  return complexTabHref(base, first);
+  if (!first) return null;
+  if (key === "units" || key === "facade") return null;
+  return tabs.includes(key) ? null : complexTabHref(base, first);
 }
 
 /**
  * attention — на вкладке не хватает данных для публикации (янтарная точка, И9); wizard — черновик:
- * шаги мастера с номером («3. Планировки»).
+ * шаги мастера с номером («3. Блоки и оплата»).
  */
 export function complexTabs(
   base: string,

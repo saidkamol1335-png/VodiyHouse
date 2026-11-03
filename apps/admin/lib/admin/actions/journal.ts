@@ -21,8 +21,11 @@ export async function loadJournalAction(
   scope: JournalScope,
   before: number,
 ): Promise<JournalLoadResult> {
-  const guard = await requireActionViewer(["head"]);
+  const guard = await requireActionViewer(["head", "manager"]);
   if (!guard.ok) return { status: "error", error: guard.code };
+  // Менеджер видит журнал ЖК во вкладке «Публикация»; общий журнал «Настроек» — руководителю (п. 29).
+  if (guard.viewer.role !== "head" && typeof scope?.complexId !== "string")
+    return { status: "error", error: "forbidden" };
   if (
     !isScopeId(scope?.developerId) ||
     !isScopeId(scope?.complexId) ||

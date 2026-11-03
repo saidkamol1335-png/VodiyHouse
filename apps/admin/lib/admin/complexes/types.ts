@@ -35,6 +35,12 @@ export type SaveComplexMainResult =
 
 export type ComplexStatusResult = StatusResult<ComplexRequirement>;
 
+/** «Удалить сейчас» (п. 24): csvNotSent — бот есть, а файл квартир не ушёл, ЖК не удалён. */
+export type DeleteNowResult =
+  | { status: "idle" }
+  | { status: "done"; at: number }
+  | { status: "error"; error: ContentErrorCode | "csvNotSent" };
+
 /** Превью файла в панели публикации (правило 1.2): фото галереи и чертежи. */
 /** Файлы ЖК в панели публикации: фото кадром; чертёж, фасад и план этажа — целиком. */
 export type ComplexFileKind = "photo" | "drawing" | "facade" | "floor_plan";

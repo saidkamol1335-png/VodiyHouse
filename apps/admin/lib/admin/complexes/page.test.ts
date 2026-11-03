@@ -76,7 +76,7 @@ describe("готовность к публикации (И7, И9)", () => {
       { requirement: "unknown", ok: false, have: null },
     ]);
     expect(items.map((item) => item.requirement)).toEqual(["address", "point", "renders"]);
-    expect([...tabsNeedingAttention(items)]).toEqual(["main", "photos"]);
+    expect([...tabsNeedingAttention(items)]).toEqual(["location", "photos"]);
     expect(rendersShort(items)).toBe(2);
     expect(requirementsFromDetail("address, point,nope")).toEqual(["address", "point"]);
     expect(requirementsFromDetail(null)).toEqual([]);

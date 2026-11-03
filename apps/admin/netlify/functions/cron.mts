@@ -24,6 +24,8 @@ export default async function cron(): Promise<void> {
   if (now.getUTCMinutes() < 5) {
     await run(site, secret, "tg-starts");
     await run(site, secret, "events");
+    // Запросы менеджеров без ответа больше суток (фаза D) — проверка раз в час, напоминание — раз в сутки на запрос.
+    await run(site, secret, "requests");
     // Архив — раз в сутки, в 03:00 по Ташкенту (22:00 UTC): ночью, когда сайтом не пользуются.
     // Курса ЦБ здесь нет: cbu.uz закрыт из-за рубежа, с Netlify — тайм-аут. Курс кладёт
     // `npm run rate:update` из Узбекистана (решение исполнителя 28.10.2026, PROGRESS).
@@ -32,6 +34,8 @@ export default async function cron(): Promise<void> {
     if (now.getUTCHours() === 19) await run(site, secret, "showcase");
     // Ход строительства (фаза 5) — в 09:00 по Ташкенту (04:00 UTC): в рабочее время, когда его прочтут.
     if (now.getUTCHours() === 4) await run(site, secret, "progress");
+    // Сводка черновиков (фаза D) — тоже утром; раз в неделю её пропускает сама база.
+    if (now.getUTCHours() === 4) await run(site, secret, "drafts");
   }
 }
 

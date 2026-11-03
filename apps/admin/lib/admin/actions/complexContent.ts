@@ -22,6 +22,7 @@ import { expireCatalog, expireComplex } from "@/lib/cache";
 // одним вызовом, после — сброс кэша страницы ЖК на сайте.
 
 const headGuard = () => requireActionViewer(["head"]);
+const editGuard = () => requireActionViewer(["head", "manager"]);
 
 const failed = <E>(error: ContentErrorCode | null, errors: E): SaveContentResult<E> => ({ status: "error", error, errors, broken: [] });
 
@@ -31,7 +32,7 @@ const answer = <E>(error: DbErrorLike | null): SaveContentResult<E> =>
 
 /** «Сохранить вкладку» на «Документах»: проверенные документы с датами. */
 export async function saveComplexDocumentsAction(formData: FormData): Promise<DocumentsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code, {});
   const parsed = parseDocuments(formData);
   if (!parsed.ok) return failed(null, parsed.errors);
@@ -44,7 +45,7 @@ export async function saveComplexDocumentsAction(formData: FormData): Promise<Do
 
 /** «Сохранить вкладку» на «Видео»: ролики YouTube по порядку. */
 export async function saveComplexVideosAction(formData: FormData): Promise<VideosResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code, {});
   const parsed = parseVideos(formData);
   if (!parsed.ok) return parsed.error ? failed(parsed.error, {}) : failed(null, parsed.errors);
@@ -57,7 +58,7 @@ export async function saveComplexVideosAction(formData: FormData): Promise<Video
 
 /** «Убрать из истории» на «Блоках»: ошибочная запись о переносе срока (исправляли опечатку). */
 export async function removeDeadlineChangeAction(formData: FormData): Promise<RemoveDeadlineChangeResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return { status: "error", error: guard.code };
   const id = readUuid(formData);
   if (!id) return { status: "error", error: "notFound" };
@@ -81,7 +82,7 @@ export async function reorderComplexesAction(formData: FormData): Promise<Catalo
 
 /** «Сохранить вкладку» на «Деталях»: тексты тем с фото из галереи. */
 export async function saveComplexDetailsAction(formData: FormData): Promise<DetailsResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return failed(guard.code, {});
   const parsed = parseDetails(formData);
   if (!parsed.ok) return failed(null, parsed.errors);

@@ -1,0 +1,24 @@
+/* «Состояние на сайте» во вкладке «Публикация» (экран 3). */
+.complex-site-state {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.complex-site-state__text,
+.complex-site-state__layouts {
+  margin: 0;
+}
+
+.complex-site-state__layouts {
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.complex-site-state__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--amber-2);
+  font-weight: 700;
+}

@@ -136,3 +136,18 @@ export async function purgeArchive(admin: SupabaseClient): Promise<{ purged: num
   }
   return { purged, postponed };
 }
+
+/** CSV квартир — руководителю перед «Удалить сейчас» (фаза D, п. 24). Без бота — true, как ночью. */
+export async function sendDeletedUnits(slug: string, units: ArchiveUnit[], caption: string): Promise<boolean> {
+  const config = telegramConfig();
+  if (!config) return true;
+  const result = await sendTelegramDocument(config, config.alertChatId, { name: `${slug}-kvartiry.csv`, content: archiveUnitsCsv(units) }, caption);
+  if (!result.ok) console.error("[archive] CSV не отправлен", slug, result.error);
+  return result.ok;
+}
+
+/** Файлы ЖК, удалённого «сейчас»: строк уже нет — папка ЖК в media и в progress-video целиком. */
+export async function removeComplexFiles(admin: SupabaseClient, complexId: string, media: string[]): Promise<void> {
+  await clearFolders(admin, MEDIA_BUCKET, [`complexes/${complexId}`], media);
+  await clearFolders(admin, PROGRESS_VIDEO_BUCKET, [`complexes/${complexId}`]);
+}

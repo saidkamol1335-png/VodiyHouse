@@ -13,8 +13,8 @@ import { COMPLEX_LIMITS, type ComplexMainFields } from "@/lib/admin/complexes/ma
 import { COMPLEX_CLASSES, HOUSE_TYPES, PARKING_TYPES } from "@/lib/admin/complexes/record";
 import type { DeveloperOption } from "@/lib/admin/complexes/types";
 
-// Три панели «Основного» (И1) — как разделы страницы ЖК на сайте: «О ЖК» (8 фактов),
-// «Расположение», «Проверено Vodiy House». Поля — общие компоненты кабинета (Д3, «реши сам»).
+// Панели «Основного» (И1), разнесённые по вкладкам экрана 3 (PLAN §10, п. 21): факты ЖК —
+// «Основное», описание — «О ЖК», «Расположение», визит сотрудника — «Документы и проверки».
 
 /** Поле в ряду на общей сетке: подписи разной высоты, а поля на одной линии. */
 const ROW_FIELD = "field--subgrid complex-main__field";
@@ -62,6 +62,17 @@ export function AboutPanel(props: SectionProps) {
           {floors ? t("floors", { floors }) : t("floorsEmpty")}{" "}
           <Link href={blocksHref}>{t("floorsLink")}</Link>
         </p>
+      </div>
+    </AdminPanel>
+  );
+}
+
+/** «О ЖК» (экран 3): описание для карточки и страницы, RU и UZ. */
+export function DescriptionPanel({ fields, issue }: SectionProps) {
+  const t = useTranslations("admin.complexes");
+  return (
+    <AdminPanel title={t("sections.description")} wide>
+      <div className="complex-main__grid">
         <BilingualField
           id="complex-short"
           name="shortDescription"

@@ -1,0 +1,65 @@
+/* «Запросы руководителю» во вкладке «Публикация» (PLAN §10, п. 25). */
+.publication-requests {
+  display: grid;
+  gap: 16px;
+}
+
+.publication-requests__pending {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--amber-line);
+  border-radius: 14px;
+  background: var(--amber-soft);
+}
+
+.publication-requests__waiting {
+  margin: 0;
+  font-weight: 700;
+}
+
+.publication-requests__note,
+.publication-requests__hint,
+.publication-requests__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.publication-requests__form {
+  display: grid;
+  gap: 12px;
+}
+
+.publication-requests__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.publication-requests__history {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.publication-requests__item {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-3);
+  font-size: var(--fs-small);
+}
+
+.publication-requests__item-head {
+  font-weight: 700;
+}
+
+.publication-requests__item--declined .publication-requests__answer {
+  color: var(--badge-bad-fg);
+}

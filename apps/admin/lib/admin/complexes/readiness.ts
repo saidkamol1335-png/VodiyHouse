@@ -21,14 +21,15 @@ export const PUBLISH_RULES = {
   coverMinLongSide: MEDIA_LIMITS.complexCoverMinLongSide,
 } as const;
 
-// Застройщик выбирают на «Основном», программу и курс ведут в «Программах оплаты» (ссылка — блок C).
+// Застройщика выбирают на «Основном»; программу и курс ведут в «Программах оплаты» — ссылка
+// на них во вкладке «Блоки и оплата» (экран 3).
 export const REQUIREMENT_TAB: Record<ComplexRequirement, ComplexTabKey> = {
-  address: "main",
-  point: "main",
+  address: "location",
+  point: "location",
   developer: "main",
   renders: "photos",
   blocks: "blocks",
-  payment: "main",
+  payment: "blocks",
 };
 
 /** have — сколько общих рендеров есть, кроме обложки (только у renders): «нужно ещё N». */

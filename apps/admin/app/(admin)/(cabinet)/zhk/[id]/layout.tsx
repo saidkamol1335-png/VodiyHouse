@@ -6,18 +6,17 @@ import { AdminEntityHead } from "@/components/AdminEntityHead";
 import { AdminPage } from "@/components/AdminPage";
 import { AdminPanel } from "@/components/AdminPanel";
 import { AdminTopbar } from "@/components/AdminTopbar";
-import { ComplexStatus } from "@/components/ComplexStatus";
+import { Button } from "@/components/Button";
+import { ComplexStateBadge, PendingRequestBadge } from "@/components/ComplexStateBadge";
 import { ComplexWizardSteps } from "@/components/ComplexWizard";
 import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
-import { setComplexStatusAction } from "@/lib/admin/actions/complexes";
 import { tabsNeedingAttention } from "@/lib/admin/complexes/readiness";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
-import { canOpenComplex, complexAccess, complexTabs } from "@/lib/admin/complexes/tabs";
+import { canOpenComplex, complexAccess, complexTabHref, complexTabs } from "@/lib/admin/complexes/tabs";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
 import { getComplex, getComplexCompleteness, getComplexReadiness } from "@/lib/admin/server/complexPage";
-import { readComplexFiles } from "@/lib/admin/server/complexes";
-import { mediaSrc } from "@/lib/admin/server/developerPage";
+import { readComplexRequests } from "@/lib/admin/server/requests";
 import { requireSection } from "@/lib/admin/session";
 import { ROUTES } from "@/lib/routes";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -28,8 +27,9 @@ export const instant = false;
 type ComplexLayoutProps = { children: ReactNode; params: Promise<{ id: string }> };
 
 /**
- * Страница ЖК (в. 6): шапка со статусом и готовностью (И8, И9), вкладки-адреса — дочерние
- * страницы; у менеджера — только «Квартиры» без шапки (Н2).
+ * Страница ЖК (экран 3, PLAN §10 п. 21): шапка со значком состояния и вкладки — дочерние страницы;
+ * «Квартиры» — свой экран ЖК (п. 22). Руководитель и менеджер видят одно и то же; кнопки статуса —
+ * во вкладке «Публикация».
  */
 export default async function ComplexLayout({ children, params }: ComplexLayoutProps) {
   const { viewer, allowed } = await requireSection("complexes");
@@ -71,7 +71,6 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
   const wizard = access.manage && complex.status === "draft";
   return (
     <AdminPage topbar={topbar}>
-      {/* Менеджер (Н2): без статуса публикации и готовности, вкладка одна — ленты нет. */}
       {access.manage ? <ComplexHead complex={complex} wizard={wizard} /> : null}
       {children}
       {wizard ? <ComplexWizardSteps base={`${ADMIN_ROUTES.complexes}/${complex.id}`} /> : null}
@@ -79,13 +78,13 @@ export default async function ComplexLayout({ children, params }: ComplexLayoutP
   );
 }
 
-/** Статус публикации с готовностью (И8, И9) и вкладки — руководителю. */
+/** Значок состояния, «Ожидает руководителя», «Квартиры» и вкладки с точками готовности (И9). */
 async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard: boolean }) {
   const t = await getTranslations("admin.complexes");
-  const [readiness, completeness, files] = await Promise.all([
+  const [readiness, completeness, requests] = await Promise.all([
     getComplexReadiness(complex.id),
     getComplexCompleteness(complex.id),
-    readComplexFiles(await createSupabaseServerClient(), complex.id),
+    readComplexRequests(await createSupabaseServerClient(), complex.id),
   ]);
   const base = `${ADMIN_ROUTES.complexes}/${complex.id}`;
   const unpublished = complex.status === "draft" || complex.status === "hidden";
@@ -95,6 +94,7 @@ async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard
     unpublished ? tabsNeedingAttention(readiness) : undefined,
     wizard,
   );
+  const done = readiness.filter((item) => item.ok).length;
   return (
     <AdminEntityHead
       status={complex.status}
@@ -102,23 +102,18 @@ async function ComplexHead({ complex, wizard }: { complex: ComplexRecord; wizard
       tabs={tabs}
       attentionLabel={t("attention")}
       statusControls={
-        <ComplexStatus
-          complex={{ ...complex, name: complex.name.ru }}
-          action={setComplexStatusAction}
-          readiness={readiness}
-          completeness={completeness}
-          files={files.map((file) => ({ id: file.id, kind: file.kind, src: mediaSrc(file.path) }))}
-          base={base}
-          developer={
-            complex.developerId
-              ? {
-                  name: complex.developerName,
-                  published: complex.developerStatus === "published",
-                  href: `${ADMIN_ROUTES.developers}/${complex.developerId}`,
-                }
-              : null
-          }
-        />
+        <div className="admin-entity-head__state">
+          <ComplexStateBadge
+            status={complex.status}
+            siteState={{ state: completeness?.state ?? "draft", done, total: readiness.length }}
+            developerPublished={complex.developerStatus === "published"}
+            size="md"
+          />
+          {requests.some((request) => request.status === "pending") ? <PendingRequestBadge size="md" /> : null}
+          <Button size="sm" variant="outline" href={complexTabHref(base, "units")}>
+            {t("tabs.units")}
+          </Button>
+        </div>
       }
     />
   );

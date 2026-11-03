@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, type ReactNode } from "react";
 import { Button } from "@/components/Button";
 import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 import type { SelectOption } from "@/components/SelectField";
-import type { ComplexMainFields } from "@/lib/admin/complexes/mainForm";
+import type { ComplexMainFields, ComplexMainSection } from "@/lib/admin/complexes/mainForm";
 import { nearbyDrafts } from "@/lib/admin/complexes/nearby";
 import type { ComplexRecord } from "@/lib/admin/complexes/record";
 import type { DeveloperOption, SaveComplexMainResult } from "@/lib/admin/complexes/types";
@@ -13,9 +13,17 @@ import type { FormAction } from "@/lib/admin/developers/types";
 import { formatCoordinates } from "@/lib/geo";
 import { submitKeepingForm } from "@/lib/ui/submitKeepingForm";
 import { useUnsavedGuard } from "@/lib/ui/useUnsavedGuard";
-import { AboutPanel, ChecksPanel, LocationPanel } from "./ComplexMainSections";
+import {
+  AboutPanel,
+  ChecksPanel,
+  DescriptionPanel,
+  LocationPanel,
+  type SectionProps,
+} from "./ComplexMainSections";
 
 type ComplexMainFormProps = {
+  /** Какая вкладка экрана 3: свои поля и своя «Сохранить» (PLAN §10, п. 21). */
+  section: ComplexMainSection;
   complex: ComplexRecord;
   action: FormAction<SaveComplexMainResult>;
   developers: readonly DeveloperOption[];
@@ -54,7 +62,14 @@ function fieldsOf(complex: ComplexRecord): ComplexMainFields {
   };
 }
 
-/** Вкладка «Основное» (И1): три панели как разделы сайта, одна «Сохранить вкладку». */
+const PANELS: Record<ComplexMainSection, (props: SectionProps) => ReactNode> = {
+  main: AboutPanel,
+  about: DescriptionPanel,
+  location: LocationPanel,
+  checks: ChecksPanel,
+};
+
+/** Поля ЖК одной вкладки экрана 3 и её «Сохранить» (И1). */
 export function ComplexMainForm(props: ComplexMainFormProps) {
   const t = useTranslations("admin.complexes");
   const [state, formAction, pending] = useActionState(
@@ -74,7 +89,7 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
     const code = failed?.fieldErrors[field];
     return code ? t(`issues.${code}`) : undefined;
   };
-  const sections = { ...props, fields, issue };
+  const Panel = PANELS[props.section];
 
   return (
     <form
@@ -84,9 +99,8 @@ export function ComplexMainForm(props: ComplexMainFormProps) {
       noValidate
     >
       <input type="hidden" name="id" value={props.complex.id} />
-      <AboutPanel {...sections} />
-      <LocationPanel {...sections} />
-      <ChecksPanel {...sections} />
+      <input type="hidden" name="section" value={props.section} />
+      <Panel {...props} fields={fields} issue={issue} />
       <div className="complex-main__save">
         <ComplexSaveFeedback state={state} />
         <Button type="submit" pending={pending} className="complex-main__submit">

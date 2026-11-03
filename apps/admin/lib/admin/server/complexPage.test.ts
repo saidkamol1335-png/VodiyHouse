@@ -44,18 +44,17 @@ beforeEach(() => {
   stored.status = "published";
 });
 
-describe("complexForTab: вкладки ЖК по роли (Н2)", () => {
+describe("complexForTab: вкладки ЖК по роли (PLAN §10, п. 6)", () => {
   it("руководитель открывает любую вкладку, и архивный ЖК тоже", async () => {
     await expect(complexForTab(params, "blocks")).resolves.toMatchObject({ id: ID });
     stored.status = "archived";
     await expect(open("main")).resolves.toMatchObject({ status: "archived" });
   });
 
-  it("менеджер: «Квартиры» открыты, другие вкладки перекидывают туда", async () => {
+  it("менеджер открывает все вкладки и «Квартиры»", async () => {
     session.role = "manager";
-    await expect(open("units")).resolves.toMatchObject({ id: ID });
-    for (const tab of ["main", "blocks", "layouts", "photos", "log"] as const) {
-      await expect(open(tab)).rejects.toThrow(`REDIRECT /zhk/${ID}/kvartiry`);
+    for (const tab of ["units", "main", "about", "blocks", "layouts", "photos", "location", "documents", "publication"] as const) {
+      await expect(open(tab)).resolves.toMatchObject({ id: ID });
     }
   });
 

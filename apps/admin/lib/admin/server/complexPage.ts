@@ -11,7 +11,7 @@ import {
   canOpenComplex,
   complexAccess,
   complexTabRedirect,
-  type ComplexTabKey,
+  type ComplexScreenKey,
 } from "../complexes/tabs";
 import { ADMIN_ROUTES } from "../nav";
 import { readComplex, readReadiness } from "./complexes";
@@ -41,12 +41,12 @@ export const getComplexCompleteness = cache(async (id: string): Promise<ComplexC
 
 /**
  * Вкладка ЖК сама проверяет сотрудника: переход между вкладками не перерисовывает layout.
- * Закрытая роли вкладка (менеджеру — всё, кроме «Квартир», Н2) перекидывает на открытую.
+ * Закрытая роли вкладка перекидывает на открытую (мобилографу раздел закрыт целиком).
  * null — показывать нечего (отказ и «база не подключена» уже показал layout).
  */
 export async function complexForTab(
   params: Promise<{ id: string }>,
-  tab: ComplexTabKey,
+  tab: ComplexScreenKey,
 ): Promise<ComplexRecord | null> {
   const { viewer, allowed } = await requireSection("complexes");
   if (!allowed || isCabinetOpenWithoutLogin || !hasSupabaseEnv()) return null;

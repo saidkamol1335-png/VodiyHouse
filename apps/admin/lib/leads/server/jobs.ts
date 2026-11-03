@@ -1,5 +1,6 @@
 import "server-only";
 import { remindProgress } from "@/lib/admin/server/progressReminder";
+import { digestDrafts, remindRequests } from "@/lib/admin/server/requestReminders";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { purgeArchive, remindArchive } from "@/lib/archive/server/purge";
 import { expireRateNow, expireShowcaseNow } from "@/lib/cache";
@@ -49,6 +50,10 @@ export const CRON_JOBS: Record<string, CronJob> = {
   },
   // Ход строительства (5D.3): раз в сутки утром — ЖК, где последний отчёт старше 45 дней (не чаще раза в неделю).
   progress: async () => ({ reminded: await remindProgress(createSupabaseAdminClient()) }),
+  // Запросы менеджеров (фаза D, п. 30): ждут руководителя больше суток — раз в час проверка.
+  requests: async () => ({ reminded: await remindRequests(createSupabaseAdminClient()) }),
+  // Черновики старше 14 дней (п. 30): сводка не чаще раза в 7 дней (отметку держит база).
+  drafts: async () => ({ listed: await digestDrafts(createSupabaseAdminClient()) }),
   // Курс ЦБ (3.2): раз в сутки; изменился — калькуляторы и «Платёж от» пересчитываются сразу.
   rate: async () => {
     const changed = await updateCbuRate(createSupabaseAdminClient());

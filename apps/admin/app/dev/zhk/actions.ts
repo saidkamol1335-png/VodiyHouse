@@ -1,5 +1,6 @@
 "use server";
 
+import { REQUEST_NOTE_MAX, type RequestResult } from "@/lib/admin/complexes/requests";
 import { devOnly } from "../devOnly";
 import { redirect } from "next/navigation";
 import { parseBlocks } from "@/lib/admin/complexes/blocksParse";
@@ -7,7 +8,7 @@ import { parseComplexCreate } from "@/lib/admin/complexes/create";
 import { parseLayouts } from "@/lib/admin/complexes/layouts";
 import { DEMO_COMPLEX_ROWS } from "@/lib/admin/complexes/demo";
 import { demoComplex, demoReadiness } from "@/lib/admin/complexes/demoPage";
-import { parseComplexMain } from "@/lib/admin/complexes/mainForm";
+import { isMainSection, parseComplexMain } from "@/lib/admin/complexes/mainForm";
 import { missingOf } from "@/lib/admin/complexes/readiness";
 import type {
   ComplexStatusResult,
@@ -41,7 +42,8 @@ export async function demoSaveComplexMainAction(
   formData: FormData,
 ): Promise<SaveComplexMainResult> {
   devOnly();
-  const parsed = parseComplexMain(formData);
+  const section = readText(formData, "section");
+  const parsed = parseComplexMain(formData, isMainSection(section) ? section : "main");
   if (!parsed.ok) {
     return {
       status: "error",
@@ -99,4 +101,13 @@ export async function demoSaveBlockLayoutsAction(formData: FormData): Promise<Sa
   return parsed.error
     ? { status: "error", error: parsed.error, rowErrors: {}, broken: [] }
     : { status: "error", error: null, rowErrors: parsed.rowErrors, broken: [] };
+}
+
+/** «Запросить у руководителя» и ответы на стенде: DEMO не меняется, бот не пишет. */
+export async function demoRequestAction(formData: FormData): Promise<RequestResult> {
+  devOnly();
+  const note = (readText(formData, "note") ?? readText(formData, "answer") ?? "").trim();
+  if (note.length > REQUEST_NOTE_MAX) return { status: "error", error: "noteTooLong" };
+  if (formData.has("answer") && !note) return { status: "error", error: "answerRequired" };
+  return { status: "done", at: Date.now(), notified: false };
 }

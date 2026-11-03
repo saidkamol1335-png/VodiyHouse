@@ -25,7 +25,7 @@ const fail = (error: ContentErrorCode, dbError?: DbError): ComplexMediaResult =>
   broken: dbError?.hint === "vh:not_ready" ? requirementsFromDetail(dbError.details) : [],
 });
 
-const headGuard = () => requireActionViewer(["head"]);
+const editGuard = () => requireActionViewer(["head", "manager"]);
 
 function readSide(formData: FormData, name: string): number | null {
   const value = Number(readText(formData, name));
@@ -45,7 +45,7 @@ function readFile(formData: FormData): FileFields | null {
   return { id, path, width, height, blur };
 }
 
-type Supabase = Extract<Awaited<ReturnType<typeof headGuard>>, { ok: true }>["supabase"];
+type Supabase = Extract<Awaited<ReturnType<typeof editGuard>>, { ok: true }>["supabase"];
 
 /** Новый файл ЖК: фото — в конец галереи, чертёж — для привязки при сохранении планировок. */
 async function attach(
@@ -69,7 +69,7 @@ async function attach(
 
 /** Поля: id (ЖК), path, width, height, blur, rule12. Ответ — id новой строки. */
 export async function attachComplexPhotoAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   const result = await attach(guard.supabase, formData, "add_complex_photo");
   if (result.status === "done") expireComplex(readUuid(formData));
@@ -78,14 +78,14 @@ export async function attachComplexPhotoAction(formData: FormData): Promise<Comp
 
 /** Поля те же; строка чертежа привязывается к планировке при «Сохранить вкладку». */
 export async function attachComplexDrawingAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   return attach(guard.supabase, formData, "add_complex_drawing");
 }
 
 /** Поля: id (ЖК), order — JSON-массив id фото в новом порядке (первое — обложка). */
 export async function reorderComplexPhotosAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   let order: unknown;
@@ -107,7 +107,7 @@ export async function reorderComplexPhotosAction(formData: FormData): Promise<Co
 
 /** Поля: id (ЖК), photo. Опубликованный ЖК не опускается ниже условий публикации. */
 export async function removeComplexPhotoAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   const photo = readUuid(formData, "photo");
@@ -125,7 +125,7 @@ export async function removeComplexPhotoAction(formData: FormData): Promise<Comp
 /** Поля: id (ЖК), photo, focusX, focusY — кадры 16:9 / 4:3 / 4:5 считаются от точки (в. 4). */
 /** Тип фото: минимум ЖК считает только общие рендеры, база не даст потерять обязательное. */
 export async function setComplexPhotoCategoryAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   const photo = readUuid(formData, "photo");
@@ -138,7 +138,7 @@ export async function setComplexPhotoCategoryAction(formData: FormData): Promise
 }
 
 export async function setComplexPhotoFocusAction(formData: FormData): Promise<ComplexMediaResult> {
-  const guard = await headGuard();
+  const guard = await editGuard();
   if (!guard.ok) return fail(guard.code);
   const id = readUuid(formData);
   const photo = readUuid(formData, "photo");
