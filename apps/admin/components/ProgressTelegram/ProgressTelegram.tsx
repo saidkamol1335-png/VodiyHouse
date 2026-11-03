@@ -3,7 +3,7 @@
 import { BellRing, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
@@ -18,13 +18,13 @@ import {
  */
 export function ProgressTelegram({ linked }: { linked: boolean }) {
   const t = useTranslations("admin.video.telegram");
-  const { url, error, pending, link, unlink } = useTelegramLink();
+  const { url, error, pending, link, unlink, check } = useTelegramLink(linked);
   return (
     <AdminPanel title={t("title")}>
       <div className="progress-telegram">
         <BellRing size={20} aria-hidden="true" className="progress-telegram__icon" />
         <p className="progress-telegram__lead">{t("lead")}</p>
-        <TelegramRow linked={linked} url={url} pending={pending} onLink={link} onUnlink={unlink} />
+        <TelegramRow linked={linked} url={url} pending={pending} onLink={link} onUnlink={unlink} onCheck={check} />
         {error ? (
           <p className="progress-telegram__error" role="alert">
             {error}
@@ -35,10 +35,17 @@ export function ProgressTelegram({ linked }: { linked: boolean }) {
   );
 }
 
-type RowProps = { linked: boolean; url: string | null; pending: boolean; onLink: () => void; onUnlink: () => void };
+type RowProps = {
+  linked: boolean;
+  url: string | null;
+  pending: boolean;
+  onLink: () => void;
+  onUnlink: () => void;
+  onCheck: () => void;
+};
 
 /** «Привязан · Отвязать», «Открыть Telegram» со ссылкой или «Привязать Telegram». */
-function TelegramRow({ linked, url, pending, onLink, onUnlink }: RowProps) {
+function TelegramRow({ linked, url, pending, onLink, onUnlink, onCheck }: RowProps) {
   const t = useTranslations("admin.video.telegram");
   if (linked) {
     return (
@@ -56,9 +63,13 @@ function TelegramRow({ linked, url, pending, onLink, onUnlink }: RowProps) {
     <div className="progress-telegram__row">
       {url ? (
         <>
-          <Button href={url} size="sm">
+          {/* Новая вкладка: кабинет остаётся открытым, после «Старт» — «проверить». */}
+          <a className="button button--primary button--sm" href={url} target="_blank" rel="noreferrer">
             <Send size={16} aria-hidden="true" />
             {t("open")}
+          </a>
+          <Button variant="ghost" size="sm" onClick={onCheck}>
+            {t("check")}
           </Button>
           <span className="progress-telegram__hint">{t("linkHint")}</span>
         </>
@@ -72,7 +83,7 @@ function TelegramRow({ linked, url, pending, onLink, onUnlink }: RowProps) {
   );
 }
 
-function useTelegramLink() {
+function useTelegramLink(linked: boolean) {
   const t = useTranslations("admin.video.telegram");
   const router = useRouter();
   const [url, setUrl] = useState<string | null>(null);
@@ -92,5 +103,16 @@ function useTelegramLink() {
       setUrl(null);
       router.refresh();
     });
-  return { url, error, pending, link, unlink };
+  // Вернулись из Telegram во вкладку — состояние привязки перечитывается само.
+  useEffect(() => {
+    if (!url || linked) return;
+    const refresh = () => router.refresh();
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [url, linked, router]);
+  const check = () => {
+    setError(null);
+    router.refresh();
+  };
+  return { url, error, pending, link, unlink, check };
 }

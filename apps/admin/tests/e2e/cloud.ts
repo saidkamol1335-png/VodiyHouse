@@ -11,7 +11,10 @@ export const hasCloud = Boolean(
 
 export const NO_CLOUD = "нет ключей Supabase в .env.local — проверка ждёт облако";
 
-export type Persona = "head" | "manager" | "mobilographer" | "newcomer" | "disabled";
+export type Persona = "head" | "manager" | "mobilographer" | "mobilographer2" | "newcomer" | "disabled";
+
+/** Персоны с сохранённой сессией (auth.setup.ts). */
+export type CabinetPersona = "head" | "manager" | "mobilographer" | "mobilographer2";
 export type StaffCredentials = { id: string; email: string; password: string; fullName: string };
 
 /** Тестовые сотрудники из global-setup.ts (через process.env — только в памяти этого прогона). */
@@ -22,7 +25,7 @@ export function e2eStaff(): Record<Persona, StaffCredentials> {
 }
 
 /** Сохранённая сессия (auth.setup.ts); без облака — undefined: кабинет открыт без входа. */
-export function cabinetState(persona: "head" | "manager" | "mobilographer"): string | undefined {
+export function cabinetState(persona: CabinetPersona): string | undefined {
   return hasCloud ? `test-results/.auth/${persona}.json` : undefined;
 }
 
@@ -57,7 +60,8 @@ export function assertE2eProject(): { url: string; secret: string } {
   return { url, secret };
 }
 
-export const E2E_EMAIL = /^e2e-[a-z0-9]+-[a-z-]+@example\.com$/;
+// Персона может кончаться цифрой (mobilographer2, фаза E).
+export const E2E_EMAIL = /^e2e-[a-z0-9]+-[a-z0-9-]+@example\.com$/;
 
 /**
  * Второй фактор руководителя (PLAN §10, п. 8) на e2e: Telegram тестового сотрудника не привязан —

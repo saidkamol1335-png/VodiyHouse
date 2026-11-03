@@ -103,18 +103,27 @@ const ROOMS: Record<number, string> = {
   4: "4-комн.",
 };
 
-/** Квартиры блока — по выбору блока, мимо кэша (наличие меняется весь день). */
+/**
+ * Квартиры блока — по выбору блока, мимо кэша (наличие меняется весь день). Обрыв связи на стройке
+ * (фаза E, п. 37): запрос повторяется, когда сеть вернётся, — поле не остаётся в «Загружаем…».
+ */
 function useBlockUnits(blockId: string) {
   const [units, setUnits] = useState<{ blockId: string; list: ProgressUnitOption[] } | null>(null);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let current = true;
-    void readProgressUnitsAction(blockId).then((list) => {
-      if (current) setUnits({ blockId, list: list ?? [] });
-    });
+    const retry = () => current && setAttempt((value) => value + 1);
+    readProgressUnitsAction(blockId).then(
+      (list) => {
+        if (current) setUnits({ blockId, list: list ?? [] });
+      },
+      () => (navigator.onLine ? setTimeout(retry, 5_000) : window.addEventListener("online", retry, { once: true })),
+    );
     return () => {
       current = false;
+      window.removeEventListener("online", retry);
     };
-  }, [blockId]);
+  }, [blockId, attempt]);
   return units?.blockId === blockId ? units.list : null;
 }
 

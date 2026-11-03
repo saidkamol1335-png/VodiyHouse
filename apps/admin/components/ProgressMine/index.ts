@@ -1,1 +1,1 @@
-export { isMineFilter, MINE_FILTERS, ProgressMine, type MineFilter } from "./ProgressMine";
+export { isMineFilter, MINE_FILTERS, mineHref, ProgressMine, type MineFilter } from "./ProgressMine";

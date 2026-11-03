@@ -32,7 +32,11 @@ export async function ProgressTasks({ tasks }: { tasks: Tasks }) {
           <p className="progress-tasks__left">
             {tasks.left === 0 ? t("done") : t("left", { left: tasks.left, total: tasks.total })}
           </p>
-          <span className="progress-tasks__bar" role="progressbar" aria-valuemin={0} aria-valuemax={tasks.total} aria-valuenow={done}>
+          <span
+            className="progress-tasks__bar"
+            role="progressbar"
+            aria-label={t("left", { left: tasks.left, total: tasks.total })}
+            aria-valuemin={0} aria-valuemax={tasks.total} aria-valuenow={done}>
             <span style={{ transform: `scaleX(${tasks.total ? done / tasks.total : 1})` }} />
           </span>
         </div>
@@ -84,7 +88,10 @@ async function TaskAction({ complexId, block }: { complexId: string; block: Task
       </Button>
     );
   }
-  if (!block.mine || !block.reportId) return <span className="progress-tasks__action" />;
+  // Возвращённый отчёт коллеги исправляет он сам: здесь — только подпись.
+  if (!block.mine || !block.reportId) {
+    return <span className="progress-tasks__action progress-tasks__muted">{block.status === "returned" ? t("others") : null}</span>;
+  }
   if (block.status === "draft" || block.status === "returned") {
     const Icon = block.status === "draft" ? PencilLine : RotateCcw;
     return (

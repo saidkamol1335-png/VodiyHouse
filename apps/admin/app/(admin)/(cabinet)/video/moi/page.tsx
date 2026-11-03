@@ -1,11 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { FormStatus } from "@/components/FormStatus";
-import { isMineFilter, ProgressMine } from "@/components/ProgressMine";
+import { isMineFilter, mineHref, ProgressMine } from "@/components/ProgressMine";
 import { ReportDrawer } from "@/components/ProgressReview";
 import { ProgressTelegram } from "@/components/ProgressTelegram";
 import { VideoLayout } from "@/components/VideoLayout";
 import type { CabinetViewer } from "@/lib/admin/access";
-import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { idParam } from "@/lib/admin/progress/params";
 import { readAuthorProgressReports, readReportDetail } from "@/lib/admin/server/progress";
 import { hasStaffTelegram } from "@/lib/admin/server/progressNotify";
@@ -36,7 +35,7 @@ async function Mine({ viewer, search }: { viewer: CabinetViewer; search: Search 
   return (
     <>
       <ProgressMine items={items} filter={filter} top={top} />
-      {report ? <ReportDrawer key={report.id} report={report} canReview={false} closeHref={ADMIN_ROUTES.videoMine} /> : null}
+      {report ? <ReportDrawer key={report.id} report={report} canReview={false} closeHref={mineHref(filter)} /> : null}
     </>
   );
 }

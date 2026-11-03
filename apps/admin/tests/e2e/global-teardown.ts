@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import pg from "pg";
 import { dbClientConfig } from "../../lib/supabase/dbClient";
 import { assertE2eProject, E2E_EMAIL, hasCloud } from "./cloud";
+import { removeE2eProgress } from "./progressFixtures";
 
 // После прогона против облака: удалить всех e2e-…@example.com, в том числе оставшихся от
 // упавших прогонов. Профиль удаляется каскадом; журнал (audit_log) не трогаем никогда.
@@ -11,6 +12,9 @@ export default async function globalTeardown(): Promise<void> {
   if (!hasCloud) return;
   const { url, secret } = assertE2eProject();
   const admin = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
+  // Отчёты мобилографа e2e (фаза E) и их файлы — до удаления авторов: потом author_id станет null, а
+  // папки incoming уже не связать с e2e.
+  await removeE2eProgress().catch((error: unknown) => console.warn("[e2e] отчёты e2e не убраны", error));
   const doomed: string[] = [];
   for (let page = 1; ; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: PAGE_SIZE });

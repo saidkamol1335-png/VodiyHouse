@@ -84,8 +84,12 @@ export function progressKit(db: TestDb, ids: ContentIds, dates: Dates) {
     width: 1600,
     height: 1200,
   });
-  const photos = (actor: string, n: number, complex?: string) =>
-    Promise.all(Array.from({ length: n }, () => photo(actor, complex)));
+  // По одному: облачный прогон не пускает параллельные запросы в одной транзакции.
+  const photos = async (actor: string, n: number, complex?: string) => {
+    const list = [];
+    for (let i = 0; i < n; i += 1) list.push(await photo(actor, complex));
+    return list;
+  };
 
   /** Тело отчёта: блок публичного ЖК, снято сегодня, 3 свежих фото автора (если не заданы). */
   const report = async (actor: string, patch: Record<string, unknown> = {}) => ({

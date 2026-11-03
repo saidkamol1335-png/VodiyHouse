@@ -42,11 +42,12 @@ export async function ProgressMine({ items, filter, top }: ProgressMineProps) {
     <div className="progress-mine">
       {top}
       <AdminPanel title={t("title")} wide>
-        <Segmented label={t("filter.label")}>
+        {/* form — подписи переносятся строкой ниже: на телефоне пять вариантов не помещаются в ряд. */}
+        <Segmented label={t("filter.label")} form>
           {MINE_FILTERS.map((key) => (
             <Link
               key={key}
-              href={key === "all" ? ADMIN_ROUTES.videoMine : `${ADMIN_ROUTES.videoMine}?status=${key}`}
+              href={mineHref(key)}
               className={segmentedItemClass(key === filter)}
               aria-current={key === filter ? "page" : undefined}
             >
@@ -59,7 +60,7 @@ export async function ProgressMine({ items, filter, top }: ProgressMineProps) {
         ) : (
           <ul className="progress-mine__list">
             {items.map((report) => (
-              <MineRow key={report.id} report={report} />
+              <MineRow key={report.id} report={report} filter={filter} />
             ))}
           </ul>
         )}
@@ -68,7 +69,16 @@ export async function ProgressMine({ items, filter, top }: ProgressMineProps) {
   );
 }
 
-async function MineRow({ report }: { report: MyProgressReport }) {
+/** Адрес «Моих отчётов» с фильтром — ящик открывается и закрывается, не сбрасывая его. */
+export const mineHref = (filter: MineFilter, report?: string) => {
+  const params = new URLSearchParams();
+  if (filter !== "all") params.set("status", filter);
+  if (report) params.set("report", report);
+  const query = params.toString();
+  return query ? `${ADMIN_ROUTES.videoMine}?${query}` : ADMIN_ROUTES.videoMine;
+};
+
+async function MineRow({ report, filter }: { report: MyProgressReport; filter: MineFilter }) {
   const t = await getTranslations("admin.video.mine");
   const unit = report.unitNumber ? t("unit", { number: report.unitNumber }) : "";
   return (
@@ -91,12 +101,12 @@ async function MineRow({ report }: { report: MyProgressReport }) {
       <Badge tone={STATUS_TONE[report.status]} size="sm" dot className="progress-mine__status">
         {t(`status.${report.status}`)}
       </Badge>
-      <MineActions report={report} />
+      <MineActions report={report} filter={filter} />
     </li>
   );
 }
 
-async function MineActions({ report }: { report: MyProgressReport }) {
+async function MineActions({ report, filter }: { report: MyProgressReport; filter: MineFilter }) {
   const t = await getTranslations("admin.video.mine");
   if (report.status === "draft" || report.status === "returned") {
     return (
@@ -110,7 +120,7 @@ async function MineActions({ report }: { report: MyProgressReport }) {
   }
   return (
     <div className="progress-mine__actions">
-      <Button href={`${ADMIN_ROUTES.videoMine}?report=${report.id}`} variant="outline" size="sm">
+      <Button href={mineHref(filter, report.id)} variant="outline" size="sm">
         {t("open")}
       </Button>
     </div>

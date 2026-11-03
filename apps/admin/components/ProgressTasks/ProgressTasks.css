@@ -109,3 +109,8 @@
     display: none;
   }
 }
+
+.progress-tasks__muted {
+  color: var(--fg-3);
+  font-size: 12px;
+}

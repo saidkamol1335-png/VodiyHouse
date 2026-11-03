@@ -1,6 +1,13 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { MediaComplex, MediaComplexItem, ProgressTasks, TaskStatus } from "@/lib/admin/progress/types";
+import type {
+  MediaComplex,
+  MediaComplexItem,
+  ProgressEdit,
+  ProgressFormComplex,
+  ProgressTasks,
+  TaskStatus,
+} from "@/lib/admin/progress/types";
 import { signProgressFiles } from "./progressFiles";
 
 // «Задания» мобилографа и «Медиа ЖК» (фаза E, пп. 34, 35): функции базы решают, кому что видно.
@@ -129,4 +136,28 @@ export async function readMediaComplex(supabase: SupabaseClient, complexId: stri
       })),
     })),
   };
+}
+
+/**
+ * ЖК и блок правки (черновик, возвращённый) — в выборе формы, даже если блок с тех пор сдан или в ЖК
+ * не осталось строящихся: отчёт не переезжает в другой блок сам (ревью фазы E).
+ */
+export async function withEditTarget(
+  supabase: SupabaseClient,
+  complexes: ProgressFormComplex[],
+  edit: ProgressEdit | null,
+): Promise<ProgressFormComplex[]> {
+  if (!edit) return complexes;
+  const complex = complexes.find((item) => item.id === edit.complexId);
+  if (complex?.blocks.some((block) => block.id === edit.blockId)) return complexes;
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("id, name, complex:complexes(name)")
+    .eq("id", edit.blockId)
+    .maybeSingle();
+  if (error || !data) return complexes;
+  const row = data as unknown as { id: string; name: string; complex: { name: { ru: string } } | null };
+  const block = { id: row.id, name: row.name };
+  if (complex) return complexes.map((item) => (item === complex ? { ...item, blocks: [...item.blocks, block] } : item));
+  return [...complexes, { id: edit.complexId, name: row.complex?.name.ru ?? "", blocks: [block] }];
 }

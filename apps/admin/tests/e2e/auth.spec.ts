@@ -251,6 +251,11 @@ test.describe("менеджер и мобилограф", () => {
     const page = await context.newPage();
     await page.goto("/video");
     await expect(page.getByRole("heading", { level: 1, name: "Отчёты мобилографа" })).toBeVisible();
+    // Фаза E (п. 34): первая вкладка мобилографа — «Задания» на текущий месяц.
+    const tabs = page.getByRole("navigation", { name: "Разделы видео и хода строительства" });
+    await expect(tabs.getByRole("link").first()).toHaveText("Задания");
+    await expect(tabs.getByRole("link", { name: "Задания" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("heading", { name: /^Задания · / })).toBeVisible();
     await expect(
       page
         .getByRole("navigation", { name: "Разделы кабинета" })

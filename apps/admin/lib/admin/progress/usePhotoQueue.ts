@@ -27,6 +27,8 @@ export type PhotoTile = {
 
 type Patch = Partial<Pick<PhotoTile, "state" | "wait" | "photo" | "preview" | "error">>;
 
+const RETRY_CAP_MS = 60_000;
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Связь вернулась — событие online (или сразу, если сеть есть). */
@@ -55,7 +57,8 @@ async function uploadWithRetry({ path, blob, live, patch }: Upload): Promise<boo
       failure = error as UploadFailure;
     }
     if (!failure || isDuplicate(failure)) return true;
-    const delay = isRetryable(failure) ? nextRetryDelay(attempt) : null;
+    // Сеть и сбои сервера — повторы без предела, не реже раза в минуту: снимок камеры не теряется.
+    const delay = isRetryable(failure) ? (nextRetryDelay(attempt) ?? RETRY_CAP_MS) : null;
     if (delay === null) return false;
     patch({ state: "waiting", wait: navigator.onLine ? { reason: "retry", seconds: delay / 1000 } : { reason: "offline" } });
     await sleep(delay);
@@ -149,32 +152,40 @@ export function usePhotoQueue({ userId, complexId }: QueueOwner, initial: readon
   const [tiles, setTiles] = useState<PhotoTile[]>(() => initial.map(storedTile));
   const { keep, release } = usePreviews();
   const live = useLiveKeys(tiles);
+  // Файлы плиток — для «Повторить» после отказа (снимок камеры в галерею не попадает).
+  const sources = useRef(new Map<string, File>());
+  const start = (file: File, key: string) =>
+    complexId && void processTile(file, key, { owner: { userId, complexId }, live, keep, setTiles });
 
   const add = (files: readonly File[]): number => {
     if (!complexId) return 0;
     const room = Math.max(0, PHOTOS_MAX - tiles.length);
     const taken = files.slice(0, room).map((file) => ({ file, key: crypto.randomUUID() }));
-    for (const { key } of taken) live.current.add(key);
+    for (const { file, key } of taken) {
+      live.current.add(key);
+      sources.current.set(key, file);
+    }
     setTiles((current) => [...current, ...taken.map(({ file, key }) => newTile(file, key))]);
-    const tile = { owner: { userId, complexId }, live, keep, setTiles };
-    for (const { file, key } of taken) void processTile(file, key, tile);
+    for (const { file, key } of taken) start(file, key);
     return taken.length;
   };
-  const remove = (key: string) => {
-    live.current.delete(key);
+  const drop = (keys: readonly string[] | null) =>
     setTiles((current) => {
-      release(current.filter((tile) => tile.key === key));
-      return current.filter((tile) => tile.key !== key);
+      const gone = keys ? current.filter((tile) => keys.includes(tile.key)) : current;
+      for (const tile of gone) {
+        live.current.delete(tile.key);
+        sources.current.delete(tile.key);
+      }
+      release(gone);
+      return keys ? current.filter((tile) => !keys.includes(tile.key)) : [];
     });
-  };
-  const reset = () => {
-    live.current.clear();
-    setTiles((current) => {
-      release(current);
-      return [];
-    });
+  const retry = (key: string) => {
+    const file = sources.current.get(key);
+    if (!file) return;
+    setTiles((current) => current.map((tile) => (tile.key === key ? { ...tile, state: "working", error: null } : tile)));
+    start(file, key);
   };
   const photos = tiles.flatMap((tile) => (tile.photo ? [tile.photo] : []));
   const working = tiles.some((tile) => tile.state === "working" || tile.state === "waiting");
-  return { tiles, photos, working, add, remove, reset };
+  return { tiles, photos, working, add, remove: (key: string) => drop([key]), reset: () => drop(null), retry };
 }

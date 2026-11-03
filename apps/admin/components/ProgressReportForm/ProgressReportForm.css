@@ -187,7 +187,8 @@
   font-size: 13px;
 }
 
-/* «На проверку», «Сохранить черновик» (фаза E): на телефоне — липкая полоса над нижней панелью. */
+/* «На проверку», «Сохранить черновик» (фаза E): в конце формы; на телефоне не липнут — внизу экрана
+   уже нижняя панель мобилографа, вдвоём они закрывали бы половину формы. */
 .progress-form__actions {
   display: grid;
   gap: 10px;
@@ -218,35 +219,7 @@
   font-size: 12px;
 }
 
-@media (max-width: 760px) {
-  .progress-form__actions {
-    position: sticky;
-    bottom: calc(var(--video-dock-h, 0px) + 8px);
-    z-index: 2;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--bg, #fff);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
-  }
 
-  .progress-form__actions > :first-child,
-  .progress-form__actions > :nth-child(3) {
-    grid-column: 1 / -1;
-  }
-}
-
-[data-motion="full"] .progress-form__spinner,
-[data-motion="lite"] .progress-form__spinner {
-  animation: progress-form-spin 0.9s linear infinite;
-}
-
-@keyframes progress-form-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 @media (max-width: 760px) {
   .progress-form__two {
@@ -371,4 +344,21 @@
 [data-motion="full"] .progress-form__upload-bar span,
 [data-motion="lite"] .progress-form__upload-bar span {
   transition: transform 0.3s linear;
+}
+
+.progress-form__retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  margin-left: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }

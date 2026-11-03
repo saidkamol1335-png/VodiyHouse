@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/Button";
@@ -25,11 +26,14 @@ export function ReviewDecision({ id, version, onDone }: { id: string; version: s
   const [returning, setReturning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const router = useRouter();
   const run = (action: (data: FormData) => Promise<ReviewActionResult>) => (data: FormData) =>
     start(async () => {
       const result = await action(data);
-      if (result.status === "error") return setError(tError(result.error));
-      onDone();
+      if (result.status !== "error") return onDone();
+      // Отказ — версия ящика могла устареть: страница перечитывает отчёт, повтор идёт с новой.
+      setError(tError(result.error));
+      router.refresh();
     });
   return (
     <div className="progress-review__decision">

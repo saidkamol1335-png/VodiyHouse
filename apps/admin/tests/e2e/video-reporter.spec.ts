@@ -1,221 +1,322 @@
-import pg from "pg";
-import { dbClientConfig } from "../../lib/supabase/dbClient";
-import { expect, test } from "./fixtures";
-import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
-import { collectPageErrors, imageFile } from "./helpers";
+import { expect, test, type Browser, type Locator, type Page } from "./fixtures";
+import { cabinetState, e2eStaff, hasCloud, NO_CLOUD, type CabinetPersona } from "./cloud";
+import { collectPageErrors } from "./helpers";
+import {
+  complexBySlug,
+  E2E_COMMENT,
+  hasDb,
+  photoFiles,
+  removeE2eProgress,
+  reportById,
+  reportsOf,
+  ruDate,
+  shotDayThisMonth,
+  storedObjects,
+  type ComplexInfo,
+} from "./progressFixtures";
+import { site } from "./site";
 
-// Кабинет мобилографа (фаза 5, 5B, мокап CabVideo) против облака: «Новый отчёт» по DEMO-ЖК — 3 фото, ссылка Shorts,
-// комментарий RU и UZ, «Отправить на проверку» → «Мои отчёты» с «На проверке». У блока Yulduz отчёт за
-// прошлый месяц уже есть (DEMO-сид) — понятный отказ; отчёт по квартире за месяц — сколько угодно. После
-// теста строка удаляется (файлы — в папке DEMO-ЖК, их уберёт demo:seed). Скриншот — test-results/screens/<проект>/p5-reporter.png.
+// Путь отчёта мобилографа целиком (Проект-2, фаза E, пп. 31–38) против облака, DEMO Yulduz (один
+// строящийся блок). Отчёт блока за текущий месяц у DEMO уже есть («один на блок за месяц»), поэтому
+// отчёт e2e — видео квартиры (их сколько угодно): мобилограф — дата съёмки, квартира, 4 фото в incoming,
+// комментарий RU и UZ, «Отправить на проверку» → «Мои отчёты»; руководитель — ящик с подписанными
+// кадрами, «Убрать кадр» (4 → 3, дальше нельзя), «Вернуть автору»; мобилограф — «Исправить» → снова на
+// проверку; менеджер — ящик без «Опубликовать»; руководитель публикует с отметкой 1.2 → в базе пути
+// complexes/…, в incoming файлов отчёта нет → сайт /ru/video/<id> «Снято <дата съёмки>». Отчёт и файлы
+// убираются.
+// Скриншот — test-results/screens/<проект>/pE-review.png.
 
-async function removeE2eReports(): Promise<void> {
-  const client = new pg.Client(dbClientConfig(process.env.SUPABASE_DB_URL!));
-  await client.connect();
-  try {
-    await client.query("begin");
-    await client.query("select set_config('vodiy.skip_audit', 'on', true)");
-    await client.query("delete from progress_reports where comment ->> 'ru' like 'E2E ·%'");
-    await client.query("commit");
-  } finally {
-    await client.end();
-  }
-}
+const SLUG = "demo-yulduz";
+const SHOT = shotDayThisMonth();
+const RU = `${E2E_COMMENT} Залит 9-й этаж`;
+const UZ = `${E2E_COMMENT} 9-qavat quyildi`;
+const RU_FIXED = `${E2E_COMMENT} Переснято без вывески`;
+const NOTE = `${E2E_COMMENT} В кадре вывеска застройщика`;
 
-/** Как менеджер (экран проверки — 5D): вернуть отчёт E2E с причиной. */
-async function returnE2eReport(note: string): Promise<void> {
-  const client = new pg.Client(dbClientConfig(process.env.SUPABASE_DB_URL!));
-  await client.connect();
-  try {
-    await client.query("begin");
-    await client.query("select set_config('vodiy.skip_audit', 'on', true)");
-    const { rowCount } = await client.query(
-      "update progress_reports set status = 'returned', return_note = $1 where comment ->> 'ru' like 'E2E ·%' and status = 'review'",
-      [note],
-    );
-    await client.query("commit");
-    expect(rowCount).toBe(1);
-  } finally {
-    await client.end();
-  }
-}
-
-test.describe.serial("кабинет мобилографа", () => {
-  test.skip(!hasCloud || !process.env.SUPABASE_DB_URL, NO_CLOUD);
-  test.use({ storageState: cabinetState("mobilographer") });
-  test.beforeAll(removeE2eReports);
-  test.afterAll(removeE2eReports);
-
-  test("«Новый отчёт»: ЖК, прошлый месяц, 3 фото, комментарий → «Мои отчёты» · На проверке", async ({
-    page,
-  }) => {
-    const errors = collectPageErrors(page);
-    await page.goto("/video");
-    await expect(page.getByRole("heading", { level: 1, name: "Отчёты мобилографа" })).toBeVisible();
-    await expect(page.getByText("Как снимать")).toBeVisible();
-    // Матрица у мобилографа та же, но чужие отчёты из неё не открываются.
-    const matrix = page.getByRole("table", { name: "Отчёты по ЖК · последние 6 месяцев" });
-    await expect(matrix.getByRole("row", { name: /^Yulduz/ })).toBeVisible();
-    await expect(matrix.getByRole("link")).toHaveCount(0);
-
-    await page.getByLabel("ЖК", { exact: true }).selectOption({ label: "ЖК Yulduz" });
-    await page.getByRole("group", { name: "Месяц отчёта" }).getByRole("button").nth(1).click();
-
-    // Без фото и комментария — подсказки формы, не отправка.
-    await page.getByRole("button", { name: "Отправить на проверку" }).click();
-    await expect(page.getByText("Добавьте минимум 3 фото")).toBeVisible();
-    await expect(page.getByText("Комментарий нужен на двух языках")).toBeVisible();
-
-    const files = await Promise.all(
-      [0, 1, 2].map(() => imageFile(page, { width: 1800, height: 1200, type: "image/jpeg" })),
-    );
-    await page
-      .locator(".progress-form__add input[type=file]")
-      .setInputFiles(files.map((file, index) => ({ ...file, name: `stroyka-${index}.jpg` })));
-    await expect(page.locator(".progress-form__shot--done")).toHaveCount(3, { timeout: 30_000 });
-    await expect(page.getByText("Фото · 3 из 3–15")).toBeVisible();
-
-    await page.locator("textarea[name='comment.ru']").fill("E2E · Залит 9-й этаж");
-    await page.locator("textarea[name='comment.uz']").fill("E2E · 9-qavat quyildi");
-    await page.getByRole("button", { name: "Отправить на проверку" }).click();
-    await expect(
-      page.getByText("Отчёт по этому блоку за месяц уже есть — выберите квартиру или другой месяц"),
-    ).toBeVisible({ timeout: 15_000 });
-
-    // Видео квартиры для клиента: первая свободная или в брони квартира блока.
-    const unit = page.getByLabel("Квартира · необязательно");
-    await expect(unit).toBeEnabled();
-    const firstUnit = await unit.locator("option").nth(1).getAttribute("value");
-    await unit.selectOption(firstUnit!);
-
-    // Видео — только ссылкой YouTube (решение заказчика 29.10): загрузки с телефона в форме нет, Shorts подходит.
-    await expect(page.locator(".progress-form__drop")).toHaveCount(0);
-    await page
-      .getByLabel("Видео · ссылка на ролик YouTube или Shorts · необязательно")
-      .fill("https://youtube.com/shorts/dQw4w9WgXcQ");
-    await page.getByRole("button", { name: "Отправить на проверку" }).click();
-    await expect(page.getByText(/Отчёт отправлен на проверку/)).toBeVisible({ timeout: 15_000 });
-    // Форма пустая: фото, квартира и комментарий — с нуля.
-    await expect(page.locator(".progress-form__shot--done")).toHaveCount(0);
-    await expect(page.locator("textarea[name='comment.ru']")).toHaveValue("");
-    await expect(unit).toHaveValue("");
-
-    const mine = page.locator(".video-screen__mine li").first();
-    await expect(mine).toContainText("ЖК Yulduz");
-    await expect(mine).toContainText(/кв\. \S+/);
-    await expect(mine).toContainText("На проверке");
-    await page.screenshot({
-      path: `test-results/screens/${test.info().project.name}/p5-reporter.png`,
-      fullPage: true,
-      caret: "initial",
-    });
-    expect(errors).toEqual([]);
+const screen = (page: Page, name: string) =>
+  page.screenshot({
+    path: `test-results/screens/${test.info().project.name}/${name}.png`,
+    caret: "initial",
   });
 
-  test("возвращённый отчёт: причина, «Исправить» — форма заполнена, ЖК не меняется → снова на проверке", async ({
-    page,
-  }) => {
-    const errors = collectPageErrors(page);
-    await returnE2eReport("E2E · В кадре вывеска застройщика");
-    await page.goto("/video");
-    const mine = page.locator(".video-screen__mine li").first();
-    await expect(mine).toContainText("Возвращён");
-    await expect(mine).toContainText("Что исправить: E2E · В кадре вывеска застройщика");
-    await mine.getByRole("link", { name: "Исправить" }).click();
+async function personaPage(browser: Browser, persona: CabinetPersona) {
+  const context = await browser.newContext({ storageState: cabinetState(persona) });
+  const page = await context.newPage();
+  return { context, page, errors: collectPageErrors(page) };
+}
 
-    await expect(page.getByText("Исправить отчёт")).toBeVisible();
-    await expect(
-      page.getByText("Менеджер вернул отчёт: E2E · В кадре вывеска застройщика"),
-    ).toBeVisible();
-    await expect(page.getByLabel("ЖК", { exact: true })).toBeDisabled();
-    await expect(page.locator(".progress-form__shot--done")).toHaveCount(3);
-    await expect(page.locator("#progress-youtube")).toHaveValue("https://youtu.be/dQw4w9WgXcQ");
-    const ru = page.locator("textarea[name='comment.ru']");
-    await expect(ru).toHaveValue("E2E · Залит 9-й этаж");
-    await ru.fill("E2E · Переснято без вывески");
-    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+/** Кадры ящика: адрес подписан сервером (incoming) или публичный — и отвечает 200. */
+async function expectImagesLoad(page: Page, images: Locator, signed: boolean): Promise<string[]> {
+  const sources: string[] = [];
+  for (const image of await images.all()) {
+    const src = (await image.getAttribute("src")) ?? "";
+    expect(src, "у кадра есть адрес").not.toBe("");
+    if (signed) expect(src).toContain("/storage/v1/object/sign/incoming/");
+    const response = await page.request.get(src);
+    expect(response.status(), src).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/jpeg");
+    sources.push(src);
+  }
+  return sources;
+}
 
-    await expect(page).toHaveURL(/\/video$/, { timeout: 15_000 });
-    await expect(page.getByText("Исправить отчёт")).toHaveCount(0);
-    await expect(mine).toContainText("На проверке");
-    await expect(mine).not.toContainText("Что исправить");
-    expect(errors).toEqual([]);
+test.describe
+  .serial("отчёт мобилографа: отправка → проверка → возврат → исправление → публикация", () => {
+  test.skip(!hasCloud || !hasDb(), NO_CLOUD);
+  // Загрузка 4 фото и переходы с действиями сервера в общем прогоне — дольше 30 с.
+  test.setTimeout(120_000);
+
+  let complex: ComplexInfo;
+  let reportId = "";
+  let submittedPaths: string[] = [];
+  let unitNumber = "";
+
+  test.beforeAll(async () => {
+    complex = await complexBySlug(SLUG);
+    await removeE2eProgress({ complexIds: [complex.id] });
+  });
+  test.afterAll(async () => {
+    if (complex) await removeE2eProgress({ complexIds: [complex.id] });
   });
 
-  // Проект-2 (PLAN §10, п. 6; 20261102170000): ящик видят руководитель и менеджер, публикует руководитель.
-  test("менеджер видит ящик отчёта без публикации; руководитель публикует только с отметкой правила 1.2", async ({
+  test("мобилограф: ЖК, дата съёмки, 4 фото, RU и UZ → «Отправить на проверку» → «Мои отчёты» · Отправлено руководителю", async ({
     browser,
   }) => {
-    const context = await browser.newContext({ storageState: cabinetState("manager") });
-    const page = await context.newPage();
-    const errors = collectPageErrors(page);
-    await page.goto("/video");
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Видео и ход строительства" }),
-    ).toBeVisible();
-    await expect(page.getByText(/Ждут проверки · \d+/)).toBeVisible();
-    const row = page
-      .locator(".progress-review__item", { hasText: "ЖК Yulduz" })
-      .filter({ hasText: /кв\. / })
-      .first();
-    await row.getByRole("link", { name: "Проверить" }).click();
+    const { context, page, errors } = await personaPage(browser, "mobilographer");
+    const author = e2eStaff().mobilographer.id;
+    await page.goto("/video/novyy");
+    await expect(page.getByRole("heading", { level: 1, name: "Отчёты мобилографа" })).toBeVisible();
+    await page.locator("#progress-complex").selectOption({ label: `ЖК ${complex.name}` });
+    await page.locator("#progress-shot").fill(SHOT);
+    await expect(page.getByText(/^Отчёт за /)).toBeVisible();
+    // Квартира: первая свободная или в брони квартира блока («Кв. 12 · 3 эт. · …»).
+    const unit = page.locator("#progress-unit");
+    await expect(unit).toBeEnabled({ timeout: 15_000 });
+    const option = unit.locator("option").nth(1);
+    unitNumber = /^Кв\. (\S+) ·/.exec((await option.textContent()) ?? "")![1]!;
+    await unit.selectOption((await option.getAttribute("value"))!);
 
-    const drawer = page.getByRole("dialog");
-    await expect(drawer).toContainText("Видео квартиры");
-    await expect(drawer).toContainText("E2E · Переснято без вывески");
-    await expect(drawer.getByRole("button", { name: "Опубликовать на сайте" })).toHaveCount(0);
+    await page.locator(".progress-form__pick input[multiple]").setInputFiles(await photoFiles(4));
+    await expect(page.locator(".progress-form__shot--done")).toHaveCount(4, { timeout: 60_000 });
+    await expect(page.getByText("Фото · 4 из 3–15")).toBeVisible();
+    await page.locator("textarea[name='comment.ru']").fill(RU);
+    await page.locator("textarea[name='comment.uz']").fill(UZ);
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+
+    // Без привязанного бота — «…сообщение в Telegram не ушло» (sent=quiet), с ботом — sent=1.
+    await expect(page).toHaveURL(/\/video\/moi\?sent=(1|quiet)$/, { timeout: 30_000 });
+    await expect(page.getByText(/^Отправлено руководителю/)).toBeVisible();
+    const item = page
+      .locator(".progress-mine__item")
+      .filter({ hasText: `ЖК ${complex.name}` })
+      .first();
+    await expect(item).toContainText("На проверке");
+    await expect(item).toContainText(`кв. ${unitNumber}`);
+    await expect(item).toContainText(`снято ${ruDate(SHOT)} · 4 фото`);
+
+    const [report] = (await reportsOf(author, complex.id)).filter((row) => row.status === "review");
+    expect(report, "отчёт на проверке в базе").toBeTruthy();
+    reportId = report!.id;
+    expect(report!.shot_on).toBe(SHOT);
+    expect(report!.month).toBe(`${SHOT.slice(0, 7)}-01`);
+    expect(report!.comment).toEqual({ ru: RU, uz: UZ });
+    expect(report!.photos).toHaveLength(4);
+    // Кадры — в приватном incoming, в папке автора и ЖК.
+    for (const photo of report!.photos) {
+      expect(photo.path).toMatch(new RegExp(`^${author}/${complex.id}/[0-9a-f-]{36}\\.jpg$`));
+    }
+    submittedPaths = report!.photos.map((photo) => photo.path);
+    expect(await storedObjects("incoming", submittedPaths)).toHaveLength(4);
     expect(errors).toEqual([]);
     await context.close();
   });
 
-  test("руководитель: «Опубликовать» — только с отметкой правила 1.2; матрица и видео для клиентов", async ({
+  test("руководитель: ящик с подписанными кадрами, «Убрать кадр» 4 → 3 (дальше неактивна), «Вернуть автору» с причиной", async ({
     browser,
   }) => {
-    const context = await browser.newContext({ storageState: cabinetState("head") });
-    const page = await context.newPage();
-    const errors = collectPageErrors(page);
-    await page.goto("/video");
-    const row = page
-      .locator(".progress-review__item", { hasText: "ЖК Yulduz" })
-      .filter({ hasText: /кв\. / })
-      .first();
-    await row.getByRole("link", { name: "Проверить" }).click();
+    const { context, page, errors } = await personaPage(browser, "head");
+    page.on("dialog", (dialog) => void dialog.accept());
+    await page.goto(`/video?report=${reportId}`);
     const drawer = page.getByRole("dialog");
-    await expect(drawer).toContainText("E2E · Переснято без вывески");
+    await expect(drawer).toContainText(RU);
+    await expect(drawer).toContainText(UZ);
+    await expect(drawer).toContainText(
+      `${complex.name} · Блок ${complex.blocks[0]!.name} · кв. ${unitNumber}`,
+    );
+    await expect(drawer.getByRole("heading", { name: /^Видео квартиры · / })).toBeVisible();
+    await expect(drawer).toContainText(`Снял E2E Мобилограф · ${ruDate(SHOT)}`);
+    const images = drawer.locator(".progress-review__photos img");
+    await expect(images).toHaveCount(4);
+    await expectImagesLoad(page, images, true);
+    await screen(page, "pE-review");
+
+    const removes = drawer.getByRole("button", { name: /^Убрать кадр \d+$/ });
+    await expect(removes).toHaveCount(4);
+    for (const button of await removes.all()) await expect(button).toBeEnabled();
+    await drawer.getByRole("button", { name: "Убрать кадр 1", exact: true }).click();
+    await expect(images).toHaveCount(3, { timeout: 20_000 });
+    await expect(removes).toHaveCount(3);
+    for (const button of await removes.all()) {
+      await expect(button).toBeDisabled();
+      await expect(button).toHaveAttribute("title", "Должно остаться не меньше 3 фото");
+    }
+    const afterRemove = await reportById(reportId);
+    expect(afterRemove!.photos.map((photo) => photo.path)).toEqual(submittedPaths.slice(1));
+    // Убранный кадр сервер удалил из incoming.
+    await expect.poll(() => storedObjects("incoming", [submittedPaths[0]!])).toEqual([]);
+
+    await drawer.getByRole("button", { name: "Вернуть автору" }).click();
+    await drawer.getByLabel("Что исправить").fill(NOTE);
+    await drawer.getByRole("button", { name: "Вернуть автору" }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/video$/);
+    const returned = await reportById(reportId);
+    expect(returned!.status).toBe("returned");
+    expect(returned!.return_note).toBe(NOTE);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("мобилограф: «Возвращён» с причиной, «Исправить» — форма заполнена, ЖК не меняется → снова на проверку", async ({
+    browser,
+  }) => {
+    const { context, page, errors } = await personaPage(browser, "mobilographer");
+    await page.goto("/video/moi");
+    const item = page
+      .locator(".progress-mine__item")
+      .filter({ hasText: `ЖК ${complex.name}` })
+      .filter({ hasText: "Возвращён" });
+    await expect(item).toHaveCount(1);
+    await expect(item).toContainText(`Что исправить: ${NOTE}`);
+    await item.getByRole("link", { name: "Исправить" }).click();
+
+    await expect(page).toHaveURL(new RegExp(`/video/novyy\\?id=${reportId}$`));
+    await expect(page.getByText("Исправить отчёт", { exact: true })).toBeVisible();
+    await expect(page.getByText(`Руководитель вернул отчёт: ${NOTE}`)).toBeVisible();
+    await expect(page.locator("#progress-complex")).toBeDisabled();
+    await expect(page.locator("#progress-shot")).toHaveValue(SHOT);
+    await expect(page.locator("#progress-unit option:checked")).toHaveText(
+      new RegExp(`^Кв\\. ${unitNumber} ·`),
+    );
+    const tiles = page.locator(".progress-form__shot--done");
+    await expect(tiles).toHaveCount(3);
+    // Превью сохранённых кадров — адреса, подписанные сервером.
+    await expectImagesLoad(page, tiles.locator("img"), true);
+    const ru = page.locator("textarea[name='comment.ru']");
+    await expect(ru).toHaveValue(RU);
+    await expect(page.locator("textarea[name='comment.uz']")).toHaveValue(UZ);
+    await ru.fill(RU_FIXED);
+    await page.getByRole("button", { name: "Отправить на проверку" }).click();
+
+    await expect(page).toHaveURL(/\/video\/moi\?sent=(1|quiet)$/, { timeout: 30_000 });
+    const again = page
+      .locator(".progress-mine__item")
+      .filter({ hasText: `ЖК ${complex.name}` })
+      .first();
+    await expect(again).toContainText("На проверке");
+    await expect(again).not.toContainText("Что исправить");
+    const resubmitted = await reportById(reportId);
+    expect(resubmitted!.status).toBe("review");
+    expect(resubmitted!.comment.ru).toBe(RU_FIXED);
+    expect(resubmitted!.photos).toHaveLength(3);
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("менеджер: ящик с кадрами, без «Опубликовать» и «Убрать кадр»", async ({ browser }) => {
+    const { context, page, errors } = await personaPage(browser, "manager");
+    await page.goto(`/video?report=${reportId}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Видео и ход строительства" }),
+    ).toBeVisible();
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toContainText(RU_FIXED);
+    await expectImagesLoad(page, drawer.locator(".progress-review__photos img"), true);
+    await expect(drawer.getByRole("button", { name: "Опубликовать на сайте" })).toHaveCount(0);
+    await expect(drawer.getByRole("button", { name: /^Убрать кадр/ })).toHaveCount(0);
+    await expect(drawer.getByRole("button", { name: "Вернуть автору" })).toHaveCount(0);
+    await expect(drawer).toContainText("Ждёт проверки руководителем по правилу 1.2");
+    expect(errors).toEqual([]);
+    await context.close();
+  });
+
+  test("руководитель публикует только с отметкой 1.2 → пути complexes/…, incoming пуст; «Ссылка» → «Скопировано»", async ({
+    browser,
+  }) => {
+    const { context, page, errors } = await personaPage(browser, "head");
+    await page.goto(`/video?report=${reportId}`);
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toContainText(RU_FIXED);
     const publish = drawer.getByRole("button", { name: "Опубликовать на сайте" });
     await expect(publish).toBeDisabled();
     await drawer.getByLabel(/Проверено по правилу 1\.2/).check();
+    await expect(publish).toBeEnabled();
     await publish.click();
-    await expect(page).toHaveURL(/\/video$/, { timeout: 15_000 });
-    await expect(page.getByRole("dialog")).toHaveCount(0);
-    await expect(page.locator(".progress-review__item", { hasText: "E2E" })).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/video$/);
 
-    // 5D.2: матрица «Отчёты по ЖК» (ячейка открывает отчёт) и «Видео для клиентов» — опубликованное
-    // видео квартиры первым, «Ссылка» копирует адрес страницы /ru/video/<id>.
-    await expect(
-      page.getByRole("table", { name: "Отчёты по ЖК · последние 6 месяцев" }),
-    ).toBeVisible();
-    await expect(
-      page
-        .getByRole("row", { name: /^Yulduz/ })
-        .getByRole("link")
-        .first(),
-    ).toBeVisible();
-    const video = page.locator(".progress-overview__video").first();
-    await expect(video).toContainText("ЖК Yulduz");
+    const published = await reportById(reportId);
+    expect(published!.status).toBe("published");
+    expect(published!.photos).toHaveLength(3);
+    const incoming = submittedPaths.slice(1);
+    for (const photo of published!.photos) {
+      expect(photo.path).toMatch(new RegExp(`^complexes/${complex.id}/[0-9a-f-]{36}\\.jpg$`));
+      expect(photo.publish_path).toBeNull();
+      expect(incoming).not.toContain(photo.path);
+    }
+    const publicPaths = published!.photos.map((photo) => photo.path);
+    expect(await storedObjects("media", publicPaths)).toHaveLength(3);
+    // Файлы incoming сервер удаляет после публикации.
+    await expect.poll(() => storedObjects("incoming", submittedPaths)).toEqual([]);
+
+    // «Видео для клиентов»: опубликованный отчёт — со ссылкой для клиента.
+    const video = page
+      .locator(".progress-overview__video")
+      .filter({ hasText: `ЖК ${complex.name}` })
+      .filter({ hasText: `снято ${ruDate(SHOT)}` })
+      .first();
     await expect(video).toContainText("Видео квартиры");
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await video.getByRole("button", { name: "Ссылка" }).click();
     await expect(video.getByRole("button", { name: "Скопировано" })).toBeVisible();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
-      /\/ru\/video\/[0-9a-f-]{36}$/,
+      new RegExp(`/ru/video/${reportId}$`),
     );
-    await page.screenshot({
-      path: `test-results/screens/${test.info().project.name}/p5-review.png`,
-      fullPage: true,
-      caret: "initial",
-    });
     expect(errors).toEqual([]);
     await context.close();
+  });
+
+  test("мобилограф видит «Опубликован»; сайт: видео квартиры /ru/video/<id> — «Снято <дата съёмки>», без номера", async ({
+    browser,
+    page,
+  }) => {
+    const mobile = await personaPage(browser, "mobilographer");
+    await mobile.page.goto("/video/moi?status=published");
+    await expect(
+      mobile.page
+        .locator(".progress-mine__item")
+        .filter({ hasText: `ЖК ${complex.name}` })
+        .first(),
+    ).toContainText("Опубликован");
+    await mobile.context.close();
+
+    const errors = collectPageErrors(page);
+    await page.goto(site(`/ru/video/${reportId}?motion=none`));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Как квартира выглядит сейчас",
+    );
+    const main = page.locator("main");
+    await expect(main).toContainText(`ЖК ${complex.name}`);
+    await expect(main).toContainText(`Снято ${ruDate(SHOT)}`);
+    await expect(main).toContainText(RU_FIXED);
+    await expect(main).not.toContainText(/Кв\.\s?\d|№\s?\d/);
+    // Кадры на сайте — из публичного бакета media.
+    const photo = main
+      .locator(
+        `img[src*="/storage/v1/object/public/media/complexes/${complex.id}/"], img[srcset*="complexes%2F${complex.id}"], img[src*="complexes%2F${complex.id}"]`,
+      )
+      .first();
+    await expect(photo).toBeAttached();
+    expect(errors).toEqual([]);
   });
 });

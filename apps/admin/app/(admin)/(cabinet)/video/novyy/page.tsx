@@ -5,6 +5,7 @@ import type { CabinetViewer } from "@/lib/admin/access";
 import { idParam } from "@/lib/admin/progress/params";
 import { shotDateBounds } from "@/lib/admin/progress/types";
 import { readProgressFormComplexes, readProgressReportForEdit } from "@/lib/admin/server/progress";
+import { withEditTarget } from "@/lib/admin/server/progressScreens";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const instant = false;
@@ -14,10 +15,11 @@ type Search = Record<string, string | string[] | undefined>;
 async function Form({ viewer, search }: { viewer: CabinetViewer; search: Search }) {
   const supabase = await createSupabaseServerClient();
   const id = idParam(search.id);
-  const [complexes, edit] = await Promise.all([
+  const [building, edit] = await Promise.all([
     readProgressFormComplexes(supabase),
     id ? readProgressReportForEdit(supabase, id) : null,
   ]);
+  const complexes = await withEditTarget(supabase, building, edit);
   return (
     <VideoScreen
       form={

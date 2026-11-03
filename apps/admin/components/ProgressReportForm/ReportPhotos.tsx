@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Images, Loader2, WifiOff, X } from "lucide-react";
+import { Camera, Images, Loader2, RotateCw, WifiOff, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ChangeEvent } from "react";
 import { PHOTOS_MAX, type PhotoTile } from "@/lib/admin/progress/usePhotoQueue";
@@ -9,6 +9,8 @@ type ReportPhotosProps = {
   tiles: readonly PhotoTile[];
   onAdd: (files: File[]) => number;
   onRemove: (key: string) => void;
+  /** «Повторить» загрузку плитки с ошибкой (файл ещё в памяти вкладки). */
+  onRetry: (key: string) => void;
   error: string | null;
 };
 
@@ -17,7 +19,7 @@ type ReportPhotosProps = {
  * «Из галереи» (несколько файлов сразу). Нет сети — плитка «ждёт сети» и догрузится сама. Сверх 15 —
  * подсказка, лишние не берутся.
  */
-export function ReportPhotos({ tiles, onAdd, onRemove, error }: ReportPhotosProps) {
+export function ReportPhotos({ tiles, onAdd, onRemove, onRetry, error }: ReportPhotosProps) {
   const t = useTranslations("admin.video.form");
   const [limit, setLimit] = useState(false);
   const add = (files: File[]) => setLimit(onAdd(files) < files.length);
@@ -38,9 +40,13 @@ export function ReportPhotos({ tiles, onAdd, onRemove, error }: ReportPhotosProp
         .filter((tile) => tile.state === "error")
         .map((tile) => (
           <p key={tile.key} className="progress-form__error" role="alert">
-            {tile.error === "photoFailed"
-              ? t("photoFailed", { name: tile.name })
-              : t("photoUploadFailed")}
+            {tile.error === "photoFailed" ? t("photoFailed", { name: tile.name }) : t("photoUploadFailed")}
+            {tile.error === "photoUploadFailed" ? (
+              <button type="button" className="progress-form__retry" onClick={() => onRetry(tile.key)}>
+                <RotateCw size={14} aria-hidden="true" />
+                {t("photoRetryNow")}
+              </button>
+            ) : null}
           </p>
         ))}
       {limit ? <p className="progress-form__notice">{t("photosLimit")}</p> : null}

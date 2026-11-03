@@ -1,7 +1,9 @@
 "use client";
 
 import { Save, Send } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import { AdminPanel } from "@/components/AdminPanel";
 import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
@@ -36,6 +38,19 @@ const NO_START: ReportStart = { complexId: null, blockId: null };
  * проверку». Черновик и возвращённый отчёт — та же форма, заполненная им.
  */
 export function ProgressReportForm(props: ProgressReportFormProps) {
+  // Адрес ?id= после первого черновика ставит replaceState — форма та же. Ушли с ?id= на чистый
+  // «Новый отчёт» (панель, вкладка, «Снять отчёт») — форма собирается заново, а не правит прежний черновик.
+  const urlId = useSearchParams().get("id");
+  const [generation, setGeneration] = useState(0);
+  const seen = useRef(urlId);
+  useEffect(() => {
+    if (seen.current && !urlId) setGeneration((value) => value + 1);
+    seen.current = urlId;
+  }, [urlId]);
+  return <ReportForm key={generation} {...props} />;
+}
+
+function ReportForm(props: ProgressReportFormProps) {
   const { complexes, shotBounds, userId, role, edit = null, start = NO_START } = props;
   const t = useTranslations("admin.video.form");
   const state = useReportForm(complexes, shotBounds.max, { userId, role }, edit, start);
@@ -57,7 +72,13 @@ export function ProgressReportForm(props: ProgressReportFormProps) {
           lockComplex={Boolean(edit || state.id)}
         />
         {issueText("shot") ? <p className="progress-form__error" role="alert">{issueText("shot")}</p> : null}
-        <ReportPhotos tiles={queue.tiles} onAdd={queue.add} onRemove={queue.remove} error={issueText("photos") ?? null} />
+        <ReportPhotos
+          tiles={queue.tiles}
+          onAdd={queue.add}
+          onRemove={queue.remove}
+          onRetry={queue.retry}
+          error={issueText("photos") ?? null}
+        />
         {PHONE_VIDEO_UPLOAD || video.state.status !== "idle" ? (
           <ReportVideo video={video.state} onPick={video.pick} onRemove={video.remove} />
         ) : null}
@@ -111,11 +132,11 @@ function FormActions({ pending, mode, back }: { pending: boolean; mode: "draft" 
   const t = useTranslations("admin.video.form");
   return (
     <div className="progress-form__actions">
-      <Button type="submit" name="intent" value="submit" block pending={pending && mode === "submit"}>
+      <Button type="submit" name="intent" value="submit" block disabled={pending} pending={pending && mode === "submit"}>
         <Send size={18} aria-hidden="true" />
         {pending && mode === "submit" ? t("sending") : t("submit")}
       </Button>
-      <Button type="submit" name="intent" value="draft" variant="outline" block pending={pending && mode === "draft"}>
+      <Button type="submit" name="intent" value="draft" variant="outline" block disabled={pending} pending={pending && mode === "draft"}>
         <Save size={18} aria-hidden="true" />
         {pending && mode === "draft" ? t("draftSaving") : t("draft")}
       </Button>

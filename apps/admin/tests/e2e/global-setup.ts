@@ -11,6 +11,8 @@ const PERSONAS: Record<Persona, PersonaSpec> = {
   head: { role: "head", fullName: "E2E Руководитель", changed: true, active: true },
   manager: { role: "manager", fullName: "E2E Менеджер", changed: true, active: true },
   mobilographer: { role: "mobilographer", fullName: "E2E Мобилограф", changed: true, active: true },
+  // Фаза E: второй мобилограф — черновики коллеги ему не видны.
+  mobilographer2: { role: "mobilographer", fullName: "E2E Мобилограф 2", changed: true, active: true },
   newcomer: { role: "manager", fullName: "E2E Новичок", changed: false, active: true },
   disabled: { role: "manager", fullName: "E2E Отключённый", changed: true, active: false },
 };

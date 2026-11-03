@@ -17,7 +17,7 @@ const lastBlock = (complex: ProgressFormComplex | undefined) => complex?.blocks.
 
 export type ReportStart = { complexId: string | null; blockId: string | null };
 
-/** Правка — как в отчёте (блок с тех пор сдан — последний строящийся); «Снять отчёт» — ЖК и блок задания. */
+/** Правка — как в отчёте (блок отчёта не подменяется, даже сданный); «Снять отчёт» — ЖК и блок задания. */
 function initialTarget(
   complexes: readonly ProgressFormComplex[],
   today: string,
@@ -27,8 +27,8 @@ function initialTarget(
   const complexId = edit?.complexId ?? start.complexId ?? complexes[0]?.id ?? "";
   const complex = complexes.find((item) => item.id === complexId) ?? (edit ? undefined : complexes[0]);
   const wanted = edit?.blockId ?? start.blockId;
-  const blockId = complex?.blocks.some((block) => block.id === wanted) ? wanted! : lastBlock(complex);
-  const keepUnit = Boolean(edit && blockId === edit.blockId);
+  const blockId = edit ? edit.blockId : complex?.blocks.some((block) => block.id === wanted) ? wanted! : lastBlock(complex);
+  const keepUnit = Boolean(edit);
   return {
     complexId: complex?.id ?? complexId,
     shotOn: edit?.shotOn ?? today,
@@ -116,13 +116,15 @@ export function useReportForm(
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Второе нажатие, пока идёт первое сохранение, — мимо: два запроса взяли бы одни и те же файлы.
+    if (pending) return;
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
     const kind = submitter?.value === "draft" ? "draft" : "submit";
     const { data, issues: found } = collect(event.currentTarget, kind, state, id);
     setIssues(found);
     setFailure(null);
     setNotice(null);
-    if (hasIssues(found)) return;
+    if (hasIssues(found)) return showFirstIssue(event.currentTarget);
     setMode(kind);
     startTransition(async () => {
       const result = await (kind === "draft" ? saveProgressDraftAction : submitProgressReportAction)(data);
@@ -145,3 +147,8 @@ const sentHref = (role: StaffRole, id: string, notified: boolean) =>
   role === "head"
     ? `${ADMIN_ROUTES.video}?report=${id}`
     : `${ADMIN_ROUTES.videoMine}?sent=${notified ? "1" : "quiet"}`;
+
+/** На телефоне кнопки — внизу экрана: ошибку у поля прокручиваем в вид. */
+function showFirstIssue(form: HTMLFormElement) {
+  requestAnimationFrame(() => form.querySelector('[role="alert"]')?.scrollIntoView({ block: "center", behavior: "smooth" }));
+}
