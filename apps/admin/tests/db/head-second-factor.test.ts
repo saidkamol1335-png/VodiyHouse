@@ -30,6 +30,17 @@ describe.skipIf(isRemoteTarget)("второй фактор руководите�
     expect(await roleOf({ kind: "user", id: manager, aal: "aal1" })).toBe("manager");
   });
 
+  it("свой TOTP-фактор в обход кабинета прав не даёт: сессия должна быть подтверждена фактором сервера", async () => {
+    const foreign = crypto.randomUUID();
+    await db.admin.query("insert into auth.sessions (id, user_id, factor_id, aal) values ($1, $2, gen_random_uuid(), 'aal2')", [foreign, head]);
+    expect(await roleOf({ kind: "user", id: head, sessionId: foreign })).toBeNull();
+    expect(await roleOf({ kind: "user", id: head, sessionId: crypto.randomUUID() })).toBeNull();
+    const ok = await db.as({ kind: "user", id: head }, (tx) => tx.query<{ v: boolean }>("select own_head_factor() as v"));
+    expect(ok.rows[0]!.v).toBe(true);
+    const bad = await db.as({ kind: "user", id: head, sessionId: foreign }, (tx) => tx.query<{ v: boolean }>("select own_head_factor() as v"));
+    expect(bad.rows[0]!.v).toBe(false);
+  });
+
   it("руководитель без фактора не правит, как посетитель", async () => {
     const insert = `insert into finishings (slug, name) values ('aal1-try', '{"ru": "Т", "uz": "T"}')`;
     await expectDenied(db.as({ kind: "user", id: head, aal: "aal1" }, (tx) => tx.query(insert)));
@@ -42,7 +53,7 @@ describe.skipIf(isRemoteTarget)("второй фактор руководите�
     expect(await call<string | null>("select complete_staff_telegram_link('h1', 43) as v")).toBeNull();
     expect(Number(await call<string>("select staff_telegram_chat($1) as v", [head]))).toBe(42);
     expect(await call<boolean>("select create_staff_telegram_link($1, 'h2') as v", [head])).toBe(false);
-    expect(await call<{ telegram: boolean }>("select head_factor_state($1) as v", [head])).toMatchObject({ telegram: true, factor_id: null, backup_left: 0 });
+    expect(await call<{ telegram: boolean }>("select head_factor_state($1) as v", [head])).toMatchObject({ telegram: true, backup_left: 0 });
   });
 
   it("код входа: раз в минуту, 5 попыток, верный сгорает", async () => {
@@ -56,6 +67,16 @@ describe.skipIf(isRemoteTarget)("второй фактор руководите�
     expect(await call<boolean>("select check_head_code($1, 'c3') as v", [head])).toBe(false);
   });
 
+  it("неверные коды: после 10 за сутки не проходит и верный", async () => {
+    await db.admin.query("update private.head_codes set sent_at = now() - interval '2 minutes'");
+    await db.admin.query("delete from private.head_factor_failures");
+    expect(await call<boolean>("select issue_head_code($1, 'lim') as v", [head])).toBe(true);
+    for (let i = 0; i < 10; i += 1) await call("select use_head_backup_code($1, 'nope') as v", [head]);
+    expect(await call<boolean>("select check_head_code($1, 'lim') as v", [head])).toBe(false);
+    await db.admin.query("update private.head_factor_failures set window_start = now() - interval '2 days'");
+    expect(await call<boolean>("select check_head_code($1, 'lim') as v", [head])).toBe(true);
+  });
+
   it("запасные коды — одноразовые, новый набор заменяет старый; сброс убирает всё", async () => {
     await call("select save_head_backup_codes($1, array['b1','b2']) as v", [head]);
     expect(await call<boolean>("select use_head_backup_code($1, 'b1') as v", [head])).toBe(true);
@@ -65,6 +86,9 @@ describe.skipIf(isRemoteTarget)("второй фактор руководите�
     await call("select save_head_totp($1, gen_random_uuid(), 'JBSWY3DPEHPK3PXP') as v", [head]);
     await call("select reset_head_second_factor($1) as v", [head]);
     expect(await call<object>("select head_factor_state($1) as v", [head])).toMatchObject({ telegram: false, factor_id: null, backup_left: 0 });
+    // Выданные до сброса токены больше не действуют, сессии закрыты.
+    expect(await roleOf({ kind: "user", id: head, iat: Math.floor(Date.now() / 1000) - 60 })).toBeNull();
+    expect((await db.admin.query("select 1 from auth.sessions where user_id = $1", [head])).rows).toHaveLength(0);
   });
 
   it("хранилище и функции фактора — только сервер", async () => {

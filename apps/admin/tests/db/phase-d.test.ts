@@ -92,4 +92,12 @@ describe.skipIf(isRemoteTarget)("фаза D: удалить сейчас, нап
     await call("select release_drafts_digest() as v");
     expect(await call<Draft[] | null>("select take_drafts_digest() as v")).not.toBeNull();
   });
+
+  it("журнал: менеджеру — только записи ЖК, руководителю — всё", async () => {
+    await db.admin.query("insert into audit_log (actor_id, action, entity, entity_id, complex_id, changes) values (null, 'update', 'settings', 'x', null, '{}')");
+    const count = async (actor: Parameters<TestDb["as"]>[0]) =>
+      Number((await db.as(actor, (tx) => tx.query<{ n: string }>("select count(*) as n from audit_log where complex_id is null"))).rows[0]!.n);
+    expect(await count(user(manager))).toBe(0);
+    expect(await count(user(head))).toBeGreaterThan(0);
+  });
 });

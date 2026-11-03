@@ -286,7 +286,7 @@ export async function deleteComplexNowAction(formData: FormData): Promise<Delete
   const units = await guard.supabase.rpc("archived_complex_units", { p_complex: id });
   if (units.error) return { status: "error", error: contentDbErrorCode(units.error) };
   const name = names[0] ?? data.slug;
-  const sent = await sendDeletedUnits(data.slug, (units.data ?? []) as ArchiveUnit[], `ЖК «${name}» удалён из архива руководителем. Квартиры — в файле.`);
+  const sent = await sendDeletedUnits(data.slug, (units.data ?? []) as ArchiveUnit[], `ЖК «${name}» удаляется из архива руководителем. Квартиры — в файле.`);
   if (!sent) return { status: "error", error: "csvNotSent" };
   const purged = await guard.supabase.rpc("purge_complex_now", { p_complex: id });
   if (purged.error) return { status: "error", error: contentDbErrorCode(purged.error) };

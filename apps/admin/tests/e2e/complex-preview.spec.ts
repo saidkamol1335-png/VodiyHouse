@@ -32,7 +32,9 @@ test.describe("предпросмотр ЖК", () => {
     test("«Открыть 1440» — страница на сайте с пометкой, как опубликованная; «Выйти» — без пометки", async ({ page, context }) => {
       await page.goto("/zhk");
       await page.getByRole("link", { name: /Shodlik/ }).first().click();
-      await page.getByRole("link", { name: "Предпросмотр" }).click();
+      // Предпросмотр — во вкладке «Публикация» (фаза D).
+      await page.getByRole("navigation", { name: "Разделы ЖК" }).getByRole("link", { name: "Публикация" }).click();
+      await expect(page).toHaveURL(/\/publikatsiya$/);
       const [preview] = await Promise.all([
         context.waitForEvent("page"),
         page.getByRole("button", { name: "Открыть 1440" }).click(),

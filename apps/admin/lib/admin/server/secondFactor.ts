@@ -122,32 +122,32 @@ export async function renewBackupCodes(userId: string): Promise<string[]> {
   return codes;
 }
 
-/** TOTP-фактор Supabase: есть — его секрет; нет — заводим (незавершённые прежние убираем). */
-async function ensureFactor(
-  session: SupabaseClient,
-  userId: string,
-): Promise<{ factorId: string; secret: string }> {
-  const stored = unwrap<{ factor_id: string; secret: string } | null>(
+export type PreparedFactor = { factorId: string; secret: string };
+
+/**
+ * TOTP-фактор Supabase для руководителя: есть наш — его секрет; нет — заводим от имени сессии.
+ * Любой другой фактор (завёл кто-то напрямую через Auth, зная пароль) удаляет секретный ключ:
+ * сессия aal1 чужой подтверждённый фактор снять не может. Код человека здесь ещё не тратится.
+ */
+export async function prepareFactor(session: SupabaseClient, userId: string): Promise<PreparedFactor> {
+  const stored = unwrap<PreparedFactor & { factor_id: string } | null>(
     "head_totp_secret",
     await admin().rpc("head_totp_secret", { p_user: userId }),
   );
-  const listed = await session.auth.mfa.listFactors();
+  const listed = await admin().auth.admin.mfa.listFactors({ userId });
   if (listed.error) throw new Error("mfa-list-failed", { cause: listed.error });
-  const factors = listed.data.all;
-  if (stored && factors.some((factor) => factor.id === stored.factor_id)) {
-    return { factorId: stored.factor_id, secret: stored.secret };
+  for (const factor of listed.data.factors) {
+    if (factor.id === stored?.factor_id) continue;
+    const removed = await admin().auth.admin.mfa.deleteFactor({ userId, id: factor.id });
+    if (removed.error) throw new Error("mfa-delete-failed", { cause: removed.error });
   }
-  for (const factor of factors.filter((item) => item.factor_type === "totp")) {
-    const removed = await session.auth.mfa.unenroll({ factorId: factor.id });
-    if (removed.error) throw new Error("mfa-unenroll-failed", { cause: removed.error });
+  if (stored && listed.data.factors.some((factor) => factor.id === stored.factor_id)) {
+    return { factorId: stored.factor_id, secret: stored.secret };
   }
   const enrolled = await session.auth.mfa.enroll({ factorType: "totp", friendlyName: "Telegram" });
   if (enrolled.error) throw new Error("mfa-enroll-failed", { cause: enrolled.error });
   const { id, totp: secret } = enrolled.data;
-  unwrap(
-    "save_head_totp",
-    await admin().rpc("save_head_totp", { p_user: userId, p_factor: id, p_secret: secret.secret }),
-  );
+  unwrap("save_head_totp", await admin().rpc("save_head_totp", { p_user: userId, p_factor: id, p_secret: secret.secret }));
   return { factorId: id, secret: secret.secret };
 }
 
@@ -155,8 +155,7 @@ async function ensureFactor(
  * Код из Telegram или запасной уже проверен — сервер подтверждает TOTP от имени сессии
  * руководителя: Auth выдаёт токен с aal2 и свежей отметкой totp (cookie пишет клиент сессии).
  */
-export async function confirmSecondFactor(session: SupabaseClient, userId: string): Promise<void> {
-  const { factorId, secret } = await ensureFactor(session, userId);
-  const verified = await session.auth.mfa.challengeAndVerify({ factorId, code: totp(secret) });
+export async function confirmSecondFactor(session: SupabaseClient, factor: PreparedFactor): Promise<void> {
+  const verified = await session.auth.mfa.challengeAndVerify({ factorId: factor.factorId, code: totp(factor.secret) });
   if (verified.error) throw new Error("mfa-verify-failed", { cause: verified.error });
 }

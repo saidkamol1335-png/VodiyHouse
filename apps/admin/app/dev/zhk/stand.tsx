@@ -30,7 +30,12 @@ import { finishingNames, journalPage } from "@/lib/admin/journal/format";
 import { cabinetPerson } from "@/lib/admin/person";
 import { complexRoute, ROUTES } from "@/lib/routes";
 import { siteOrigin } from "@/lib/site/metadata";
-import { demoCreateComplexAction, demoRequestAction, demoSetComplexStatusAction } from "./actions";
+import {
+  demoCreateComplexAction,
+  demoDeleteComplexNowAction,
+  demoRequestAction,
+  demoSetComplexStatusAction,
+} from "./actions";
 import { demoPreviewLinkAction } from "./previewActions";
 
 // Стенды «ЖК» на DEMO мокапа по ролям: /dev/zhk — руководитель, /dev/menedzher/zhk — менеджер
@@ -55,7 +60,7 @@ export function devOnlyStand() {
 
 type ComplexesStandProps = { stand: ComplexStand; scopeId: unknown };
 
-/** Список «ЖК»: «+ Добавить ЖК» — обоим, «Порядок в каталоге» — руководителю. */
+/** Список «ЖК»: «+ Добавить ЖК» — обоим, действия в строке и «Порядок в каталоге» — руководителю. */
 export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
   devOnlyStand();
   const person = await cabinetPerson(stand.viewer);
@@ -84,6 +89,7 @@ export async function ComplexesStand({ stand, scopeId }: ComplexesStandProps) {
           developer={scope.developer}
           initialFilter={scope.archived ? "archived" : "all"}
           access={access}
+          actions={access.publish ? { setStatus: demoSetComplexStatusAction, deleteNow: demoDeleteComplexNowAction } : null}
         />
         {access.publish ? <CatalogOrder complexes={catalogOrderOf(DEMO_COMPLEX_ROWS)} action={null} /> : null}
       </AdminPage>

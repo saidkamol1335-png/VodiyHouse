@@ -134,7 +134,7 @@ test.describe("кабинет · ЖК · квартиры", () => {
 
     await position(page, 1).getByLabel("Планировка").selectOption({ label: "2-комн. · 67,1 м²" });
     page.once("dialog", (dialog) => dialog.dismiss());
-    await page.getByRole("link", { name: "Журнал" }).click();
+    await page.getByRole("navigation", { name: "Разделы ЖК" }).getByRole("link", { name: "Публикация" }).click();
     await expect(page).toHaveURL(/\/kvartiry$/);
     await save.click();
     await expect(formStatus(page, "Планировка поменялась у 22 квартир")).toBeVisible();

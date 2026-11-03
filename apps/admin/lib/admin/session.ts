@@ -34,6 +34,18 @@ export async function readOwnProfile(supabase: SupabaseClient, userId: string): 
   return profile?.id === userId ? profile : null;
 }
 
+/**
+ * Второй фактор руководителя: claims токена (aal2, totp за 30 дней) и база — сессия подтверждена
+ * тем фактором, секрет которого хранит сервер (own_head_factor). Свой фактор, заведённый в обход
+ * кабинета, даёт aal2, но не права руководителя. Спрашиваем базу только у руководителя.
+ */
+async function headFactorOk(supabase: SupabaseClient, claimsFresh: boolean, profile: OwnProfileRow | null): Promise<boolean> {
+  if (!claimsFresh || profile?.role !== "head") return claimsFresh;
+  const { data, error } = await supabase.rpc("own_head_factor");
+  if (error) throw new Error("cabinet-factor-unavailable", { cause: error });
+  return data === true;
+}
+
 /** Один раз на запрос (React.cache): layout, страница и меню читают одно и то же. */
 export const getCabinetSession = cache(async (): Promise<CabinetSession> => {
   // Решение «без входа» и сессия — только во время запроса, не при сборке.
@@ -48,7 +60,8 @@ export const getCabinetSession = cache(async (): Promise<CabinetSession> => {
   const userId = data?.claims.sub ?? null;
   const profile = userId ? await readOwnProfile(supabase, userId) : null;
   const email = typeof data?.claims.email === "string" ? data.claims.email : null;
-  return { result: resolveViewer(userId, profile, headFactorFresh(data?.claims)), email };
+  const factor = await headFactorOk(supabase, headFactorFresh(data?.claims), profile);
+  return { result: resolveViewer(userId, profile, factor), email };
 });
 
 /**
@@ -122,12 +135,14 @@ export async function requireActionViewer(
   if ("code" in user) return { ok: false, code: user.code };
 
   let profile: OwnProfileRow | null;
+  let factor: boolean;
   try {
     profile = user.id ? await readOwnProfile(supabase, user.id) : null;
+    factor = await headFactorOk(supabase, user.factorFresh, profile);
   } catch {
     return { ok: false, code: "network" };
   }
-  const decision = decideActionGuard(resolveViewer(user.id, profile, user.factorFresh), roles, {
+  const decision = decideActionGuard(resolveViewer(user.id, profile, factor), roles, {
     allowPasswordChange: options.allowPasswordChange ?? false,
     allowSecondFactor: options.allowSecondFactor ?? false,
   });

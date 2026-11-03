@@ -114,11 +114,16 @@ test.describe("кабинет · фасад и планы этажей", () => {
     expect(errors).toEqual([]);
   });
 
-  test("менеджеру вкладки нет — адрес уводит на «Квартиры»", async ({ browser }) => {
+  test("менеджер открывает «Фасад» (фаза D): переключатель «Список · Фасад» ведёт на «Квартиры»", async ({ browser }) => {
     const context = await browser.newContext({ storageState: cabinetState("manager") });
     const page = await context.newPage();
     await page.goto(`/zhk/${complexId}/fasad`);
-    await expect(page).toHaveURL(new RegExp(`/zhk/${complexId}/kvartiry`));
+    await expect(page).toHaveURL(new RegExp(`/zhk/${complexId}/fasad$`));
+    await expect(page.getByRole("heading", { name: "Фасад ЖК" })).toBeVisible();
+    const view = page.getByRole("navigation", { name: "Квартиры: вид" });
+    await expect(view.getByRole("link", { name: "Фасад" })).toHaveAttribute("aria-current", "page");
+    await view.getByRole("link", { name: "Список" }).click();
+    await expect(page).toHaveURL(new RegExp(`/zhk/${complexId}/kvartiry$`));
     await context.close();
   });
 });

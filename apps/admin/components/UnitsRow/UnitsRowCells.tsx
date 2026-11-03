@@ -71,7 +71,7 @@ export function SiteCell({ view }: { view: UnitRowView }) {
     return (
       <td className="units-row__site units-row__site--on" role="cell">
         <span className="units-row__prefix">{t("card.site")} </span>
-        {t("site.on")}
+        {view.muted ? t("site.onNoPrice") : t("site.on")}
       </td>
     );
   return (

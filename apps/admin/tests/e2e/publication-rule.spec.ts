@@ -175,16 +175,22 @@ test.describe("кабинет · правило публикации", () => {
     await expect(rowOf("Chernovik")).toContainText(/Черновик \(\d из 6\)/);
     await shot(page, "cabinet-list");
 
-    await rowOf("Chernovik").click();
+    // Чек-лист — во вкладке «Публикация» (фаза D), открыт сразу.
+    const publication = async (name: string) => {
+      await rowOf(name).click();
+      await page.getByRole("navigation", { name: "Разделы ЖК" }).getByRole("link", { name: /Публикация/ }).click();
+      await expect(page).toHaveURL(/\/publikatsiya$/);
+    };
+    await publication("Chernovik");
     const toggle = page.getByRole("button", { name: /Для публикации: \d из 6/ });
-    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(".complex-readiness__list li")).toHaveCount(6);
-    await expect(page.locator(".complex-readiness__layouts")).toContainText("Полных квартир: 0 из 0");
+    await expect(page.locator(".complex-site-state__layouts")).toContainText("Полных квартир: 0 из 0");
     await shot(page, "cabinet-draft");
 
     await page.goto("/zhk");
-    await rowOf("Seryy").click();
-    await expect(page.locator(".complex-readiness__layouts")).toContainText("Полных квартир: 1 из 3");
+    await publication("Seryy");
+    await expect(page.locator(".complex-site-state__layouts")).toContainText("Полных квартир: 1 из 3");
   });
 
   test("планировки: метка «Не хватает» и фильтр «Только неполные»", async ({ page }) => {

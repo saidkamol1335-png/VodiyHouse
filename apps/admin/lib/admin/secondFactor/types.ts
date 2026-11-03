@@ -3,6 +3,8 @@ export type FactorResult =
   | { status: "idle" }
   | { status: "sent"; at: number }
   | { status: "link"; url: string }
+  /** 10 запасных кодов — показать один раз (/kod/zapasnye). */
+  | { status: "codes"; codes: string[] }
   | {
       status: "error";
       error:
@@ -12,6 +14,7 @@ export type FactorResult =
         | "sendFailed"
         | "wrongCode"
         | "linked"
+        | "issued"
         | "session"
         | "forbidden"
         | "network"

@@ -49,42 +49,55 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     expect(errors).toEqual([]);
   });
 
-  test("меню — Главная и ЖК; список без создания и статусов публикации → сразу «Квартиры»", async ({
+  test("меню — ЖК и «Настройки» → «Справочники»; список с созданием и значками, без архива → «Основное»", async ({
     page,
   }) => {
     await page.goto(MANAGER);
     await expect(nav(page).getByRole("link", { name: "ЖК", exact: true })).toBeVisible();
-    for (const hidden of ["Застройщики", "Настройки"])
-      await expect(nav(page).getByRole("link", { name: hidden })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
-    await expect(page.getByRole("group", { name: "Статус" })).toHaveCount(0);
-    // Архива нет, плашек публикации и «не на сайте: застройщик не опубликован» — тоже.
+    await expect(nav(page).getByRole("link", { name: "Застройщики" })).toHaveCount(0);
+    // Фаза D (п. 29): «Настройки» менеджера — только «Справочники».
+    await expect(nav(page).getByRole("link", { name: "Настройки" })).toHaveAttribute(
+      "href",
+      "/nastroyki/spravochniki",
+    );
+    // Фаза D (п. 6): менеджер добавляет ЖК и видит состояние строк; архива и действий в строке нет.
+    await expect(page.getByRole("button", { name: "Добавить ЖК" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Статус" }).getByRole("button", { name: /Архив/ })).toHaveCount(0);
     await expect(page.locator(".complex-list__row")).toHaveCount(6);
-    await expect(page.locator(".complex-list__status")).toHaveCount(0);
-    await expect(page.locator(".complex-list__warning")).toHaveCount(0);
+    await expect(page.locator(".complex-list__status")).toHaveCount(6);
+    await expect(page.locator(".complex-list__actions")).toHaveCount(0);
     await expect(page.locator(".complex-list__stock").first()).toContainText("свободно 41");
     await page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" }).click();
-    await expect(page).toHaveURL(new RegExp(`/${SHODLIK_ID}/kvartiry$`));
+    await expect(page).toHaveURL(new RegExp(`${MANAGER}/${SHODLIK_ID}$`));
     expect(await noHorizontalScroll(page)).toBe(0);
   });
 
-  test("страница ЖК: без статуса, готовности и вкладок; «Основное» перекидывает на «Квартиры»", async ({
+  test("страница ЖК: все 8 вкладок и «Квартиры»; капсулы статуса нет нигде; архивный ЖК — 404", async ({
     page,
   }) => {
     await page.goto(`${MANAGER}/${SHODLIK_ID}`);
-    await expect(page).toHaveURL(new RegExp(`/${SHODLIK_ID}/kvartiry$`));
     await expect(page.getByRole("heading", { name: "ЖК Shodlik" })).toBeVisible();
-    await expect(page.locator(".admin-entity-head")).toHaveCount(0);
+    await expect(page.locator(".admin-entity-head")).toHaveCount(1);
+    await expect(page.getByRole("navigation", { name: "Разделы ЖК" }).getByRole("link")).toHaveCount(8);
     await expect(
       page.getByRole("button", { name: /Скрыть с сайта|В архив|Опубликовать/ }),
     ).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Основное" })).toHaveCount(0);
-    await expect(page.getByText(/из них сайт считает «осталось N»/)).toBeVisible();
-    // Другие вкладки — туда же; архивного ЖК (его нет и в списке) менеджеру не открыть и по ссылке.
     await page.goto(`${MANAGER}/${SHODLIK_ID}/bloki`);
+    await expect(page).toHaveURL(new RegExp(`/${SHODLIK_ID}/bloki$`));
+    await expect(page.getByRole("button", { name: "Сохранить вкладку" })).toBeVisible();
+    // «Публикация» менеджера — запрос руководителю вместо кнопок статуса.
+    await page.goto(`${MANAGER}/${SHODLIK_ID}/publikatsiya`);
+    await expect(page.getByRole("button", { name: "Запросить скрытие" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Скрыть с сайта|^В архив$|Опубликовать/ }),
+    ).toHaveCount(0);
+    await page.getByRole("link", { name: "Квартиры", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${SHODLIK_ID}/kvartiry$`));
+    await expect(page.getByText(/из них сайт считает «осталось N»/)).toBeVisible();
+    // Архивного ЖК (его нет и в списке) менеджеру не открыть и по ссылке.
     // Запросом, а не в браузере: страница 404 в разработке пишет в консоль свои предупреждения.
     expect((await page.request.get(units(MANAGER, ARCHIVED_ID))).status()).toBe(404);
+    expect((await page.request.get(`${MANAGER}/${ARCHIVED_ID}/publikatsiya`)).status()).toBe(404);
     expect((await page.request.get(units("/dev/zhk", ARCHIVED_ID))).status()).toBe(200);
   });
 
@@ -224,7 +237,7 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     await expect(page.locator(".complex-list__row").first()).toBeVisible();
     // После гидратации: screenshot прячет курсор стилем, до неё React заметил бы чужой атрибут.
     await page.waitForLoadState("networkidle");
-    await page.screenshot({ path: `${dir}/s12-manager-list.png`, caret: "initial" });
+    await page.screenshot({ path: `${dir}/d2-manager-list.png`, caret: "initial" });
     await openList(page);
     await rowOf(page, "4")
       .getByRole("button", { name: /Сменить статус/ })

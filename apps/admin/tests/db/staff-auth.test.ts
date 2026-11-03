@@ -45,8 +45,9 @@ describe("вход сотрудников и «Сотрудники»", () => {
       )
     ).rows[0];
 
+  // Сессия стенда (id = id сотрудника, createStaff) — не в счёт: считаем открытые тестом.
   const sessionsOf = async (id: string) =>
-    (await db.admin.query("select id from auth.sessions where user_id = $1", [id])).rows.length;
+    (await db.admin.query("select id from auth.sessions where user_id = $1 and id <> $1", [id])).rows.length;
   const openSession = (id: string) =>
     db.admin.query("insert into auth.sessions (id, user_id) values (gen_random_uuid(), $1)", [id]);
 
@@ -220,12 +221,15 @@ describe("вход сотрудников и «Сотрудники»", () => {
     expect(await sessionsOf(staff)).toBe(1);
   });
 
-  it("повышение до руководителя действует без нового входа", async () => {
+  // Фаза D (п. 8): права руководителя — только с его вторым фактором; повышенному — после кода.
+  it("повышение до руководителя: права — после второго фактора, без нового входа по паролю", async () => {
     const staff = await createStaff(db.admin, "manager");
     const addHint = `insert into hints (slug, term, text)
       values ('t-${crypto.randomUUID().slice(0, 8)}', '{"ru":"Т","uz":"T"}', '{"ru":"Т","uz":"T"}')`;
     await expectDenied(db.as(user(staff), (tx) => tx.query(addHint)));
     await db.as(user(head), (tx) => tx.query("update profiles set role = 'head' where id = $1", [staff]));
+    await expectDenied(db.as(user(staff), (tx) => tx.query(addHint)));
+    await db.admin.query("insert into private.head_totp (user_id, factor_id, secret) values ($1, $1, 'JBSWY3DPEHPK3PXP')", [staff]);
     await db.as(user(staff), (tx) => tx.query(addHint));
   });
 

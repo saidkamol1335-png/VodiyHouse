@@ -33,7 +33,7 @@ export default async function ComplexFacadePage({ params }: { params: Promise<{ 
   const data = await readComplexFacade(await createSupabaseServerClient(), complex.id, mediaSrc);
   return (
     <>
-      <UnitsScreenSwitch base={`${ADMIN_ROUTES.complexes}/${complex.id}`} />
+      <UnitsScreenSwitch base={`${ADMIN_ROUTES.complexes}/${complex.id}`} current="facade" />
       <ComplexFacadeTab key={complex.id} complexId={complex.id} published={complex.status === "published"} data={data} actions={FACADE_ACTIONS} />
     </>
   );

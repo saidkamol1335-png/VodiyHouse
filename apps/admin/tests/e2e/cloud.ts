@@ -73,6 +73,8 @@ export async function passSecondFactor(page: Page, userId: string): Promise<void
   await page.getByRole("button", { name: /Войти запасным кодом/ }).click();
   await page.getByLabel("Запасной код").fill(code);
   await page.getByRole("button", { name: "Войти", exact: true }).click();
+  // Коды выдаёт кнопка на /kod/zapasnye (открытие страницы ничего не меняет).
+  await page.getByRole("button", { name: "Показать запасные коды" }).click({ timeout: 30_000 });
   await page.getByRole("link", { name: "Я сохранил коды — в кабинет" }).click({ timeout: 30_000 });
   await expect(page).not.toHaveURL(/\/kod/, { timeout: 30_000 });
 }

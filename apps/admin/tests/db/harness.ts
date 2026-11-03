@@ -16,7 +16,7 @@ const SHIM_FILE = path.join(import.meta.dirname, "supabase-shim.sql");
 export type Aal = "aal1" | "aal2";
 export type Actor =
   | { kind: "anon" }
-  | { kind: "user"; id: string; iat?: number; aal?: Aal; totpAt?: number }
+  | { kind: "user"; id: string; iat?: number; aal?: Aal; totpAt?: number; sessionId?: string }
   | { kind: "service" };
 
 /** Общее у PGlite и облачной базы (pg): тесты не знают, где выполняются. */
@@ -63,7 +63,8 @@ export function claimsOf(actor: Actor): string {
   if (actor.kind !== "user") return JSON.stringify({ role });
   const aal = actor.aal ?? "aal2";
   const amr = aal === "aal2" ? [{ method: "totp", timestamp: actor.totpAt ?? Math.floor(Date.now() / 1000) }] : [];
-  const claims = { sub: actor.id, role, aal, amr };
+  // Сессия стенда — с тем же id, что у сотрудника (createStaff заводит её с фактором сервера).
+  const claims = { sub: actor.id, role, aal, amr, session_id: actor.sessionId ?? actor.id };
   return JSON.stringify(actor.iat === undefined ? claims : { ...claims, iat: actor.iat });
 }
 
@@ -129,6 +130,11 @@ export async function createStaff(admin: Db, role: StaffRole, options: StaffOpti
      values ($1, $2, $3, $4, $5)`,
     [id, fullName, role, isActive, mustChangePassword],
   );
+  // Сессия, подтверждённая фактором сервера: руководителю стенда второй фактор пройден (20261103130000).
+  await admin.query("insert into auth.sessions (id, user_id, factor_id, aal) values ($1, $1, $1, 'aal2')", [id]);
+  if (role === "head") {
+    await admin.query("insert into private.head_totp (user_id, factor_id, secret) values ($1, $1, 'JBSWY3DPEHPK3PXP')", [id]);
+  }
   return id;
 }
 

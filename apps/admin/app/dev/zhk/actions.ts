@@ -13,6 +13,7 @@ import { missingOf } from "@/lib/admin/complexes/readiness";
 import type {
   ComplexStatusResult,
   CreateComplexResult,
+  DeleteNowResult,
   SaveComplexMainResult,
   SaveRowsResult,
 } from "@/lib/admin/complexes/types";
@@ -83,6 +84,19 @@ export async function demoSetComplexStatusAction(formData: FormData): Promise<Co
     if (missing.length > 0) return { status: "error", error: "notReady", missing };
   }
   return { status: "done", to, at: Date.now() };
+}
+
+/** «Удалить сейчас» из «Архива» на стенде: та же проверка названия, без CSV и удаления. */
+export async function demoDeleteComplexNowAction(formData: FormData): Promise<DeleteNowResult> {
+  devOnly();
+  const complex = demoComplex(readUuid(formData) ?? "");
+  if (!complex) return { status: "error", error: "notFound" };
+  if (complex.status !== "archived") return { status: "error", error: "statusMove" };
+  const confirm = readText(formData, "confirm") ?? "";
+  if (!Object.values(complex.name).some((name) => archiveConfirmed(confirm, name))) {
+    return { status: "error", error: "confirmName" };
+  }
+  return { status: "done", at: Date.now() };
 }
 
 export async function demoSaveComplexBlocksAction(formData: FormData): Promise<SaveRowsResult> {

@@ -162,26 +162,39 @@ test.describe("руководитель", () => {
 });
 
 test.describe("менеджер и мобилограф", () => {
-  test("менеджер: «Настроек» в меню нет; адрес напрямую — «Раздел доступен руководителю»", async ({
+  test("менеджер: «Настройки» — только «Справочники» с «+ Добавить»; прочие адреса настроек ведут туда", async ({
     browser,
   }) => {
     const context = await browser.newContext({ storageState: cabinetState("manager") });
     const page = await context.newPage();
+    const errors = collectPageErrors(page);
     await page.goto("/");
-    await expect(
-      page
-        .getByRole("navigation", { name: "Разделы кабинета" })
-        .getByRole("link", { name: "Настройки" }),
-    ).toHaveCount(0);
-    await page.goto("/nastroyki");
-    await expect(page.getByRole("heading", { name: "Раздел доступен руководителю" })).toBeVisible();
+    const settings = page
+      .getByRole("navigation", { name: "Разделы кабинета" })
+      .getByRole("link", { name: "Настройки" });
+    await expect(settings).toHaveAttribute("href", "/nastroyki/spravochniki");
+    await settings.click();
+    await expect(page).toHaveURL(/\/nastroyki\/spravochniki$/);
+    // Фаза D (п. 29): вкладка одна; пункты добавляет, правит и удаляет руководитель; подсказок «?» нет.
+    await expect(page.getByRole("navigation", { name: "Разделы настроек" }).getByRole("link")).toHaveText([
+      "Справочники",
+    ]);
+    await expect(page.getByText(/Править, скрывать и удалять пункты может руководитель/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Добавить/ }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /^(Изменить|Скрыть|Удалить)/ })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /Подсказки/ })).toHaveCount(0);
+    for (const path of ["/nastroyki", "/nastroyki/kontakty", "/nastroyki/zhurnal"]) {
+      await page.goto(path);
+      await expect(page, path).toHaveURL(/\/nastroyki\/spravochniki$/);
+    }
+    expect(errors).toEqual([]);
     await context.close();
   });
 
   // 12.6 (Н2): права роли в облаке — меню, список, вкладки и действия квартир (DEMO после demo:seed).
   // Н7 здесь не проверить: в сиде у всех блоков есть список — его проверяют тесты базы и стенд.
   // Только на 1440: оба проекта тапнули бы одну и ту же свободную квартиру общего DEMO в облаке.
-  test("менеджер: «ЖК» → список без создания → «Квартиры» без генератора, стояков и правок", async ({
+  test("менеджер: «ЖК» → список с созданием, без архива → вкладки ЖК и «Публикация» с запросом → «Квартиры» статусом", async ({
     browser,
   }, testInfo) => {
     desktopOnly(testInfo.project.name);
@@ -193,17 +206,26 @@ test.describe("менеджер и мобилограф", () => {
       .getByRole("link", { name: "ЖК", exact: true })
       .click();
     await expect(page).toHaveURL(/\/zhk$/);
-    await expect(page.getByRole("button", { name: "Добавить ЖК" })).toHaveCount(0);
-    await expect(page.locator(".complex-list__status")).toHaveCount(0);
+    // Фаза D (п. 6): менеджер добавляет и правит ЖК; публикует, архивирует и удаляет руководитель.
+    await expect(page.getByRole("button", { name: "Добавить ЖК" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Статус" }).getByRole("button", { name: /Архив/ })).toHaveCount(0);
+    await expect(page.locator(".complex-list__status").first()).toBeVisible();
+    await expect(page.locator(".complex-list__actions")).toHaveCount(0);
     // DEMO-сид: у Shodlik оба блока со списком — проверяем, что видно после чтения списка. Застройщик —
     // DEMO: настоящий Shodlik (npm run content:import) — у MYB Development.
     const shodlik = page.locator(".complex-list__row").filter({ hasText: "ЖК Shodlik" }).filter({ hasText: /Sifat Qurilish/ });
-    await expect(shodlik).toHaveAttribute("href", /\/zhk\/[0-9a-f-]{36}\/kvartiry$/);
-    const units = (await shodlik.getAttribute("href"))!;
-    await page.goto(units.replace(/\/kvartiry$/, "/bloki"));
-    await expect(page).toHaveURL(new RegExp(`${units}$`));
+    await expect(shodlik).toHaveAttribute("href", /\/zhk\/[0-9a-f-]{36}$/);
+    const base = (await shodlik.getAttribute("href"))!;
+    await page.goto(`${base}/bloki`);
+    await expect(page).toHaveURL(new RegExp(`${base}/bloki$`));
+    await expect(page.getByTestId("block-card").first()).toBeVisible();
+    await page.goto(`${base}/publikatsiya`);
+    await expect(page.getByRole("button", { name: /^Запросить/ }).first()).toBeVisible();
+    await expect(page.getByRole("form", { name: "Статус на сайте" })).toHaveCount(0);
+    const units = `${base}/kvartiry`;
+    await page.goto(units);
     await expect(page.getByRole("button", { name: /Сменить статус$/ }).first()).toBeVisible();
-    await expect(page.locator(".admin-entity-head")).toHaveCount(0);
+    await expect(page.locator(".admin-entity-head")).toHaveCount(1);
     await expect(page.getByRole("button", { name: /Статус и правка$/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Стояки/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "+ Квартира" })).toHaveCount(0);

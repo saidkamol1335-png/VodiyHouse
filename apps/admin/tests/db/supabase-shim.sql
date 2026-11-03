@@ -28,7 +28,10 @@ create table auth.users (
 create table auth.sessions (
   id uuid primary key,
   user_id uuid not null references auth.users (id) on delete cascade,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Фактор, которым подтверждена сессия (aal2), как у Supabase MFA: второй фактор руководителя.
+  factor_id uuid,
+  aal text
 );
 
 -- Те же определения, что у Supabase: id и роль берутся из claims JWT текущего запроса.

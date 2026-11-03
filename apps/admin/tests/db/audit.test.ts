@@ -107,11 +107,13 @@ describe("журнал изменений", () => {
     expect(rows.map((row) => row.relname)).toEqual(["profiles", "settings"]);
   });
 
-  it("читают руководитель и менеджер; мобилограф ничего не видит, посетителю закрыто", async () => {
-    const visible = async (id: string) =>
-      (await db.as(user(id), (tx) => tx.query("select id from audit_log"))).rows.length;
+  // Фаза D (п. 29): менеджеру — записи ЖК (журнал вкладки «Публикация»), общий журнал — руководителю.
+  it("руководитель — весь журнал, менеджер — записи ЖК; мобилограф ничего не видит, посетителю закрыто", async () => {
+    const visible = async (id: string, where = "true") =>
+      (await db.as(user(id), (tx) => tx.query(`select id from audit_log where ${where}`))).rows.length;
     expect(await visible(head)).toBeGreaterThan(0);
-    expect(await visible(manager)).toBe(await visible(head));
+    expect(await visible(manager)).toBe(await visible(head, "complex_id is not null"));
+    expect(await visible(manager, "complex_id is null")).toBe(0);
     expect(await visible(mobilographer)).toBe(0);
     await expectDenied(db.as(anon, (tx) => tx.query("select id from audit_log")));
   });

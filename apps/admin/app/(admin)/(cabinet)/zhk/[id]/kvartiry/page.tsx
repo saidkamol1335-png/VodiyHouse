@@ -72,7 +72,7 @@ export default async function ComplexUnitsPage({ params, searchParams }: Complex
   const base = `${ADMIN_ROUTES.complexes}/${complex.id}`;
   return (
     <>
-      <UnitsScreenSwitch base={base} />
+      <UnitsScreenSwitch base={base} current="list" />
       <ComplexUnitsTab
       view={unitsTabView({ ...tab, layouts })}
       tabHref={complexTabHref(base, "units")}

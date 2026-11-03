@@ -145,7 +145,12 @@ function edited(state: UnitsListState, event: EditEvent): UnitsListState {
     };
   }
   if (event.type === "unitsPatched")
-    return { ...state, base: withFields(base, event.ids, event.fields, event.stamp) };
+    return {
+      ...state,
+      base: withFields(base, event.ids, event.fields, event.stamp),
+      // Правка одной квартиры (цена в строке): строка не уходит из-под руки вместе с «Отменить».
+      pinned: event.ids.size === 1 ? new Set([...state.pinned, ...event.ids]) : state.pinned,
+    };
   const keep = <T>(entries: Iterable<[string, T]>) =>
     new Map([...entries].filter(([id]) => !event.ids.has(id)));
   return {

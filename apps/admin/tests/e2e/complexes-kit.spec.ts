@@ -2,8 +2,9 @@ import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Шаг 11 фазы 1: «ЖК» на служебном стенде (/dev/zhk, DEMO мокапа) — список (в. 5), создание,
-// статус и готовность (И8, И9), вкладки «Основное», «Блоки», «Планировки», «Фото» (И1–И6).
-// Те же компоненты, что у /admin/zhk; действия стенда — настоящие проверки форм без базы.
+// статус и готовность (И8, И9) — во вкладке «Публикация» (фаза D), вкладки «Основное» и
+// «Расположение» (И1–И3). Те же компоненты, что у /admin/zhk; действия стенда — настоящие
+// проверки форм без базы.
 
 const LIST = "/dev/zhk";
 const complexUrl = (n: number) => `${LIST}/00000000-0000-4000-8000-0000000000c${n}`;
@@ -124,36 +125,44 @@ test.describe("кабинет · ЖК · страница", () => {
   test("вкладки — адреса; у черновика точки там, где не хватает данных", async ({ page }) => {
     await open(page, GULZOR);
     const tabs = page.getByRole("navigation", { name: "Разделы ЖК" });
-    // Черновик — мастер «Новый ЖК» (шаг 3.6): вкладки — шаги с номером, «Журнал» — без.
+    // Черновик — мастер «Новый ЖК»: 8 вкладок — шаги с номером; «Квартиры» — кнопкой в шапке.
     await expect(tabs.getByRole("link")).toHaveText([
       /^1\. Основное/,
-      /^2\. Блоки/,
-      /^3\. Планировки/,
-      "4. Квартиры",
+      "2. О ЖК",
+      /^3\. Блоки и оплата/,
+      "4. Планировки",
       /^5\. Фото/,
-      "Фасад и планы",
-      "6. Видео",
-      "7. Детали",
-      "8. Документы",
-      "9. Предпросмотр",
-      "Журнал",
+      /^6\. Расположение/,
+      "7. Документы и проверки",
+      "8. Публикация",
     ]);
-    await expect(tabs.locator(".admin-tabs__dot")).toHaveCount(3);
+    // Застройщик — «Основное», оплата — «Блоки и оплата», адрес и точка — «Расположение».
+    await expect(tabs.locator(".admin-tabs__dot")).toHaveCount(4);
+    await expect(tabs.getByRole("link", { name: /Расположение/ }).locator(".admin-tabs__dot")).toHaveCount(1);
     await expect(tabs.getByRole("link", { name: /Фото/ })).toHaveAttribute(
       "href",
       `${GULZOR}/foto`,
     );
+    // Шапка: значок состояния и «Квартиры»; капсулы статуса нет — она на «Публикации».
+    await expect(page.getByText("Черновик (0 из 6)")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Квартиры", exact: true })).toHaveAttribute(
+      "href",
+      `${GULZOR}/kvartiry`,
+    );
+    await expect(page.getByRole("form", { name: "Статус на сайте" })).toHaveCount(0);
     await open(page, SHODLIK);
-    // У опубликованного строки готовности и точек нет.
+    // У опубликованного строки готовности, точек и номеров нет.
     await expect(page.locator(".admin-tabs__dot")).toHaveCount(0);
     await expect(page.locator(".complex-readiness")).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Разделы ЖК" }).getByRole("link").first(),
+    ).toHaveText("Основное");
   });
 
-  test("готовность (И9): «0 из 6», список — ссылки на вкладки, «рендеров нужно ещё 4»", async ({ page }) => {
-    await open(page, GULZOR);
+  test("готовность (И9) на «Публикации»: «0 из 6» открыт сразу, пункты — ссылки на вкладки", async ({ page }) => {
+    await open(page, `${GULZOR}/publikatsiya`);
     // Застройщик Gulzor не опубликован, а минимум теперь этого требует.
     const toggle = page.getByRole("button", { name: /Для публикации: 0 из 6/ });
-    await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     const list = page.locator(".complex-readiness__list");
     await expect(list.locator("li")).toHaveCount(6);
@@ -161,11 +170,17 @@ test.describe("кабинет · ЖК · страница", () => {
       "href",
       `${GULZOR}/bloki`,
     );
+    await expect(list.getByRole("link", { name: /Точка на карте — «Расположение»/ })).toHaveAttribute(
+      "href",
+      `${GULZOR}/raspolozhenie`,
+    );
     await expect(list).toContainText("рендеров нужно ещё 4");
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 
   test("публикация (И8): панель с галочкой 1.2; без данных — чего не хватает", async ({ page }) => {
-    await open(page, GULZOR);
+    await open(page, `${GULZOR}/publikatsiya`);
     await page.getByRole("button", { name: "Опубликовать" }).click();
     const panel = page.locator(".publish-check");
     await expect(panel).toContainText("Опубликовать ЖК?");
@@ -181,8 +196,8 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(submit).toBeEnabled();
   });
 
-  test("архив — только с верным названием (RU или UZ)", async ({ page }) => {
-    await open(page, GULZOR);
+  test("архив на «Публикации» — только с верным названием (RU или UZ)", async ({ page }) => {
+    await open(page, `${GULZOR}/publikatsiya`);
     await page.getByRole("button", { name: "В архив" }).click();
     const confirm = page.getByLabel("Чтобы подтвердить, введите название");
     await confirm.fill("Gulzar");
@@ -193,18 +208,21 @@ test.describe("кабинет · ЖК · страница", () => {
     await expect(formStatus(page, "Отправлен в архив")).toBeVisible();
   });
 
-  test("«Основное»: три панели; контакты в тексте и кривая точка — ошибки, потом «Сохранено»", async ({
+  test("«Основное» — одна панель; «Расположение»: контакты в тексте и кривая точка — ошибки, потом «Сохранено»", async ({
     page,
   }) => {
     await open(page, SHODLIK);
-    await expect(page.getByRole("heading", { level: 2 })).toHaveText([
-      "О ЖК",
-      "Расположение",
-      "Проверено Vodiy House",
-    ]);
+    // Фаза D: описание — «О ЖК», адрес и точка — «Расположение», визит — «Документы и проверки».
+    await expect(page.getByRole("heading", { level: 2 })).toHaveText(["О ЖК"]);
     await expect(page.getByText("Этажность считается по блокам: 12 этажей.")).toBeVisible();
     await expect(page.getByLabel("Потолки, м")).toHaveValue("3,0");
+    await expect(page.getByLabel("Ориентир · RU")).toHaveCount(0);
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    await expect(formStatus(page, "Сохранено")).toBeVisible();
 
+    await open(page, `${SHODLIK}/raspolozhenie`);
+    await expect(page.getByRole("heading", { level: 2 })).toHaveText(["Расположение"]);
+    await expect(page.getByLabel("Название · RU")).toHaveCount(0);
     await page.getByLabel("Ориентир · RU").fill("звоните +998 90 123 45 67");
     await page.getByLabel("Координаты или ссылка на карту").fill("рядом с парком");
     await expect(
@@ -225,9 +243,10 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("точка вне области — подсказка; класс сбрасывается крестиком", async ({ page }) => {
-    await open(page, SHODLIK);
+    await open(page, `${SHODLIK}/raspolozhenie`);
     await page.getByLabel("Координаты или ссылка на карту").fill("71.7843, 40.3842");
     await expect(page.getByText(/широта и долгота перепутаны/)).toBeVisible();
+    await open(page, SHODLIK);
     const classes = page.getByRole("radiogroup", { name: "Класс" });
     await expect(classes.getByRole("radio", { name: "Комфорт" })).toBeChecked();
     await classes.getByRole("button", { name: "Сбросить" }).click();
@@ -245,7 +264,7 @@ test.describe("кабинет · ЖК · страница", () => {
     });
     await page
       .getByRole("navigation", { name: "Разделы ЖК" })
-      .getByRole("link", { name: "Журнал" })
+      .getByRole("link", { name: "Публикация" })
       .click();
     expect(asked).toContain("Уйти без сохранения?");
   });
@@ -256,6 +275,13 @@ test.describe("кабинет · ЖК · страница", () => {
     await open(page, SHODLIK);
     const classes = page.getByRole("radiogroup", { name: "Класс" });
     await classes.getByText("Бизнес", { exact: true }).click();
+    await page.getByLabel("Название · RU").fill("Shodlik +998 90 123 45 67");
+    await page.getByRole("button", { name: "Сохранить вкладку" }).click();
+    await expect(page.getByText(/В тексте контакты/)).toBeVisible();
+    await expect(classes.getByRole("radio", { name: "Бизнес" })).toBeChecked();
+
+    // Район — на «Расположении» (фаза D): та же форма, свои поля.
+    await open(page, `${SHODLIK}/raspolozhenie`);
     const location = page.getByLabel("Город или район");
     const before = await location.inputValue();
     const other = await location
@@ -270,7 +296,6 @@ test.describe("кабинет · ЖК · страница", () => {
     await page.getByLabel("Ориентир · RU").fill("звоните +998 90 123 45 67");
     await page.getByRole("button", { name: "Сохранить вкладку" }).click();
     await expect(page.getByText(/В тексте контакты/)).toBeVisible();
-    await expect(classes.getByRole("radio", { name: "Бизнес" })).toBeChecked();
     await expect(location).toHaveValue(other!);
   });
 
@@ -281,7 +306,7 @@ test.describe("кабинет · ЖК · страница", () => {
     await rowOf(page, "Shodlik").click();
     await expect(page).toHaveURL(SHODLIK);
     await page.waitForLoadState("networkidle");
-    await page.getByLabel("До центра, мин").fill("9");
+    await page.getByLabel("Потолки, м").fill("3,2");
     let asked = "";
     page.once("dialog", (dialog) => {
       asked = dialog.message();
@@ -290,13 +315,13 @@ test.describe("кабинет · ЖК · страница", () => {
     await page.evaluate(() => history.back());
     await expect.poll(() => asked).toContain("Уйти без сохранения?");
     await expect(page).toHaveURL(SHODLIK);
-    await expect(page.getByLabel("До центра, мин")).toHaveValue("9");
+    await expect(page.getByLabel("Потолки, м")).toHaveValue("3,2");
   });
 
   test("несохранённые правки: переход по вкладке спрашивает «Уйти без сохранения?»", async ({
     page,
   }) => {
-    await open(page, SHODLIK);
+    await open(page, `${SHODLIK}/raspolozhenie`);
     await page.getByLabel("До центра, мин").fill("9");
     let asked = "";
     page.once("dialog", (dialog) => {
@@ -305,20 +330,20 @@ test.describe("кабинет · ЖК · страница", () => {
     });
     await page
       .getByRole("navigation", { name: "Разделы ЖК" })
-      .getByRole("link", { name: "Журнал" })
+      .getByRole("link", { name: "Публикация" })
       .click();
     expect(asked).toContain("Уйти без сохранения?");
-    await expect(page).toHaveURL(SHODLIK);
+    await expect(page).toHaveURL(`${SHODLIK}/raspolozhenie`);
   });
 
-  test("застройщик не опубликован — подсказка в шапке; со страницы застройщика — его ЖК", async ({
+  test("застройщик не опубликован — подсказка на «Публикации»; со страницы застройщика — его ЖК", async ({
     page,
   }) => {
-    await open(page, GULZOR);
+    await open(page, `${GULZOR}/publikatsiya`);
     await expect(page.locator(".form-status")).toContainText(
       "ЖК не появится на сайте, пока не опубликован застройщик «Navro‘z Qurilish».",
     );
-    await open(page, SHODLIK);
+    await open(page, `${SHODLIK}/publikatsiya`);
     await expect(page.getByText(/ЖК не появится на сайте/)).toHaveCount(0);
     await open(page, "/dev/zastroyshchiki/00000000-0000-4000-8000-0000000000d1");
     await page.getByRole("link", { name: "ЖК застройщика →" }).click();
@@ -327,7 +352,7 @@ test.describe("кабинет · ЖК · страница", () => {
   });
 
   test("страница не шире экрана", async ({ page }) => {
-    for (const url of [SHODLIK, GULZOR]) {
+    for (const url of [SHODLIK, GULZOR, `${GULZOR}/publikatsiya`, `${SHODLIK}/raspolozhenie`]) {
       await open(page, url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);

@@ -56,6 +56,16 @@ describe("справочники", () => {
     expect(renamed.affectedRows).toBe(0);
   });
 
+  it("пункт менеджера — видимый и в конце списка, что бы ни прислал клиент", async () => {
+    await db.as(user(manager), (tx) =>
+      tx.query(`insert into finishings (slug, name, is_active, sort) values ('m-first', '{"ru": "М", "uz": "M"}', false, -100)`),
+    );
+    const { rows } = await db.admin.query<{ is_active: boolean; last: boolean }>(
+      "select is_active, sort = (select max(sort) from finishings) as last from finishings where slug = 'm-first'",
+    );
+    expect(rows[0]).toEqual({ is_active: true, last: true });
+  });
+
   it("название обязательно на двух языках, без лишних ключей", async () => {
     const insert = (name: string) =>
       db.as(user(head), (tx) =>

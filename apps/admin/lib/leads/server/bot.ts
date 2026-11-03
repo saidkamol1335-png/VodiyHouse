@@ -7,7 +7,7 @@ import ru from "@/messages/ru.json";
 import uz from "@/messages/uz.json";
 import { objectFrom, pagePathFrom, sourceFrom, type LeadPayload } from "../request";
 import type { LeadSubmitResult, SiteLang } from "../types";
-import type { TelegramKeyboard } from "./channels";
+import { sendTelegram, telegramConfig, type TelegramKeyboard } from "./channels";
 
 // Бот «Написать в Telegram» (Ф8 A, ТЗ 10.5): /start <код> — приветствие на языке сайта и
 // «Поделиться номером»; номер (кнопкой или текстом) — заявка «Telegram-бот» с ЖК, страницей и
@@ -81,12 +81,26 @@ async function linkStaff(chatId: number, token: string, deps: BotDeps) {
     p_chat: chatId,
   });
   if (error) console.error("[bot] привязка сотрудника не удалась", error.code, error.message);
+  // Привязка — первая, перепривязки нет: если это не руководитель, пусть узнают сразу (ревью фазы D).
+  if (typeof data === "string") await alertStaffLinked(deps.admin, data);
   await deps.reply(
     chatId,
     typeof data === "string"
       ? "Готово: коды входа в кабинет Vodiy House будут приходить сюда. Вернитесь в кабинет и нажмите «Отправить код»."
       : "Ссылка устарела. Откройте кабинет и нажмите «Привязать Telegram» ещё раз.",
   );
+}
+
+async function alertStaffLinked(client: SupabaseClient, userId: string) {
+  const config = telegramConfig();
+  if (!config) return;
+  const { data } = await client.from("profiles").select("full_name").eq("id", userId).maybeSingle();
+  const sent = await sendTelegram(
+    config,
+    config.alertChatId,
+    `🔐 К кабинету привязан Telegram для кодов входа: ${data?.full_name ?? "сотрудник"}. Если это сделал не он — срочно сбросьте второй фактор (npm run staff:reset-2fa) и смените пароль.`,
+  );
+  if (!sent.ok) console.error("[bot] тревога о привязке не ушла", sent.error);
 }
 
 type BoundStart = { site_lang: SiteLang; complex: { ru: string; uz: string } | null };

@@ -21,14 +21,20 @@ type AdminTabsProps = {
   attentionLabel?: string;
   /** Микс с элементом блока-владельца по БЭМ: место и размер задаёт его CSS. */
   className?: string;
+  /**
+   * Сегмент активной вкладки, когда вкладки стоят не в layout, а на странице (там
+   * useSelectedLayoutSegment всегда null): «Список · Фасад» экрана «Квартиры».
+   */
+  current?: string | null;
 };
 
 /**
  * Вкладки-пилюли страницы ЖК и застройщика (решения фазы 1, в. 6, и Д2). Каждая вкладка —
  * свой адрес: работает «назад», ссылку на вкладку можно отправить. Стоит в layout раздела.
  */
-export function AdminTabs({ label, tabs, attentionLabel, className }: AdminTabsProps) {
-  const segment = useSelectedLayoutSegment();
+export function AdminTabs({ label, tabs, attentionLabel, className, current }: AdminTabsProps) {
+  const layoutSegment = useSelectedLayoutSegment();
+  const segment = current === undefined ? layoutSegment : current;
   const track = useRef<HTMLDivElement>(null);
   const edges = useStripScroll(track, true, segment ?? "");
 

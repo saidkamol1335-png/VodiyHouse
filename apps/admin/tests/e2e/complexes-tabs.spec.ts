@@ -2,7 +2,8 @@ import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors, imageFile } from "./helpers";
 
 // Шаг 11 фазы 1: вкладки ЖК на служебном стенде (/dev/zhk/<id>, DEMO мокапа) — «Блоки» (И4),
-// «Планировки» (И5), «Фото» (И6) и «Журнал»; «Квартиры» — complexes-units.spec.ts.
+// «Планировки» (И5), «Фото» (И6) и журнал ЖК (фаза D — во вкладке «Публикация»); «Квартиры» —
+// complexes-units.spec.ts.
 
 const complexUrl = (n: number) => `/dev/zhk/00000000-0000-4000-8000-0000000000c${n}`;
 const SHODLIK = complexUrl(1);
@@ -224,17 +225,18 @@ test.describe("кабинет · ЖК · фото и журнал", () => {
     await expect(page.getByRole("button", { name: "Сохранить вкладку" })).toHaveCount(0);
   });
 
-  test("«Журнал» ЖК: блоки и планировки с названием ЖК", async ({ page }) => {
-    await open(page, `${SHODLIK}/zhurnal`);
-    await expect(page.getByText("Блок B").first()).toBeVisible();
-    await expect(page.getByText("Готовность, %")).toBeVisible();
-    await expect(page.getByText("Блок A · 1-комн. · 42,5 м²")).toBeVisible();
+  test("журнал ЖК на «Публикации»: блоки и планировки с названием ЖК", async ({ page }) => {
+    await open(page, `${SHODLIK}/publikatsiya`);
+    const journal = page.locator(".journal-list");
+    await expect(journal.getByText("Блок B").first()).toBeVisible();
+    await expect(journal.getByText("Готовность, %")).toBeVisible();
+    await expect(journal.getByText("Блок A · 1-комн. · 42,5 м²")).toBeVisible();
   });
 
   test("журнал квартир (12.2): сводки — сколько, номера, статусы плашками, без сырых ключей", async ({
     page,
   }) => {
-    await open(page, `${SHODLIK}/zhurnal`);
+    await open(page, `${SHODLIK}/publikatsiya`);
     const entries = page.locator(".journal-list__entry");
     const unitsEntry = (text: string) => entries.filter({ hasText: text });
 
@@ -267,18 +269,18 @@ test.describe("кабинет · ЖК · фото и журнал", () => {
     expect(await noHorizontalScroll(page)).toBe(0);
   });
 
-  test(`журнал квартир · скриншот`, async ({ page }, testInfo) => {
-    await open(page, `${SHODLIK}/zhurnal`);
+  test(`«Публикация» с журналом квартир · скриншот`, async ({ page }, testInfo) => {
+    await open(page, `${SHODLIK}/publikatsiya`);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({
       caret: "initial",
-      path: `test-results/screens/${testInfo.project.name}/s12-journal.png`,
+      path: `test-results/screens/${testInfo.project.name}/d3-publication-journal.png`,
       fullPage: true,
     });
   });
 
   test("вкладки не шире экрана", async ({ page }) => {
-    for (const url of [`${SHODLIK}/foto`, `${SHODLIK}/kvartiry`, `${SHODLIK}/zhurnal`]) {
+    for (const url of [`${SHODLIK}/foto`, `${SHODLIK}/kvartiry`, `${SHODLIK}/publikatsiya`]) {
       await open(page, url);
       await page.waitForLoadState("networkidle");
       expect(await noHorizontalScroll(page), url).toBe(0);
