@@ -147,7 +147,7 @@ async function createProject(token) {
   }
   const testRef = fs
     .readFileSync(path.join(SITE, ".env.local"), "utf8")
-    .match(/https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1];
+    .match(/^NEXT_PUBLIC_SUPABASE_URL=https:\/\/([a-z0-9]+)\.supabase\.co/m)?.[1]; // не пример из комментария
   const test = projects.find((project) => refOf(project) === testRef);
   if (!test) throw new Error("тестовый проект не найден в списке — не знаю организацию");
   const org = test.organization_slug ?? test.organization_id;
@@ -375,8 +375,25 @@ async function netlifyDeploy(env) {
       env,
     );
   }
+  // Как у vodiyhouse-test: без плагина Next сайт выкладывается сырым .next (404 на всех страницах),
+  // а вход команды Netlify — только для превью, иначе прод отдаёт 401.
+  netlify(
+    [
+      "api",
+      "updateSite",
+      "--data",
+      apiData({
+        site_id: NETLIFY_SITE_ID,
+        body: {
+          plugins: [{ package: "@netlify/plugin-nextjs", pinned_version: "5" }],
+          sso_login_context: "non_production",
+        },
+      }),
+    ],
+    env,
+  );
   log(
-    `7 Netlify (${site.name}): переменные ${vars.join(", ")} (+ SITE_NOINDEX=1, NODE_VERSION=24 заданы раньше)`,
+    `7 Netlify (${site.name}): переменные ${vars.join(", ")} (+ SITE_NOINDEX=1, NODE_VERSION=24 заданы раньше), плагин Next, вход команды — только превью`,
   );
   const build = JSON.parse(
     netlify(

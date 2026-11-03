@@ -4,8 +4,10 @@
 # Netlify (тестовый деплой — решение фазы 3, Ф2; переезд к заказчику — шаг «Запуск»).
 # Адаптер Next.js (OpenNext) Netlify подключает сам; переменные окружения — в настройках сайта
 # Netlify, не здесь (.env.example: что нужно и откуда).
+# Ветка release/project-1 собирает только прод: стенды /dev (DEMO мокапа зашито в код) из сборки
+# убираем — иначе их пререндер с DEMO лежит в HTML, хотя страница отвечает 404 (аудит прода 03.11).
 [build]
-  command = "npm run build -w @vh/site"
+  command = "rm -rf apps/site/app/dev && npm run build -w @vh/site"
   publish = "apps/site/.next"
   functions = "apps/site/netlify/functions"
 

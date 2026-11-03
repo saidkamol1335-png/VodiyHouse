@@ -25,8 +25,9 @@
 
 **Перед встречей**
 
-- [ ] `npx supabase login` в `Desktop\VH_release\apps\site` (Enter → браузер → код) и `node scripts/prod-up.mjs` — или сказать агенту «вошёл» (`docs/prod-setup.md`, «Быстрый путь»). Сайт Netlify `vodiyhouse-prod` уже создан и подключён.
-- [ ] Агент: обход «нет выдумок» и Lighthouse (`docs/prod-check.md`).
+- [x] 03.11: прод поднят — Supabase `ksfeguedeveenblyetgk` (Франкфурт), https://vodiyhouse-prod.netlify.app; обход «нет выдумок» 390/1440 ✓, Lighthouse mobile: главная 96, каталог 100 (SEO 66 — только закрытие от поиска до домена).
+- [ ] **Сменить пароль базы тестового облака** (Supabase → проект тестового облака → Database → Reset password) и обновить `SUPABASE_DB_URL` в `.env.local` (`VH_mijoz\apps\site`, `VH_mijoz\apps\admin`, `VH_release\apps\site`): 03.11 агент случайно вывел строку подключения тестовой базы в чат. Прод не затронут.
+- [ ] На встрече до показа сайта — шаг 4 (телефон VH в «Контактах»): без него политика конфиденциальности и сообщения об ошибках ссылаются на телефон, которого нет на странице, а калькулятор пуст до включения программы MYB (шаг 5).
 
 **Дашборды после передачи аккаунтов**
 

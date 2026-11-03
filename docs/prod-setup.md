@@ -74,7 +74,8 @@ SITE_SIGNING_SECRET=<из п. 1>
 
 Не задавать до ответа заказчика: `SITE_URL` (до домена — адрес Netlify), `TELEGRAM_*`, `LEADS_SHEET_*`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_YANDEX_MAPS_KEY`. Без Telegram и Таблицы заявка сохраняется в кабинете («Заявки») — это нормально до бота заказчика.
 
-4. Если первая сборка уже запустилась без переменных — после них Deploys → «Clear cache and deploy site».
+4. Плагин **@netlify/plugin-nextjs** (v5, как у vodiyhouse-test) — без него сборка «ready», но все страницы 404. Site configuration → Access & security → Visitor access: вход команды — **только non-production** (иначе прод отдаёт 401). `prod-up.mjs` ставит оба сам.
+5. Если первая сборка уже запустилась без переменных — после них Deploys → «Clear cache and deploy site».
 
 ## 5. Дальше — агент (одно «да» исполнителя 02.11 на цепочку)
 

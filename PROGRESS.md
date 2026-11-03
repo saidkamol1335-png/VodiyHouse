@@ -4,7 +4,7 @@
 
 ## Сейчас
 
-- **02.11 — сдача Проекта-1 (ветка `release/project-1`, папка `Desktop\VH_release`):** прод без выдумок у исполнителя — `docs/prod-setup.md`; журнал и решения интервью — `docs/progress/project1-release.md`; встреча и «сделать руками» — `docs/handover-meeting.md`; от заказчика — `docs/handover-client.md`. Ждёт: `npx supabase login` (человек) → `node scripts/prod-up.mjs` в `apps/site` (или «вошёл» агенту); сайт Netlify `vodiyhouse-prod` уже создан.
+- **03.11 — сдача Проекта-1 (ветка `release/project-1`, папка `Desktop\VH_release`):** прод поднят — Supabase `ksfeguedeveenblyetgk` (Франкфурт), https://vodiyhouse-prod.netlify.app; `cloud:check --prod` ✓, обход «нет выдумок» 390/1440 ✓, Lighthouse mobile 96 / 100. Дальше — встреча: `docs/handover-meeting.md` (сценарий и «сделать руками»), от заказчика — `docs/handover-client.md`; журнал — `docs/progress/project1-release.md` (R10).
 - **Проект-2, фазы A–B** готовы 02.11 (интервью — `PLAN.md` §10, аудит — `docs/split-audit.md`); миграции A–B в тестовом облаке, деплой 82b68fd. Фаза C — в main у другой сессии.
 
 ## Журнал фазы A
@@ -32,8 +32,3 @@
 - Ревью B (низкое): менеджер напрямую может выставить media_assets.width/height и layouts.drawing_id на медиа другого ЖК — проверку «чертёж того же ЖК» и отзыв UPDATE размеров — в фазе D вместе с экранами; колонки состояния ЖК можно писать напрямую (триггер сразу пересчитывает) — отозвать UPDATE списком колонок; после восстановления дампа с session_replication_role=replica — вызвать private.refresh_complex_states по всем ЖК; в audit_log старые записи хранят роль «videographer».
 - Облако: после выкладки проверить, что регистрация в Auth выключена (config.toml в облако сам не попадает) — у authenticated остаётся чтение по RLS.
 
-## Облако и деплой
-- 02.11 сделано: 5 миграций фазы B в тестовом облаке (расхождений состояния 0, anon не читает ни одной таблицы); Vault `site_signing_secret` + `SITE_SIGNING_SECRET` в apps/site/.env.local и Netlify (production); `leads.channels` = telegram, sheet; Netlify vodiyhouse-test: base — корень, Package directory `apps/site`, сборка `npm run build -w @vh/site`, публикация `apps/site/.next`.
-- 02.11 после выкладки: e2e на 1440 нашёл, что в облаке любая правка квартир и ЖК из кабинета падала — Data API Supabase держит safeupdate (DELETE без WHERE запрещён), а пересчёт состояния чистил временную таблицу без WHERE; в PGlite safeupdate нет. Исправлено миграцией `20261102150000_state_refresh_safeupdate` (в облаке), добавлен страж-тест «нет DELETE / UPDATE без WHERE ни в одной функции». Деплой 4c0622f на Netlify — ready; /uz, каталог, /admin/vhod — 200, телефон VH из public_settings на месте.
-- 02.11: 82b68fd запушен, деплой ready (/uz, каталог, /admin/vhod — 200, телефон VH на месте); 160000 и 170000 в тестовом облаке (dry-run показал ровно их; к моменту выкладки облако уже было up to date — применены параллельно), leads.channels = telegram, sheet, отчёты одобряет только head; aal-проверки в staff_role нет — черновик 180000 не выкладывался.
-- Ждёт: второй сайт Netlify для `apps/admin` — создать в фазе D, когда в админке будет что показать (Package directory — только в UI или через API, как у сайта).

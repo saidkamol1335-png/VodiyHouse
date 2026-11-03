@@ -909,7 +909,7 @@
   "lead": {
     "titles": {
       "callback": "{minutes} daqiqada qo‘ng‘iroq qilamiz",
-      "callbackPlain": "Qo‘ng‘iroq qiling",
+      "callbackPlain": "Menga qo‘ng‘iroq qiling",
       "view": "Ko‘rishga yozilish",
       "documents": "TJM hujjatlari nusxalari",
       "consult": "Quruvchi bo‘yicha maslahat",
@@ -924,7 +924,7 @@
     },
     "buttons": {
       "view": "Ko‘rishga yozilish",
-      "callback": "Qo‘ng‘iroq qiling",
+      "callback": "Menga qo‘ng‘iroq qiling",
       "layout": "Mavjudligini bilish",
       "documents": "Hujjatlar nusxasini so‘rash",
       "consult": "Maslahat olish",
@@ -1051,10 +1051,10 @@
     "share": "Tanlovni ulashish",
     "shareTitle": "Tanlov: {count} ta TJM",
     "podborka": {
-      "metaTitle": "Tanlov: {count} ta TJM — Vodiy House",
+      "metaTitle": "{count, plural, =0 {Tanlov} other {Tanlov: {count} ta TJM}} — Vodiy House",
       "metaDescription": "{names}. Quruvchi narxlari, kvartiralar mavjudligi, tanlash va ko‘rsatish — bepul.",
       "eyebrow": "Vodiy House tanlovi",
-      "title": "Tanlov: {count} ta TJM",
+      "title": "{count, plural, =0 {Tanlov bo‘sh} other {Tanlov: {count} ta TJM}}",
       "lead": "Bu TJMlar siz uchun tanlandi. Raqamingizni qoldiring — Vodiy House menejeri batafsil aytib beradi va kvartiralarni ko‘rsatadi.",
       "empty": "Tanlov bo‘sh yoki undagi TJMlar sotuvdan olingan. Barcha yangi uylarni ko‘ring — yoki raqam qoldiring, qo‘lda tanlab beramiz.",
       "context": "Tanlov: {names}",
