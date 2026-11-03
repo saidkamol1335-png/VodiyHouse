@@ -16,6 +16,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title"), robots: { index: false, follow: false } };
 }
 
+// nonce CSP (фаза F) читается из заголовков — оболочка стендов рендерится на запрос.
+export const instant = false;
+
 // Стенды — только для разработки. Защита здесь, до любых ожиданий: стенд, который сначала ждёт
 // searchParams, звал notFound() уже после статичной оболочки — ответ уходил с кодом 200 (приёмка
 // фазы 1). Свои devOnlyStand / devOnly у стендов и действий остаются вторым рубежом.

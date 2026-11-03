@@ -38,7 +38,8 @@ test.describe("кабинет · статистика · руководител�
       "page",
     );
     await expect(page.locator(".stats-screen__period")).toContainText(/30 дней · сравнение с/);
-    const kpis = page.locator(".stats-screen__kpi");
+    // Цифры сайта — первый ряд; ниже такие же карточки у «Хода стройки» (фаза F).
+    const kpis = page.locator(".stats-screen__kpis").first().locator(".stats-screen__kpi");
     await expect(kpis).toHaveCount(6);
     await expect(kpis.first()).toContainText("Посетители");
     expect(
