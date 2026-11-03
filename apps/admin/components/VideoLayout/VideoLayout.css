@@ -1,0 +1,17 @@
+/* Раздел «Видео и ход стройки» (фаза E): вкладки сверху; у мобилографа на телефоне вкладок нет — их
+   заменяет нижняя панель, контенту — запас снизу под неё. */
+.video-layout {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .video-layout--dock .video-layout__tabs {
+    display: none;
+  }
+
+  .video-layout--dock {
+    padding-bottom: calc(var(--video-dock-h, 72px) + 16px);
+  }
+}

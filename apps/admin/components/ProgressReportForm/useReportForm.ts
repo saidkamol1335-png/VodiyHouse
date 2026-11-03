@@ -3,158 +3,145 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRef, useState, useTransition, type FormEvent } from "react";
-import { submitProgressReportAction } from "@/lib/admin/actions/progressReports";
+import { saveProgressDraftAction, submitProgressReportAction } from "@/lib/admin/actions/progressReports";
+import type { StaffRole } from "@/lib/admin/access";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import type { ProgressFix, ProgressFormComplex } from "@/lib/admin/progress/types";
-import { PHOTOS_MIN, usePhotoQueue } from "@/lib/admin/progress/usePhotoQueue";
+import type { ProgressEdit, ProgressFormComplex } from "@/lib/admin/progress/types";
+import { usePhotoQueue } from "@/lib/admin/progress/usePhotoQueue";
 import { useVideoUpload } from "@/lib/admin/progress/useVideoUpload";
+import { hasIssues, reportIssues, type ReportIssues } from "./issues";
 import type { ReportTargetValue } from "./ReportTarget";
-
-export type ReportIssues = { photos?: string; video?: string; comment?: string; form?: string };
 
 /** Мокап: при смене ЖК блок — последний (самый свежий), квартира и фото сбрасываются. */
 const lastBlock = (complex: ProgressFormComplex | undefined) => complex?.blocks.at(-1)?.id ?? "";
 
-const hasComment = (data: FormData) =>
-  Boolean(
-    String(data.get("comment.ru") ?? "").trim() && String(data.get("comment.uz") ?? "").trim(),
-  );
+export type ReportStart = { complexId: string | null; blockId: string | null };
 
-/** Что мешает отправить: фото (3–15, загружены), видео (загружено, не вместе со ссылкой), комментарий. */
-function issuesOf(
-  data: FormData,
-  queue: { working: boolean; photos: readonly unknown[] },
-  videoStatus: string,
-  t: (key: "photosWait" | "photosMin" | "videoWait" | "videoBoth" | "commentMissing") => string,
-): ReportIssues {
-  const photos = queue.working
-    ? "photosWait"
-    : queue.photos.length < PHOTOS_MIN
-      ? "photosMin"
-      : null;
+/** Правка — как в отчёте (блок с тех пор сдан — последний строящийся); «Снять отчёт» — ЖК и блок задания. */
+function initialTarget(
+  complexes: readonly ProgressFormComplex[],
+  today: string,
+  edit: ProgressEdit | null,
+  start: ReportStart,
+): ReportTargetValue {
+  const complexId = edit?.complexId ?? start.complexId ?? complexes[0]?.id ?? "";
+  const complex = complexes.find((item) => item.id === complexId) ?? (edit ? undefined : complexes[0]);
+  const wanted = edit?.blockId ?? start.blockId;
+  const blockId = complex?.blocks.some((block) => block.id === wanted) ? wanted! : lastBlock(complex);
+  const keepUnit = Boolean(edit && blockId === edit.blockId);
   return {
-    photos: photos ? t(photos) : undefined,
-    video: videoIssue(videoStatus, Boolean(String(data.get("youtube") ?? "").trim()), t),
-    comment: hasComment(data) ? undefined : t("commentMissing"),
+    complexId: complex?.id ?? complexId,
+    shotOn: edit?.shotOn ?? today,
+    blockId,
+    unitId: keepUnit ? (edit?.unitId ?? "") : "",
   };
 }
 
-/** Видео ещё грузится или выбраны и файл, и ссылка YouTube — отправлять рано. */
-function videoIssue(
-  status: string,
-  hasLink: boolean,
-  t: (key: "videoWait" | "videoBoth") => string,
-): string | undefined {
-  if (status === "uploading" || status === "offline") return t("videoWait");
-  if (status === "done" && hasLink) return t("videoBoth");
-  return undefined;
-}
+type Owner = { userId: string; role: StaffRole };
 
-/** Исправление — как в отчёте; блок отчёта с тех пор сдан — последний строящийся, без квартиры. */
-function initialTarget(
-  complexes: readonly ProgressFormComplex[],
-  months: readonly string[],
-  fix: ProgressFix | null,
-): ReportTargetValue {
-  if (!fix) {
-    return {
-      complexId: complexes[0]?.id ?? "",
-      month: months[0] ?? "",
-      blockId: lastBlock(complexes[0]),
-      unitId: "",
-    };
-  }
-  const complex = complexes.find((item) => item.id === fix.complexId);
-  const building = complex?.blocks.some((block) => block.id === fix.blockId) ?? false;
-  return building
-    ? { complexId: fix.complexId, month: fix.month, blockId: fix.blockId, unitId: fix.unitId ?? "" }
-    : { complexId: fix.complexId, month: fix.month, blockId: lastBlock(complex), unitId: "" };
-}
-
-/** ЖК, месяц, блок, квартира и фото этого ЖК: другой ЖК — блок последний, квартира и фото с нуля. */
+/** ЖК, дата, блок, квартира и фото этого ЖК: другой ЖК — блок последний, квартира и фото с нуля. */
 function useReportTarget(
   complexes: readonly ProgressFormComplex[],
-  months: readonly string[],
-  onChange: () => void,
-  fix: ProgressFix | null,
+  today: string,
+  owner: Owner,
+  edit: ProgressEdit | null,
+  start: ReportStart,
 ) {
-  const [target, setTarget] = useState<ReportTargetValue>(() =>
-    initialTarget(complexes, months, fix),
+  const [target, setTarget] = useState<ReportTargetValue>(() => initialTarget(complexes, today, edit, start));
+  const queue = usePhotoQueue({ userId: owner.userId, complexId: target.complexId || null }, edit?.photos);
+  const { video, pick, remove } = useVideoUpload(
+    { userId: owner.userId, complexId: target.complexId || null },
+    edit?.videoPath ?? null,
   );
-  const queue = usePhotoQueue(target.complexId || null, fix?.photos);
-  const { video, pick, remove } = useVideoUpload(target.complexId || null, fix?.videoPath ?? null);
   const change = (patch: Partial<ReportTargetValue>) => {
-    onChange();
     if (patch.complexId && patch.complexId !== target.complexId) {
       queue.reset();
       remove();
       const complex = complexes.find((item) => item.id === patch.complexId);
-      return setTarget({
-        ...target,
-        complexId: patch.complexId,
-        blockId: lastBlock(complex),
-        unitId: "",
-      });
+      return setTarget({ ...target, complexId: patch.complexId, blockId: lastBlock(complex), unitId: "" });
     }
     setTarget({ ...target, ...patch, ...(patch.blockId ? { unitId: "" } : {}) });
   };
-  const clear = () => {
-    queue.reset();
-    remove();
-    setTarget((current) => ({ ...current, unitId: "" }));
-  };
-  return { target, change, queue, video: { state: video, pick, remove }, clear };
+  return { target, change, queue, video: { state: video, pick, remove } };
+}
+
+type Notice = "draftSaved" | "draftPartial" | null;
+type Target = ReturnType<typeof useReportTarget>;
+
+/** Форма → данные действия и что мешает сохранить (черновик берёт только уже загруженное). */
+function collect(form: HTMLFormElement, kind: "draft" | "submit", { target, queue, video }: Target, id: string | null) {
+  const data = new FormData(form);
+  const comment = { ru: String(data.get("comment.ru") ?? ""), uz: String(data.get("comment.uz") ?? "") };
+  const issues = reportIssues({
+    mode: kind,
+    shotOn: target.shotOn,
+    photosWorking: queue.working,
+    photos: queue.photos.length,
+    videoStatus: video.state.status,
+    hasLink: Boolean(String(data.get("youtube") ?? "").trim()),
+    comment,
+  });
+  if (video.state.status === "done" && video.state.path) data.set("videoPath", video.state.path);
+  data.set("blockId", target.blockId);
+  data.set("unitId", target.unitId);
+  data.set("shotOn", target.shotOn);
+  data.set("photos", JSON.stringify(queue.photos));
+  if (id) data.set("id", id);
+  return { data, issues };
 }
 
 /**
- * Состояние «Нового отчёта»: ЖК, месяц, блок, квартира, очередь фото; проверка перед отправкой
- * (3–15 фото загружены, комментарий на двух языках) и отправка. После «Отправлено» — пустая форма и
- * свежие «Мои отчёты» (router.refresh); исправленный возвращённый отчёт — обратно на экран без ?fix.
+ * Состояние формы отчёта (фаза E, пп. 32, 37): «Сохранить черновик» — что уже загружено (после первого
+ * сохранения адрес становится ?id=, форма и очередь загрузок не пересоздаются); «На проверку» — полная
+ * проверка и отправка: мобилограф — в «Мои отчёты», руководитель — в ящик отчёта.
  */
 export function useReportForm(
   complexes: readonly ProgressFormComplex[],
-  months: readonly string[],
-  fix: ProgressFix | null = null,
+  today: string,
+  owner: Owner,
+  edit: ProgressEdit | null,
+  start: ReportStart,
 ) {
   const t = useTranslations("admin.video.form");
   const tError = useTranslations("admin.developers.errors");
   const router = useRouter();
   const form = useRef<HTMLFormElement>(null);
-  const [sent, setSent] = useState(false);
-  const { target, change, queue, video, clear } = useReportTarget(
-    complexes,
-    months,
-    () => setSent(false),
-    fix,
-  );
-  // Поля текста управляемые (счётчик знаков): после отправки форма собирается заново — пустой.
-  const [round, setRound] = useState(0);
+  const state = useReportTarget(complexes, today, owner, edit, start);
+  const [id, setId] = useState<string | null>(edit?.id ?? null);
   const [issues, setIssues] = useState<ReportIssues>({});
-  const [pending, start] = useTransition();
+  const [failure, setFailure] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice>(null);
+  const [pending, startTransition] = useTransition();
+  const [mode, setMode] = useState<"draft" | "submit">("submit");
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const found = issuesOf(data, queue, video.state.status, t);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const kind = submitter?.value === "draft" ? "draft" : "submit";
+    const { data, issues: found } = collect(event.currentTarget, kind, state, id);
     setIssues(found);
-    setSent(false);
-    if (found.photos || found.video || found.comment) return;
-    if (video.state.path) data.set("videoPath", video.state.path);
-    data.set("blockId", target.blockId);
-    data.set("unitId", target.unitId);
-    data.set("month", target.month);
-    data.set("photos", JSON.stringify(queue.photos));
-    if (fix) data.set("id", fix.id);
-    start(async () => {
-      const result = await submitProgressReportAction(data);
-      if (result.status === "error") return setIssues({ form: tError(result.error) });
-      if (fix) return router.replace(ADMIN_ROUTES.video);
-      clear();
-      setRound((value) => value + 1);
-      setSent(true);
-      router.refresh();
+    setFailure(null);
+    setNotice(null);
+    if (hasIssues(found)) return;
+    setMode(kind);
+    startTransition(async () => {
+      const result = await (kind === "draft" ? saveProgressDraftAction : submitProgressReportAction)(data);
+      if (result.status === "error") return setFailure(tError(result.error));
+      if (result.status === "done") return router.push(sentHref(owner.role, result.id, result.notified));
+      setId(result.id);
+      // Адрес — ?id= черновика: Next не пересобирает страницу, очередь загрузок живёт.
+      if (!id) window.history.replaceState(null, "", `${ADMIN_ROUTES.videoNew}?id=${result.id}`);
+      const uploading = state.video.state.status === "uploading" || state.video.state.status === "offline";
+      setNotice(state.queue.working || uploading ? "draftPartial" : "draftSaved");
     });
   };
 
-  return { form, round, target, change, queue, video, issues, sent, pending, submit };
+  const issueText = (key: keyof ReportIssues) => (issues[key] ? t(issues[key]!) : undefined);
+  return { form, ...state, issueText, failure, notice, pending, mode, submit, id };
 }
+
+/** После «На проверку»: руководитель — в ящик своего отчёта, мобилограф — в «Мои отчёты» с итогом. */
+const sentHref = (role: StaffRole, id: string, notified: boolean) =>
+  role === "head"
+    ? `${ADMIN_ROUTES.video}?report=${id}`
+    : `${ADMIN_ROUTES.videoMine}?sent=${notified ? "1" : "quiet"}`;

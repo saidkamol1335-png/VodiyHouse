@@ -1,0 +1,1 @@
+export { VideoDock } from "./VideoDock";

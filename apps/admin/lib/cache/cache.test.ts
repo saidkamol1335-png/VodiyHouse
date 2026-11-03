@@ -98,8 +98,10 @@ const NO_CONTENT_FILES = [
   "preview.ts",
   // Запросы руководителю (PLAN §10, п. 25): сам запрос сайт не меняет — меняет статус ЖК.
   "publicationRequests.ts",
-  // Отчёт на проверке (фаза 5) на сайт не попадает — его публикует менеджер (5D, свой файл).
+  // Черновик и отчёт на проверке (фаза 5, E) на сайт не попадают — публикует руководитель (свой файл).
   "progressReports.ts",
+  // Telegram мобилографа (фаза E, п. 36): сайт не меняется.
+  "progressTelegram.ts",
   // Второй фактор руководителя (фаза D): сайт не меняется.
   "secondFactor.ts",
   "siteNow.ts",
@@ -112,8 +114,9 @@ const WITHOUT_TAG = new Set([
   "createDeveloperAction",
   "attachComplexDrawingAction",
   "saveDeveloperPrivateAction",
-  // Возврат отчёта мобилографу (фаза 5): отчёт и так не на сайте.
+  // Возврат отчёта мобилографу и «Убрать кадр» (фаза 5, E): отчёт на проверке и так не на сайте.
   "returnProgressReportAction",
+  "removeProgressPhotoAction",
 ]);
 const EXPIRES =
   /\b(expireCatalog|expireComplex|expireProgress|expireDeveloper|expireDictionaries|expirePrograms|expireShowcase|expireSiteSettings|markComplexStale|markDeveloperStale|markShowcaseStale)\(/;

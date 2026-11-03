@@ -62,3 +62,26 @@ export function progressVideoPath(complexId: string, fileId: string = crypto.ran
 export function progressVideoPublicUrl(supabaseUrl: string, path: string): string {
   return `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/${PROGRESS_VIDEO_BUCKET}/${path}`;
 }
+
+/** Опубликованное фото отчёта (и фото отчётов до фазы E) — бакет media, папка ЖК. */
+export const PROGRESS_PHOTO_PATH_PATTERN = /^complexes\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.jpg$/;
+
+// Проект-2, фаза E (PLAN §10, п. 13): загрузки отчёта до публикации — приватный бакет incoming,
+// папка автора и ЖК (политика Storage private.is_incoming_path). В публичные бакеты файлы копирует
+// сервер при публикации.
+export const INCOMING_BUCKET = "incoming";
+export const INCOMING_PATH_PATTERN = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|mp4)$/;
+
+export function incomingPath(
+  userId: string,
+  complexId: string,
+  ext: "jpg" | "mp4",
+  fileId: string = crypto.randomUUID(),
+): string {
+  return `${userId}/${complexId}/${fileId}.${ext}`;
+}
+
+/** Папка автора в ЖК — по ней докачка видео находит свою прерванную загрузку. */
+export function incomingFolder(userId: string, complexId: string): string {
+  return `${userId}/${complexId}/`;
+}

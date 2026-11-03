@@ -289,7 +289,44 @@ describe.skipIf(isRemoteTarget)("бакет incoming — загрузки моб
 
     expect(await visible(mobilographer)).toHaveLength(2);
     expect((await visible(mobilographer)).every((name) => name.startsWith(`${mobilographer}/`))).toBe(true);
-    expect(await visible(head)).toHaveLength(4);
+    // Фаза E: и руководитель видит только свою папку — чужие файлы ему подписывает сервер.
+    expect(await visible(head)).toEqual([expect.stringMatching(new RegExp(`^${head}/`))]);
     expect(await visible(manager)).toHaveLength(0);
+  });
+
+  it("файл отчёта на проверке не удалить и не загрузить заново; свой файл черновика — можно удалить", async () => {
+    const remove = (actor: string, name: string) =>
+      db.as(user(actor), async (tx) => {
+        await tx.query("select set_config('storage.allow_delete_query', 'true', true)");
+        return tx.query("delete from storage.objects where bucket_id = 'incoming' and name = $1", [name]);
+      });
+    const today = (await db.admin.query<{ d: string }>("select private.tashkent_today()::text as d")).rows[0]!.d;
+    const names = [file(mobilographer), file(mobilographer), file(mobilographer)];
+    for (const name of names) {
+      await db.admin.query(
+        "insert into storage.objects (bucket_id, name, metadata) values ('incoming', $1, '{\"mimetype\": \"image/jpeg\", \"size\": 1000}')",
+        [name],
+      );
+    }
+    const body = (id?: string) =>
+      JSON.stringify({
+        id,
+        block_id: ids.publicBlock,
+        unit_id: ids.units[0],
+        shot_on: today,
+        comment: { ru: "Двор", uz: "Hovli" },
+        photos: names.map((path) => ({ path, width: 10, height: 10 })),
+      });
+    const draft = (
+      await db.as(user(mobilographer), (tx) => tx.query<{ r: { id: string } }>("select public.save_progress_draft($1) as r", [body()]))
+    ).rows[0]!.r.id;
+    await expectDenied(upload(user(mobilographer), names[0]!));
+    await db.as(user(mobilographer), (tx) => tx.query("select public.submit_progress_report($1)", [body(draft)]));
+    expect((await remove(mobilographer, names[0]!)).affectedRows).toBe(0);
+    expect((await remove(other, names[0]!)).affectedRows).toBe(0);
+    const loose = file(mobilographer);
+    await upload(user(mobilographer), loose);
+    expect((await remove(other, loose)).affectedRows).toBe(0);
+    expect((await remove(mobilographer, loose)).affectedRows).toBe(1);
   });
 });

@@ -31,6 +31,10 @@ export const ADMIN_ROUTES = {
   programs: `${ADMIN_ROUTE}/programmy`,
   programsCalc: `${ADMIN_ROUTE}/programmy/raschet`,
   video: `${ADMIN_ROUTE}/video`,
+  // Фаза E (п. 38): кабинет мобилографа — «Новый отчёт», «Мои отчёты», «Медиа ЖК».
+  videoNew: `${ADMIN_ROUTE}/video/novyy`,
+  videoMine: `${ADMIN_ROUTE}/video/moi`,
+  videoMedia: `${ADMIN_ROUTE}/video/media`,
   stats: `${ADMIN_ROUTE}/statistika`,
   settings: `${ADMIN_ROUTE}/nastroyki`,
   dictionaries: `${ADMIN_ROUTE}/nastroyki/spravochniki`,

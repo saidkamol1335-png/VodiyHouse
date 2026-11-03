@@ -6,11 +6,10 @@ import { Button } from "@/components/Button";
 import { LeadWhen } from "@/components/LeadWhen";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import type { ReviewItem } from "@/lib/admin/progress/types";
-import { formatMonthYear } from "@vh/shared/format";
-import { mediaPublicUrl } from "@/lib/media";
+import { formatDate } from "@vh/shared/format";
 
 /**
- * «Ждут проверки · N» (фаза 5, мокап CabReview): отчёты мобилографов — старые сверху; «Проверить»
+ * «Ждут проверки · N» (фаза 5, мокап CabReview): отчёты мобилографов — по моменту отправки, старые сверху; «Проверить»
  * открывает ящик отчёта (?report=<id>). Пусто — панели нет.
  */
 export async function ReviewQueue({ items }: { items: readonly ReviewItem[] }) {
@@ -34,15 +33,14 @@ export async function ReviewQueue({ items }: { items: readonly ReviewItem[] }) {
 
 async function QueueItem({ item }: { item: ReviewItem }) {
   const t = await getTranslations("admin.video");
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const unit = item.unitNumber ? t("mine.unit", { number: item.unitNumber }) : "";
   return (
     <li className="progress-review__item">
-      {item.thumb ? (
-        // eslint-disable-next-line @next/next/no-img-element -- миниатюра 76 × 50 из бакета в кабинете
+      {item.thumbUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- миниатюра 76 × 50, адрес подписал сервер
         <img
           className="progress-review__thumb"
-          src={mediaPublicUrl(supabaseUrl, item.thumb)}
+          src={item.thumbUrl}
           alt=""
           loading="lazy"
         />
@@ -55,8 +53,9 @@ async function QueueItem({ item }: { item: ReviewItem }) {
             complex: item.complexName,
             block: item.blockName,
             unit,
-            month: formatMonthYear(item.month),
           })}
+          {" · "}
+          {t("tasks.shot", { date: formatDate(new Date(item.shotOn + "T12:00:00")) })}
         </p>
         <p className="progress-review__meta">
           {item.author ?? t("review.noAuthor")} · <LeadWhen at={item.createdAt} /> ·{" "}

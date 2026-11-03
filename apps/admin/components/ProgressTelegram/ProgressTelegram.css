@@ -1,0 +1,39 @@
+/* «Уведомления в Telegram» мобилографа (фаза E, п. 36): значок, пояснение, кнопка или «Привязан». */
+.progress-telegram {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.progress-telegram__icon {
+  margin-top: 2px;
+  color: var(--amber-2);
+}
+
+.progress-telegram__lead {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.progress-telegram__row {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-telegram__hint {
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-telegram__error {
+  grid-column: 2;
+  margin: 0;
+  color: var(--bad);
+  font-size: 13px;
+}

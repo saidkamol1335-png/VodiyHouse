@@ -80,12 +80,13 @@ describe("хранилище фото", () => {
   });
 
   // Проект-2 (PLAN §10, п. 6): менеджер загружает фото ЖК, но не застройщика.
-  it("посетитель загружать не может; менеджер — фото ЖК; мобилограф — только JPEG в папку ЖК (фото отчётов, фаза 5)", async () => {
+  // Фаза E (п. 13): фото отчётов мобилограф грузит в приватный incoming, в media их копирует сервер.
+  it("посетитель загружать не может; менеджер — фото ЖК; мобилограф в media — ничего", async () => {
     await expectDenied(upload(anon, complexFile(ids.publicComplex)));
     await upload(user(manager), complexFile(ids.publicComplex));
     await expectDenied(upload(user(manager), `developers/${ids.publicDeveloper}/${crypto.randomUUID()}.jpg`));
-    await upload(user(mobilographer), complexFile(ids.publicComplex));
     for (const name of [
+      complexFile(ids.publicComplex),
       complexFile(ids.publicComplex, "png"),
       complexFile(crypto.randomUUID()),
       `developers/${ids.publicDeveloper}/${crypto.randomUUID()}.jpg`,
@@ -95,25 +96,23 @@ describe("хранилище фото", () => {
     }
   });
 
-  it("видео отчётов: бакет progress-video, только MP4 в папку ЖК — мобилограф и руководитель; удаляет руководитель", async () => {
+  it("видео отчётов: бакет progress-video, только MP4, до 50 МБ; пишет только сервер, удаляет руководитель", async () => {
     const { rows } = await db.admin.query(
-      "select public, allowed_mime_types from storage.buckets where id = 'progress-video'",
+      "select public, allowed_mime_types, file_size_limit::int as limit from storage.buckets where id in ('progress-video', 'incoming') order by id",
     );
-    expect(rows).toEqual([{ public: true, allowed_mime_types: ["video/mp4"] }]);
+    expect(rows).toEqual([
+      { public: false, allowed_mime_types: ["image/jpeg", "video/mp4"], limit: 52428800 },
+      { public: true, allowed_mime_types: ["video/mp4"], limit: 52428800 },
+    ]);
     const video = (complexId: string, ext = "mp4") => complexFile(complexId, ext);
-    await upload(user(mobilographer), video(ids.publicComplex), "progress-video");
-    await upload(user(head), video(ids.draftComplex), "progress-video");
-    for (const actor of [user(manager), anon]) {
+    for (const actor of [user(mobilographer), user(head), user(manager), anon]) {
       await expectDenied(upload(actor, video(ids.publicComplex), "progress-video"));
-    }
-    for (const name of [video(ids.publicComplex, "mov"), video(crypto.randomUUID()), complexFile(ids.publicComplex)]) {
-      await expectDenied(upload(user(mobilographer), name, "progress-video"));
     }
     // MP4 в бакет фото не попадает: там только картинки.
     await expectDenied(upload(user(mobilographer), video(ids.publicComplex), "media"));
 
     const name = video(ids.publicComplex);
-    await upload(user(mobilographer), name, "progress-video");
+    await db.admin.query("insert into storage.objects (bucket_id, name) values ('progress-video', $1)", [name]);
     const remove = (actor: Actor) =>
       db.as(actor, async (tx) => {
         await tx.query("select set_config('storage.allow_delete_query', 'true', true)");

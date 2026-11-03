@@ -484,9 +484,9 @@ async function fillProgress(id, complex) {
     );
     if (existing.rowCount) continue;
     const inserted = await client.query(
-      // Сайт пишет «Снято …» по дате создания: день съёмки из чек-листа, не день загрузки.
-      `insert into public.progress_reports (complex_id, block_id, month, comment, status, published_at, created_at)
-       values ($1, $2, $3::date, $4::jsonb::public.i18n_text, 'published', $5::date + time '12:00', $5::date + time '12:00') returning id`,
+      // «Снято …» на сайте — дата съёмки (фаза E): день из чек-листа, не день загрузки.
+      `insert into public.progress_reports (complex_id, block_id, month, shot_on, comment, status, published_at, created_at)
+       values ($1, $2, $3::date, $5::date, $4::jsonb, 'published', $5::date + time '12:00', $5::date + time '12:00') returning id`,
       [id, blockId, report.month, JSON.stringify(report.comment), report.date],
     );
     for (const [index, file] of report.photos.entries()) {

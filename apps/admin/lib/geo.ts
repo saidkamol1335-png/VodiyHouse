@@ -75,3 +75,8 @@ export function formatCoordinates({ lat, lng }: GeoPoint): string {
 export function yandexMapsUrl({ lat, lng }: GeoPoint): string {
   return `https://yandex.uz/maps/?pt=${lng},${lat}&z=17&l=map`;
 }
+
+/** «Маршрут» до точки (фаза E, «Медиа ЖК»): Яндекс Карты строят путь от текущего места, на машине. */
+export function yandexRouteUrl({ lat, lng }: GeoPoint): string {
+  return `https://yandex.uz/maps/?rtext=~${lat},${lng}&rtt=auto`;
+}

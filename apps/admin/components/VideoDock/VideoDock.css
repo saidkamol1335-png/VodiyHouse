@@ -1,0 +1,47 @@
+/* Нижняя панель мобилографа (фаза E, п. 37): только на телефоне, над безопасной зоной экрана. */
+.video-dock {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .video-dock {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: var(--z-video-dock);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--panel-bg);
+    box-shadow: 0 -6px 20px rgb(0 0 0 / 8%);
+  }
+
+  .video-dock__item {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    min-height: 52px;
+    padding: 6px 2px;
+    border-radius: 12px;
+    color: var(--fg-3);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .video-dock__item--active {
+    background: var(--amber-soft);
+    color: var(--fg);
+  }
+
+  .video-dock__item--active svg {
+    color: var(--amber-2);
+  }
+
+  .video-dock__item:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: -2px;
+  }
+}

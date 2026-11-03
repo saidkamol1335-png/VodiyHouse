@@ -87,8 +87,15 @@ describe("Server Actions кабинета", () => {
       retryLeadDeliveryAction: /requireActionViewer\(\["head", "manager"\], \{ fresh: true \}\)/,
       // Отчёты хода строительства (фаза 5): отправляют мобилограф и руководитель; файлы удаляет сервер.
       readProgressUnitsAction: /requireActionViewer\(\["head", "mobilographer"\]\)/,
-      submitProgressReportAction:
-        /requireActionViewer\(\["head", "mobilographer"\], \{ fresh: true \}\)/,
+      // Фаза E: черновик и удаление — тоже они; Telegram уведомлений — только мобилограф (п. 36).
+      ...Object.fromEntries(
+        ["submitProgressReportAction", "saveProgressDraftAction", "deleteProgressReportAction"].map((name) => [
+          name,
+          /requireActionViewer\(\["head", "mobilographer"\], \{ fresh: true \}\)/,
+        ]),
+      ),
+      progressTelegramLinkAction: /requireActionViewer\(\["mobilographer"\], \{ fresh: true \}\)/,
+      progressTelegramUnlinkAction: /requireActionViewer\(\["mobilographer"\], \{ fresh: true \}\)/,
       // Публикует и возвращает отчёты только руководитель (PLAN §10, п. 6) — проверка headOnly ниже.
       // Журнал: менеджеру — только журнал ЖК (проверка scope в самом действии, п. 29).
       loadJournalAction: /requireActionViewer\(\["head", "manager"\]\)/,

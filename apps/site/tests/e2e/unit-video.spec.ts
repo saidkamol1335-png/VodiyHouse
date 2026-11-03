@@ -62,7 +62,7 @@ test.describe("видео квартиры для клиента", () => {
     // Расчёт — по планировке, без списка квартир: номера нет и в калькуляторе.
     await main.getByRole("button", { name: "Рассчитать платёж" }).click();
     await expect(page.getByRole("dialog", { name: /комн. · / })).toBeVisible();
-    await expect(page.locator("body")).not.toContainText(/Кв.s?d|№s?d/);
+    await expect(page.locator("body")).not.toContainText(/Кв\.\s?\d|№\s?\d/);
     await page.keyboard.press("Escape");
     expect(await noSideScroll(page)).toBe(true);
     await page.screenshot({

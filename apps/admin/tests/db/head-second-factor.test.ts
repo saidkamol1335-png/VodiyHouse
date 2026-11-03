@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { anon, createStaff, createTestDb, expectDenied, isRemoteTarget, service, type Actor, type TestDb } from "./harness";
+import { anon, createStaff, createTestDb, expectDenied, expectHint, isRemoteTarget, service, type Actor, type TestDb } from "./harness";
 
 // Фаза D (20261103110000, PLAN §10 пп. 8, 28): права руководителя — только со вторым фактором не
 // старше 30 дней; менеджеру и мобилографу фактор не нужен. Хранилище фактора — только сервер.
@@ -89,6 +89,37 @@ describe.skipIf(isRemoteTarget)("второй фактор руководите�
     // Выданные до сброса токены больше не действуют, сессии закрыты.
     expect(await roleOf({ kind: "user", id: head, iat: Math.floor(Date.now() / 1000) - 60 })).toBeNull();
     expect((await db.admin.query("select 1 from auth.sessions where user_id = $1", [head])).rows).toHaveLength(0);
+  });
+
+  // Фаза E (п. 36): мобилограф привязывает Telegram для уведомлений об отчётах и сам отвязывает.
+  it("Telegram мобилографа: привязка и отвязка; менеджеру ссылка не выдаётся; руководитель не отвязывается", async () => {
+    const mobile = await createStaff(db.admin, "mobilographer");
+    expect(await call<boolean>("select create_staff_telegram_link($1, 'm1') as v", [mobile])).toBe(true);
+    expect(await call<string>("select complete_staff_telegram_link('m1', 77) as v")).toBe(mobile);
+    expect(Number(await call<string>("select staff_telegram_chat($1) as v", [mobile]))).toBe(77);
+    expect(await call<boolean>("select unlink_staff_telegram($1) as v", [mobile])).toBe(true);
+    expect(await call<string | null>("select staff_telegram_chat($1) as v", [mobile])).toBeNull();
+    expect(await call<boolean>("select create_staff_telegram_link($1, 'm2') as v", [mobile])).toBe(true);
+    expect(await call<boolean>("select create_staff_telegram_link($1, 'x1') as v", [manager])).toBe(false);
+    await expectHint(call("select unlink_staff_telegram($1) as v", [head]), "vh:forbidden");
+    for (const actor of [{ kind: "user", id: mobile } as Actor, anon]) {
+      await expectDenied(db.as(actor, (tx) => tx.query("select unlink_staff_telegram($1)", [mobile])));
+    }
+  });
+
+  it("смена роли: ссылка не срабатывает, привязка снимается; уход с руководителя — и второй фактор", async () => {
+    const mobile = await createStaff(db.admin, "mobilographer");
+    expect(await call<boolean>("select create_staff_telegram_link($1, 'r1') as v", [mobile])).toBe(true);
+    await db.admin.query("update profiles set role = 'manager' where id = $1", [mobile]);
+    expect(await call<string | null>("select complete_staff_telegram_link('r1', 88) as v")).toBeNull();
+
+    const boss = await createStaff(db.admin, "head");
+    expect(await call<boolean>("select create_staff_telegram_link($1, 'r2') as v", [boss])).toBe(true);
+    expect(await call<string>("select complete_staff_telegram_link('r2', 99) as v")).toBe(boss);
+    await call("select save_head_backup_codes($1, array['z1']) as v", [boss]);
+    await db.admin.query("update profiles set role = 'manager' where id = $1", [boss]);
+    expect(await call<string | null>("select staff_telegram_chat($1) as v", [boss])).toBeNull();
+    expect(await call<object>("select head_factor_state($1) as v", [boss])).toMatchObject({ telegram: false, backup_left: 0 });
   });
 
   it("хранилище и функции фактора — только сервер", async () => {

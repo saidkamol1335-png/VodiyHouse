@@ -73,7 +73,8 @@
   .action-toast {
     right: 12px;
     left: 12px;
-    bottom: 12px;
+    /* Над нижней панелью мобилографа (фаза E), если она есть. */
+    bottom: calc(12px + var(--video-dock-h, 0px));
     max-width: none;
   }
 }

@@ -4,6 +4,10 @@ export { MAX_CANVAS_AREA, downscaleSteps, fitWithin } from "./fit";
 export { hasExif } from "./metadata";
 export type { MediaOwner, StoredImageType } from "./path";
 export {
+  INCOMING_BUCKET,
+  INCOMING_PATH_PATTERN,
+  incomingFolder,
+  incomingPath,
   MEDIA_BUCKET,
   MEDIA_PATH_PATTERN,
   isOwnMediaPath,
@@ -11,6 +15,7 @@ export {
   mediaPath,
   mediaPublicUrl,
   ownerTypeOf,
+  PROGRESS_PHOTO_PATH_PATTERN,
   PROGRESS_VIDEO_BUCKET,
   PROGRESS_VIDEO_PATH_PATTERN,
   progressVideoPath,

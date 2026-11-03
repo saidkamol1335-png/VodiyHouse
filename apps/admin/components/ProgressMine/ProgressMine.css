@@ -1,0 +1,93 @@
+/* «Мои отчёты» (фаза E): фильтр по статусу, строки — миниатюра, ЖК · блок, дата съёмки, статус, действия. */
+.progress-mine {
+  display: grid;
+  gap: 20px;
+}
+
+.progress-mine__empty {
+  margin: 14px 0 0;
+  color: var(--fg-3);
+  font-size: 14px;
+}
+
+.progress-mine__list {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-mine__item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line-2);
+}
+
+.progress-mine__item:first-child {
+  border-top: 0;
+}
+
+.progress-mine__thumb {
+  display: block;
+  width: 64px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--line);
+  object-fit: cover;
+}
+
+.progress-mine__text {
+  min-width: 0;
+}
+
+.progress-mine__title {
+  margin: 0;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.progress-mine__when {
+  margin: 2px 0 0;
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-mine__note,
+.progress-mine__error {
+  margin: 4px 0 0;
+  color: var(--bad);
+  font-size: 12px;
+}
+
+.progress-mine__status {
+  white-space: nowrap;
+}
+
+.progress-mine__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 760px) {
+  .progress-mine__item {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+  }
+
+  .progress-mine__actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .progress-mine__actions > * {
+    flex: 1;
+    min-height: 44px;
+  }
+}

@@ -263,3 +263,41 @@
     grid-column: 1 / -1;
   }
 }
+
+/* «Убрать кадр» под фото (фаза E, п. 38): у руководителя, отчёт на проверке; при 3 фото — неактивна. */
+.progress-review__photos li {
+  display: grid;
+  gap: 4px;
+}
+
+.progress-review__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--bad);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.progress-review__remove:disabled {
+  color: var(--fg-3);
+  cursor: not-allowed;
+}
+
+.progress-review__remove:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.progress-review__remove-error {
+  color: var(--bad);
+  font-size: 11px;
+}

@@ -1,6 +1,13 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { MEDIA_BUCKET, PROGRESS_VIDEO_BUCKET, PROGRESS_VIDEO_PATH_PATTERN } from "@/lib/media";
+import {
+  INCOMING_BUCKET,
+  INCOMING_PATH_PATTERN,
+  MEDIA_BUCKET,
+  PROGRESS_PHOTO_PATH_PATTERN,
+  PROGRESS_VIDEO_BUCKET,
+  PROGRESS_VIDEO_PATH_PATTERN,
+} from "@/lib/media";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -45,27 +52,37 @@ export async function floorPlanFilesOfGoneBlocks(
     .map((row) => row.image!.path);
 }
 
+/** Куда идёт файл отчёта по пути: incoming — до публикации, media — фото, progress-video — видео. */
+export function progressFileBucket(path: string): string | null {
+  if (INCOMING_PATH_PATTERN.test(path)) return INCOMING_BUCKET;
+  if (PROGRESS_PHOTO_PATH_PATTERN.test(path)) return MEDIA_BUCKET;
+  if (PROGRESS_VIDEO_PATH_PATTERN.test(path)) return PROGRESS_VIDEO_BUCKET;
+  return null;
+}
+
 /**
- * Файлы отчёта хода строительства (фаза 5), которые вернула база после отправки или удаления: фото —
- * в бакете media, видео (.mp4) — в progress-video. Удаляет сервер секретным ключом: у мобилографа в
- * хранилище права удалять нет, а пути уже проверила функция отчёта (только файлы этого отчёта).
+ * Файлы отчёта хода строительства, которые вернула база после сохранения, удаления, возврата или
+ * публикации: бакет — по явному шаблону пути (incoming, фото media, видео progress-video), прочее — в
+ * лог и мимо. Удаляет сервер секретным ключом: пути уже проверила функция отчёта.
  */
 export async function removeProgressFiles(admin: SupabaseClient, paths: unknown): Promise<void> {
-  const list = (Array.isArray(paths) ? paths : []).filter(
-    (path): path is string => typeof path === "string" && path.length > 0,
-  );
-  const videos = list.filter((path) => PROGRESS_VIDEO_PATH_PATTERN.test(path));
-  await removeMediaFiles(
-    admin,
-    list.filter((path) => !videos.includes(path)),
-  );
-  if (videos.length === 0) return;
-  try {
-    const { error } = await admin.storage.from(PROGRESS_VIDEO_BUCKET).remove(videos);
-    if (error)
-      console.error("progress-video-remove-failed", { paths: videos, error: error.message });
-  } catch (error) {
-    console.error("progress-video-remove-failed", { paths: videos, error });
+  const byBucket = new Map<string, string[]>();
+  for (const path of Array.isArray(paths) ? paths : []) {
+    if (typeof path !== "string" || path.length === 0) continue;
+    const bucket = progressFileBucket(path);
+    if (!bucket) {
+      console.error("progress-file-unknown", { path });
+      continue;
+    }
+    byBucket.set(bucket, [...(byBucket.get(bucket) ?? []), path]);
+  }
+  for (const [bucket, list] of byBucket) {
+    try {
+      const { error } = await admin.storage.from(bucket).remove(list);
+      if (error) console.error("progress-file-remove-failed", { bucket, paths: list, error: error.message });
+    } catch (error) {
+      console.error("progress-file-remove-failed", { bucket, paths: list, error });
+    }
   }
 }
 

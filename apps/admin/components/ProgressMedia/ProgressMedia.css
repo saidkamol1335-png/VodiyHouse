@@ -1,0 +1,163 @@
+/* «Медиа ЖК» (фаза E, п. 35): список ЖК с «Маршрутом»; ЖК — месяцы, отчёты, сетка фото со «Скачать». */
+.progress-media__hint,
+.progress-media__muted {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 13px;
+}
+
+.progress-media__complexes {
+  display: grid;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-media__complex {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px dashed var(--line-2);
+}
+
+.progress-media__complex:first-child {
+  border-top: 0;
+}
+
+.progress-media__open {
+  display: grid;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.progress-media__open:hover .progress-media__name {
+  text-decoration: underline;
+}
+
+.progress-media__name {
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.progress-media__meta {
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+.progress-media__address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.progress-media__route {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progress-media__route svg {
+  color: var(--amber-2);
+}
+
+.progress-media__head {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.progress-media__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.progress-media__month {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.progress-media__month-title {
+  margin: 0;
+  color: var(--fg);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.progress-media__report {
+  display: grid;
+  gap: 8px;
+}
+
+.progress-media__report-title {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.progress-media__video {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 12px;
+  background: #000;
+}
+
+.progress-media__photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-media__photo {
+  position: relative;
+}
+
+.progress-media__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--line);
+}
+
+.progress-media__download {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--panel-bg);
+  color: var(--fg);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+}
+
+@media (max-width: 760px) {
+  .progress-media__photos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

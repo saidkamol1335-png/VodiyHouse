@@ -1,32 +1,22 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { seedContent, type ContentIds } from "./content-fixtures";
-import {
-  anon,
-  createStaff,
-  createTestDb,
-  expectDenied,
-  expectHint,
-  user,
-  type Db,
-  type TestDb,
-} from "./harness";
+import { anon, createStaff, createTestDb, expectDenied, expectHint, user, type TestDb } from "./harness";
+import { progressKit, tashkentDates, type Dates } from "./progress-fixtures";
 
-// Фаза 5 (5A.1): отчёты хода строительства (миграция 20261029100000_progress_reports.sql) — кто отправляет,
-// проверяет, публикует и видит; правила отчёта (месяц, 3–15 фото, комментарий RU и UZ, видео — одно),
-// возврат и повторная отправка, удаление с файлами, снимок квартиры для ссылки клиента.
-
-type Submitted = { id: string; complex_id: string; removed: string[] };
+// Фаза 5 (5A.1) и Проект-2, фаза E (20261103140000, 20261103150000): отчёты хода строительства — кто
+// отправляет, проверяет, публикует и видит; правила отчёта (дата съёмки, 3–15 фото, комментарий RU и UZ,
+// видео — одно, файлы — свои загрузки incoming), возврат и повторная отправка, удаление с файлами,
+// снимок квартиры для ссылки клиента, сайт.
 
 describe("отчёты хода строительства: права и правила", () => {
   let db: TestDb;
   let ids: ContentIds;
+  let dates: Dates;
+  let kit: ReturnType<typeof progressKit>;
   let head: string;
   let manager: string;
   let video: string;
   let otherVideo: string;
-  let month: string;
-  let previous: string;
-  let longAgo: string;
 
   beforeAll(async () => {
     db = await createTestDb();
@@ -35,99 +25,90 @@ describe("отчёты хода строительства: права и пра
     manager = await createStaff(db.admin, "manager");
     video = await createStaff(db.admin, "mobilographer");
     otherVideo = await createStaff(db.admin, "mobilographer");
-    const { rows } = await db.admin.query<{ m: string; p: string; l: string }>(
-      `select to_char(date_trunc('month', private.tashkent_today()), 'YYYY-MM-DD') as m,
-              to_char(date_trunc('month', private.tashkent_today()) - interval '1 month', 'YYYY-MM-DD') as p,
-              to_char(date_trunc('month', private.tashkent_today()) - interval '2 months', 'YYYY-MM-DD') as l`,
-    );
-    ({ m: month, p: previous, l: longAgo } = rows[0]!);
+    dates = await tashkentDates(db);
+    kit = progressKit(db, ids, dates);
   });
   afterAll(() => db.close());
 
-  const photo = (complex = ids.publicComplex) => ({
-    path: `complexes/${complex}/${crypto.randomUUID()}.jpg`,
-    width: 1600,
-    height: 1200,
-  });
-  const photos = (n: number, complex?: string) => Array.from({ length: n }, () => photo(complex));
-  const report = (patch: Record<string, unknown> = {}) => ({
-    block_id: ids.publicBlock,
-    month,
-    comment: { ru: "Залит 9-й этаж", uz: "9-qavat quyildi" },
-    photos: photos(3),
-    ...patch,
-  });
-  const call = <T>(actor: string, sql: string, params: unknown[]) =>
-    db
-      .as(user(actor), (tx: Db) => tx.query<{ r: T }>(`select ${sql} as r`, params))
-      .then((result) => result.rows[0]!.r);
-  const submit = (actor: string, body: Record<string, unknown>) =>
-    call<Submitted>(actor, "public.submit_progress_report($1)", [JSON.stringify(body)]);
-  const publish = (actor: string, id: string, checked = true) =>
-    call<{ complex_id: string }>(actor, "public.publish_progress_report($1, $2)", [id, checked]);
-  const status = async (id: string) =>
-    (
-      await db.admin.query<{ status: string }>(
-        "select status from progress_reports where id = $1",
-        [id],
-      )
-    ).rows[0]?.status;
+  const row = async (id: string, columns: string) =>
+    (await db.admin.query(`select ${columns} from progress_reports where id = $1`, [id])).rows[0];
 
   it("мобилограф отправляет отчёт блока за месяц; второй за тот же месяц — отказ, за прошлый — можно", async () => {
-    const first = await submit(video, report());
+    const first = await kit.submit(video, await kit.report(video));
     expect(first.complex_id).toBe(ids.publicComplex);
-    expect(await status(first.id)).toBe("review");
-    await expectHint(submit(video, report()), "vh:duplicate");
-    await submit(video, report({ month: previous }));
-    await expectHint(submit(video, report({ month: longAgo })), "vh:month");
+    expect(await kit.status(first.id)).toBe("review");
+    expect(await row(first.id, "to_char(month, 'YYYY-MM-DD') as month, shot_on::text as shot")).toEqual({
+      month: dates.month,
+      shot: dates.today,
+    });
+    await expectHint(kit.submit(video, await kit.report(video)), "vh:duplicate");
+    const previous = await kit.submit(video, await kit.report(video, { shot_on: dates.prev }));
+    expect(await row(previous.id, "to_char(month, 'YYYY-MM-DD') as month")).toEqual({ month: dates.prevMonth });
+  });
+
+  it("дата съёмки: сегодня и до 60 дней назад; завтра и 61 день — отказ", async () => {
+    const unit = ids.units[0];
+    await kit.submit(video, await kit.report(video, { unit_id: unit, shot_on: dates.d60 }));
+    await expectHint(kit.submit(video, await kit.report(video, { unit_id: unit, shot_on: dates.d61 })), "vh:shot_date");
+    await expectHint(kit.submit(video, await kit.report(video, { unit_id: unit, shot_on: dates.tomorrow })), "vh:shot_date");
+    await expectHint(kit.submit(video, await kit.report(video, { unit_id: unit, shot_on: null })), "vh:shot_date");
+    await expectHint(kit.submit(video, await kit.report(video, { unit_id: unit, shot_on: "31.02" })), "vh:invalid");
   });
 
   it("правила: 3–15 фото своего ЖК, комментарий на двух языках, видео — файл или YouTube; менеджер не отправляет", async () => {
     const unit = ids.units[0];
-    await expectHint(submit(video, report({ unit_id: unit, photos: photos(2) })), "vh:photos");
-    await expectHint(submit(video, report({ unit_id: unit, photos: photos(16) })), "vh:photos");
+    const report = (patch: Record<string, unknown>) => kit.report(video, { unit_id: unit, ...patch });
+    await expectHint(kit.submit(video, await report({ photos: await kit.photos(video, 2) })), "vh:photos");
+    await expectHint(kit.submit(video, await report({ photos: await kit.photos(video, 16) })), "vh:photos");
     await expectHint(
-      submit(video, report({ unit_id: unit, photos: photos(3, ids.draftComplex) })),
+      kit.submit(video, await report({ photos: await kit.photos(video, 3, ids.draftComplex) })),
       "vh:invalid",
     );
+    await expectHint(kit.submit(video, await report({ comment: { ru: "Только по-русски", uz: " " } })), "vh:comment");
+    await expectHint(kit.submit(video, await report({ comment: { ru: "я".repeat(301), uz: "a" } })), "vh:comment");
     await expectHint(
-      submit(video, report({ unit_id: unit, comment: { ru: "Только по-русски", uz: " " } })),
-      "vh:comment",
-    );
-    await expectHint(
-      submit(
+      kit.submit(
         video,
-        report({
-          unit_id: unit,
-          youtube_id: "dQw4w9WgXcQ",
-          video_path: `complexes/${ids.publicComplex}/${crypto.randomUUID()}.mp4`,
-        }),
+        await report({ youtube_id: "dQw4w9WgXcQ", video_path: await kit.upload(video, { ext: "mp4" }) }),
       ),
       "vh:invalid",
     );
+    await expectHint(kit.submit(video, await report({ youtube_id: "не ссылка" })), "vh:youtube");
+    await expectHint(kit.submit(video, await report({ unit_id: ids.units[3] })), "vh:sold");
+    await expectHint(kit.submit(video, await report({ block_id: crypto.randomUUID() })), "vh:not_found");
+    await expectHint(kit.submit(video, await report({ block_id: "не uuid" })), "vh:invalid");
+    await expectHint(kit.submit(manager, await kit.report(manager, { unit_id: unit })), "vh:forbidden");
+    await kit.submit(video, await report({ video_path: await kit.upload(video, { ext: "mp4" }) }));
+  });
+
+  it("файлы — только свежие свои загрузки incoming нужного вида и размера", async () => {
+    const unit = ids.units[0];
+    const withPhoto = async (path: string) =>
+      kit.report(video, { unit_id: unit, photos: [...(await kit.photos(video, 2)), { path, width: 10, height: 10 }] });
+    const bad = [
+      await kit.upload(otherVideo),
+      await kit.upload(video, { age: "25 hours" }),
+      await kit.upload(video, { mimetype: "video/mp4" }),
+      await kit.upload(video, { size: 15_728_641 }),
+      `${video}/${ids.publicComplex}/${crypto.randomUUID()}.jpg`,
+      `complexes/${ids.publicComplex}/${crypto.randomUUID()}.jpg`,
+    ];
+    for (const path of bad) await expectHint(kit.submit(video, await withPhoto(path)), "vh:invalid");
     await expectHint(
-      submit(video, report({ unit_id: unit, youtube_id: "не ссылка" })),
-      "vh:youtube",
+      kit.submit(video, await kit.report(video, { unit_id: unit, video_path: await kit.upload(video, { ext: "mp4", size: 52_428_801 }) })),
+      "vh:invalid",
     );
-    await expectHint(submit(video, report({ unit_id: ids.units[3] })), "vh:sold");
-    await expectHint(submit(video, report({ block_id: crypto.randomUUID() })), "vh:not_found");
-    await expectHint(submit(video, report({ block_id: "не uuid" })), "vh:invalid");
-    await expectHint(submit(manager, report({ unit_id: unit })), "vh:forbidden");
+    await expectHint(
+      kit.submit(video, await kit.report(video, { unit_id: unit, video_path: await kit.upload(video) })),
+      "vh:invalid",
+    );
   });
 
   it("отчёт квартиры: сколько угодно за месяц, снимок квартиры переживает её удаление", async () => {
-    const unitReport = await submit(
-      video,
-      report({ unit_id: ids.units[1], youtube_id: "dQw4w9WgXcQ" }),
-    );
-    await submit(video, report({ unit_id: ids.units[1] }));
-    const snapshot = async () =>
-      (
-        await db.admin.query(
-          "select is_unit, unit_id, layout_id, unit_rooms, unit_area::text as unit_area, unit_floor from progress_reports where id = $1",
-          [unitReport.id],
-        )
-      ).rows[0];
+    const unitReport = await kit.submit(video, await kit.report(video, { unit_id: ids.units[1], youtube_id: "dQw4w9WgXcQ" }));
+    await kit.submit(video, await kit.report(video, { unit_id: ids.units[1] }));
+    const snapshot = () =>
+      row(unitReport.id, "is_unit, unit_id, layout_id, unit_rooms, unit_area::text as unit_area, unit_floor");
     expect(await snapshot()).toEqual({
       is_unit: true,
       unit_id: ids.units[1],
@@ -137,24 +118,16 @@ describe("отчёты хода строительства: права и пра
       unit_floor: 2,
     });
     await db.admin.query("delete from units where id = $1", [ids.units[1]]);
-    expect(await snapshot()).toMatchObject({
-      is_unit: true,
-      unit_id: null,
-      unit_rooms: 1,
-      unit_floor: 2,
-    });
+    expect(await snapshot()).toMatchObject({ is_unit: true, unit_id: null, unit_rooms: 1, unit_floor: 2 });
   });
 
-  it("видят: руководитель и менеджер — все, мобилограф — свои (и их фото); посетитель — ничего", async () => {
-    const mine = await submit(otherVideo, report({ unit_id: ids.units[0] }));
+  it("видят: руководитель и менеджер — отправленные, мобилограф — свои (и их фото); посетитель — ничего", async () => {
+    const mine = await kit.submit(otherVideo, await kit.report(otherVideo, { unit_id: ids.units[0] }));
     const column = { progress_reports: "id", progress_photos: "report_id" };
     const count = (actor: string, table: keyof typeof column) =>
       db
         .as(user(actor), (tx) =>
-          tx.query<{ n: string }>(
-            `select count(*) as n from ${table} where ${column[table]} = $1`,
-            [mine.id],
-          ),
+          tx.query<{ n: string }>(`select count(*) as n from ${table} where ${column[table]} = $1`, [mine.id]),
         )
         .then((result) => Number(result.rows[0]!.n));
     expect(await count(otherVideo, "progress_reports")).toBe(1);
@@ -172,161 +145,124 @@ describe("отчёты хода строительства: права и пра
       await expectDenied(
         db.as(user(actor), (tx) =>
           tx.query(
-            `insert into progress_reports (complex_id, block_id, month, comment, author_id, status, published_at)
-             values ($1, $2, $3, '{"ru": "а", "uz": "b"}', $4, 'published', now())`,
-            [ids.publicComplex, ids.publicBlock, month, actor],
+            `insert into progress_reports (complex_id, block_id, month, shot_on, comment, author_id, status, published_at)
+             values ($1, $2, $3, $4, '{"ru": "а", "uz": "b"}', $5, 'published', now())`,
+            [ids.publicComplex, ids.publicBlock, dates.month, dates.today, actor],
           ),
         ),
       );
-      await expectDenied(
-        db.as(user(actor), (tx) => tx.query("update progress_reports set status = 'published'")),
-      );
+      await expectDenied(db.as(user(actor), (tx) => tx.query("update progress_reports set status = 'published'")));
       await expectDenied(db.as(user(actor), (tx) => tx.query("delete from progress_photos")));
     }
   });
 
   // Одобряет только руководитель (PLAN §10, п. 6): менеджер видит отчёт, но не публикует и не возвращает.
   it("публикует только руководитель и только с отметкой правила 1.2; снимает с публикации — тоже он", async () => {
-    const { id } = await submit(video, report({ unit_id: ids.units[2] }));
-    await expectHint(publish(video, id), "vh:forbidden");
-    await expectHint(publish(manager, id), "vh:forbidden");
-    await expectHint(call(manager, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]), "vh:forbidden");
-    await expectHint(publish(head, id, false), "vh:rule12");
-    expect(await status(id)).toBe("review");
-    expect((await publish(head, id)).complex_id).toBe(ids.publicComplex);
-    const row = (
-      await db.admin.query("select status, published_by from progress_reports where id = $1", [id])
-    ).rows[0];
-    expect(row).toEqual({ status: "published", published_by: head });
-    await expectHint(publish(head, id), "vh:stale");
-    await expectHint(call(manager, "public.unpublish_progress_report($1)", [id]), "vh:forbidden");
-    await call(head, "public.unpublish_progress_report($1)", [id]);
-    expect(await status(id)).toBe("review");
+    const { id } = await kit.submit(video, await kit.report(video, { unit_id: ids.units[2] }));
+    await expectHint(kit.publish(video, id), "vh:forbidden");
+    await expectHint(kit.publish(manager, id), "vh:forbidden");
+    await expectHint(kit.call(manager, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]), "vh:forbidden");
+    await expectHint(kit.publish(head, id, false), "vh:rule12");
+    expect(await kit.status(id)).toBe("review");
+    const published = await kit.publish(head, id);
+    expect(published).toMatchObject({ complex_id: ids.publicComplex, author_id: video });
+    expect(published.incoming).toHaveLength(3);
+    expect(await row(id, "status, published_by")).toEqual({ status: "published", published_by: head });
+    for (const path of await kit.paths(id)) expect(path).toMatch(/^complexes\//);
+    await expectHint(kit.publish(head, id), "vh:stale");
+    await expectHint(kit.call(manager, "public.unpublish_progress_report($1)", [id]), "vh:forbidden");
+    await kit.call(head, "public.unpublish_progress_report($1)", [id]);
+    expect(await kit.status(id)).toBe("review");
+    // Повторной публикации копировать нечего — пути уже публичные.
+    expect((await kit.publishFiles(head, id)).files).toEqual([]);
+    await kit.publish(head, id);
+    expect(await kit.status(id)).toBe("published");
   });
 
   it("возврат с причиной → мобилограф исправляет и отправляет снова; лишние файлы — серверу на удаление", async () => {
-    const kept = photos(3);
-    const { id } = await submit(
+    const kept = await kit.photos(video, 3);
+    const { id } = await kit.submit(
       video,
-      report({ unit_id: ids.units[0], photos: [...kept, photo()] }),
+      await kit.report(video, { unit_id: ids.units[0], photos: [...kept, await kit.photo(video)] }),
     );
-    await expectHint(call(head, "public.return_progress_report($1, $2)", [id, "  "]), "vh:note");
-    await expectHint(
-      call(video, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]),
-      "vh:forbidden",
+    await expectHint(kit.call(head, "public.return_progress_report($1, $2)", [id, "  "]), "vh:note");
+    await expectHint(kit.call(video, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]), "vh:forbidden");
+    const returned = await kit.call<{ author_id: string; removed: string[] }>(
+      head,
+      "public.return_progress_report($1, $2)",
+      [id, "Контакты в кадре"],
     );
-    await call(head, "public.return_progress_report($1, $2)", [id, "Контакты в кадре"]);
-    const returned = (
-      await db.admin.query("select status, return_note from progress_reports where id = $1", [id])
-    ).rows[0];
-    expect(returned).toEqual({ status: "returned", return_note: "Контакты в кадре" });
+    expect(returned).toMatchObject({ author_id: video, removed: [] });
+    expect(await row(id, "status, return_note")).toEqual({ status: "returned", return_note: "Контакты в кадре" });
 
-    const fix = report({
+    const fix = await kit.report(video, {
       id,
       unit_id: ids.units[0],
       photos: kept,
       comment: { ru: "Переснято", uz: "Qayta olindi" },
     });
-    await expectHint(submit(otherVideo, fix), "vh:not_found");
-    const resubmitted = await submit(video, fix);
+    await expectHint(kit.submit(otherVideo, fix), "vh:not_found");
+    const resubmitted = await kit.submit(video, fix);
     expect(resubmitted.removed).toHaveLength(1);
-    const after = (
-      await db.admin.query(
-        "select status, return_note, comment ->> 'ru' as ru, (select count(*)::int from progress_photos where report_id = $1) as photos from progress_reports where id = $1",
-        [id],
-      )
-    ).rows[0];
-    expect(after).toEqual({ status: "review", return_note: null, ru: "Переснято", photos: 3 });
-    await expectHint(submit(video, fix), "vh:stale");
+    expect(
+      await row(
+        id,
+        "status, return_note, comment ->> 'ru' as ru, (select count(*)::int from progress_photos where report_id = $1) as photos",
+      ),
+    ).toEqual({ status: "review", return_note: null, ru: "Переснято", photos: 3 });
+    await expectHint(kit.submit(video, fix), "vh:stale");
   });
 
-  it("удаление: автор — свой неопубликованный, руководитель — любой; файлы отчёта — серверу", async () => {
-    const draft = await submit(video, report({ unit_id: ids.units[0] }));
-    await expectHint(
-      call(otherVideo, "public.delete_progress_report($1)", [draft.id]),
-      "vh:not_found",
-    );
-    await expectHint(
-      call(manager, "public.delete_progress_report($1)", [draft.id]),
-      "vh:forbidden",
-    );
-    const removed = await call<{ removed: string[] }>(video, "public.delete_progress_report($1)", [
-      draft.id,
-    ]);
+  it("удаление: автор — свой черновик или возвращённый, руководитель — любой; файлы отчёта — серверу", async () => {
+    const sent = await kit.submit(video, await kit.report(video, { unit_id: ids.units[0] }));
+    await expectHint(kit.call(otherVideo, "public.delete_progress_report($1)", [sent.id]), "vh:not_found");
+    await expectHint(kit.call(manager, "public.delete_progress_report($1)", [sent.id]), "vh:forbidden");
+    await expectHint(kit.call(video, "public.delete_progress_report($1)", [sent.id]), "vh:forbidden");
+    await kit.call(head, "public.return_progress_report($1, $2)", [sent.id, "Переснять"]);
+    const removed = await kit.call<{ removed: string[] }>(video, "public.delete_progress_report($1)", [sent.id]);
     expect(removed.removed).toHaveLength(3);
-    expect(await status(draft.id)).toBeUndefined();
+    expect(await kit.status(sent.id)).toBeUndefined();
 
-    const published = await submit(
+    const published = await kit.submit(
       video,
-      report({
-        unit_id: ids.units[0],
-        video_path: `complexes/${ids.publicComplex}/${crypto.randomUUID()}.mp4`,
-      }),
+      await kit.report(video, { unit_id: ids.units[0], video_path: await kit.upload(video, { ext: "mp4" }) }),
     );
-    await publish(head, published.id);
-    await expectHint(
-      call(video, "public.delete_progress_report($1)", [published.id]),
-      "vh:forbidden",
-    );
-    const byHead = await call<{ removed: string[] }>(head, "public.delete_progress_report($1)", [
-      published.id,
-    ]);
+    await kit.publish(head, published.id);
+    await expectHint(kit.call(video, "public.delete_progress_report($1)", [published.id]), "vh:forbidden");
+    const byHead = await kit.call<{ removed: string[] }>(head, "public.delete_progress_report($1)", [published.id]);
     expect(byHead.removed).toHaveLength(4);
-    expect(byHead.removed.at(-1)).toMatch(/\.mp4$/);
+    expect(byHead.removed.at(-1)).toMatch(/^complexes\/.+\.mp4$/);
   });
 
   it("только свои файлы: путь галереи ЖК или чужого отчёта — отказ (их удалил бы сервер)", async () => {
     const gallery = (
-      await db.admin.query<{ path: string }>("select path from media_assets where id = $1", [
-        ids.publicPhoto,
-      ])
+      await db.admin.query<{ path: string }>("select path from media_assets where id = $1", [ids.publicPhoto])
     ).rows[0]!.path;
-    await expectHint(
-      submit(
-        video,
-        report({
-          unit_id: ids.units[0],
-          photos: [...photos(2), { path: gallery, width: 10, height: 10 }],
-        }),
-      ),
-      "vh:invalid",
-    );
-    const taken = await submit(video, report({ unit_id: ids.units[0] }));
-    const takenPath = (
-      await db.admin.query<{ path: string }>(
-        "select path from progress_photos where report_id = $1 limit 1",
-        [taken.id],
-      )
-    ).rows[0]!.path;
-    await expectHint(
-      submit(
-        otherVideo,
-        report({
-          unit_id: ids.units[0],
-          photos: [...photos(2), { path: takenPath, width: 10, height: 10 }],
-        }),
-      ),
-      "vh:invalid",
-    );
-    const mp4 = `complexes/${ids.publicComplex}/${crypto.randomUUID()}.mp4`;
-    await submit(video, report({ unit_id: ids.units[0], video_path: mp4 }));
-    await expectHint(
-      submit(otherVideo, report({ unit_id: ids.units[0], video_path: mp4 })),
-      "vh:invalid",
-    );
+    const withPhoto = async (actor: string, path: string) =>
+      kit.report(actor, { unit_id: ids.units[0], photos: [...(await kit.photos(actor, 2)), { path, width: 10, height: 10 }] });
+    await expectHint(kit.submit(video, await withPhoto(video, gallery)), "vh:invalid");
+    const taken = await kit.submit(video, await kit.report(video, { unit_id: ids.units[0] }));
+    const [takenPath] = await kit.paths(taken.id);
+    await expectHint(kit.submit(otherVideo, await withPhoto(otherVideo, takenPath!)), "vh:invalid");
+    await expectHint(kit.submit(video, await withPhoto(video, takenPath!)), "vh:invalid");
+    const mp4 = await kit.upload(video, { ext: "mp4" });
+    await kit.submit(video, await kit.report(video, { unit_id: ids.units[0], video_path: mp4 }));
+    await expectHint(kit.submit(video, await kit.report(video, { unit_id: ids.units[0], video_path: mp4 })), "vh:invalid");
     // Ширина «1000.0» — тоже целое число.
-    await submit(
-      video,
-      report({ unit_id: ids.units[0], photos: [{ ...photo(), width: 1000.0 }, ...photos(2)] }),
-    );
+    const [first, ...rest] = await kit.photos(video, 3);
+    await kit.submit(video, await kit.report(video, { unit_id: ids.units[0], photos: [{ ...first!, width: 1000.0 }, ...rest] }));
   });
 
-  it("руководитель исправляет возвращённый отчёт сам; месяц возвращённого отчёта сохраняется", async () => {
-    const { id } = await submit(video, report({ unit_id: ids.units[0], month: previous }));
-    await call(head, "public.return_progress_report($1, $2)", [id, "Нет двора"]);
-    await db.admin.query("update progress_reports set month = $2 where id = $1", [id, longAgo]);
-    await submit(head, report({ id, unit_id: ids.units[0], month: longAgo }));
-    expect(await status(id)).toBe("review");
+  it("руководитель исправляет возвращённый отчёт сам: файлы мобилографа и старая дата съёмки проходят", async () => {
+    const { id } = await kit.submit(video, await kit.report(video, { unit_id: ids.units[0], shot_on: dates.prev }));
+    await kit.call(head, "public.return_progress_report($1, $2)", [id, "Нет двора"]);
+    await db.admin.query(
+      "update progress_reports set shot_on = $2::date, month = date_trunc('month', $2::date) where id = $1",
+      [id, dates.d61],
+    );
+    const photos = await kit.storedPhotos(id);
+    await kit.submit(head, await kit.report(head, { id, unit_id: ids.units[0], shot_on: dates.d61, photos }));
+    expect(await kit.status(id)).toBe("review");
   });
 
   it("удаление блока и квартиры: отчёты уходят с блоком без отдельных записей журнала, связь с квартирой — без правки", async () => {
@@ -342,49 +278,47 @@ describe("отчёты хода строительства: права и пра
         [block],
       )
     ).rows[0]!.id;
-    const blockReport = await submit(video, report({ block_id: block }));
-    const unitReport = await submit(video, report({ block_id: block, unit_id: unit }));
+    const blockReport = await kit.submit(video, await kit.report(video, { block_id: block }));
+    const unitReport = await kit.submit(video, await kit.report(video, { block_id: block, unit_id: unit }));
     const journal = (id: string) =>
       db.admin
         .query<{ action: string }>(
           "select action::text from audit_log where entity = 'progress_reports' and entity_id = $1 order by id",
           [id],
         )
-        .then((result) => result.rows.map((row) => row.action));
+        .then((result) => result.rows.map((item) => item.action));
     await db.admin.query("delete from units where id = $1", [unit]);
     expect(await journal(unitReport.id)).toEqual(["insert"]);
     await db.admin.query("delete from blocks where id = $1", [block]);
-    expect(await status(blockReport.id)).toBeUndefined();
+    expect(await kit.status(blockReport.id)).toBeUndefined();
     expect(await journal(blockReport.id)).toEqual(["insert"]);
   });
 
-  it("сайт: «Ход строительства» — только опубликованные отчёты блоков видимого ЖК, новые сверху", async () => {
+  it("сайт: «Ход строительства» — только опубликованные отчёты блоков видимого ЖК, новые сверху, «снято» — дата съёмки", async () => {
     const site = (complex: string) =>
       db
         .as(anon, (tx) =>
           tx.query<{
-            r: { id: string; month: string; photos: unknown[]; block: { name: string } }[] | null;
+            r: { id: string; month: string; shot_at: string; photos: { path: string }[]; block: { name: string } }[] | null;
           }>("select public.site_complex_progress($1) as r", [complex]),
         )
         .then((result) => result.rows[0]!.r);
     const before = (await site(ids.publicComplex))!.length;
-    const draft = await submit(
-      video,
-      report({ month: previous, block_id: ids.publicBlock, unit_id: ids.units[0] }),
-    );
+    const unitReport = await kit.submit(video, await kit.report(video, { shot_on: dates.prev, unit_id: ids.units[0] }));
     const published = (
       await db.admin.query<{ id: string }>(
-        "select id from progress_reports where block_id = $1 and not is_unit and month = $2",
-        [ids.publicBlock, month],
+        "select id from progress_reports where block_id = $1 and not is_unit and month = $2 and status = 'review'",
+        [ids.publicBlock, dates.month],
       )
     ).rows[0]!.id;
-    await publish(head, published);
-    await publish(head, draft.id);
+    await kit.publish(head, published);
+    await kit.publish(head, unitReport.id);
     const items = (await site(ids.publicComplex))!;
     expect(items.length).toBe(before + 1);
-    expect(items[0]).toMatchObject({ id: published, month, block: { name: expect.any(String) } });
+    expect(items[0]).toMatchObject({ id: published, month: dates.month, shot_at: dates.today, block: { name: expect.any(String) } });
     expect(items[0]!.photos).toHaveLength(3);
-    expect(items.map((item) => item.id)).not.toContain(draft.id);
+    for (const item of items[0]!.photos) expect(item.path).toMatch(/^complexes\//);
+    expect(items.map((item) => item.id)).not.toContain(unitReport.id);
     expect(await site(ids.draftComplex)).toBeNull();
 
     // 5C.3: кадры для каталога и главной — последний отчёт блока ЖК на сайте, не квартиры.
@@ -398,26 +332,18 @@ describe("отчёты хода строительства: права и пра
     const frame = frames.find((item) => item.complex_id === ids.publicComplex);
     expect(frame).toMatchObject({ report_id: published, block: expect.any(String) });
     expect(frame!.photos).toHaveLength(3);
-    expect(frames.map((item) => item.report_id)).not.toContain(draft.id);
+    expect(frames.map((item) => item.report_id)).not.toContain(unitReport.id);
     expect(frames.map((item) => item.complex_id)).not.toContain(ids.draftComplex);
   });
 
   it("сайт: видео квартиры — опубликованный отчёт по квартире без номера, id квартиры и цены; история — квартира и блок", async () => {
-    const { id } = await submit(
-      video,
-      report({ unit_id: ids.units[2], youtube_id: "dQw4w9WgXcQ" }),
-    );
+    const { id } = await kit.submit(video, await kit.report(video, { unit_id: ids.units[2], youtube_id: "dQw4w9WgXcQ" }));
     const page = (reportId: string) =>
       db
-        .as(anon, (tx) =>
-          tx.query<{ r: Record<string, unknown> | null }>(
-            "select public.site_unit_video($1) as r",
-            [reportId],
-          ),
-        )
+        .as(anon, (tx) => tx.query<{ r: Record<string, unknown> | null }>("select public.site_unit_video($1) as r", [reportId]))
         .then((result) => result.rows[0]?.r ?? null);
     expect(await page(id)).toBeNull();
-    await publish(head, id);
+    await kit.publish(head, id);
     const video_ = (await page(id))!;
     expect(Object.keys(video_).sort()).toEqual(
       [
@@ -443,6 +369,7 @@ describe("отчёты хода строительства: права и пра
       floor: 2,
       layout_id: ids.twoRoomLayout,
       youtube_id: "dQw4w9WgXcQ",
+      shot_at: dates.today,
     });
     expect(JSON.stringify(video_)).not.toMatch(/"number"|"unit_id"|"price"/);
     expect((video_.history as { id: string }[]).length).toBeGreaterThan(0);
@@ -455,26 +382,25 @@ describe("отчёты хода строительства: права и пра
     expect(await page(blockReport)).toBeNull();
   });
 
-  it("обзор для кабинета: все сотрудники видят статусы отчётов блоков и последние видео, посетитель — нет", async () => {
+  it("обзор для кабинета: руководитель и менеджер видят статусы отчётов блоков и последние видео; мобилограф и посетитель — нет", async () => {
     type Overview = {
       complexes: { id: string; built: boolean }[];
       reports: { id: string; status: string }[];
-      videos: { id: string; unit: string | null }[];
+      videos: { id: string; unit: string | null; shot_at: string }[];
     };
-    const overview = (actor: string) =>
-      call<Overview | null>(actor, "public.progress_overview()", []);
+    const overview = (actor: string) => kit.call<Overview | null>(actor, "public.progress_overview()");
     const published = (
-      await db.admin.query<{ id: string }>(
-        "select id from progress_reports where status = 'published' and not is_unit limit 1",
-      )
+      await db.admin.query<{ id: string }>("select id from progress_reports where status = 'published' and not is_unit limit 1")
     ).rows[0]!.id;
-    for (const actor of [video, otherVideo, manager, head]) {
+    for (const actor of [manager, head]) {
       const data = (await overview(actor))!;
       expect(data.complexes.map((complex) => complex.id)).toContain(ids.publicComplex);
-      expect(data.reports.map((report) => report.id)).toContain(published);
+      expect(data.reports.map((item) => item.id)).toContain(published);
       expect(data.videos.length).toBeGreaterThan(0);
+      expect(data.videos[0]!.shot_at).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(JSON.stringify(data.reports)).not.toMatch(/comment|path/);
     }
+    expect(await overview(video)).toBeNull();
     await expectDenied(db.as(anon, (tx) => tx.query("select public.progress_overview()")));
   });
 
@@ -483,6 +409,6 @@ describe("отчёты хода строительства: права и пра
       "select action::text, count(*)::int as n from audit_log where entity = 'progress_reports' and complex_id = $1 group by action order by action",
       [ids.publicComplex],
     );
-    expect(rows.map((row) => row.action)).toEqual(["delete", "insert", "update"]);
+    expect(rows.map((item) => item.action)).toEqual(["delete", "insert", "update"]);
   });
 });

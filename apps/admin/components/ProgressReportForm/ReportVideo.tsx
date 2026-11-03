@@ -2,6 +2,7 @@
 
 import { Film, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { VIDEO_MAX_MB } from "@/lib/admin/progress/types";
 import type { VideoUploadState } from "@/lib/admin/progress/useVideoUpload";
 import { formatFileSize } from "@vh/shared/format";
 
@@ -17,8 +18,8 @@ type ReportVideoProps = {
  */
 export function ReportVideo({ video, onPick, onRemove }: ReportVideoProps) {
   const t = useTranslations("admin.video.form");
-  if (video.status === "idle" || (video.status === "error" && video.error === "notMp4")) {
-    return <VideoDrop notMp4={video.error === "notMp4"} onPick={onPick} />;
+  if (video.status === "idle" || (video.status === "error" && video.error !== "failed")) {
+    return <VideoDrop error={video.error} onPick={onPick} />;
   }
   return (
     <div className="progress-form__field">
@@ -57,7 +58,7 @@ export function ReportVideo({ video, onPick, onRemove }: ReportVideoProps) {
 }
 
 /** «Загрузить видео с телефона · MP4 · если связь оборвётся, загрузка продолжится с того же места». */
-function VideoDrop({ notMp4, onPick }: { notMp4: boolean; onPick: (file: File) => void }) {
+function VideoDrop({ error, onPick }: { error: VideoUploadState["error"]; onPick: (file: File) => void }) {
   const t = useTranslations("admin.video.form");
   return (
     <div className="progress-form__field">
@@ -65,16 +66,16 @@ function VideoDrop({ notMp4, onPick }: { notMp4: boolean; onPick: (file: File) =
       <label className="progress-form__drop">
         <Upload size={22} aria-hidden="true" />
         <span className="progress-form__drop-title">{t("videoDrop")}</span>
-        <span className="progress-form__drop-hint">{t("videoDropHint")}</span>
+        <span className="progress-form__drop-hint">{t("videoDropHint", { mb: VIDEO_MAX_MB })}</span>
         <input
           type="file"
           accept="video/mp4"
           onChange={(event) => event.target.files?.[0] && onPick(event.target.files[0])}
         />
       </label>
-      {notMp4 ? (
+      {error ? (
         <p className="progress-form__error" role="alert">
-          {t("videoNotMp4")}
+          {error === "notMp4" ? t("videoNotMp4") : t("videoTooLarge", { mb: VIDEO_MAX_MB })}
         </p>
       ) : null}
     </div>
@@ -88,7 +89,7 @@ function noteOf(
   if (video.status === "done") return t("videoDone");
   if (video.status === "offline") return t("videoOffline", { percent: video.percent });
   if (video.status === "error")
-    return video.error === "tooLarge" ? t("videoTooLarge") : t("videoFailed");
+    return video.error === "tooLarge" ? t("videoTooLarge", { mb: VIDEO_MAX_MB }) : t("videoFailed");
   if (video.resumedAt !== null) return t("videoResumed", { percent: video.resumedAt });
   return t("videoStarted", { size: formatFileSize(video.size) });
 }

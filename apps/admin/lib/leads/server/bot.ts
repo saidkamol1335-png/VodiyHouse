@@ -72,8 +72,9 @@ export async function handleTelegramUpdate(update: TelegramUpdate, deps: BotDeps
 }
 
 /**
- * /start h_<токен> — привязка Telegram руководителя для кодов входа (PLAN §10, п. 8). Ответ — по-русски:
- * кабинет только на русском.
+ * /start h_<токен> — привязка Telegram сотрудника: руководителю — коды входа (PLAN §10, п. 8), мобилографу —
+ * уведомления об отчётах (фаза E, п. 36; вид привязки база берёт из роли). Ответ — по-русски: кабинет
+ * только на русском.
  */
 async function linkStaff(chatId: number, token: string, deps: BotDeps) {
   const { data, error } = await deps.admin.rpc("complete_staff_telegram_link", {
@@ -81,13 +82,23 @@ async function linkStaff(chatId: number, token: string, deps: BotDeps) {
     p_chat: chatId,
   });
   if (error) console.error("[bot] привязка сотрудника не удалась", error.code, error.message);
-  // Привязка — первая, перепривязки нет: если это не руководитель, пусть узнают сразу (ревью фазы D).
-  if (typeof data === "string") await alertStaffLinked(deps.admin, data);
+  if (typeof data !== "string") {
+    await deps.reply(chatId, "Ссылка устарела. Откройте кабинет и нажмите «Привязать Telegram» ещё раз.");
+    return;
+  }
+  const { data: profile } = await deps.admin.from("profiles").select("role").eq("id", data).maybeSingle();
+  if (profile?.role === "mobilographer") {
+    await deps.reply(
+      chatId,
+      "Готово: сюда будут приходить уведомления об отчётах — «Возвращён» с причиной и «Опубликован».",
+    );
+    return;
+  }
+  // Привязка руководителя — первая, перепривязки нет: если это не он, пусть узнают сразу (ревью фазы D).
+  await alertStaffLinked(deps.admin, data);
   await deps.reply(
     chatId,
-    typeof data === "string"
-      ? "Готово: коды входа в кабинет Vodiy House будут приходить сюда. Вернитесь в кабинет и нажмите «Отправить код»."
-      : "Ссылка устарела. Откройте кабинет и нажмите «Привязать Telegram» ещё раз.",
+    "Готово: коды входа в кабинет Vodiy House будут приходить сюда. Вернитесь в кабинет и нажмите «Отправить код».",
   );
 }
 

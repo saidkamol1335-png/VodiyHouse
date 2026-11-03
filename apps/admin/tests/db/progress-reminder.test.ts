@@ -39,8 +39,8 @@ describe("напоминание о ходе строительства", () => 
   const published = async (daysAgo: number) => {
     await db.admin.query("select set_config('vodiy.skip_audit', 'on', false)");
     await db.admin.query(
-      `insert into progress_reports (complex_id, block_id, author_id, month, status, comment, published_at, published_by)
-       values ($1, $2, $3, date_trunc('month', now() - make_interval(days => $4))::date, 'published',
+      `insert into progress_reports (complex_id, block_id, author_id, month, shot_on, status, comment, published_at, published_by)
+       values ($1, $2, $3, date_trunc('month', now() - make_interval(days => $4))::date, (now() - make_interval(days => $4))::date, 'published',
                '{"ru":"Ход","uz":"Ход"}', now() - make_interval(days => $4), $3)`,
       [ids.publicComplex, ids.publicBlock, head, daysAgo],
     );

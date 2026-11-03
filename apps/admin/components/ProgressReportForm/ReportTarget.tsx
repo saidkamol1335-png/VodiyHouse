@@ -6,38 +6,42 @@ import { Segmented, segmentedItemClass } from "@/components/Segmented";
 import { SelectField } from "@/components/SelectField";
 import { readProgressUnitsAction } from "@/lib/admin/actions/progressReports";
 import type { ProgressFormComplex, ProgressUnitOption } from "@/lib/admin/progress/types";
-import { formatArea, formatMonthYear } from "@vh/shared/format";
+import { formatArea } from "@vh/shared/format";
+import { ShotDateField } from "./ShotDateField";
 
 export type ReportTargetValue = {
   complexId: string;
-  month: string;
+  shotOn: string;
   blockId: string;
   unitId: string;
 };
 
 type ReportTargetProps = {
   complexes: readonly ProgressFormComplex[];
-  months: readonly string[];
+  /** Окно даты съёмки по Ташкенту (сервер): «2026-09-04» … «2026-11-03». */
+  shotBounds: { min: string; max: string };
+  /** Прежняя дата возвращённого отчёта — её можно оставить и вне окна. */
+  keepShot?: string | null;
   value: ReportTargetValue;
   onChange: (patch: Partial<ReportTargetValue>) => void;
-  /** Исправление возвращённого отчёта: ЖК не меняется (фото уже в его папке). */
+  /** Черновик и возвращённый отчёт: ЖК не меняется (фото уже в его папке). */
   lockComplex?: boolean;
 };
 
 type Choice = { id: string; label: string };
 
 /**
- * «ЖК · Месяц отчёта», «Блок» (только если строящихся блоков несколько) и «Квартира · необязательно»
- * (мокап CabVideo .form__two): квартиры блока — по выбору блока, без проданных.
+ * «ЖК · Дата съёмки» (фаза E, п. 33), «Блок» (только если строящихся блоков несколько) и «Квартира ·
+ * необязательно» (мокап CabVideo .form__two): квартиры блока — по выбору блока, без проданных.
  */
 export function ReportTarget({
   complexes,
-  months,
+  shotBounds,
+  keepShot = null,
   value,
   onChange,
   lockComplex = false,
 }: ReportTargetProps) {
-  const t = useTranslations("admin.video.form");
   const complex = complexes.find((item) => item.id === value.complexId);
   const blocks = complex?.blocks ?? [];
   return (
@@ -49,11 +53,12 @@ export function ReportTarget({
           locked={lockComplex}
           onChange={(complexId) => onChange({ complexId })}
         />
-        <Choices
-          label={t("month")}
-          choices={months.map((month) => ({ id: month, label: formatMonthYear(month) }))}
-          current={value.month}
-          onPick={(month) => onChange({ month })}
+        <ShotDateField
+          value={value.shotOn}
+          min={shotBounds.min}
+          max={shotBounds.max}
+          keep={keepShot}
+          onChange={(shotOn) => onChange({ shotOn })}
         />
       </div>
       <BlockUnitRow blocks={blocks} value={value} onChange={onChange} />
@@ -68,7 +73,7 @@ type ChoicesProps = {
   onPick: (id: string) => void;
 };
 
-/** Сегмент мокапа: «Октябрь 2026 | Сентябрь 2026», «Блок 1 | Блок 2». */
+/** Сегмент мокапа: «Блок 1 | Блок 2». */
 function Choices({ label, choices, current, onPick }: ChoicesProps) {
   return (
     <div className="progress-form__field">

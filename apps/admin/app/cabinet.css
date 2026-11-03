@@ -119,3 +119,9 @@
 @import "../components/ProgressReview/ProgressReview.css";
 @import "../components/ProgressOverview/ProgressOverview.css";
 @import "../components/VideoScreen/VideoScreen.css";
+@import "../components/VideoLayout/VideoLayout.css";
+@import "../components/VideoDock/VideoDock.css";
+@import "../components/ProgressTasks/ProgressTasks.css";
+@import "../components/ProgressMine/ProgressMine.css";
+@import "../components/ProgressTelegram/ProgressTelegram.css";
+@import "../components/ProgressMedia/ProgressMedia.css";

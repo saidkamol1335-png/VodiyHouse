@@ -1,85 +1,78 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { Save, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AdminPanel } from "@/components/AdminPanel";
 import { BilingualField } from "@/components/BilingualField";
 import { Button } from "@/components/Button";
 import { Field } from "@/components/Field";
 import { FormStatus } from "@/components/FormStatus";
+import type { StaffRole } from "@/lib/admin/access";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
-import {
-  PHONE_VIDEO_UPLOAD,
-  type ProgressFix,
-  type ProgressFormComplex,
-} from "@/lib/admin/progress/types";
+import { PHONE_VIDEO_UPLOAD, type ProgressEdit, type ProgressFormComplex } from "@/lib/admin/progress/types";
 import { ReportPhotos } from "./ReportPhotos";
 import { ReportTarget } from "./ReportTarget";
 import { ReportVideo } from "./ReportVideo";
-import { useReportForm } from "./useReportForm";
+import { useReportForm, type ReportStart } from "./useReportForm";
 
 type ProgressReportFormProps = {
   complexes: readonly ProgressFormComplex[];
-  /** Текущий и прошлый месяц по Ташкенту (сервер), «2026-10-01»; у исправления — и его месяц. */
-  months: readonly string[];
-  /** Возвращённый отчёт: форма заполнена им, ЖК не меняется. */
-  fix?: ProgressFix | null;
+  /** Окно даты съёмки по Ташкенту (сервер): max — сегодня. */
+  shotBounds: { min: string; max: string };
+  userId: string;
+  role: StaffRole;
+  /** Черновик или возвращённый отчёт (?id=): форма заполнена им, ЖК не меняется. */
+  edit?: ProgressEdit | null;
+  /** «Снять отчёт» из «Заданий»: ЖК и блок выбраны. */
+  start?: ReportStart;
 };
 
 const COMMENT_MAX = 300;
+const NO_START: ReportStart = { complexId: null, blockId: null };
 
 /**
- * «Новый отчёт» (фаза 5, мокап CabVideo): ЖК, месяц, блок, квартира; видео; 3–15 фото; комментарий
- * RU и UZ; «Отправить на проверку». Фото грузятся сразу при выборе — к отправке они уже в бакете.
- * «Исправить отчёт» — та же форма, заполненная возвращённым отчётом, с причиной возврата сверху.
+ * «Новый отчёт» (фаза 5, мокап CabVideo; фаза E, пп. 31–33, 37): ЖК, дата съёмки, блок, квартира; видео;
+ * 3–15 фото (камерой или из галереи, сразу в incoming); комментарий RU и UZ; «Сохранить черновик» и «На
+ * проверку». Черновик и возвращённый отчёт — та же форма, заполненная им.
  */
-export function ProgressReportForm({ complexes, months, fix = null }: ProgressReportFormProps) {
+export function ProgressReportForm(props: ProgressReportFormProps) {
+  const { complexes, shotBounds, userId, role, edit = null, start = NO_START } = props;
   const t = useTranslations("admin.video.form");
-  const state = useReportForm(complexes, months, fix);
-  const { form, round, target, change, queue, video, issues, sent, pending, submit } = state;
+  const state = useReportForm(complexes, shotBounds.max, { userId, role }, edit, start);
+  const { form, target, change, queue, video, issueText, failure, notice, pending, mode, submit } = state;
   if (complexes.length === 0) return <AdminPanel title={t("title")}>{t("noComplexes")}</AdminPanel>;
+  const title = edit?.status === "returned" ? t("fixTitle") : state.id ? t("editTitle") : t("title");
   return (
-    <AdminPanel title={fix ? t("fixTitle") : t("title")} wide>
+    <AdminPanel title={title} wide>
       <form ref={form} className="progress-form" onSubmit={submit} noValidate>
-        {fix ? (
-          <FormStatus tone="notice">{t("fixNote", { note: fix.returnNote })}</FormStatus>
+        {edit?.status === "returned" && edit.returnNote ? (
+          <FormStatus tone="notice">{t("fixNote", { note: edit.returnNote })}</FormStatus>
         ) : null}
         <ReportTarget
           complexes={complexes}
-          months={months}
+          shotBounds={shotBounds}
+          keepShot={edit?.status === "returned" ? edit.shotOn : null}
           value={target}
           onChange={change}
-          lockComplex={Boolean(fix)}
+          lockComplex={Boolean(edit || state.id)}
         />
-        {/* Файл — только если загрузка включена или у возвращённого отчёта он уже есть (убрать его). */}
+        {issueText("shot") ? <p className="progress-form__error" role="alert">{issueText("shot")}</p> : null}
+        <ReportPhotos tiles={queue.tiles} onAdd={queue.add} onRemove={queue.remove} error={issueText("photos") ?? null} />
         {PHONE_VIDEO_UPLOAD || video.state.status !== "idle" ? (
           <ReportVideo video={video.state} onPick={video.pick} onRemove={video.remove} />
         ) : null}
-        {issues.video ? (
-          <p className="progress-form__error" role="alert">
-            {issues.video}
-          </p>
-        ) : null}
-        <YoutubeField key={`youtube-${round}`} initial={fix?.youtubeId ?? ""} />
-        <ReportPhotos
-          tiles={queue.tiles}
-          onAdd={queue.add}
-          onRemove={queue.remove}
-          error={issues.photos ?? null}
-        />
-        <CommentField key={`comment-${round}`} error={issues.comment} initial={fix?.comment} />
-        {issues.form ? <FormStatus tone="error">{issues.form}</FormStatus> : null}
-        {sent ? <FormStatus tone="success">{t("sent")}</FormStatus> : null}
-        <FormActions pending={pending} fix={Boolean(fix)} />
+        {issueText("video") ? <p className="progress-form__error" role="alert">{issueText("video")}</p> : null}
+        <YoutubeField initial={edit?.youtubeId ?? ""} />
+        <CommentField error={issueText("comment")} initial={edit?.comment} />
+        {failure ? <FormStatus tone="error">{failure}</FormStatus> : null}
+        {notice ? <FormStatus tone={notice === "draftSaved" ? "success" : "notice"}>{t(notice)}</FormStatus> : null}
+        <FormActions pending={pending} mode={mode} back={Boolean(edit)} />
       </form>
     </AdminPanel>
   );
 }
 
-/**
- * Ссылка на ролик или Shorts YouTube — без загрузки с телефона это и есть поле «Видео»; у исправления —
- * ссылка отчёта.
- */
+/** Ссылка на ролик или Shorts YouTube — для длинных видео (файл — до 50 МБ). */
 function YoutubeField({ initial }: { initial: string }) {
   const t = useTranslations("admin.video.form");
   return (
@@ -96,13 +89,7 @@ function YoutubeField({ initial }: { initial: string }) {
 }
 
 /** Комментарий RU | UZ (мокап: «Комментарий · RU», «Izoh · UZ», до 300 знаков). */
-function CommentField({
-  error,
-  initial,
-}: {
-  error: string | undefined;
-  initial?: { ru: string; uz: string };
-}) {
+function CommentField({ error, initial }: { error: string | undefined; initial?: { ru: string; uz: string } }) {
   const t = useTranslations("admin.video.form");
   return (
     <BilingualField
@@ -119,20 +106,24 @@ function CommentField({
   );
 }
 
-/** «Отправить на проверку»; у исправления ещё «Отменить» — обратно к новому отчёту. */
-function FormActions({ pending, fix }: { pending: boolean; fix: boolean }) {
+/** «На проверку» и «Сохранить черновик»; у правки ещё «Назад к отчётам». На телефоне — липкая полоса. */
+function FormActions({ pending, mode, back }: { pending: boolean; mode: "draft" | "submit"; back: boolean }) {
   const t = useTranslations("admin.video.form");
   return (
-    <>
-      <Button type="submit" block pending={pending} className="progress-form__submit">
+    <div className="progress-form__actions">
+      <Button type="submit" name="intent" value="submit" block pending={pending && mode === "submit"}>
         <Send size={18} aria-hidden="true" />
-        {pending ? t("sending") : t("submit")}
+        {pending && mode === "submit" ? t("sending") : t("submit")}
       </Button>
-      {fix ? (
-        <Button href={ADMIN_ROUTES.video} variant="ghost" block>
+      <Button type="submit" name="intent" value="draft" variant="outline" block pending={pending && mode === "draft"}>
+        <Save size={18} aria-hidden="true" />
+        {pending && mode === "draft" ? t("draftSaving") : t("draft")}
+      </Button>
+      {back ? (
+        <Button href={ADMIN_ROUTES.videoMine} variant="ghost" block>
           {t("cancelFix")}
         </Button>
       ) : null}
-    </>
+    </div>
   );
 }

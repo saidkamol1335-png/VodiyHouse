@@ -18,7 +18,7 @@ const NOTE_MAX = 300;
  * неактивна (и база без неё не опубликует); «Вернуть мобилографу» — с причиной (в мокапе её не было:
  * мобилограф не знал бы, что исправить).
  */
-export function ReviewDecision({ id, onDone }: { id: string; onDone: () => void }) {
+export function ReviewDecision({ id, version, onDone }: { id: string; version: string; onDone: () => void }) {
   const t = useTranslations("admin.video.review");
   const tError = useTranslations("admin.developers.errors");
   const [checked, setChecked] = useState(false);
@@ -35,6 +35,7 @@ export function ReviewDecision({ id, onDone }: { id: string; onDone: () => void 
     <div className="progress-review__decision">
       <form action={run(publishProgressReportAction)} className="progress-review__publish">
         <input type="hidden" name="id" value={id} />
+        <input type="hidden" name="version" value={version} />
         <label className="progress-review__check">
           <input
             type="checkbox"

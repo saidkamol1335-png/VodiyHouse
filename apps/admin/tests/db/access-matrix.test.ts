@@ -341,25 +341,40 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       expect((await db.admin.query("select status::text, price from public.units where id = $1", [unit])).rows[0]).toEqual(before);
     });
 
-    it("отчёты хода строительства: отправляет, видит только свои, не публикует (фаза 5)", async () => {
-      const month = (await db.admin.query<{ m: string }>("select to_char(date_trunc('month', private.tashkent_today()), 'YYYY-MM-DD') as m")).rows[0]!.m;
-      const body = (unit: string) =>
+    it("отчёты хода строительства: отправляет, видит только свои (и не черновики коллег), не публикует", async () => {
+      const today = (await db.admin.query<{ d: string }>("select private.tashkent_today()::text as d")).rows[0]!.d;
+      const upload = async (actor: string) => {
+        const name = `${actor}/${ids.publicComplex}/${crypto.randomUUID()}.jpg`;
+        await db.admin.query(
+          "insert into storage.objects (bucket_id, name, metadata) values ('incoming', $1, '{\"mimetype\": \"image/jpeg\", \"size\": 1000}')",
+          [name],
+        );
+        return { path: name, width: 10, height: 10 };
+      };
+      const body = async (actor: string, unit: string) =>
         JSON.stringify({
           block_id: ids.publicBlock,
           unit_id: unit,
-          month,
+          shot_on: today,
           comment: { ru: "Двор", uz: "Hovli" },
-          photos: [1, 2, 3].map(() => ({ path: `complexes/${ids.publicComplex}/${crypto.randomUUID()}.jpg`, width: 10, height: 10 })),
+          photos: [await upload(actor), await upload(actor), await upload(actor)],
         });
-      const submit = (actor: string, unit: string) =>
-        db.as(user(actor), (tx) => tx.query<{ r: { id: string } }>("select public.submit_progress_report($1) as r", [body(unit)])).then((r) => r.rows[0]!.r.id);
-      const own = await submit(mobilographer, ids.units[0]!);
-      const others = await submit(head, ids.units[1]!);
-      expect(await visible(user(mobilographer), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(1);
-      expect(await visible(user(manager), "select id from public.progress_reports where id = any($1)", [[own, others]])).toBe(2);
-      // Одобряет отчёты только руководитель (PLAN §10, п. 6).
-      await expectHint(db.as(user(manager), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
-      await expectHint(db.as(user(mobilographer), (tx) => tx.query("select public.publish_progress_report($1, true)", [own])), "vh:forbidden");
+      const send = async (actor: string, unit: string, fn = "submit_progress_report") => {
+        const json = await body(actor, unit);
+        return db.as(user(actor), (tx) => tx.query<{ r: { id: string } }>(`select public.${fn}($1) as r`, [json])).then((r) => r.rows[0]!.r.id);
+      };
+      const own = await send(mobilographer, ids.units[0]!);
+      const others = await send(head, ids.units[1]!);
+      const headDraft = await send(head, ids.units[1]!, "save_progress_draft");
+      expect(await visible(user(mobilographer), "select id from public.progress_reports where id = any($1)", [[own, others, headDraft]])).toBe(1);
+      expect(await visible(user(manager), "select id from public.progress_reports where id = any($1)", [[own, others, headDraft]])).toBe(2);
+      // Одобряет отчёты и убирает кадры только руководитель (PLAN §10, пп. 6, 38).
+      for (const actor of [manager, mobilographer]) {
+        await expectHint(db.as(user(actor), (tx) => tx.query("select public.progress_publish_files($1, true, now())", [own])), "vh:forbidden");
+        await expectHint(db.as(user(actor), (tx) => tx.query("select public.publish_progress_report($1, true, now())", [own])), "vh:forbidden");
+        await expectHint(db.as(user(actor), (tx) => tx.query("select public.remove_progress_photo(id) from public.progress_photos where report_id = $1 limit 1", [own])), "vh:forbidden");
+      }
+      expect((await db.as(user(mobilographer), (tx) => tx.query<{ r: unknown }>("select public.progress_overview() as r"))).rows[0]!.r).toBeNull();
       expect(await writes(user(mobilographer), "update public.progress_reports set status = 'published', published_at = now() where id = $1", [own])).toBe(0);
     });
   });

@@ -1,8 +1,8 @@
 "use client";
 
-import { Loader2, Plus, X } from "lucide-react";
+import { Camera, Images, Loader2, WifiOff, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { PHOTOS_MAX, type PhotoTile } from "@/lib/admin/progress/usePhotoQueue";
 
 type ReportPhotosProps = {
@@ -13,8 +13,9 @@ type ReportPhotosProps = {
 };
 
 /**
- * «Фото · N из 3–15» (мокап CabVideo .shots): квадраты с «×» и плитка «+» — выбор нескольких файлов
- * сразу (на телефоне — галерея или камера). Сверх 15 — подсказка, лишние не берутся.
+ * «Фото · N из 3–15» (мокап CabVideo .shots; фаза E, п. 37): квадраты с «×», «Снять» (камера телефона) и
+ * «Из галереи» (несколько файлов сразу). Нет сети — плитка «ждёт сети» и догрузится сама. Сверх 15 —
+ * подсказка, лишние не берутся.
  */
 export function ReportPhotos({ tiles, onAdd, onRemove, error }: ReportPhotosProps) {
   const t = useTranslations("admin.video.form");
@@ -31,8 +32,8 @@ export function ReportPhotos({ tiles, onAdd, onRemove, error }: ReportPhotosProp
         {tiles.map((tile, index) => (
           <Shot key={tile.key} tile={tile} index={index} onRemove={onRemove} />
         ))}
-        {tiles.length < PHOTOS_MAX ? <AddShot onAdd={add} /> : null}
       </ul>
+      {tiles.length < PHOTOS_MAX ? <AddShots onAdd={add} /> : null}
       {tiles
         .filter((tile) => tile.state === "error")
         .map((tile) => (
@@ -64,8 +65,9 @@ function Shot({
   const t = useTranslations("admin.video.form");
   return (
     <li className={`progress-form__shot progress-form__shot--${tile.state}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- превью из памяти браузера, до бакета */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- превью из памяти браузера или подписанный адрес */}
       {tile.preview ? <img src={tile.preview} alt="" /> : null}
+      {tile.state === "waiting" ? <WaitBadge tile={tile} /> : null}
       {tile.state === "working" ? (
         <Loader2
           className="progress-form__spinner"
@@ -86,26 +88,40 @@ function Shot({
   );
 }
 
-/** Плитка «+»: выбор нескольких фото; поле очищается — тот же файл можно выбрать снова. */
-function AddShot({ onAdd }: { onAdd: (files: File[]) => void }) {
+/** «Ждёт сети» / «Повтор через N с» — поверх плитки. */
+function WaitBadge({ tile }: { tile: PhotoTile }) {
   const t = useTranslations("admin.video.form");
-  const input = useRef<HTMLInputElement>(null);
+  const text = tile.wait?.reason === "retry" ? t("photoRetry", { seconds: tile.wait.seconds }) : t("photoWaiting");
   return (
-    <li className="progress-form__shot progress-form__shot--add">
-      <label className="progress-form__add">
-        <Plus size={22} aria-hidden="true" />
-        <span className="sr-only">{t("addPhoto")}</span>
-        <input
-          ref={input}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          onChange={(event) => {
-            if (event.target.files) onAdd([...event.target.files]);
-            if (input.current) input.current.value = "";
-          }}
-        />
+    <span className="progress-form__shot-wait" role="status">
+      <WifiOff size={14} aria-hidden="true" />
+      <span className="sr-only">{text}</span>
+    </span>
+  );
+}
+
+/**
+ * «Снять» — камера телефона (capture: на компьютере откроется выбор файла) и «Из галереи» — несколько
+ * файлов. Поле очищается — тот же файл можно выбрать снова.
+ */
+function AddShots({ onAdd }: { onAdd: (files: File[]) => void }) {
+  const t = useTranslations("admin.video.form");
+  const pick = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) onAdd([...event.target.files]);
+    event.target.value = "";
+  };
+  return (
+    <div className="progress-form__pick">
+      <label className="progress-form__pick-button progress-form__pick-button--camera">
+        <Camera size={20} aria-hidden="true" />
+        {t("camera")}
+        <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={pick} />
       </label>
-    </li>
+      <label className="progress-form__pick-button">
+        <Images size={20} aria-hidden="true" />
+        {t("gallery")}
+        <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={pick} />
+      </label>
+    </div>
   );
 }

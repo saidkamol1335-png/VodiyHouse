@@ -36,6 +36,8 @@ export default async function cron(): Promise<void> {
     if (now.getUTCHours() === 4) await run(site, secret, "progress");
     // Сводка черновиков (фаза D) — тоже утром; раз в неделю её пропускает сама база.
     if (now.getUTCHours() === 4) await run(site, secret, "drafts");
+    // Уборка incoming (фаза E) — в 02:00 по Ташкенту (21:00 UTC), до архива.
+    if (now.getUTCHours() === 21) await run(site, secret, "incoming");
   }
 }
 

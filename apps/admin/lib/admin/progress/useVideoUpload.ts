@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Upload, type DetailedError } from "tus-js-client";
-import { PROGRESS_VIDEO_BUCKET, progressVideoPath } from "@/lib/media";
+import { INCOMING_BUCKET, incomingFolder, incomingPath } from "@/lib/media";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { VIDEO_MAX_MB } from "./types";
 
 // Видео отчёта с телефона (фаза 5, мокап CabVideo: «если связь оборвётся, загрузка продолжится с того же
 // места»): загрузка с докачкой Storage (TUS) частями по 6 МБ — такой размер требует Supabase. Обрыв —
 // повторы сами; закрыли вкладку и выбрали тот же файл — загрузка продолжается (отпечаток в браузере).
-// Политика Storage: только MP4 в папку существующего ЖК, мобилограф и руководитель.
+// Фаза E (пп. 13, 31): в приватный incoming, папка автора и ЖК, до 50 МБ (лимит бакета); в публичный
+// progress-video файл копирует сервер при публикации.
 
 const CHUNK = 6 * 1024 * 1024;
 const RETRIES = [0, 3_000, 5_000, 10_000, 20_000, 30_000, 60_000, 60_000, 120_000, 120_000];
@@ -47,10 +49,12 @@ type Callbacks = {
 };
 
 /** Загрузка с докачкой; запускает её вызывающий — после проверки, что её ещё не отменили. */
-async function prepareUpload(file: File, complexId: string, { update, stall }: Callbacks) {
+type Owner = { userId: string; complexId: string };
+
+async function prepareUpload(file: File, { userId, complexId }: Owner, { update, stall }: Callbacks) {
   const supabase = createSupabaseBrowserClient();
   const base = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
-  const path = progressVideoPath(complexId);
+  const path = incomingPath(userId, complexId, "mp4");
   const upload = new Upload(file, {
     endpoint: `${base}/storage/v1/upload/resumable`,
     chunkSize: CHUNK,
@@ -62,7 +66,7 @@ async function prepareUpload(file: File, complexId: string, { update, stall }: C
       "x-upsert": "false",
     },
     metadata: {
-      bucketName: PROGRESS_VIDEO_BUCKET,
+      bucketName: INCOMING_BUCKET,
       objectName: path,
       contentType: "video/mp4",
       cacheControl: "31536000",
@@ -82,14 +86,14 @@ async function prepareUpload(file: File, complexId: string, { update, stall }: C
       update({ status: "error", error: statusOf(error) === 413 ? "tooLarge" : "failed" });
     },
   });
-  await resumePrevious(upload, complexId);
+  await resumePrevious(upload, incomingFolder(userId, complexId));
   return upload;
 }
 
 /** Тот же файл уже начинали грузить в этот ЖК — продолжаем с того места и в тот же путь. */
-async function resumePrevious(upload: Upload, complexId: string): Promise<void> {
+async function resumePrevious(upload: Upload, folder: string): Promise<void> {
   const previous = (await upload.findPreviousUploads()).find((item) =>
-    item.metadata.objectName?.startsWith(`complexes/${complexId}/`),
+    item.metadata.objectName?.startsWith(folder),
   );
   if (!previous) return;
   upload.options.metadata = {
@@ -97,6 +101,12 @@ async function resumePrevious(upload: Upload, complexId: string): Promise<void> 
     objectName: previous.metadata.objectName!,
   };
   upload.resumeFromPreviousUpload(previous);
+}
+
+/** Не MP4 или больше лимита бакета — сразу совет про YouTube, без загрузки впустую. */
+function rejectVideo(file: File): VideoUploadError | null {
+  if (file.type !== "video/mp4" && !/\.mp4$/i.test(file.name)) return "notMp4";
+  return file.size > VIDEO_MAX_MB * 1024 * 1024 ? "tooLarge" : null;
 }
 
 const storedState = (path: string): VideoUploadState => ({
@@ -108,7 +118,10 @@ const storedState = (path: string): VideoUploadState => ({
 });
 
 /** Одно видео отчёта: выбрать, следить за процентами и обрывом связи, убрать. */
-export function useVideoUpload(complexId: string | null, initialPath: string | null = null) {
+export function useVideoUpload(
+  { userId, complexId }: { userId: string; complexId: string | null },
+  initialPath: string | null = null,
+) {
   // Исправление возвращённого отчёта: его видео уже в бакете.
   const [state, setState] = useState<VideoUploadState>(() =>
     initialPath ? storedState(initialPath) : IDLE,
@@ -126,9 +139,8 @@ export function useVideoUpload(complexId: string | null, initialPath: string | n
 
   const pick = (file: File) => {
     if (!complexId) return;
-    if (file.type !== "video/mp4" && !/\.mp4$/i.test(file.name)) {
-      return setState({ ...IDLE, status: "error", name: file.name, error: "notMp4" });
-    }
+    const rejected = rejectVideo(file);
+    if (rejected) return setState({ ...IDLE, status: "error", name: file.name, size: file.size, error: rejected });
     const mine = ++attempt.current;
     const update = (patch: Partial<VideoUploadState>) => {
       if (attempt.current === mine) setState((current) => ({ ...current, ...patch }));
@@ -138,13 +150,13 @@ export function useVideoUpload(complexId: string | null, initialPath: string | n
       update({ status: "offline" });
     };
     setState({ ...IDLE, status: "uploading", name: file.name, size: file.size });
-    void prepareUpload(file, complexId, { update, stall }).then((prepared) => {
+    void prepareUpload(file, { userId, complexId }, { update, stall }).then((prepared) => {
       if (attempt.current !== mine) return;
       upload.current = prepared;
       prepared.start();
     });
   };
-  // Не загрузилось до конца — загрузка отменяется; загруженный файл останется в папке ЖК.
+  // Не загрузилось до конца — загрузка отменяется; загруженный файл без отчёта уберёт ночная уборка.
   const remove = () => {
     attempt.current += 1;
     // Отменять (и стирать на сервере) — только незаконченную: завершённую сервер уже не отдаёт (409).

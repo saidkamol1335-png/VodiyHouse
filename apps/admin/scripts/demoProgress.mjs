@@ -118,10 +118,13 @@ export async function uploadProgress(db, storage, complexes) {
 const REPORT_SQL = `
   insert into public.progress_reports (
     complex_id, block_id, is_unit, unit_id, layout_id, unit_rooms, unit_area, unit_floor,
-    month, comment, status, created_at, published_at
+    month, shot_on, comment, status, created_at, published_at
   )
   select $1, $2, $3, u.id, u.layout_id, l.rooms, l.area, u.floor,
-         (date_trunc('month', private.tashkent_today()) - make_interval(months => $4))::date, $5::jsonb, 'published',
+         (date_trunc('month', private.tashkent_today()) - make_interval(months => $4))::date,
+         -- Дата съёмки (фаза E): второе число месяца отчёта, у текущего — не позже сегодня.
+         least(private.tashkent_today(), (date_trunc('month', private.tashkent_today()) - make_interval(months => $4))::date + 1),
+         $5::jsonb, 'published',
          least(now() - interval '1 hour', date_trunc('month', private.tashkent_today()) - make_interval(months => $4) + interval '1 day 7 hours 20 minutes'),
          least(now() - interval '30 minutes', date_trunc('month', private.tashkent_today()) - make_interval(months => $4) + interval '1 day 9 hours')
   from (select 1) one

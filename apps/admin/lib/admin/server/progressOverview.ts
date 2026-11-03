@@ -35,14 +35,14 @@ type Overview = {
  * Ссылка клиенту (как в мокапе — /ru): видео квартиры — его страница, отчёт блока — «Ход строительства»
  * ЖК. Полный адрес: сайт — отдельное приложение (PLAN §10).
  */
-const clientUrl = (video: OverviewVideo) =>
-  video.is_unit
-    ? `${siteOrigin()}/ru/video/${video.id}`
-    : `${siteOrigin()}/ru${complexRoute(video.slug)}#${COMPLEX_ANCHORS.progress}`;
+export const clientVideoUrl = ({ isUnit, id, slug }: { isUnit: boolean; id: string; slug: string }) =>
+  isUnit
+    ? `${siteOrigin()}/ru/video/${id}`
+    : `${siteOrigin()}/ru${complexRoute(slug)}#${COMPLEX_ANCHORS.progress}`;
 
 /**
- * Обзор для всех ролей (мокап CabReview): матрица «Отчёты по ЖК · последние 6 месяцев» и «Видео для
- * клиентов · последние». Функция базы: мобилографу таблица отдаёт только свои отчёты, а матрица — общая.
+ * Обзор руководителя и менеджера (мокап CabReview): матрица «Отчёты по ЖК · последние 6 месяцев» и «Видео
+ * для клиентов · последние». Мобилографу база отвечает null (фаза E: у него — «Задания»).
  */
 export async function readProgressOverview(
   supabase: SupabaseClient,
@@ -70,7 +70,7 @@ export async function readProgressOverview(
       shotAt: video.shot_at,
       author: video.author,
       thumb: video.thumb,
-      url: clientUrl(video),
+      url: clientVideoUrl({ isUnit: video.is_unit, id: video.id, slug: video.slug }),
     })),
   };
 }

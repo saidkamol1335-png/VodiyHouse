@@ -50,6 +50,11 @@ export const CONTENT_ERRORS = [
   "reportYoutube",
   "returnNote",
   "reportDuplicate",
+  "reportShotDate",
+  "reportFiles",
+  "reportFrames",
+  "reportLimit",
+  "copyFailed",
   "savedReload",
   "network",
   "notConfigured",
@@ -97,6 +102,10 @@ const BY_HINT: Record<string, ContentErrorCode> = {
   "vh:photos": "reportPhotos",
   "vh:youtube": "reportYoutube",
   "vh:note": "returnNote",
+  "vh:shot_date": "reportShotDate",
+  "vh:files": "reportFiles",
+  "vh:frames": "reportFrames",
+  "vh:limit": "reportLimit",
 };
 
 // Тот же отказ, но о разном (detail функции базы): номер или место на этаже, нет списка блока.

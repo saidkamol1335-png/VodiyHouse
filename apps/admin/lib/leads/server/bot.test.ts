@@ -74,3 +74,35 @@ describe("бот «Написать в Telegram»", () => {
     expect(bot.reply).not.toHaveBeenCalled();
   });
 });
+
+// Фаза E (п. 36): /start h_<токен> мобилографа — уведомления об отчётах, без тревоги о втором факторе.
+describe("бот: привязка Telegram сотрудника", () => {
+  const TOKEN = `h_${"a".repeat(32)}`;
+  const staff = (role: string, linked: string | null = "user-1") => {
+    const rpc = vi.fn(async () => ({ data: linked, error: null }));
+    const maybeSingle = vi.fn(async () => ({ data: { role, full_name: "Азиз" }, error: null }));
+    const from = vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }));
+    const reply = vi.fn<BotDeps["reply"]>(async () => undefined);
+    const value: BotDeps = {
+      admin: { rpc, from } as unknown as BotDeps["admin"],
+      reply,
+      submit: vi.fn(),
+      chatKey: (id) => `chat-${id}`,
+    };
+    return { value, rpc, reply };
+  };
+
+  it("мобилограф — «уведомления об отчётах будут приходить сюда»", async () => {
+    const bot = staff("mobilographer");
+    await handleTelegramUpdate(message({ text: `/start ${TOKEN}` }), bot.value);
+    expect(bot.rpc).toHaveBeenCalledWith("complete_staff_telegram_link", expect.objectContaining({ p_chat: 7 }));
+    expect(bot.reply).toHaveBeenCalledTimes(1);
+    expect(String(bot.reply.mock.calls[0]![1])).toContain("уведомления об отчётах");
+  });
+
+  it("ссылка устарела — так и отвечает", async () => {
+    const bot = staff("mobilographer", null);
+    await handleTelegramUpdate(message({ text: `/start ${TOKEN}` }), bot.value);
+    expect(String(bot.reply.mock.calls[0]![1])).toContain("Ссылка устарела");
+  });
+});

@@ -52,7 +52,7 @@ export type ProgressReport = {
   isUnit: boolean;
   /** Первое число месяца отчёта, «2026-10-01». */
   month: string;
-  /** Когда снято (загружено) — «Снято 02.10.2026». */
+  /** Дата съёмки (фаза E, shot_on) — «Снято 02.10.2026». */
   shotAt: string;
   comment: LocalizedText;
   youtubeId: string | null;

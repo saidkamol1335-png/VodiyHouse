@@ -76,30 +76,67 @@
   border-color: var(--bad, #b42318);
 }
 
-.progress-form__shot--add {
-  border-style: dashed;
+/* «Снять» и «Из галереи» (фаза E, п. 37): поле выбора — под кнопкой, фокус виден на ней. */
+.progress-form__pick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.progress-form__add {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  color: var(--fg-2);
+.progress-form__pick-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px dashed var(--line-2);
+  border-radius: 12px;
+  color: var(--fg);
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* Поле выбора файлов — под плиткой «+», фокус виден на плитке. */
-.progress-form__add input {
+.progress-form__pick-button--camera {
+  border-style: solid;
+  border-color: var(--amber);
+}
+
+.progress-form__pick-button svg {
+  color: var(--amber-2);
+}
+
+.progress-form__pick-button input {
   position: absolute;
   width: 1px;
   height: 1px;
   opacity: 0;
 }
 
-.progress-form__add:has(input:focus-visible) {
+.progress-form__pick-button:has(input:focus-visible) {
   outline: 2px solid var(--amber);
-  outline-offset: -3px;
+  outline-offset: 2px;
+}
+
+/* «Ждёт сети» / «повтор через N с» — значок поверх плитки. */
+.progress-form__shot--waiting img {
+  opacity: 0.55;
+}
+
+.progress-form__shot-wait {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg, #fff);
+  color: var(--amber-2);
 }
 
 .progress-form__spinner {
@@ -150,8 +187,54 @@
   font-size: 13px;
 }
 
-.progress-form__submit {
+/* «На проверку», «Сохранить черновик» (фаза E): на телефоне — липкая полоса над нижней панелью. */
+.progress-form__actions {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-form__actions > :first-child {
   min-height: 52px;
+}
+
+.progress-form__date {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--bg, #fff);
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px;
+}
+
+.progress-form__date:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.progress-form__hint {
+  color: var(--fg-3);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .progress-form__actions {
+    position: sticky;
+    bottom: calc(var(--video-dock-h, 0px) + 8px);
+    z-index: 2;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--bg, #fff);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  }
+
+  .progress-form__actions > :first-child,
+  .progress-form__actions > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
 }
 
 [data-motion="full"] .progress-form__spinner,
