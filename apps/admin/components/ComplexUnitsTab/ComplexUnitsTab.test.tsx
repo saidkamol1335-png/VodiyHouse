@@ -55,42 +55,27 @@ const heading = (name: string) => screen.queryByRole("heading", { name });
 
 afterEach(cleanup);
 
-describe("«Квартиры» у блока без списка: руководитель и менеджер", () => {
-  it("блоков нет: руководителю — «Добавить блок →», менеджеру — без ссылки", () => {
-    renderTab("head", null);
+// PLAN §10, п. 6: менеджер ведёт квартиры наравне с руководителем — экран у обоих один.
+describe.each(["head", "manager"] as const)("«Квартиры» у блока без списка: %s", (role) => {
+  it("блоков нет — «Добавить блок →»", () => {
+    renderTab(role, null);
     expect(screen.getByRole("link", { name: "Добавить блок →" })).toBeTruthy();
-    cleanup();
-    renderTab("manager", null);
-    expect(screen.getByText("Блоков пока нет — их заводит руководитель.")).toBeTruthy();
-    expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("с планировками: оба видят «Наличие по планировкам», генератор — только руководитель", () => {
-    renderTab("head", block(), [LAYOUT]);
+  it("с планировками — «Наличие по планировкам» и генератор", () => {
+    renderTab(role, block(), [LAYOUT]);
     expect(heading("Наличие по планировкам")).toBeTruthy();
     expect(heading("Генератор списка")).toBeTruthy();
-    cleanup();
-    renderTab("manager", block(), [LAYOUT]);
-    expect(heading("Наличие по планировкам")).toBeTruthy();
-    expect(heading("Генератор списка")).toBeNull();
-    expect(screen.getByText(/^Статусы квартир блока/)).toBeTruthy();
   });
 
-  it("без планировок: руководителю о них скажет генератор, менеджеру — панель Н7", () => {
-    renderTab("head", block(), []);
+  it("без планировок — о них скажет генератор", () => {
+    renderTab(role, block(), []);
     expect(heading("Наличие по планировкам")).toBeNull();
     expect(screen.getByText(/У блока нет планировок — квартиры получатся без типа/)).toBeTruthy();
-    cleanup();
-    renderTab("manager", block(), []);
-    expect(screen.getByText("У блока нет планировок — их заводит руководитель.")).toBeTruthy();
   });
 
-  it("без этажности: руководителю — «Указать этажность →», менеджеру — только Н7", () => {
-    renderTab("head", block({ floorsTotal: null }), [LAYOUT]);
+  it("без этажности — «Указать этажность →»", () => {
+    renderTab(role, block({ floorsTotal: null }), [LAYOUT]);
     expect(screen.getByRole("link", { name: "Указать этажность →" })).toBeTruthy();
-    cleanup();
-    renderTab("manager", block({ floorsTotal: null }), [LAYOUT]);
-    expect(heading("Наличие по планировкам")).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Указать этажность →" })).toBeNull();
   });
 });

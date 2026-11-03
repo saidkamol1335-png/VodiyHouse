@@ -93,7 +93,7 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     ).toHaveCount(0);
     await page.getByRole("link", { name: "Квартиры", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${SHODLIK_ID}/kvartiry$`));
-    await expect(page.getByText(/из них сайт считает «осталось N»/)).toBeVisible();
+    await expect(page.getByText(/сайт считает «осталось N»/)).toBeVisible();
     // Архивного ЖК (его нет и в списке) менеджеру не открыть и по ссылке.
     // Запросом, а не в браузере: страница 404 в разработке пишет в консоль свои предупреждения.
     expect((await page.request.get(units(MANAGER, ARCHIVED_ID))).status()).toBe(404);
@@ -101,20 +101,20 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     expect((await page.request.get(units("/dev/zhk", ARCHIVED_ID))).status()).toBe(200);
   });
 
-  test("Shodlik: статус тапом с «Отменить»; ни стояков, ни «+ Квартира», ни правки, ни удаления", async ({
+  // PLAN §10, п. 6: менеджер ведёт квартиры наравне с руководителем — правка, «+ Квартира», удаление.
+  test("Shodlik: правка, «+ Квартира» и удаление списка — как у руководителя; статус тапом с «Отменить»", async ({
     page,
   }) => {
     await openList(page);
     await expect(rows(page)).toHaveCount(88);
-    await expect(page.getByRole("button", { name: /^Стояки/ })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "+ Квартира" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Удалить список блока" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /Статус и правка$/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "+ Квартира" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Удалить список блока" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Статус и правка$/ }).first()).toBeVisible();
     // Блок со списком: наличие — из квартир, переключателя планировок нет.
     await expect(page.getByRole("heading", { name: "Наличие по планировкам" })).toHaveCount(0);
 
-    await rowOf(page, "4").getByRole("button", { name: "Кв. 4, свободна. Сменить статус" }).click();
-    await expect(page.getByRole("button", { name: "Изменить квартиру" })).toHaveCount(0);
+    await rowOf(page, "4").getByRole("button", { name: "Кв. 4, свободна. Статус и правка" }).click();
+    await expect(page.getByRole("button", { name: "Изменить квартиру" })).toBeVisible();
     await page
       .getByRole("group", { name: /^Статус кв\. 4/ })
       .getByRole("button", { name: "бронь" })
@@ -129,8 +129,8 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     await page.getByRole("checkbox", { name: "Выбрать кв. 1", exact: true }).check();
     await expect(bulk(page)).toContainText("Выбрано: 1 квартира");
     await expect(bulk(page).getByRole("button", { name: "Статус", exact: true })).toBeVisible();
-    for (const hidden of ["Цена", "Отделка", "Удалить"])
-      await expect(bulk(page).getByRole("button", { name: hidden, exact: true })).toHaveCount(0);
+    for (const shown of ["Цена", "Отделка", "Удалить"])
+      await expect(bulk(page).getByRole("button", { name: shown, exact: true })).toBeVisible();
     expect(await noHorizontalScroll(page)).toBe(0);
 
     // Массовый «Статус» и «Отменить» после него — менеджеру тоже («Решаю сам» шага 12).
@@ -149,9 +149,9 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     await expect(rowOf(page, "4").getByRole("button", { name: /свободна/ })).toBeVisible();
   });
 
-  test("Namuna: «Наличие по планировкам» без генератора; тап сохраняет сразу", async ({ page }) => {
+  test("Namuna: «Наличие по планировкам» и генератор; тап сохраняет сразу", async ({ page }) => {
     await openAvailability(page);
-    await expect(page.getByRole("heading", { name: "Генератор списка" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Генератор списка" })).toBeVisible();
     await expect(page.getByText("цена по запросу").first()).toBeVisible();
     const studio = availability(page, "Студия · 34,2 м²");
     const second = availability(page, "1-комн. · 48,6 м²");
@@ -240,7 +240,7 @@ test.describe("кабинет · ЖК · квартиры: менеджер", ()
     await page.screenshot({ path: `${dir}/d2-manager-list.png`, caret: "initial" });
     await openList(page);
     await rowOf(page, "4")
-      .getByRole("button", { name: /Сменить статус/ })
+      .getByRole("button", { name: /Статус и правка/ })
       .click();
     await page.getByRole("checkbox", { name: "Выбрать кв. 1", exact: true }).check();
     await page.screenshot({ path: `${dir}/s12-manager-units.png`, caret: "initial" });

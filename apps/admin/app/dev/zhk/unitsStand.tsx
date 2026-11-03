@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ComplexUnitsTab } from "@/components/ComplexUnitsTab";
+import { UnitsScreenSwitch } from "@/components/UnitsScreenSwitch";
 import { demoComplex } from "@/lib/admin/complexes/demoPage";
 import { demoUnitsTab } from "@/lib/admin/complexes/demoUnits";
 import {
@@ -66,7 +67,9 @@ export async function UnitsStand({ stand, id, blok, demo }: UnitsStandProps) {
   const scenario = demoUnitsScenario(demo);
   const base = `${stand.base}/${complex.id}`;
   return (
-    <ComplexUnitsTab
+    <>
+      <UnitsScreenSwitch base={base} current="list" />
+      <ComplexUnitsTab
       view={unitsTabView(demoUnitsTab(complex.id, blok, scenario))}
       tabHref={complexTabHref(base, "units")}
       blocksHref={complexTabHref(base, "blocks")}
@@ -75,6 +78,7 @@ export async function UnitsStand({ stand, id, blok, demo }: UnitsStandProps) {
       actions={unitsActionsFor(stand.viewer.role, demoActions(scenario))}
       viewerName={(await cabinetPerson(stand.viewer)).name}
       switchQuery={scenario ? `demo=${scenario}` : null}
-    />
+      />
+    </>
   );
 }

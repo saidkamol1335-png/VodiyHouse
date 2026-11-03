@@ -22,18 +22,9 @@ const ALL: UnitsTabActions = {
 };
 
 describe("права на вкладке «Квартиры» — наличием действий", () => {
-  it("руководитель — всё", () => {
+  it("руководитель и менеджер — всё (PLAN §10, п. 6)", () => {
     expect(unitsActionsFor("head", ALL)).toBe(ALL);
-  });
-
-  it("менеджер — чтение, статус с «Отменить» и Н7; ни генератора, ни стояков, ни правок", () => {
-    const manager = unitsActionsFor("manager", ALL);
-    expect(manager.list.read).toBe(ALL.list.read);
-    expect(manager.list.status).toBe(ALL.list.status);
-    expect(manager.layoutAvailable).toBe(ALL.layoutAvailable);
-    expect(manager.list.edit).toBeNull();
-    expect(manager.create).toBeNull();
-    expect(manager.saveRisers).toBeNull();
+    expect(unitsActionsFor("manager", ALL)).toBe(ALL);
   });
 
   it("мобилограф — только чтение, как и действие чтения (PLAN §5; раздел ему пока закрыт)", () => {

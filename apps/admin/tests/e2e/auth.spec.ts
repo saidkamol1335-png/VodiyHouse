@@ -224,15 +224,12 @@ test.describe("менеджер и мобилограф", () => {
     await expect(page.getByRole("form", { name: "Статус на сайте" })).toHaveCount(0);
     const units = `${base}/kvartiry`;
     await page.goto(units);
-    await expect(page.getByRole("button", { name: /Сменить статус$/ }).first()).toBeVisible();
+    // PLAN §10, п. 6: менеджер правит квартиры, как руководитель.
+    await expect(page.getByRole("button", { name: /Статус и правка$/ }).first()).toBeVisible();
     await expect(page.locator(".admin-entity-head")).toHaveCount(1);
-    await expect(page.getByRole("button", { name: /Статус и правка$/ })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /^Стояки/ })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "+ Квартира" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Удалить список блока" })).toHaveCount(0);
     // Настоящая цепочка «действие → функция базы → тег ЖК» менеджером: тап и «Отменить» — DEMO
     // возвращается сам (приёмка 12.7: стенд ходит в demo-действия, а не в эти).
-    const free = page.getByRole("button", { name: /, свободна\. Сменить статус$/ }).first();
+    const free = page.getByRole("button", { name: /, свободна\. Статус и правка$/ }).first();
     const number = /^Кв\. (\S+),/.exec((await free.getAttribute("aria-label"))!)![1]!;
     await free.click();
     await page

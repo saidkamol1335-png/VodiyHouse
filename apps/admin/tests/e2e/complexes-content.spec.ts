@@ -111,7 +111,7 @@ test.describe("кабинет · ЖК · видео, детали, докуме�
     await expect(page).toHaveURL(/\/publikatsiya$/);
     // Последний шаг: «Далее» нет — подсказка про чек-лист; кнопка «Опубликовать» — здесь же.
     await expect(page.getByRole("link", { name: /^Далее/ })).toHaveCount(0);
-    await expect(page.getByText("Всё заполнено? Проверьте чек-лист")).toBeVisible();
+    await expect(page.getByText("Последний шаг: проверьте чек-лист выше")).toBeVisible();
     await expect(page.getByRole("button", { name: "Опубликовать" })).toBeVisible();
     await open(page, `${SHODLIK}/foto`);
     await expect(page.getByRole("link", { name: "Фото", exact: true })).toBeVisible();
