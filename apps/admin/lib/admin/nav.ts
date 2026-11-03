@@ -10,7 +10,8 @@ export type AdminNavKey =
   | "programs"
   | "video"
   | "stats"
-  | "settings";
+  | "settings"
+  | "guide";
 
 /** Адреса кабинета латиницей, как у публичных страниц (ТЗ 3). */
 export const ADMIN_ROUTES = {
@@ -40,6 +41,8 @@ export const ADMIN_ROUTES = {
   dictionaries: `${ADMIN_ROUTE}/nastroyki/spravochniki`,
   contacts: `${ADMIN_ROUTE}/nastroyki/kontakty`,
   journal: `${ADMIN_ROUTE}/nastroyki/zhurnal`,
+  /** Памятка своей роли (фаза F, п. 42). */
+  guide: `${ADMIN_ROUTE}/pamyatka`,
 } as const;
 
 export type AdminNavItem = {
@@ -86,6 +89,13 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     roles: ["head", "manager"],
     ready: true,
     hrefFor: { manager: ADMIN_ROUTES.dictionaries },
+  },
+  // «Памятка» (фаза F, п. 42): каждой роли своя; последним пунктом — вход по-прежнему ведёт в первый.
+  {
+    key: "guide",
+    href: ADMIN_ROUTES.guide,
+    roles: ["head", "manager", "mobilographer"],
+    ready: true,
   },
 ];
 

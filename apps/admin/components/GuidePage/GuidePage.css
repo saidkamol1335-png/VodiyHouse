@@ -1,0 +1,81 @@
+/* «Памятка» (фаза F, п. 42): текст на панели кабинета, строка — до 72 знаков; таблицы на телефоне
+   прокручиваются внутри себя, страница вбок не едет. */
+.guide-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 72ch;
+  padding: var(--admin-panel-pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--panel-bg);
+  color: var(--fg);
+  line-height: var(--lh-body, 1.55);
+}
+
+.guide-page__lead,
+.guide-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.guide-page__title {
+  margin: 8px 0 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  letter-spacing: var(--ls-panel-title);
+}
+
+.guide-page__subtitle {
+  margin: 0;
+  font-size: var(--fs-body, 1rem);
+  font-weight: 700;
+}
+
+.guide-page__text {
+  margin: 0;
+}
+
+.guide-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.guide-page__code {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  overflow-wrap: anywhere;
+}
+
+.guide-page__table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.guide-page__table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+}
+
+.guide-page__table th,
+.guide-page__table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.guide-page__table th {
+  color: var(--fg-3);
+  font-weight: 600;
+}
+
+.guide-page__tabs {
+  margin-bottom: 16px;
+}

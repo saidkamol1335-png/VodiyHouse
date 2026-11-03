@@ -151,6 +151,7 @@ test.describe("оболочка кабинета /admin", () => {
       "Видео и ход стройки",
       "Статистика сайта",
       "Настройки",
+      "Памятка",
       /сайт/i,
     ]);
     await expect(links.first()).toHaveAttribute("aria-current", "page");
@@ -162,6 +163,7 @@ test.describe("оболочка кабинета /admin", () => {
     await expect(links.nth(6)).toHaveAttribute("href", "/video");
     await expect(links.nth(7)).toHaveAttribute("href", "/statistika");
     await expect(links.nth(8)).toHaveAttribute("href", "/nastroyki");
+    await expect(links.nth(9)).toHaveAttribute("href", "/pamyatka");
     // Сайт — отдельное приложение (PLAN §10): «/» здесь — главная кабинета.
     await expect(links.last()).toHaveAttribute("href", site("/ru"));
     await expect(

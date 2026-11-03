@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BookOpen,
   BriefcaseBusiness,
   BuildingComplex,
   ChartColumn,
@@ -47,6 +48,7 @@ const ICONS: Record<AdminNavKey, LucideIcon> = {
   video: Video,
   stats: ChartColumn,
   settings: Settings,
+  guide: BookOpen,
 };
 
 export function AdminNav({ items, variant, siteHref }: AdminNavProps) {

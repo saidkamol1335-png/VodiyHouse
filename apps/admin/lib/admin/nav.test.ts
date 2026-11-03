@@ -28,6 +28,7 @@ describe("меню кабинета", () => {
       "video",
       "stats",
       "settings",
+      "guide",
     ]);
     expect(visibleNav("manager").map((item) => item.key)).toEqual([
       "home",
@@ -36,9 +37,10 @@ describe("меню кабинета", () => {
       "programs",
       "video",
       "settings",
+      "guide",
     ]);
     // Фаза 5 (5B): мобилограф — сразу в «Видео и ход стройки».
-    expect(visibleNav("mobilographer").map((item) => item.key)).toEqual(["video"]);
+    expect(visibleNav("mobilographer").map((item) => item.key)).toEqual(["video", "guide"]);
     expect(isSectionOpen("manager", "complexes")).toBe(true);
     expect(isSectionOpen("manager", "developers")).toBe(false);
   });
@@ -56,10 +58,11 @@ describe("меню кабинета", () => {
       "programs",
       "video",
       "settings",
+      "guide",
     ]);
   });
 
-  it("руководитель видит все 9 разделов в порядке PLAN §7 (с «Витриной» 3.16а)", () => {
+  it("руководитель видит все 10 разделов в порядке PLAN §7 (с «Витриной» 3.16а)", () => {
     expect(keysFor("head")).toEqual([
       "home",
       "leads",
@@ -70,16 +73,25 @@ describe("меню кабинета", () => {
       "video",
       "stats",
       "settings",
+      "guide",
     ]);
   });
 
   it("менеджер: заявки, ЖК, расчёт, видео и «Справочники» — без застройщиков и статистики", () => {
-    expect(keysFor("manager")).toEqual(["home", "leads", "complexes", "programs", "video", "settings"]);
+    expect(keysFor("manager")).toEqual([
+      "home",
+      "leads",
+      "complexes",
+      "programs",
+      "video",
+      "settings",
+      "guide",
+    ]);
     expect(visibleNav("manager").find((item) => item.key === "settings")!.href).toBe(ADMIN_ROUTES.dictionaries);
   });
 
-  it("мобилограф видит только видео", () => {
-    expect(keysFor("mobilographer")).toEqual(["video"]);
+  it("мобилограф видит только видео и «Памятку» (фаза F)", () => {
+    expect(keysFor("mobilographer")).toEqual(["video", "guide"]);
   });
 
   it("менеджеру «Программы оплаты» открываются «Расчётом для клиента», пункт активен во всём разделе", () => {
