@@ -50,7 +50,9 @@ function activeGroups(filter: Filter): number {
  * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
  * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon = false }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false }: CatalogResultsProps) {
+  // Все опубликованные — «Скоро» (первая публикация): на главной показываем их, а не «скоро появятся».
+  const hideSoon = hideSoonWanted && withoutSoon(catalog.complexes).length > 0;
   const [shown, setShown] = useState(pageSize);
   const [open, setOpen] = useState(false);
   const results = useRef<HTMLDivElement>(null);
@@ -67,6 +69,8 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
     return hideSoon && collection?.mode !== "manual" ? withoutSoon(complexes) : complexes;
   }, [catalog, collection, filter, hideSoon]);
   useSheetLock(open, closeSheet);
+  // Каталог ещё пуст (до первой публикации): без фильтра и «Найдено 0» — «скоро» и подбор вручную.
+  if (catalog.complexes.length === 0) return <CatalogComingSoon catalog={catalog} />;
   const showResults = () => {
     setOpen(false);
     results.current?.scrollIntoView({ behavior: getMotionTier() === "full" ? "smooth" : "auto", block: "start" });
@@ -82,6 +86,20 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
         {collection ? <AppliedCollection collection={collection} onReset={reset} /> : null}
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
         <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} badges={badges} onMore={() => setShown(shown + pageSize)} onReset={reset} />
+      </div>
+    </div>
+  );
+}
+
+/** Опубликованных ЖК нет (решение 02.11.2026): «Скоро здесь появятся новостройки» и заявка на подбор. */
+function CatalogComingSoon({ catalog }: { catalog: SiteCatalog }) {
+  const t = useTranslations("catalog.empty");
+  return (
+    <div className="catalog-results__empty">
+      <h2 className="catalog-results__empty-title">{t("title")}</h2>
+      <p className="catalog-results__empty-hint">{t("text")}</p>
+      <div className="catalog-results__empty-actions">
+        <PickButton catalog={catalog} filter={NO_FILTER} />
       </div>
     </div>
   );

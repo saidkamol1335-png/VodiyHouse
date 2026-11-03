@@ -11,6 +11,7 @@ import {
   projectRefFromUrl,
   type CheckLine,
 } from "./cloudCheck";
+import { checkProd } from "./prodCheck";
 
 const REF = "abcdefghijklmnopqrst";
 const GOOD_ENV = {
@@ -167,5 +168,73 @@ describe("база", () => {
       text: "миграции изменены после применения: 20261020120000",
       hint: expect.stringContaining("новым файлом миграции"),
     });
+  });
+
+  it("в облаке версии, которых нет в ветке, — ✗ (код и база разошлись)", () => {
+    const lines = checkDatabase({
+      ...pushed,
+      applied: [...local, "20261102190000"],
+      demoComplexes: 4,
+      activeHeads: 1,
+    });
+    expect(statuses(lines)).toEqual(["ok", "fail", "ok", "ok"]);
+    expect(lines[1]?.text).toContain("20261102190000");
+  });
+
+  it("прод: DEMO не нужен, руководитель — ? до встречи", () => {
+    expect(statuses(checkDatabase({ ...pushed, demoComplexes: 0, activeHeads: 0 }, true))).toEqual([
+      "ok",
+      "manual",
+    ]);
+  });
+});
+
+describe("прод (--prod)", () => {
+  const clean = {
+    demo: 0,
+    e2eUsers: 0,
+    leads: 0,
+    nextLeadNumber: 1001,
+    incompletePublished: [],
+    rate: true,
+  };
+
+  it("чистый прод — всё ✓", () => {
+    expect(statuses(checkProd(clean))).toEqual(["ok", "ok", "ok", "ok", "ok", "ok"]);
+  });
+
+  it("DEMO, сотрудники e2e и неполный опубликованный ЖК — ✗; заявки, счётчик и курс — ?", () => {
+    const lines = checkProd({
+      demo: 3,
+      e2eUsers: 2,
+      leads: 1,
+      nextLeadNumber: 1002,
+      incompletePublished: ["shodlik"],
+      rate: false,
+    });
+    expect(statuses(lines)).toEqual(["fail", "fail", "manual", "manual", "fail", "manual"]);
+    expect(lines[4]?.text).toContain("shodlik");
+  });
+
+  it("запрос не прошёл (до db:push, нет прав) — ✗, а не пропуск строки", () => {
+    const lines = checkProd({
+      demo: null,
+      e2eUsers: null,
+      leads: null,
+      nextLeadNumber: null,
+      incompletePublished: null,
+      rate: null,
+    });
+    expect(statuses(lines)).toEqual(["fail", "fail", "fail", "fail", "fail", "fail"]);
+  });
+
+  it("E2E_SUPABASE_PROJECT_REF прода — ✗, пусто — ✓", () => {
+    const url = "https://abcdefghijklmnopqrst.supabase.co";
+    const e2eLine = (value: string | undefined) =>
+      checkEnv({ NEXT_PUBLIC_SUPABASE_URL: url, E2E_SUPABASE_PROJECT_REF: value }, true).find(
+        (line) => line.text.startsWith("E2E_SUPABASE_PROJECT_REF"),
+      );
+    expect(e2eLine("abcdefghijklmnopqrst")?.status).toBe("fail");
+    expect(e2eLine(undefined)?.status).toBe("ok");
   });
 });

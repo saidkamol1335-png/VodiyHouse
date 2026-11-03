@@ -5,6 +5,8 @@
 // Management API: токен Account → Access Tokens — на один запуск, в .env.local не сохранять:
 //   PowerShell: $env:SUPABASE_ACCESS_TOKEN = "sbp_…"; npm run cloud:check
 // Код выхода 1 — есть ✗.
+// Прод: `node --env-file=.env.prod scripts/cloud-check.mjs --prod` — DEMO, сотрудники e2e и неполные
+// опубликованные ЖК — ✗, заявки и счётчик — ? (только чтение, решение 02.11).
 
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -19,6 +21,7 @@ import {
   manualAuthConfig,
   projectRefFromUrl,
 } from "../lib/supabase/cloudCheck.ts";
+import { checkProd } from "../lib/supabase/prodCheck.ts";
 import { dbClientConfig } from "../lib/supabase/dbClient.ts";
 import { editedMigrations } from "../lib/supabase/migrationDrift.ts";
 
@@ -26,6 +29,7 @@ const TIMEOUT_MS = 10_000;
 const MIGRATIONS_DIR = path.join(import.meta.dirname, "..", "..", "..", "supabase", "migrations");
 const MARK = { ok: "✓", fail: "✗", manual: "?" };
 const env = process.env;
+const PROD = process.argv.includes("--prod");
 let failed = false;
 
 function print(title, lines) {
@@ -132,20 +136,60 @@ async function databaseLines(connectionString) {
       client,
       "select count(*)::int as count from public.profiles where role = 'head' and is_active",
     );
-    return checkDatabase({
-      applied: migrations.map((row) => row.version),
-      local: [...files.keys()],
-      edited: editedMigrations(migrations, files),
-      demoComplexes,
-      activeHeads,
-    });
+    const lines = checkDatabase(
+      {
+        applied: migrations.map((row) => row.version),
+        local: [...files.keys()],
+        edited: editedMigrations(migrations, files),
+        demoComplexes,
+        activeHeads,
+      },
+      PROD,
+    );
+    if (!PROD) return lines;
+    const rows = async (sql) =>
+      client.query(sql).then(
+        ({ rows }) => rows,
+        () => null,
+      );
+    const incomplete = await rows(
+      "select slug from public.complexes where status = 'published' and site_state = 'draft' order by slug",
+    );
+    const rate = await rows("select private.exchange_rate() as rate");
+    // Счётчик identity не откатывается удалением заявок — читаем саму последовательность.
+    const seq = await rows("select pg_get_serial_sequence('public.leads', 'number') as name");
+    const next = seq?.[0]?.name
+      ? await rows(
+          `select (case when is_called then last_value + 1 else last_value end)::int as count from ${seq[0].name}`,
+        )
+      : null;
+    return [
+      ...lines,
+      ...checkProd({
+        // Как demo:remove: застройщики и ЖК demo-…, заявки «DEMO · …».
+        demo: await countOrNull(
+          client,
+          `select ((select count(*) from public.complexes where slug like 'demo-%')
+                 + (select count(*) from public.developers where slug like 'demo-%')
+                 + (select count(*) from public.leads where name like 'DEMO · %'))::int as count`,
+        ),
+        e2eUsers: await countOrNull(
+          client,
+          "select count(*)::int as count from auth.users where email like '%@example.com'",
+        ),
+        leads: await countOrNull(client, "select count(*)::int as count from public.leads"),
+        nextLeadNumber: next?.[0]?.count ?? null,
+        incompletePublished: incomplete?.map((row) => row.slug) ?? null,
+        rate: rate ? rate[0].rate !== null : null,
+      }),
+    ];
   } finally {
     await client.end();
   }
 }
 
-const envLines = checkEnv(env);
-print("Ключи (.env.local):", envLines);
+const envLines = checkEnv(env, PROD);
+print(PROD ? "Ключи (прод):" : "Ключи (.env.local):", envLines);
 
 const url = env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "");
 const ref = projectRefFromUrl(url);

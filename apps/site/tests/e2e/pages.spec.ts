@@ -30,7 +30,7 @@ test.describe("страницы 3.11", () => {
     await page.getByLabel("Телефон").fill(`90${String(Date.now() % 10_000_000).padStart(7, "0")}`);
     await page.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(page.getByText(/Номер заявки #\d+/)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Ответим в течение рабочего дня.", { exact: true })).toBeVisible();
+    await expect(page.getByText("Менеджер Vodiy House свяжется с вами.", { exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });
 

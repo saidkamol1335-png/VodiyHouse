@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/novostro
   const [{ slug }, localeRaw, t] = await Promise.all([params, getLocale(), getTranslations("complex")]);
   const locale = isLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE;
   const result = await readComplexPage(slug);
-  if (result.kind !== "page") return { title: t("name", { name: slug }) };
+  // Нет ЖК или черновик — без адреса из URL в заголовке вкладки (аудит прода 03.11).
+  if (result.kind !== "page") return {};
   const { page } = result;
   const name = page.name[locale];
   const cover = page.photos[0];

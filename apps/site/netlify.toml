@@ -4,9 +4,14 @@
 # Netlify (тестовый деплой — решение фазы 3, Ф2; переезд к заказчику — шаг «Запуск»).
 # Адаптер Next.js (OpenNext) Netlify подключает сам; переменные окружения — в настройках сайта
 # Netlify, не здесь (.env.example: что нужно и откуда).
+# Стенды /dev (DEMO мокапа зашито в код) из сборки убираем: иначе их пререндер с DEMO лежит в HTML,
+# хотя страница отвечает 404 (аудит прода 03.11, release/project-1 958414c).
 [build]
-  command = "npm run build -w @vh/site"
+  command = "rm -rf apps/site/app/dev && npm run build -w @vh/site"
   publish = "apps/site/.next"
+  # Сборка — только если менялся код сайта (кредиты Netlify, 03.11.2026): правка кабинета или
+  # документов не пересобирает сайт. Ручной деплой и первая сборка (кэша нет) идут всегда.
+  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- apps/site packages/shared package.json package-lock.json'
 
 [build.environment]
   NODE_VERSION = "24"

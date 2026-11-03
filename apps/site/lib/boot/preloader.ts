@@ -7,7 +7,10 @@
  */
 export const PRELOADER_ATTRIBUTE = "data-preloader";
 export const PRELOADER_SEEN_KEY = "vh-entered";
-/** Дольше не держим: страница открывается, ролик или кадры докачиваются уже при открытой странице. */
-export const PRELOADER_MAX_WAIT_MS = 10_000;
+/**
+ * Дольше не держим (решение 02.11.2026: ~3 с при любой сети, было 10 с): страница открывается с
+ * постером, ролик или кадры докачиваются уже при открытой странице.
+ */
+export const PRELOADER_MAX_WAIT_MS = 3_000;
 /** Страховка в <head>: скрипты не загрузились — метка снимается сама, страница не остаётся закрытой. */
-export const PRELOADER_FAILSAFE_MS = 15_000;
+export const PRELOADER_FAILSAFE_MS = 6_000;

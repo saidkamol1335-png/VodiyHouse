@@ -2,10 +2,16 @@
 # Package directory — apps/admin (монорепо npm workspaces). Документация Netlify «Monorepos»:
 # установка и команда сборки — из корня, пути здесь — от корня.
 # Переменные окружения — в настройках этого сайта Netlify (apps/admin/.env.example).
+# Стенды /dev (DEMO зашито в код) из сборки убираем: иначе их пререндер с DEMO лежит в HTML, хотя
+# страница отвечает 404 (аудит прода 03.11). password-kit.spec.ts импортирует стенд, а next build
+# проверяет типы и в тестах — уходит вместе с ним.
 [build]
-  command = "npm run build -w @vh/admin"
+  command = "rm -rf apps/admin/app/dev apps/admin/tests/e2e/password-kit.spec.ts && npm run build -w @vh/admin"
   publish = "apps/admin/.next"
   functions = "apps/admin/netlify/functions"
+  # Сборка — только если менялся код кабинета (кредиты Netlify, 03.11.2026): правка сайта или
+  # документов не пересобирает кабинет. Ручной деплой и первая сборка (кэша нет) идут всегда.
+  ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- apps/admin packages/shared package.json package-lock.json'
 
 [build.environment]
   NODE_VERSION = "24"

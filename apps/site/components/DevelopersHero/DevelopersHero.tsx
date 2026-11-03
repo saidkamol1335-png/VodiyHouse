@@ -3,7 +3,7 @@ import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 
 type DevelopersHeroProps = {
-  /** Застройщиков на сайте; null — база не ответила, счётчика нет. */
+  /** Застройщиков на сайте; null — база не ответила, 0 — ещё нет: счётчика нет. */
   count: number | null;
 };
 
@@ -15,10 +15,12 @@ export async function DevelopersHero({ count }: DevelopersHeroProps) {
       <Container>
         <Eyebrow>{t("eyebrow")}</Eyebrow>
         <h1 className="heading heading--h1 developers-hero__title">
-          {t.rich("title", { accent: (chunks) => <span className="heading__accent">{chunks}</span> })}
+          {t.rich("title", {
+            accent: (chunks) => <span className="heading__accent">{chunks}</span>,
+          })}
         </h1>
         <p className="developers-hero__lead">{t("lead")}</p>
-        {count !== null ? <p className="developers-hero__count">{t("count", { n: count })}</p> : null}
+        {count ? <p className="developers-hero__count">{t("count", { n: count })}</p> : null}
       </Container>
     </section>
   );
