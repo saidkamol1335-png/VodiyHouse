@@ -46,7 +46,13 @@ const applied = (await prod.query("select version from supabase_migrations.schem
 const files = (await readdir(MIGRATIONS)).filter((file) => file.endsWith(".sql")).sort();
 const byVersion = new Map(files.map((file) => [file.split("_")[0], file]));
 const missingFiles = applied.filter((version) => !byVersion.has(version));
-if (missingFiles.length) fail(`в проде есть миграции, которых нет в репозитории: ${missingFiles.join(", ")}`);
+if (missingFiles.length) {
+  // Схему прода по репозиторию не собрать — дальше сверять нечего.
+  fail(`в проде есть миграции, которых нет в репозитории: ${missingFiles.join(", ")}`);
+  await prod.query("rollback");
+  await prod.end();
+  process.exit(1);
+}
 const pending = files.filter((file) => !applied.includes(file.split("_")[0]));
 const copy = await PGlite.create({ extensions: { pgcrypto } });
 await copy.exec(await readFile(SHIM, "utf8"));
@@ -186,11 +192,14 @@ for (const file of pending) {
 }
 
 console.log("\n5. Сверка «до» и «после»");
+let rowsChanged = false;
 for (const table of tables) {
   const now = (await copy.query(`select count(*)::int as n from ${table}`)).rows[0].n;
-  if (now !== beforeCounts[table]) fail(`${table}: строк было ${beforeCounts[table]}, стало ${now}`);
+  if (now === beforeCounts[table]) continue;
+  rowsChanged = true;
+  fail(`${table}: строк было ${beforeCounts[table]}, стало ${now}`);
 }
-ok("число строк во всех таблицах прода не изменилось");
+if (!rowsChanged) ok("число строк во всех таблицах прода не изменилось");
 const after = await snapshot();
 let same = 0;
 for (const [key, value] of Object.entries(before)) {
@@ -215,15 +224,23 @@ else ok("хранимое состояние ЖК и планировок сов
 
 
 console.log(`\n6. Вызовы rpc кода ${RELEASE} после миграций`);
-const releaseCode = execFileSync("git", ["grep", "-hoE", 'rpc[(]"[a-z_]+"(, *[{][^}]*[}])?', RELEASE, "--", "apps/site"], {
-  cwd: ROOT,
-  encoding: "utf8",
-});
+// Вызов rpc целиком, и в несколько строк: .rpc("имя", { p_…: … }).
+const RPC_CALL = /\.rpc\(\s*"([a-z_]+)"\s*(?:,\s*\{([^}]*)\})?/g;
+const git = (...args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 const calls = new Map();
-for (const line of releaseCode.split("\n").filter(Boolean)) {
-  const name = /rpc\("([a-z_]+)"/.exec(line)[1];
-  const keys = [...(line.match(/\{([^}]*)\}/)?.[1] ?? "").matchAll(/(p_[a-z_]+)/g)].map((match) => match[1]);
-  calls.set(name, [...new Set([...(calls.get(name) ?? []), ...keys])]);
+// Тесты не в счёт: в них вызовы-образцы (rpc-contract.test.ts).
+const sources = git("grep", "-l", "-F", ".rpc(", RELEASE, "--", "apps/site", ":!apps/site/tests", ":!*.test.ts");
+for (const file of sources.split("\n").filter(Boolean)) {
+  const filePath = file.slice(RELEASE.length + 1);
+  // Кабинет release (apps/site/lib/admin, …/admin, компоненты Admin*) заменит кабинет main; всё
+  // остальное — сайт, он должен пережить окно между миграциями и переключением.
+  const cabinet = /\/admin/i.test(filePath);
+  for (const match of git("show", `${RELEASE}:${filePath}`).matchAll(RPC_CALL)) {
+    const [, name, args = ""] = match;
+    const keys = [...args.matchAll(/(p_[a-z_]+)/g)].map((key) => key[1]);
+    const known = calls.get(name) ?? { keys: [], isPublic: false };
+    calls.set(name, { keys: [...new Set([...known.keys, ...keys])], isPublic: known.isPublic || !cabinet });
+  }
 }
 const procs = (
   await copy.query(
@@ -232,17 +249,22 @@ const procs = (
   )
 ).rows;
 const changed = [];
-for (const [name, keys] of calls) {
+for (const [name, { keys, isPublic }] of calls) {
   const candidates = procs.filter((proc) => proc.name === name);
-  if (candidates.length === 0) changed.push(`${name} — функции нет`);
-  else if (!candidates.some((proc) => keys.every((key) => proc.names.includes(key))))
-    changed.push(`${name}(${keys.join(", ")}) — другие аргументы`);
+  const problem =
+    candidates.length === 0
+      ? "функции нет"
+      : candidates.some((proc) => keys.every((key) => proc.names.includes(key)))
+        ? null
+        : `другие аргументы (${keys.join(", ")})`;
+  if (problem) changed.push({ name, problem, isPublic });
 }
-// Публичные страницы release (site_*) должны пережить окно между миграциями и переключением сайта.
-const sitePages = changed.filter((line) => line.startsWith("site_"));
-for (const line of changed) console.log(`  · ${line}`);
-if (sitePages.length) fail(`функции сайта release после миграций: ${sitePages.join("; ")}`);
-ok(`rpc release: ${calls.size}, без изменений ${calls.size - changed.length}; изменённые не site_* — кабинет release, его заменит кабинет main`);
+for (const { name, problem, isPublic } of changed)
+  console.log(`  · ${name} — ${problem}${isPublic ? "" : " (кабинет release)"}`);
+const publicChanged = changed.filter((call) => call.isPublic);
+if (publicChanged.length) fail(`вызовы сайта release после миграций: ${publicChanged.map((call) => call.name).join(", ")}`);
+const publicCount = [...calls.values()].filter((call) => call.isPublic).length;
+ok(`rpc release: ${calls.size}, без изменений ${calls.size - changed.length}; вызовов сайта ${publicCount}`);
 
 await copy.close();
 console.log(failed ? "\nЕсть ✗ — запуск по сценарию не начинать." : "\nРепетиция пройдена.");

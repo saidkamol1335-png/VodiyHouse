@@ -109,7 +109,7 @@ async function alertStaffLinked(client: SupabaseClient, userId: string) {
   const sent = await sendTelegram(
     config,
     config.alertChatId,
-    `🔐 К кабинету привязан Telegram для кодов входа: ${data?.full_name ?? "сотрудник"}. Если это сделал не он — срочно сбросьте второй фактор (npm run staff:reset-2fa) и смените пароль.`,
+    `🔐 К кабинету привязан Telegram для кодов входа: ${data?.full_name ?? "сотрудник"}. Если это сделал не он — срочно попросите исполнителя сбросить второй фактор и смените пароль.`,
   );
   if (!sent.ok) console.error("[bot] тревога о привязке не ушла", sent.error);
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { fontVariables } from "@/lib/fonts";
 import "./globals.css";
 import "./admin.css";
@@ -9,8 +10,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Адрес не совпал ни с одним маршрутом кабинета. Обходит все layout.
-export default function GlobalNotFound() {
+// Адрес не совпал ни с одним маршрутом кабинета. Обходит все layout. На запрос (фаза F): статичная
+// страница без nonce — её скрипты CSP кабинета не пустила бы.
+export default async function GlobalNotFound() {
+  await connection();
   return (
     <html lang="ru" data-motion="lite" className={fontVariables}>
       <body>

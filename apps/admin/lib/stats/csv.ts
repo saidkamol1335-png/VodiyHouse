@@ -65,11 +65,17 @@ function progressRows(stats: SiteStats, progress: ProgressStats | null): (string
     [p("csv.unitPublished"), progress.unit_published],
     [p("csv.returned"), progress.returned],
     [p("csv.returnedReports"), progress.returned_reports],
+    [p("csv.unitReturned"), progress.unit_returned],
     [p("csv.waitAvg"), hours(progress.wait_avg_hours)],
     [p("csv.waitMax"), hours(progress.wait_max_hours)],
     [p("csv.waitingNow"), progress.waiting_now],
     [],
-    [p("csv.without", { month: formatMonthYear(progress.month).toLowerCase() })],
+    [
+      p("csv.without", {
+        month: formatMonthYear(progress.month).toLowerCase(),
+        closed: String(!progress.month_open),
+      }),
+    ],
     [p("csv.complex"), p("csv.blocks"), p("csv.last")],
   ];
   for (const complex of progress.complexes_without)

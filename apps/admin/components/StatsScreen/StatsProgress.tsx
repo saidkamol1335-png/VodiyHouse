@@ -68,7 +68,9 @@ function progressTiles(progress: ProgressStats, t: ProgressT) {
       "returned",
       Undo2,
       formatStatsCount(returned),
-      returned > 0 ? t("returnedReports", { count: progress.returned_reports }) : null,
+      returned + progress.unit_returned > 0
+        ? t("returnedSub", { reports: progress.returned_reports, units: progress.unit_returned })
+        : null,
     ],
     [
       "wait",
@@ -96,9 +98,8 @@ async function WithoutReport({ progress }: { progress: ProgressStats }) {
     <div className="stats-progress__without">
       <h3 className="stats-progress__title">
         {t("withoutTitle", { month })}
-        {progress.month_open ? (
-          <span className="stats-progress__open"> · {t("monthOpen")}</span>
-        ) : null}
+        {/* Прошлый месяц — по нынешнему списку строящихся блоков, «45+ дн.» — на сегодня. */}
+        <span className="stats-progress__open"> · {t(progress.month_open ? "monthOpen" : "monthClosed")}</span>
       </h3>
       {rows.length === 0 ? (
         <p className="stats-screen__empty">

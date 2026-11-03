@@ -45,6 +45,7 @@ describe.skipIf(process.env.DB_TEST_TARGET === "remote")(
     let video: string;
     let day10: string;
     let day20: string;
+  let day30: string;
 
     beforeAll(async () => {
       db = await createTestDb();
@@ -54,11 +55,13 @@ describe.skipIf(process.env.DB_TEST_TARGET === "remote")(
       video = await createStaff(db.admin, "mobilographer");
       dates = await tashkentDates(db);
       kit = progressKit(db, ids, dates);
-      const { rows } = await db.admin.query<{ d10: string; d20: string }>(
-        `select (private.tashkent_today() - 10)::text as d10, (private.tashkent_today() - 20)::text as d20`,
+      const { rows } = await db.admin.query<{ d10: string; d20: string; d30: string }>(
+        `select (private.tashkent_today() - 10)::text as d10, (private.tashkent_today() - 20)::text as d20,
+                (private.tashkent_today() - 30)::text as d30`,
       );
       day10 = rows[0]!.d10;
       day20 = rows[0]!.d20;
+      day30 = rows[0]!.d30;
     });
     afterAll(() => db.close());
 
@@ -207,6 +210,28 @@ describe.skipIf(process.env.DB_TEST_TARGET === "remote")(
       expect(now.waiting_now).toBe(1);
       expect(now.oldest_wait_hours).toBeGreaterThanOrEqual(30);
       expect(now.oldest_wait_hours).toBeLessThan(31);
+    });
+
+    // Ревью фазы F: отчёт блока стал видео квартиры (update с is_unit [false, true]) и пропал без
+    // строки delete (как при удалении блока каскадом) — статистика не падает и видит видео квартиры.
+    it("удалённый без записи отчёт со сменой «блок → квартира» в журнале — видео квартиры, без ошибки", async () => {
+      const own = await block("E");
+      const { id } = await kit.submit(video, await kit.report(video, { block_id: own }));
+      await returnReport(id, "Это видео квартиры");
+      await kit.submit(video, await kit.report(video, { id, block_id: ids.publicBlock, unit_id: ids.units[2] }));
+      await kit.publish(head, id);
+      await retime(id, day30, [8, 9, 10, 11]);
+      await db.admin.exec("set session_replication_role = replica");
+      await db.admin.query("delete from public.progress_reports where id = $1", [id]);
+      await db.admin.exec("set session_replication_role = origin");
+      expect(await stats(day30, day30)).toMatchObject({
+        published: 0,
+        returned: 0,
+        unit_published: 1,
+        unit_returned: 1,
+        wait_count: 2,
+        wait_avg_hours: 1,
+      });
     });
   },
 );

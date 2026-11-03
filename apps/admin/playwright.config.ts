@@ -21,6 +21,11 @@ if (process.argv.some((arg) => arg.includes("picker.spec")) && !process.argv.som
 }
 
 // Размеры приёмки — CLAUDE.md: 390×844 (телефон) и 1440×900 (десктоп).
+// Уже запущенный dev-сервер (reuseExistingServer) не получит TELEGRAM_DRY_RUN из webServer: с
+// TELEGRAM_LIVE=1 в .env.local он писал бы в настоящие чаты — не запускаем (фаза F).
+if (process.env.TELEGRAM_LIVE === "1" && process.env.TELEGRAM_DRY_RUN !== "1")
+  throw new Error("TELEGRAM_LIVE=1 в окружении: e2e на таком сервере писали бы в настоящие чаты Telegram — уберите его");
+
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,

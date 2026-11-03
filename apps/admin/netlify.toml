@@ -10,7 +10,8 @@
   publish = "apps/admin/.next"
   functions = "apps/admin/netlify/functions"
   # Сборка — только если менялся код кабинета (кредиты Netlify, 03.11.2026): правка сайта или
-  # документов не пересобирает кабинет. Ручной деплой и первая сборка (кэша нет) идут всегда.
+  # документов не пересобирает кабинет. Первая сборка (кэша нет) идёт всегда; после смены
+  # переменных — «Clear cache and deploy site»: простой «Trigger deploy» без правок кода отменится.
   ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- apps/admin packages/shared package.json package-lock.json'
 
 [build.environment]

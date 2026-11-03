@@ -102,6 +102,14 @@ describe("proxy: кабинет", () => {
     expect(transient.headers.get("set-cookie") ?? "").not.toContain("vh-staff");
   });
 
+  it("на общем домене метка ставится каждый раз — метка только хоста становится общей", async () => {
+    vi.stubEnv("STAFF_COOKIE_DOMAIN", ".vodiyhouse.uz");
+    const proxy = await loadProxy({ nodeEnv: "production", keys: true });
+    const headers = new Headers({ cookie: `${COOKIE}=x; vh-staff=1` });
+    const response = await proxy(new NextRequest("https://admin.vodiyhouse.uz/", { headers }));
+    expect(response.headers.get("set-cookie") ?? "").toMatch(/vh-staff=1;.*Domain=\.vodiyhouse\.uz/i);
+  });
+
   it("CSP с nonce (фаза F): на каждом ответе — и вход, и кабинет, и редирект, и /dev, /api; nonce каждый раз новый", async () => {
     const proxy = await loadProxy({ nodeEnv: "production", keys: true });
     const responses = [

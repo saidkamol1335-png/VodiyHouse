@@ -3,7 +3,7 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { adminGate, hasAuthCookie, isAdminPath, type GateDecision } from "@/lib/admin/gate";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
 import { RETURN_COOKIE, RETURN_MAX_AGE_SECONDS, safeReturnPath } from "@/lib/admin/returnPath";
-import { staffCookie } from "@/lib/admin/staffCookie";
+import { staffCookie, staffCookieDomain } from "@/lib/admin/staffCookie";
 import { contentSecurityPolicy, createNonce, NONCE_HEADER } from "@/lib/securityHeaders";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { STAFF_COOKIE } from "@vh/shared/staffCookie";
@@ -51,8 +51,10 @@ async function cabinetProxy(request: NextRequest) {
   }
 
   const session = await refreshAdminSession(request);
-  // Вошёл до фазы F или метку стёрли — помечаем браузер сотрудника для сайта (п. 40); вход ставит её сам.
-  if (session.hasSession && !request.cookies.has(STAFF_COOKIE))
+  // Метка сотрудника для сайта (п. 40): нет её — ставим (вошёл до фазы F, стёрли); на общем домене —
+  // ставим каждый раз: по запросу не видно, общая у браузера метка или только этого хоста (вошёл до
+  // того, как задали STAFF_COOKIE_DOMAIN), а сайт видит только общую.
+  if (session.hasSession && (!request.cookies.has(STAFF_COOKIE) || staffCookieDomain(request.nextUrl.hostname)))
     session.response.cookies.set(staffCookie(request.nextUrl.hostname, request.nextUrl.protocol === "https:"));
   // Сбой сети Auth — не повод выкидывать на вход: кабинет сам покажет «временно недоступен».
   const hasSession = session.hasSession || session.transient;

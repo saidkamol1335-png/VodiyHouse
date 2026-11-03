@@ -10,7 +10,8 @@
   command = "rm -rf apps/site/app/dev && npm run build -w @vh/site"
   publish = "apps/site/.next"
   # Сборка — только если менялся код сайта (кредиты Netlify, 03.11.2026): правка кабинета или
-  # документов не пересобирает сайт. Ручной деплой и первая сборка (кэша нет) идут всегда.
+  # документов не пересобирает сайт. Первая сборка (кэша нет) идёт всегда; после смены
+  # переменных — «Clear cache and deploy site»: простой «Trigger deploy» без правок кода отменится.
   ignore = 'test "$CACHED_COMMIT_REF" != "$COMMIT_REF" && git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- apps/site packages/shared package.json package-lock.json'
 
 [build.environment]

@@ -4,8 +4,8 @@
 
 ## 1. Аккаунты и доступы
 
-- [ ] **Supabase** — боевой проект `ksfeguedeveenblyetgk` (Франкфурт) уже есть; переезд на аккаунт заказчика — «Transfer project» (`docs/prod-setup.md` §6). Тариф: Free — видео с телефона до 50 МБ, без ежедневных бэкапов; Pro — бэкапы, Leaked password protection, лимит видео поднимается без правки кода (лимит бакета `incoming` и `progress-video`).
-- [ ] **Netlify — два сайта**: `vodiyhouse-prod` (сайт, `apps/site`) и новый сайт кабинета (`apps/admin`), оба из `main`, у каждого свои переменные (`apps/site/.env.example`, `apps/admin/.env.example`). Переезд на команду заказчика — «Transfer site». `ignore` в `netlify.toml`: правка только документов не пересобирает ни один сайт; ручной деплой и первая сборка — всегда.
+- [ ] **Supabase** — боевой проект `ksfeguedeveenblyetgk` (Франкфурт) уже есть; переезд на аккаунт заказчика — «Transfer project» (`docs/prod-setup.md` §6). Тариф: Free — видео с телефона до 50 МБ, без ежедневных бэкапов; Pro — бэкапы, Leaked password protection; лимит видео поднимается без правки кода: лимит бакетов `incoming` и `progress-video` в Supabase и `NEXT_PUBLIC_VIDEO_MAX_MB` кабинета в Netlify (вшивается при сборке — «Clear cache and deploy»), плюс «до 50 МБ» в памятке мобилографа и «Как снимать».
+- [ ] **Netlify — два сайта**: `vodiyhouse-prod` (сайт, `apps/site`) и новый сайт кабинета (`apps/admin`), оба из `main`, у каждого свои переменные (`apps/site/.env.example`, `apps/admin/.env.example`). Переезд на команду заказчика — «Transfer site». `ignore` в `netlify.toml`: правка только документов не пересобирает ни один сайт; после смены переменных — «Clear cache and deploy site» (простой «Trigger deploy» без правок кода отменится).
 - [ ] Токены Netlify CLI и Supabase исполнителя — отозвать после переезда.
 - [ ] **Домены**: `vodiyhouse.uz` → сайт, `admin.vodiyhouse.uz` → кабинет, https (сценарий, шаг 10).
 - [ ] **Google Таблица «Заявки»** — у заказчика, приёмник из `docs/leads-sheet.md` с его аккаунта.
