@@ -6,8 +6,9 @@
 # Netlify, не здесь (.env.example: что нужно и откуда).
 # Ветка release/project-1 собирает только прод: стенды /dev (DEMO мокапа зашито в код) из сборки
 # убираем — иначе их пререндер с DEMO лежит в HTML, хотя страница отвечает 404 (аудит прода 03.11).
+# password-kit.spec.ts импортирует стенд, а next build проверяет типы и в тестах — уходит вместе с ним.
 [build]
-  command = "rm -rf apps/site/app/dev && npm run build -w @vh/site"
+  command = "rm -rf apps/site/app/dev apps/site/tests/e2e/password-kit.spec.ts && npm run build -w @vh/site"
   publish = "apps/site/.next"
   functions = "apps/site/netlify/functions"
 
