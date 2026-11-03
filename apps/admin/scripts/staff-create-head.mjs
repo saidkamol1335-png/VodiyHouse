@@ -46,8 +46,10 @@ function adminClient() {
 }
 
 function printPassword(email, password) {
-  console.log(`\nEmail: ${email}\nВременный пароль: ${password}\nВход: <адрес сайта>/admin/vhod`);
-  console.log("Пароль показан один раз. При первом входе руководитель задаст свой (/admin/parol).");
+  // Кабинет — свой адрес (Проект-2): ADMIN_URL из env, иначе подсказка.
+  const login = `${process.env.ADMIN_URL || "<адрес кабинета>"}/vhod`;
+  console.log(`\nEmail: ${email}\nВременный пароль: ${password}\nВход: ${login}`);
+  console.log("Пароль показан один раз. При первом входе руководитель задаст свой (/parol), затем привяжет Telegram (/kod).");
 }
 
 async function createHead(admin, { email, name, allowSecond }) {
