@@ -2,10 +2,12 @@
 
 import { parseDetails } from "@/lib/admin/complexes/details";
 import { parseDocuments } from "@/lib/admin/complexes/documents";
+import { parseFaq } from "@/lib/admin/complexes/faq";
 import type {
   CatalogOrderResult,
   DetailsResult,
   DocumentsResult,
+  FaqResult,
   RemoveDeadlineChangeResult,
   SaveContentResult,
   VideosResult,
@@ -91,4 +93,19 @@ export async function saveComplexDetailsAction(formData: FormData): Promise<Deta
   const { error } = await guard.supabase.rpc("save_complex_details", { p_complex: id, p_details: parsed.payload });
   if (!error) expireComplex(id);
   return answer(error);
+}
+
+/** «Частые вопросы» на «О ЖК» (п. 21): до 8 пар целиком одним сохранением. */
+export async function saveComplexFaqAction(formData: FormData): Promise<FaqResult> {
+  const guard = await editGuard();
+  if (!guard.ok) return failed(guard.code, {});
+  const parsed = parseFaq(formData);
+  if (!parsed.ok) return parsed.error ? failed(parsed.error, {}) : failed(null, parsed.errors);
+  const id = readUuid(formData);
+  if (!id) return failed("notFound", {});
+  const { data, error } = await guard.supabase.from("complexes").update({ faq: parsed.payload }).eq("id", id).select("id");
+  if (error) return answer(error);
+  if (!data?.length) return failed("notFound", {});
+  expireComplex(id);
+  return { status: "saved", at: Date.now() };
 }

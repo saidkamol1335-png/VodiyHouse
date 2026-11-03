@@ -1,0 +1,1 @@
+export { ComplexFaqForm } from "./ComplexFaqForm";

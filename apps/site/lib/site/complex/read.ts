@@ -10,7 +10,7 @@ import { pickerFrom, type PickerRecord } from "@/lib/site/picker/records";
 import { progressReportsFrom, type ProgressReportRecord } from "@/lib/site/progress/records";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ComplexPage } from "./model";
-import { complexPageFrom, type ComplexPageRecord } from "./records";
+import { complexPageFrom, faqFrom, type ComplexPageRecord } from "./records";
 
 // Страница ЖК (шаг 3.5): site_complex(slug) ролью посетителя, в кэше страницы (PLAN 3а: страницы
 // ЖК статичные, обновляются по тегу). Теги — по договору lib/cache: ЖК и его застройщик; «не найден»
@@ -22,16 +22,19 @@ import { complexPageFrom, type ComplexPageRecord } from "./records";
  * Разделы необязательные: сбой одного не снимает страницу — она выходит без него.
  */
 async function withPicker(client: SupabaseClient, page: ComplexPage): Promise<ComplexPage> {
-  const [picker, progress] = await Promise.all([
+  const [picker, progress, faq] = await Promise.all([
     client.rpc("site_complex_picker", { p_complex: page.id }),
     client.rpc("site_complex_progress", { p_complex: page.id }),
+    client.rpc("site_complex_faq", { p_complex: page.id }),
   ]);
   if (picker.error) console.error("[novostroyki/zhk] «Выбрать квартиру» недоступен", picker.error);
   if (progress.error) console.error("[novostroyki/zhk] «Ход строительства» недоступен", progress.error);
+  if (faq.error) console.error("[novostroyki/zhk] «Частые вопросы» недоступны", faq.error);
   return {
     ...page,
     picker: picker.error ? null : pickerFrom(picker.data as PickerRecord | null),
     progress: progress.error ? [] : progressReportsFrom(progress.data as ProgressReportRecord[] | null),
+    faq: faq.error ? [] : faqFrom(faq.data),
   };
 }
 

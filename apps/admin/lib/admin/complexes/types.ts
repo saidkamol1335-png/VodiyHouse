@@ -1,4 +1,5 @@
 import type { ContentErrorCode } from "../developers/errors";
+import type { FaqErrors } from "./faq";
 import type { StatusResult } from "../developers/types";
 import type { ComplexCreateErrors, ComplexCreateFields } from "./create";
 import type { DetailsErrors } from "./details";
@@ -77,6 +78,7 @@ export type RemoveDeadlineChangeResult = { status: "done"; at: number } | { stat
 export type DocumentsResult = SaveContentResult<DocumentsErrors>;
 export type VideosResult = SaveContentResult<VideoErrors>;
 export type DetailsResult = SaveContentResult<DetailsErrors>;
+export type FaqResult = SaveContentResult<FaqErrors>;
 
 /** Файлы ЖК (фото, чертежи): id — новой строки media_assets или того, что поменяли. */
 export type ComplexMediaResult =

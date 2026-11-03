@@ -4,6 +4,7 @@ import { ComplexTerms } from "@/components/ComplexTerms";
 import { ComplexDetails } from "@/components/ComplexDetails";
 import { ComplexDeveloper } from "@/components/ComplexDeveloper";
 import { ComplexDocuments } from "@/components/ComplexDocuments";
+import { ComplexFaq } from "@/components/ComplexFaq";
 import { ComplexFacts } from "@/components/ComplexFacts";
 import { ComplexPicker } from "@/components/ComplexPicker";
 import { ComplexPlans } from "@/components/ComplexPlans";
@@ -69,6 +70,11 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
         <ComplexDeveloper page={page} consult={{ type: "consult", object: { complex: page.slug }, context: page.developer.name }} />
       </ComplexSection>
       {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
+      {has("faq") ? (
+        <ComplexSection id={COMPLEX_ANCHORS.faq} title={t("faq.title")}>
+          <ComplexFaq faq={page.faq} />
+        </ComplexSection>
+      ) : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
     </>
   );

@@ -544,7 +544,8 @@
       "developer": "Quruvchi",
       "documents": "Hujjatlar",
       "progress": "Qurilish jarayoni",
-      "soon": "Rejalar va narxlar"
+      "soon": "Rejalar va narxlar",
+      "faq": "Savollar"
     },
     "about": {
       "title": "TJM haqida",
@@ -832,6 +833,9 @@
       "badge": "Tez kunda",
       "text": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling:",
       "textNoPhone": "Rejalar va narxlar tez orada saytda paydo bo‘ladi. Shartlarni hozir bilish uchun Vodiy House’ga qo‘ng‘iroq qiling."
+    },
+    "faq": {
+      "title": "Ko‘p beriladigan savollar"
     }
   },
   "showcase": {

@@ -88,4 +88,6 @@ export type ComplexPage = Omit<
   picker: ComplexPicker | null;
   /** «Ход строительства» (фаза 5): опубликованные отчёты блоков, новые сверху; пусто — раздела нет. */
   progress: ProgressReport[];
+  /** «Частые вопросы» (PLAN §10, п. 21): пары вопрос — ответ; пусто — раздела нет. */
+  faq: { q: LocalizedText; a: LocalizedText }[];
 };

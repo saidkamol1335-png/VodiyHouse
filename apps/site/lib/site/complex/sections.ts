@@ -19,6 +19,8 @@ export const COMPLEX_ANCHORS = {
   details: "detali",
   developer: "zastroyshchik",
   documents: "dokumenty",
+  // PLAN §10, п. 21: вопросы покупателей — последним разделом, перед заявкой.
+  faq: "voprosy",
 } as const;
 
 export type ComplexSectionKey = keyof typeof COMPLEX_ANCHORS;
@@ -40,6 +42,7 @@ export function complexSections(page: ComplexPage): ComplexSectionKey[] {
     details: page.details.length > 0,
     developer: true,
     documents: page.documents.length > 0,
+    faq: page.faq.length > 0,
   };
   return (Object.keys(COMPLEX_ANCHORS) as ComplexSectionKey[]).filter((key) => present[key]);
 }

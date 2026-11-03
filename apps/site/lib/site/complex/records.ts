@@ -1,5 +1,6 @@
 import type { LocalizedText } from "@/lib/contacts";
 import type { Currency } from "@vh/shared/calc/money";
+import { bilingualRecord } from "@vh/shared/calc/stockRecords";
 import type { RateRecord, SiteProgramRecord } from "@vh/shared/calc/records";
 import {
   catalogFrom,
@@ -212,6 +213,9 @@ function catalogOf(record: ComplexPageRecord): { catalog: SiteCatalog; complex: 
   return { catalog: { ...catalog, complexes: [] }, complex: catalog.complexes[0]! };
 }
 
+/** Фасад и планы, ход строительства, частые вопросы — отдельными RPC, их кладёт read.ts. */
+const SEPARATE_SECTIONS = { picker: null, progress: [], faq: [] } satisfies Pick<ComplexPage, "picker" | "progress" | "faq">;
+
 export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
   const { complex } = record;
   const { catalog, complex: catalogComplex } = catalogOf(record);
@@ -253,8 +257,16 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
       })),
     })),
     catalog,
-    // Фасад и планы — отдельным RPC (site_complex_picker), их кладёт read.ts.
-    picker: null,
-    progress: [],
+    ...SEPARATE_SECTIONS,
   };
+}
+
+/** «Частые вопросы» из site_complex_faq: чужая запись — без неё, а не без страницы. */
+export function faqFrom(value: unknown): ComplexPage["faq"] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item: { q?: unknown; a?: unknown }) => {
+    const q = bilingualRecord(item?.q);
+    const a = bilingualRecord(item?.a);
+    return q.ru && q.uz && a.ru && a.uz ? [{ q, a }] : [];
+  });
 }

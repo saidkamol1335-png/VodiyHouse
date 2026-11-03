@@ -1,4 +1,5 @@
 import "server-only";
+import { faqDrafts, type FaqDraft } from "../complexes/faq";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DeadlineChange } from "../complexes/deadlines";
 import { detailRows, type DetailRecord, type DetailRow } from "../complexes/details";
@@ -64,4 +65,11 @@ export async function readDeadlineChanges(supabase: SupabaseClient, complexId: s
     to: { year: row.to_year, quarter: row.to_quarter },
     changedOn: row.changed_on,
   }));
+}
+
+/** «Частые вопросы» ЖК (п. 21) — строки формы «О ЖК». */
+export async function readComplexFaq(supabase: SupabaseClient, complexId: string): Promise<FaqDraft[]> {
+  const { data, error } = await supabase.from("complexes").select("faq").eq("id", complexId).maybeSingle();
+  if (error) unavailable("complex-faq", error);
+  return faqDrafts(data?.faq ?? []);
 }

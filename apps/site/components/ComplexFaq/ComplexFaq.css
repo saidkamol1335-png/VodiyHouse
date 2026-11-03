@@ -1,0 +1,50 @@
+/* «Частые вопросы» ЖК (PLAN §10, п. 21): карточка как у «Документов», вопросы через пунктир,
+   ответ раскрывается под вопросом (details, без скриптов). */
+.complex-faq {
+  margin: 0;
+  padding: 4px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--panel-bg);
+  list-style: none;
+}
+
+.complex-faq__item {
+  border-top: 1px dashed var(--dash);
+}
+
+.complex-faq__item:first-child {
+  border-top: 0;
+}
+
+.complex-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 0;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.complex-faq__question::-webkit-details-marker {
+  display: none;
+}
+
+.complex-faq__chevron {
+  flex: none;
+  color: var(--fg-3);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+.complex-faq__details[open] .complex-faq__chevron {
+  transform: rotate(180deg);
+}
+
+.complex-faq__answer {
+  margin: 0 0 14px;
+  color: var(--fg-2);
+  white-space: pre-line;
+}
