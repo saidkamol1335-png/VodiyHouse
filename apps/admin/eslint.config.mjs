@@ -84,7 +84,8 @@ const eslintConfig = defineConfig([
     // (подпись компонента с разбором пропсов — уже 8–10 строк). Тесты и shadcn/ui — не наш код
     // правил: describe-блоки длинные по природе.
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
-    ignores: ["**/*.test.{ts,tsx}", "components/ui/**"],
+    // Тексты памяток (фаза F) — содержимое, как messages/*.json, а не код.
+    ignores: ["**/*.test.{ts,tsx}", "components/ui/**", "lib/admin/guide/{head,manager,mobilographer}.ts"],
     rules: {
       "max-lines-per-function": ["error", { max: 45, skipBlankLines: true, skipComments: true }],
       "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
