@@ -65,4 +65,13 @@ describe("пиксели рекламы", () => {
     expect(win().fbq).toBeUndefined();
     expect(document.head.querySelectorAll("script")).toHaveLength(0);
   });
+
+  it("браузер сотрудника (метка vh-staff от кабинета, фаза F) — пиксели не грузятся", async () => {
+    document.cookie = "vh-staff=1";
+    const { startPixels } = await load();
+    startPixels();
+    expect(win().fbq).toBeUndefined();
+    expect(document.head.querySelectorAll("script")).toHaveLength(0);
+    document.cookie = "vh-staff=; max-age=0";
+  });
 });

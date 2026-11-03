@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, draftMode } from "next/headers";
+import { cookies, draftMode, headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { hasAuthCookie } from "@/lib/admin/gate";
 import { isCabinetOpenWithoutLogin, STAFF_ROLES } from "@/lib/admin/access";
@@ -13,6 +13,7 @@ import { captchaTokenOf } from "@/lib/captcha";
 import { ADMIN_ROUTES, landingPath } from "@/lib/admin/nav";
 import { RETURN_COOKIE, safeReturnPath } from "@/lib/admin/returnPath";
 import { passwordDeps, signInDeps } from "@/lib/admin/server/deps";
+import { requestOrigin, staffCookie, staffCookieRemoval } from "@/lib/admin/staffCookie";
 import { requireActionViewer, type ActionGuardCode } from "@/lib/admin/session";
 import { hasSupabaseAdminEnv, hasSupabaseEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -30,6 +31,9 @@ export async function signInAction(_previous: SignInState, formData: FormData): 
   const supabase = await createSupabaseServerClient();
   const outcome = await signIn(signInDeps(supabase), parsed.value);
   if (outcome.kind === "error") return { email, error: outcome.code, fieldErrors: {} };
+  // Сотрудник подтверждён — браузер помечен для сайта (фаза F, п. 40): его визиты не в статистике.
+  const { hostname, https } = requestOrigin(await headers());
+  (await cookies()).set(staffCookie(hostname, https));
   // Вне try: redirect() бросает NEXT_REDIRECT. replace — «Назад» не вернёт на форму входа.
   redirect(await afterSignIn(outcome.to), RedirectType.replace);
 }
@@ -82,6 +86,9 @@ export async function signOutAction(): Promise<void> {
       for (const { name } of store.getAll()) if (hasAuthCookie([name])) store.delete({ name, path: "/" });
     }
   }
+  // Метку сотрудника для сайта снимаем тоже: следующий на общем компьютере — посетитель.
+  const { hostname, https } = requestOrigin(await headers());
+  (await cookies()).set(staffCookieRemoval(hostname, https));
   // Предпросмотр ЖК (шаг 3.6) — тоже этого сотрудника: на общем компьютере следующий не увидит пометку.
   (await draftMode()).disable();
   redirect(ADMIN_ROUTES.login, RedirectType.replace);

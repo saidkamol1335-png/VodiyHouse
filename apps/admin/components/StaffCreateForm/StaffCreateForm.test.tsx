@@ -63,7 +63,7 @@ describe("добавить сотрудника", () => {
     submit();
     expect(await screen.findByText("Не длиннее 80 символов")).toBeTruthy();
     expect((screen.getByLabelText("Роль") as HTMLSelectElement).value).toBe("manager");
-    expect(screen.getByText("Заявки, наличие квартир, расчёт и видео для клиентов")).toBeTruthy();
+    expect(screen.getByText("Заявки, ЖК и квартиры, расчёт и видео для клиентов; публикует руководитель")).toBeTruthy();
   });
 
   it("ошибка email — под полем, введённое остаётся", async () => {

@@ -1,4 +1,5 @@
 import "server-only";
+import { STAFF_COOKIE, STAFF_COOKIE_VALUE } from "@vh/shared/staffCookie";
 import { callSigned, hasSignedWriteEnv, visitorKey } from "@/lib/supabase/signedWrite";
 import { EVENT_BATCH_MAX, EVENT_TYPES, type EventBatch, type SiteEvent } from "../types";
 import { deviceOf, isBot } from "../visitor";
@@ -6,7 +7,7 @@ import { deviceOf, isBot } from "../visitor";
 // Приёмник событий сайта (шаг 3.12): посетитель без входа — секретным ключом, проверяет база
 // (track_events открыт только серверу). Посетитель — случайный id в cookie на год, сессия — 30 минут
 // без действий; IP не храним — лимит с адреса считает база по его солёному хэшу (как у заявок): без
-// cookie — id вкладки из пачки (пока открыта вкладка — один посетитель и одна сессия). Боты и сотрудники (с cookie сессии кабинета) не записываются.
+// cookie — id вкладки из пачки (пока открыта вкладка — один посетитель и одна сессия). Боты и сотрудники (метка vh-staff от кабинета, фаза F, п. 40) не записываются.
 
 export const VISITOR_COOKIE = "vh-vid";
 export const SESSION_COOKIE = "vh-sid";
@@ -46,11 +47,12 @@ export type TrackRequest = { userAgent: string | null; cookies: Map<string, stri
 export type TrackResult = { visitor: string; session: string } | null;
 
 /**
- * null — не записываем (бот, нет подписи или пустая пачка); иначе — id для cookie. Сессию сотрудника
- * сайт больше не видит (кабинет на своём домене) — его посещения считаются (PLAN §10, п. 18).
+ * null — не записываем (бот, сотрудник, нет подписи или пустая пачка); иначе — id для cookie.
+ * Сотрудника выдаёт метка кабинета на общем домене .vodiyhouse.uz (фаза F, п. 40); на тестовых
+ * *.netlify.app общего домена нет — там его посещения считаются (п. 18).
  */
 export async function trackEvents({ userAgent, cookies, body }: TrackRequest): Promise<TrackResult> {
-  if (!hasSignedWriteEnv() || isBot(userAgent)) return null;
+  if (!hasSignedWriteEnv() || isBot(userAgent) || cookies.get(STAFF_COOKIE) === STAFF_COOKIE_VALUE) return null;
   const batch = batchFrom(body);
   if (!batch) return null;
   // Без cookie посетителя (запрещены) — id вкладки из пачки: иначе каждая пачка — новый посетитель.

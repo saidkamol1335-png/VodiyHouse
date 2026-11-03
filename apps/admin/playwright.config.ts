@@ -78,7 +78,14 @@ export default defineConfig({
     },
   ],
   webServer: [
-    { command: `npm run dev -- --port ${PORT}`, url: `${BASE_URL}/vhod`, reuseExistingServer: true, timeout: 180_000 },
+    // TELEGRAM_DRY_RUN — e2e не пишут в настоящие чаты (фаза F, п. 45); dev и так молчит без TELEGRAM_LIVE.
+    {
+      command: `npm run dev -- --port ${PORT}`,
+      url: `${BASE_URL}/vhod`,
+      reuseExistingServer: true,
+      timeout: 180_000,
+      env: { TELEGRAM_DRY_RUN: "1" },
+    },
     {
       command: `npm run dev -w @vh/site -- --port ${SITE_PORT}`,
       url: `${SITE_URL}/uz`,

@@ -48,13 +48,10 @@ const nextConfig: NextConfig = {
     // Next 16 не оптимизирует картинки с локальных адресов; разрешено только для локального Supabase.
     dangerouslyAllowLocalIP: isLocalSupabase,
   },
-  // Кабинет admin.vodiyhouse.uz (PLAN §10): noindex, запрет фреймов и CSP на каждом ответе.
+  // Кабинет admin.vodiyhouse.uz (PLAN §10): noindex и запрет фреймов на каждом ответе; CSP с nonce —
+  // в proxy.ts (фаза F).
   async headers() {
-    const headers = securityHeaders({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      isDev: process.env.NODE_ENV === "development",
-    });
-    return [{ source: "/:path*", headers }];
+    return [{ source: "/:path*", headers: securityHeaders() }];
   },
   experimental: {
     // Несколько корневых layout (кабинет, /dev) — общий 404 собирается отдельно.

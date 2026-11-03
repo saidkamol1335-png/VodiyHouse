@@ -20,7 +20,10 @@ export type ProgressUnitOption = {
   area: number | null;
 };
 
-export type ProgressReportStatus = "draft" | "review" | "returned" | "published";
+export const PROGRESS_REPORT_STATUSES = ["draft", "review", "returned", "published"] as const;
+export type ProgressReportStatus = (typeof PROGRESS_REPORT_STATUSES)[number];
+export const isProgressReportStatus = (value: unknown): value is ProgressReportStatus =>
+  typeof value === "string" && (PROGRESS_REPORT_STATUSES as readonly string[]).includes(value);
 
 /** Фото отчёта — уходит в save_progress_draft / submit_progress_report как есть. */
 export type ProgressPhoto = { path: string; width: number; height: number; blur: string | null };

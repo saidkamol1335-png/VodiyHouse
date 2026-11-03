@@ -1,6 +1,7 @@
 // Заголовки безопасности кабинета (PLAN §10): закрыт от поиска и фреймов, адрес не уходит наружу.
-// CSP без nonce (docs Next.js, «Content Security Policy → Without Nonces»); script-src с nonce —
-// в фазе D, вместе с proxy кабинета.
+// CSP со своим nonce на каждый запрос (фаза F, п. 45; docs Next.js «Content Security Policy»): её
+// ставит proxy.ts — и в запрос (Next берёт оттуда nonce для своих скриптов), и в ответ. Здесь, в
+// next.config, — остальные заголовки: вторая CSP сузила бы первую и спрятала бы настоящую политику.
 
 type Header = { key: string; value: string };
 
@@ -12,12 +13,17 @@ function supabaseOrigins(supabaseUrl: string | undefined): string[] {
   return [url.origin, ws];
 }
 
-export function contentSecurityPolicy(options: { supabaseUrl?: string; isDev: boolean }): string {
+/**
+ * script-src: только скрипты с nonce и те, что они подгрузили сами ('strict-dynamic' — Turnstile на
+ * входе, чанки Next); адрес Cloudflare — запас для браузеров без CSP3. style-src остаётся
+ * 'unsafe-inline': с nonce браузер отбросил бы style="…" из серверной разметки (графики, превью).
+ */
+export function contentSecurityPolicy(options: { supabaseUrl?: string; isDev: boolean; nonce: string }): string {
   const supabase = supabaseOrigins(options.supabaseUrl);
   const httpSupabase = supabase.slice(0, 1);
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${options.isDev ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com`,
+    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic'${options.isDev ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com`,
     "style-src 'self' 'unsafe-inline'",
     ["img-src 'self' blob: data:", ...httpSupabase].join(" "),
     "font-src 'self'",
@@ -34,7 +40,13 @@ export function contentSecurityPolicy(options: { supabaseUrl?: string; isDev: bo
   return directives.join("; ");
 }
 
-export function securityHeaders(options: { supabaseUrl?: string; isDev: boolean }): Header[] {
+/** Заголовок запроса с nonce для layout (скрипт в <head>); читают его — страница динамическая. */
+export const NONCE_HEADER = "x-nonce";
+
+/** Новый nonce на запрос: 128 бит случайности в base64. */
+export const createNonce = () => btoa(crypto.randomUUID());
+
+export function securityHeaders(): Header[] {
   return [
     // Кабинет не индексируется никогда — не только на тестовом деплое.
     { key: "X-Robots-Tag", value: "noindex, nofollow" },
@@ -43,6 +55,5 @@ export function securityHeaders(options: { supabaseUrl?: string; isDev: boolean 
     { key: "Referrer-Policy", value: "same-origin" },
     { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
     { key: "X-Frame-Options", value: "DENY" },
-    { key: "Content-Security-Policy", value: contentSecurityPolicy(options) },
   ];
 }

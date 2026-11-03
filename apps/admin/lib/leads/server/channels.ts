@@ -68,6 +68,23 @@ export type TelegramKeyboard =
   | { keyboard: { text: string; request_contact?: boolean }[][]; resize_keyboard: true; one_time_keyboard: true }
   | { remove_keyboard: true };
 
+/**
+ * Telegram молчит вне боевой сборки (фаза F, п. 45): dev-сервер и e2e не пишут в настоящие чаты, даже
+ * если в .env.local настоящий токен. TELEGRAM_LIVE=1 — включить локально (проверка бота и кода входа);
+ * TELEGRAM_DRY_RUN=1 — заглушить и `next start` (приёмка e2e на прод-сборке). На сайтах Netlify
+ * TELEGRAM_DRY_RUN не задавать: заявки остались бы недоставленными.
+ */
+export function telegramMuted(env: Env = process.env): boolean {
+  if (env.TELEGRAM_DRY_RUN === "1") return true;
+  return env.NODE_ENV !== "production" && env.TELEGRAM_LIVE !== "1";
+}
+
+/** Заглушённая отправка: не ушла (заявка остаётся в очереди), в журнал — только чат, без текста. */
+function muted(method: string, chatId: string | number): SendResult {
+  console.info(`[telegram] ${method} в чат ${chatId} не отправлен: Telegram заглушён (TELEGRAM_LIVE / TELEGRAM_DRY_RUN)`);
+  return { ok: false, error: "muted" };
+}
+
 /** Сообщение ботом (Bot API sendMessage); простой текст — разметка Telegram не ломается на «_». */
 export async function sendTelegram(
   config: TelegramConfig,
@@ -75,6 +92,7 @@ export async function sendTelegram(
   text: string,
   keyboard?: TelegramKeyboard,
 ): Promise<SendResult> {
+  if (telegramMuted()) return muted("sendMessage", chatId);
   try {
     const response = await post(`https://api.telegram.org/bot${config.token}/sendMessage`, {
       chat_id: chatId,
@@ -109,6 +127,7 @@ export async function sendTelegramDocument(
   file: { name: string; content: string },
   caption: string,
 ): Promise<SendResult> {
+  if (telegramMuted()) return muted("sendDocument", chatId);
   const form = new FormData();
   form.set("chat_id", String(chatId));
   form.set("caption", caption.slice(0, 1024));

@@ -6,14 +6,14 @@ import type { AdminSessionRefresh } from "@/lib/supabase/proxySession";
 // proxy.ts целиком: сессия Supabase подменена, окружение задаётся до загрузки модуля
 // (решение «кабинет без входа» считается при импорте lib/admin/access.ts).
 const refresh = vi.hoisted(() => ({
-  result: null as null | (() => AdminSessionRefresh),
+  result: null as null | ((request: NextRequest) => AdminSessionRefresh),
   calls: 0,
 }));
 vi.mock("@/lib/supabase/proxySession", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/supabase/proxySession")>()),
-  refreshAdminSession: async () => {
+  refreshAdminSession: async (request: NextRequest) => {
     refresh.calls += 1;
-    return refresh.result!();
+    return refresh.result!(request);
   },
 }));
 
@@ -88,6 +88,51 @@ describe("proxy: кабинет", () => {
     refresh.result = () => ({ response: NextResponse.next(), hasSession: true, transient: false });
     expect((await proxy(request("/", { cookie: `${COOKIE}=x` }))).status).toBe(200);
     expect(refresh.calls).toBe(2);
+  });
+
+  it("метка сотрудника для сайта: есть сессия без метки — ставим; метка есть, сбой Auth — не трогаем", async () => {
+    const proxy = await loadProxy({ nodeEnv: "development", keys: true });
+    const marked = await proxy(request("/", { cookie: `${COOKIE}=x` }));
+    expect(marked.headers.get("set-cookie") ?? "").toMatch(/vh-staff=1; Path=\/;.*Max-Age=\d+;.*SameSite=lax/i);
+    expect(marked.headers.get("set-cookie") ?? "").not.toMatch(/Domain=|HttpOnly/i);
+    const again = await proxy(request("/", { cookie: `${COOKIE}=x; vh-staff=1` }));
+    expect(again.headers.get("set-cookie") ?? "").not.toContain("vh-staff");
+    refresh.result = () => ({ response: NextResponse.next(), hasSession: false, transient: true });
+    const transient = await proxy(request("/", { cookie: `${COOKIE}=x` }));
+    expect(transient.headers.get("set-cookie") ?? "").not.toContain("vh-staff");
+  });
+
+  it("CSP с nonce (фаза F): на каждом ответе — и вход, и кабинет, и редирект, и /dev, /api; nonce каждый раз новый", async () => {
+    const proxy = await loadProxy({ nodeEnv: "production", keys: true });
+    const responses = [
+      await proxy(request("/vhod")),
+      await proxy(request("/", { cookie: `${COOKIE}=x` })),
+      await proxy(request("/zayavki")),
+      await proxy(request("/dev/zhk")),
+      await proxy(request("/api/cron/leads")),
+    ];
+    const nonces = responses.map((response) => {
+      const policy = response.headers.get("content-security-policy") ?? "";
+      expect(policy).toMatch(/script-src 'self' 'nonce-[A-Za-z0-9+/=]+' 'strict-dynamic'/);
+      return /'nonce-([^']+)'/.exec(policy)![1];
+    });
+    expect(new Set(nonces).size).toBe(nonces.length);
+    // Страница получает nonce в заголовках запроса (x-middleware-request-*) — тот же, что в ответе.
+    const page = await proxy(request("/vhod"));
+    const nonce = /'nonce-([^']+)'/.exec(page.headers.get("content-security-policy")!)![1];
+    expect(page.headers.get("x-middleware-request-x-nonce")).toBe(nonce);
+    expect(page.headers.get("x-middleware-request-content-security-policy")).toContain(`'nonce-${nonce}'`);
+  });
+
+  it("обновлённый токен сессии доходит до страницы вместе с nonce", async () => {
+    refresh.result = (incoming) => {
+      incoming.cookies.set(COOKIE, "fresh");
+      return { response: NextResponse.next({ request: incoming }), hasSession: true, transient: false };
+    };
+    const proxy = await loadProxy({ nodeEnv: "production", keys: true });
+    const response = await proxy(request("/", { cookie: `${COOKIE}=stale` }));
+    expect(response.headers.get("x-middleware-request-cookie")).toContain(`${COOKIE}=fresh`);
+    expect(response.headers.get("x-middleware-request-x-nonce")).toBeTruthy();
   });
 
   it("продакшен без ключей — 307 на вход; разработка без ключей — кабинет открыт", async () => {

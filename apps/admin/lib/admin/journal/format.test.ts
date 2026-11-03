@@ -37,6 +37,40 @@ describe("значения в журнале", () => {
     });
   });
 
+  it("статус отчёта мобилографа — подписью; «опубликовал» (uuid) скрыт, причина возврата — текстом", () => {
+    expect(journalValue("progress_reports", "status", "review")).toEqual({
+      kind: "progressStatus",
+      status: "review",
+    });
+    expect(journalValue("progress_reports", "status", "hidden")).toEqual({
+      kind: "text",
+      text: "hidden",
+    });
+    expect(journalValue("complexes", "status", "draft")).toEqual({ kind: "status", status: "draft" });
+    const [entry] = journalEntries([
+      record({
+        entity: "progress_reports",
+        changes: {
+          status: ["review", "returned"],
+          return_note: [null, "Нужно фото фасада"],
+          published_by: [null, "6f1c0d6e-0000-4000-8000-000000000001"],
+        },
+      }),
+    ]);
+    expect(entry!.changes).toEqual([
+      {
+        field: "status",
+        before: { kind: "progressStatus", status: "review" },
+        after: { kind: "progressStatus", status: "returned" },
+      },
+      {
+        field: "return_note",
+        before: { kind: "empty" },
+        after: { kind: "text", text: "Нужно фото фасада" },
+      },
+    ]);
+  });
+
   it("деньги: цена квартиры и «цена от» планировки — с валютой блока; у ЖК число — текстом", () => {
     const usd = { currency: "USD" as const };
     expect(journalValue("layouts", "price_from", 26402.28, usd)).toEqual({

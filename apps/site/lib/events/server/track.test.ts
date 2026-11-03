@@ -1,5 +1,24 @@
-import { describe, expect, it } from "vitest";
-import { batchFrom } from "./track";
+import { describe, expect, it, vi } from "vitest";
+import { batchFrom, trackEvents } from "./track";
+
+const signed = vi.hoisted(() => ({ calls: 0 }));
+vi.mock("@/lib/supabase/signedWrite", () => ({
+  hasSignedWriteEnv: () => true,
+  visitorKey: () => "key",
+  callSigned: async () => {
+    signed.calls += 1;
+    return { ok: true };
+  },
+}));
+
+describe("сотрудник не в статистике (фаза F, п. 40)", () => {
+  it("метка vh-staff от кабинета — пачка не записывается и cookie посетителя не выдаются", async () => {
+    const body = { events: [{ type: "page_view", path: "/ru" }], lang: "ru", source: null };
+    const userAgent = "Mozilla/5.0 (Linux; Android 14) Chrome/130 Mobile Safari/537.36";
+    expect(await trackEvents({ userAgent, cookies: new Map([["vh-staff", "1"]]), body })).toBeNull();
+    expect(signed.calls).toBe(0);
+  });
+});
 
 const TAB = "0b6f4f0e-7a0e-4c3a-9a51-3d3c2b1a0f11";
 const event = { type: "page_view", path: "/ru" };

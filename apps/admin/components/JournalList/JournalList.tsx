@@ -173,6 +173,10 @@ function JournalValueText({ value, finishings }: ValueProps) {
       );
     case "status":
       return <span className="journal-list__value">{t(`publication.${value.status}`)}</span>;
+    case "progressStatus":
+      return (
+        <span className="journal-list__value">{t(`journal.progressStatus.${value.status}`)}</span>
+      );
     case "date":
       return (
         <span className="journal-list__value">

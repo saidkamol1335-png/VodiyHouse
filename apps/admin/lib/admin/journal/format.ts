@@ -1,5 +1,6 @@
 import { isUnitStatus, type UnitStatus } from "@vh/shared/units";
 import type { ContentErrorCode } from "../developers/errors";
+import { isProgressReportStatus, type ProgressReportStatus } from "../progress/types";
 import { PUBLICATION_STATUSES, type PublicationStatus } from "../publication";
 import { parseUnitsSummary, type UnitsSummary } from "./unitsSummary";
 
@@ -29,6 +30,8 @@ export type JournalValue =
   | { kind: "flag"; on: boolean }
   | { kind: "status"; status: PublicationStatus }
   | { kind: "unitStatus"; status: UnitStatus }
+  /** Статус отчёта мобилографа (фаза F): черновик · на проверке · возвращён · опубликован. */
+  | { kind: "progressStatus"; status: ProgressReportStatus }
   /** Цена квартиры: валюта блока — из самой записи (changes.currency). */
   | { kind: "money"; amount: number; currency: JournalCurrency | null; perM2: boolean }
   /** Отделка: название — из справочника; null у квартиры — «как в блоке». */
@@ -81,6 +84,8 @@ const HIDDEN_FIELDS = new Set([
   "video_path",
   "author_id",
   "unit_id",
+  // Кто опубликовал — автор записи журнала; uuid людям не нужен (фаза F).
+  "published_by",
 ]);
 // Ссылки на файлы (чертёж, фото темы) и составные списки («Что входит в цену», «Удобство
 // локации»): значения людям не прочитать, но сама правка на сайте должна быть в журнале —
@@ -130,6 +135,8 @@ export function journalValue(
     return { kind: "status", status: raw };
   if (entity === "units" && field === "status" && isUnitStatus(raw))
     return { kind: "unitStatus", status: raw };
+  if (entity === "progress_reports" && field === "status" && isProgressReportStatus(raw))
+    return { kind: "progressStatus", status: raw };
   if (MONEY_FIELDS[entity]?.has(field) && typeof raw === "number")
     return {
       kind: "money",

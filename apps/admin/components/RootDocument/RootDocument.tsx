@@ -14,13 +14,15 @@ type RootDocumentProps = {
   withColumns?: boolean;
   /** Сообщения для браузера; без них — все (lib/i18n/clientMessages.ts). */
   messages?: AbstractIntlMessages;
+  /** nonce CSP запроса (фаза F): без него скрипт в <head> браузер не выполнит. */
+  nonce?: string;
 };
 
 /**
  * Общая оболочка <html> для корневых layout сайта, кабинета и /dev.
  * Сервер всегда рендерит lite; скрипт в <head> поправит до первой отрисовки.
  */
-export function RootDocument({ lang, children, withColumns = false, messages }: RootDocumentProps) {
+export function RootDocument({ lang, children, withColumns = false, messages, nonce }: RootDocumentProps) {
   return (
     <html
       lang={lang}
@@ -31,7 +33,8 @@ export function RootDocument({ lang, children, withColumns = false, messages }: 
       {/* Правило написано для Pages Router; в App Router <head> корневого layout — штатный способ. */}
       {/* eslint-disable-next-line @next/next/no-head-element */}
       <head>
-        <script dangerouslySetInnerHTML={{ __html: HEAD_BOOT_SCRIPT }} />
+        {/* Браузер прячет nonce из атрибута после разбора — расхождение при гидрации ожидаемо. */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: HEAD_BOOT_SCRIPT }} />
       </head>
       <body>
         {withColumns ? <BackgroundColumns /> : null}

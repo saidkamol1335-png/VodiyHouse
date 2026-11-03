@@ -1,9 +1,10 @@
+import { hasStaffCookie } from "@vh/shared/staffCookie";
 import { leadSource } from "@/lib/leads/source";
 import { EVENT_BATCH_MAX, type EventBatch, type SiteEvent } from "./types";
 
 // Очередь событий в браузере (шаг 3.12): события копятся и уходят пачкой раз в несколько секунд и
-// при уходе со страницы (sendBeacon переживает закрытие вкладки). Сотрудник с сессией кабинета и
-// стенды /dev — не считаются. Рекламные пиксели получают те же события (lib/events/pixels.ts).
+// при уходе со страницы (sendBeacon переживает закрытие вкладки). Сотрудник (метка vh-staff от кабинета,
+// фаза F, п. 40; локально — и cookie сессии кабинета: порты делят cookie) и стенды /dev — не считаются. Рекламные пиксели получают те же события (lib/events/pixels.ts).
 
 const ENDPOINT = "/api/e";
 const FLUSH_MS = 4000;
@@ -21,8 +22,9 @@ const listeners = new Set<Listener>();
 const history: SiteEvent[] = [];
 const HISTORY_MAX = 20;
 
-/** Сотрудник с сессией кабинета или стенд /dev: ни наших событий, ни пикселей. */
-export const isStaff = () => AUTH_COOKIE.test(document.cookie) || window.location.pathname.startsWith("/dev");
+/** Сотрудник или стенд /dev: ни наших событий, ни пикселей. */
+export const isStaff = () =>
+  hasStaffCookie(document.cookie) || AUTH_COOKIE.test(document.cookie) || window.location.pathname.startsWith("/dev");
 
 /** Источник для ленты: utm_source первого захода или домен, откуда пришли; метки креатива — utm_medium и utm_content. */
 function sourceMarks(): Pick<EventBatch, "source" | "medium" | "content"> {
