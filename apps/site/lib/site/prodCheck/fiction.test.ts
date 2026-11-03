@@ -55,4 +55,9 @@ describe("findZeroCounts", () => {
   it("цены, сроки и проценты с нулём — не находка", () => {
     expect(findZeroCounts("от $45 000 · 10 квартир · 0% наценки · 100 ЖК · 0 сум")).toEqual([]);
   });
+
+  it("число-значение в JSON (цена в сумах в JSON-LD и данных страницы) — не телефон; строка с номером — телефон", () => {
+    expect(findFiction(String.raw`"lowPrice":682682000,"priceCurrency":"UZS" \"priceFrom\":682682000`)).toEqual([]);
+    expect(findFiction(`"telephone":"901234567"`)).toEqual([{ rule: "телефон", match: "901234567" }]);
+  });
 });

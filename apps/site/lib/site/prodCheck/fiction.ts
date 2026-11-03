@@ -59,6 +59,9 @@ const PHONE =
 const CONTACT_LINK =
   /href="(tel:[^"]+|https?:\/\/(?:t\.me\/(?!share)|telegram\.me\/|wa\.me\/|api\.whatsapp\.com\/|(?:www\.)?instagram\.com\/|viber:)[^"]*)"/g;
 
+/** Конец «"ключ":» перед числом (и экранированный \": в данных RSC). */
+const JSON_NUMBER = /\\?"\s*:\s*$/;
+
 export const phoneDigits = (value: string) => value.replace(/\D/g, "").replace(/^998/, "");
 
 export type FictionHit = { rule: string; match: string };
@@ -83,6 +86,9 @@ export function findFiction(text: string, allowedPhones: readonly string[] = [])
   }
   const allowed = new Set(allowedPhones.map(phoneDigits));
   for (const match of text.matchAll(PHONE)) {
+    // Число сразу после «"ключ":» — значение данных (цена в JSON-LD и данных страницы: "lowPrice":682682000),
+    // а не номер на экране: телефоны в данных — строки (запуск 03.11, ложная находка у Shodlik).
+    if (JSON_NUMBER.test(text.slice(Math.max(0, match.index - 4), match.index))) continue;
     if (!allowed.has(phoneDigits(match[0]))) hits.push({ rule: "телефон", match: match[0].trim() });
   }
   return hits;
