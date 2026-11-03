@@ -15,7 +15,9 @@ describe("Telegram вне боевой сборки молчит (фаза F, п
     expect(telegramMuted({ NODE_ENV: "development", TELEGRAM_LIVE: "1" })).toBe(false);
     expect(telegramMuted({ NODE_ENV: "production" })).toBe(false);
     expect(telegramMuted({ NODE_ENV: "production", TELEGRAM_DRY_RUN: "1" })).toBe(true);
-    expect(telegramMuted({ NODE_ENV: "development", TELEGRAM_LIVE: "1", TELEGRAM_DRY_RUN: "1" })).toBe(true);
+    expect(
+      telegramMuted({ NODE_ENV: "development", TELEGRAM_LIVE: "1", TELEGRAM_DRY_RUN: "1" }),
+    ).toBe(true);
   });
 
   it("заглушённые sendMessage и sendDocument не ходят в сеть и отвечают «не ушло»", async () => {

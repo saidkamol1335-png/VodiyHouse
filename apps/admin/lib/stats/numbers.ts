@@ -53,3 +53,16 @@ export const formatStatsPercent = (value: number) => PERCENT.format(value);
 export const formatStatsCount = (value: number) => COUNT.format(value);
 /** Подпись оси графика: «800», «2,5» — шаг 2,5 бывает, его дробь не округляем. */
 export const formatStatsAxis = (value: number) => PERCENT.format(value);
+
+const ONE_DECIMAL = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+
+/**
+ * Ожидание проверки (фаза F): до двух суток — часами с одним знаком («5,5»), дольше — сутками
+ * («3,2»); null — не было ни одного решения.
+ */
+export function waitParts(hours: number | null): { unit: "hours" | "days"; value: string } | null {
+  if (hours === null) return null;
+  return hours < 48
+    ? { unit: "hours", value: ONE_DECIMAL.format(hours) }
+    : { unit: "days", value: ONE_DECIMAL.format(hours / 24) };
+}

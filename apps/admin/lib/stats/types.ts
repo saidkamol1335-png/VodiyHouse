@@ -58,3 +58,47 @@ export type SiteStats = {
   complexes: (StatsObject & { name: LocalizedText })[];
   developers: (StatsObject & { name: string })[];
 };
+
+/** Блок без отчёта за месяц: «нет отчёта» или возвращён автору (черновики не видны — «нет отчёта»). */
+export type ProgressStatsBlock = { id: string; name: string; state: "none" | "returned" };
+
+export type ProgressStatsComplex = {
+  id: string;
+  name: LocalizedText;
+  status: "draft" | "published" | "hidden";
+  blocks_total: number;
+  /** Блоки с отчётом месяца на проверке или опубликованным. */
+  blocks_done: number;
+  missing: ProgressStatsBlock[];
+  last_published_at: string | null;
+  /** «45+ дн.»: последний опубликованный отчёт ЖК старше 45 дней или его не было. */
+  late: boolean;
+};
+
+/**
+ * Ответ progress_stats(с, по) (фаза F, п. 41): «Ход стройки» за период — считает база по журналу.
+ * Основные числа — отчёты блоков; видео квартир — отдельно. Ожидание — часы от последней отправки
+ * до решения (ночи и выходные входят), по всем отчётам.
+ */
+export type ProgressStats = {
+  from: string;
+  to: string;
+  until: string;
+  /** Месяц «без отчёта» — месяц конца периода (первое число); month_open — он ещё идёт. */
+  month: string;
+  month_open: boolean;
+  published: number;
+  /** Возвратов (раз) и возвращённых отчётов. */
+  returned: number;
+  returned_reports: number;
+  unit_published: number;
+  unit_returned: number;
+  wait_count: number;
+  wait_avg_hours: number | null;
+  wait_max_hours: number | null;
+  /** Ждут проверки сейчас и самое долгое ожидание (часы). */
+  waiting_now: number;
+  oldest_wait_hours: number | null;
+  complexes_building: number;
+  complexes_without: ProgressStatsComplex[];
+};

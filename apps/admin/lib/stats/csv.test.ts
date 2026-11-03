@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { statsCsv, statsCsvFilename } from "./csv";
-import type { SiteStats } from "./types";
+import type { ProgressStats, SiteStats } from "./types";
 
 const totals = {
   visitors: 3,
@@ -83,5 +83,59 @@ describe("CSV статистики", () => {
     expect(statsCsvFilename({ from: "2026-10-29", to: "2026-10-29" })).toBe(
       "vodiyhouse-statistika-2026-10-29_2026-10-29.csv",
     );
+  });
+
+  it("«Ход стройки» (фаза F): числа и ЖК без отчёта — секцией после итогов; не прочитался — строкой", () => {
+    const progress: ProgressStats = {
+      from: "2026-10-27",
+      to: "2026-10-28",
+      until: "2026-10-28T19:00:00Z",
+      month: "2026-10-01",
+      month_open: true,
+      published: 4,
+      returned: 2,
+      returned_reports: 1,
+      unit_published: 1,
+      unit_returned: 0,
+      wait_count: 5,
+      wait_avg_hours: 6.5,
+      wait_max_hours: 20,
+      waiting_now: 1,
+      oldest_wait_hours: 3,
+      complexes_building: 3,
+      complexes_without: [
+        {
+          id: "c1",
+          name: { ru: "=Shodlik; «A»", uz: "Shodlik" },
+          status: "published",
+          blocks_total: 2,
+          blocks_done: 0,
+          missing: [
+            { id: "b1", name: "A", state: "none" },
+            { id: "b2", name: "B", state: "returned" },
+          ],
+          last_published_at: null,
+          late: true,
+        },
+      ],
+    };
+    const lines = statsCsv(stats({}), progress).split("\r\n");
+    const at = lines.indexOf("Ход стройки 27.10.2026 — 28.10.2026");
+    expect(at).toBeGreaterThan(0);
+    expect(lines[at - 1]).toBe("");
+    expect(lines.slice(at + 1, at + 8)).toEqual([
+      "Опубликовано отчётов блоков;4",
+      "Опубликовано видео квартир;1",
+      "Возвратов автору;2",
+      "Возвращённых отчётов;1",
+      "Среднее ожидание проверки, ч;6,5",
+      "Дольше всех, ч;20",
+      "Ждут проверки сейчас;1",
+    ]);
+    expect(lines).toContain("ЖК без отчёта за октябрь 2026");
+    // Название ЖК — ячейкой: «=» не формула, «;» не делит строку.
+    expect(lines).toContain(`"'=Shodlik; «A»";A, B (возвращён);не было`);
+    expect(statsCsv(stats({}), null)).toContain("\r\nХод стройки: не прочитался\r\n");
+    expect(statsCsv(stats({}))).not.toContain("Ход стройки");
   });
 });

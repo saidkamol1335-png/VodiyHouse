@@ -6,7 +6,9 @@ const prod = { STAFF_COOKIE_DOMAIN: ".vodiyhouse.uz" };
 describe("метка браузера сотрудника (фаза F, п. 40)", () => {
   it("общий домен — только для кабинета на нём; тестовый Netlify и localhost — без домена", () => {
     expect(staffCookieDomain("admin.vodiyhouse.uz", prod)).toBe(".vodiyhouse.uz");
-    expect(staffCookieDomain("ADMIN.vodiyhouse.uz", { STAFF_COOKIE_DOMAIN: "vodiyhouse.uz" })).toBe(".vodiyhouse.uz");
+    expect(staffCookieDomain("ADMIN.vodiyhouse.uz", { STAFF_COOKIE_DOMAIN: "vodiyhouse.uz" })).toBe(
+      ".vodiyhouse.uz",
+    );
     expect(staffCookieDomain("vodiyhouse-admin-test.netlify.app", prod)).toBeUndefined();
     expect(staffCookieDomain("localhost", prod)).toBeUndefined();
     expect(staffCookieDomain("evilvodiyhouse.uz", prod)).toBeUndefined();
@@ -39,8 +41,13 @@ describe("метка браузера сотрудника (фаза F, п. 40)"
 
   it("хост и протокол действия — из x-forwarded-*, иначе host без порта", () => {
     expect(
-      requestOrigin(new Headers({ "x-forwarded-host": "admin.vodiyhouse.uz", "x-forwarded-proto": "https" })),
+      requestOrigin(
+        new Headers({ "x-forwarded-host": "admin.vodiyhouse.uz", "x-forwarded-proto": "https" }),
+      ),
     ).toEqual({ hostname: "admin.vodiyhouse.uz", https: true });
-    expect(requestOrigin(new Headers({ host: "localhost:3001" }))).toEqual({ hostname: "localhost", https: false });
+    expect(requestOrigin(new Headers({ host: "localhost:3001" }))).toEqual({
+      hostname: "localhost",
+      https: false,
+    });
   });
 });

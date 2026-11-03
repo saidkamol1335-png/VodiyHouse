@@ -8,7 +8,7 @@ import { isCabinetOpenWithoutLogin } from "@/lib/admin/access";
 import { todayInTashkent } from "@/lib/admin/showcase/period";
 import { cabinetPerson } from "@/lib/admin/person";
 import { readSiteNow } from "@/lib/admin/server/siteNow";
-import { readSiteStats } from "@/lib/admin/server/stats";
+import { readProgressStats, readSiteStats } from "@/lib/admin/server/stats";
 import { requireSection } from "@/lib/admin/session";
 import { statsPeriodOf } from "@/lib/stats/period";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -45,13 +45,14 @@ export default async function StatsPage({ searchParams }: PageProps<"/statistika
   const today = todayInTashkent();
   const period = statsPeriodOf(await searchParams, today);
   const supabase = await createSupabaseServerClient();
-  const [stats, siteNow] = await Promise.all([
+  const [stats, siteNow, progress] = await Promise.all([
     readSiteStats(supabase, period).catch(() => null),
     readSiteNow(supabase).catch(() => null),
+    readProgressStats(supabase, period).catch(() => null),
   ]);
   return (
     <AdminPage topbar={topbar}>
-      <StatsScreen stats={stats} period={period} today={today} siteNow={siteNow} />
+      <StatsScreen stats={stats} period={period} today={today} siteNow={siteNow} progress={progress} />
     </AdminPage>
   );
 }

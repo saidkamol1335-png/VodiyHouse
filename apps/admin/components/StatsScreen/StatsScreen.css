@@ -354,3 +354,48 @@
     padding: 8px 6px;
   }
 }
+
+/* «Ход стройки» (фаза F, п. 41): четыре цифры, пояснение к ожиданию и таблица ЖК без отчёта за месяц. */
+.stats-progress__kpis {
+  margin-bottom: 8px;
+}
+
+.stats-progress__note {
+  margin: 0 0 16px;
+  color: var(--fg-3);
+  font-size: var(--fs-micro);
+}
+
+.stats-progress__without {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-progress__title {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+.stats-progress__open {
+  color: var(--fg-3);
+  font-weight: 400;
+}
+
+.stats-progress__late {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--amber-soft);
+  color: var(--amber-2);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  white-space: nowrap;
+}
+
+.stats-progress__more {
+  margin: 0;
+  font-size: var(--fs-small);
+}

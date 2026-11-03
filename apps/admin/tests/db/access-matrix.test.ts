@@ -319,8 +319,13 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       await expect(db.as(user(mobilographer), (tx) => tx.query("select public.lead_card(1001)"))).rejects.toThrow();
     });
 
-    it("статистику сайта (фаза 6) видит только руководитель — ни мобилограф, ни менеджер", async () => {
-      for (const call of ["select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())", "select public.site_today()"]) {
+    it("статистику сайта (фаза 6) и «Ход стройки» (фаза F) видит только руководитель — ни мобилограф, ни менеджер", async () => {
+      for (const call of [
+        "select public.site_stats(private.tashkent_today() - 1, private.tashkent_today())",
+        "select public.site_today()",
+        // Фаза F: «Ход стройки».
+        "select public.progress_stats(private.tashkent_today() - 1, private.tashkent_today())",
+      ]) {
         for (const actor of [user(mobilographer), user(manager), anon]) {
           await expect(db.as(actor, (tx) => tx.query(call)), call).rejects.toThrow(DENIED);
         }

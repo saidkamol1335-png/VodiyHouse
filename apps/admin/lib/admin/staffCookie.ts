@@ -45,7 +45,11 @@ export function staffCookie(hostname: string, https: boolean, env: Env = process
 }
 
 /** Снять метку: тот же домен и путь, срок 0 — иначе браузер оставит прежнюю. */
-export function staffCookieRemoval(hostname: string, https: boolean, env: Env = process.env): StaffCookie {
+export function staffCookieRemoval(
+  hostname: string,
+  https: boolean,
+  env: Env = process.env,
+): StaffCookie {
   return { ...staffCookie(hostname, https, env), value: "", maxAge: 0 };
 }
 

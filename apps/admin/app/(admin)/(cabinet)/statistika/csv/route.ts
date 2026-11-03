@@ -1,5 +1,5 @@
 import { requireActionViewer } from "@/lib/admin/session";
-import { readSiteStats } from "@/lib/admin/server/stats";
+import { readProgressStats, readSiteStats } from "@/lib/admin/server/stats";
 import { statsCsv, statsCsvFilename } from "@/lib/stats/csv";
 import { statsPeriodOf } from "@/lib/stats/period";
 
@@ -11,8 +11,12 @@ export async function GET(request: Request) {
   if (!guard.ok) return new Response("forbidden", { status: guard.code === "session" ? 401 : 403 });
   const period = statsPeriodOf(Object.fromEntries(new URL(request.url).searchParams));
   try {
-    const stats = await readSiteStats(guard.supabase, period);
-    return new Response(statsCsv(stats), {
+    // «Ход стройки» не прочитался — строка об этом в файле; 503 — только если нет статистики сайта.
+    const [stats, progress] = await Promise.all([
+      readSiteStats(guard.supabase, period),
+      readProgressStats(guard.supabase, period).catch(() => null),
+    ]);
+    return new Response(statsCsv(stats, progress), {
       headers: {
         "content-type": "text/csv; charset=utf-8",
         "content-disposition": `attachment; filename="${statsCsvFilename(stats)}"`,

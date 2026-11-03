@@ -147,3 +147,13 @@ describe("график статистики", () => {
     expect(chartPaths([null, null], null)).toMatchObject({ line: "", area: "", prev: "" });
   });
 });
+
+describe("ожидание проверки (фаза F)", () => {
+  it("до двух суток — часами, дольше — сутками, с одним знаком; нет решений — null", async () => {
+    const { waitParts } = await import("./numbers");
+    expect(waitParts(null)).toBeNull();
+    expect(waitParts(2.5)).toEqual({ unit: "hours", value: "2,5" });
+    expect(waitParts(47.9)).toEqual({ unit: "hours", value: "47,9" });
+    expect(waitParts(60)).toEqual({ unit: "days", value: "2,5" });
+  });
+});

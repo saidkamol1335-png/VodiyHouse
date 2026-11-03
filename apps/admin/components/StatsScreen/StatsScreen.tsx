@@ -7,9 +7,10 @@ import type { SiteNow } from "@/lib/admin/home/siteNow";
 import { formatTime } from "@vh/shared/format";
 import { siteOrigin } from "@/lib/site/metadata";
 import { daysIn, type StatsPeriod } from "@/lib/stats/period";
-import type { SiteStats } from "@/lib/stats/types";
+import type { ProgressStats, SiteStats } from "@/lib/stats/types";
 import { StatsKpis } from "./StatsKpis";
 import { StatsObjects } from "./StatsObjects";
+import { StatsProgress } from "./StatsProgress";
 import { StatsBreakdown, StatsCreatives, StatsFunnel } from "./StatsPanels";
 import { StatsToolbar } from "./StatsToolbar";
 
@@ -19,6 +20,8 @@ type StatsScreenProps = {
   period: StatsPeriod;
   today: string;
   siteNow: SiteNow | null;
+  /** «Ход стройки» (фаза F); null — не прочитался, своя строка в панели. */
+  progress: ProgressStats | null;
 };
 
 /** «2026-10-20» → «20.10.2026». */
@@ -47,9 +50,9 @@ async function PeriodLine({ stats, isToday }: { stats: SiteStats; isToday: boole
 
 /**
  * «Статистика сайта» руководителя (мокап CabStats): периоды, 6 цифр, график, источники, устройства
- * и язык, типы заявок, популярные ЖК, креативы, путь посетителя и «Сейчас на сайте».
+ * и язык, типы заявок, популярные ЖК, креативы, «Ход стройки» (фаза F), путь посетителя и «Сейчас на сайте».
  */
-export async function StatsScreen({ stats, period, today, siteNow }: StatsScreenProps) {
+export async function StatsScreen({ stats, period, today, siteNow, progress }: StatsScreenProps) {
   const t = await getTranslations("admin.stats");
   // «Сегодня» — только сегодняшний день: один прошедший день тоже по часам, но со своим текстом.
   const isToday = !!stats && stats.from === today && stats.to === today;
@@ -75,6 +78,7 @@ export async function StatsScreen({ stats, period, today, siteNow }: StatsScreen
       ) : (
         <AdminPanel title={t("title")}>{t("unavailable")}</AdminPanel>
       )}
+      <StatsProgress progress={progress} />
       <div className="stats-screen__grid">
         {stats ? <StatsFunnel stats={stats} /> : null}
         <SiteNowPanel initial={siteNow} read={readSiteNowAction} siteHref={`${siteOrigin()}/ru`} />
