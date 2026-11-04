@@ -118,6 +118,29 @@
   font-weight: 700;
 }
 
+/* Изменившаяся строка (lively, /kalkulyator): значение проявляется; в full — ещё и подъём. */
+[data-motion="full"] .calc-total__flash {
+  display: inline-block;
+  animation: calc-total-flash 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-motion="lite"] .calc-total__flash {
+  animation: calc-total-flash-fade var(--dur-fast) ease-out;
+}
+
+@keyframes calc-total-flash {
+  from {
+    opacity: 0.25;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes calc-total-flash-fade {
+  from {
+    opacity: 0.4;
+  }
+}
+
 .calc-total__actions {
   display: grid;
   gap: 10px;

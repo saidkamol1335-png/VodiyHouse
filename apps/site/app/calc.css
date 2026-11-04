@@ -13,6 +13,7 @@
 @import "../components/CalcTerm/CalcTerm.css";
 @import "../components/CalcTotal/CalcTotal.css";
 @import "../components/Hint/Hint.css";
+@import "../components/RollingNumber/RollingNumber.css";
 
 @import "../components/FlatCalculator/FlatUnits.css";
 

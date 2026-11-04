@@ -1,0 +1,56 @@
+/* Перекат разрядов суммы (PLAN §10, п. 49): окно высотой в строку, внутри лента 0–9 сдвигается к
+   цифре. Только transform; full — перекат, lite — проявление нового числа, none — без движения. */
+
+/* relative — строка для диктора (sr-only, absolute) держится внутри числа. */
+.rolling-number {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.rolling-number__track {
+  display: inline-flex;
+  line-height: 1.1;
+}
+
+.rolling-number__digit {
+  display: inline-block;
+  height: 1.1em;
+  overflow: hidden;
+}
+
+.rolling-number__reel {
+  display: block;
+  transform: translateY(calc(var(--rolling-digit) * -10%));
+}
+
+.rolling-number__reel::before {
+  content: "0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9";
+  display: block;
+  white-space: pre;
+  text-align: center;
+}
+
+.rolling-number__char {
+  display: inline-block;
+  height: 1.1em;
+}
+
+.rolling-number__char::before {
+  content: attr(data-char);
+  white-space: pre;
+}
+
+[data-motion="full"] .rolling-number__reel {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-motion="lite"] .rolling-number__track {
+  animation: rolling-number-fade var(--dur-fast) ease-out;
+}
+
+@keyframes rolling-number-fade {
+  from {
+    opacity: 0.35;
+  }
+}

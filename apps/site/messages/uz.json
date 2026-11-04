@@ -295,6 +295,20 @@
         "term": "Muddat",
         "rate": "Bank foizi",
         "markup": "Ustama"
+      },
+      "breakdown": {
+        "title": "To‘lov nimalardan iborat",
+        "down": "Boshlang‘ich to‘lov",
+        "loan": "Asosiy qarz",
+        "rest": "Qoldiq",
+        "interest": "Bank foizlari",
+        "markup": "Ustama"
+      },
+      "balance": {
+        "title": "Qarz qoldig‘i",
+        "axis": "muddat, {unit}",
+        "summaryYears": "Qarz qoldig‘i: boshida {start}, {at} yildan keyin — {middle}",
+        "summaryMonths": "Qarz qoldig‘i: boshida {start}, {at} oydan keyin — {middle}"
       }
     },
     "steps": {

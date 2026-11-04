@@ -8,10 +8,12 @@ import { CalcStickyBar } from "@/components/CalcStickyBar";
 import { CalcTotal, type TotalContext } from "@/components/CalcTotal";
 import { HintsContext } from "@/components/Hint";
 import { SiteTelegramCopy, ToTotal } from "@/components/SiteCalculator/SiteActions";
+import type { Calculation } from "@vh/shared/calc/calculate";
 import type { CalcHints } from "@vh/shared/calc/hints";
 import type { ExchangeRate } from "@vh/shared/calc/money";
 import { firstPaymentMonth } from "@vh/shared/calc/realtor";
 import type { CalcLocale, CalcT } from "@vh/shared/calc/text";
+import { RealtorBalance, RealtorBreakdown } from "./RealtorCharts";
 import { Choice } from "./RealtorFields";
 import { RealtorInputs, type Update } from "./RealtorInputs";
 import { RealtorTabs, panelId, tabId } from "./RealtorTabs";
@@ -59,17 +61,16 @@ export function RealtorCalculator({ id, initialState, rate, leadEnabled, hints }
             role="tabpanel"
             aria-labelledby={tabId(id, state.tab)}
           >
-            <RealtorInputs id={id} state={state} view={view} rate={rate} update={update} t={t} locale={locale} />
+            {/* Новая вкладка — новые шаги: они входят сдвигом и проявлением (RealtorCalculator.css). */}
+            <div key={state.tab} className="realtor-calc__panel">
+              <RealtorInputs id={id} state={state} view={view} rate={rate} update={update} t={t} locale={locale} />
+            </div>
           </div>
           <div ref={totalRef} className="realtor-calc__result">
             <RealtorResult state={state} view={view} context={context} leadEnabled={leadEnabled} update={update} />
           </div>
         </div>
-        {view.calc ? (
-          <div className="realtor-calc__footer">
-            <CalcSchedule calculation={view.calc} {...context} firstMonth={firstPaymentMonth(new Date())} />
-          </div>
-        ) : null}
+        {view.calc ? <RealtorFooter calc={view.calc} context={context} /> : null}
         <CalcStickyBar
           watch={totalRef}
           label={view.head?.label ?? t("sticky.monthly")}
@@ -82,6 +83,16 @@ export function RealtorCalculator({ id, initialState, rate, leadEnabled, hints }
 }
 
 const NO_HINTS: CalcHints = {};
+
+/** Под калькулятором: остаток долга по периодам и график платежей с датами. */
+function RealtorFooter({ calc, context }: { calc: Calculation; context: TotalContext }) {
+  return (
+    <div className="realtor-calc__footer">
+      <RealtorBalance calc={calc} context={context} />
+      <CalcSchedule calculation={calc} {...context} firstMonth={firstPaymentMonth(new Date())} />
+    </div>
+  );
+}
 
 const tabLabels = (t: CalcT) => ({
   mortgage: t("realtor.tabs.mortgage"),
@@ -123,6 +134,8 @@ function RealtorResult({ update, ...props }: ActionsProps & { update: Update }) 
       problem={view.problem}
       actions={view.head ? <Actions {...props} /> : null}
       footnotes={view.footnotes}
+      figure={view.calc ? <RealtorBreakdown calc={view.calc} context={context} /> : null}
+      lively
       beam
     />
   );

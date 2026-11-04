@@ -100,6 +100,30 @@ test.describe("сайт · страница калькулятора", () => {
     await expect(page.getByTestId("calc-total").locator(".beam")).toHaveCSS("display", "none");
   });
 
+  test("п. 49: перекат цифр, подложка вкладок, полоса и остаток долга — движение только в full", async ({
+    page,
+  }) => {
+    await page.goto("/ru/kalkulyator?motion=full");
+    await page.waitForLoadState("networkidle");
+    const total = page.getByTestId("calc-total");
+    // Сумма — одной строкой для диктора и копирования; ленты разрядов — рисунок CSS.
+    await expect(total.locator(".calc-total__value")).toHaveText(/^7\s558\s000\sсум$/);
+    await expect(total.locator(".rolling-number__reel").first()).toHaveCSS("transition-duration", "0.45s");
+    await expect(total.locator(".realtor-calc__legend-item")).toHaveText([/Взнос\s*8%/, /Тело кредита\s*32%/, /Проценты банка\s*59%/]);
+    await expect(page.locator(".realtor-calc__column")).toHaveCount(16);
+    await expect(page.getByRole("img", { name: /^Остаток долга: в начале 480\s000\s000 сум/ })).toBeVisible();
+    const indicator = page.locator(".realtor-calc__tab-indicator");
+    const before = await indicator.evaluate((element) => element.style.getPropertyValue("--tab-x"));
+    await page.getByRole("tab", { name: "Рассрочка" }).click();
+    await expect.poll(() => indicator.evaluate((element) => element.style.getPropertyValue("--tab-x"))).not.toBe(before);
+    await expect(total.locator(".calc-total__value")).toHaveText(/^20\s000\s000\sсум$/);
+    await expect(total.locator(".realtor-calc__legend-item")).toHaveCount(2);
+    await page.goto("/ru/kalkulyator?motion=none");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator(".rolling-number__reel").first()).toHaveCSS("transition-duration", "0s");
+    await expect(page.locator(".realtor-calc__bar-part").first()).toHaveCSS("transition-duration", "0s");
+  });
+
   test("скриншоты s26: ипотека (ru, uz), рассрочка, «Сколько могу купить», график, окно заявки", async ({
     page,
   }, testInfo) => {

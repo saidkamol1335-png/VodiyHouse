@@ -20,6 +20,7 @@
 }
 
 .realtor-calc__tabs {
+  position: relative;
   display: flex;
   gap: 4px;
   justify-self: start;
@@ -32,6 +33,8 @@
 }
 
 .realtor-calc__tab {
+  position: relative;
+  z-index: 1;
   flex: none;
   min-height: var(--touch-target);
   padding: 0 18px;
@@ -50,12 +53,46 @@
   color: var(--fg);
 }
 
+/* До меры подложки (сервер, без JS) выбранная — та же графитовая плашка: после меры её рисует
+   подложка, и при загрузке ничего не скачет. */
 .realtor-calc__tab--active,
 .realtor-calc__tab--active:hover {
-  border-color: var(--chip-on-border);
-  background: var(--seg-on-bg);
+  border-color: transparent;
+  background: var(--action-bg);
   box-shadow: var(--seg-on-shadow);
-  color: var(--fg);
+  color: var(--action-fg);
+}
+
+/* Подложка измерена (JS): выбранную рисует она — графитовая плашка переезжает к новой вкладке,
+   масштаб по ширине от базы 100 px (только transform). */
+.realtor-calc__tab-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 100px;
+  border-radius: var(--r-m);
+  background: var(--action-bg);
+  box-shadow: var(--seg-on-shadow);
+  transform: translateX(var(--tab-x)) scaleX(var(--tab-scale));
+  transform-origin: left center;
+}
+
+[data-motion="full"] .realtor-calc__tab-indicator {
+  transition: transform 0.45s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+
+[data-motion="lite"] .realtor-calc__tab-indicator {
+  transition: transform var(--dur-fast) ease-out;
+}
+
+.realtor-calc__tabs--measured .realtor-calc__tab--active,
+.realtor-calc__tabs--measured .realtor-calc__tab--active:hover {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--action-fg);
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .realtor-calc__tab:focus-visible {
@@ -70,11 +107,58 @@
   align-items: start;
 }
 
-.realtor-calc__inputs {
+.realtor-calc__inputs,
+.realtor-calc__panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   min-width: 0;
+}
+
+/* Смена вкладки: шаги новой входят сдвигом и проявлением по очереди; lite — только проявление. */
+[data-motion="full"] .realtor-calc__panel > * {
+  animation: realtor-calc-panel 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+[data-motion="full"] .realtor-calc__panel > :nth-child(2) {
+  animation-delay: 60ms;
+}
+
+[data-motion="full"] .realtor-calc__panel > :nth-child(3) {
+  animation-delay: 120ms;
+}
+
+[data-motion="lite"] .realtor-calc__panel {
+  animation: realtor-calc-fade var(--dur-fast) ease-out;
+}
+
+@keyframes realtor-calc-panel {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes realtor-calc-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Вход страницы (как SiteMotion): вкладки, итог и график — следом за шапкой калькулятора. */
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="full"]
+  :is(.realtor-calc__tabs, .realtor-calc__result, .realtor-calc__footer) {
+  animation: site-intro-rise var(--dur-intro) var(--ease) 0.24s backwards;
+}
+
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="full"]
+  .realtor-calc__result {
+  animation-delay: 0.36s;
+}
+
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="lite"]
+  .realtor-calc {
+  animation: site-intro-fade var(--dur-fast) ease-out backwards;
 }
 
 .realtor-calc__result,
@@ -281,6 +365,17 @@
   }
 }
 
+/* Итог (~760 px) целиком помещается под шапкой: своя прокрутка не нужна — дробная высота крупной
+   суммы давала у неё пиксель переполнения и полосу прокрутки. Ниже — прокрутка остаётся. */
+@container (min-width: 900px) {
+  @media (min-height: 880px) {
+    .realtor-calc__result {
+      max-height: none;
+      overflow-y: visible;
+    }
+  }
+}
+
 /* Телефон: место под липкой полосой «Платёж в месяц» (В7 B); срок — число над ползунком. */
 @media (max-width: 767px) {
   .realtor-calc {
@@ -307,4 +402,352 @@
   .realtor-calc__currency {
     margin-top: 0;
   }
+}
+
+/* ─── Полоса «из чего выплата» (п. 49): доли — scaleX от начала своей доли, плавно в full ─────── */
+
+.realtor-calc__breakdown {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.realtor-calc__breakdown-title,
+.realtor-calc__balance-title {
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.realtor-calc__bar {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--bg-4);
+}
+
+.realtor-calc__bar-part--down,
+.realtor-calc__legend-item--down {
+  --part-color: var(--fg-3);
+}
+
+.realtor-calc__bar-part--loan,
+.realtor-calc__legend-item--loan {
+  --part-color: var(--fg);
+}
+
+.realtor-calc__bar-part--extra,
+.realtor-calc__legend-item--extra {
+  --part-color: var(--amber);
+}
+
+.realtor-calc__bar-part {
+  position: absolute;
+  inset: 0;
+  background: var(--part-color);
+  transform: translateX(calc(var(--part-start) * 100%)) scaleX(var(--part-share));
+  transform-origin: left center;
+}
+
+[data-motion="full"] .realtor-calc__bar-part {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-motion="lite"] .realtor-calc__bar-part {
+  transition: transform var(--dur-fast) ease-out;
+}
+
+.realtor-calc__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-small);
+}
+
+.realtor-calc__legend-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.realtor-calc__legend-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-2);
+}
+
+.realtor-calc__legend-label::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--part-color);
+}
+
+.realtor-calc__legend-value {
+  color: var(--fg);
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Остаток долга (п. 49): столбики — scaleY от доли кредита, растут снизу ─────────────────── */
+
+.realtor-calc__footer {
+  display: grid;
+  gap: 16px;
+}
+
+.realtor-calc__balance {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 20px 24px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-1);
+}
+
+.realtor-calc__balance-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.realtor-calc__balance-unit {
+  color: var(--fg-3);
+}
+
+.realtor-calc__columns {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 4px;
+  height: 120px;
+  padding-bottom: 20px;
+}
+
+.realtor-calc__column {
+  position: relative;
+}
+
+.realtor-calc__column-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-xs) var(--r-xs) 0 0;
+  background: linear-gradient(to top, var(--amber), var(--amber-2));
+  opacity: 0.85;
+  transform: scaleY(var(--column-share));
+  transform-origin: bottom center;
+}
+
+[data-motion="full"] .realtor-calc__column-fill {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-motion="full"] .realtor-calc__column:nth-child(even) .realtor-calc__column-fill {
+  transition-delay: 40ms;
+}
+
+[data-motion="lite"] .realtor-calc__column-fill {
+  transition: transform var(--dur-fast) ease-out;
+}
+
+.realtor-calc__column-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 4px;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  transform: translateX(-50%);
+}
+
+/* ─── Ползунок и кнопки (п. 49): подсказка над бегунком, бегунок крупнее, кнопки «вжимаются» ─── */
+
+.realtor-calc__range-wrap {
+  position: relative;
+}
+
+.realtor-calc__bubble {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  /* Центр бегунка 22 px: от 11 px до (100% − 11 px). */
+  left: calc(11px + (100% - 22px) * var(--realtor-calc-fill-ratio));
+  padding: 4px 8px;
+  border-radius: var(--r-s);
+  background: var(--action-bg);
+  color: var(--action-fg);
+  font-size: var(--fs-small);
+  font-weight: 650;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 6px) scale(0.9);
+  transform-origin: bottom center;
+}
+
+.realtor-calc__range-wrap:has(.realtor-calc__range:active, .realtor-calc__range:focus-visible)
+  .realtor-calc__bubble {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+[data-motion="full"] .realtor-calc__bubble {
+  transition:
+    opacity var(--dur-fast) var(--ease),
+    transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+[data-motion="lite"] .realtor-calc__bubble {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+[data-motion="full"] .realtor-calc__range::-webkit-slider-thumb {
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.realtor-calc__range:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.realtor-calc__range:active::-moz-range-thumb {
+  transform: scale(1.2);
+}
+
+[data-motion="full"] :is(.realtor-calc__chip, .realtor-calc__tab) {
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+[data-motion="full"] :is(.realtor-calc__chip, .realtor-calc__tab):active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 767px) {
+  .realtor-calc__balance {
+    padding: 16px;
+  }
+}
+
+/* ─── Скин калькулятора (слово исполнителя 04.11: «чуть округли границы и добавь shadow»; правила
+   ui-ux-pro-max: отклик на наведение тенью и рамкой без сдвига раскладки, 150–300 мс, видимый фокус).
+   Только внутри .realtor-calc — расчёт квартиры и остальной сайт остаются как были. Радиусы — мягче
+   скина сайта (4–12 px → 8–20 px), тени — два слоя: контактная и мягкая. ─────────────────────── */
+
+.realtor-calc {
+  --r-s: 8px;
+  --r-m: 10px;
+  --r-l: 14px;
+  --r-xl: 18px;
+  --r-2xl: 20px;
+  --realtor-shadow: 0 1px 2px rgba(30, 28, 25, 0.05), 0 10px 28px -14px rgba(30, 28, 25, 0.22);
+  --realtor-shadow-hover: 0 2px 4px rgba(30, 28, 25, 0.06), 0 18px 40px -16px rgba(30, 28, 25, 0.3);
+  --realtor-shadow-control: 0 1px 2px rgba(30, 28, 25, 0.06), 0 4px 10px -6px rgba(30, 28, 25, 0.18);
+}
+
+/* Карточки: шаги, итог, остаток долга, вкладки. Наведение — тень глубже: её слой (::after) лишь
+   проявляется (opacity), сама карточка не двигается. */
+.realtor-calc :is(.calc-step, .realtor-calc__balance, .calc-total) {
+  position: relative;
+  box-shadow: var(--realtor-shadow);
+}
+
+.realtor-calc :is(.calc-step, .realtor-calc__balance)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--realtor-shadow-hover);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.realtor-calc :is(.calc-step, .realtor-calc__balance):is(:hover, :focus-within)::after {
+  opacity: 1;
+}
+
+[data-motion="full"] .realtor-calc :is(.calc-step, .realtor-calc__balance)::after {
+  transition: opacity 0.25s var(--ease);
+}
+
+[data-motion="lite"] .realtor-calc :is(.calc-step, .realtor-calc__balance)::after {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+.realtor-calc .realtor-calc__tabs {
+  box-shadow: var(--realtor-shadow-control);
+}
+
+/* Поля, кнопки, чипы и сегменты — мягче углы, лёгкая тень; кнопки сайта в скине почти прямые. */
+.realtor-calc .field__input {
+  box-shadow: inset 0 1px 2px rgba(30, 28, 25, 0.05);
+}
+
+.realtor-calc .field__input:focus {
+  box-shadow: var(--field-ring);
+}
+
+/* Скин сайта ставит кнопкам 2 px с большей точностью селектора — здесь её перекрываем. */
+:root[data-surface="site"] .realtor-calc .button {
+  border-radius: var(--r-m);
+}
+
+.realtor-calc :is(.realtor-calc__chip, .segmented) {
+  box-shadow: var(--realtor-shadow-control);
+}
+
+.realtor-calc .realtor-calc__chip {
+  cursor: pointer;
+}
+
+.realtor-calc .segmented--form {
+  border-radius: var(--r-m);
+}
+
+.realtor-calc .segmented--form .segmented__item {
+  border-radius: var(--r-s);
+}
+
+.realtor-calc .calc-schedule__toggle {
+  box-shadow: var(--realtor-shadow-control);
+}
+
+/* Наведение на чипы и «График платежей» — подъём на 1–2 px (transform, без сдвига соседей); кнопки
+   сайта поднимаются и «вжимаются» сами (liquid-glass.css). */
+[data-motion="full"] .realtor-calc :is(.realtor-calc__chip, .calc-schedule__toggle) {
+  transition:
+    border-color 0.2s var(--ease),
+    color 0.2s var(--ease),
+    transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@media (hover: hover) {
+  [data-motion="full"] .realtor-calc .calc-schedule__toggle:hover {
+    transform: translateY(-2px);
+  }
+
+  [data-motion="full"] .realtor-calc .realtor-calc__chip:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Нажатие главнее наведения: мышь при нажатии всегда над кнопкой. */
+  [data-motion="full"] .realtor-calc .realtor-calc__chip:hover:active {
+    transform: scale(0.95);
+  }
+}
+
+[data-motion="full"] .realtor-calc .calc-schedule__toggle:active {
+  transform: scale(0.98);
 }

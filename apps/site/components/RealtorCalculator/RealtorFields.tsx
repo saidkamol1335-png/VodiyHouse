@@ -72,23 +72,33 @@ type RangeProps = {
   onChange: (value: number) => void;
 };
 
-/** Ползунок срока: заливка до значения (как у взноса в калькуляторе квартиры). */
+/**
+ * Ползунок срока: заливка до значения (как у взноса в калькуляторе квартиры); над бегунком, пока его
+ * тянут или он в фокусе с клавиатуры, — подсказка со значением (п. 49).
+ */
 export function Range({ id, label, valueText, value, min, max, onChange }: RangeProps) {
-  const fill = max > min ? ((value - min) / (max - min)) * 100 : 100;
+  const ratio = max > min ? (value - min) / (max - min) : 1;
   return (
-    <input
-      id={id}
-      type="range"
-      className="realtor-calc__range"
-      min={min}
-      max={max}
-      step={1}
-      value={value}
-      aria-label={label}
-      aria-valuetext={valueText}
-      style={{ "--realtor-calc-fill": `${fill}%` } as CSSProperties}
-      onChange={(event) => onChange(Number(event.target.value))}
-    />
+    <div
+      className="realtor-calc__range-wrap"
+      style={{ "--realtor-calc-fill": `${ratio * 100}%`, "--realtor-calc-fill-ratio": ratio } as CSSProperties}
+    >
+      <input
+        id={id}
+        type="range"
+        className="realtor-calc__range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        aria-label={label}
+        aria-valuetext={valueText}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
+      <span className="realtor-calc__bubble" aria-hidden="true">
+        {valueText}
+      </span>
+    </div>
   );
 }
 

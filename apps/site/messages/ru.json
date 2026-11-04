@@ -295,6 +295,20 @@
         "term": "Срок",
         "rate": "Ставка банка",
         "markup": "Наценка"
+      },
+      "breakdown": {
+        "title": "Из чего складывается выплата",
+        "down": "Взнос",
+        "loan": "Тело кредита",
+        "rest": "Остаток",
+        "interest": "Проценты банка",
+        "markup": "Наценка"
+      },
+      "balance": {
+        "title": "Остаток долга",
+        "axis": "срок, {unit}",
+        "summaryYears": "Остаток долга: в начале {start}, через {at, plural, one {# год} few {# года} other {# лет}} — {middle}",
+        "summaryMonths": "Остаток долга: в начале {start}, через {at} мес. — {middle}"
       }
     },
     "steps": {

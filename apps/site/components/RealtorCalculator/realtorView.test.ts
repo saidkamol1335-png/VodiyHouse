@@ -17,6 +17,7 @@ import {
 import { leadRowsOf, telegramOf } from "./realtorText";
 import { realtorView } from "./realtorView";
 import { realtorSearch } from "./useRealtorState";
+import { balanceBars } from "./RealtorCharts";
 
 // Риелторский калькулятор (PLAN §10, п. 48): строки итога, заявка, Telegram и адрес — на русских и
 // узбекских текстах сайта. Пробелы в суммах — неразрывные (Intl), поэтому сравниваем без них.
@@ -226,5 +227,29 @@ describe("адрес", () => {
     expect(parseNumber("")).toBeNull();
     expect(parseNumber("12a")).toBeNull();
     expect(parseNumber("-5")).toBeNull();
+  });
+});
+
+describe("остаток долга по периодам (п. 49)", () => {
+  const calcOf = (state: RealtorState) => view(state).calc!;
+
+  it("ипотека 15 лет — по годам: 16 столбиков, от суммы кредита до нуля, по убыванию", () => {
+    const bars = balanceBars(calcOf(REALTOR_DEFAULTS));
+    expect(bars).toHaveLength(16);
+    expect(bars[0]).toEqual({ at: 0, balance: 480_000_000 });
+    expect(bars.at(-1)).toEqual({ at: 180, balance: 0 });
+    expect(bars.every((bar, index) => index === 0 || bar.balance < bars[index - 1]!.balance)).toBe(true);
+  });
+
+  it("рассрочка 24 мес. — по месяцам, 36 мес. — по кварталам, не больше 26 столбиков", () => {
+    const installment = { ...REALTOR_DEFAULTS, tab: "installment" as const };
+    expect(balanceBars(calcOf({ ...installment, months: 24 }))).toHaveLength(25);
+    expect(balanceBars(calcOf({ ...installment, months: 36 }))).toHaveLength(13);
+    expect(balanceBars(calcOf({ ...REALTOR_DEFAULTS, years: 25 })).length).toBeLessThanOrEqual(26);
+  });
+
+  it("рассрочка 40 мес. — не годами (иначе «3,33 года»): кварталы, последний столбик — 40-й месяц", () => {
+    const bars = balanceBars(calcOf({ ...REALTOR_DEFAULTS, tab: "installment", months: 40 }));
+    expect(bars.map((bar) => bar.at)).toEqual([0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 40]);
   });
 });
