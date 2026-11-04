@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:prod": "node scripts/dev-prod-copy.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "frames": "node scripts/frames/frames.mjs",
+    "frames:placeholder": "node scripts/frames/placeholder.mjs",
+    "frames:key": "node scripts/frames/key-stills.mjs",
     "test:db:remote": "node --env-file-if-exists=.env.local scripts/test-db-remote.mjs",
     "e2e": "playwright test",
     "e2e:1440": "playwright test --project=desktop-1440",
@@ -28,8 +32,10 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "@vh/shared": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "gsap": "3.13.0",
     "lucide-react": "^1.59.0",
     "next": "16.4.2",
     "next-intl": "^4.14.9",
@@ -37,8 +43,8 @@
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.7.0",
-    "tus-js-client": "^4.3.1",
-    "@vh/shared": "*"
+    "three": "^0.187.0",
+    "tus-js-client": "^4.3.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
@@ -50,6 +56,7 @@
     "@types/pg": "8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",

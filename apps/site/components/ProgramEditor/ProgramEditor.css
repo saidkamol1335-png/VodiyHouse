@@ -144,7 +144,7 @@
   display: grid;
   gap: 16px;
   padding-top: 16px;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .program-editor__actions,

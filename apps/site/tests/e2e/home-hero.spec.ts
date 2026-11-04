@@ -1,315 +1,150 @@
 import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
-// Первый экран главной (30.10.2026): полёт дрона над стройкой вместо «Чертёж → стройка». full —
-// лента кадров по прокрутке (как в артефакте «Закат»): текст гаснет, на последних кадрах финал «Дом
-// сдан»; lite — ролик один раз и стоп на вечере; none и экономия трафика — только постер. Шапка в
-// тонах экрана; на телефоне — вырезка 9:16, текст внизу первого экрана, факты полосой под ним.
-// Встроенный Chromium Playwright не играет H.264 — проверяем WebM.
+// Первый экран главной «Ufq · Раскол» (03.11.2026; переходы — motion kit Oryzo): светлое небо, по
+// центру текст, внизу травертиновый горизонт; рендеры — прямоугольники за ним, при входе не видны. На
+// десктопе ≥ 1024×720 сцена липнет: текст уходит, заголовок уменьшается к шапке, рамки выходят целиком
+// (центральная шире), камера «ныряет» в центральную, экран раскалывается по ней — в щель поднимается
+// каталог. Ниже — рамки выходят, пока экран уезжает; none — готовая картина.
 
 const hero = (page: Page) => page.locator(".home-hero");
-const video = (page: Page) => page.locator(".home-hero__video");
-const canvas = (page: Page) => page.locator(".home-hero__canvas");
-const posterSrc = (page: Page) =>
-  page
-    .locator(".home-hero__poster img")
-    .evaluate((image) => (image as HTMLImageElement).currentSrc);
-
-/** Запросы файлов ролика и ленты: ролик (webm, mp4) и кадры отдельно. */
-function heroRequests(page: Page) {
-  const videos: string[] = [];
-  const frames: string[] = [];
-  page.on("request", (request) => {
-    const url = request.url();
-    if (/\/hero\/timelapse\/.*\.(webm|mp4)$/.test(url)) videos.push(url);
-    if (/\/hero\/timelapse\/v3\/frames-(1920|1280)\/\d{4}\.webp$/.test(url)) frames.push(url);
+const tower = (page: Page, slot: string) => page.locator(`.home-hero__tower--${slot}`);
+const phase = (page: Page) => hero(page).getAttribute("data-phase");
+/** Начало и длина липкого пути. */
+const track = (page: Page) =>
+  page.evaluate(() => {
+    const section = document.querySelector<HTMLElement>(".home-hero")!;
+    const trackEl = section.querySelector<HTMLElement>(".home-hero__track")!;
+    const stage = section.querySelector<HTMLElement>(".home-hero__stage")!;
+    return {
+      top: section.getBoundingClientRect().top + window.scrollY,
+      length: trackEl.offsetHeight - stage.offsetHeight,
+    };
   });
-  return { videos, frames };
-}
+const scrollTo = (page: Page, top: number) =>
+  page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), top);
 
-const scrollLength = (page: Page) =>
-  hero(page).evaluate((element) => element.getBoundingClientRect().height - window.innerHeight);
-
-/** Середина холста совпадает с кадром 0001 из набора 1920, нарисованным без масштаба (допуск — округление). */
-const canvasMatchesFirstFrame = (page: Page) =>
-  canvas(page).evaluate(async (element) => {
-    const surface = element as HTMLCanvasElement;
-    const image = new Image();
-    image.src = "/hero/timelapse/v3/frames-1920/0001.webp";
-    await image.decode();
-    const probe = document.createElement("canvas");
-    probe.width = surface.width;
-    probe.height = surface.height;
-    const context = probe.getContext("2d")!;
-    const positionX = parseFloat(getComputedStyle(surface).objectPosition) / 100;
-    const left = Math.round((surface.width - image.naturalWidth) * positionX);
-    context.drawImage(image, left, Math.round((surface.height - image.naturalHeight) / 2));
-    const area = [surface.width / 2, surface.height / 2, 200, 200] as const;
-    const expected = context.getImageData(...area).data;
-    const actual = surface.getContext("2d")!.getImageData(...area).data;
-    return expected.every((value, index) => Math.abs(value - actual[index]!) <= 2);
-  });
-
-test.describe("первый экран главной — полёт над стройкой", () => {
-  test("1440, full: кадры по прокрутке — текст гаснет, в конце финал и постер; шапка тёмная над экраном", async ({
+test.describe("первый экран главной — колоннада и раскол", () => {
+  test("1440, full: при входе рендеров нет; выходят целиком, центральная шире; нырок и раскол открывают каталог", async ({
     page,
   }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop-1440", "лента по прокрутке — десктоп");
+    test.skip(testInfo.project.name !== "desktop-1440", "липкая сцена — десктоп");
     const errors = collectPageErrors(page);
-    const requests = heroRequests(page);
     await page.goto("/ru?motion=full");
     await expect(hero(page)).toHaveClass(/home-hero--full/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    await expect(page.getByRole("heading", { level: 1 })).toHaveAccessibleName(
       "Квартиры в новостройках Ферганы — по цене застройщика",
     );
-    await expect(page.getByRole("link", { name: /Подобрать квартиру/ }).first()).toHaveAttribute(
-      "href",
-      /#katalog$/,
-    );
-    await expect(page.locator(".home-hero__quiz")).toHaveAttribute("href", "#podbor");
-    await expect(page.locator("html")).toHaveAttribute("data-hero-dark", "");
-    await expect(page.locator(".site-header")).toHaveClass(/site-header--dark/);
-    // Текст стоит по краю логотипа шапки.
-    const [logo, copy] = await Promise.all([
-      page.locator(".logo").boundingBox(),
-      page.locator(".home-hero__copy").boundingBox(),
+    await expect(page.locator(".home-hero__pill a")).toHaveCount(0);
+    await expect(hero(page)).toHaveAttribute("data-phase", "rest");
+    // Переменных на секции нет — позы пишутся прямо в слои.
+    expect(await hero(page).getAttribute("style")).toBeNull();
+    const ledgerTop = (await page.locator(".home-hero__ledger").boundingBox())!.y;
+    for (const slot of ["c", "l1", "r1"]) {
+      const box = (await tower(page, slot).boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(ledgerTop);
+    }
+    // Пауза: всё вышло целиком над горизонтом, прямоугольники, центральная шире.
+    const { top, length } = await track(page);
+    await scrollTo(page, top + length * 0.48);
+    await expect.poll(() => phase(page), { timeout: 10_000 }).toBe("hold");
+    await page.waitForTimeout(600);
+    const [title, facts, center, side] = await Promise.all([
+      page.getByRole("heading", { level: 1 }).boundingBox(),
+      page.locator(".home-hero__facts-row").boundingBox(),
+      tower(page, "c").boundingBox(),
+      tower(page, "l1").boundingBox(),
     ]);
-    expect(Math.abs((logo?.x ?? 0) - (copy?.x ?? 1))).toBeLessThan(2);
-    // Холст вместо ролика: проявляется с первым кадром, секция выше экрана на ленту.
-    await expect(canvas(page)).toHaveCount(1);
-    await expect(video(page)).toHaveCount(0);
-    await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
-    await expect(page.locator(".home-hero__cue")).toContainText("Листайте");
-    expect(await scrollLength(page)).toBeGreaterThan(page.viewportSize()!.height * 2);
-    // Сначала первый кадр из лёгкого набора: экран загрузки ждёт черновик, а не 1920.
-    expect(requests.frames[0]).toMatch(/\/frames-1280\/0001\.webp$/);
-    // Середина ленты: вступление погасло, его ссылки не ловят фокус, но h1 остаётся диктору.
-    const length = await scrollLength(page);
-    await page.evaluate((top) => window.scrollTo(0, top), length * 0.5);
-    await expect(hero(page)).toHaveClass(/home-hero--past-intro/, { timeout: 10_000 });
-    await expect(page.locator(".home-hero__copy")).toHaveCSS("opacity", "0");
-    await expect(page.locator(".home-hero__copy .home-hero__cta")).toBeHidden();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-    await expect(page.locator(".home-hero__finale")).toBeHidden();
-    await expect(page.locator("html")).toHaveAttribute("data-hero-dark", "");
-    // Конец ленты: финал «Дом сдан» с кнопкой к каталогу проявился; последний кадр уступает постеру.
-    await page.evaluate((top) => window.scrollTo(0, top + 10), length);
-    await expect(hero(page)).toHaveClass(/home-hero--finale/, { timeout: 10_000 });
-    await expect(page.locator(".home-hero__finale")).toHaveCSS("opacity", "1");
-    await expect(page.getByText("Дом сдан.")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Смотреть квартиры/ })).toHaveAttribute(
-      "href",
-      /#katalog$/,
-    );
-    await expect(hero(page)).toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
-    await expect(canvas(page)).toHaveCSS("opacity", "0");
-    expect(requests.videos).toEqual([]);
-    // Ниже первого экрана шапка снова в цветах темы, ссылки вступления снова доступны.
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect(page.locator("html")).not.toHaveAttribute("data-hero-dark", "");
-    await expect(hero(page)).not.toHaveClass(/home-hero--past-intro/);
-    await expect(page.locator(".home-hero__copy .home-hero__cta")).toBeVisible();
+    expect(center!.width / side!.width).toBeGreaterThan(1.2);
+    for (const box of [center!, side!]) {
+      expect(box.y).toBeGreaterThanOrEqual(title!.y + title!.height);
+      expect(box.y + box.height).toBeLessThanOrEqual(facts!.y);
+    }
+    const style = await tower(page, "l1")
+      .locator(".home-hero__frame")
+      .evaluate((element) => {
+        const computed = getComputedStyle(element);
+        return { radius: computed.borderRadius, mask: computed.webkitMaskImage || "none" };
+      });
+    expect(style.radius).toBe("0px");
+    expect(style.mask).toBe("none");
+    // Конец пути: раскол прошёл, сцена скрыта, под шапкой — следующая страница.
+    await scrollTo(page, top + length);
+    await expect.poll(() => phase(page), { timeout: 10_000 }).toBe("through");
+    await expect(page.locator(".home-hero__stage")).toHaveCSS("visibility", "hidden");
+    await expect(page.locator("#katalog")).toBeInViewport();
+    // Пройденная сцена не перехватывает клики каталога под собой.
+    const pill = page.locator("#katalog .filter-pills__pill").first();
+    await pill.click({ trial: true });
     expect(errors).toEqual([]);
   });
 
-  for (const screen of [
-    // Задник 1920 > 1400: черновик из 1280, настоящие кадры — 1920, кадр рисуется 1:1.
-    { width: 1536, height: 864, dpr: 1.25, set: "1920", backing: [1920, 1080] },
-    // Full HD с полосой прокрутки: кадр на 0,8 % шире окна — всё равно пиксель в пиксель, край режется.
-    { width: 1905, height: 950, dpr: 1, set: "1920", backing: [1905, 950] },
-    // Задник 1366 ≤ 1400: только 1280, задник не шире кадра.
-    { width: 1366, height: 768, dpr: 1, set: "1280", backing: [1280, 720] },
-  ] as const) {
-    test(`${screen.width}×${screen.height}, DPR ${screen.dpr}: кадры ${screen.set}, задник ${screen.backing[0]}`, async ({
-      browser,
-    }, testInfo) => {
-      test.skip(testInfo.project.name !== "desktop-1440", "лента по прокрутке — десктоп");
-      const context = await browser.newContext({
-        viewport: { width: screen.width, height: screen.height },
-        deviceScaleFactor: screen.dpr,
-      });
-      const page = await context.newPage();
-      const errors = collectPageErrors(page);
-      const requests = heroRequests(page);
-      await page.goto("/ru?motion=full");
-      await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
-      const backing = await canvas(page).evaluate((element) => {
-        const surface = element as HTMLCanvasElement;
-        return [surface.width, surface.height];
-      });
-      expect(backing).toEqual(screen.backing);
-      // Настоящие кадры пошли, в том числе поверх черновика; чужого набора нет, кроме черновика.
-      await expect
-        .poll(
-          () => requests.frames.filter((url) => url.includes(`/frames-${screen.set}/`)).length,
-          {
-            timeout: 15_000,
-          },
-        )
-        .toBeGreaterThan(20);
-      const sets = new Set(requests.frames.map((url) => /frames-(\d+)/.exec(url)?.[1]));
-      expect([...sets].sort()).toEqual(screen.set === "1920" ? ["1280", "1920"] : ["1280"]);
-      if (screen.set === "1920") {
-        const light = requests.frames
-          .filter((url) => url.includes("/frames-1280/"))
-          .map((url) => Number(/(\d{4})\.webp$/.exec(url)?.[1]) - 1)
-          .sort((a, b) => a - b);
-        expect(light).toEqual(Array.from({ length: 13 }, (_, index) => index * 10));
-        expect(
-          requests.frames.filter((url) => url.endsWith("/frames-1920/0001.webp")),
-        ).toHaveLength(1);
-        // Настоящий первый кадр на холсте — пиксель в пиксель, как файл с целым смещением.
-        await expect.poll(() => canvasMatchesFirstFrame(page), { timeout: 15_000 }).toBe(true);
-      }
-      // Конец ленты: настоящий кадр 1920 пиксель в пиксель постеру не уступает, кадр 1280 уступает.
-      const length = await scrollLength(page);
-      await page.evaluate((top) => window.scrollTo(0, top + 10), length);
-      await expect(hero(page)).toHaveClass(/home-hero--finale/, { timeout: 10_000 });
-      if (screen.set === "1920") {
-        await expect(hero(page)).not.toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
-        await expect(canvas(page)).toHaveCSS("opacity", "1");
-      } else {
-        await expect(hero(page)).toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
-        await expect(canvas(page)).toHaveCSS("opacity", "0");
-      }
-      expect(errors).toEqual([]);
-      await context.close();
-    });
-  }
-
-  test("1905×950: настоящий последний кадр не пришёл — на конце ленты постер, а не чужой кадр", async ({
-    browser,
+  test("1440, full: фокус в ушедший текст — к началу, за первый экран — к концу сцены", async ({
+    page,
   }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop-1440", "лента по прокрутке — десктоп");
-    const context = await browser.newContext({ viewport: { width: 1905, height: 950 } });
-    const page = await context.newPage();
-    await page.route(/\/frames-(1920|1280)\/0121\.webp$/, () => undefined);
+    test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
     await page.goto("/ru?motion=full");
-    await expect(hero(page)).toHaveClass(/home-hero--ready/, { timeout: 15_000 });
-    const length = await scrollLength(page);
-    await page.evaluate((top) => window.scrollTo(0, top + 10), length);
-    await expect(hero(page)).toHaveClass(/home-hero--at-end/, { timeout: 15_000 });
-    await expect(canvas(page)).toHaveCSS("opacity", "0");
-    await context.close();
+    const { top, length } = await track(page);
+    await scrollTo(page, top + length * 0.6);
+    await expect.poll(() => phase(page), { timeout: 10_000 }).toBe("dive");
+    const cta = page.locator(".home-hero__cta");
+    await cta.focus();
+    await expect(cta).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(top + 5);
+    await expect(page.locator(".home-hero__out--actions")).toHaveCSS("opacity", "1");
+    // Каталог под пластинами: фокус туда — сразу к концу сцены, где он виден.
+    await page.locator("#katalog .filter-pills__pill").first().focus();
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBeGreaterThanOrEqual(top + length - 2);
   });
 
-  test("1440, full по ссылке с #якорем: ленты нет — ролик, место у квиза не прыгает", async ({
+  test("1440, full по ссылке #katalog: сцена не закрывает каталог, кнопки фильтра нажимаются", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    const requests = heroRequests(page);
-    await page.goto("/ru?motion=full#podbor");
-    await expect(page.locator("html")).toHaveAttribute("data-motion", "full");
-    await expect(hero(page)).toHaveClass(/home-hero--lite/);
-    await expect(canvas(page)).toHaveCount(0);
-    await expect(page.locator("#podbor")).toBeInViewport();
-    expect(await scrollLength(page)).toBeLessThan(page.viewportSize()!.height);
-    await page.waitForTimeout(1_000);
-    await expect(page.locator("#podbor")).toBeInViewport();
-    expect(requests.frames).toEqual([]);
+    await page.goto("/ru?motion=full#katalog");
+    await expect(page.locator("#katalog")).toBeInViewport();
+    const pill = page.locator("#katalog .filter-pills__pill").first();
+    await pill.click({ trial: true });
+    await expect(page.locator("html")).toHaveAttribute("data-hero-ready", "");
   });
 
-  test("1440, lite: ролик 1080p проявляется, пауза кнопкой, один раз и стоп на вечере", async ({
-    page,
-  }, testInfo) => {
+  test("1440, lite: та же сцена без догона", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    const errors = collectPageErrors(page);
-    const requests = heroRequests(page);
     await page.goto("/ru?motion=lite");
     await expect(hero(page)).toHaveClass(/home-hero--lite/);
-    await expect(canvas(page)).toHaveCount(0);
-    await expect(page.locator(".home-hero__cue")).toHaveCount(0);
-    await expect(page.locator(".home-hero__finale")).toHaveCount(0);
-    await expect(video(page)).toHaveAttribute("src", /\/hero\/timelapse\/v3\/hero-1080\.webm$/);
-    await expect(video(page)).toHaveJSProperty("muted", true);
-    await expect(hero(page)).toHaveClass(/home-hero--playing/, { timeout: 20_000 });
-    // Пауза кнопкой (WCAG 2.2.2): ролик стоит и сам не продолжается; кнопка продолжает.
-    await page.getByRole("button", { name: "Остановить ролик" }).click();
-    await expect(page.getByRole("button", { name: "Продолжить ролик" })).toBeVisible();
-    await expect
-      .poll(() => video(page).evaluate((element) => (element as HTMLVideoElement).paused))
-      .toBe(true);
-    await page.getByRole("button", { name: "Продолжить ролик" }).click();
-    await expect
-      .poll(() => video(page).evaluate((element) => (element as HTMLVideoElement).paused))
-      .toBe(false);
-    // Один раз: ускоренный ролик доходит до конца, не повторяется и уступает постеру — тот же кадр.
-    await video(page).evaluate((element) => {
-      (element as HTMLVideoElement).playbackRate = 16;
-    });
-    await expect
-      .poll(() => video(page).evaluate((element) => (element as HTMLVideoElement).ended), {
-        timeout: 20_000,
-      })
-      .toBe(true);
-    expect(await video(page).evaluate((element) => (element as HTMLVideoElement).loop)).toBe(false);
-    await expect(hero(page)).not.toHaveClass(/home-hero--playing/);
-    await expect(video(page)).toHaveCSS("opacity", "0");
-    await expect(page.getByRole("button", { name: "Остановить ролик" })).toHaveCount(0);
-    // Секция — один экран, кадры ленты не качаются.
-    expect(await scrollLength(page)).toBeLessThan(page.viewportSize()!.height);
-    expect(requests.frames).toEqual([]);
-    expect(errors).toEqual([]);
+    const { top, length } = await track(page);
+    expect(length).toBeGreaterThan(page.viewportSize()!.height);
+    await scrollTo(page, top + length * 0.48);
+    await expect.poll(() => phase(page)).toBe("hold");
+    await scrollTo(page, top + length);
+    await expect.poll(() => phase(page)).toBe("through");
   });
 
-  test("1440, lite: «Назад» на главную — ролик не играет второй раз, сразу постер", async ({
-    page,
-  }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    const errors = collectPageErrors(page);
-    await page.goto("/ru?motion=lite");
-    await expect(hero(page)).toHaveClass(/home-hero--playing/, { timeout: 20_000 });
-    await page.locator(".site-header").getByRole("link", { name: "Новостройки" }).click();
-    await expect(page).toHaveURL(/\/ru\/novostroyki/);
-    const requests: string[] = [];
-    page.on("request", (request) => {
-      if (/\/hero\/timelapse\/.*\.(webm|mp4)$/.test(request.url())) requests.push(request.url());
-    });
-    await page.goBack();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Квартиры в новостройках");
-    await page.waitForTimeout(2_000);
-    await expect(hero(page)).not.toHaveClass(/home-hero--playing/);
-    expect(requests).toEqual([]);
-    expect(errors).toEqual([]);
-  });
-
-  test("1440, none: только постер «вечер», ни холста, ни ролика", async ({ page }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "desktop-1440",
-      "режим без анимации — одной ширины хватает",
-    );
-    const requests = heroRequests(page);
+  test("1440, none: готовая картина без движения", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-1440", "одной ширины хватает");
     await page.goto("/ru?motion=none");
     await expect(hero(page)).toHaveClass(/home-hero--none/);
-    await expect(video(page)).toHaveCount(0);
-    await expect(canvas(page)).toHaveCount(0);
-    expect(await posterSrc(page)).toMatch(/\/v3\/poster-last-(1280|1920)\.(avif|webp)$/);
-    await page.waitForTimeout(1_500);
-    expect(requests.videos).toEqual([]);
-    expect(requests.frames).toEqual([]);
+    const stage = (await page.locator(".home-hero__stage").boundingBox())!;
+    const height = await hero(page).evaluate((element) => element.getBoundingClientRect().height);
+    expect(height).toBeLessThanOrEqual(stage.height + 2);
+    const ledgerTop = (await page.locator(".home-hero__ledger").boundingBox())!.y;
+    const center = (await tower(page, "c").boundingBox())!;
+    expect(center.y + center.height).toBeLessThanOrEqual(ledgerTop);
+    await expect(page.locator(".home-hero__plate").first()).toBeHidden();
+    await expect(page.locator(".home-hero__note")).toBeVisible();
+    const animations = await hero(page).evaluate(
+      (element) =>
+        document.getAnimations().filter((animation) => {
+          const target = (animation.effect as KeyframeEffect | null)?.target;
+          return target instanceof Element && element.contains(target);
+        }).length,
+    );
+    expect(animations).toBe(0);
   });
 
-  test("1440, экономия трафика: ни ленты, ни ролика — постер", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop-1440", "одной ширины хватает");
-    await page.addInitScript(() => {
-      Object.defineProperty(Navigator.prototype, "connection", {
-        configurable: true,
-        get: () => ({ saveData: true, effectiveType: "4g" }),
-      });
-    });
-    const requests = heroRequests(page);
-    for (const motion of ["full", "lite"]) {
-      await page.goto(`/ru?motion=${motion}`);
-      await expect(hero(page)).toHaveClass(/home-hero--none/, { timeout: 10_000 });
-      await expect(video(page)).toHaveCount(0);
-      await expect(canvas(page)).toHaveCount(0);
-    }
-    await page.waitForTimeout(1_000);
-    expect(requests.videos).toEqual([]);
-    expect(requests.frames).toEqual([]);
-  });
-
-  test("390, lite: 9:16, текст внизу первого экрана, факты полосой ниже, без горизонтальной прокрутки", async ({
+  test("390: при входе рендеров нет, после прокрутки — вышли; вбок не уезжает", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -319,32 +154,21 @@ test.describe("первый экран главной — полёт над ст
     const errors = collectPageErrors(page);
     await page.goto("/uz?motion=lite");
     await expect(hero(page)).toHaveClass(/home-hero--lite/);
-    await expect(video(page)).toHaveAttribute(
-      "src",
-      /\/hero\/timelapse\/v3\/hero-portrait\.(webm|mp4)$/,
-      {
-        timeout: 10_000,
-      },
-    );
-    await expect(video(page)).toHaveAttribute("playsinline", "");
-    expect(await posterSrc(page)).toMatch(/\/v3\/poster-portrait-last\.(avif|webp)$/);
-    const viewport = page.viewportSize()!;
-    const [copy, facts] = await Promise.all([
-      page.locator(".home-hero__copy").boundingBox(),
-      page.locator(".home-hero__facts").boundingBox(),
+    const ledgerTop = (await page.locator(".home-hero__ledger").boundingBox())!.y;
+    expect((await tower(page, "c").boundingBox())!.y).toBeGreaterThanOrEqual(ledgerTop);
+    await expect(page.locator(".home-hero__tower--wide-only").first()).toBeHidden();
+    await scrollTo(page, 700);
+    await expect.poll(() => phase(page)).toBe("hold");
+    const [center, ledger] = await Promise.all([
+      tower(page, "c").boundingBox(),
+      page.locator(".home-hero__ledger").boundingBox(),
     ]);
-    // Текст и кнопки — внизу первого экрана, «бесплатно» и цифры — сразу под ним.
-    expect((copy?.y ?? 0) + (copy?.height ?? 0)).toBeGreaterThan(viewport.height - 2);
-    expect((copy?.y ?? 0) + (copy?.height ?? 0)).toBeLessThan(viewport.height + 120);
-    expect(facts?.y ?? 0).toBeGreaterThanOrEqual((copy?.y ?? 0) + (copy?.height ?? 0) - 1);
-    // Ничего не уходит за правый край: пилюли «бесплатно» переносятся, а не раздвигают экран.
-    expect((copy?.x ?? 0) + (copy?.width ?? 0)).toBeLessThanOrEqual(viewport.width + 1);
-    expect((facts?.x ?? 0) + (facts?.width ?? 0)).toBeLessThanOrEqual(viewport.width + 1);
-    await expect(page.getByRole("link", { name: /Kvartira tanlash/ }).first()).toBeInViewport({
-      ratio: 1,
-    });
-    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-    expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+    expect(center!.y + center!.height).toBeLessThanOrEqual(ledger!.y);
+    await expect(page.locator(".home-hero__note")).toBeVisible();
+    const width = page.viewportSize()!.width;
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
     expect(errors).toEqual([]);
   });
 });

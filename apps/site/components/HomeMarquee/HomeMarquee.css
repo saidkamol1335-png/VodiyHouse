@@ -4,8 +4,8 @@
   margin-top: 8px;
   padding: 26px 0;
   overflow: hidden;
-  border-top: 1px dashed var(--dash);
-  border-bottom: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }

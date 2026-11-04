@@ -110,7 +110,7 @@
   display: grid;
   gap: 8px;
   padding-top: 14px;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .units-generator__notes {

@@ -82,7 +82,7 @@
 }
 
 .complex-list__rows > li + li {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 /* Вся строка — ссылка: название и подпись · комнаты · «свободно N» · плашка · стрелка.

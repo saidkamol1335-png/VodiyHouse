@@ -28,6 +28,7 @@ const ANON_FUNCTIONS = [
   "site_layout_calc",
   "site_payment_programs",
   "site_progress_frames",
+  "site_reviews",
   "site_showcase",
   "site_slug_state",
   "site_submit_lead",

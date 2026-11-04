@@ -21,7 +21,7 @@
 }
 
 .catalog-order__row + .catalog-order__row {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .catalog-order__place {

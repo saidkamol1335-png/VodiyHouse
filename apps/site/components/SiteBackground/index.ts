@@ -1,0 +1,1 @@
+export { SiteBackground } from "./SiteBackground";

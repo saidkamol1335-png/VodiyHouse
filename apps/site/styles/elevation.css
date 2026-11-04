@@ -1,0 +1,98 @@
+/* Тени сайта — одна тёплая шкала (UI/UX по ui-ux-pro-max, слово исполнителя 04.11). До неё было 119
+   разных теней семи оттенков (графит, чёрный, холодный сине-чёрный…), а карточки на странице не
+   отделялись от фона. Цвет тени — тёплая умбра от бронзы, не чёрный; ступень — контактная, ключевая и
+   рассеянная тени. Старые токены переназначены на шкалу: компоненты следуют без правок.
+   Подключается после skin-site.css и liquid-glass.css. Ступени объявлены и на тёмных островках:
+   там они пересчитываются с их --elev-rgb / --elev-k (наследуется готовое значение, не формула). */
+:root[data-surface="site"],
+:root[data-surface="site"]
+  :is(.about-hero__card, .collections__card, .complex-picker__stage, .complex-viewer, .complex-location__drop, .complex-preview, .sections-folder) {
+  --elev-rgb: 52 31 13;
+  --elev-k: 1;
+
+  /* 1 — покой: карточки, панели, фильтр, стеклянные кнопки в покое */
+  --elev-1:
+    0 1px 1px rgb(var(--elev-rgb) / calc(0.04 * var(--elev-k))),
+    0 2px 6px -2px rgb(var(--elev-rgb) / calc(0.06 * var(--elev-k))),
+    0 10px 24px -14px rgb(var(--elev-rgb) / calc(0.12 * var(--elev-k)));
+
+  /* 2 — приподнято: наведение карточек, капсула шапки, главная кнопка, рамки фото */
+  --elev-2:
+    0 1px 2px rgb(var(--elev-rgb) / calc(0.05 * var(--elev-k))),
+    0 6px 14px -6px rgb(var(--elev-rgb) / calc(0.1 * var(--elev-k))),
+    0 22px 44px -22px rgb(var(--elev-rgb) / calc(0.22 * var(--elev-k)));
+
+  /* 3 — над страницей: всплывающие, подсказки, метки карты, уведомления, папка «Разделы» */
+  --elev-3:
+    0 2px 4px rgb(var(--elev-rgb) / calc(0.06 * var(--elev-k))),
+    0 12px 28px -10px rgb(var(--elev-rgb) / calc(0.16 * var(--elev-k))),
+    0 36px 72px -28px rgb(var(--elev-rgb) / calc(0.26 * var(--elev-k)));
+
+  /* 4 — окно: диалоги, чертёж, калькулятор, линза «Деталей» */
+  --elev-4:
+    0 4px 10px rgb(var(--elev-rgb) / calc(0.07 * var(--elev-k))),
+    0 24px 48px -16px rgb(var(--elev-rgb) / calc(0.2 * var(--elev-k))),
+    0 64px 120px -40px rgb(var(--elev-rgb) / calc(0.34 * var(--elev-k)));
+
+  /* Шторки и липкие панели снизу на телефоне — тень вверх */
+  --elev-sheet:
+    0 -1px 0 rgb(var(--elev-rgb) / calc(0.06 * var(--elev-k))),
+    0 -16px 40px -16px rgb(var(--elev-rgb) / calc(0.24 * var(--elev-k)));
+
+  --shadow-1: var(--elev-1);
+  --card-shadow: var(--elev-1);
+  --shadow-2: var(--elev-2);
+  --shadow-hover: var(--elev-2);
+  --card-shadow-hover: var(--elev-2);
+  --shadow-3: var(--elev-4);
+  --toast-shadow: var(--elev-3);
+  --map-chip-shadow: var(--elev-2);
+  --map-pin-shadow: var(--elev-3);
+  --shadow-sheet: var(--elev-sheet);
+  --lg-drop: var(--elev-1);
+  --lg-shadow: var(--elev-2);
+  --lg-action-glass: inset 0 1px 1px rgb(255 255 255 / 0.3), inset 0 0 0 1px rgb(255 255 255 / 0.08), var(--elev-2);
+  --quiz-bar-glow: none;
+  --quiz-option-on-glow: var(--chip-on-ring);
+
+  /* Кольцо фокуса полей: было 1,29 : 1 (слабее наведения) — теперь бронза 2 px. */
+  --field-ring: 0 0 0 1px var(--amber), 0 0 0 4px rgb(122 86 52 / 0.16);
+}
+
+/* Тёмные островки: те же ступени, гуще. */
+:root[data-surface="site"]
+  :is(.about-hero__card, .collections__card, .complex-picker__stage, .complex-viewer, .complex-location__drop, .complex-preview, .sections-folder) {
+  --elev-rgb: 8 6 4;
+  --elev-k: 2.4;
+}
+
+/* Наведение карточек: следующая ступень на ::after проявляется (opacity), а не прыгает box-shadow. */
+:root[data-surface="site"] .catalog-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: var(--elev-2);
+  opacity: 0;
+  pointer-events: none;
+}
+
+:root[data-surface="site"]:not([data-motion="none"]) .catalog-card::after {
+  transition: opacity var(--dur-base) var(--ease);
+}
+
+@media (hover: hover) {
+  :root[data-surface="site"] .catalog-card:hover {
+    box-shadow: var(--elev-1);
+  }
+
+  :root[data-surface="site"] .catalog-card:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Стеклянные кнопки в покое почти сливались с фоном (1,07 : 1): тонкая граница. */
+:root[data-surface="site"] :is(.button--outline, .button--ghost, .phone-button, .filter-pills__pill):not(#lg) {
+  box-shadow: var(--lg-glass), 0 0 0 1px rgb(30 28 25 / 0.12);
+}

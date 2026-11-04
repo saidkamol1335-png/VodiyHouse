@@ -209,7 +209,10 @@
   color: var(--fg);
   box-shadow: var(--shadow-2);
   cursor: pointer;
-  transition: opacity var(--dur-base), visibility var(--dur-base), transform var(--dur-base) var(--ease);
+  transition:
+    opacity var(--dur-base),
+    visibility var(--dur-base),
+    transform var(--dur-base) var(--ease);
 }
 
 .collections__arrow--prev {
@@ -293,15 +296,22 @@
   pointer-events: none;
 }
 
-[data-motion="full"] .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched]) .collections__arrow--next svg {
+[data-motion="full"]
+  .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched])
+  .collections__arrow--next
+  svg {
   animation: collections-nudge var(--dur-collections-hint) var(--ease) 2;
 }
 
-[data-motion="full"] .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched]) .collections__arrow--next::after {
+[data-motion="full"]
+  .collections__viewport[data-revealed="full"][data-edge="start"]:not([data-touched])
+  .collections__arrow--next::after {
   animation: collections-ping var(--dur-collections-hint) ease-out 2;
 }
 
-[data-motion="lite"] .collections__viewport[data-revealed="lite"][data-edge="start"]:not([data-touched]) .collections__arrow--next::after {
+[data-motion="lite"]
+  .collections__viewport[data-revealed="lite"][data-edge="start"]:not([data-touched])
+  .collections__arrow--next::after {
   opacity: 0.6;
   transition: opacity var(--dur-fast) ease-out;
 }
@@ -324,5 +334,17 @@
   100% {
     opacity: 0;
     transform: scale(1.35);
+  }
+}
+
+/* Параллакс фото (Reveal.css): картинка едет внутри карточки подборки (лента подборок — своя прокрутка). */
+@supports (animation-timeline: view()) {
+  [data-motion="full"] .collections__card {
+    view-timeline: --photo-parallax block;
+  }
+
+  [data-motion="full"] .collections__photo .site-photo__image {
+    animation: photo-parallax linear both;
+    animation-timeline: --photo-parallax;
   }
 }

@@ -12,6 +12,8 @@ type RootDocumentProps = {
   children: ReactNode;
   /** Линии колонок на фоне — только публичный сайт (дизайн-решение Э1, 19.10.2026). */
   withColumns?: boolean;
+  /** «site» — скин публичного сайта (apps/site/styles/skin-site.css); кабинет и /dev — без него. */
+  surface?: "site";
   /** Сообщения для браузера; без них — все (lib/i18n/clientMessages.ts). */
   messages?: AbstractIntlMessages;
 };
@@ -20,11 +22,12 @@ type RootDocumentProps = {
  * Общая оболочка <html> для корневых layout сайта, кабинета и /dev.
  * Сервер всегда рендерит lite; скрипт в <head> поправит до первой отрисовки.
  */
-export function RootDocument({ lang, children, withColumns = false, messages }: RootDocumentProps) {
+export function RootDocument({ lang, children, withColumns = false, surface, messages }: RootDocumentProps) {
   return (
     <html
       lang={lang}
       data-motion="lite"
+      data-surface={surface}
       className={fontVariables}
       suppressHydrationWarning
     >

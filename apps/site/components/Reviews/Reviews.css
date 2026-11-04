@@ -1,0 +1,405 @@
+/* «Отзывы тех, кто уже получил ключи» (PLAN §10, п. 47; Motion Kit №16). Три колонки строки: текст,
+   свободная зона под ключ, фото. reviews--3d (full, ≥ 768 px, WebGL): липкая сцена с ключом на экран,
+   строки идут поверх и сквозь неё, активная — у центра: цитата загорается по словам, остальные
+   приглушены. Без 3D — кадр ключа в шапке, строки проявляются, цитаты яркие. Только opacity/transform. */
+.reviews {
+  --reviews-free: 10vw;
+  --reviews-media: 22vw;
+  --reviews-dim: 0.35;
+  --reviews-glow: radial-gradient(
+    ellipse 34% 42% at 50% 0%,
+    rgba(201, 162, 94, 0.3),
+    rgba(201, 162, 94, 0) 72%
+  );
+
+  position: relative;
+  padding-top: 96px;
+}
+
+.reviews--3d {
+  --reviews-free: min(34vw, 560px);
+}
+
+.reviews__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.reviews__title {
+  max-width: 820px;
+  margin: 0;
+  color: var(--fg-heading);
+  font-size: var(--fs-h2);
+  font-weight: 600;
+  letter-spacing: var(--ls-h2);
+  line-height: var(--lh-heading);
+}
+
+/* Кадр ключа в шапке — lite, none, телефон и без WebGL; при живом 3D он не нужен. */
+.reviews__still {
+  flex: none;
+  width: min(320px, 30vw);
+  height: auto;
+}
+
+.reviews--3d .reviews__still {
+  display: none;
+}
+
+.reviews__bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin: 40px 0 0;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--line-3);
+  color: var(--fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label-l);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.reviews__bar-side--end {
+  text-align: right;
+}
+
+.reviews__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg-heading);
+}
+
+/* Звёзды с половинками: форма — clip-path, заливка — фон (без анимации). */
+.reviews__stars-row {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.reviews__star {
+  width: 14px;
+  height: 14px;
+  background: var(--line-2);
+  clip-path: polygon(
+    50% 0,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+.reviews__star--full {
+  background: var(--amber);
+}
+
+.reviews__star--half {
+  background: linear-gradient(90deg, var(--amber) 50%, var(--line-2) 50%);
+}
+
+.reviews__body {
+  position: relative;
+}
+
+/* Липкая сцена ключа: на экран, под строками; тёплое пятно света сверху. */
+.reviews__stage {
+  display: none;
+}
+
+.reviews--3d .reviews__stage {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  display: block;
+  height: 100svh;
+  pointer-events: none;
+}
+
+.reviews__glow {
+  position: absolute;
+  inset: 0;
+  background: var(--reviews-glow);
+}
+
+.reviews__canvas {
+  display: none;
+}
+
+.reviews--3d .reviews__canvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: var(--reviews-free);
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+/* Строки: поверх сцены — линии и текст выше канваса, ключ проходит «сквозь» них. */
+.reviews__list {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  list-style: none;
+}
+
+.reviews--3d .reviews__list {
+  margin-top: -100svh;
+  padding-top: 32svh;
+}
+
+.reviews__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--reviews-free) var(--reviews-media);
+  grid-template-areas: "text free media";
+  align-items: center;
+  gap: 24px;
+  padding: 48px 0;
+  border-bottom: 1px dashed var(--line-3);
+}
+
+.reviews--3d .reviews__row {
+  min-height: 62svh;
+}
+
+.reviews__text {
+  grid-area: text;
+}
+
+.reviews__stars {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.reviews__score {
+  color: var(--fg-heading);
+  font-weight: 600;
+}
+
+.reviews__quote {
+  margin: 0 0 20px;
+  color: var(--fg-heading);
+  font-size: clamp(20px, 1.8vw, 26px);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.38;
+}
+
+.reviews__accent {
+  color: var(--amber);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.08em;
+}
+
+.reviews__author {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 12px;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.reviews__name {
+  color: var(--fg-heading);
+}
+
+.reviews__complex {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reviews__media {
+  grid-area: media;
+  overflow: hidden;
+  border-radius: var(--r-m);
+  aspect-ratio: 4 / 5;
+  background: var(--bg-4);
+}
+
+.reviews__photo,
+.reviews__poster img,
+.reviews__player {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+
+.reviews__poster {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.reviews__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  color: var(--fg-heading);
+  transform: translate(-50%, -50%);
+}
+
+.reviews__poster:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.reviews__cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: 56px;
+  padding-bottom: 120px;
+}
+
+/* 3D (full, ≥ 1024 px): активная строка яркая, цитата загорается по словам; остальные приглушены.
+   Без ключа (lite, телефон, без WebGL) — всё яркое. */
+.reviews--3d .reviews__word {
+  opacity: 0.3;
+  transition: opacity 0.35s ease;
+}
+
+.reviews--3d .reviews__row--active .reviews__word,
+.reviews--3d .reviews__row:focus-within .reviews__word {
+  opacity: 1;
+  transition-delay: calc(var(--w) * 35ms);
+}
+
+.reviews--3d .reviews__stars,
+.reviews--3d .reviews__author,
+.reviews--3d .reviews__media {
+  opacity: var(--reviews-dim);
+  transition: opacity 0.5s ease;
+}
+
+.reviews--3d .reviews__row--active .reviews__stars,
+.reviews--3d .reviews__row--active .reviews__author,
+.reviews--3d .reviews__row--active .reviews__media,
+.reviews--3d .reviews__row:focus-within .reviews__stars,
+.reviews--3d .reviews__row:focus-within .reviews__author,
+.reviews--3d .reviews__row:focus-within .reviews__media {
+  opacity: 1;
+}
+
+/* Финал: ключ повернулся в замке — появляется CTA. */
+.reviews--3d .reviews__cta {
+  /* Финал — пока ключ ещё в кадре: кнопка под ним, липкая сцена не уехала. */
+  min-height: 55svh;
+  align-items: flex-start;
+  padding-top: 32px;
+  /* Невидимая кнопка не ловит щелчков; с клавиатуры — видна по :focus-within. */
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reviews--3d.reviews--final .reviews__cta,
+.reviews--3d .reviews__cta:focus-within {
+  pointer-events: auto;
+  opacity: 1;
+  transform: none;
+}
+
+.reviews--3d[data-live] .reviews__canvas {
+  will-change: transform;
+}
+
+/* lite: строки проявляются по очереди (без затемнения); до появления скрыты — без мигания. */
+[data-js]:not([data-reveal-off])[data-motion="lite"] .reviews__row:not([data-revealed]) {
+  opacity: 0;
+}
+
+.reviews__row[data-revealed="lite"] {
+  animation: reviews-in 0.7s ease both;
+}
+
+@keyframes reviews-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .reviews {
+    --reviews-free: 0px;
+    --reviews-media: 34vw;
+  }
+}
+
+/* Телефон: ключ только в шапке, строка в одну колонку — цитата, под ней фото. */
+@media (max-width: 767px) {
+  .reviews {
+    padding-top: 64px;
+  }
+
+  .reviews__heading {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  .reviews__still {
+    width: min(260px, 70vw);
+    align-self: center;
+  }
+
+  .reviews__bar {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 8px;
+  }
+
+  .reviews__bar-side--end {
+    text-align: left;
+  }
+
+  .reviews__row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "text" "media";
+    gap: 20px;
+    padding: 36px 0;
+  }
+
+  .reviews__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .reviews__cta {
+    padding-bottom: 72px;
+  }
+}

@@ -57,7 +57,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   font-size: var(--fs-control-l);
 }
 
@@ -130,7 +130,7 @@
 }
 
 .complex-stock__left--none {
-  border-style: dashed;
+  border-style: var(--rule-style);
   border-color: var(--dash);
   background: none;
   color: var(--fg-3);

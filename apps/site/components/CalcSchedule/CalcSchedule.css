@@ -54,7 +54,7 @@
 .calc-schedule__table th,
 .calc-schedule__table td {
   padding: 9px 12px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   text-align: right;
   white-space: nowrap;
 }

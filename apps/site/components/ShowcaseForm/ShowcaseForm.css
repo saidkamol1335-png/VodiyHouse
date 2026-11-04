@@ -114,7 +114,7 @@
   display: grid;
   gap: 14px;
   padding: 16px;
-  border: 1px dashed var(--line);
+  border: 1px var(--rule-style) var(--line);
   border-radius: var(--r-l);
 }
 
@@ -167,7 +167,7 @@
   gap: 12px;
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .showcase-form__delete {

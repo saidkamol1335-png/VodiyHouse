@@ -72,7 +72,7 @@
 }
 
 .complex-photos__tile--add {
-  border-style: dashed;
+  border-style: var(--rule-style);
   background: none;
 }
 
@@ -108,7 +108,7 @@
   align-items: center;
   justify-content: center;
   padding: 8px;
-  border-style: dashed;
+  border-style: var(--rule-style);
 }
 
 /* Ошибка загрузки — на всю строку сетки: причина и «Убрать» видны без прокрутки (390: 100×75). */

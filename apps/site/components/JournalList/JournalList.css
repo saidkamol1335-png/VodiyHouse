@@ -25,7 +25,7 @@
   align-items: start;
   gap: 6px 16px;
   padding: 12px 0;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .journal-list__entry:first-child {

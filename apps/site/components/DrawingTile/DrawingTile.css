@@ -10,7 +10,7 @@
   width: 64px;
   height: 44px;
   padding: 0;
-  border: 1px dashed var(--line-3);
+  border: 1px var(--rule-style) var(--line-3);
   border-radius: var(--r-s);
   background: none;
   color: var(--fg-2);
@@ -55,6 +55,8 @@
 }
 
 .drawing-tile__dialog {
+  /* Preflight Tailwind обнуляет margin; по центру dialog ставит margin: auto. */
+  margin: auto;
   max-width: min(960px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   padding: 16px;

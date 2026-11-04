@@ -30,7 +30,7 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border: 1px dashed var(--amber-line);
+  border: 1px var(--rule-style) var(--amber-line);
   border-radius: var(--r-pill);
   color: var(--amber-2);
   font-family: var(--mono);

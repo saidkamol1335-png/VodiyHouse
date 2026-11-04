@@ -19,11 +19,11 @@
 
 .bg-columns__line {
   display: block;
-  border-left: 1px dashed var(--cols-line);
+  border-left: 1px var(--rule-style) var(--cols-line);
 }
 
 .bg-columns__line:nth-child(6) {
-  border-right: 1px dashed var(--cols-line);
+  border-right: 1px var(--rule-style) var(--cols-line);
 }
 
 /* Телефон: три линии — края полей и центр (мобильный мокап: 16 / 195 / 373 px). */
@@ -37,6 +37,6 @@
   }
 
   .bg-columns__line:nth-child(2) {
-    border-right: 1px dashed var(--cols-line);
+    border-right: 1px var(--rule-style) var(--cols-line);
   }
 }

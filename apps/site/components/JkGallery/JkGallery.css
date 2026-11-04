@@ -1,0 +1,277 @@
+/* «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17). По умолчанию — лента с нативной
+   горизонтальной прокруткой и scroll-snap (lite, none, телефон, без JS). jk-gallery--pinned ставит
+   скрипт в full на ≥ 768 px: секция на экран, трек едет влево (transform), названия — параллакс.
+   Карточка — тёмное фото: светлый текст задают токены блока, а не тема. */
+.jk-gallery {
+  --jk-edge: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+  --jk-gap: max(12px, 1vw);
+  --jk-card-h: min(80svh, 760px);
+  --jk-fg: #faf8f4;
+  --jk-fg-2: rgba(250, 248, 244, 0.84);
+  --jk-scrim: linear-gradient(
+    180deg,
+    rgba(14, 12, 10, 0.5) 0%,
+    rgba(14, 12, 10, 0.08) 26%,
+    rgba(14, 12, 10, 0.06) 52%,
+    rgba(14, 12, 10, 0.62) 100%
+  );
+  --jk-title-size: clamp(48px, 7.4vw, 136px);
+
+  padding: 96px 0 64px;
+  overflow-x: clip;
+}
+
+.jk-gallery__heading {
+  margin: 16px 0 32px;
+}
+
+.jk-gallery__viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--jk-edge);
+  scrollbar-width: none;
+}
+
+.jk-gallery__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.jk-gallery__track {
+  display: flex;
+  gap: var(--jk-gap);
+  width: max-content;
+  margin: 0;
+  padding: 0 var(--jk-edge);
+  list-style: none;
+}
+
+.jk-gallery__card {
+  position: relative;
+  flex: none;
+  width: 60vw;
+  height: var(--jk-card-h);
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--bg-4);
+  scroll-snap-align: start;
+}
+
+.jk-gallery__card--all {
+  --jk-title-size: clamp(40px, 4.6vw, 84px);
+  width: 32vw;
+}
+
+.jk-gallery__card--wide {
+  width: 70vw;
+}
+
+.jk-gallery__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--jk-fg);
+  text-decoration: none;
+}
+
+.jk-gallery__link:focus-visible {
+  outline: 2px solid var(--jk-fg);
+  outline-offset: -6px;
+  border-radius: inherit;
+}
+
+.jk-gallery__media {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+
+.jk-gallery__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--jk-scrim);
+  pointer-events: none;
+}
+
+.jk-gallery__photo.site-photo {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  height: 100%;
+  border-radius: 0;
+}
+
+.jk-gallery__title {
+  position: absolute;
+  left: clamp(20px, 3vw, 44px);
+  bottom: clamp(56px, 9%, 96px);
+  max-width: none;
+  font-size: var(--jk-title-size);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  white-space: nowrap;
+  text-shadow: 0 2px 30px rgba(14, 12, 10, 0.28);
+}
+
+.jk-gallery__meta {
+  position: absolute;
+  max-width: 44%;
+  color: var(--jk-fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.jk-gallery__meta--tl,
+.jk-gallery__meta--tr {
+  top: clamp(18px, 2.4vw, 28px);
+}
+
+.jk-gallery__meta--bl,
+.jk-gallery__meta--br {
+  bottom: clamp(18px, 2.4vw, 28px);
+}
+
+.jk-gallery__meta--tl,
+.jk-gallery__meta--bl {
+  left: clamp(20px, 3vw, 44px);
+}
+
+.jk-gallery__meta--tr,
+.jk-gallery__meta--br {
+  right: clamp(20px, 3vw, 44px);
+  text-align: right;
+}
+
+/* «Все ЖК →» — светлая карточка без фото. */
+.jk-gallery__link--all {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: clamp(24px, 3vw, 44px);
+  color: var(--fg-heading);
+  border: 1px solid var(--line-2);
+  border-radius: inherit;
+}
+
+.jk-gallery__link--all:focus-visible {
+  outline-color: var(--amber);
+}
+
+.jk-gallery__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  font-size: var(--jk-title-size);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.jk-gallery__all-arrow {
+  width: 0.7em;
+  height: 0.7em;
+}
+
+.jk-gallery__all-note {
+  color: var(--fg-2);
+  font-size: var(--fs-body);
+}
+
+.jk-gallery__hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px var(--jk-edge) 0;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.jk-gallery__hint-line {
+  width: 48px;
+  height: 1px;
+  background: var(--line-3);
+}
+
+/* Закреплённая секция (full, ≥ 768 px): шапка, трек на остаток экрана, подсказка. */
+.jk-gallery--pinned {
+  padding: 0;
+}
+
+.jk-gallery--pinned .jk-gallery__pin {
+  display: grid;
+  /* minmax(0, 1fr): иначе колонка растёт до ширины трека (max-content) и шапка уезжает вправо. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100svh;
+  padding: calc(var(--header-h) + 20px) 0 24px;
+}
+
+.jk-gallery--pinned .jk-gallery__heading {
+  margin: 10px 0 20px;
+}
+
+.jk-gallery--pinned .jk-gallery__viewport {
+  overflow: clip;
+  scroll-snap-type: none;
+}
+
+.jk-gallery--pinned .jk-gallery__track {
+  height: 100%;
+}
+
+.jk-gallery--pinned .jk-gallery__card {
+  height: 100%;
+}
+
+.jk-gallery--pinned[data-live] .jk-gallery__track,
+.jk-gallery--pinned[data-live] .jk-gallery__title,
+.jk-gallery--pinned[data-live] .jk-gallery__media {
+  will-change: transform;
+}
+
+/* Наведение на карточку — только full: фото чуть ближе (transform), на телефоне и в lite — нет. */
+@media (hover: hover) {
+  :root[data-motion="full"] .jk-gallery__photo .site-photo__image {
+    transition: transform 0.7s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  :root[data-motion="full"] .jk-gallery__link:hover .site-photo__image {
+    transform: scale(1.03);
+  }
+}
+
+@media (max-width: 767px) {
+  .jk-gallery {
+    --jk-card-h: min(68svh, 560px);
+    --jk-title-size: clamp(36px, 11vw, 56px);
+    padding: 64px 0 48px;
+  }
+
+  .jk-gallery__card,
+  .jk-gallery__card--wide,
+  .jk-gallery__card--all {
+    --jk-title-size: clamp(36px, 11vw, 56px);
+    width: 84vw;
+  }
+
+  .jk-gallery__title {
+    right: 20px;
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jk-gallery__viewport {
+    scroll-snap-type: none;
+  }
+}

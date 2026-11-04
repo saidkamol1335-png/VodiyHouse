@@ -4,3 +4,8 @@ export { getMotionTier, applyMotionTier, detectMotionTier, whenMotionDecided } f
 export { useMotion } from "./useMotion";
 export { REVEALED_ATTRIBUTE, useReveal } from "./useReveal";
 export { MotionController } from "./MotionController";
+export { clamp, damp } from "./damp";
+export { FINE_POINTER_QUERY, useFinePointer } from "./finePointer";
+export { requestPointerFrame, subscribePointer, type PointerFrame, type PointerSubscriber } from "./pointerHub";
+export { usePointerEffect, type PointerEffect } from "./usePointerEffect";
+export { aimSpring, createSpring, stepSpring, type Spring } from "./spring";

@@ -7,7 +7,7 @@
   margin: 0;
   padding: 16px 0 0;
   border: 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .nearby-editor__title {

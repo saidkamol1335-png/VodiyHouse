@@ -42,7 +42,7 @@
 }
 
 .stats-chart__key--prev::before {
-  border-top: 2px dashed var(--blue);
+  border-top: 2px var(--rule-style) var(--blue);
 }
 
 .stats-chart__box {
@@ -134,7 +134,7 @@
   top: 0;
   bottom: 0;
   left: var(--x);
-  border-left: 1px dashed var(--fg-3);
+  border-left: 1px var(--rule-style) var(--fg-3);
 }
 
 .stats-chart__dot {

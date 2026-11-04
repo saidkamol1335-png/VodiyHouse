@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Page, TestInfo } from "@playwright/test";
 
 /** Ошибки консоли и необработанные исключения страницы. «Готово» — только при пустом списке. */
 export function collectPageErrors(page: Page): string[] {
@@ -16,7 +16,11 @@ export const PUBLIC_PAGES = ["/uz", "/ru", "/ru/podbor", "/uz/podbor"] as const;
 export const demoCards = (page: Page) =>
   page
     .locator(".catalog-card")
-    .filter({ has: page.locator('a[href*="/novostroyki/demo-"]:not([href*="demo-skoro"]):not([href*="demo-seryy"])') });
+    .filter({
+      has: page.locator(
+        'a[href*="/novostroyki/demo-"]:not([href*="demo-skoro"]):not([href*="demo-seryy"])',
+      ),
+    });
 
 // Картинки для загрузки рисуются прямо в браузере — фикстуры в git не нужны.
 export type ImageSpec = {
@@ -101,4 +105,19 @@ export async function imageFile(page: Page, spec: ImageSpec) {
     mimeType: spec.type,
     buffer: await makeImage(page, spec),
   };
+}
+
+/**
+ * Скриншот шага: в отчёт теста и, если задан SHOTS_DIR, файлом «<проект>-<имя>.png» — для приёмки
+ * («скрины одним прогоном», CLAUDE.md).
+ */
+export async function attachShot(page: Page, testInfo: TestInfo, name: string): Promise<void> {
+  const body = await page.screenshot();
+  await testInfo.attach(name, { body, contentType: "image/png" });
+  const dir = process.env.SHOTS_DIR;
+  if (dir) {
+    const { mkdir, writeFile } = await import("node:fs/promises");
+    await mkdir(dir, { recursive: true });
+    await writeFile(`${dir}/${testInfo.project.name}-${name}.png`, body);
+  }
 }

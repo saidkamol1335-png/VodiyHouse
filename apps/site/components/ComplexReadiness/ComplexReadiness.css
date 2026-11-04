@@ -11,7 +11,7 @@
   gap: 8px;
   min-height: 32px;
   padding: 0 12px;
-  border: 1px dashed var(--amber-line);
+  border: 1px var(--rule-style) var(--amber-line);
   border-radius: var(--r-pill);
   background: var(--amber-soft);
   color: var(--badge-amber-fg);

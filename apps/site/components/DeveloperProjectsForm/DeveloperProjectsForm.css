@@ -26,7 +26,7 @@
   align-items: start;
   gap: 12px;
   padding: 14px 0;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
 }
 
 /* Перетаскиваемая строка чуть приподнята: только transform и тень, без перерисовки раскладки. */

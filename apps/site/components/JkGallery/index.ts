@@ -1,0 +1,1 @@
+export { JkGallery } from "./JkGallery";

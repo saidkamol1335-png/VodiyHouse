@@ -84,7 +84,7 @@
   max-height: min(60vh, 520px);
   overflow-y: auto;
   padding-bottom: 12px;
-  border-bottom: 1px dashed var(--line);
+  border-bottom: 1px var(--rule-style) var(--line);
   animation: units-bulk-in var(--dur-fast) var(--ease) both;
 }
 

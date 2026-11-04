@@ -60,7 +60,7 @@
   align-items: start;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
 }
 
 .site-now__row svg {

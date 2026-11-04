@@ -97,3 +97,51 @@
     content: none;
   }
 }
+
+/* Папка «Разделы» (Icon Folder, 04.11.2026): пункт в начале полосы раскрывает под ней копию папки
+   образца — плитки и теги ведут к разделам. Мышь — по наведению, касание — нажатием. */
+.complex-nav__folder-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 6px;
+  height: var(--complex-nav-h);
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.complex-nav__folder-toggle svg {
+  transition: rotate var(--dur-base) var(--ease);
+}
+
+.complex-nav__folder-toggle[aria-expanded="true"] svg {
+  rotate: 180deg;
+}
+
+.complex-nav__folder-toggle:focus-visible {
+  outline-offset: -2px;
+}
+
+.complex-nav__folder {
+  position: absolute;
+  /* Без зазора под полосой: курсор идёт к папке, не покидая навигатор (pointerleave). */
+  top: 100%;
+  left: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+  z-index: 2;
+  width: min(420px, calc(100vw - 2 * var(--gutter)));
+  padding-top: 50px;
+}
+
+@media (max-width: 760px) {
+  .complex-nav__folder-toggle {
+    height: var(--touch-target);
+    border-radius: var(--r-pill);
+  }
+}

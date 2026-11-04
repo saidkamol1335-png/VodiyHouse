@@ -31,7 +31,7 @@
 .calc-compare__table th,
 .calc-compare__table td {
   padding: 12px 14px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   text-align: right;
   vertical-align: middle;
 }

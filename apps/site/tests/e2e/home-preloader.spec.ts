@@ -3,8 +3,9 @@ import { collectPageErrors } from "./helpers";
 
 // Экран загрузки при входе на главную (30.10.2026, как в артефакте «Закат»): собирается знак, идут
 // проценты, потом страница открывается. Один раз за сессию вкладки; не при #якоре, reduced-motion и
-// экономии трафика. Ролик или лента качаются при любой скорости. ?e2e-preloader — общий fixtures
-// не отмечает вход пройденным.
+// экономии трафика. Экран ждёт шрифты и постер первого экрана (ролика больше нет, 03.11.2026), под ним
+// вступление первого экрана стоит на первом кадре. ?e2e-preloader — общий fixtures не отмечает вход
+// пройденным.
 
 const preloader = (page: Page) => page.locator(".site-preloader");
 const hero = (page: Page) => page.locator(".home-hero");
@@ -58,48 +59,25 @@ test.describe("экран загрузки при входе", () => {
     page,
   }) => {
     test.setTimeout(60_000);
-    await page.route(/\/hero\/timelapse\/.*\.(webm|mp4|webp)$/, () => undefined);
-    await page.goto(ENTRY);
+    // Постер не отвечает: события load не будет — ждём только разметку и оживление.
+    await page.route(/\/hero\/renders\/.*\.(avif|webp)$/, () => undefined);
+    await page.goto(ENTRY, { waitUntil: "domcontentloaded" });
     await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 25_000 });
     await expect(preloader(page)).toBeHidden();
   });
 
-  test("1440, lite, сеть медленнее ролика: экран уходит с 10 % файла, ролик стартует, когда его хватает до конца", async ({
+  test("1440, full: под экраном вступление первого экрана стоит, после — заголовок на месте", async ({
     page,
   }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop-1440", "файл 1080p — десктоп");
-    // Браузер всё ещё качает, в буфере 20 %, canplaythrough придёт по команде теста.
-    await page.addInitScript(() => {
-      const held: (() => void)[] = [];
-      (window as unknown as { __canPlayThrough: () => void }).__canPlayThrough = () =>
-        held.forEach((fire) => fire());
-      const add = HTMLMediaElement.prototype.addEventListener;
-      HTMLMediaElement.prototype.addEventListener = function (
-        this: HTMLMediaElement,
-        type: string,
-        listener: EventListenerOrEventListenerObject,
-        options?: boolean | AddEventListenerOptions,
-      ) {
-        if (type !== "canplaythrough") return add.call(this, type, listener, options);
-        held.push(() => (listener as EventListener).call(this, new Event(type)));
-      };
-      Object.defineProperty(HTMLMediaElement.prototype, "networkState", { get: () => 2 });
-      Object.defineProperty(HTMLMediaElement.prototype, "buffered", {
-        get(this: HTMLMediaElement) {
-          return { length: 1, end: () => this.duration * 0.2 };
-        },
-      });
-    });
-    await page.goto(`${ENTRY}&motion=lite`);
-    // Раньше предела экрана (10 с): он ушёл по доле файла, а не по таймеру.
-    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 8_000 });
-    await expect(hero(page)).toHaveClass(/home-hero--lite/);
-    await page.waitForTimeout(500);
-    await expect(hero(page)).not.toHaveClass(/home-hero--playing/);
-    await page.evaluate(() =>
-      (window as unknown as { __canPlayThrough: () => void }).__canPlayThrough(),
-    );
-    await expect(hero(page)).toHaveClass(/home-hero--playing/, { timeout: 10_000 });
+    test.skip(testInfo.project.name !== "desktop-1440", "одной ширины хватает");
+    await page.goto(`${ENTRY}&motion=full`);
+    const title = page.locator(".home-hero__title-in").first();
+    const preloading = await html(page).evaluate((root) => root.hasAttribute("data-preloader"));
+    if (preloading) await expect(title).toHaveCSS("animation-play-state", "paused");
+    await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/, { timeout: 20_000 });
+    await expect(title).toHaveCSS("animation-play-state", "running");
+    await expect(title).toHaveCSS("opacity", "1", { timeout: 5_000 });
+    await expect(hero(page)).toHaveAttribute("data-entered", "", { timeout: 8_000 });
   });
 
   test("#якорь и другие страницы — без экрана", async ({ page }) => {
@@ -110,7 +88,9 @@ test.describe("экран загрузки при входе", () => {
     await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/);
   });
 
-  test("экономия трафика и reduced-motion — без экрана, только постер", async ({ browser }) => {
+  test("экономия трафика и reduced-motion — без экрана; reduced-motion — постер без движения", async ({
+    browser,
+  }) => {
     const reduced = await browser.newContext({ reducedMotion: "reduce" });
     const quiet = await reduced.newPage();
     await quiet.goto(ENTRY);
@@ -128,7 +108,8 @@ test.describe("экран загрузки при входе", () => {
     const page = await saving.newPage();
     await page.goto(ENTRY);
     await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/);
-    await expect(hero(page)).toHaveClass(/home-hero--none/, { timeout: 10_000 });
+    // Тяжёлых файлов у первого экрана больше нет: при экономии трафика — лёгкое движение lite.
+    await expect(hero(page)).toHaveClass(/home-hero--lite/, { timeout: 10_000 });
     await saving.close();
   });
 

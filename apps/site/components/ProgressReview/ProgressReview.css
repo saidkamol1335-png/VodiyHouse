@@ -17,7 +17,7 @@
   align-items: center;
   gap: 14px;
   padding: 12px 0;
-  border-top: 1px dashed var(--line-2);
+  border-top: 1px var(--rule-style) var(--line-2);
 }
 
 .progress-review__item:first-child {
@@ -75,7 +75,7 @@
   display: grid;
   gap: 6px;
   padding: 22px 64px 16px 24px;
-  border-bottom: 1px dashed var(--dash, var(--line-2));
+  border-bottom: 1px var(--rule-style) var(--dash, var(--line-2));
 }
 
 .progress-review__crumb {
@@ -191,7 +191,7 @@
 .progress-review__notice {
   margin: 0;
   padding: 16px 24px 22px;
-  border-top: 1px dashed var(--dash, var(--line-2));
+  border-top: 1px var(--rule-style) var(--dash, var(--line-2));
 }
 
 .progress-review__decision {

@@ -1,63 +1,365 @@
-/* Плашки «О ЖК» (мокап .facts, .fact): 4 в ряд на 1440, 2 — на планшете и телефоне. */
+/* «О ЖК» — вертикальная лента шагов по образцу «How I work» портфолио исполнителя (04.11.2026): линия по
+   центру, значки на ней, подпись и крупный контурный номер по разные стороны. Состояния шага —
+   data-state (ahead / current / passed) из FactsSteps; смена — только opacity и transform. Телефон и
+   планшет (< 1024 px): линия слева, номеров нет. Светлый скин: горит графит, лампа и заливка — бронза. */
+
 .complex-facts {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  --facts-node: 40px;
+  --facts-gap: 64px;
+  --facts-glow: rgba(248, 155, 13, 0.42);
+
+  position: relative;
+  padding-block: 8px;
+}
+
+.complex-facts__rail {
+  position: absolute;
+  top: calc(8px + var(--facts-node) / 2);
+  bottom: 48px;
+  left: 50%;
+  width: 1px;
+  background: var(--line-2);
+  pointer-events: none;
+}
+
+.complex-facts__fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  background: var(--amber);
+}
+
+.complex-facts__tip {
+  position: absolute;
+  top: -4px;
+  left: -3.5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--amber);
+  box-shadow:
+    0 0 0 3px rgba(122, 86, 52, 0.14),
+    0 0 12px 2px var(--facts-glow);
+  opacity: 0;
+}
+
+.complex-facts__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--facts-gap);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.complex-facts__item {
+.complex-facts__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px;
+  min-height: var(--facts-node);
+}
+
+/* ─── Значок на линии ─────────────────────────────────────────────────────────────────────── */
+
+.complex-facts__node {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--card-border);
-  border-radius: var(--r-l);
+  grid-row: 1;
+  grid-column: 6 / span 2;
+  align-self: start;
+  justify-content: center;
+}
+
+/* Соединитель от значка к подписи: тонкая линия, дошедший шаг заливает её от значка. */
+.complex-facts__link {
+  position: absolute;
+  top: calc(var(--facts-node) / 2);
+  height: 1px;
+  background: var(--line-2);
+}
+
+.complex-facts__step--left .complex-facts__link {
+  right: calc(50% + var(--facts-node) / 2 + 6px);
+  left: 0;
+}
+
+.complex-facts__step--right .complex-facts__link {
+  right: 0;
+  left: calc(50% + var(--facts-node) / 2 + 6px);
+}
+
+.complex-facts__link-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  background: var(--amber);
+}
+
+.complex-facts__step--left .complex-facts__link-fill {
+  transform-origin: 100% 50%;
+}
+
+.complex-facts__step--right .complex-facts__link-fill {
+  transform-origin: 0 50%;
+}
+
+.complex-facts__box {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: var(--facts-node);
+  height: var(--facts-node);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-s);
   background: var(--card-bg);
-  box-shadow: var(--card-shadow);
-}
-
-.complex-facts__item svg {
-  color: var(--amber-2);
-}
-
-.complex-facts__label {
-  font-family: var(--mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   color: var(--fg-3);
 }
 
+/* Горящий значок — графит с белым знаком, поверх обычного; проявляется opacity. */
+.complex-facts__box-lit {
+  position: absolute;
+  inset: -1px;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #3a3631, var(--action-bg, #1e1c19));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 8px 20px -8px rgba(30, 28, 25, 0.55);
+  color: var(--action-fg, #f6f2ea);
+  opacity: 0;
+}
+
+/* «Лампа» над текущим значком: янтарная полоска и мягкий ореол (радиальный градиент, без filter). */
+.complex-facts__lamp {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 30px;
+  height: 4px;
+  border-radius: 999px 999px 0 0;
+  background: var(--brand-amber);
+  opacity: 0;
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+.complex-facts__lamp::after {
+  position: absolute;
+  inset: -14px -22px -26px;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, var(--facts-glow), transparent);
+  content: "";
+}
+
+/* ─── Крупный номер ──────────────────────────────────────────────────────────────────────── */
+
+.complex-facts__num {
+  position: relative;
+  display: block;
+  grid-row: 1;
+  margin-top: -6px;
+  font-size: clamp(4rem, 2rem + 4vw, 6.5rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  user-select: none;
+  pointer-events: none;
+}
+
+.complex-facts__step--left .complex-facts__num {
+  grid-column: 8 / span 5;
+  text-align: left;
+}
+
+.complex-facts__step--right .complex-facts__num {
+  grid-column: 1 / span 5;
+  text-align: right;
+}
+
+.complex-facts__num-line,
+.complex-facts__num-pass {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line-3);
+}
+
+.complex-facts__num-pass,
+.complex-facts__num-fill {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.complex-facts__num-pass {
+  -webkit-text-stroke-color: var(--amber);
+}
+
+.complex-facts__num-fill {
+  background: linear-gradient(180deg, var(--fg-heading) 20%, var(--amber));
+  background-clip: text;
+  color: transparent;
+}
+
+/* ─── Подпись ────────────────────────────────────────────────────────────────────────────── */
+
+.complex-facts__copy {
+  grid-row: 1;
+  padding-top: 4px;
+}
+
+.complex-facts__step--left .complex-facts__copy {
+  grid-column: 1 / span 5;
+  text-align: right;
+}
+
+.complex-facts__step--right .complex-facts__copy {
+  grid-column: 8 / span 5;
+}
+
+.complex-facts__label {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  margin: 0;
+  color: var(--fg-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.complex-facts__step--left .complex-facts__label {
+  justify-content: flex-end;
+}
+
+.complex-facts__index {
+  color: var(--fg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
 .complex-facts__value {
-  font-size: var(--fs-body);
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  margin: 10px 0 0;
+  color: var(--fg-heading);
+  font-size: clamp(1.5rem, 1.05rem + 1.2vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
-@media (max-width: 980px) {
-  .complex-facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* ─── Состояния ──────────────────────────────────────────────────────────────────────────── */
+
+.complex-facts__step:is([data-state="passed"], [data-state="current"]) .complex-facts__box-lit,
+.complex-facts__step[data-state="passed"] .complex-facts__num-pass,
+.complex-facts__step[data-state="current"] .complex-facts__num-fill,
+.complex-facts__step[data-state="current"] .complex-facts__lamp {
+  opacity: 1;
 }
 
-@media (max-width: 760px) {
+.complex-facts__step:is([data-state="passed"], [data-state="current"]) .complex-facts__link-fill {
+  transform: none;
+}
+
+/* Без JS — все шаги пройдены, линия залита. */
+html:not([data-js]) .complex-facts__box-lit,
+html:not([data-js]) .complex-facts__num-pass {
+  opacity: 1;
+}
+
+html:not([data-js]) .complex-facts__fill,
+html:not([data-js]) .complex-facts__link-fill {
+  transform: none;
+}
+
+[data-motion="full"]
+  .complex-facts
+  :is(
+    .complex-facts__box-lit,
+    .complex-facts__lamp,
+    .complex-facts__num-pass,
+    .complex-facts__num-fill
+  ) {
+  transition: opacity var(--dur-slower) var(--ease);
+}
+
+[data-motion="full"] .complex-facts__link-fill {
+  transition: transform var(--dur-slower) var(--ease);
+}
+
+[data-motion="lite"]
+  .complex-facts
+  :is(
+    .complex-facts__box-lit,
+    .complex-facts__lamp,
+    .complex-facts__num-pass,
+    .complex-facts__num-fill
+  ) {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+[data-motion="lite"] :is(.complex-facts__fill, .complex-facts__link-fill) {
+  transition: transform var(--dur-base) var(--ease-2);
+}
+
+/* ─── Телефон и планшет: линия слева, без номеров ────────────────────────────────────────── */
+
+@media not all and (min-width: 1024px) {
   .complex-facts {
-    gap: 8px;
+    --facts-node: 32px;
+    --facts-gap: 32px;
   }
 
-  .complex-facts__item {
-    gap: 2px;
-    padding: 12px;
-    border-radius: var(--r-m);
-    box-shadow: none;
+  .complex-facts__rail {
+    left: 24px;
   }
 
-  .complex-facts__item svg {
-    width: 18px;
-    height: 18px;
-    margin-bottom: 6px;
+  .complex-facts__step {
+    display: block;
+    padding-left: 60px;
+  }
+
+  .complex-facts__node {
+    position: absolute;
+    top: 0;
+    left: 8px;
+  }
+
+  .complex-facts__box {
+    border-radius: 10px;
+  }
+
+  .complex-facts__box svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .complex-facts__link,
+  .complex-facts__num {
+    display: none;
+  }
+
+  .complex-facts__step--left .complex-facts__copy {
+    text-align: left;
+  }
+
+  .complex-facts__step--left .complex-facts__label {
+    justify-content: flex-start;
+  }
+
+  .complex-facts__copy {
+    padding-top: 2px;
+  }
+
+  .complex-facts__value {
+    margin-top: 6px;
+    font-size: 1.375rem;
   }
 }

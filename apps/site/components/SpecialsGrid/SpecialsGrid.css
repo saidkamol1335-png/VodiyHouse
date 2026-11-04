@@ -150,7 +150,7 @@
   gap: 12px;
   margin-top: auto;
   padding-top: 14px;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .special-card__offer {

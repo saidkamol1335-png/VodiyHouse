@@ -18,6 +18,8 @@ type SitePhotoProps = {
   preload?: boolean;
   /** Микс с элементом блока-владельца по БЭМ (скругление, место в сетке). */
   className?: string;
+  /** contain — кадр целиком, без обрезки (галерея ЖК: рендеры в родных пропорциях). */
+  fit?: "cover" | "contain";
 };
 
 /**
@@ -27,8 +29,9 @@ type SitePhotoProps = {
 // Кадр — и в самом Image: по нему Next строит размытую заглушку (иначе она растянута и по центру,
 // а фото потом прыгает к точке фокуса). Переменная --photo-pos меняется на телефоне в CSS.
 const IMAGE_STYLE: CSSProperties = { objectFit: "cover", objectPosition: "var(--photo-pos)" };
+const IMAGE_STYLE_CONTAIN: CSSProperties = { objectFit: "contain" };
 
-export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, preload = false, className }: SitePhotoProps) {
+export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, preload = false, className, fit = "cover" }: SitePhotoProps) {
   const src = mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", photo.path);
   return (
     <div
@@ -44,7 +47,7 @@ export function SitePhoto({ photo, alt, frame, phoneFrame, sizes, preload = fals
         preload={preload}
         // preload даёт <link rel=preload>, но не приоритет самой картинки — без него LCP ждёт.
         fetchPriority={preload ? "high" : undefined}
-        style={IMAGE_STYLE}
+        style={fit === "contain" ? IMAGE_STYLE_CONTAIN : IMAGE_STYLE}
         placeholder={photo.blur ? "blur" : "empty"}
         blurDataURL={photo.blur ?? undefined}
       />

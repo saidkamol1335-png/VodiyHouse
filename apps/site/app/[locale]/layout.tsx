@@ -8,6 +8,8 @@ import { SiteAnalytics } from "@/components/SiteAnalytics";
 import { RootDocument } from "@/components/RootDocument";
 import { SiteContactsProvider } from "@/components/SiteContacts";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteBackground } from "@/components/SiteBackground";
+import { SiteMotion } from "@/components/SiteMotion";
 import { siteMessages } from "@/lib/i18n/clientMessages";
 import { isLocale, LOCALES } from "@/lib/i18n/routing";
 import { hiddenNav } from "@/lib/routes";
@@ -17,6 +19,10 @@ import { SITE_NAME, siteOrigin } from "@/lib/site/metadata";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
 import "../globals.css";
 import "../site.css";
+import "../../styles/skin-site.css";
+import "../../styles/liquid-glass.css";
+import "../../styles/button-flame.css";
+import "../../styles/elevation.css";
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -46,13 +52,15 @@ export default async function SiteLayout({ children }: LayoutProps<"/[locale]">)
   // «Спецпредложения» в меню — якорь раздела главной: без действующих предложений и рекламы пункта нет.
   const specials = showcase.specials.length > 0 || showcase.ads.length > 0;
   return (
-    <RootDocument lang={locale} withColumns messages={siteMessages(messages)}>
+    <RootDocument lang={locale} surface="site" messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>
         <HiddenNavProvider hidden={hiddenNav({ calculator, specials })}>
           <LeadProvider>
+            <SiteBackground />
             {children}
             <SiteFooter />
             <SiteAnalytics />
+            <SiteMotion />
           </LeadProvider>
         </HiddenNavProvider>
       </SiteContactsProvider>

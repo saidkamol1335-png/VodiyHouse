@@ -1,0 +1,336 @@
+/* Движение по всему сайту (03.11.2026, слово исполнителя «динамические анимации по всему сайту»).
+   Только публичный сайт (html[data-surface="site"]), только transform, translate, scale и opacity.
+   Каждый приём — два варианта: full — полный, lite — короткое проявление или ничего; none — ничего
+   (токены режима гасят длительности, а правила full/lite под none не срабатывают). Первый экран главной,
+   её разделы со своей сценой и разделы ЖК (useReveal) здесь не трогаются — у них своё. */
+
+:root[data-surface="site"] {
+  --dur-intro: 900ms; /* вход пункта первого экрана, full */
+  --dur-intro-media: 1300ms; /* вход фото и ролика первого экрана, full */
+  --stagger-intro: 70ms; /* шаг между пунктами входа */
+  --intro-rise: 22px;
+  --z-progress: 41; /* полоса прокрутки — над шапкой сайта (40), под меню телефона (60) */
+}
+
+/* ─── 1. Вход первого экрана внутренних страниц ───────────────────────────────────────────────
+   Играет CSS с первой отрисовки, пункты по очереди (--intro-i). Не играет: страница открыта не сверху
+   (data-reveal-off) и уже сыграно (html[data-intro-done] — ставит SiteMotion; смена lite → full и «Назад» / «Вперёд»
+   не повторяют вход). Заголовок не задерживается (LCP): он второй пункт, 70 мс. */
+
+:is(
+  .calc-hero > *,
+  .text-page__head > *,
+  .developers-hero .container > *,
+  .about-hero__card > *,
+  .partners-hero__layout > div > *,
+  .complex-hero > *,
+  .developer-hero > *,
+  .developer-hero__card > *,
+  .site-stats__item,
+  .about-hero__stat,
+  :has(> .catalog-results) > :is(.eyebrow, .heading),
+  :has(> .favorites-view) > .eyebrow
+):nth-child(2) {
+  --intro-i: 1;
+}
+
+:is(
+  .calc-hero > *,
+  .text-page__head > *,
+  .developers-hero .container > *,
+  .about-hero__card > *,
+  .partners-hero__layout > div > *,
+  .complex-hero > *,
+  .developer-hero__card > *,
+  .site-stats__item,
+  .about-hero__stat
+):nth-child(3) {
+  --intro-i: 2;
+}
+
+:is(
+  .calc-hero > *,
+  .developers-hero .container > *,
+  .about-hero__card > *,
+  .partners-hero__layout > div > *,
+  .complex-hero > *,
+  .developer-hero__card > *,
+  .site-stats__item,
+  .about-hero__stat
+):nth-child(4) {
+  --intro-i: 3;
+}
+
+:is(
+  .about-hero__card > *,
+  .developer-hero__card > *,
+  .site-stats__item,
+  .about-hero__stat
+):nth-child(n + 5) {
+  --intro-i: 4;
+}
+
+/* Цифры идут за текстом героя: на «О нас» и «Застройщикам» они в первом экране. */
+:is(.site-stats__item, .about-hero__stat) {
+  --intro-base: 0.32s;
+}
+
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="full"]
+  :is(
+    .calc-hero > *,
+    .text-page__head > *,
+    .developers-hero .container > *,
+    .about-hero__card > :not(.about-hero__media),
+    .partners-hero__layout > div > *,
+    .complex-hero > :not(.complex-hero__gallery),
+    .developer-hero__crumbs,
+    .developer-hero__card > *,
+    .site-stats__item,
+    .about-hero__stat,
+    :has(> .catalog-results) > :is(.eyebrow, .heading),
+    :has(> .favorites-view) > .eyebrow
+  ) {
+  animation: site-intro-rise var(--dur-intro) var(--ease)
+    calc(var(--intro-base, 0s) + var(--intro-i, 0) * var(--stagger-intro)) backwards;
+}
+
+/* Фото и ролики первого экрана: проявляются и «садятся» из лёгкого увеличения. */
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="full"]
+  :is(.about-hero__media, .partners-hero__media, .complex-hero__gallery, .developer-hero__cover) {
+  animation: site-intro-media var(--dur-intro-media) var(--ease) 0.05s backwards;
+}
+
+[data-surface="site"][data-js]:not([data-reveal-off], [data-intro-done])[data-motion="lite"]
+  :is(
+    .calc-hero,
+    .text-page__head,
+    .developers-hero,
+    .about-hero,
+    .partners-hero,
+    .complex-hero,
+    .developer-hero,
+    :has(> .catalog-results) > :is(.eyebrow, .heading),
+    :has(> .favorites-view) > .eyebrow
+  ) {
+  animation: site-intro-fade var(--dur-fast) ease-out backwards;
+}
+
+/* ─── 2. Полоса прокрутки страницы ─────────────────────────────────────────────────────────────
+   Тонкая бронзовая линия по верхнему краю, едет за прокруткой (scroll-timeline, без JS). Только full и
+   только где браузер умеет scroll-timeline; lite и none — полосы нет. */
+
+.site-motion__progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  [data-surface="site"][data-motion="full"] .site-motion__progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-progress);
+    display: block;
+    height: 2px;
+    background: linear-gradient(90deg, var(--amber), var(--brand-amber, var(--amber)));
+    transform-origin: 0 50%;
+    pointer-events: none;
+    animation: site-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+/* ─── 3. Появление при прокрутке ───────────────────────────────────────────────────────────────
+   Карточки, пункты и строки поднимаются, пока входят в окно (view-timeline), и опускаются обратно при
+   прокрутке вверх — без скрытого состояния: выдача не мигает при смене фильтра, а без поддержки
+   view() всё просто на месте. Только full; lite — блоки сразу на месте (как карточки каталога). */
+
+@supports (animation-timeline: view()) {
+  [data-surface="site"][data-motion="full"]
+    :is(
+      .catalog-card,
+      .developers-list__row,
+      .partners-formats__card,
+      .site-steps__item,
+      .text-page__section,
+      .text-page__footer,
+      .about-office__title,
+      .about-office__lead,
+      .about-office__card,
+      .complex-documents__item,
+      .developer-about__text,
+      .developer-about__checks li,
+      .developer-objects__head
+    ) {
+    animation: scroll-rise linear backwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+
+  /* Ряд карточек — не стеной: средний и правый столбцы входят чуть позже. */
+  [data-surface="site"][data-motion="full"]
+    :is(.catalog-grid, .partners-formats__list, .site-footer__grid)
+    > :nth-child(3n + 2) {
+    animation-range: entry 8% entry 63%;
+  }
+
+  [data-surface="site"][data-motion="full"]
+    :is(.catalog-grid, .partners-formats__list, .site-footer__grid)
+    > :nth-child(3n) {
+    animation-range: entry 16% entry 71%;
+  }
+
+  /* Фото героя застройщика и «О нас» едут в рамке медленнее страницы (тот же параллакс, что у
+     карточек каталога). Рамки уже обрезают содержимое (overflow: hidden). */
+  [data-surface="site"][data-motion="full"] :is(.developer-hero__cover, .about-hero__media) {
+    overflow: hidden;
+    view-timeline: --site-hero-parallax block;
+  }
+
+  [data-surface="site"][data-motion="full"]
+    :is(.developer-hero__cover > .site-photo__image, .about-hero__media .timelapse-clip__frame) {
+    animation: site-hero-parallax linear both;
+    animation-timeline: --site-hero-parallax;
+    animation-range: cover 0% cover 100%;
+  }
+}
+
+/* ─── 4. Наведение ─────────────────────────────────────────────────────────────────────────────
+   full: карточки приподнимаются, стрелки кнопок и ссылок шагают вперёд, логотипы чуть крупнее, главные
+   кнопки тянутся за курсором («магнит», SiteMotion — только у мыши). Через отдельные свойства translate
+   и scale: transform остаётся появлению при прокрутке и нажатию кнопки. lite — без движения: только
+   проявление подчёркивания ссылок подвала. */
+
+[data-surface="site"][data-motion="full"]
+  :is(
+    .developer-programs__card,
+    .partners-formats__card,
+    .developer-others__card,
+    .site-steps__item,
+    .about-hero__stat
+  ) {
+  transition: translate var(--dur-slow) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-surface="site"][data-motion="full"]
+    :is(
+      .developer-programs__card,
+      .partners-formats__card,
+      .developer-others__card,
+      .site-steps__item,
+      .about-hero__stat
+    ):hover {
+    translate: 0 -4px;
+  }
+
+  [data-surface="site"][data-motion="full"]
+    :is(.button, .developer-programs__calc)
+    > svg:last-child {
+    transition: translate var(--dur-base) var(--ease);
+  }
+
+  /* Первый ребёнок кнопки — слой пламени: стрелка шагает, только если перед ней есть текст в теге. */
+  [data-surface="site"][data-motion="full"] .button:not(:disabled):hover > svg:last-child:not(.button__flame + svg),
+  [data-surface="site"][data-motion="full"]
+    .developer-programs__calc:hover
+    > svg:last-child:not(:first-child) {
+    translate: 3px 0;
+  }
+
+  [data-surface="site"][data-motion="full"]
+    :is(.developers-list__logo, .developer-others__logo, .partners-formats__icon) {
+    transition: scale var(--dur-slow) var(--ease);
+  }
+
+  [data-surface="site"][data-motion="full"]
+    :is(
+      .developers-list__row:hover .developers-list__logo,
+      .developer-others__card:hover .developer-others__logo,
+      .partners-formats__card:hover .partners-formats__icon
+    ) {
+    scale: 1.06;
+  }
+}
+
+/* Магнит главных кнопок (translate) — в styles/button-flame.css: там переходы собраны поверх стекла. */
+
+/* Подчёркивание ссылок подвала: full — линия вырастает слева, lite — проявляется. В колонках подвала
+   (с 04.11) наведение — янтарная черта слева (SiteFooter.css), подчёркивание — только у строки ©. */
+:root[data-surface="site"] .site-footer__links .site-footer__link::after {
+  content: none;
+}
+
+[data-surface="site"] .site-footer__link {
+  position: relative;
+}
+
+[data-surface="site"]:is([data-motion="full"], [data-motion="lite"]) .site-footer__link::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -2px;
+  height: 1px;
+  background: currentcolor;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-surface="site"][data-motion="full"] .site-footer__link::after {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition:
+    transform var(--dur-slow) var(--ease),
+    opacity var(--dur-fast) ease-out;
+}
+
+[data-surface="site"][data-motion="lite"] .site-footer__link::after {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
+    .site-footer__link:hover::after {
+    opacity: 0.6;
+    transform: none;
+  }
+}
+
+/* ─── Ключевые кадры ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes site-intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--intro-rise));
+  }
+}
+
+@keyframes site-intro-media {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes site-intro-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes site-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes site-hero-parallax {
+  from {
+    transform: translate3d(0, -5%, 0) scale(1.12);
+  }
+
+  to {
+    transform: translate3d(0, 5%, 0) scale(1.12);
+  }
+}

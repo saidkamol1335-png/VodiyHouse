@@ -8,7 +8,7 @@
     flex-direction: column;
     gap: 2px;
     padding: 6px var(--gutter) 14px;
-    border-top: 1px dashed var(--dash);
+    border-top: 1px var(--rule-style) var(--dash);
     background: var(--glass-solid);
     animation: tablet-menu-in var(--dur-base) var(--ease) both;
   }
@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   height: 48px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   color: var(--fg);
   font-size: var(--fs-lead);
   font-weight: 700;

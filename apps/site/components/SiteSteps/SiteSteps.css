@@ -6,7 +6,7 @@
   display: grid;
   margin: 0;
   padding: 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
   list-style: none;
 }
 
@@ -23,11 +23,11 @@
 
 .site-steps--row .site-steps__item + .site-steps__item {
   padding-left: 24px;
-  border-left: 1px dashed var(--dash);
+  border-left: 1px var(--rule-style) var(--dash);
 }
 
 .site-steps--list .site-steps__item + .site-steps__item {
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .site-steps--list .site-steps__item {
@@ -62,7 +62,7 @@
 
   .site-steps--row .site-steps__item + .site-steps__item {
     padding-left: 0;
-    border-top: 1px dashed var(--dash);
+    border-top: 1px var(--rule-style) var(--dash);
     border-left: 0;
   }
 }

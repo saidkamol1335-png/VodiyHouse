@@ -94,7 +94,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 11px 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
   font-size: var(--fs-control);
 }
 

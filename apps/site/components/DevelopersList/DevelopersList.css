@@ -22,7 +22,8 @@
 
 .developers-list__search:focus-within {
   border-color: var(--amber);
-  box-shadow: 0 0 0 3px var(--chip-on-bg);
+  /* Было кольцо цвета поля (1 : 1) — невидимое; теперь бронза 2 px. */
+  box-shadow: var(--field-ring);
 }
 
 .developers-list__search input {
@@ -61,8 +62,7 @@
   color: var(--fg);
   text-decoration: none;
   transition:
-    transform var(--dur-fast, 180ms) ease,
-    box-shadow var(--dur-fast, 180ms) ease;
+    transform var(--dur-fast, 180ms) ease;
 }
 
 .developers-list__row:hover {

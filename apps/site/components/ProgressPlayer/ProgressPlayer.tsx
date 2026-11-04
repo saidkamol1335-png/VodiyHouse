@@ -18,6 +18,10 @@ type ProgressPlayerProps = {
   label?: string;
   /** Плеер — первое, что видно на странице (видео квартиры): первый кадр грузится сразу (LCP). */
   priority?: boolean;
+  /** «photos» — фото отчёта и у отчёта с видео (плитка фото в папке месяца). */
+  mode?: "photos";
+  /** С какого кадра слайд-шоу начинать (плитка «Фото 3 из 5»). */
+  initialFrame?: number;
 };
 
 /** Кадр слайд-шоу фото — каждые 3,5 с (мокап: смена кадра 3.5 s, кроссфейд 1.1 s). */
@@ -25,12 +29,19 @@ const FRAME_MS = 3500;
 const posterOf = (id: string) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const playerOf = (id: string) => `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
 
+/** Что показывает плеер: ролик YouTube, файл MP4 или слайд-шоу фото (mode «photos» — фото и при видео). */
+function kindOf(report: ProgressReport, mode: ProgressPlayerProps["mode"]): "youtube" | "file" | "photos" {
+  if (mode === "photos" && report.photos.length > 0) return "photos";
+  if (report.youtubeId) return "youtube";
+  return report.videoPath ? "file" : "photos";
+}
+
 /**
  * Плеер отчёта хода строительства (мокап .player): уголки видоискателя, штамп «дата · блок» и
  * «Видео за …». Видео — ролик YouTube (плеер только по нажатию, ТЗ 7.5) или файл MP4 (preload="none",
  * постер — первое фото); без видео — слайд-шоу фото отчёта, как кадры мокапа.
  */
-export function ProgressPlayer({ report, caption = true, label, priority = false }: ProgressPlayerProps) {
+export function ProgressPlayer({ report, caption = true, label, priority = false, mode, initialFrame = 0 }: ProgressPlayerProps) {
   const t = useTranslations("complex.progress");
   const locale = useLocale() as Locale;
   // «Видео за октябрь 2026»: в подписях месяц строчный; штамп — капсом через CSS.
@@ -42,7 +53,7 @@ export function ProgressPlayer({ report, caption = true, label, priority = false
   ]
     .filter(Boolean)
     .join(" · ");
-  const kind = report.youtubeId ? "youtube" : report.videoPath ? "file" : "photos";
+  const kind = kindOf(report, mode);
   return (
     <figure className={`progress-player progress-player--${kind}`}>
       {kind === "youtube" ? (
@@ -53,7 +64,9 @@ export function ProgressPlayer({ report, caption = true, label, priority = false
         />
       ) : null}
       {kind === "file" ? <FileMedia report={report} title={videoTitle} /> : null}
-      {kind === "photos" ? <Slideshow report={report} label={t("play", { month })} priority={priority} /> : null}
+      {kind === "photos" ? (
+        <Slideshow report={report} label={t("play", { month })} priority={priority} initialFrame={initialFrame} />
+      ) : null}
       <span className="progress-player__corners" aria-hidden="true" />
       <span className="progress-player__stamp progress-player__stamp--start">
         <i aria-hidden="true" />
@@ -135,9 +148,11 @@ function FileMedia({ report, title }: { report: ProgressReport; title: string })
  * Фото отчёта по очереди: «Смотреть» запускает смену кадров, «Пауза» — останавливает. Новый отчёт —
  * новый плеер (key у ProgressPlayer): кадр и пауза начинаются заново.
  */
-function Slideshow({ report, label, priority }: { report: ProgressReport; label: string; priority: boolean }) {
+type SlideshowProps = { report: ProgressReport; label: string; priority: boolean; initialFrame: number };
+
+function Slideshow({ report, label, priority, initialFrame }: SlideshowProps) {
   const locale = useLocale() as Locale;
-  const [frame, setFrame] = useState(0);
+  const [frame, setFrame] = useState(() => Math.min(Math.max(initialFrame, 0), Math.max(report.photos.length - 1, 0)));
   const [playing, setPlaying] = useState(false);
   // Нажали «Смотреть» хоть раз: большой кнопки больше нет, пауза замирает на кадре, а не сбрасывает наезд.
   const [started, setStarted] = useState(false);

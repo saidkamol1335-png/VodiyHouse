@@ -98,7 +98,7 @@
   display: grid;
   gap: 14px;
   padding-top: 12px;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
   animation: block-card-reveal var(--dur-fast) var(--ease) both;
 }
 

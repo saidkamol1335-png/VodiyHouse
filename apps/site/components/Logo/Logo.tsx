@@ -7,7 +7,7 @@ export function LogoMark({ className = "logo__mark" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 148 110" aria-hidden="true">
       {MARK_RECTS.map(([x, y, width, height]) => (
-        <rect key={`${x}-${y}`} x={x} y={y} width={width} height={height} fill="var(--amber)" />
+        <rect key={`${x}-${y}`} x={x} y={y} width={width} height={height} fill="var(--brand-amber)" />
       ))}
     </svg>
   );

@@ -36,6 +36,6 @@
 
 .lead-delivery__mark--off {
   border-color: var(--line-2);
-  border-style: dashed;
+  border-style: var(--rule-style);
   color: var(--fg-3);
 }

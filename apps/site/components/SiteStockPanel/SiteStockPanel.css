@@ -82,7 +82,7 @@
 }
 
 .site-stock__rows > li + li {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .site-stock__empty {

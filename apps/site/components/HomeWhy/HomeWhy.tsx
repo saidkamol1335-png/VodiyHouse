@@ -1,18 +1,21 @@
 import { House } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { Button } from "@/components/Button";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { Reveal } from "@/components/Reveal";
-import { Spotlight } from "@/components/Spotlight";
 import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
 import type { CardRoomType } from "@/lib/site/catalog/card";
 import type { CatalogComplex } from "@/lib/site/catalog/records";
 import type { ProgressSample } from "@/lib/site/home/stats";
+import { DocsTile } from "./DocsTile";
+import { RouteTile } from "./RouteTile";
 import { VideoTile } from "./VideoTile";
+import { Copy, Kicker } from "./WhyParts";
+import { WhyCard } from "./WhyCard";
 
 type HomeWhyProps = {
   /** «Остатки по каждому ЖК» — живой пример: первый ЖК ленты и его типы (мокап .avmini). */
@@ -22,10 +25,11 @@ type HomeWhyProps = {
 };
 
 /**
- * «Почему через Vodiy House» (мокап .bento): видео стройки, наличие на живом примере, цена как у
- * застройщика («0%»), проверенные документы, бесплатные услуги лентой. Видео стройки (фаза 5) —
- * баннером во всю ширину над сеткой (решение 5C.3: в узкой плитке «Наличие» не помещается); пока
- * опубликованных отчётов нет, баннера нет. Подсветка за курсором — только full.
+ * «Почему через Vodiy House» — вариант А «Янтарь бренда» (артефакт «Сервис — бесплатно · анимации»,
+ * 04.11.2026): бенто из 12 колонок — видео стройки во всю ширину, наличие (7) и янтарная «0%» (5),
+ * проверка (4) и маршрут бесплатных услуг (8). У каждой карточки свой сюжет при появлении: full — как
+ * в образце, lite — короткое проявление, none — сразу итог. Данные — настоящие: типы и остатки первого
+ * ЖК ленты, кадр последнего отчёта, пункты проверки — ТЗ 8.4.
  */
 export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
   const t = await getTranslations("home.why");
@@ -40,96 +44,137 @@ export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
             </Heading>
           </div>
         </Reveal>
-        <Reveal variant="group" className="home-why__grid">
+        <div className="home-why__grid">
           {video ? (
-            <Spotlight className="home-why__tile home-why__tile--video">
+            <WhyCard className="home-why__tile--video">
               <VideoTile video={video} />
-            </Spotlight>
+            </WhyCard>
           ) : null}
           <StockTile sample={sample} />
-          <Spotlight className="home-why__tile home-why__tile--olive">
-            <span className="home-why__big" aria-hidden="true">{t("priceBig")}</span>
-            <Tile kicker={t("priceKicker")} title={t("priceTitle")} text={t("priceText")} />
-          </Spotlight>
-          <Spotlight className="home-why__tile">
-            <DocsDrawing />
-            <Tile kicker={t("docsKicker")} title={t("docsTitle")} text={t("docsText")} />
-          </Spotlight>
-          <Spotlight className="home-why__tile home-why__tile--wide">
-            <ServicePills pills={t("pills").split(" · ")} />
-            <Tile kicker={t("freeKicker")} title={t("freeTitle")} text={t("freeText")} />
-          </Spotlight>
-        </Reveal>
+          <FeeTile />
+          <DocsTile />
+          <RouteTile />
+        </div>
       </Container>
     </section>
   );
 }
 
-function Tile({ kicker, title, text, children }: { kicker: string; title: string; text: string; children?: ReactNode }) {
+/**
+ * Счётчик «осталось N»: каждая цифра — лента 0–9 (цифры ленты рисует CSS, в тексте страницы — только
+ * число), в full докручивается от нуля (одометр).
+ */
+function Odometer({ value }: { value: number }) {
   return (
     <>
-      <p className="home-why__kicker">{kicker}</p>
-      <div className="home-why__body">
-        <p className="home-why__tile-title">{title}</p>
-        <p className="home-why__text">{text}</p>
-        {children}
-      </div>
+      <span className="sr-only">{value}</span>
+      <span className="home-why__odo" aria-hidden="true">
+        {String(value)
+          .split("")
+          .map((digit, index) => (
+            <span key={index} className="home-why__odo-win">
+              <span className="home-why__odo-strip" style={{ "--odo": digit } as CSSProperties} />
+            </span>
+          ))}
+      </span>
     </>
   );
 }
 
 async function StockTile({ sample }: Pick<HomeWhyProps, "sample">) {
-  const [t, tRooms] = await Promise.all([getTranslations("home.why"), getTranslations("catalog.card")]);
+  const t = await getTranslations("home.why");
   const locale = (await getLocale()) as Locale;
   return (
-    <Spotlight className="home-why__tile home-why__tile--wide">
-      {sample ? (
-        <div className="home-why__stock" aria-hidden="true">
-          <p className="home-why__stock-name">{tRooms("name", { name: sample.complex.name[locale] })}</p>
-          {sample.types.map((type) => (
-            <p key={type.rooms} className="home-why__stock-row">
-              <span>{type.rooms <= 4 ? tRooms(`rooms.${type.rooms as 0 | 1 | 2 | 3 | 4}`) : tRooms("rooms.more", { n: type.rooms })}</span>
-              <b className={(type.free ?? 0) <= 3 ? "home-why__stock-left home-why__stock-left--few" : "home-why__stock-left"}>
-                {tRooms("left", { n: type.free ?? 0 })}
-              </b>
-            </p>
-          ))}
+    <WhyCard className="home-why__tile--stock">
+      <div className="home-why__split home-why__split--stock">
+        <div className="home-why__copy">
+          <Kicker index="02" text={t("stockKicker")} />
+          <div className="home-why__body">
+            <Copy title={t("stockTitle")} text={t("stockText")} />
+            {sample ? (
+              <Button
+                variant="outline"
+                size="sm"
+                href={`/${locale}${complexRoute(sample.complex.slug)}`}
+                className="home-why__cta home-why__rv home-why__rv--3"
+              >
+                <span className="home-why__cta-ico" aria-hidden="true">
+                  <House size={16} />
+                </span>
+                {t("stockCta")}
+              </Button>
+            ) : null}
+          </div>
         </div>
-      ) : null}
-      <Tile kicker={t("stockKicker")} title={t("stockTitle")} text={t("stockText")}>
-        {sample ? (
-          <Button variant="outline" size="sm" href={`/${locale}${complexRoute(sample.complex.slug)}`} className="home-why__cta">
-            <House size={16} aria-hidden="true" />
-            {t("stockCta")}
-          </Button>
-        ) : null}
-      </Tile>
-    </Spotlight>
-  );
-}
-
-/** Документ с галочкой (мокап .docs-draw): в full линии прорисовываются, иначе — сразу. */
-function DocsDrawing() {
-  return (
-    <svg className="home-why__docs" viewBox="0 0 120 120" width="96" height="96" aria-hidden="true">
-      <path d="M30 14h44l18 18v74H30z" />
-      <path d="M74 14v18h18" />
-      <path d="M44 70l12 12 22-26" />
-    </svg>
-  );
-}
-
-/** Услуги лентой (мокап .pills): в full ползут вверх, иначе стоят. */
-function ServicePills({ pills }: { pills: string[] }) {
-  return (
-    <div className="home-why__pills" aria-hidden="true">
-      <div className="home-why__pills-track">
-        {[...pills, ...pills].map((pill, index) => (
-          <span key={index} className="home-why__pill" style={{ ["--pill-shift" as string]: `${Math.round(Math.sin(index * 1.3) * 22)}px` }}>
-            {pill}
-          </span>
-        ))}
+        {sample ? <StockPanel sample={sample} /> : null}
       </div>
+    </WhyCard>
+  );
+}
+
+/** Живой пример наличия: типы первого ЖК ленты и «осталось N». */
+async function StockPanel({ sample }: { sample: NonNullable<HomeWhyProps["sample"]> }) {
+  const [t, tRooms] = await Promise.all([
+    getTranslations("home.why"),
+    getTranslations("catalog.card"),
+  ]);
+  const locale = (await getLocale()) as Locale;
+  const roomName = (rooms: number) =>
+    rooms <= 4 ? tRooms(`rooms.${rooms as 0 | 1 | 2 | 3 | 4}`) : tRooms("rooms.more", { n: rooms });
+  return (
+    <div className="home-why__stock home-why__rv home-why__rv--2">
+      <p className="home-why__stock-head">
+        <span className="home-why__stock-name">
+          {tRooms("name", { name: sample.complex.name[locale] })}
+        </span>
+        <span className="home-why__live">
+          <i aria-hidden="true" />
+          {t("stockLive")}
+        </span>
+      </p>
+      <ul className="home-why__stock-list">
+        {sample.types.map((type) => (
+          <li key={type.rooms} className="home-why__stock-row">
+            <span>{roomName(type.rooms)}</span>
+            <b className="home-why__badge">
+              {t.rich("stockLeft", { n: () => <Odometer value={type.free ?? 0} /> })}
+            </b>
+          </li>
+        ))}
+      </ul>
     </div>
+  );
+}
+
+/** «0%»: цифры крутятся слот-машиной до нуля, «+ комиссия» зачёркивается, «= ваша цена» выскакивает. */
+async function FeeTile() {
+  const t = await getTranslations("home.why");
+  return (
+    <WhyCard className="home-why__tile--fee" delay={120}>
+      <div className="home-why__fee">
+        <Kicker index="03" text={t("priceKicker")} />
+        {/* Заголовок — раньше равенства: диктор по заголовкам не пропускает его; на экране он внизу (order). */}
+        <div className="home-why__body">
+          <Copy title={t("priceTitle")} text={t("priceText")} />
+        </div>
+        <p className="home-why__eq home-why__rv home-why__rv--1">
+          <span className="sr-only">{t("priceEqSr")}</span>
+          <span className="home-why__eq-vis" aria-hidden="true">
+            <span className="home-why__chip">{t("priceEqFrom")}</span>
+            <span className="home-why__plus">
+              {t("priceEqFee")}
+              <span className="home-why__strike" />
+            </span>
+            <span className="home-why__chip home-why__chip--res">{t("priceEqYours")}</span>
+          </span>
+        </p>
+        <span className="home-why__big" aria-hidden="true">
+          <span className="home-why__big-win">
+            <span className="home-why__big-strip" />
+          </span>
+          <span className="home-why__big-pct">%</span>
+        </span>
+      </div>
+    </WhyCard>
   );
 }

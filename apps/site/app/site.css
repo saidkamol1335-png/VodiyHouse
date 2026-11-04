@@ -30,6 +30,9 @@
 @import "../components/HomeOffers/HomeOffers.css";
 @import "../components/HomePartner/HomePartner.css";
 @import "../components/HomeWhy/HomeWhy.css";
+@import "../components/FlatPicker/FlatPicker.css";
+@import "../components/JkGallery/JkGallery.css";
+@import "../components/Reviews/Reviews.css";
 @import "../components/LeadDialog/LeadDialog.css";
 @import "../components/LeadForm/LeadForm.css";
 @import "../components/Heading/Heading.css";
@@ -47,10 +50,12 @@
 @import "../components/SitePhoto/SitePhoto.css";
 @import "../components/SitePreloader/SitePreloader.css";
 @import "../components/ShareButton/ShareButton.css";
+@import "../components/SiteBackground/SiteBackground.css";
 @import "../components/SiteFooter/SiteFooter.css";
 @import "../components/SpecialsGrid/SpecialsGrid.css";
 @import "../components/Spotlight/Spotlight.css";
 @import "../components/SiteStats/SiteStats.css";
+@import "../components/SiteMotion/SiteMotion.css";
 @import "../components/TimelapseClip/TimelapseClip.css";
 @import "../components/TimelapseToggle/TimelapseToggle.css";
 @import "../components/SiteSteps/SiteSteps.css";

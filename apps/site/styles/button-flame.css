@@ -1,0 +1,399 @@
+/* «Тлеющий уголь» — кнопки сайта и шапки (03.11.2026, слово исполнителя: Flame Button @ayushmxxn, MIT).
+   Из образца взяты сдвоенное ядро (круг + широкий эллипс) под текстом за курсором и жар у ближнего
+   края пилюли, растущий к краю по pow(|t − ½|·2, 1,6). Кислотный огонь образца заменён бронзой и
+   янтарём скина, без filter (мягкость — ступенями градиента), без ореола наружу (кнопка обрезает).
+   Курсор считает SiteMotion (buttonPointer.ts — общий кадр с магнитом): --flame-dx, --flame-edge,
+   data-flame-side. Только сайт; кабинет не видит слой (Button.css: .button__flame — display: none).
+   full: ядро за курсором, жар у края, дыхание пока наведено; касание — вспышка 520 мс в точке.
+   lite: ядро проявляется в центре за 200 мс при наведении и нажатии, без слежения. none: ничего.
+   Подключается после liquid-glass.css: переходы кнопки здесь собраны заново (стекло их перебивает). */
+
+:root[data-surface="site"] {
+  --flame-hot: #c98a3c; /* искра — бронза с янтарём знака */
+  --flame-core: rgba(201, 138, 60, 0.62);
+  --flame-glow: rgba(248, 155, 13, 0.2);
+  --flame-peak: 0.55; /* потолок ядра на графите: крем остаётся ≥ 4,5:1 */
+  --dur-flame-burst: 520ms;
+  --dur-flame-breathe: 1.8s;
+}
+
+/* Стекло (контурные, призрачные, иконки, телефон, чипы, язык) — едва тёплый отсвет. */
+:root[data-surface="site"]
+  :is(
+    .button--outline,
+    .button--ghost,
+    .icon-button,
+    .phone-button,
+    .filter-pills__pill,
+    .segmented__item,
+    .favorite-button,
+    .share-button
+  ) {
+  --flame-peak: 0.3;
+}
+
+/* Тёмные островки: главная кнопка — кость, уголь — шампань. */
+:root[data-surface="site"] :is(.about-hero__card, .site-header--dark) {
+  --flame-hot: #e2c497;
+  --flame-core: rgba(205, 176, 138, 0.55);
+  --flame-glow: rgba(205, 176, 138, 0.24);
+}
+
+/* ─── .button: ядро и жар ─────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .button:not(.button--danger, .button--pending) > .button__flame {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Ядро: круг и широкий эллипс одним слоем, центр — точка курсора по горизонтали. */
+.button__flame::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 208px;
+  height: 128px;
+  margin: -64px 0 0 -104px;
+  background:
+    radial-gradient(
+      64px circle at 50% 50%,
+      var(--flame-hot) 0,
+      var(--flame-core) 34%,
+      transparent 78%
+    ),
+    radial-gradient(104px 52px at 50% 50%, var(--flame-glow) 0, transparent 100%);
+  opacity: 0;
+  transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(0.85);
+}
+
+.button--sm > .button__flame::before {
+  scale: 0.78;
+}
+
+/* Жар у края — со стороны курсора. */
+.button__flame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    44% 85% at 100% 50%,
+    var(--flame-hot),
+    var(--flame-core) 30%,
+    transparent 75%
+  );
+  opacity: calc(var(--flame-edge, 0) * var(--flame-peak));
+}
+
+.button[data-flame-side="start"] > .button__flame::after {
+  background: radial-gradient(
+    44% 85% at 0% 50%,
+    var(--flame-hot),
+    var(--flame-core) 30%,
+    transparent 75%
+  );
+}
+
+:root[data-surface="site"][data-motion="full"] .button__flame::before {
+  transition:
+    opacity 300ms ease-out,
+    transform var(--dur-slow) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root[data-surface="site"][data-motion="full"] .button:not(:disabled):hover > .button__flame::before {
+    opacity: var(--flame-peak);
+    transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(1);
+    transition:
+      opacity 180ms ease-out,
+      transform 90ms linear;
+    animation: flame-breathe var(--dur-flame-breathe) ease-in-out 450ms infinite;
+  }
+
+  :root[data-surface="site"][data-motion="lite"] .button:not(:disabled):hover > .button__flame::before {
+    opacity: calc(var(--flame-peak) * 0.7);
+    transform: scale(1);
+    transition: opacity var(--dur-fast) ease-out;
+  }
+}
+
+/* Нажатие пальцем в lite (телефон почти всегда в lite) — тёплый отсвет без JS, 120 мс. */
+:root[data-surface="site"][data-motion="lite"] .button:not(:disabled):active > .button__flame::before {
+  opacity: calc(var(--flame-peak) * 0.75);
+  transform: scale(1);
+  transition: opacity 120ms ease-out;
+}
+
+/* Клавиатура: ядро в центре, без слежения. */
+:root[data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
+  .button:focus-visible
+  > .button__flame::before {
+  opacity: calc(var(--flame-peak) * 0.7);
+  transform: scale(1);
+}
+
+/* Касание в full (планшет): вспышка в точке; a/b — перезапуск без reflow (SiteMotion). Заливка
+   backwards: после вспышки слой возвращается к своему состоянию (наведение, фокус), а не гаснет. */
+:root[data-surface="site"][data-motion="full"] .button[data-flame="a"] > .button__flame::before {
+  animation: flame-burst-a var(--dur-flame-burst) var(--ease) backwards;
+}
+
+:root[data-surface="site"][data-motion="full"] .button[data-flame="b"] > .button__flame::before {
+  animation: flame-burst-b var(--dur-flame-burst) var(--ease) backwards;
+}
+
+/* ─── Мелкие кнопки шапки и страниц: жар поднимается снизу (::after, без слежения) ─────────── */
+
+:root[data-surface="site"]
+  :is(
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item:not(.segmented__item--active)
+  ) {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
+  :is(
+    .icon-button:not(.icon-button--bare),
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc:not(:disabled),
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item:not(.segmented__item--active)
+  )::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(60% 70% at 50% 100%, var(--flame-core), transparent 72%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+:root[data-surface="site"][data-motion="full"]
+  :is(
+    .icon-button,
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item
+  )::after {
+  transform: translateY(30%) scale(0.7);
+  transition:
+    opacity 300ms ease-out,
+    transform 450ms var(--ease);
+}
+
+:root[data-surface="site"][data-motion="lite"]
+  :is(
+    .icon-button,
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item
+  )::after {
+  transition: opacity var(--dur-fast) ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root[data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
+    :is(
+      .icon-button:not(.icon-button--bare),
+      .phone-button,
+      .filter-pills__pill,
+      .favorite-button,
+      .share-button,
+      .complex-bar__book,
+      .complex-layout__calc:not(:disabled),
+      .quiz__start,
+      .favorites-view__share,
+      .segmented__item:not(.segmented__item--active)
+    ):hover::after {
+    opacity: var(--flame-peak);
+    transform: none;
+  }
+}
+
+/* Нажатие и фокус клавиатурой — тот же отсвет (на телефоне это единственный вариант). */
+:root[data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
+  :is(
+    .icon-button:not(.icon-button--bare),
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc:not(:disabled),
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item:not(.segmented__item--active)
+  ):is(:active, :focus-visible)::after {
+  opacity: var(--flame-peak);
+  transform: none;
+}
+
+:root[data-surface="site"][data-motion="full"]
+  :is(
+    .icon-button,
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item
+  )[data-flame="a"]::after {
+  animation: flame-rise-a var(--dur-flame-burst) var(--ease) backwards;
+}
+
+:root[data-surface="site"][data-motion="full"]
+  :is(
+    .icon-button,
+    .phone-button,
+    .filter-pills__pill,
+    .favorite-button,
+    .share-button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .segmented__item
+  )[data-flame="b"]::after {
+  animation: flame-rise-b var(--dur-flame-burst) var(--ease) backwards;
+}
+
+/* Меню шапки: уголь живёт в капле — она сама переносит его к пункту под курсором (useLiquidDrop). */
+:root[data-surface="site"] .header-nav__drop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(60% 90% at 50% 130%, var(--flame-core), transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+:root[data-surface="site"][data-motion="full"] .header-nav__drop::after {
+  transition: opacity 300ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root[data-surface="site"][data-motion="full"] .header-nav:hover .header-nav__drop::after {
+    opacity: 0.5;
+  }
+}
+
+/* ─── Переходы кнопки: пружина стекла + магнит (translate), одним списком ─────────────────── */
+
+:root[data-surface="site"][data-motion="full"] :is(.button--primary, .button--outline):not(#lg) {
+  translate: var(--magnet-x, 0) var(--magnet-y, 0);
+  transition:
+    color var(--dur-fast) var(--ease),
+    transform 0.55s var(--lg-spring),
+    translate var(--dur-slow) var(--ease);
+}
+
+:root[data-motion="none"] .button__flame {
+  display: none;
+}
+
+/* ─── Ключевые кадры ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes flame-breathe {
+  50% {
+    scale: 1.05;
+  }
+}
+
+@keyframes flame-burst-a {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(0.6);
+  }
+
+  18% {
+    opacity: var(--flame-peak);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(1.15);
+  }
+}
+
+@keyframes flame-burst-b {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(0.6);
+  }
+
+  18% {
+    opacity: var(--flame-peak);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--flame-dx, 0px), 0, 0) scale(1.15);
+  }
+}
+
+@keyframes flame-rise-a {
+  0% {
+    opacity: 0;
+    transform: translateY(30%) scale(0.7);
+  }
+
+  25% {
+    opacity: var(--flame-peak);
+  }
+
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+@keyframes flame-rise-b {
+  0% {
+    opacity: 0;
+    transform: translateY(30%) scale(0.7);
+  }
+
+  25% {
+    opacity: var(--flame-peak);
+  }
+
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}

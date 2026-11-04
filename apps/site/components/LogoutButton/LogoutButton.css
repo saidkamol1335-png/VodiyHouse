@@ -7,7 +7,7 @@
 /* Строка меню аватара (≤ 980 px), пунктир сверху — как у пунктов меню мокапа. */
 .logout-button--menu {
   margin: 0 -6px;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .logout-button__menu-item {

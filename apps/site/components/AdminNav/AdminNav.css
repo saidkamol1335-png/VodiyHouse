@@ -90,7 +90,7 @@
     top: 0;
     z-index: var(--z-admin-strip);
     display: block;
-    border-bottom: 1px dashed var(--dash);
+    border-bottom: 1px var(--rule-style) var(--dash);
     background: var(--glass);
     -webkit-backdrop-filter: var(--glass-filter);
     backdrop-filter: var(--glass-filter);

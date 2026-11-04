@@ -15,7 +15,7 @@
 }
 
 .complex-documents-form__row + .complex-documents-form__row {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .complex-documents-form__text {

@@ -22,3 +22,15 @@
   for = "/hero/timelapse/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Рендеры первого экрана главной: новый набор — новая папка версии (lib/site/home/heroRenders.ts).
+[[headers]]
+  for = "/hero/renders/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Иллюстрации «Документов ЖК»: новый набор — новая папка версии (lib/site/complex/documentImages.ts).
+[[headers]]
+  for = "/docs-hover/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -124,7 +124,7 @@
 }
 
 .progress-overview__cell--wait {
-  border: 1px dashed var(--line-3);
+  border: 1px var(--rule-style) var(--line-3);
   color: var(--fg-2);
 }
 
@@ -155,7 +155,7 @@ a.progress-overview__cell:focus-visible {
   align-items: center;
   gap: 14px;
   padding: 12px 0;
-  border-top: 1px dashed var(--line-2);
+  border-top: 1px var(--rule-style) var(--line-2);
 }
 
 .progress-overview__video:first-child {

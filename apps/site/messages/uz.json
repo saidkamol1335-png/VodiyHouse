@@ -47,10 +47,11 @@
       "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
       "cta": "Kvartira tanlash",
       "scrollCue": "Pastga suring",
-      "loading": "Qurilish videosi yuklanmoqda",
-      "finaleTitle": "Uy topshirildi.",
-      "finaleText": "Topshirilgan yoki qurilayotgan TJMdan kvartira tanlab beramiz — quruvchi narxida.",
-      "finaleCta": "Kvartiralarni ko‘rish",
+      "slides": {
+        "label": "Yangi uylar vizualizatsiyalari",
+        "note": "Vizualizatsiyalar namunaviy xarakterga ega"
+      },
+      "loading": "Sayt yuklanmoqda",
       "free": {
         "price": "Narx — quruvchinikidek",
         "service": "Tanlash va ko‘rsatish — bepul",
@@ -76,6 +77,80 @@
       "title": "Kvartirani ",
       "titleAccent": "parametrlar bo‘yicha tanlang"
     },
+    "flatPicker": {
+      "lead": "Xonadoningizni tanlang",
+      "wordmark": "VODIY",
+      "caption": "Namuna reja",
+      "tablist": "Xonadon turi",
+      "tabs": {
+        "1": "1 xonali",
+        "2": "2 xonali",
+        "3": "3 xonali",
+        "4": "4+ xonali"
+      },
+      "names": {
+        "1": "Bir xonali",
+        "2": "Ikki xonali",
+        "3": "Uch xonali",
+        "4": "To‘rt va undan ko‘p xonali"
+      },
+      "lines": {
+        "1": {
+          "a": "Birinchi o‘z uyingiz yoki ijara uchun:",
+          "b": "yorug‘ xona, oshxona va sanuzel."
+        },
+        "2": {
+          "a": "Yotoqxona mehmonxonadan alohida —",
+          "b": "juftlik yoki farzandli oila uchun qulay."
+        },
+        "3": {
+          "a": "Ikki yotoqxona va umumiy mehmonxona:",
+          "b": "butun oila va mehmonlar uchun joy."
+        },
+        "4": {
+          "a": "Katta oila uchun",
+          "b": "keng rejalar."
+        }
+      },
+      "figure": {
+        "area": "Maydon",
+        "price": "Narx",
+        "stock": "Sotuvda"
+      },
+      "from": "{value} dan",
+      "approx": "≈ {value}",
+      "flats": "{partial, select, true {kamida } other {}}{n} ta xonadon",
+      "flatsUnknown": "sotuvda bor",
+      "stock": "{complexes} ta TJMda {flats}",
+      "cta": "{partial, select, true {Xonadonlarni} other {{n} ta xonadonni}} ko‘rish",
+      "built": "topshirilgan uylar bor",
+      "quarter": "{year}-yil {q}-chorak",
+      "feature": {
+        "deadline": "Topshirish — {value}",
+        "installment": "{n} oygacha muddatli to‘lov",
+        "perM2": "1 m² narxi {value} dan",
+        "price": "Quruvchi narxida"
+      },
+      "months": "{n} oygacha",
+      "table": {
+        "title": "Taqqoslash",
+        "area": "Maydon",
+        "price": "Narx",
+        "perM2": "1 m² narxi",
+        "flats": "Sotuvda",
+        "complexes": "TJM",
+        "deadline": "Topshirish",
+        "installment": "Muddatli to‘lov"
+      }
+    },
+    "projects": {
+      "eyebrow": "Loyihalar",
+      "title": "Vodiy House",
+      "titleAccent": "loyihalari",
+      "all": "Barcha TJMlar",
+      "allNote": "Saytda {n} ta TJM — narxlar, mavjud xonadonlar va rejalar bilan",
+      "hint": "Suring"
+    },
     "manifesto": {
       "eyebrow": "Vodiy House qisqacha",
       "text": "Farg‘ona viloyati yangi uylari — bitta katalogda. <a>TJM hujjatlarini tekshiramiz,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
@@ -93,7 +168,6 @@
       "freeKicker": "Bepul",
       "freeTitle": "Tanlash, ko‘rsatish va bankda yordam",
       "freeText": "Menejer birinchi qo‘ng‘iroqdan kalitgacha yoningizda.",
-      "pills": "TJM tanlash · Obyekt ko‘rsatish · Hujjat tekshiruvi · Ipoteka · Muddatli to‘lov · Kadastr · Kalitlar",
       "stockKicker": "Mavjudlik",
       "stockTitle": "Har bir TJM qoldiqlari",
       "stockText": "Bo‘sh kvartiralar soni kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
@@ -103,7 +177,31 @@
       "videoTitle": "Qurilish jarayonini suratga olamiz",
       "videoText": "Obyektga borish shart emas — kvartira hozir qanday ko‘rinishini ko‘ring.",
       "videoCta": "Namunani ko‘rish",
-      "videoRec": "REC · {complex} · {block}-blok"
+      "videoRec": "REC · {complex} · {block}-blok",
+      "stockLive": "onlayn",
+      "stockLeft": "<n></n> ta qoldi",
+      "priceEqFrom": "Quruvchi narxi",
+      "priceEqFee": "+ komissiya",
+      "priceEqYours": "= sizning narxingiz",
+      "priceEqSr": "Komissiyasiz quruvchi narxi — sizning narxingiz shu.",
+      "docsSeal": "TEKSHIRILGAN · VODIY HOUSE · TJM HUJJATLARI ·",
+      "docsSealLabel": "Vodiy House tomonidan tekshirilgan",
+      "docsChecks": "Qurilishga ruxsatnoma · Yer rasmiylashtirilgan · Quruvchining topshirilgan obyektlari · Xodim obyektga borgan",
+      "route": "TJM tanlash · Obyekt ko‘rsatish · Hujjat tekshiruvi · Bankda yordam · Kadastr · Kalitlar",
+      "routeTotal": "Siz uchun jami",
+      "routeTotalValue": "0 so‘m"
+    },
+    "reviews": {
+      "title": "Kalitini olgan mijozlarimiz fikri",
+      "barLeft": "Mijozlar fikri",
+      "count": "Fikrlar {n}",
+      "average": "{value}/5",
+      "ratingLabel": "Baho: 5 dan {value}",
+      "barRight": "Kalitlar topshirildi",
+      "cta": "Xonadon tanlash",
+      "play": "Video fikrni ko‘rish",
+      "photoAlt": "Xaridor surati",
+      "keyAlt": "Vodiy House yorlig‘li kalit"
     },
     "partner": {
       "eyebrow": "Quruvchilar uchun",
@@ -519,6 +617,7 @@
       "counter": "{n} / {total}",
       "prev": "Oldingi surat",
       "next": "Keyingi surat",
+      "nextLabel": "Keyingi",
       "thumb": "{n}-suratni ko‘rsatish",
       "open": "Suratni kattalashtirish",
       "close": "Yopish"
@@ -547,6 +646,7 @@
     },
     "nav": {
       "label": "Sahifa bo‘limlari",
+      "folder": "Bo‘limlar",
       "about": "TJM haqida",
       "location": "Joylashuv",
       "stock": "Mavjudlik",
@@ -814,7 +914,8 @@
       "title": "TJM hujjatlari",
       "lead": "Faqat Vodiy House tekshirgan hujjatlarni ko‘rsatamiz. Nusxalarni menejer beradi — bu bepul.",
       "checkedOn": "Tekshirilgan: {date}",
-      "hint": "«{name}» nimani anglatadi?"
+      "hint": "«{name}» nimani anglatadi?",
+      "requestScan": "Nusxasini so‘rash: {name}"
     },
     "preview": {
       "label": "Oldindan ko‘rish",
@@ -839,7 +940,12 @@
       "pause": "Pauza",
       "resume": "Ko‘rish",
       "frame": "{total} tadan {n}-kadr",
-      "thumbs": "Barcha hisobotlar"
+      "thumbs": "Barcha hisobotlar",
+      "photos": "{n} ta surat",
+      "videos": "{n} ta video",
+      "contents": "{month} materiallari",
+      "itemPhoto": "{total} tadan {n}-surat",
+      "itemVideo": "{month} videosi"
     },
     "soon": {
       "badge": "Tez kunda",

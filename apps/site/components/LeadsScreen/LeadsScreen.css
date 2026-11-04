@@ -49,7 +49,7 @@
 .leads-screen__limit {
   margin: 0;
   padding: 18px;
-  border: 1px dashed var(--dash);
+  border: 1px var(--rule-style) var(--dash);
   border-radius: var(--r-m);
   color: var(--fg-3);
   font-size: var(--fs-small);

@@ -14,5 +14,5 @@
 .eyebrow::before {
   content: "";
   width: 18px;
-  border-top: 1px dashed var(--amber-line);
+  border-top: 1px var(--rule-style) var(--amber-line);
 }

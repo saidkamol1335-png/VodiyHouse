@@ -1,73 +1,173 @@
-/* «Документы ЖК» (мокап .card + .li): строки через пунктир — ✓, название с «?», дата моно справа. */
+/* «Документы ЖК» — Interactive Hover Links (@hurerag24, MIT) один в один (04.11.2026, «точь-в-точь,
+   цвета как в образце»): классы Tailwind образца в БЭМ — строки max-w 64rem, рамка снизу 2px
+   (oklch 97 % → 14,5 % за 500 мс), заголовок 36/60 px жирный, подзаголовок 16 px, фото 128 × 96 /
+   256 × 192 под текстом, стрелка 32/48 px. Пружины и положение фото — ComplexDocumentsList.
+   full у мыши — всё; lite и тач — только смена цвета; none — без переходов. */
+
+/* UI/UX 04.11: токены сайта вместо нейтралей образца — контраст ≥ 4,5 : 1, шрифт бренда. */
 .complex-documents {
+  --doc-fg: var(--fg);
+  --doc-muted-fg: var(--fg-3);
+  --doc-muted: var(--line-2);
+
+  /* Образец — max-w 64rem; у нас во всю ширину: справа от названия — место для фото. */
+  max-width: none;
   margin: 0;
-  padding: 4px 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  background: var(--panel-bg);
+  padding: 0;
+  font-family: inherit;
   list-style: none;
 }
 
 .complex-documents__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 16px;
+  border-bottom: 2px solid var(--doc-muted);
+}
+
+/* Вся строка — кнопка заявки на скан (под текстом; «?» подсказки — над ней). */
+.complex-documents__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.complex-documents__hit:focus-visible {
+  outline: 2px solid var(--doc-fg);
+  outline-offset: 2px;
+}
+
+.complex-documents__text {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.complex-documents__heading {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 0;
-  border-top: 1px dashed var(--dash);
-}
-
-.complex-documents__item:first-child {
-  border-top: 0;
-}
-
-.complex-documents__check {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--badge-ok-border);
-  border-radius: 50%;
-  background: var(--ok-soft);
-  color: var(--ok);
-}
-
-.complex-documents__name {
-  flex: 1;
-  min-width: 0;
-  padding-top: 3px;
-}
-
-.complex-documents__name b {
-  font-size: var(--fs-small-l);
+  color: var(--doc-muted-fg);
+  font-size: 2.25rem;
   font-weight: 700;
+  line-height: calc(2.5 / 2.25);
+  letter-spacing: normal;
 }
 
-.complex-documents__date {
-  align-self: flex-start;
-  padding-top: 5px;
-  font-family: var(--mono);
-  font-size: var(--fs-micro);
-  letter-spacing: var(--ls-mono);
-  text-transform: uppercase;
-  color: var(--fg-3);
-  white-space: nowrap;
+.complex-documents__word {
+  display: block;
 }
 
-@media (max-width: 760px) {
-  .complex-documents {
-    padding: 4px 14px;
+.complex-documents__letter {
+  display: inline-block;
+  white-space: pre;
+}
+
+.complex-documents__heading .term-hint {
+  pointer-events: auto;
+}
+
+.complex-documents__sub {
+  position: relative;
+  z-index: 10;
+  display: block;
+  margin-top: 8px;
+  color: var(--doc-muted-fg);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Фото выходит рядом с названием (left — из кода, за концом названия) и растёт от своего левого края. */
+.complex-documents__shot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 0;
+  width: 128px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  box-shadow: var(--elev-2);
+  transform: translateY(-50%) scale(0) rotate(-12.5deg);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.complex-documents__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.complex-documents__arrow-clip {
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.complex-documents__arrow {
+  position: relative;
+  z-index: 10;
+  padding: 16px;
+  color: var(--doc-fg);
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.complex-documents__arrow svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+/* Цвет — как у образца: 500 мс cubic-bezier(.4, 0, .2, 1), только у устройств с наведением. */
+:is([data-motion="full"], [data-motion="lite"]) :is(.complex-documents__item, .complex-documents__heading, .complex-documents__sub) {
+  transition: border-color var(--dur-base) cubic-bezier(0.4, 0, 0.2, 1), color var(--dur-base) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .complex-documents__item[data-hover] {
+    border-color: var(--doc-fg);
   }
 
+  .complex-documents__item[data-hover] :is(.complex-documents__heading, .complex-documents__sub) {
+    color: var(--doc-fg);
+  }
+}
+
+/* Нажатие пальцем — тот же цвет (у образца на тач-экране нет ничего). */
+.complex-documents__item:has(.complex-documents__hit:active) {
+  border-color: var(--doc-fg);
+}
+
+@media (min-width: 48rem) {
   .complex-documents__item {
-    flex-wrap: wrap;
-    row-gap: 2px;
+    padding-block: 32px;
   }
 
-  .complex-documents__date {
-    width: 100%;
-    padding: 0 0 0 38px;
+  .complex-documents__heading {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  /* Образец — 256 × 192; чуть меньше, чтобы встать рядом с длинным названием. */
+  .complex-documents__shot {
+    width: 208px;
+    height: 156px;
+  }
+
+  .complex-documents__arrow svg {
+    width: 48px;
+    height: 48px;
   }
 }
