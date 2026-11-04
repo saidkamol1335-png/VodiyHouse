@@ -63,7 +63,7 @@ async function cabinetProxy(request: NextRequest) {
 
 function gateResponse(request: NextRequest, decision: GateDecision, response: NextResponse) {
   if (decision.kind === "next") return response;
-  const redirect = copySessionCookies(response, NextResponse.redirect(new URL(decision.location, request.url)));
+  const redirect = copySessionCookies(response, NextResponse.redirect(new URL(`${request.nextUrl.basePath}${decision.location}`, request.url)));
   // Ссылка кабинета без сессии (заявка из чата менеджеров) — после входа вернуться к ней. Только
   // переход страницы: предзагрузка Link, запросы RSC и файлы (CSV) адрес возврата не меняют.
   const back = safeReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);

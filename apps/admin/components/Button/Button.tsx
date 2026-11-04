@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { MouseEvent, ReactNode, Ref } from "react";
+import { withBasePath } from "@/lib/basePath";
 
 type ButtonProps = {
   children: ReactNode;
@@ -102,6 +103,6 @@ type ButtonLinkProps = Pick<ButtonProps, "children" | "download" | "aria-label" 
  * (сайт — отдельное приложение, PLAN §10) — обычная <a>: роутер кабинета его не знает.
  */
 function ButtonLink({ download, ...props }: ButtonLinkProps) {
-  if (download) return <a {...props} download />;
+  if (download) return <a {...props} href={withBasePath(props.href)} download />;
   return /^https?:\/\//.test(props.href) ? <a {...props} /> : <Link {...props} />;
 }

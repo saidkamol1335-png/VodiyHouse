@@ -10,6 +10,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "node scripts/dev-one.mjs",
     "dev:site": "npm run dev -w @vh/site",
     "dev:admin": "npm run dev -w @vh/admin",
     "build:site": "npm run build -w @vh/site",

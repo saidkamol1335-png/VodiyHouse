@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { UpdatedAgo } from "@/components/UpdatedAgo";
 import type { HaltReason } from "@/lib/admin/home/liveStock";
 import { ADMIN_ROUTES } from "@/lib/admin/nav";
+import { withBasePath } from "@/lib/basePath";
 
 type LiveStatusProps = {
   live: boolean;
@@ -58,7 +59,7 @@ function HaltLabel({ halted }: { halted: HaltReason }) {
     <>
       {t(`halt.${halted}`)}
       {halted === "session" ? (
-        <a className="live-status__action" href={ADMIN_ROUTES.login}>
+        <a className="live-status__action" href={withBasePath(ADMIN_ROUTES.login)}>
           {t("signIn")}
         </a>
       ) : null}

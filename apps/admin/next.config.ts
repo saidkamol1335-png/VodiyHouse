@@ -32,7 +32,19 @@ function supabaseMediaPattern(): { protocol: "https" | "http"; hostname: string;
 
 const isLocalSupabase = LOCAL_HOSTS.has(supabaseHost()?.hostname ?? "");
 
+// Один локальный адрес для сайта и кабинета (scripts/dev-one.mjs в корне): кабинет на /admin. В проде не задаётся.
+function adminBasePath(): string {
+  const value = process.env.ADMIN_BASE_PATH ?? "";
+  if (value !== "" && !/^\/[a-z0-9-]+$/.test(value)) throw new Error(`ADMIN_BASE_PATH «${value}»: нужно вида /admin`);
+  return value;
+}
+
+const basePath = adminBasePath();
+
 const nextConfig: NextConfig = {
+  ...(basePath ? { basePath } : {}),
+  // lib/basePath.ts читает префикс и в браузере.
+  env: { ADMIN_BASE_PATH: basePath },
   // Статичная оболочка страницы + потоковые динамические части (PLAN 3а: страницы ЖК статичные).
   cacheComponents: true,
   partialPrefetching: true,
