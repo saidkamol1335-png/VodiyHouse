@@ -68,7 +68,8 @@
   text-transform: uppercase;
 }
 
-.calc-schedule__table th:first-child {
+.calc-schedule__table th:first-child,
+.calc-schedule__table .calc-schedule__cell--date {
   text-align: left;
 }
 

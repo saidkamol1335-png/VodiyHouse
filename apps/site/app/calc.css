@@ -1,5 +1,5 @@
-/* Калькулятор платежа (фаза 2): один набор блоков на кабинет («Расчёт для клиента»), /kalkulyator
-   и расчёт квартиры. Подключают только страницы с калькулятором — не каждая страница сайта. */
+/* Калькулятор платежа (фаза 2): один набор блоков на расчёт квартиры и риелторский /kalkulyator
+   (PLAN §10, п. 48). Подключают только страницы с калькулятором — не каждая страница сайта. */
 
 /* Части — первыми: их собирает PaymentCalculator, его правила раскладки грузятся позже. */
 @import "../components/CalcCompare/CalcCompare.css";
@@ -19,3 +19,4 @@
 @import "../components/PaymentCalculator/PaymentCalculator.css";
 @import "../components/FlatCalculator/FlatCalculator.css";
 @import "../components/SiteCalculator/SiteCalculator.css";
+@import "../components/RealtorCalculator/RealtorCalculator.css";

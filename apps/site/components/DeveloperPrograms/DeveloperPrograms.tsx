@@ -7,11 +7,12 @@ import type { CalcProgram } from "@vh/shared/calc/programs";
 import { initialsOf } from "@vh/shared/format";
 import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
-import { ROUTES } from "@/lib/routes";
+import { type ProgramComplex, programHref } from "./programLink";
 
 type DeveloperProgramsProps = {
   options: readonly ProgramOption<CalcProgram>[];
-  developerSlug: string;
+  /** ЖК застройщика на сайте и их блоки — куда ведёт «Рассчитать платёж». */
+  complexes: readonly ProgramComplex[];
   developerName: string;
   locale: Locale;
 };
@@ -21,9 +22,9 @@ const APOSTROPHES = /[‘’']/g;
 /**
  * «Условия покупки» (мокап SiteDev, ТЗ 8.2): программы застройщика и банков — те же названия и
  * строка условий, что в калькуляторе; знак — инициалы банка или застройщика (мокап «FS», «IB»);
- * «Рассчитать платёж» открывает /kalkulyator с этой программой.
+ * «Рассчитать платёж» ведёт на ЖК, где программу считает калькулятор квартиры (PLAN §10, п. 48).
  */
-export async function DeveloperPrograms({ options, developerSlug, developerName, locale }: DeveloperProgramsProps) {
+export async function DeveloperPrograms({ options, complexes, developerName, locale }: DeveloperProgramsProps) {
   const [t, tCalc] = await Promise.all([getTranslations("developers.page"), getTranslations("calc")]);
   if (options.length === 0) return null;
   const mark = (option: ProgramOption<CalcProgram>) =>
@@ -36,6 +37,7 @@ export async function DeveloperPrograms({ options, developerSlug, developerName,
       <p className="developer-programs__lead">{t("termsLead")}</p>
       <ul className="developer-programs__grid">
         {options.map((option) => {
+          const href = programHref(option, complexes);
           return (
             <li key={option.id} className="developer-programs__card">
               <span className="developer-programs__mark" aria-hidden="true">
@@ -43,13 +45,12 @@ export async function DeveloperPrograms({ options, developerSlug, developerName,
               </span>
               <b className="developer-programs__title">{programTitle(option, tCalc, locale)}</b>
               <span className="developer-programs__note">{programNote(option, tCalc)}</span>
-              <Link
-                className="developer-programs__calc"
-                href={`${ROUTES.calculator}?developer=${developerSlug}&program=${option.id}`}
-              >
-                {t("calculate")}
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
+              {href ? (
+                <Link className="developer-programs__calc" href={href}>
+                  {t("calculate")}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              ) : null}
             </li>
           );
         })}

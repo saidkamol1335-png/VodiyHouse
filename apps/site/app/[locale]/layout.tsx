@@ -13,7 +13,6 @@ import { SiteMotion } from "@/components/SiteMotion";
 import { siteMessages } from "@/lib/i18n/clientMessages";
 import { isLocale, LOCALES } from "@/lib/i18n/routing";
 import { hiddenNav } from "@/lib/routes";
-import { readCalculatorInMenu } from "@/lib/site/calculator";
 import { readSiteContacts } from "@/lib/site/contacts";
 import { SITE_NAME, siteOrigin } from "@/lib/site/metadata";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
@@ -43,8 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SiteLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await rootLocale();
   if (!isLocale(locale)) notFound();
-  const [calculator, contacts, messages, showcase] = await Promise.all([
-    readCalculatorInMenu(),
+  const [contacts, messages, showcase] = await Promise.all([
     readSiteContacts(),
     getMessages(),
     readSiteShowcase(),
@@ -54,7 +52,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/[locale]">)
   return (
     <RootDocument lang={locale} surface="site" messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>
-        <HiddenNavProvider hidden={hiddenNav({ calculator, specials })}>
+        <HiddenNavProvider hidden={hiddenNav({ specials })}>
           <LeadProvider>
             <SiteBackground />
             {children}

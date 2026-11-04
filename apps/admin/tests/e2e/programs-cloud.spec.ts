@@ -69,20 +69,13 @@ test.describe("облако · программы оплаты и калькул
   });
 
   for (const locale of ["ru", "uz"] as const) {
-    test(`/${locale}/kalkulyator: застройщики DEMO из базы, пункт меню, расчёт другого застройщика`, async ({
-      page,
-    }) => {
+    // /kalkulyator — риелторский (PLAN §10, п. 48): программы застройщиков DEMO считает расчёт
+    // квартиры на странице ЖК; здесь — вкладки и пункт меню, который есть всегда.
+    test(`/${locale}/kalkulyator: риелторский калькулятор и пункт меню`, async ({ page }) => {
       await page.goto(site(`/${locale}/kalkulyator`));
-      await expect(page.locator(".site-calculator__empty")).toHaveCount(0);
       await expect(page.getByTestId("calc-total")).toBeVisible();
-      for (const name of DEVELOPERS) await expect(page.getByRole("button", { name })).toBeVisible();
-      await page.getByRole("button", { name: "Marg‘ilon Invest" }).click();
-      await expect(page).toHaveURL(/\?developer=demo-margilan-invest$/);
-      await expect(page.getByRole("button", { name: "Marg‘ilon Invest" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      );
-      await expect(page.getByTestId("calc-total")).toBeVisible();
+      await expect(page.getByRole("tab")).toHaveCount(3);
+      for (const name of DEVELOPERS) await expect(page.getByRole("button", { name })).toHaveCount(0);
       if (isPhone(page))
         await page
           .getByRole("button", { name: locale === "ru" ? "Открыть меню" : "Menyuni ochish" })

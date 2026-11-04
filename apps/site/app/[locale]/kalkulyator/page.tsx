@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
-import { CalcHero, type CalcHeroExample } from "@/components/CalcHero";
+import { CalcHero } from "@/components/CalcHero";
 import { Container } from "@/components/Container";
-import { SiteCalculator } from "@/components/SiteCalculator";
+import { RealtorCalculator, stateFrom } from "@/components/RealtorCalculator";
 import { SiteHeader } from "@/components/SiteHeader";
-import { CALC_EXAMPLES, exampleSearch, exampleYears } from "@vh/shared/calc/examples";
-import { readCalcParams } from "@vh/shared/calc/params";
+import type { ExchangeRate } from "@vh/shared/calc/money";
+import { readRealtorParams } from "@vh/shared/calc/realtorParams";
 import { CALC_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/routes";
+import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { LEAD_FORM_ENABLED } from "@/lib/site/flags";
-import { readSiteCalc } from "@/lib/site/calculator";
 import { readSiteCalcHints } from "@/lib/site/hints";
 import { pageMetadata } from "@/lib/site/metadata";
 
@@ -29,21 +30,22 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-/** /kalkulyator (шаг 2.6): шапка страницы статичная, калькулятор — по адресу (?developer=…). */
+/**
+ * /kalkulyator — риелторский калькулятор (PLAN §10, п. 48, образец uysot.uz): ипотека, рассрочка и
+ * «Сколько могу купить» по условиям, которые вводит посетитель. Программы застройщиков считает
+ * калькулятор квартиры на странице ЖК. Шапка статичная, расчёт — по адресу (ссылкой можно поделиться).
+ */
 export default async function CalculatorPage({ searchParams }: CalculatorPageProps) {
   const t = await getTranslations("calc.page");
+  const hero = (
+    <CalcHero eyebrow={t("eyebrow")} title={t("title")} accent={t("titleAccent")} lead={t("lead")} />
+  );
   return (
     <>
       <SiteHeader />
       <Container as="main">
-        <Suspense
-          fallback={
-            <>
-              <CalcHero {...heroTexts(t)} examples={[]} />
-              <div className="site-calculator__pending" aria-hidden="true" />
-            </>
-          }
-        >
+        {hero}
+        <Suspense fallback={<div className="realtor-calc__pending" aria-hidden="true" />}>
           <Calculator searchParams={searchParams} />
         </Suspense>
       </Container>
@@ -51,54 +53,36 @@ export default async function CalculatorPage({ searchParams }: CalculatorPagePro
   );
 }
 
-type PageT = Awaited<ReturnType<typeof getTranslations<"calc.page">>>;
-
-const heroTexts = (t: PageT) => ({
-  eyebrow: t("eyebrow"),
-  title: t("title"),
-  accent: t("titleAccent"),
-  lead: t("lead"),
-  examplesLabel: t("examples"),
-});
-
-/** Примеры — только когда есть DEMO-застройщики с такими программами (решение фазы 2). */
-async function examplesOf(t: PageT, tCalc: Awaited<ReturnType<typeof getTranslations<"calc">>>) {
-  const examples: CalcHeroExample[] = [];
-  for (const example of CALC_EXAMPLES) {
-    const current = (await readSiteCalc(example.developer))?.current;
-    if (current?.slug !== example.developer) continue;
-    const search = exampleSearch(example, current.data.options);
-    if (!search) continue;
-    const term = tCalc("years", { count: exampleYears(example) });
-    examples.push({
-      href: `/${await getLocale()}${ROUTES.calculator}?${search}`,
-      title: t("example", { area: example.areaM2, term }),
-      note: `${current.name} · ${example.bank}`,
-    });
+/**
+ * Курс для $ | сум — из каталога (там он и для карточек). Облака нет или база не ответила —
+ * калькулятор всё равно работает, только в валюте ввода: условия вводит сам посетитель.
+ */
+async function readRate(): Promise<ExchangeRate | null> {
+  try {
+    return (await readSiteCatalog())?.rate ?? null;
+  } catch (error) {
+    unstable_rethrow(error);
+    return null;
   }
-  return examples;
 }
 
 async function Calculator({ searchParams }: { searchParams: Promise<Search> }) {
-  const [t, tCalc, messages] = await Promise.all([
-    getTranslations("calc.page"),
-    getTranslations("calc"),
+  const [messages, rate, hints, search] = await Promise.all([
     getMessages(),
+    readRate(),
+    readSiteCalcHints(),
+    searchParams,
   ]);
-  const params = readCalcParams(await searchParams);
-  const [screen, hints] = await Promise.all([readSiteCalc(params.developer), readSiteCalcHints()]);
   return (
-    <>
-      <CalcHero {...heroTexts(t)} examples={await examplesOf(t, tCalc)} />
-      {/* Тексты калькулятора — только этой странице: в HTML остальных страниц сайта их нет. */}
-      <NextIntlClientProvider messages={pickMessages(messages, CALC_MESSAGES)}>
-        <SiteCalculator
-          screen={screen ?? { developers: [], current: null }}
-          initialParams={{ ...params, developer: screen?.current?.slug ?? null }}
-          leadEnabled={LEAD_FORM_ENABLED}
-          hints={hints}
-        />
-      </NextIntlClientProvider>
-    </>
+    // Тексты калькулятора — только этой странице: в HTML остальных страниц сайта их нет.
+    <NextIntlClientProvider messages={pickMessages(messages, CALC_MESSAGES)}>
+      <RealtorCalculator
+        id="realtor-calc"
+        initialState={stateFrom(readRealtorParams(search))}
+        rate={rate}
+        leadEnabled={LEAD_FORM_ENABLED}
+        hints={hints}
+      />
+    </NextIntlClientProvider>
   );
 }

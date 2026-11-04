@@ -6,8 +6,12 @@ import { site } from "./site";
 // термином пояснение в 1–2 предложения; тексты — справочник hints (на стендах — черновики из
 // кода, как в миграции). Редактор — «Настройки → Справочники → Подсказки «?»».
 
-const STAND = site("/dev/kalkulyator");
-const BANK_EXAMPLE = /120 м² · 2 года/;
+// /kalkulyator стал риелторским (PLAN §10, п. 48) — подсказки программ проверяем на расчёте квартиры.
+const LAYOUT_78 = "00000000-0000-4000-8000-0000000e1002";
+const IPOTEKA = "00000000-0000-4000-8000-000000000103";
+const STAND = site(`/dev/raschet-kvartiry?plan=${LAYOUT_78}`);
+const STAND_UZ = site(`/dev/raschet-kvartiry/uz?plan=${LAYOUT_78}`);
+const BANK = site(`/dev/raschet-kvartiry?plan=${LAYOUT_78}&program=${IPOTEKA}&down=20&months=24`);
 
 const hint = (page: Page, term: string) =>
   page.getByRole("button", { name: `Что значит «${term}»?` });
@@ -42,7 +46,7 @@ test.describe("подсказки «?»", () => {
     await page.goto(STAND);
     const total = page.getByTestId("calc-total");
     await expect(hint(page, "Рассрочка от застройщика")).toBeVisible();
-    await page.getByRole("link", { name: BANK_EXAMPLE }).click();
+    await page.goto(BANK);
     await expect(total.getByRole("button", { name: /Рассрочка через банк/ })).toBeVisible();
     for (const term of ["Проценты банка", "Оценка квартиры", "Комиссия банка", "Переплата"]) {
       await expect(total.getByRole("button", { name: `Что значит «${term}»?` })).toBeVisible();
@@ -55,7 +59,7 @@ test.describe("подсказки «?»", () => {
   });
 
   test("по-узбекски: «?» и пояснение на узбекском", async ({ page }) => {
-    await page.goto(`${STAND}/uz`);
+    await page.goto(STAND_UZ);
     const button = page.getByRole("button", { name: "«Boshlang‘ich to‘lov» nima degani?" });
     await button.click();
     await expect(page.getByText(/Xarid paytida darhol to‘lanadigan summa/)).toBeVisible();
@@ -92,7 +96,8 @@ test.describe("подсказки «?»", () => {
     await hint(page, "Первоначальный взнос").click();
     await page.locator(".calc-down").scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${dir}/s28-hint-down.png`, caret: "initial" });
-    await page.getByRole("link", { name: BANK_EXAMPLE }).click();
+    await page.goto(BANK);
+    await page.waitForLoadState("networkidle");
     const total = page.getByTestId("calc-total");
     await total.getByRole("button", { name: "Что значит «Переплата»?" }).click();
     await total.scrollIntoViewIfNeeded();

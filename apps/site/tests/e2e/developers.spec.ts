@@ -56,7 +56,8 @@ test.describe("застройщики", () => {
     await expect(page.locator(".catalog-card")).toHaveCount(2);
     await expect(page.locator(".developer-delivered__table tbody tr")).toHaveCount(2);
     await expect(page.locator(".developer-delivered__table")).toContainText("Перенос на 3 мес.");
-    await expect(page.locator(".developer-programs__calc").first()).toHaveAttribute("href", /\/ru\/kalkulyator\?developer=demo-sifat&program=/);
+    await expect(page.locator(".developer-programs__calc").first()).toHaveAttribute("href", /^(\/ru\/novostroyki\/demo-[a-z-]+#planirovki|#obekty)$/);
+    await expect(page.locator('.developer-programs__calc[href*="kalkulyator"]')).toHaveCount(0);
     await expect(page.locator('.developer-others__card[href*="/zastroyshchiki/demo-"]')).toHaveCount(2);
     await shot(page, "page");
     await page.getByRole("button", { name: "Получить консультацию" }).first().click();

@@ -216,15 +216,86 @@
   },
   "calc": {
     "page": {
-      "metaTitle": "Muddatli to‘lov va ipoteka kalkulyatori — Vodiy House",
-      "metaDescription": "Farg‘ona yangi uylaridagi kvartira uchun oylik to‘lov, ortiqcha to‘lov va yakuniy narxni hisoblang: quruvchidan va bank orqali muddatli to‘lov, ipoteka.",
+      "metaTitle": "Ipoteka va muddatli to‘lov kalkulyatori — Vodiy House",
+      "metaDescription": "Kvartira uchun oylik to‘lov, ortiqcha to‘lov va yakuniy narxni hisoblang: bank foizi, boshlang‘ich to‘lov va muddatni o‘zingiz kiritasiz. Ipoteka, muddatli to‘lov va to‘lov bo‘yicha kvartira tanlash.",
       "eyebrow": "Kalkulyator",
       "title": "Kalkulyator:",
       "titleAccent": "muddatli to‘lov va ipoteka",
-      "lead": "Quruvchi va dasturni tanlang — oylik to‘lov, ortiqcha to‘lov va yakuniy narx darhol hisoblanadi.",
-      "examples": "Hisob-kitob namunalari",
-      "example": "{area} m² · {term}",
-      "empty": "Kalkulyator quruvchilar to‘lov dasturlarini qo‘shganda ishlaydi. Hozircha birga hisoblaymiz — Vodiy House’ga yozing."
+      "lead": "Narx, boshlang‘ich to‘lov, muddat va bank foizini kiriting — oylik to‘lov, ortiqcha to‘lov va jadval darhol hisoblanadi. Bank yoki quruvchi shartlarini o‘zingiz kiritasiz."
+    },
+    "realtor": {
+      "tabs": {
+        "label": "Nimani hisoblaymiz",
+        "mortgage": "Ipoteka",
+        "installment": "Muddatli to‘lov",
+        "afford": "Qancha narxli uy olaman"
+      },
+      "eyebrow": {
+        "mortgage": "Ipoteka · {method}",
+        "installment": "Muddatli to‘lov",
+        "afford": "To‘lov bo‘yicha tanlash · {method}"
+      },
+      "steps": {
+        "price": "Kvartira narxi",
+        "monthly": "Oylik to‘lov",
+        "down": "Boshlang‘ich to‘lov",
+        "term": "Muddat va foiz",
+        "termInstallment": "Muddat va ustama"
+      },
+      "price": {
+        "modesLabel": "Narxni qanday kiritish"
+      },
+      "monthly": {
+        "label": "Oyiga qancha to‘lay olasiz",
+        "hint": "Shu to‘lovga qanday kvartira olish mumkinligini hisoblaymiz"
+      },
+      "down": {
+        "label": "Boshlang‘ich to‘lov",
+        "share": "narxning {pct}",
+        "presets": "Boshlang‘ich to‘lov narxga nisbatan foizda",
+        "capped": "Boshlang‘ich to‘lov narxning 90 % idan ko‘p — bu endi kredit emas: 90 % bilan hisoblaymiz"
+      },
+      "term": {
+        "years": "Muddat",
+        "months": "Muddat",
+        "slider": "Muddat, {unit}",
+        "presets": "Muddatni tez tanlash",
+        "unitYears": "yil",
+        "unitMonths": "oy"
+      },
+      "rate": {
+        "label": "Bank foizi",
+        "unit": "% yillik",
+        "hint": "Foizni bank aytadi: banklar va dasturlarda u har xil",
+        "empty": "Bank foizini kiriting — to‘lovni hisoblaymiz",
+        "capped": "Foiz {max} % dan yuqori — {max} % bilan hisoblaymiz"
+      },
+      "markup": {
+        "label": "Quruvchi ustamasi",
+        "unit": "% muddatga",
+        "hint": "Butun muddat uchun qoldiqqa ustama; 0 — ustamasiz muddatli to‘lov",
+        "capped": "Ustama {max} % dan yuqori — {max} % bilan hisoblaymiz"
+      },
+      "method": {
+        "label": "To‘lov turi",
+        "annuity": "Annuitet",
+        "differentiated": "Differensial",
+        "annuityNote": "teng to‘lovlar",
+        "differentiatedNote": "to‘lov kamayib boradi"
+      },
+      "total": {
+        "afford": "Kvartira narxi, ko‘pi bilan",
+        "last": "Oxirgi to‘lov",
+        "noMonthly": "Oylik to‘lovni kiriting — kvartira narxini hisoblaymiz"
+      },
+      "lead": {
+        "mode": "Nima hisoblandi",
+        "price": "Narxi",
+        "down": "Boshlang‘ich to‘lov",
+        "term": "Muddat",
+        "rate": "Bank foizi",
+        "markup": "Ustama"
+      }
     },
     "steps": {
       "developer": "Quruvchi",
@@ -344,6 +415,7 @@
       "hide": "To‘lov jadvalini yashirish",
       "caption": "To‘lov jadvali",
       "month": "Oy",
+      "date": "Sana",
       "payment": "To‘lov",
       "principal": "Asosiy qarz",
       "interest": "Foizlar",
@@ -1309,7 +1381,7 @@
     },
     "q3": {
       "title": "Muddatli to‘lov va ipoteka",
-      "text": "Quruvchilar va banklar dasturlari shartlari — saytdagi kalkulyatorda. Kvartirangiz bo‘yicha aniq hisobni menejer yuboradi."
+      "text": "Ipoteka va muddatli to‘lov bo‘yicha to‘lovni saytdagi kalkulyatorda, quruvchi dasturlari shartlarini esa TJM sahifasida hisoblaysiz. Kvartirangiz bo‘yicha aniq hisobni menejer yuboradi."
     },
     "cta": "Savollar qoldimi? Menejer qo‘ng‘iroq qilib, hammasini aytib beradi."
   },

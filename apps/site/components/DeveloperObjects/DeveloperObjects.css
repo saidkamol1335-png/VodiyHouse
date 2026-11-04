@@ -3,6 +3,8 @@
 
 .developer-objects {
   margin-top: 56px;
+  /* «Рассчитать платёж» у программы на несколько ЖК ведёт сюда (#obekty) — под шапкой. */
+  scroll-margin-top: calc(var(--header-h) + 16px);
 }
 
 .developer-objects__head {

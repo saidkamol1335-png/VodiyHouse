@@ -96,15 +96,15 @@ function shareLink({ view, params }: CalcSnapshot<CalcProgram>): string {
 
 type Status = { tone: "success" | "error"; text: string; message: string; manual: boolean } | null;
 
-type SiteTelegramCopyProps = {
+export type SiteTelegramCopyProps = {
   /** Текст расчёта сейчас (без ссылки): ответ на прошлое копирование — только про него. */
   message: string | null;
   /** Тот же текст со ссылкой на расчёт — адрес страницы известен только в браузере. */
   withLink: () => string | null;
 };
 
-/** Текст в буфер; буфер недоступен — текст в поле, чтобы скопировать руками. */
-function SiteTelegramCopy({ message, withLink }: SiteTelegramCopyProps) {
+/** Текст в буфер; буфер недоступен — текст в поле, чтобы скопировать руками (и у /kalkulyator). */
+export function SiteTelegramCopy({ message, withLink }: SiteTelegramCopyProps) {
   const t = useTranslations("calc");
   const [saved, setStatus] = useState<Status>(null);
   const status = saved?.message === message ? saved : null;

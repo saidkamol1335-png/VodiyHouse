@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useId, useState, type KeyboardEvent } from "react";
 import { CatalogGrid } from "@/components/CatalogGrid";
+import { DEVELOPER_OBJECTS_ANCHOR } from "@/components/DeveloperPrograms/programLink";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { developerCounts, isDelivered } from "@/lib/site/developers/model";
 
@@ -66,7 +67,7 @@ export function DeveloperObjects({ catalog, complexes }: DeveloperObjectsProps) 
   const counts = developerCounts(complexes);
   const shown = complexes.filter((complex) => tab === "all" || (tab === "built") === isDelivered(complex));
   return (
-    <section className="developer-objects" aria-labelledby={`${baseId}-title`}>
+    <section id={DEVELOPER_OBJECTS_ANCHOR} className="developer-objects" aria-labelledby={`${baseId}-title`}>
       <div className="developer-objects__head">
         <h2 id={`${baseId}-title`} className="heading heading--h2">
           {t("objects")}

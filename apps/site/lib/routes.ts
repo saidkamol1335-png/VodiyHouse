@@ -63,13 +63,11 @@ export const HEADER_NAV: readonly { key: NavKey; href: string }[] = [
 ];
 
 /**
- * Скрытые пункты (решение «Пустые состояния»): «Калькулятор» — без застройщиков с программами,
- * «Спецпредложения» — пока на главной нет действующих предложений и рекламы (3.16б).
+ * Скрытые пункты (решение «Пустые состояния»): «Спецпредложения» — пока на главной нет действующих
+ * предложений и рекламы (3.16б). «Калькулятор» риелторский — работает всегда (PLAN §10, п. 48).
  */
-export const hiddenNav = ({ calculator, specials = false }: { calculator: boolean; specials?: boolean }): NavKey[] => [
-  ...(calculator ? [] : (["calculator"] as NavKey[])),
-  ...(specials ? [] : (["specials"] as NavKey[])),
-];
+export const hiddenNav = ({ specials = false }: { specials?: boolean }): NavKey[] =>
+  specials ? [] : ["specials"];
 
 /**
  * Подвал, «Каталог» (порядок мокапа): новостройки, калькулятор, застройщики (3.15), «О нас» и

@@ -1,1 +1,1 @@
-export { CalcHero, type CalcHeroExample } from "./CalcHero";
+export { CalcHero } from "./CalcHero";

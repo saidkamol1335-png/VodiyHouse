@@ -17,7 +17,7 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
 import { developerRoute, ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
-import type { SiteCatalog } from "@/lib/site/catalog/records";
+import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { developerChecks, developerComplexes, developerCounts, developerCover } from "@/lib/site/developers/model";
 import { programOptionsOf } from "@/lib/site/developers/programs";
 import { developerSlugState, readSiteDeveloper, readSiteDevelopers } from "@/lib/site/developers/read";
@@ -109,13 +109,22 @@ export default async function DeveloperPageRoute({ params }: PageProps<"/[locale
           <DeveloperAbout page={page} checks={checks} locale={locale} />
           {catalog ? <DeveloperObjects catalog={catalogOf(catalog, page)} complexes={complexes} /> : null}
           <DeveloperDelivered projects={page.pastProjects} locale={locale} />
-          <DeveloperPrograms options={options} developerSlug={page.slug} developerName={page.name} locale={locale} />
+          <DeveloperPrograms options={options} complexes={programComplexes(complexes)} developerName={page.name} locale={locale} />
           <DeveloperOthers others={others} />
         </Container>
       </main>
     </NextIntlClientProvider>
   );
 }
+
+/**
+ * ЖК застройщика и их блоки — куда ведёт «Рассчитать платёж» у программы (PLAN §10, п. 48); у ЖК
+ * «Скоро» планировок и расчёта нет — туда не ведём.
+ */
+const programComplexes = (complexes: readonly CatalogComplex[]) =>
+  complexes
+    .filter((complex) => complex.state !== "soon")
+    .map((complex) => ({ slug: complex.slug, blockIds: complex.blocks.map((block) => block.id) }));
 
 /** Застройщик в архиве — 307 на список (его могут восстановить); удалён или чужой адрес — 404. */
 async function goneOrNotFound(slug: string, locale: Locale): Promise<never> {

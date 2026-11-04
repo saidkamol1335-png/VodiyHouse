@@ -250,6 +250,9 @@
     --action-bg: #f1ece3;
     --action-bg-hover: #ffffff;
     --action-fg: #1e1c19;
+    /* Стекло кнопки (liquid-glass) считается от --action-bg на :root — пересчитать здесь, иначе
+       «Получить точный расчёт» — тёмный текст на графите в тёмной панели. */
+    --lg-action: color-mix(in srgb, var(--action-bg) 90%, transparent);
   }
 }
 
