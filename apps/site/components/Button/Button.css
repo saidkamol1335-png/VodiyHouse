@@ -32,13 +32,13 @@
 }
 
 .button--primary {
-  background: var(--amber);
-  color: var(--on-amber);
-  box-shadow: var(--glow-amber);
+  background: var(--action-bg, var(--amber));
+  color: var(--action-fg, var(--on-amber));
+  box-shadow: var(--action-glow, var(--glow-amber));
 }
 
 .button--primary:hover {
-  background: var(--amber-hover);
+  background: var(--action-bg-hover, var(--amber-hover));
 }
 
 /* Блик пробегает по кнопке раз в 3,6 с — только в full, через transform (CLAUDE.md §3). */
@@ -60,7 +60,7 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--amber-hover);
+    background: var(--action-bg-hover, var(--amber-hover));
     transform: translateY(101%);
     transition: transform var(--dur-slow) var(--ease);
   }
@@ -70,7 +70,7 @@
   }
 
   [data-motion="full"] .button--primary:not(:disabled):hover {
-    background: var(--amber);
+    background: var(--action-bg, var(--amber));
   }
 
   [data-motion="full"] .button--primary:not(:disabled):hover::before,
@@ -142,4 +142,9 @@
   100% {
     transform: translateX(120%);
   }
+}
+
+/* Слой пламени (styles/button-flame.css) — только на публичном сайте; в кабинете и /dev его нет. */
+.button__flame {
+  display: none;
 }

@@ -282,7 +282,7 @@
   margin: 6px 0 0;
   padding: 0;
   list-style: none;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .catalog-card__type {
@@ -291,7 +291,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 8px 0;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   font-size: var(--fs-small-l);
   font-weight: 600;
 }
@@ -422,5 +422,21 @@
       animation-timeline: view();
       animation-range: entry 0% entry 40%;
     }
+  }
+}
+
+/* Параллакс фото (Reveal.css): кадр ленты едет внутри своей ячейки, наведение по-прежнему увеличивает картинку. */
+@supports (animation-timeline: view()) {
+  [data-motion="full"] .catalog-card__media {
+    view-timeline: --photo-parallax block;
+  }
+
+  [data-motion="full"] .catalog-card__slide {
+    overflow: hidden;
+  }
+
+  [data-motion="full"] .catalog-card__slide > .site-photo {
+    animation: photo-parallax linear both;
+    animation-timeline: --photo-parallax;
   }
 }

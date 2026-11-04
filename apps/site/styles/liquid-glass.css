@@ -1,0 +1,373 @@
+/* «Жидкое стекло» (03.11.2026, слово исполнителя: «примени такой дизайн и анимацию на header и на
+   все кнопки» — по мотивам Liquid Glass Navbar, @gughigug, MIT). Только публичный сайт, поверх скина
+   skin-site.css. Стекло — подложка с бликом сверху, светлый ободок, внутренняя тень по низу и мягкая
+   тень наружу; шапка — плавающая капсула, пункты меню — «капля», которая перетекает к пункту под
+   курсором (HeaderNav, useLiquidDrop). Кнопки: блик-мениск при наведении и пружинное нажатие.
+   Анимируются только transform и opacity; пружина и перетекание — только в full.
+   Преломление фона (SVG feDisplacementMap) — только капсула меню в Chromium (html[data-refract]). */
+
+/* ─── Токены ─────────────────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] {
+  --lg-tint: rgba(255, 255, 255, 0.38);
+  --lg-tint-strong: rgba(255, 255, 255, 0.58);
+  --lg-shine: radial-gradient(
+    120% 140% at 30% 0%,
+    rgba(255, 255, 255, 0.78),
+    rgba(255, 255, 255, 0) 55%
+  );
+  --lg-rim: rgba(255, 255, 255, 0.92);
+  --lg-edge: rgba(255, 255, 255, 0.5);
+  --lg-line: rgba(30, 28, 25, 0.1);
+  --lg-depth: rgba(122, 86, 52, 0.14);
+  --lg-drop: 0 6px 16px -6px rgba(30, 28, 25, 0.26), 0 1px 2px rgba(30, 28, 25, 0.06);
+  --lg-shadow: 0 12px 32px -14px rgba(30, 28, 25, 0.32), 0 2px 6px rgba(30, 28, 25, 0.06);
+  --lg-glass:
+    inset 0 1px 1px var(--lg-rim), inset 0 -2px 6px var(--lg-depth), inset 0 0 0 1px var(--lg-edge),
+    var(--lg-drop);
+  /* Капсула шапки: стекло над страницей. */
+  --lg-bar: rgba(248, 250, 251, 0.46);
+  --lg-bar-filter: blur(14px) saturate(1.3) brightness(1.04);
+  /* Главная кнопка — графитовое стекло. */
+  --lg-action: color-mix(in srgb, var(--action-bg) 90%, transparent);
+  --lg-action-shine: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 52%);
+  --lg-action-glass:
+    inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 10px 24px -12px rgba(30, 28, 25, 0.55), 0 2px 6px rgba(30, 28, 25, 0.12);
+  /* Пружина: быстро вжимается, отпускается с перелётом (как капля). */
+  --lg-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --lg-press: scale(0.96, 0.92);
+}
+
+/* Тёмные островки (тёмные карточки): стекло темнее, ободок слабее. Подвал с 04.11 — светлая бумага. */
+:root[data-surface="site"]
+  :is(
+    .about-hero__card,
+    .collections__card,
+    .complex-picker__stage,
+    .complex-viewer,
+    .complex-location__drop,
+    .complex-preview
+  ) {
+  --lg-tint: rgba(255, 255, 255, 0.08);
+  --lg-tint-strong: rgba(255, 255, 255, 0.16);
+  --lg-shine: radial-gradient(
+    120% 140% at 30% 0%,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0) 55%
+  );
+  --lg-rim: rgba(255, 255, 255, 0.3);
+  --lg-edge: rgba(255, 255, 255, 0.14);
+  --lg-depth: rgba(0, 0, 0, 0.2);
+  --lg-drop: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  --lg-action-glass:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 10px 24px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Шапка: плавающая стеклянная капсула ────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .site-header::before {
+  display: none;
+}
+
+/* Высота шапки целиком — ровно --header-h (8 + капсула + 4): прозрачная шапка поднимает следующий
+   блок на --header-h, первый экран считает от неё. */
+:root[data-surface="site"] .site-header {
+  padding: 8px 12px 4px;
+}
+
+:root[data-surface="site"] .site-header__inner {
+  position: relative;
+  isolation: isolate;
+  height: calc(var(--header-h) - 12px);
+  max-width: calc(var(--container) - 16px);
+  padding-inline: 10px 8px;
+  border-radius: var(--r-pill);
+}
+
+/* Стекло капсулы — свой слой: появляется через opacity. Над первым экраном — лёгкое, после
+   прокрутки — плотнее (второй слой). */
+:root[data-surface="site"] .site-header__inner::before,
+:root[data-surface="site"] .site-header__inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+:root[data-surface="site"] .site-header__inner::before {
+  background: var(--lg-shine), var(--lg-bar);
+  -webkit-backdrop-filter: var(--lg-bar-filter);
+  backdrop-filter: var(--lg-bar-filter);
+  box-shadow:
+    inset 0 1px 1px var(--lg-rim),
+    inset 0 0 0 1px var(--lg-edge),
+    0 0 0 1px var(--lg-line),
+    var(--lg-shadow);
+}
+
+:root[data-surface="site"] .site-header__inner::after {
+  background: rgba(248, 250, 251, 0.5);
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease);
+}
+
+:root[data-surface="site"] .site-header--solid .site-header__inner::after {
+  opacity: 1;
+}
+
+/* Над фото телефона (страница ЖК) — белые иконки на тёмных кружках: капсулы нет, пока шапка не стала
+   сплошной. */
+:root[data-surface="site"]:not([data-anchor-start])
+  .site-header--over-photo:not(.site-header--solid)
+  .site-header__inner::before {
+  opacity: 0;
+}
+
+@media (max-width: 760px) {
+  /* Белые иконки на тёмных кружках поверх фото — без светлого стекла кнопок. */
+  :root[data-surface="site"]:not([data-anchor-start])
+    .site-header--over-photo:not(.site-header--solid)
+    .site-header__icon:not(#lg) {
+    background: var(--over-photo-button);
+    box-shadow: none;
+  }
+
+  :root[data-surface="site"] .site-header {
+    padding: 6px 8px 2px;
+  }
+
+  :root[data-surface="site"] .site-header__inner {
+    height: calc(var(--header-h) - 8px);
+    padding-inline: 6px;
+  }
+}
+
+/* ─── Меню шапки: капсула с каплей ───────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .header-nav {
+  position: relative;
+  isolation: isolate;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+}
+
+:root[data-surface="site"] .header-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(30, 28, 25, 0.06);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
+}
+
+/* Преломление фона — как у оригинала, только Chromium (useLiquidDrop ставит html[data-refract]). */
+:root[data-surface="site"][data-refract] .header-nav::before {
+  -webkit-backdrop-filter: url(#vh-refract) blur(2px) saturate(1.2) brightness(1.06);
+  backdrop-filter: url(#vh-refract) blur(2px) saturate(1.2) brightness(1.06);
+}
+
+:root[data-surface="site"] .header-nav__link {
+  z-index: 1;
+  height: 36px;
+  padding: 0 13px;
+}
+
+/* Пунктир под активным — у капли своя подсветка. */
+:root[data-surface="site"] .header-nav__link--active::after {
+  display: none;
+}
+
+/* Капля: ширина — базовая (100 px), под пункт её подгоняет transform: scaleX (useLiquidDrop). */
+.header-nav__drop {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  z-index: -1;
+  width: 100px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  background: var(--lg-shine), var(--lg-tint-strong);
+  box-shadow: var(--lg-glass);
+  opacity: 0;
+  transform-origin: 0 50%;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease);
+}
+
+.header-nav__drop[data-shown] {
+  opacity: 1;
+}
+
+/* ─── Кнопки ─────────────────────────────────────────────────────────────────────────────── */
+/* :not(#lg) поднимает вес до правил Button.css в full ([data-motion] … :not(:disabled):hover):
+   иначе наведение возвращало бы сплошную заливку и «поднимающийся» слой. */
+
+/* Все кнопки сайта — пилюли (у скина «люкс» углы были почти прямыми: стекло — капля). */
+:root[data-surface="site"]
+  :is(
+    .button,
+    .complex-bar__book,
+    .complex-layout__calc,
+    .quiz__start,
+    .favorites-view__share,
+    .filter-pills__pill
+  ) {
+  border-radius: var(--r-pill);
+}
+
+:root[data-surface="site"] :is(.button--outline, .button--ghost, .button--danger):not(#lg),
+:root[data-surface="site"]
+  :is(.icon-button:not(.icon-button--bare), .phone-button, .filter-pills__pill):not(#lg) {
+  border-color: transparent;
+  background: var(--lg-shine), var(--lg-tint);
+  box-shadow: var(--lg-glass);
+}
+
+:root[data-surface="site"] :is(.button--outline, .button--ghost):not(#lg):hover,
+:root[data-surface="site"]
+  :is(.icon-button:not(.icon-button--bare), .phone-button, .filter-pills__pill):not(#lg):hover {
+  border-color: transparent;
+  background: var(--lg-shine), var(--lg-tint-strong);
+}
+
+/* Вес как у правила прозрачного стекла выше (там .icon-button:not(…) в :is) — выбранный чип не светлеет. */
+:root[data-surface="site"]
+  :is(.button--primary.button, .filter-pills__pill.filter-pills__pill--active):not(#lg),
+:root[data-surface="site"]
+  :is(.button--primary.button, .filter-pills__pill.filter-pills__pill--active):not(#lg):hover {
+  border-color: transparent;
+  background: var(--lg-action-shine), var(--lg-action);
+  box-shadow: var(--lg-action-glass);
+  color: var(--action-fg);
+}
+
+:root[data-surface="site"] .filter-pills__pill--active .filter-pills__count {
+  color: inherit;
+  opacity: 0.7;
+}
+
+/* Мениск при наведении: блик-капля проявляется сверху (opacity + scale). Заливка снизу и бегущий
+   блик скина больше не нужны. */
+:root[data-surface="site"] :is(.button, .icon-button, .phone-button, .filter-pills__pill) {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-surface="site"]
+  :is(.button, .icon-button, .phone-button, .filter-pills__pill):not(#lg)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    80% 90% at 50% -10%,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 70%
+  );
+  opacity: 0;
+  transform: translateY(-30%) scale(0.9);
+  transition:
+    opacity var(--dur-base) var(--ease),
+    transform var(--dur-slow) var(--ease);
+  pointer-events: none;
+}
+
+:root[data-surface="site"] :is(.button--primary, .filter-pills__pill--active):not(#lg)::before {
+  background: radial-gradient(
+    80% 90% at 50% -10%,
+    rgba(255, 255, 255, 0.24),
+    rgba(255, 255, 255, 0) 70%
+  );
+}
+
+@media (hover: hover) {
+  :root[data-surface="site"]
+    :is(.button, .icon-button, .phone-button, .filter-pills__pill):not(#lg):not(
+      :disabled
+    ):hover::before {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root[data-surface="site"][data-motion] .button::after {
+  display: none;
+}
+
+/* Пружинное нажатие — только full: вжимается быстро, отпускается с перелётом. lite и none — как было. */
+:root[data-surface="site"][data-motion="full"]
+  :is(.button, .icon-button, .phone-button, .filter-pills__pill, .segmented__item) {
+  transition:
+    color var(--dur-fast) var(--ease),
+    transform 0.55s var(--lg-spring);
+}
+
+:root[data-surface="site"][data-motion="full"]
+  :is(.button, .icon-button, .phone-button, .filter-pills__pill, .segmented__item):not(
+    :disabled
+  ):active {
+  transform: var(--lg-press);
+  transition-duration: var(--dur-fast), 0.12s;
+}
+
+@media (hover: hover) {
+  :root[data-surface="site"][data-motion="full"]
+    :is(.button, .phone-button, .filter-pills__pill):not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* ─── Переключатели (язык, сегменты форм): стеклянный жёлоб, выбранное — капля ────────────────── */
+
+:root[data-surface="site"] .segmented {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 0 0 1px var(--lg-line);
+}
+
+:root[data-surface="site"] .segmented__item--active {
+  background: var(--lg-shine), var(--lg-tint-strong);
+  box-shadow: var(--lg-glass);
+}
+
+/* Выбранный пункт «садится» каплей: короткая рябь по высоте — только full. */
+:root[data-surface="site"][data-motion="full"] .segmented__item--active {
+  animation: lg-settle 0.6s var(--lg-spring) both;
+}
+
+@keyframes lg-settle {
+  0% {
+    transform: scale(1.08, 0.86);
+  }
+  45% {
+    transform: scale(0.97, 1.05);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-surface="site"]
+    :is(.button, .icon-button, .phone-button, .filter-pills__pill, .segmented__item),
+  :root[data-surface="site"]
+    :is(.button, .icon-button, .phone-button, .filter-pills__pill)::before {
+    transition: none;
+    animation: none;
+  }
+}

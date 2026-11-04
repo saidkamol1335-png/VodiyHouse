@@ -108,7 +108,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
             offer={<ComplexOffer name={name} slug={page.slug} soon={page.state === "soon"} summary={complexSummary(page)} contacts={contacts} gift={complexGift(showcase, page.id)?.title ?? null} />}
           />
         </Container>
-        <ComplexNav label={t("nav.label")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`) }))} />
+        <ComplexNav label={t("nav.label")} folderLabel={t("nav.folder")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`), section: key }))} />
         <Container>
           <ComplexSections page={page} sections={sections} name={name} locale={locale} />
         </Container>

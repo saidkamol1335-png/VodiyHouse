@@ -18,13 +18,9 @@ type HeroTranslator = Awaited<ReturnType<typeof getTranslations<"home.hero">>>;
 
 const PERK_KEYS = ["price", "service", "docs"] as const;
 
-/** Первый экран главной: тексты home.hero и цифры каталога — серверу, экран с роликом и лентой — клиенту. */
+/** Первый экран главной: тексты home.hero и цифры каталога — серверу, арка с рендерами и движение — клиенту. */
 export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
-  const [t, video, locale] = await Promise.all([
-    getTranslations("home.hero"),
-    getTranslations("timelapse"),
-    getLocale(),
-  ]);
+  const [t, locale] = await Promise.all([getTranslations("home.hero"), getLocale()]);
   const text: HeroText = {
     eyebrow: t("eyebrow"),
     titleLead: t("titleLead"),
@@ -34,9 +30,10 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
     perks: PERK_KEYS.map((key) => t(`free.${key}`)),
     statsLabel: t("stats.label"),
     scrollCue: t("scrollCue"),
-    finaleTitle: t("finaleTitle"),
-    finaleText: t("finaleText"),
-    finaleCta: t("finaleCta"),
+    slides: {
+      label: t("slides.label"),
+      note: t("slides.note"),
+    },
   };
   return (
     <HeroScreen
@@ -45,7 +42,6 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
       ctaHref={`#${catalogId}`}
       quiz={<HeroQuizLink />}
       found={found ? <HeroQuickPick found={found} locale={locale as Locale} /> : null}
-      toggleLabels={{ pause: video("pause"), play: video("play") }}
     />
   );
 }

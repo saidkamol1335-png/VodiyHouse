@@ -69,6 +69,7 @@ export function Button({
   if (href) {
     return (
       <ButtonLink className={classes} href={href} download={download} aria-label={ariaLabel} aria-describedby={ariaDescribedBy}>
+        <ButtonFlame />
         {children}
       </ButtonLink>
     );
@@ -87,9 +88,15 @@ export function Button({
       aria-expanded={ariaExpanded}
       aria-describedby={ariaDescribedBy}
     >
+      <ButtonFlame />
       {children}
     </button>
   );
+}
+
+/** Слой пламени под текстом (styles/button-flame.css): только сайт, в кабинете скрыт (Button.css). */
+function ButtonFlame() {
+  return <span className="button__flame" aria-hidden="true" />;
 }
 
 type ButtonLinkProps = Pick<ButtonProps, "children" | "download" | "aria-label" | "aria-describedby"> & {

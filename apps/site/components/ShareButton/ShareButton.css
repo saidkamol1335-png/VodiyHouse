@@ -122,7 +122,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 6px 6px 14px;
-  border: 1px dashed var(--dash);
+  border: 1px var(--rule-style) var(--dash);
   border-radius: var(--r-pill);
 }
 

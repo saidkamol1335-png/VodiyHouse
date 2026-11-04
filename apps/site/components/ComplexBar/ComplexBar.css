@@ -60,14 +60,14 @@
     gap: 8px;
     min-height: 52px;
     border-radius: var(--r-pill);
-    background: var(--amber);
+    background: var(--action-bg, var(--amber));
     border: 0;
-    color: var(--on-amber);
+    color: var(--action-fg, var(--on-amber));
     font: inherit;
     font-size: var(--fs-body);
     font-weight: 700;
     cursor: pointer;
-    box-shadow: var(--glow-amber);
+    box-shadow: var(--action-glow, var(--glow-amber));
   }
 
   .complex-bar__book:focus-visible,

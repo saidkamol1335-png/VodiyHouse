@@ -99,7 +99,7 @@
 
 /* Второй язык пуст, а первый заполнен — подсказка, не ошибка (решение Д3). */
 .field__input--missing {
-  border-style: dashed;
+  border-style: var(--rule-style);
   border-color: var(--amber-line);
 }
 

@@ -1,0 +1,312 @@
+<!doctype html>
+<!--
+  Заглушка «Выберите свою квартиру» (PLAN §10, п. 47): процедурная квартира без крыши — 1, 2 или 3
+  комнаты, тёплая палитра Vodiy House. Не реальная планировка ЖК: только до настоящих кадров (TODO-
+  заказчик). Рендерит scripts/frames/render.mjs через Playwright: renderFrame(t) — камера из вида сверху
+  (t = 0) в 3/4 (t = 1), фон прозрачный.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+    </style>
+    <script type="importmap">
+      { "imports": { "three": "/three/build/three.module.js", "three/addons/": "/three/examples/jsm/" } }
+    </script>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "three";
+      import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+      const params = new URLSearchParams(location.search);
+      const ROOMS = Number(params.get("rooms") ?? 2);
+      const WIDTH = Number(params.get("w") ?? 1440);
+      const HEIGHT = Number(params.get("h") ?? 1008);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(WIDTH, HEIGHT);
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.body.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environmentIntensity = 0.55;
+
+      const COLOR = {
+        slab: 0xe4ded4,
+        wall: 0xf1ece4,
+        wallTop: 0x6b5a48,
+        wood: 0xc49a6c,
+        tile: 0xdcd8d0,
+        linen: 0xf3eee6,
+        pillow: 0xe2d6c4,
+        sofa: 0x8b8d78,
+        oak: 0xa77d55,
+        walnut: 0x6e4f36,
+        stone: 0x3b3733,
+        counter: 0xe8e2d8,
+        rug: 0xcdbfa9,
+        bronze: 0x7a5634,
+        porcelain: 0xf7f5f1,
+        leaf: 0x5f7a4e,
+        glass: 0xbfd3dc,
+      };
+      const material = (color, options = {}) =>
+        new THREE.MeshStandardMaterial({ color, roughness: 0.82, metalness: 0, ...options });
+      const MAT = Object.fromEntries(Object.entries(COLOR).map(([key, value]) => [key, material(value)]));
+      MAT.stone.roughness = 0.35;
+      MAT.porcelain.roughness = 0.25;
+      MAT.bronze.metalness = 0.6;
+      MAT.bronze.roughness = 0.4;
+      MAT.glass = material(COLOR.glass, { transparent: true, opacity: 0.45, roughness: 0.1 });
+
+      const house = new THREE.Group();
+      scene.add(house);
+
+      /** Коробка: x, z — левый ближний угол, y — низ. */
+      function box(x, y, z, w, h, d, mat, cast = true) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        mesh.position.set(x + w / 2, y + h / 2, z + d / 2);
+        mesh.castShadow = cast;
+        mesh.receiveShadow = true;
+        house.add(mesh);
+        return mesh;
+      }
+
+      // Стены срезаны, как у кукольного дома: в 3/4 видно комнаты, а не фасад.
+      const WALL_H = 1.35;
+      const T = 0.14;
+      const SLAB = 0.28;
+
+      /** Стена по оси с проёмами [from, to] (двери и окна): кусками. */
+      function wall(axis, fixed, from, to, gaps = [], windows = []) {
+        const holes = [...gaps.map((g) => ({ ...g, kind: "door" })), ...windows.map((g) => ({ ...g, kind: "window" }))].sort((a, b) => a.from - b.from);
+        let at = from;
+        const piece = (a, b, y, h) => {
+          if (b - a < 0.01) return;
+          if (axis === "x") box(a, y, fixed - T / 2, b - a, h, T, MAT.wall);
+          else box(fixed - T / 2, y, a, T, h, b - a, MAT.wall);
+        };
+        for (const hole of holes) {
+          piece(at, hole.from, 0, WALL_H);
+          if (hole.kind === "window") {
+            piece(hole.from, hole.to, 0, 0.6);
+            if (axis === "x") box(hole.from, 0.6, fixed - 0.02, hole.to - hole.from, WALL_H - 0.6, 0.04, MAT.glass, false);
+            else box(fixed - 0.02, 0.6, hole.from, 0.04, WALL_H - 0.6, hole.to - hole.from, MAT.glass, false);
+          }
+          at = hole.to;
+        }
+        piece(at, to, 0, WALL_H);
+      }
+
+      // ── Мебель ────────────────────────────────────────────────────────────
+      function bed(x, z, rot = 0) {
+        const g = new THREE.Group();
+        const add = (bx, by, bz, w, h, d, mat) => {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+          m.position.set(bx + w / 2, by + h / 2, bz + d / 2);
+          m.castShadow = true;
+          m.receiveShadow = true;
+          g.add(m);
+        };
+        add(0, 0, 0, 1.7, 0.32, 2.05, MAT.oak);
+        add(0.05, 0.32, 0.05, 1.6, 0.2, 1.95, MAT.linen);
+        add(0, 0, -0.08, 1.7, 1.0, 0.1, MAT.walnut);
+        add(0.15, 0.52, 0.12, 0.6, 0.14, 0.4, MAT.pillow);
+        add(0.95, 0.52, 0.12, 0.6, 0.14, 0.4, MAT.pillow);
+        add(0.05, 0.53, 1.15, 1.6, 0.05, 0.85, MAT.rug);
+        add(-0.5, 0, 0, 0.42, 0.5, 0.4, MAT.walnut);
+        add(1.78, 0, 0, 0.42, 0.5, 0.4, MAT.walnut);
+        g.position.set(x, SLAB, z);
+        g.rotation.y = rot;
+        house.add(g);
+      }
+
+      function sofa(x, z, rot = 0) {
+        const g = new THREE.Group();
+        const add = (bx, by, bz, w, h, d, mat) => {
+          const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+          m.position.set(bx + w / 2, by + h / 2, bz + d / 2);
+          m.castShadow = true;
+          m.receiveShadow = true;
+          g.add(m);
+        };
+        add(0, 0, 0, 2.3, 0.42, 0.95, MAT.sofa);
+        add(0, 0.42, 0, 2.3, 0.42, 0.22, MAT.sofa);
+        add(0, 0.42, 0, 0.2, 0.22, 0.95, MAT.sofa);
+        add(2.1, 0.42, 0, 0.2, 0.22, 0.95, MAT.sofa);
+        add(0.3, 0, 1.35, 1.1, 0.38, 0.6, MAT.walnut);
+        add(-0.2, 0.001, -0.1, 2.7, 0.012, 2.4, MAT.rug);
+        g.position.set(x, SLAB, z);
+        g.rotation.y = rot;
+        house.add(g);
+      }
+
+      function kitchen(x, z, w) {
+        box(x, SLAB, z, w, 0.88, 0.62, MAT.counter);
+        box(x, SLAB + 0.88, z, w, 0.04, 0.64, MAT.stone);
+        box(x + w - 0.72, SLAB, z, 0.7, 1.3, 0.66, MAT.counter);
+        // Стол и стулья.
+        const tx = x + w / 2 - 0.6;
+        const tz = z - 1.75;
+        box(tx, SLAB, tz, 1.2, 0.74, 0.8, MAT.oak);
+        for (const [cx, cz] of [[tx + 0.1, tz - 0.45], [tx + 0.65, tz - 0.45], [tx + 0.1, tz + 0.85], [tx + 0.65, tz + 0.85]]) {
+          box(cx, SLAB, cz, 0.42, 0.45, 0.42, MAT.walnut);
+        }
+      }
+
+      function wardrobe(x, z, w, deep = 0.6) {
+        // Высота — по срезу стен.
+        box(x, SLAB, z, w, 1.3, deep, MAT.oak);
+        box(x + w / 2 - 0.01, SLAB + 0.2, z - 0.005, 0.02, 1.0, 0.01, MAT.bronze, false);
+      }
+
+      function plant(x, z) {
+        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.4, 24), MAT.porcelain);
+        pot.position.set(x, SLAB + 0.2, z);
+        const leaves = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 16), MAT.leaf);
+        leaves.position.set(x, SLAB + 0.75, z);
+        for (const mesh of [pot, leaves]) {
+          mesh.castShadow = true;
+          house.add(mesh);
+        }
+      }
+
+      function bath(x, z, w, d) {
+        box(x + 0.08, SLAB, z + d - 0.85, 1.7, 0.56, 0.78, MAT.porcelain);
+        box(x + w - 0.62, SLAB, z + 0.1, 0.5, 0.82, 0.42, MAT.porcelain);
+        box(x + 0.15, SLAB, z + 0.1, 0.4, 0.42, 0.6, MAT.porcelain);
+      }
+
+      // ── Планировки (метры): верхний ряд — комнаты к окнам, нижний — санузел и прихожая. ──
+      const PLANS = {
+        1: { rooms: [["studio", 5.2], ["kitchen", 3.0]] },
+        2: { rooms: [["bedroom", 3.7], ["living", 4.4], ["kitchen", 3.0]] },
+        3: { rooms: [["bedroom", 3.5], ["bedroom", 3.5], ["living", 4.6], ["kitchen", 3.0]] },
+      };
+      const plan = PLANS[ROOMS] ?? PLANS[2];
+      const W = plan.rooms.reduce((sum, [, w]) => sum + w, 0);
+      const D = 6.6;
+      const ROW = 2.5; // глубина нижнего ряда
+      const BATH = 2.4;
+
+      box(-0.25, 0, -0.25, W + 0.5, SLAB, D + 0.5, MAT.slab);
+      // Пол: дерево в комнатах, плитка в санузле.
+      box(0, SLAB - 0.005, ROW, W, 0.01, D - ROW, MAT.wood, false);
+      box(BATH, SLAB - 0.005, 0, W - BATH, 0.01, ROW, MAT.wood, false);
+      box(0, SLAB - 0.005, 0, BATH, 0.01, ROW, MAT.tile, false);
+
+      const wallGroup = new THREE.Group();
+      const base = SLAB;
+      const before = house.children.length;
+      // Наружные стены: окна — на дальней (z = D) и боковых.
+      let x = 0;
+      const windows = plan.rooms.map(([, w]) => {
+        const win = { from: x + w / 2 - 0.75, to: x + w / 2 + 0.75 };
+        x += w;
+        return win;
+      });
+      wall("x", D, 0, W, [], windows);
+      wall("x", 0, 0, W, [{ from: W - 1.6, to: W - 0.7 }]);
+      wall("z", 0, 0, D, [], [{ from: ROW + 1.2, to: ROW + 2.6 }]);
+      wall("z", W, 0, D, [], [{ from: ROW + 1.2, to: ROW + 2.6 }]);
+      // Между рядами — двери в каждую комнату.
+      x = 0;
+      const doors = plan.rooms.map(([, w]) => {
+        const from = Math.max(x + 0.3, BATH + 0.15);
+        x += w;
+        return { from, to: from + 0.9 };
+      });
+      wall("x", ROW, 0, W, doors);
+      // Перегородки верхнего ряда.
+      x = 0;
+      for (const [, w] of plan.rooms.slice(0, -1)) {
+        x += w;
+        wall("z", x, ROW, D);
+      }
+      // Санузел.
+      wall("z", BATH, 0, ROW, [{ from: 0.9, to: 1.75 }]);
+      for (const mesh of house.children.slice(before)) mesh.position.y += base;
+
+      // Мебель по комнатам.
+      x = 0;
+      for (const [kind, w] of plan.rooms) {
+        const cx = x + w / 2;
+        if (kind === "bedroom") {
+          bed(cx - 0.85, D - 2.35);
+          wardrobe(x + 0.12, ROW + 0.12, Math.min(1.6, w - 1.6));
+        } else if (kind === "studio") {
+          bed(x + 0.6, D - 2.35);
+          sofa(x + w - 2.75, ROW + 0.25);
+          plant(x + w - 0.35, D - 0.4);
+        } else if (kind === "living") {
+          sofa(cx + 1.15, D - 0.25, Math.PI);
+          box(cx - 0.9, SLAB, ROW + 0.12, 1.8, 0.5, 0.4, MAT.walnut);
+          plant(x + 0.4, D - 0.4);
+        } else if (kind === "kitchen") {
+          kitchen(x + 0.15, D - 0.77, w - 0.3);
+        }
+        x += w;
+      }
+      bath(0, 0, BATH, ROW);
+      wardrobe(W - 2.2, 0.12, 1.4, 0.55);
+      box(BATH + 0.6, SLAB + 0.001, 0.6, 1.6, 0.012, 1.0, MAT.rug, false);
+
+      house.position.set(-W / 2, 0, -D / 2);
+
+      // Тень на «земле» под коробкой — чтобы объект не висел в воздухе.
+      const catcher = new THREE.Mesh(new THREE.PlaneGeometry(W * 3, D * 3), new THREE.ShadowMaterial({ opacity: 0.12 }));
+      catcher.rotation.x = -Math.PI / 2;
+      catcher.receiveShadow = true;
+      scene.add(catcher);
+
+      const key = new THREE.DirectionalLight(0xfff1de, 2.3);
+      key.position.set(-4, 16, 6);
+      key.castShadow = true;
+      key.shadow.mapSize.set(2048, 2048);
+      key.shadow.camera.left = -W;
+      key.shadow.camera.right = W;
+      key.shadow.camera.top = W;
+      key.shadow.camera.bottom = -W;
+      key.shadow.bias = -0.0004;
+      key.shadow.radius = 4;
+      scene.add(key);
+      scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cdbd, 0.6));
+
+      const camera = new THREE.PerspectiveCamera(28, WIDTH / HEIGHT, 0.1, 200);
+      const span = Math.max(W, D) + 1.2;
+
+      /** t = 0 — вид сверху (план), t = 1 — 3/4: камера опускается и обходит квартиру. */
+      window.renderFrame = (t) => {
+        const ease = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+        const polar = THREE.MathUtils.degToRad(0.01 + 50 * ease);
+        const azimuth = THREE.MathUtils.degToRad(-32 * ease);
+        const fit = span / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / Math.min(1, camera.aspect * 0.92);
+        const distance = fit * (1 - 0.1 * ease);
+        camera.position.set(
+          distance * Math.sin(polar) * Math.sin(azimuth),
+          distance * Math.cos(polar),
+          distance * Math.sin(polar) * Math.cos(azimuth),
+        );
+        camera.up.set(0, polar < 0.02 ? 0 : 1, polar < 0.02 ? -1 : 0);
+        camera.lookAt(0, 0.9 * ease, 0);
+        renderer.render(scene, camera);
+        return renderer.domElement.toDataURL("image/png");
+      };
+      window.sceneReady = true;
+    </script>
+  </body>
+</html>

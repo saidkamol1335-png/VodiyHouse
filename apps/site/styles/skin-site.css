@@ -1,0 +1,532 @@
+/* Скин «Архитектурный люкс» (03.11.2026, слово исполнителя «чтобы ощущалась luxury»): травертин,
+   графитовый текст, бронзовый акцент, сплошные тонкие линии, графитовая главная кнопка, без свечений.
+   Только публичный сайт — html[data-surface="site"] (RootDocument); кабинет и /dev не меняются.
+   Янтарь знака — --brand-amber (логотип, подвал, экран загрузки): его скин не трогает, а --amber
+   здесь — роль акцента (бронза). Откат — убрать import в app/[locale]/layout.tsx.
+   Тема одна, светлая: тёмные блоки (первый экран, подвал, итог калькулятора) — токены на самом блоке.
+   Спецификация и расчёт контраста — docs/design-decisions.md (строка 03.11.2026). */
+
+/* ─── Токены ─────────────────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] {
+  /* Фоны: «туман долины» — холодный светлый серо-голубой (04.11, слово исполнителя «не бежевый»; был травертин) */
+  --bg: #edf1f3;
+  --bg-2: #f8fafb;
+  --bg-3: #f2f5f7;
+  --bg-4: #e1e7eb;
+  --row-alt: #f2f5f7;
+  --page-glow: none;
+  --card-bg: #f8fafb;
+  --control-bg: #f8fafb;
+  --chip-bg: #f8fafb;
+  --field-bg: #f8fafb;
+  --seg-bg: rgba(30, 28, 25, 0.05);
+  --seg-on-bg: #f8fafb;
+  --chip-on-bg: #f8fafb; /* выбранное — графитовая рамка, не заливка */
+  --map-bg: #e1e7eb;
+  --picker-plan-bg: #f2f5f7;
+  --picker-frame-bg: #e1e7eb;
+  --quiz-card-bg: linear-gradient(#f8fafb, #eef2f4);
+  --offer-free-bg: rgba(46, 106, 76, 0.07);
+
+  /* Текст: графит */
+  --fg: #1e1c19;
+  --fg-heading: #161512;
+  --fg-2: #4a4640;
+  --fg-3: #625c53;
+  --badge-fg: #3f3a33;
+  --badge-line-fg: #4a4640;
+  --chip-fg: #4a4640;
+
+  /* Линии — сплошные и тонкие */
+  --line: rgba(30, 28, 25, 0.1);
+  --line-2: rgba(30, 28, 25, 0.16);
+  --line-3: rgba(30, 28, 25, 0.3);
+  --dash: rgba(30, 28, 25, 0.12);
+  --rule-style: solid;
+  --control-border: rgba(30, 28, 25, 0.18);
+  --chip-border: rgba(30, 28, 25, 0.18);
+  --card-border: rgba(30, 28, 25, 0.1);
+  --seg-border: rgba(30, 28, 25, 0.1);
+  --home-marquee-stroke: rgba(30, 28, 25, 0.2);
+
+  /* Акцент — бронза (затемнённый янтарь знака): мелкий текст, линии, фокус. 5,46 : 1 на --bg */
+  --amber: #7a5634;
+  --amber-hover: #6a4a2c;
+  --on-amber: #f6f2ea;
+  --amber-2: #7a5634;
+  --amber-3: #6a4a2c;
+  /* Курсивные акценты Cormorant — янтарь знака, затемнённый до 3,6 : 1 на фоне: запас над янтарными
+     прядями шейдера (крупный текст, WCAG 1.4.3); 04.11 */
+  --gold: #b06d05;
+  --amber-soft: rgba(122, 86, 52, 0.1);
+  --amber-line: rgba(122, 86, 52, 0.36);
+  --field-ring: 0 0 0 3px rgba(122, 86, 52, 0.18);
+
+  /* Главное действие — графит, 15,2 : 1 */
+  --action-bg: #1e1c19;
+  --action-bg-hover: #34312c;
+  --action-fg: #f6f2ea;
+  --action-glow: none;
+
+  /* Свечения выключены */
+  --glow-amber: none;
+  --logo-glow: none;
+  --footer-pixel-glow: none;
+  --footer-glow: none;
+  --flash-glow: none;
+  --button-shine: transparent;
+  --live-dot-glow: none;
+  --spot-fill: transparent;
+  --spot-edge: transparent;
+  --beam-color: transparent;
+
+  /* Выбранное состояние */
+  --chip-on-border: #1e1c19;
+  --chip-on-ring: inset 0 0 0 1px #1e1c19;
+  --seg-on-shadow: 0 1px 2px rgba(30, 28, 25, 0.08), inset 0 0 0 1px rgba(30, 28, 25, 0.18);
+
+  /* Бейджи и статусы — приглушённые */
+  --badge-amber-bg: transparent;
+  --badge-amber-fg: #7a5634;
+  --badge-amber-border: rgba(122, 86, 52, 0.35);
+  --ok: #2e6a4c;
+  --ok-strong: #245a3f;
+  --ok-soft: rgba(46, 106, 76, 0.08);
+  --ok-line: rgba(46, 106, 76, 0.28);
+  --bad: #a23b2c;
+  --bad-soft: rgba(162, 59, 44, 0.07);
+  --blue: #3e5a7a;
+  --blue-soft: rgba(62, 90, 122, 0.08);
+  --violet: #5e5478;
+  --teal: #3d6b68;
+  --badge-ok-fg: #2e6a4c;
+  --badge-ok-border: rgba(46, 106, 76, 0.28);
+  --badge-bad-fg: #8e3527;
+  --badge-bad-border: rgba(162, 59, 44, 0.28);
+  --badge-blue-fg: #3e5a7a;
+  --badge-blue-border: rgba(62, 90, 122, 0.28);
+  --live-dot: #3f8a63;
+  --s-free: rgba(46, 106, 76, 0.07);
+  --s-free-b: rgba(46, 106, 76, 0.26);
+  --s-free-t: #2e6a4c;
+  --s-res: rgba(122, 86, 52, 0.1);
+  --s-res-b: rgba(122, 86, 52, 0.36);
+  --s-res-t: #6a4a2c;
+  --s-sold: rgba(162, 59, 44, 0.06);
+  --s-sold-b: rgba(162, 59, 44, 0.24);
+  --s-sold-t: #8e3527;
+
+  /* Значки «рядом» и монограммы застройщиков — монохром */
+  --poi-cafe: #4a4640;
+  --poi-car: #4a4640;
+  --poi-clinic: #4a4640;
+  --poi-kindergarten: #4a4640;
+  --poi-mosque: #4a4640;
+  --poi-park: #4a4640;
+  --poi-school: #4a4640;
+  --poi-shop: #4a4640;
+  --poi-sport: #4a4640;
+  --poi-stop: #4a4640;
+  --developer-mark-1: #1e1c19;
+  --developer-mark-2: #1e1c19;
+  --developer-mark-3: #1e1c19;
+  --developer-mark-4: #1e1c19;
+  --developer-mark-5: #1e1c19;
+  --developer-mark-fg: #cdb08a;
+
+  /* Поверх фото */
+  --photo-bg: #12110f;
+  --over-photo-chip: rgba(20, 18, 15, 0.62);
+  --card-chip-bg: rgba(248, 250, 251, 0.94);
+  --gallery-thumb-shadow: none;
+  --gallery-thumb-shadow-on: 0 0 0 2px #f8fafb, 0 0 0 3px #1e1c19;
+  --special-badge-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  /* Тёмные блоки: графит и шампань */
+  --hero-muted: #b9b1a5;
+  --about-card-bg: #1e1c19;
+  --inv: #1e1c19;
+  --on-inv: #f6f2ea;
+  --calc-dark-bg: #1a1916;
+  --calc-dark-accent: #cdb08a;
+  --calc-dark-ok: #8fc7a6;
+  --calc-dark-bad: #e8907f;
+  --home-bento-olive: linear-gradient(160deg, #2a2621, #1a1916);
+  --home-bento-olive-kicker: #cdb08a;
+  --picker-stage-bg: #12110f;
+
+  /* Форма: почти прямые углы, тени вместо рамок на подъёме */
+  --r-xs: 2px;
+  --r-s: 4px;
+  --r-m: 6px;
+  --r-l: 8px;
+  --r-xl: 10px;
+  --r-2xl: 12px;
+  --r-card: 6px;
+  --shadow-1: 0 1px 0 rgba(30, 28, 25, 0.04);
+  --card-shadow: 0 1px 0 rgba(30, 28, 25, 0.04);
+  --shadow-2: 0 1px 2px rgba(30, 28, 25, 0.04), 0 12px 32px -16px rgba(30, 28, 25, 0.14);
+  --shadow-hover: 0 28px 56px -32px rgba(30, 28, 25, 0.3);
+  --card-shadow-hover: 0 28px 56px -32px rgba(30, 28, 25, 0.3);
+  --shadow-3: 0 40px 90px -40px rgba(20, 18, 15, 0.38);
+  --control-shadow: none;
+
+  /* Стекло в lite и none — сплошной фон «туман долины» */
+  --glass-solid: #edf1f3;
+  --glass-blur: 20px;
+  --glass-saturate: 1.05;
+
+  /* Шрифты: подписи — Manrope (JetBrains на сайте не скачивается), название ЖК — прямой Cormorant */
+  --mono: var(--font);
+  --display: var(--font-cormorant-display), "Cormorant Garamond", Georgia, serif;
+  --fs-h1: clamp(44px, 5vw, 76px);
+  --fs-h2: clamp(32px, 3.4vw, 52px);
+  --fs-card-name: 24px;
+  --fs-card-name-phone: 22px;
+  --fs-card-price: 22px;
+  --fs-stat: 38px;
+}
+
+:root[data-surface="site"][data-motion="full"] {
+  --glass: rgba(237, 241, 243, 0.94);
+  --dur-home-marquee: 60s;
+}
+
+@media (max-width: 760px) {
+  :root[data-surface="site"] {
+    --fs-h1: 36px;
+    --fs-h2: 28px;
+  }
+}
+
+/* Тёмные островки: бронза на тёмном даёт 2,6–3,4 : 1 — здесь акцент шампань (9,1 : 1 на #12110f),
+   кнопка — кость. Шапка — только пока она над первым экраном (условия SiteHeader.css), иначе
+   шампань легла бы на светлое стекло. */
+:root[data-surface="site"]
+  :is(
+    .about-hero__card,
+    .collections__card,
+    .complex-picker__stage,
+    .complex-viewer,
+    .complex-location__drop,
+    .complex-preview
+  ),
+:root[data-surface="site"]:not([data-anchor-start]) .site-header--dark:not(.site-header--solid),
+:root[data-surface="site"][data-hero-dark] .site-header--dark {
+  --amber: #cdb08a;
+  --amber-hover: #dcc4a3;
+  --amber-2: #cdb08a;
+  --amber-3: #dcc4a3;
+  --gold: var(--brand-amber);
+  --amber-soft: rgba(205, 176, 138, 0.14);
+  --on-amber: #1e1c19;
+  --amber-line: rgba(205, 176, 138, 0.4);
+  --action-bg: #f1ece3;
+  --action-bg-hover: #ffffff;
+  --action-fg: #1e1c19;
+}
+
+/* Карточка застройщика тёмная поверх фото только на десктопе; на телефоне она светлая. */
+@media (min-width: 761px) {
+  :root[data-surface="site"] .developer-hero__card {
+    --amber: #cdb08a;
+    --amber-hover: #dcc4a3;
+    --amber-2: #cdb08a;
+    --gold: var(--brand-amber);
+    --on-amber: #1e1c19;
+    --action-bg: #f1ece3;
+    --action-bg-hover: #ffffff;
+    --action-fg: #1e1c19;
+  }
+}
+
+@media (max-width: 767px) {
+  :root[data-surface="site"] .calc-total {
+    --amber: #cdb08a;
+    --amber-2: #cdb08a;
+    --gold: var(--brand-amber);
+    --on-amber: #1e1c19;
+    --action-bg: #f1ece3;
+    --action-bg-hover: #ffffff;
+    --action-fg: #1e1c19;
+  }
+}
+
+/* Обводка подборки лежит снаружи карточки, на травертине: графит, а не шампань островка. */
+:root[data-surface="site"] :is(.collections__card:focus-visible, .collections__card--on) {
+  outline-color: #1e1c19;
+}
+
+/* ─── Кнопки ─────────────────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .button {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Почти прямые углы у кнопок, фильтров и бейджей; круглые иконки остаются круглыми. */
+:root[data-surface="site"]
+  :is(.button, .complex-bar__book, .complex-layout__calc, .quiz__start, .favorites-view__share) {
+  border-radius: 2px;
+}
+
+:root[data-surface="site"] :is(.filter-pills__pill, .badge) {
+  border-radius: var(--r-xs);
+}
+
+:root[data-surface="site"] .button--outline {
+  border-color: rgba(30, 28, 25, 0.28);
+  background: transparent;
+}
+
+:root[data-surface="site"] .button--outline:hover {
+  border-color: var(--fg);
+}
+
+:root[data-surface="site"][data-motion="full"] .button--primary::after {
+  display: none;
+}
+
+/* «Рассчитать» у планировок — вторичная: не четыре заливки в ряд. */
+:root[data-surface="site"] .complex-layout__calc {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px rgba(30, 28, 25, 0.28);
+}
+
+:root[data-surface="site"] .complex-layout__calc:hover {
+  background: var(--bg-3);
+}
+
+/* ─── Карточка каталога ──────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .catalog-card__developer {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+:root[data-surface="site"] .catalog-card__name {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  font-variant-numeric: lining-nums;
+}
+
+:root[data-surface="site"] :is(.catalog-card__address, .catalog-card__facts, .catalog-card__type) {
+  font-weight: 500;
+}
+
+:root[data-surface="site"] .catalog-card__landmark-icon {
+  color: var(--fg-3);
+}
+
+:root[data-surface="site"] .catalog-card__amount {
+  font-weight: 450;
+  letter-spacing: -0.02em;
+}
+
+:root[data-surface="site"] .catalog-card__monthly {
+  color: var(--fg-2);
+  font-weight: 550;
+}
+
+:root[data-surface="site"] :is(.catalog-card__soon, .catalog-card__promo, .catalog-card__class) {
+  font-weight: 600;
+}
+
+/* Пилюли оплаты — строкой текста через точку */
+:root[data-surface="site"] .catalog-card__pays .badge {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-2);
+  font-weight: 500;
+}
+
+:root[data-surface="site"] .catalog-card__pays .badge + .badge::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--fg-3);
+}
+
+/* Остатки «N ta qoldi»: точка статуса вместо цветной пилюли — сигнал остаётся */
+:root[data-surface="site"] :is(.catalog-card__type .badge, .badge.stock-badge) {
+  height: auto;
+  padding: 0;
+  gap: 6px;
+  border: 0;
+  background: none;
+  color: var(--fg-2);
+  font-weight: 550;
+}
+
+:root[data-surface="site"] :is(.catalog-card__type .badge, .badge.stock-badge)::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-3);
+}
+
+:root[data-surface="site"] :is(.catalog-card__type .badge--ok, .badge--ok.stock-badge)::before {
+  background: var(--ok);
+}
+
+:root[data-surface="site"]
+  :is(.catalog-card__type .badge--amber, .badge--amber.stock-badge)::before {
+  background: var(--amber);
+}
+
+:root[data-surface="site"] .catalog-card__type .badge--bad::before {
+  background: var(--bad);
+}
+
+/* ─── Типографика ────────────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .heading--h1 {
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+:root[data-surface="site"] .heading--h2 {
+  font-weight: 450;
+  letter-spacing: -0.03em;
+}
+
+:root[data-surface="site"] .heading--h3 {
+  font-weight: 550;
+  letter-spacing: -0.01em;
+}
+
+:root[data-surface="site"] .heading__accent {
+  font-size: 1.08em;
+}
+
+:root[data-surface="site"] .eyebrow {
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+:root[data-surface="site"] .eyebrow::before {
+  width: 24px;
+  border-top: 1px solid var(--amber);
+  transform-origin: left center;
+}
+
+/* ─── Поля, шапка, кнопки поверх фото ────────────────────────────────────────────────────── */
+
+/* Рамка поля — не меньше 3 : 1 (WCAG 1.4.11) */
+:root[data-surface="site"] .field__input {
+  border-color: rgba(30, 28, 25, 0.5);
+  font-weight: 500;
+}
+
+:root[data-surface="site"] .field__input:hover {
+  border-color: var(--fg);
+}
+
+:root[data-surface="site"] .header-nav__link--active::after {
+  border-bottom: 1px solid currentColor;
+}
+
+/* Кость с графитовой иконкой — одинаково читается над любым кадром, в full, lite и none */
+:root[data-surface="site"]
+  :is(.catalog-card__tools, .complex-gallery__tools) {
+  --over-photo-button: rgba(248, 250, 251, 0.9);
+  --over-photo-button-strong: rgba(248, 250, 251, 0.94);
+  --over-photo-fg: #1e1c19;
+  --over-photo-line: rgba(30, 28, 25, 0.12);
+  --over-photo-filter: none;
+}
+
+/* ─── Страница ЖК ────────────────────────────────────────────────────────────────────────── */
+
+:root[data-surface="site"] .complex-hero__name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: calc(var(--fs-h1) * 1.1);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums;
+}
+
+:root[data-surface="site"] .complex-hero__crumbs {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-surface="site"] .badge {
+  font-weight: 600;
+}
+
+:root[data-surface="site"] .complex-offer__amount {
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+:root[data-surface="site"] .complex-offer__free {
+  box-shadow: inset 2px 0 0 var(--ok);
+}
+
+:root[data-surface="site"][data-motion="full"] .beam::before {
+  display: none;
+}
+
+/* ─── Подвал — светлая бумага (с 04.11, Ridgeline Dither Footer): токены страницы, фон — SiteFooter.css ── */
+
+:root[data-surface="site"] .site-footer__promise {
+  font-weight: 400;
+}
+
+/* ─── Фактура и движение (только transform и opacity; none — без анимаций) ───────────────── */
+
+:root[data-surface="site"][data-motion="full"] .film-grain {
+  opacity: 0.025;
+}
+
+:root[data-surface="site"][data-motion="full"] :is(.spotlight::before, .spotlight::after) {
+  display: none;
+}
+
+/* Наведение на карточку — мягче: −2 px и 1.03 вместо −4 px и 1.05 */
+:root[data-surface="site"][data-motion="full"] .catalog-card:hover {
+  transform: translateY(-2px);
+}
+
+:root[data-surface="site"][data-motion="full"] .catalog-card:hover .site-photo__image {
+  transform: scale(1.03);
+}
+
+/* Линия надзаголовка прорисовывается слева направо по прокрутке (full); lite — проявляется. */
+@keyframes skin-eyebrow-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes skin-eyebrow-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  :root[data-surface="site"][data-motion="full"] .eyebrow {
+    view-timeline: --skin-eyebrow block;
+  }
+
+  :root[data-surface="site"][data-motion="full"] .eyebrow::before {
+    animation: skin-eyebrow-draw linear both;
+    animation-timeline: --skin-eyebrow;
+    animation-range: entry 0% cover 25%;
+  }
+}
+
+:root[data-surface="site"][data-motion="lite"] .eyebrow::before {
+  animation: skin-eyebrow-fade var(--dur-fast) var(--ease) both;
+}

@@ -9,7 +9,7 @@
   height: 20px;
   margin-left: 6px;
   padding: 0;
-  border: 1px dashed var(--dash);
+  border: 1px var(--rule-style) var(--dash);
   border-radius: 50%;
   background: none;
   color: var(--fg-2);

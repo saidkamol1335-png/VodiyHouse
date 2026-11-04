@@ -31,6 +31,7 @@ const ANON_FUNCTIONS = [
   // Проект-2, фаза C: сайт проверяет грант предпросмотра (20261102210000).
   "site_preview_slug",
   "site_progress_frames",
+  "site_reviews",
   "site_showcase",
   "site_slug_state",
   "site_submit_lead",

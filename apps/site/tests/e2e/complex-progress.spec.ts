@@ -9,12 +9,10 @@ import { hasCloud } from "./cloud";
 const SHODLIK = "/ru/novostroyki/demo-shodlik";
 
 const shot = (page: Page, name: string) =>
-  page
-    .locator("#hod-stroitelstva")
-    .screenshot({
-      path: `test-results/screens/${test.info().project.name}/p5-${name}.png`,
-      caret: "initial",
-    });
+  page.locator("#hod-stroitelstva").screenshot({
+    path: `test-results/screens/${test.info().project.name}/p5-${name}.png`,
+    caret: "initial",
+  });
 
 test.describe("ход строительства на странице ЖК", () => {
   test.skip(!hasCloud, "страница читает DEMO из облака");
@@ -79,7 +77,7 @@ test.describe("кадры стройки на главной и в катало�
     await page.goto("/ru?motion=none");
     const tile = page.locator(".home-why__tile--video");
     await expect(tile).toContainText("Снимаем, как идёт стройка");
-    await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · \S+ · блок \S+$/);
+    await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · .+ · блок \S+$/);
     const section = page.locator(".home-why");
     await section.scrollIntoViewIfNeeded();
     await expect(tile.locator(".home-why__frame img").first()).toHaveJSProperty("complete", true);
@@ -87,7 +85,9 @@ test.describe("кадры стройки на главной и в катало�
       path: `test-results/screens/${test.info().project.name}/p5-home-video.png`,
     });
 
-    const card = page.locator(".catalog-card", { has: page.locator(".catalog-card__caption") }).first();
+    const card = page
+      .locator(".catalog-card", { has: page.locator(".catalog-card__caption") })
+      .first();
     await expect(card.locator(".catalog-card__caption")).toHaveText(/^Стройка · [А-Я][а-я]+$/);
 
     await tile.getByRole("link", { name: "Смотреть пример" }).click();

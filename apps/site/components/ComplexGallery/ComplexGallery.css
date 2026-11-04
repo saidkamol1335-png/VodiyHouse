@@ -1,61 +1,224 @@
-/* Галерея ЖК (мокап .gal + .jkh--stack 21:9, телефон — .jg 390 × 342): лента со свайпом,
-   стеклянные стрелки, миниатюры слева снизу, счётчик справа снизу. Фото-блок тёмный. */
+/* Галерея ЖК — Portal Carousel (@hyperiux, MIT) один в один (04.11.2026): чёрный кадр, за курсором —
+   квадратное превью следующего рендера с чёрной меткой «Далее», клик в любом месте раскрывает его
+   порталом (PortalLayer), слева посередине перекатываются счётчик и подпись. Значения — из образца:
+   превью min(200px, 42vw), метка 10px / .2em, счётчик 14px / 500 / белый 70%, подпись clamp(24–44px). */
 .complex-gallery {
   position: relative;
+  isolation: isolate;
+  width: 100%;
+  /* Рамка — в родных пропорциях обложки, но не выше экрана (решение исполнителя 03.11: рендеры целиком). */
+  aspect-ratio: var(--gallery-ratio, 16 / 9);
+  max-height: max(520px, calc(100svh - 160px));
   overflow: hidden;
-  border: 1px solid var(--line);
   border-radius: var(--r-xl);
-  background: var(--photo-bg);
+  background: #000;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.complex-gallery__track {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-}
-
-.complex-gallery__track::-webkit-scrollbar {
-  display: none;
-}
-
-.complex-gallery__slide {
-  flex: 0 0 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  scroll-snap-align: start;
-  cursor: zoom-in;
-}
-
-/* Лента прокручивается и обрезает всё за краем: кольцо фокуса — внутри кадра. */
-.complex-gallery__slide:focus-visible {
-  outline-offset: -4px;
-}
-
-/* Кадр мокапа: 21:9 на десктопе; точка фокуса — от кадра обложки (SitePhoto). */
-.complex-gallery__photo,
-.complex-gallery__placeholder {
-  display: block;
-  aspect-ratio: 21 / 9;
-}
-
-.complex-gallery__placeholder {
-  background-color: var(--photo-bg);
-  background-position: center;
-  background-size: cover;
-}
-
-/* Затемнение — только на телефоне (мокап .jg__shade): под белыми иконками шапки и счётчиком. */
-.complex-gallery__shade {
-  display: none;
-}
-
-.complex-gallery__nav {
+/* База — принятый кадр; поля вокруг рендера другой пропорции — его размытое превью. */
+.complex-gallery__base,
+.complex-gallery__layers {
   position: absolute;
-  top: 50%;
+  inset: 0;
+}
+
+.complex-gallery__base {
+  background: #000 center / cover no-repeat;
+}
+
+.complex-gallery__layers {
+  z-index: 1;
+}
+
+.complex-gallery .complex-gallery__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  background: transparent;
+}
+
+/* Следующий рендер грузится тем же кандидатом под базой — портал раскрывается без ожидания сети. */
+.complex-gallery .complex-gallery__preload {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  aspect-ratio: auto;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* z-index — свои 1–6 внутри изолированного блока (isolation), не глобальная шкала. */
+/* Слой-портал: стартует в прямоугольнике превью (transform из portalFrames), растёт на весь кадр. */
+.complex-gallery__layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000 center / cover no-repeat;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.complex-gallery__layer-view {
+  position: absolute;
+  inset: 0;
+  /* Обратный scale от центра: на экране картинка вписана в окно «cover» по центру, как img образца. */
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+/* Затемнение из левого верхнего угла под подписью: белый текст читается и над светлым небом рендера.
+   Тёплый графит, не чёрный; над слоями портала, под подписью и превью. */
+.complex-gallery::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   z-index: 2;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(24, 18, 12, 0.5) 0%, rgba(24, 18, 12, 0.22) 32%, transparent 58%);
+  pointer-events: none;
+}
+
+/* Счётчик и подпись — левый верхний угол (слово исполнителя 04.11; образец — слева посередине):
+   счётчик моноширинной капителью, янтарная черта, название — шрифтом заголовков сайта. */
+.complex-gallery__caption {
+  position: absolute;
+  top: clamp(20px, 3vw, 36px);
+  left: clamp(20px, 3vw, 40px);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: min(70%, 640px);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(24, 18, 12, 0.25), 0 6px 28px rgba(24, 18, 12, 0.35);
+  pointer-events: none;
+}
+
+.complex-gallery__counter {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  color: rgba(255, 248, 238, 0.82);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Черта между счётчиком и названием — янтарь знака. */
+.complex-gallery__counter::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  margin-left: 0.6em;
+  background: var(--brand-amber);
+}
+
+.complex-gallery__title {
+  color: #fffaf3;
+  font-family: var(--display);
+  font-size: clamp(1.75rem, 3.1vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+/* RollingText: окно со срезом по высоте; .2em снизу — чтобы не резать выносные элементы. */
+.complex-gallery__roll {
+  position: relative;
+  display: inline-block;
+  overflow-y: clip;
+  margin-bottom: -0.2em;
+  padding-bottom: 0.2em;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.complex-gallery__roll-current {
+  display: block;
+}
+
+.complex-gallery__roll-previous {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: block;
+}
+
+/* Превью следующего: квадрат min(200px, 42vw), двигает только useThumbFollow (transform). */
+.complex-gallery__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  width: min(200px, 42vw);
+  aspect-ratio: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.complex-gallery__thumb-button {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: #000;
+  outline: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.complex-gallery__thumb-button:focus-visible {
+  box-shadow:
+    0 0 0 2px #000,
+    0 0 0 4px #fff;
+}
+
+.complex-gallery .complex-gallery__thumb-photo {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.complex-gallery__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  padding: 4px 8px;
+  background: #000;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Сердце, «Поделиться» и «Во весь экран» — правый верхний угол, над всеми слоями. */
+.complex-gallery__tools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+  cursor: auto;
+}
+
+.complex-gallery__expand {
   display: grid;
   place-items: center;
   width: 36px;
@@ -66,157 +229,44 @@
   color: var(--over-photo-fg);
   -webkit-backdrop-filter: var(--over-photo-filter);
   backdrop-filter: var(--over-photo-filter);
-  transform: translateY(-50%);
-  cursor: pointer;
+  cursor: zoom-in;
 }
 
-/* Крайняя стрелка — aria-disabled, а не disabled: фокус с клавиатуры остаётся на ней (видна
-   приглушённой), мышью — прячется, как в мокапе. */
-.complex-gallery__nav[aria-disabled="true"] {
-  opacity: 0;
-  cursor: default;
-}
-
-.complex-gallery__nav[aria-disabled="true"]:focus-visible {
-  opacity: var(--opacity-unavailable);
-}
-
-.complex-gallery__nav--prev {
-  left: 14px;
-}
-
-.complex-gallery__nav--next {
-  right: 14px;
-}
-
-.complex-gallery__thumbs {
-  position: absolute;
-  left: 14px;
-  bottom: 14px;
-  z-index: 2;
-  display: flex;
-  gap: 8px;
-}
-
-.complex-gallery__thumb {
-  width: 96px;
-  padding: 0;
-  overflow: hidden;
-  border: 2px solid var(--gallery-thumb-line);
-  border-radius: 11px;
-  background: var(--photo-bg);
-  box-shadow: var(--gallery-thumb-shadow);
-  opacity: 0.8;
-  cursor: pointer;
-  transition: opacity var(--dur-base) ease-out;
-}
-
-.complex-gallery__thumb:hover,
-.complex-gallery__thumb--on {
-  opacity: 1;
-}
-
-.complex-gallery__thumb--on {
-  border-color: var(--amber);
-  box-shadow: var(--gallery-thumb-shadow-on);
-}
-
-.complex-gallery__thumb-photo {
-  aspect-ratio: 3 / 2;
-}
-
-.complex-gallery__count {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 25px;
-  padding: 0 10px;
-  border: 1px solid var(--over-photo-line);
-  border-radius: var(--r-pill);
-  background: var(--over-photo-chip);
-  color: var(--over-photo-fg);
-  font-family: var(--mono);
-  font-size: var(--fs-small);
-  -webkit-backdrop-filter: var(--over-photo-filter);
-  backdrop-filter: var(--over-photo-filter);
-}
-
-/* Значок «фото» — только в счётчике телефона (мокап .jg__cnt). */
-.complex-gallery__count svg {
-  display: none;
-}
-
-/* full: кадр проявляется из лёгкого приближения (мокап .gal__main img.is-on). */
-[data-motion="full"] .complex-gallery__photo .site-photo__image {
-  animation: complex-gallery-in var(--dur-slower) var(--ease) both;
-}
-
-@keyframes complex-gallery-in {
-  from {
-    transform: scale(1.04);
-  }
-}
-
+/* Телефон: рамка без скругления во всю ширину; шапка лежит над правым верхним углом — кнопки уходят
+   в левый нижний угол (превью в покое — справа снизу, как в образце). */
 @media (max-width: 760px) {
   .complex-gallery {
-    border: 0;
     border-radius: 0;
   }
 
-  .complex-gallery__photo,
-  .complex-gallery__placeholder {
-    aspect-ratio: 390 / 342;
-  }
-
-  .complex-gallery__shade {
-    position: absolute;
-    inset: 0;
-    display: block;
-    pointer-events: none;
-    background: var(--gallery-shade);
-  }
-
-  .complex-gallery__nav,
-  .complex-gallery__thumbs {
-    display: none;
-  }
-
-  .complex-gallery__count {
-    right: 12px;
-    bottom: 12px;
-    height: 32px;
-    padding: 0 12px;
-    border: 0;
-    background: var(--over-photo-chip-strong);
-    font-size: var(--fs-label);
-  }
-
-  .complex-gallery__count svg {
-    display: block;
-  }
-}
-
-/* Сердце и «Поделиться» (мокап .gal .jc__icons): правый верхний угол фото, над тенью. */
-.complex-gallery__tools {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 3;
-  display: flex;
-  gap: 8px;
-}
-
-/* Телефон: шапка лежит поверх фото с кнопками справа сверху — сердце и «Поделиться» уходят в левый
-   нижний угол, напротив счётчика (в мокапе MobJk их нет — реши сам). */
-@media (max-width: 760px) {
   .complex-gallery__tools {
     top: auto;
     right: auto;
     bottom: 12px;
     left: 12px;
+  }
+
+  /* Телефон: сверху лежит шапка — подпись внизу слева, над кнопками; затемнение — снизу. */
+  .complex-gallery__caption {
+    top: auto;
+    bottom: 64px;
+    left: 16px;
+    max-width: 56%;
+  }
+
+  .complex-gallery::after {
+    background: linear-gradient(to top, rgba(24, 18, 12, 0.5), transparent 55%);
+  }
+
+  .complex-gallery__title {
+    white-space: normal;
+  }
+}
+
+/* UI/UX 04.11: «Во весь экран» рядом с сердцем и «Поделиться» — той же высоты 44 px на касании. */
+@media (pointer: coarse), (max-width: 760px) {
+  .complex-gallery__expand {
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

@@ -41,12 +41,12 @@
   padding: 0 22px;
   border: 0;
   border-radius: var(--r-pill);
-  background: var(--amber);
-  color: var(--on-amber);
+  background: var(--action-bg, var(--amber));
+  color: var(--action-fg, var(--on-amber));
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: var(--glow-amber);
+  box-shadow: var(--action-glow, var(--glow-amber));
 }
 
 .favorites-view__share:focus-visible {

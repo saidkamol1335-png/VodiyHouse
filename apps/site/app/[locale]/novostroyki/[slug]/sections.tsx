@@ -42,7 +42,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
     <>
       {has("about") ? (
         <ComplexSection id={COMPLEX_ANCHORS.about} title={t("about.title")} lead={page.shortDescription?.[locale]} tight>
-          <ComplexFacts facts={complexFacts(page, locale)} />
+          <ComplexFacts facts={complexFacts(page, locale)} deadline={complexSummary(page).deadline} />
           <ComplexTerms page={page} />
         </ComplexSection>
       ) : null}
@@ -63,7 +63,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       ) : null}
       {has("details") ? (
         <ComplexSection id={COMPLEX_ANCHORS.details} title={t("details.title")}>
-          <ComplexDetails details={page.details} />
+          <ComplexDetails details={page.details} complexName={name} />
         </ComplexSection>
       ) : null}
       <ComplexSection id={COMPLEX_ANCHORS.developer} title={t("developer.title")}>
@@ -130,7 +130,7 @@ async function DocumentsSection({ page, name }: { page: ComplexPage; name: strin
   );
   return (
     <ComplexSection id={COMPLEX_ANCHORS.documents} title={t("title")} lead={t("lead")} action={request}>
-      <ComplexDocuments documents={page.documents} />
+      <ComplexDocuments documents={page.documents} complexSlug={page.slug} complexName={name} />
     </ComplexSection>
   );
 }

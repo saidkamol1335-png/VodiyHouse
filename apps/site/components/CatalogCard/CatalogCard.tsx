@@ -113,7 +113,7 @@ function CardButtons({ phone, intent }: { phone: string | null; intent: LeadInte
   return (
     <div className="catalog-card__buttons">
       {phone ? <PhoneButton phone={phone} className="catalog-card__phone" /> : null}
-      <LeadButton intent={intent} size="sm" className="catalog-card__callback" />
+      <LeadButton intent={intent} variant="outline" size="sm" className="catalog-card__callback" />
       <TelegramButton object={intent.object ?? {}} className="catalog-card__telegram" aria-label={t("telegram")}>
         <Send size={16} strokeWidth={1.9} aria-hidden />
       </TelegramButton>

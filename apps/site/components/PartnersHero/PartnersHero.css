@@ -3,7 +3,7 @@
 
 .partners-hero {
   padding: calc(var(--header-h) + 72px) 0 56px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
 }
 
 .partners-hero__layout {

@@ -62,7 +62,7 @@
 }
 
 .calc-term__button--custom {
-  border-style: dashed;
+  border-style: var(--rule-style);
 }
 
 .calc-term__button--active,

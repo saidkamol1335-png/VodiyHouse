@@ -53,7 +53,7 @@
 }
 
 .badge--line {
-  border-style: dashed;
+  border-style: var(--rule-style);
   border-color: var(--dash);
   background: transparent;
   color: var(--badge-line-fg);

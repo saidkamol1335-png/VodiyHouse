@@ -95,6 +95,18 @@ export function expirePrograms(developerId?: string | null): void {
  * бейдж спецпредложения на карточке ЖК и «Подарок» на странице ЖК — ещё CATALOG_TAG.
  */
 export const SHOWCASE_TAG = "showcase";
+/** Отзывы покупателей на главной (PLAN §10, п. 47) — правка отзыва в кабинете (форма — позже). */
+export const REVIEWS_TAG = "reviews";
+
+/** Отзыв опубликован, снят или согласие отозвано (форма кабинета — позже): блок главной — сразу. */
+export function expireReviews(): void {
+  updateTag(REVIEWS_TAG);
+}
+
+/** То же не из Server Action (скрипт, задача по расписанию). */
+export function expireReviewsNow(): void {
+  revalidateTag(REVIEWS_TAG, { expire: 0 });
+}
 
 export function expireShowcase(): void {
   updateTag(SHOWCASE_TAG);

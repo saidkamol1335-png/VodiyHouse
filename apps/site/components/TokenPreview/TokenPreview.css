@@ -90,7 +90,7 @@
   align-items: baseline;
   gap: 16px;
   padding-block: 10px;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .token-preview__lead {

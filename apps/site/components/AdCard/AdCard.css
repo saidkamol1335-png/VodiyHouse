@@ -9,8 +9,7 @@
   border: 1px solid var(--amber-line);
   border-radius: var(--r-2xl);
   background:
-    radial-gradient(700px 320px at 100% 0%, var(--amber-soft), transparent 70%),
-    var(--card-bg);
+    radial-gradient(700px 320px at 100% 0%, var(--amber-soft), transparent 70%), var(--card-bg);
   box-shadow: var(--card-shadow);
 }
 
@@ -93,8 +92,8 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
-  border-top: 1px dashed var(--dash);
-  border-bottom: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
 }
 
 .ad-card__fact {
@@ -106,7 +105,7 @@
 
 .ad-card__fact + .ad-card__fact {
   padding-left: 14px;
-  border-left: 1px dashed var(--dash);
+  border-left: 1px var(--rule-style) var(--dash);
 }
 
 .ad-card__fact dt {
@@ -200,10 +199,22 @@ a.ad-card__chip:hover {
     grid-column: 1 / -1;
     padding-left: 0;
     border-left: 0;
-    border-top: 1px dashed var(--dash);
+    border-top: 1px var(--rule-style) var(--dash);
   }
 
   .ad-card__buttons > * {
     flex: 1 1 200px;
+  }
+}
+
+/* Параллакс фото (Reveal.css): картинка едет внутри рамки, наведение увеличивает рамку фото. */
+@supports (animation-timeline: view()) {
+  [data-motion="full"] .ad-card__media {
+    view-timeline: --photo-parallax block;
+  }
+
+  [data-motion="full"] .ad-card__photo .site-photo__image {
+    animation: photo-parallax linear both;
+    animation-timeline: --photo-parallax;
   }
 }

@@ -39,7 +39,7 @@ html[data-preloader] .site-preloader {
 
 /* До оживления страницы знак виден бледным силуэтом: экран не выглядит пустым, блоки его заполняют. */
 .site-preloader__block {
-  fill: var(--amber);
+  fill: var(--brand-amber);
   opacity: 0.14;
   transform-box: fill-box;
   transform-origin: center;
@@ -89,7 +89,7 @@ html[data-preloader] .site-preloader {
 }
 
 .site-preloader__percent {
-  color: var(--amber);
+  color: var(--brand-amber);
 }
 
 .site-preloader__caption {
@@ -117,7 +117,7 @@ html[data-preloader] .site-preloader {
 .site-preloader__fill {
   display: block;
   height: 100%;
-  background: var(--amber);
+  background: var(--brand-amber);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -125,7 +125,7 @@ html[data-preloader] .site-preloader {
 .site-preloader__core {
   position: absolute;
   inset: 0;
-  background: var(--amber);
+  background: var(--brand-amber);
   opacity: 0;
   pointer-events: none;
 }
@@ -141,7 +141,7 @@ html[data-preloader] .site-preloader {
 .site-preloader__slab {
   flex: 1;
   margin-bottom: -1px;
-  background: var(--amber);
+  background: var(--brand-amber);
   opacity: 0;
 }
 

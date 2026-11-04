@@ -6,57 +6,69 @@ import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
 import { COMPLEX_ANCHORS } from "@/lib/site/complex/sections";
 import type { ProgressSample } from "@/lib/site/home/stats";
-
-/** Кадров в видоискателе — 4, как в мокапе (.bnv); у отчёта с 3 фото первое показывается дважды. */
-const SLOTS = 4;
+import type { SitePhotoData } from "@/lib/site/photo";
+import { WhyMedia } from "./WhyMedia";
+import { Copy, Kicker } from "./WhyParts";
 
 /**
- * «Видео стройки» (мокап .bn--wide с .bnv, фаза 5): видоискатель с кадрами последнего отчёта и
- * «REC · ЖК · блок», «Смотреть пример» — раздел «Ход строительства» этого ЖК (страницы видео квартир
- * — для клиентов по ссылке, с главной их не открываем). В full кадры сменяются, в lite и none — первый.
+ * «Видео стройки» (вариант А): слева текст и «Смотреть пример» — раздел «Ход строительства» этого ЖК,
+ * справа видоискатель с первым кадром последнего отчёта. full — автофокус (размытая копия гаснет),
+ * рамка защёлкивается, рамка фокуса мигает, медленный наезд камеры, REC мигает, идёт таймкод и полоса;
+ * lite и none — кадр стоит.
  */
 export async function VideoTile({ video }: { video: ProgressSample }) {
   const t = await getTranslations("home.why");
   const locale = (await getLocale()) as Locale;
   const { complex, frame } = video;
-  const slots = Array.from(
-    { length: SLOTS },
-    (_, index) => frame.photos[index % frame.photos.length]!,
-  );
+  const href = `/${locale}${complexRoute(complex.slug)}#${COMPLEX_ANCHORS.progress}`;
+  const photo = frame.photos[0]!;
   return (
-    <>
-      <div className="home-why__video" aria-hidden="true">
-        {slots.map((photo, index) => (
-          <span key={index} className="home-why__frame" style={{ ["--frame" as string]: index }}>
-            <SitePhoto
-              photo={photo}
-              alt=""
-              frame="cover"
-              sizes="(max-width: 760px) 100vw, 400px"
-              className="home-why__photo"
-            />
-          </span>
-        ))}
-        <span className="home-why__corners" />
+    <div className="home-why__split home-why__split--video">
+      <div className="home-why__copy">
+        <Kicker index="01" text={t("videoKicker")} />
+        <div className="home-why__body">
+          <Copy title={t("videoTitle")} text={t("videoText")} />
+          <Button
+            variant="outline"
+            size="sm"
+            href={href}
+            className="home-why__cta home-why__rv home-why__rv--3"
+          >
+            <span className="home-why__cta-ico" aria-hidden="true">
+              <Play size={14} fill="currentColor" strokeWidth={0} />
+            </span>
+            {t("videoCta")}
+          </Button>
+        </div>
+      </div>
+      <WhyMedia href={href}>
+        <ViewfinderShot photo={photo} />
+        <ViewfinderShot photo={photo} soft />
         <span className="home-why__rec">
-          <i />
-          {t("videoRec", { complex: complex.name[locale], block: frame.block })}
+          <i aria-hidden="true" />
+          <span className="home-why__rec-text">
+            {t("videoRec", { complex: complex.name[locale], block: frame.block })}
+          </span>
         </span>
-      </div>
-      <p className="home-why__kicker">{t("videoKicker")}</p>
-      <div className="home-why__body">
-        <p className="home-why__tile-title">{t("videoTitle")}</p>
-        <p className="home-why__text">{t("videoText")}</p>
-        <Button
-          variant="outline"
-          size="sm"
-          href={`/${locale}${complexRoute(complex.slug)}#${COMPLEX_ANCHORS.progress}`}
-          className="home-why__cta"
-        >
-          <Play size={16} aria-hidden="true" />
-          {t("videoCta")}
-        </Button>
-      </div>
-    </>
+      </WhyMedia>
+    </div>
+  );
+}
+
+/** Кадр видоискателя; soft — размытая копия поверх, в full гаснет («автофокус»). */
+function ViewfinderShot({ photo, soft = false }: { photo: SitePhotoData; soft?: boolean }) {
+  return (
+    <span
+      className={soft ? "home-why__frame home-why__frame--soft" : "home-why__frame"}
+      aria-hidden="true"
+    >
+      <SitePhoto
+        photo={photo}
+        alt=""
+        frame="cover"
+        sizes="(max-width: 760px) 100vw, 640px"
+        className="home-why__photo"
+      />
+    </span>
   );
 }

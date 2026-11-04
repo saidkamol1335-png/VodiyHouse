@@ -2,7 +2,8 @@
    Без JS всё видно ([data-js]). Показанное в lite не прячется, когда проба включит full. Скрыт блок
    полностью, не 0.01: полупрозрачный текст проверка контраста читает как серый на сером. */
 
-[data-js]:not([data-reveal-off])[data-motion="full"] .reveal:not([data-revealed], .reveal--words, .reveal--group) {
+[data-js]:not([data-reveal-off])[data-motion="full"]
+  .reveal:not([data-revealed], .reveal--words, .reveal--group) {
   opacity: 0;
   transform: translateY(var(--rise-offset));
 }
@@ -25,7 +26,9 @@
   display: inline-block;
 }
 
-[data-js]:not([data-reveal-off])[data-motion="full"] .reveal--words:not([data-revealed]) .heading__word {
+[data-js]:not([data-reveal-off])[data-motion="full"]
+  .reveal--words:not([data-revealed])
+  .heading__word {
   opacity: 0;
   transform: translateY(0.6em);
 }
@@ -55,5 +58,18 @@
   from {
     opacity: 0;
     transform: translateY(var(--scroll-rise));
+  }
+}
+
+/* Параллакс фото в рамке (по мотивам era-residence.com, 03.11.2026): фото крупнее рамки и едет внутри неё
+   медленнее страницы — сверху вниз, пока рамка проходит окно. Подключают блоки под full и view-timeline
+   своей рамки (--photo-parallax): рамка может лежать в горизонтальной ленте, у которой своя прокрутка. */
+@keyframes photo-parallax {
+  from {
+    transform: translate3d(0, -7%, 0) scale(1.16);
+  }
+
+  to {
+    transform: translate3d(0, 7%, 0) scale(1.16);
   }
 }

@@ -1,25 +1,24 @@
-import { Building2, LayoutGrid, Layers, MapPin, MoveVertical, PaintRoller, SquareParking, Star, type LucideIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import type { CardDeadline } from "@/lib/site/catalog/card";
 import type { Fact } from "@/lib/site/complex/summary";
-
-const ICONS: Record<Fact["key"], LucideIcon> = {
-  class: Star,
-  floors: Layers,
-  houseType: Building2,
-  ceilings: MoveVertical,
-  finishing: PaintRoller,
-  parking: SquareParking,
-  toCenter: MapPin,
-  blocks: LayoutGrid,
-};
+import { FactsSteps, type FactStep } from "./FactsSteps";
 
 const CEILING = new Intl.NumberFormat("ru-RU", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2,
 });
 
-/** Плашки «О ЖК» (мокап .facts, ТЗ 7.3б): иконка, подпись, значение; пустое поле не выводится. */
-export async function ComplexFacts({ facts }: { facts: readonly Fact[] }) {
+type ComplexFactsProps = {
+  facts: readonly Fact[];
+  deadline: CardDeadline;
+};
+
+/**
+ * «О ЖК» (мокап .facts, ТЗ 7.3б): факты ЖК — шаги вертикальной ленты по образцу «How I work» портфолио
+ * исполнителя (04.11.2026): подпись — что это, крупно — значение; срок сдачи — последним шагом. Пустое
+ * поле не выводится.
+ */
+export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
   const t = await getTranslations("complex");
   const valueOf = (fact: Fact): string => {
     switch (fact.key) {
@@ -39,19 +38,21 @@ export async function ComplexFacts({ facts }: { facts: readonly Fact[] }) {
         return fact.value.join(fact.key === "blocks" ? " · " : " / ");
     }
   };
-  if (facts.length === 0) return null;
-  return (
-    <ul className="complex-facts">
-      {facts.map((fact) => {
-        const Icon = ICONS[fact.key];
-        return (
-          <li key={fact.key} className="complex-facts__item">
-            <Icon size={20} strokeWidth={1.7} aria-hidden />
-            <span className="complex-facts__label">{t(`about.facts.${fact.key}`)}</span>
-            <span className="complex-facts__value">{valueOf(fact)}</span>
-          </li>
-        );
-      })}
-    </ul>
-  );
+  const steps: FactStep[] = facts.map((fact) => ({
+    id: fact.key,
+    label: t(`about.facts.${fact.key}`),
+    value: valueOf(fact),
+  }));
+  if (deadline) {
+    steps.push({
+      id: "deadline",
+      label: t("offer.deadline"),
+      value:
+        deadline.kind === "built"
+          ? t("offer.built")
+          : t("quarter", { q: deadline.quarter, year: deadline.year }),
+    });
+  }
+  if (steps.length === 0) return null;
+  return <FactsSteps steps={steps} />;
 }

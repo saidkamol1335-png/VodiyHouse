@@ -7,7 +7,7 @@
   gap: 22px 44px;
   margin: 0;
   padding-top: 22px;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 .site-stats__item {

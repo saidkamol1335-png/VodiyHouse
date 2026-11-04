@@ -78,7 +78,7 @@
 
 .catalog-results__empty {
   padding: 48px 24px;
-  border: 1px dashed var(--dash);
+  border: 1px var(--rule-style) var(--dash);
   border-radius: var(--r-card);
   text-align: center;
 }

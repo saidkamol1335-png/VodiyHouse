@@ -97,7 +97,7 @@
 }
 
 .complex-layout__left--none {
-  border-style: dashed;
+  border-style: var(--rule-style);
   border-color: var(--dash);
   background: none;
   color: var(--fg-3);

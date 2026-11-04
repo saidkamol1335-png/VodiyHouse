@@ -48,3 +48,10 @@
     display: none;
   }
 }
+
+.header-nav__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}

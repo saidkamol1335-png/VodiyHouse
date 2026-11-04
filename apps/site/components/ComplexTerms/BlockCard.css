@@ -178,7 +178,7 @@
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 6px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   color: var(--fg-2);
   font-size: var(--fs-small-l);
 }
@@ -247,7 +247,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 9px 0;
-    border-bottom: 1px dashed var(--line-2);
+    border-bottom: 1px var(--rule-style) var(--line-2);
   }
 
   .complex-block__facts dt {

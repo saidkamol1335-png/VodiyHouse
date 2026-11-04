@@ -33,3 +33,4 @@ docs/mockup/screens/
 
 # Local Netlify folder
 .netlify
+apps/site/public/assets/flat-placeholder/
