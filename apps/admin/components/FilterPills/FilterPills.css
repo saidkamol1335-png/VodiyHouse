@@ -1,5 +1,5 @@
-/* Пилюли-фильтры (мокап: .chip--sm «Все застройщики»): тот же вид, что у вкладок AdminTabs,
-   но это кнопки внутри страницы, а не адреса. На телефоне ряд прокручивается сам. */
+/* Фильтры-кнопки над списком («Все · Черновики · …»): белые кнопки радиусом 8, выбранная — серая
+   (образец: gray-100 + рамка gray-300). На телефоне ряд прокручивается сам. */
 .filter-pills {
   display: flex;
   gap: 6px;
@@ -36,24 +36,26 @@
   flex: none;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: 36px;
   padding: 0 14px;
   border: 1px solid var(--chip-border);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: var(--chip-bg);
+  box-shadow: var(--control-shadow);
   color: var(--chip-fg);
   font: inherit;
   font-size: var(--fs-small);
-  font-weight: 650;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition:
+    background-color var(--dur-fast) var(--ease),
     border-color var(--dur-fast) var(--ease),
     color var(--dur-fast) var(--ease);
 }
 
 .filter-pills__pill:hover {
-  border-color: var(--line-3);
+  background: var(--bg-3);
   color: var(--fg);
 }
 
@@ -64,10 +66,16 @@
 
 .filter-pills__pill--active,
 .filter-pills__pill--active:hover {
-  border-color: var(--chip-on-border);
-  background: var(--chip-on-bg);
-  box-shadow: var(--chip-on-ring);
+  border-color: var(--line-3);
+  background: var(--bg-4);
+  box-shadow: none;
   color: var(--fg);
+}
+
+/* Тёмная тема: выбранная — заметно светлее (gray-700) на почти чёрной странице, иначе не отличить. */
+:root[data-theme="dark"] .filter-pills__pill--active,
+:root[data-theme="dark"] .filter-pills__pill--active:hover {
+  background: var(--line-3);
 }
 
 .filter-pills__count {

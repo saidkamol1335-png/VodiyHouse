@@ -1,0 +1,285 @@
+/* Скин кабинета (04.11.2026, слово исполнителя: «дизайн и оттенки как у Dashboard with Collapsible
+   Sidebar», 21st.dev @uniquesonu). Холодные серые Tailwind (gray-50…950), белые карточки с тонкой
+   рамкой и лёгкой тенью, радиусы 8–14 px, системный шрифт, без стекла, свечений и бумажного фона.
+   Акцент — фирменный янтарь (решение исполнителя вместо синего образца).
+   Две темы: светлая и тёмная — html[data-theme], её ставит скрипт в <head> (lib/boot/headScript.ts)
+   по выбору в переключателе (ThemeToggle) или по теме системы. Только приложение кабинета: сайт
+   (apps/site) этих токенов не видит. */
+
+:root {
+  /* Шрифт — системный, как в образце: Segoe UI / San Francisco / Roboto. */
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --display: var(--font);
+  --ls-brand: -0.02em;
+  --ls-admin-title: -0.025em;
+  --fs-admin-title: 28px;
+  --fs-h4: 18px; /* заголовок карточки (образец: text-lg font-semibold) */
+  --fs-login-title: 30px; /* «Кабинет сотрудника» — в одну строку карточки входа */
+  /* Подписи — тем же системным шрифтом, без моно: 12 px, лёгкая разрядка (образец: text-xs uppercase). */
+  --mono: var(--font);
+  --ls-mono: 0;
+  --ls-label: 0.04em;
+  --fs-label: 12px;
+  --fs-label-l: 12px;
+  --fs-micro: 12px;
+  --fs-tiny: 11px;
+  --fs-nano: 11px;
+
+  /* Радиусы образца: кнопки и пункты меню 8, плитки значков 10, карточки 14. */
+  --r-s: 8px;
+  --r-m: 10px;
+  --r-l: 14px;
+  --r-xl: 14px;
+  --r-2xl: 16px;
+  --r-card: 14px;
+
+  --rule-style: solid;
+  --page-glow: none;
+  --glass-filter: none;
+
+  /* ---------- светлая тема ---------- */
+  color-scheme: light;
+  --bg: #f9fafb; /* gray-50: фон страницы */
+  --bg-2: #ffffff; /* карточки, меню */
+  --bg-3: #f9fafb;
+  --bg-4: #f3f4f6; /* gray-100 */
+  --row-alt: #f9fafb;
+  --fg: #101828; /* gray-900 */
+  --fg-heading: #101828;
+  --fg-2: #4a5565; /* gray-600 */
+  --fg-3: #6a7282; /* gray-500, 4,8:1 на белом */
+
+  --line: #e5e7eb; /* gray-200 */
+  --line-2: #e5e7eb;
+  --line-3: #d1d5dc; /* gray-300 */
+  --dash: #e5e7eb;
+  --cols-line: transparent;
+  --scrim: rgba(3, 7, 18, 0.5);
+
+  --glass: #ffffff;
+  --glass-solid: #ffffff;
+  --glass-2: #ffffff;
+  --glass-3: #f3f4f6;
+
+  --amber-soft: #fff7e6;
+  --amber-line: rgba(232, 140, 0, 0.45);
+  --gold: var(--amber-2);
+
+  --shadow-1: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px -1px rgba(16, 24, 40, 0.08);
+  --shadow-2: var(--shadow-1);
+  --shadow-hover: 0 4px 6px -1px rgba(16, 24, 40, 0.1), 0 2px 4px -2px rgba(16, 24, 40, 0.1);
+  --shadow-3: 0 20px 25px -5px rgba(16, 24, 40, 0.1), 0 8px 10px -6px rgba(16, 24, 40, 0.1);
+  --toast-shadow: var(--shadow-3);
+  --glow-amber: none;
+  --spot-fill: transparent;
+  --spot-edge: transparent;
+  --logo-glow: none;
+  --button-shine: transparent;
+  --flash-glow: 0 0 0 3px rgba(248, 155, 13, 0.35);
+
+  --control-bg: #ffffff;
+  --control-border: #e5e7eb;
+  --control-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --seg-bg: #f3f4f6;
+  --seg-border: #e5e7eb;
+  --seg-on-bg: #ffffff;
+  --seg-on-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 0 0 1px #e5e7eb;
+
+  --switch-off-bg: #e5e7eb;
+  --switch-knob: #ffffff;
+  --switch-knob-shadow: 0 1px 3px rgba(16, 24, 40, 0.2);
+  --switch-on-glow: none;
+
+  /* Меню: белая колонка, активный пункт — светлый янтарь с полосой слева (образец: bg-blue-50 + border-l). */
+  --admin-side-bg: #ffffff;
+  --admin-nav-fg: #4a5565;
+  --admin-nav-hover: #f9fafb;
+  --admin-nav-on-bg: #fff7e6;
+  --admin-nav-on-fg: #8f4e00;
+  --admin-nav-on-ring: transparent;
+  --admin-nav-on-icon: #c46a00;
+  --admin-pill-on-glow: none;
+  /* Плитки-значки (застройщик, программа): светлый янтарь и янтарный знак (образец: bg-blue-50). */
+  --admin-mark-bg: #fff7e6;
+  --admin-mark-fg: #c46a00;
+
+  /* Итог калькулятора на телефоне — обычная карточка, не тёмная плита. */
+  --calc-dark-bg: #ffffff;
+  --calc-dark-fg: #101828;
+  --calc-dark-fg-2: #4a5565;
+  --calc-dark-line: #e5e7eb;
+  --calc-dark-accent: #c46a00;
+  --calc-dark-glass: #f3f4f6;
+  --calc-dark-seg-on: #ffffff;
+  --calc-dark-ok: #15803d;
+  --calc-dark-bad: #c9402f;
+
+  --badge-bg: #f3f4f6;
+  --badge-fg: #364153;
+  --badge-amber-bg: #fff7e6;
+  --badge-line-fg: #4a5565;
+
+  --chip-bg: #ffffff;
+  --chip-border: #e5e7eb;
+  --chip-fg: #4a5565;
+  --chip-on-bg: #fff7e6;
+  --chip-on-border: #f89b0d;
+  --chip-on-ring: none;
+
+  --panel-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --card-shadow: var(--shadow-1);
+  --card-shadow-hover: var(--shadow-hover);
+
+  --field-bg: #ffffff;
+  --field-ring: 0 0 0 3px rgba(248, 155, 13, 0.22);
+  --field-ring-error: 0 0 0 3px rgba(201, 64, 47, 0.16);
+  --login-card-bg: #ffffff;
+  --login-shade: linear-gradient(180deg, rgba(3, 7, 18, 0.55), rgba(3, 7, 18, 0.62));
+  --beam-color: transparent;
+  --beam-tip: transparent;
+
+  --map-bg: #f3f4f6;
+  --picker-plan-bg: #f9fafb;
+  --picker-frame-bg: #f3f4f6;
+  --quiz-card-bg: #ffffff;
+  --offer-free-bg: #fff7e6;
+
+  --admin-icon-tile: #f3f4f6; /* плитка значка в карточке цифр (образец: p-2 bg-blue-50 rounded-lg) */
+}
+
+/* ---------- тёмная тема (образец: dark:bg-gray-900 / gray-950, рамки gray-800) ---------- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #030712; /* gray-950 */
+  --bg-2: #101828; /* gray-900 */
+  --bg-3: #151e2e;
+  --bg-4: #1e2939; /* gray-800 */
+  --row-alt: #151e2e;
+  --fg: #f3f4f6; /* gray-100 */
+  --fg-heading: #f9fafb;
+  --fg-2: #d1d5dc; /* gray-300 */
+  --fg-3: #99a1af; /* gray-400, 6,6:1 на gray-900 */
+
+  --line: #1e2939;
+  --line-2: #1e2939;
+  --line-3: #364153; /* gray-700 */
+  --dash: #1e2939;
+  --scrim: rgba(0, 0, 0, 0.62);
+  --drawing-bg: #ffffff; /* чертёж — белый лист и в тёмной теме */
+
+  --glass: #101828;
+  --glass-solid: #101828;
+  --glass-2: #101828;
+  --glass-3: #1e2939;
+
+  --amber-2: #ffb547; /* мелкий янтарный текст на тёмном */
+  --amber-3: #ffc46b;
+  --amber-soft: rgba(248, 155, 13, 0.14);
+  --amber-line: rgba(248, 155, 13, 0.45);
+
+  --ok: #34c26f;
+  --ok-strong: #5bd48c;
+  --ok-soft: rgba(52, 194, 111, 0.14);
+  --ok-line: rgba(52, 194, 111, 0.35);
+  --bad: #ff7a6b;
+  --bad-soft: rgba(255, 122, 107, 0.12);
+  --blue: #7aa7ff;
+  --blue-soft: rgba(122, 167, 255, 0.14);
+  --violet: #a994ff;
+  --violet-soft: rgba(169, 148, 255, 0.14);
+  --teal: #3cc3bb;
+  --teal-soft: rgba(60, 195, 187, 0.14);
+
+  --s-free: rgba(52, 194, 111, 0.14);
+  --s-free-b: rgba(52, 194, 111, 0.45);
+  --s-free-t: #7ee2a8;
+  --s-res: rgba(248, 155, 13, 0.18);
+  --s-res-b: rgba(248, 155, 13, 0.55);
+  --s-res-t: #ffc46b;
+  --s-sold: rgba(255, 122, 107, 0.1);
+  --s-sold-b: rgba(255, 122, 107, 0.38);
+  --s-sold-t: #ff9d91;
+
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.45);
+  --shadow-3: 0 20px 25px -5px rgba(0, 0, 0, 0.55), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --shadow-sheet: 0 -18px 50px rgba(0, 0, 0, 0.55);
+
+  --control-bg: #101828;
+  --control-border: #364153;
+  --control-shadow: none;
+  /* Дорожка переключателя — светлее карточки (gray-800), выбранный сегмент — gray-700. */
+  --seg-bg: #1e2939;
+  --seg-border: #364153;
+  --seg-on-bg: #364153;
+  --seg-on-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  --switch-off-bg: #364153;
+  --switch-knob-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+
+  --admin-side-bg: #101828;
+  --admin-nav-fg: #d1d5dc;
+  --admin-nav-hover: #1e2939;
+  --admin-nav-on-bg: rgba(248, 155, 13, 0.14);
+  --admin-nav-on-fg: #ffc46b;
+  --admin-nav-on-icon: #ffb547;
+  --admin-mark-bg: rgba(248, 155, 13, 0.14);
+  --admin-mark-fg: #ffb547;
+
+  --calc-dark-bg: #101828;
+  --calc-dark-fg: #f3f4f6;
+  --calc-dark-fg-2: #d1d5dc;
+  --calc-dark-line: #1e2939;
+  --calc-dark-accent: #ffb547;
+  --calc-dark-glass: #1e2939;
+  --calc-dark-seg-on: #1e2939;
+  --calc-dark-ok: #5bd48c;
+  --calc-dark-bad: #ff8f80;
+
+  --badge-bg: #1e2939;
+  --badge-fg: #d1d5dc;
+  --badge-amber-bg: rgba(248, 155, 13, 0.14);
+  --badge-amber-fg: #ffc46b;
+  --badge-amber-border: rgba(248, 155, 13, 0.4);
+  --badge-ok-fg: #7ee2a8;
+  --badge-ok-border: rgba(52, 194, 111, 0.4);
+  --badge-bad-fg: #ff9d91;
+  --badge-bad-border: rgba(255, 122, 107, 0.4);
+  --badge-blue-fg: #a9c5ff;
+  --badge-blue-border: rgba(122, 167, 255, 0.4);
+  --badge-line-fg: #b6bcc6;
+
+  --chip-bg: #101828;
+  --chip-border: #364153;
+  --chip-fg: #d1d5dc;
+  --chip-on-bg: rgba(248, 155, 13, 0.14);
+
+  --panel-bg: #101828;
+  --card-bg: #101828;
+  --card-border: #1e2939;
+  --card-chip-bg: rgba(16, 24, 40, 0.92);
+
+  --field-bg: #101828;
+  --login-card-bg: #101828;
+
+  --map-bg: #1e2939;
+  --map-road: rgba(255, 255, 255, 0.12);
+  --quiz-card-bg: #101828;
+  --quiz-option-bg: #101828;
+  --quiz-option-hover: #1e2939;
+  --offer-free-bg: rgba(248, 155, 13, 0.1);
+
+  /* Обратная плашка (тёмная на светлом) в тёмной теме — светлая. */
+  --inv: #f3f4f6;
+  --on-inv: #101828;
+  --inv-3: rgba(16, 24, 40, 0.55);
+
+  --admin-icon-tile: #1e2939;
+}
+
+/* Основной текст — обычной толщины (образец: font-normal); заголовки 600–700 читаются над ним. */
+body {
+  font-weight: 400;
+}

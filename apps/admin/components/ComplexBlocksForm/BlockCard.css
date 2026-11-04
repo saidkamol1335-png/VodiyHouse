@@ -37,21 +37,26 @@
   margin-left: auto;
 }
 
+/* Стрелки порядка — квадратные кнопки-значки, как поля и кнопки кабинета. */
 .block-card__move {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  background: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
+  box-shadow: var(--control-shadow);
   color: var(--fg-2);
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease);
+  transition:
+    color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
 }
 
 .block-card__move:hover:not(:disabled) {
+  background: var(--bg-3);
   color: var(--fg);
 }
 
@@ -98,7 +103,7 @@
   display: grid;
   gap: 14px;
   padding-top: 12px;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
   animation: block-card-reveal var(--dur-fast) var(--ease) both;
 }
 
@@ -124,5 +129,13 @@
 @media (max-width: 760px) {
   .block-card {
     padding: 14px;
+  }
+}
+
+/* Телефон и касание — цель 44 px. */
+@media (max-width: 760px), (pointer: coarse) {
+  .block-card__move {
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

@@ -1,0 +1,58 @@
+/* «Свернуть меню» — последняя строка панели (образец: «Hide», border-t). */
+.side-toggle {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: var(--fs-control);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.side-toggle:hover {
+  color: var(--fg);
+}
+
+.side-toggle__icon {
+  flex: none;
+  transition: transform var(--dur-base) var(--ease);
+}
+
+.side-toggle__label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.side-toggle__label--expand,
+:root[data-side="collapsed"] .side-toggle__label--collapse {
+  display: none;
+}
+
+:root[data-side="collapsed"] .side-toggle {
+  justify-content: center;
+  padding: 0;
+}
+
+/* Свёрнуто: стрелки вправо, подпись «Развернуть меню» — только для диктора. */
+:root[data-side="collapsed"] .side-toggle__icon {
+  transform: rotate(180deg);
+}
+
+:root[data-side="collapsed"] .side-toggle__label--expand {
+  position: absolute;
+  display: block;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+}

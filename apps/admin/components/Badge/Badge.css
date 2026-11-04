@@ -1,24 +1,24 @@
-/* Плашки мокапа (.badge): 25 px, пилюля, жирный 12 px; цвета — токены. */
+/* Плашки статуса (образец: rounded-full badge): 22 px, пилюля, 12 px / 600; цвета — токены. */
 .badge {
   display: inline-flex;
   flex: none;
   align-items: center;
   gap: 6px;
-  height: 25px;
-  padding: 0 10px;
+  height: 22px;
+  padding: 0 9px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
   background: var(--badge-bg);
   color: var(--badge-fg);
-  font-size: var(--fs-caption);
-  font-weight: 700;
+  font-size: var(--fs-label);
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .badge--sm {
-  height: 21px;
-  padding: 0 8px;
-  font-size: var(--fs-label);
+  height: 20px;
+  padding: 0 7px;
+  font-size: var(--fs-tiny);
 }
 
 .badge__dot {
@@ -53,8 +53,7 @@
 }
 
 .badge--line {
-  border-style: dashed;
-  border-color: var(--dash);
-  background: transparent;
+  border-color: var(--line-3);
+  background: var(--badge-bg);
   color: var(--badge-line-fg);
 }

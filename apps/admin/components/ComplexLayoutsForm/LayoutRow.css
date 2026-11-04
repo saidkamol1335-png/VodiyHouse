@@ -50,17 +50,20 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: none;
   color: var(--fg-3);
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease);
+  transition:
+    color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
 }
 
 .layout-row__icon:hover:not(:disabled) {
+  background: var(--bg-3);
   color: var(--fg);
 }
 
@@ -105,5 +108,11 @@
 
   .layout-row__end {
     margin-top: 0;
+  }
+
+  /* Иконки — под палец. */
+  .layout-row__icon {
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

@@ -73,7 +73,13 @@
 
 .complex-photos__tile--add {
   border-style: dashed;
+  border-color: var(--line-3);
   background: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.complex-photos__tile--add:hover:not(:has([aria-disabled])) {
+  background: var(--bg-3);
 }
 
 .complex-photos__add {

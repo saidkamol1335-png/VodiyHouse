@@ -21,7 +21,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 0;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .hints-editor__text {

@@ -19,11 +19,12 @@
   align-items: start;
 }
 
+/* Без внешней рамки: карточка полей и карточка итога стоят рядом, без вложения в третью. */
 .payment-calculator--framed .payment-calculator__main {
-  padding: 16px;
-  border: 1px solid var(--amber-line);
-  border-radius: var(--r-2xl);
-  background: var(--bg-3);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .payment-calculator__inputs {
@@ -32,9 +33,10 @@
   gap: 28px;
   min-width: 0;
   padding: 24px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-xl);
-  background: var(--bg-2);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
 }
 
 /* Расчёт квартиры рисует рамку сам: поля лежат прямо в ней, без своей карточки (SiteJkCalc1). */
@@ -49,6 +51,7 @@
   padding: 0;
   border: 0;
   background: none;
+  box-shadow: none;
 }
 
 .payment-calculator__steps {

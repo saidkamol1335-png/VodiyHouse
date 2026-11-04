@@ -75,6 +75,7 @@ export function AdminNav({ items, variant, siteHref }: AdminNavProps) {
               href={href}
               className={active ? "admin-nav__link admin-nav__link--active" : "admin-nav__link"}
               aria-current={active ? "page" : undefined}
+              data-tip={t(key)}
             >
               <Icon className="admin-nav__icon" size={iconSize} strokeWidth={1.7} aria-hidden />
               <span className="admin-nav__label">{t(key)}</span>
@@ -83,7 +84,7 @@ export function AdminNav({ items, variant, siteHref }: AdminNavProps) {
           );
         })}
         <p className="admin-nav__section">{t("siteSection")}</p>
-        <a className="admin-nav__link" href={siteHref} target="_blank" rel="noopener">
+        <a className="admin-nav__link" href={siteHref} target="_blank" rel="noopener" data-tip={t("openSite")}>
           <Globe className="admin-nav__icon" size={iconSize} strokeWidth={1.7} aria-hidden />
           <span className="admin-nav__label">
             {variant === "strip" ? t("site") : t("openSite")}

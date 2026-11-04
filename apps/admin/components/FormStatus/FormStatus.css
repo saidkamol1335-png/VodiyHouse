@@ -18,7 +18,7 @@
 
 /* Как прежняя .login-form__status мокапа: янтарная пунктирная рамка. */
 .form-status--notice {
-  border-style: dashed;
+  border-style: solid;
   border-color: var(--amber-line);
   background: var(--amber-soft);
 }

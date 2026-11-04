@@ -22,9 +22,10 @@
 
 .showcase-list__panel {
   padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-l);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .showcase-list__head {
@@ -45,9 +46,9 @@
 
 .showcase-list__count {
   color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-mono);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  letter-spacing: normal;
 }
 
 .showcase-list__empty {
@@ -63,7 +64,7 @@
 }
 
 .showcase-list__rows > li + li {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 /* Вся строка — ссылка: знак · название, подпись и заметка об очереди · плашка · стрелка. */

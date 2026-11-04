@@ -19,17 +19,24 @@
   font-size: var(--fs-small);
 }
 
+/* «+ Квартира» и «Повторить» — кнопки с рамкой радиусом 8, как вторые действия кабинета. */
 .units-block__add {
   height: 36px;
   padding: 0 15px;
-  border: 1px solid var(--chip-border);
-  border-radius: var(--r-pill);
-  background: var(--chip-bg);
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
+  box-shadow: var(--control-shadow);
   color: var(--fg);
   font: inherit;
   font-size: var(--fs-small-l);
   font-weight: 650;
   cursor: pointer;
+}
+
+.units-block__add:hover,
+.units-block__retry:hover:not([aria-disabled="true"]) {
+  background: var(--bg-3);
 }
 
 .units-block__add[aria-expanded="true"] {
@@ -66,11 +73,12 @@
 }
 
 .units-block__retry {
-  height: 34px;
+  height: 36px;
   padding: 0 14px;
-  border: 1px solid var(--chip-border);
-  border-radius: var(--r-pill);
-  background: var(--chip-bg);
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
+  box-shadow: var(--control-shadow);
   color: var(--fg);
   font: inherit;
   font-size: var(--fs-small);

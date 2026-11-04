@@ -67,7 +67,7 @@
   gap: 12px;
   min-height: 56px;
   padding: 8px 0;
-  border-top: 1px dashed var(--line-2);
+  border-top: 1px var(--rule-style) var(--line-2);
 }
 
 .progress-tasks__text {

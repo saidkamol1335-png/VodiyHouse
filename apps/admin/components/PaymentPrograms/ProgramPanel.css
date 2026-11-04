@@ -6,9 +6,10 @@
   gap: 16px;
   min-width: 0;
   padding: var(--admin-panel-pad);
-  border: 1px solid var(--line);
-  border-radius: var(--r-2xl);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .program-panel__head {
@@ -16,6 +17,19 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 14px;
+}
+
+/* Действия шапки («Расчёт для клиента», «Условия проверены») — кнопки с рамкой, а не голый текст. */
+.program-panel__head .button--ghost {
+  border-color: var(--control-border);
+  background: var(--control-bg);
+  box-shadow: var(--control-shadow);
+  color: var(--fg-2);
+}
+
+.program-panel__head .button--ghost:hover:not(:disabled) {
+  background: var(--bg-3);
+  color: var(--fg);
 }
 
 .program-panel__mark {
@@ -44,6 +58,7 @@
 .program-panel__title {
   margin: 0;
   font-size: var(--fs-h4);
+  font-weight: 600;
   letter-spacing: var(--ls-panel-title);
 }
 
@@ -69,7 +84,7 @@
   gap: 10px;
   min-height: 120px;
   padding: 16px;
-  border: 1px dashed var(--dash);
+  border: 1px dashed var(--line-3);
   border-radius: var(--r-xl);
 }
 

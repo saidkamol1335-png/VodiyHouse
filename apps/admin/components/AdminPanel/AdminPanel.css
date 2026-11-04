@@ -2,15 +2,17 @@
   position: relative;
   min-width: 0;
   padding: var(--admin-panel-pad);
-  border: 1px solid var(--line);
+  border: 1px solid var(--card-border);
   border-radius: var(--r-l);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .admin-panel__title {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
+  color: var(--fg-heading);
   font-size: var(--fs-h4);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: var(--ls-panel-title);
 }
 

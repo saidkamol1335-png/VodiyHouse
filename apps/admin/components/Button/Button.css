@@ -1,97 +1,61 @@
-/* Кнопки-пилюли мокапа (.btn): 46 px, 14,5 px / 650. */
+/* Кнопки кабинета (образец: rounded-lg): 40 px, радиус 8, 14 px / 600; наведение — смена цвета. */
 .button {
   position: relative;
-  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 46px;
-  padding: 0 22px;
-  overflow: hidden;
+  height: 40px;
+  padding: 0 16px;
   border: 1px solid transparent;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: transparent;
   color: var(--fg);
   font: inherit;
-  font-size: var(--fs-control-l);
-  font-weight: 650;
-  letter-spacing: -0.005em;
+  font-size: var(--fs-control);
+  font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
   user-select: none;
   transition:
-    background-color var(--dur-base) var(--ease),
-    box-shadow var(--dur-base) var(--ease),
-    transform var(--dur-fast) var(--ease);
-}
-
-.button:active {
-  transform: scale(0.97);
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-base) var(--ease);
 }
 
 .button--primary {
   background: var(--amber);
   color: var(--on-amber);
-  box-shadow: var(--glow-amber);
+  box-shadow: var(--control-shadow);
 }
 
-.button--primary:hover {
+.button--primary:hover:not(:disabled) {
   background: var(--amber-hover);
 }
 
-/* Блик пробегает по кнопке раз в 3,6 с — только в full, через transform (CLAUDE.md §3). */
-[data-motion="full"] .button--primary::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(115deg, transparent 35%, var(--button-shine) 50%, transparent 65%);
-  transform: translateX(-120%);
-  animation: button-shine var(--dur-shine) var(--ease-2) infinite;
-}
-
-/* Заливка поднимается снизу при наведении (мокап .rh), только full; в lite меняется лишь цвет. */
-@media (hover: hover) {
-  [data-motion="full"] .button--primary:not(:disabled)::before,
-  [data-motion="full"] .button--outline:not(:disabled)::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--amber-hover);
-    transform: translateY(101%);
-    transition: transform var(--dur-slow) var(--ease);
-  }
-
-  [data-motion="full"] .button--outline:not(:disabled)::before {
-    background: var(--glass-3);
-  }
-
-  [data-motion="full"] .button--primary:not(:disabled):hover {
-    background: var(--amber);
-  }
-
-  [data-motion="full"] .button--primary:not(:disabled):hover::before,
-  [data-motion="full"] .button--outline:not(:disabled):hover::before {
-    transform: translateY(0);
-  }
-}
-
-/* С рамкой — вторая кнопка рядом с главной (мокап: «Скопировать для Telegram» под «Получить
-   точный расчёт»). */
+/* С рамкой — вторая кнопка рядом с главной (белая, рамка gray-200, наведение — gray-50). */
 .button--outline {
-  border-color: var(--line-2);
-  background: var(--bg-2);
+  border-color: var(--control-border);
+  background: var(--control-bg);
+  box-shadow: var(--control-shadow);
+  color: var(--fg-2);
 }
 
-.button--outline:hover {
-  border-color: var(--line-3);
+.button--outline:hover:not(:disabled) {
+  background: var(--bg-3);
+  color: var(--fg);
 }
 
-.button--ghost:hover {
+/* Прозрачная — действия строки: серый текст, не спорит с заголовком. */
+.button--ghost {
+  color: var(--fg-2);
+}
+
+.button--ghost:hover:not(:disabled) {
   background: var(--glass-3);
+  color: var(--fg);
 }
 
 .button--danger {
@@ -99,17 +63,23 @@
   color: var(--badge-bad-fg);
 }
 
-.button--danger:hover {
+.button--danger:hover:not(:disabled) {
   background: var(--bad-soft);
 }
 
 .button--sm {
   height: 36px;
-  padding: 0 15px;
+  padding: 0 12px;
   font-size: var(--fs-small-l);
 }
 
-/* На касание — цель не меньше 44 px (приёмка «телефон»), вид кнопки тот же. */
+/* Телефон и касание — цель не меньше 44 px (приёмка «телефон»), вид кнопки тот же. */
+@media (max-width: 767px), (pointer: coarse) {
+  .button:not(.button--sm) {
+    height: var(--touch-target);
+  }
+}
+
 @media (pointer: coarse) {
   .button--sm {
     height: var(--touch-target);
@@ -125,21 +95,6 @@
   cursor: default;
 }
 
-.button:disabled:active {
-  transform: none;
-}
-
 .button--pending {
   cursor: progress;
-}
-
-@keyframes button-shine {
-  0%,
-  55% {
-    transform: translateX(-120%);
-  }
-  80%,
-  100% {
-    transform: translateX(120%);
-  }
 }

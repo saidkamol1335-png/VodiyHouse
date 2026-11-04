@@ -4,9 +4,10 @@
 .site-stock {
   container: site-stock / inline-size;
   padding: var(--admin-panel-pad);
-  border: 1px solid var(--line);
+  border: 1px solid var(--card-border);
   border-radius: var(--r-l);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .site-stock__head {
@@ -27,8 +28,9 @@
 
 .site-stock__title {
   margin: 0;
+  color: var(--fg-heading);
   font-size: var(--fs-h4);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: var(--ls-panel-title);
 }
 
@@ -82,7 +84,7 @@
 }
 
 .site-stock__rows > li + li {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .site-stock__empty {

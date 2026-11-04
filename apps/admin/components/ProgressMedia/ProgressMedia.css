@@ -19,7 +19,13 @@
   gap: 6px 12px;
   align-items: center;
   padding: 12px 0;
-  border-top: 1px dashed var(--line-2);
+  border-top: 1px var(--rule-style) var(--line-2);
+}
+
+/* Плашка «строится / сдан» — по своей ширине у правого края, а не растянута колонкой адреса. */
+.progress-media__complex > .badge {
+  justify-self: end;
+  align-self: start;
 }
 
 .progress-media__complex:first-child {
@@ -61,7 +67,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  /* Палец — 44 px, но строку списка ссылка не раздвигает. */
   min-height: 44px;
+  margin-block: -12px;
   color: var(--fg);
   font-size: 14px;
   font-weight: 600;
@@ -116,7 +124,7 @@
 .progress-media__video {
   width: 100%;
   max-width: 560px;
-  border-radius: 12px;
+  border-radius: var(--r-m);
   background: #000;
 }
 
@@ -138,7 +146,7 @@
   width: 100%;
   height: auto;
   aspect-ratio: 4 / 3;
-  border-radius: 10px;
+  border-radius: var(--r-m);
   object-fit: cover;
   background: var(--line);
 }

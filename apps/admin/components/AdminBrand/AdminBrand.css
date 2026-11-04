@@ -30,3 +30,28 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+
+/* Скин 04.11: шапка панели с линией снизу (образец: border-b под «TomIsLoading · Pro Plan»). */
+.admin-brand {
+  min-height: 48px;
+  padding: 4px 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-brand__sub {
+  font-family: var(--font);
+  font-size: var(--fs-label);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (min-width: 981px) {
+  :root[data-side="collapsed"] .admin-brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  :root[data-side="collapsed"] .admin-brand > span {
+    display: none;
+  }
+}

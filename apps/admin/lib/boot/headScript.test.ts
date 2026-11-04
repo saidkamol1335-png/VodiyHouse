@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HEAD_BOOT_SCRIPT } from "./headScript";
 import { PRELOADER_ATTRIBUTE } from "./preloader";
 
-function runBootScript({ search = "", reduced = false, path = "/uz" } = {}) {
+function runBootScript({ search = "", reduced = false, path = "/uz", dark = false } = {}) {
   window.history.replaceState(null, "", `${path}${search}`);
   vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query === "(prefers-reduced-motion: reduce)" && reduced,
+    matches:
+      (query === "(prefers-reduced-motion: reduce)" && reduced) ||
+      (query === "(prefers-color-scheme: dark)" && dark),
   }));
   new Function(HEAD_BOOT_SCRIPT)();
   return document.documentElement;
@@ -25,10 +27,25 @@ describe("HEAD_BOOT_SCRIPT", () => {
     expect(runBootScript().getAttribute("data-motion")).toBe("lite");
   });
 
-  it("старый выбор темы в хранилище не действует", () => {
+  it("старый выбор темы (vh-theme) не действует — тема как в системе", () => {
     document.documentElement.removeAttribute("data-theme");
     localStorage.setItem("vh-theme", "dark");
-    expect(runBootScript().hasAttribute("data-theme")).toBe(false);
+    expect(runBootScript().getAttribute("data-theme")).toBe("light");
+  });
+
+  it("тема кабинета: без выбора — как в системе, выбор сильнее системы", () => {
+    expect(runBootScript({ dark: true }).getAttribute("data-theme")).toBe("dark");
+    localStorage.setItem("vh-admin-theme", "light");
+    expect(runBootScript({ dark: true }).getAttribute("data-theme")).toBe("light");
+    localStorage.setItem("vh-admin-theme", "dark");
+    expect(runBootScript().getAttribute("data-theme")).toBe("dark");
+  });
+
+  it("свёрнутое меню — до первой отрисовки", () => {
+    document.documentElement.removeAttribute("data-side");
+    expect(runBootScript().hasAttribute("data-side")).toBe(false);
+    localStorage.setItem("vh-admin-side", "collapsed");
+    expect(runBootScript().getAttribute("data-side")).toBe("collapsed");
   });
 
   it("сохранённый full и ?motion=lite — побеждает параметр", () => {

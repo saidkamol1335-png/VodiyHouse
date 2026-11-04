@@ -16,7 +16,12 @@ import {
   CATALOG_PENDING_TIMEOUT_MS,
 } from "@/lib/site/catalog/pending";
 
+import { SIDE_ATTRIBUTE, SIDE_COLLAPSED, SIDE_STORAGE_KEY, THEME_ATTRIBUTE, THEME_STORAGE_KEY } from "./theme";
+
 const PENDING = JSON.stringify(CATALOG_PENDING_ATTRIBUTE);
+
+// Тема кабинета: сохранённый выбор, иначе — как в системе; меню свёрнуто — если так оставили.
+const THEME_BOOT = `try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.setAttribute("${THEME_ATTRIBUTE}",t);if(localStorage.getItem(${JSON.stringify(SIDE_STORAGE_KEY)})==="${SIDE_COLLAPSED}")d.setAttribute("${SIDE_ATTRIBUTE}","${SIDE_COLLAPSED}")}catch(e){}`;
 
 export const HEAD_BOOT_SCRIPT = `(function(){var d=document.documentElement;d.setAttribute("data-js","");setTimeout(function(){if(!d.hasAttribute("${HYDRATED_ATTRIBUTE}"))d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")},${REVEAL_FAILSAFE_MS});if(location.hash.length>1){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}try{
 var n=performance.getEntriesByType("navigation")[0];if(n&&(n.type==="reload"||n.type==="back_forward")&&Number(sessionStorage.getItem(${JSON.stringify(SCROLL_MEMORY_KEY)}+location.pathname))>0){d.setAttribute("${ANCHOR_START_ATTRIBUTE}","");d.setAttribute("${REVEAL_OFF_ATTRIBUTE}","")}}catch(e){}try{
@@ -26,4 +31,4 @@ var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringi
 if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";
 if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);
 var s=sessionStorage.getItem(${JSON.stringify(PRELOADER_SEEN_KEY)});sessionStorage.setItem(${JSON.stringify(PRELOADER_SEEN_KEY)},"1");
-if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}})();`;
+if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}${THEME_BOOT}})();`;

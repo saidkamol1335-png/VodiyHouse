@@ -1,11 +1,12 @@
-/* Таблица заявок (мокап CabLeads): шапка моно капсом, строки-зебра (--row-alt), номер моно; вся
+/* Таблица заявок (мокап CabLeads): шапка капсом на серой полосе, строки-зебра (--row-alt); вся
    строка — нажатие на карточку. Уже 720 px — карточки по сетке областей. */
 
 .leads-table {
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid var(--card-border);
   border-radius: var(--r-l);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
   container: leads-table / inline-size;
 }
 
@@ -16,14 +17,17 @@
 }
 
 .leads-table__th {
+  overflow: hidden;
   padding: 14px 12px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-3);
   color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-micro);
-  font-weight: 500;
+  font-family: var(--font);
+  font-size: var(--fs-label);
+  font-weight: 600;
   letter-spacing: var(--ls-label);
   text-align: left;
+  text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -33,11 +37,11 @@
 }
 
 .leads-table__th--when {
-  width: 128px;
+  width: 108px;
 }
 
 .leads-table__th--type {
-  width: 132px;
+  width: 148px;
 }
 
 .leads-table__th--complex {
@@ -45,7 +49,7 @@
 }
 
 .leads-table__th--status {
-  width: 168px;
+  width: 120px;
 }
 
 .leads-table__th--manager {
@@ -98,7 +102,10 @@
 
 .leads-table__name {
   display: block;
+  overflow: hidden;
   font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .leads-table__phone {
@@ -145,7 +152,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px 12px;
     padding: 14px 16px;
-    border-bottom: 1px dashed var(--dash);
+    border-bottom: 1px var(--rule-style) var(--dash);
   }
 
   .leads-table__cell {
@@ -163,6 +170,12 @@
 
   .leads-table__cell--client {
     grid-area: client;
+    min-width: 0;
+  }
+
+  /* В карточке имя переносится: строка во всю ширину, обрезать нечего. */
+  .leads-table__name {
+    white-space: normal;
   }
 
   .leads-table__cell--type {

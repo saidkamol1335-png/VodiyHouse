@@ -5,8 +5,8 @@ import { withBasePath } from "@/lib/basePath";
 type ButtonProps = {
   children: ReactNode;
   /**
-   * primary — янтарная пилюля с бликом, ghost — прозрачная, danger — прозрачная с красной рамкой
-   * для того, что не отменить (мокап: .btn--primary, .btn--ghost, .btn--danger).
+   * primary — янтарная, outline — белая с рамкой, ghost — прозрачная, danger — прозрачная с красной
+   * рамкой для того, что не отменить.
    */
   variant?: "primary" | "ghost" | "outline" | "danger";
   size?: "md" | "sm";

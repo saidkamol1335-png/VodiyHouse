@@ -1,4 +1,4 @@
-/* ---------- боковая панель (мокап: .anav) ---------- */
+/* ---------- боковая панель (скин 04.11: образец «Dashboard with Collapsible Sidebar») ---------- */
 .admin-nav__track {
   position: relative;
   display: flex;
@@ -7,15 +7,16 @@
 }
 
 .admin-nav__link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 42px;
+  height: 44px;
   padding: 0 12px;
   border-radius: var(--r-s);
   color: var(--admin-nav-fg);
   font-size: var(--fs-control);
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   transition:
     background-color var(--dur-fast) var(--ease),
@@ -27,11 +28,14 @@
   color: var(--fg);
 }
 
+/* Активный: светлый янтарь, полоса слева и лёгкая тень (образец: bg-blue-50 border-l shadow-sm). */
 .admin-nav__link--active,
 .admin-nav__link--active:hover {
   background: var(--admin-nav-on-bg);
-  box-shadow: 0 0 0 1px var(--admin-nav-on-ring) inset;
-  color: var(--fg);
+  box-shadow:
+    2px 0 0 var(--amber) inset,
+    var(--shadow-1);
+  color: var(--admin-nav-on-fg);
 }
 
 .admin-nav__icon {
@@ -50,28 +54,93 @@
   text-overflow: ellipsis;
 }
 
+/* Счётчик — кружок справа (образец: h-5 w-5 rounded-full); текст тёмный: белый на янтаре не читается. */
 .admin-nav__badge {
   display: inline-flex;
   align-items: center;
-  height: 21px;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
   margin-left: auto;
-  padding: 0 8px;
-  border: 1px solid var(--amber-line);
+  padding: 0 6px;
   border-radius: var(--r-pill);
-  background: var(--amber-soft);
-  color: var(--amber-3);
+  background: var(--amber);
+  color: var(--on-amber);
   font-size: var(--fs-label);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .admin-nav__section {
-  margin: 0;
-  padding: 12px 12px 4px;
+  margin: 8px 0 0;
+  padding: 12px 12px 6px;
+  border-top: 1px solid var(--line);
   color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-tiny);
-  letter-spacing: 0.14em;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+/* ---------- свёрнутая панель: полоса значков с подсказками ---------- */
+@media (min-width: 981px) {
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__link {
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Подпись остаётся для диктора, на экране — подсказка справа при наведении. */
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__badge {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: var(--fs-tiny);
+  }
+
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__section {
+    height: 1px;
+    margin: 8px 6px;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+  }
+
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__link::after {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    z-index: var(--z-popover);
+    padding: 6px 10px;
+    border-radius: var(--r-s);
+    background: var(--inv);
+    box-shadow: var(--shadow-hover);
+    color: var(--on-inv);
+    content: attr(data-tip);
+    font-size: var(--fs-caption);
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition:
+      opacity var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+
+  :root[data-side="collapsed"] .admin-nav--side .admin-nav__link:is(:hover, :focus-visible)::after {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
 }
 
 /* ---------- лента пилюль до 980 px (мокап: .adm-mnav) ---------- */
@@ -84,16 +153,13 @@
     display: none;
   }
 
-  /* Прилипает со стеклом решения Э2 — в мокапе фон 90 % без blur, и текст просвечивал (К3.2). */
   .admin-nav--strip {
     position: sticky;
     top: 0;
     z-index: var(--z-admin-strip);
     display: block;
-    border-bottom: 1px dashed var(--dash);
-    background: var(--glass);
-    -webkit-backdrop-filter: var(--glass-filter);
-    backdrop-filter: var(--glass-filter);
+    border-bottom: 1px solid var(--line);
+    background: var(--admin-side-bg);
   }
 
   .admin-nav--strip .admin-nav__track {
@@ -125,18 +191,18 @@
     gap: 7px;
     height: 36px;
     padding: 0 13px;
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-pill);
+    border: 1px solid var(--line-3);
+    border-radius: var(--r-s);
     color: var(--fg-2);
     font-size: var(--fs-small);
-    font-weight: 700;
+    font-weight: 500;
   }
 
   .admin-nav--strip .admin-nav__link--active {
     border-color: var(--amber);
-    background: none;
-    box-shadow: var(--admin-pill-on-glow);
-    color: var(--fg);
+    background: var(--admin-nav-on-bg);
+    box-shadow: none;
+    color: var(--admin-nav-on-fg);
   }
 
   .admin-nav--strip .admin-nav__badge {

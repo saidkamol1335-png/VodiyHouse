@@ -1,12 +1,12 @@
-/* Отметка правила 1.2 у загрузки: янтарная рамка — как подтверждения кабинета. */
+/* Отметка правила 1.2 у загрузки: светло-серая плашка с тонкой янтарной рамкой. */
 .rule12-check {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 12px;
-  border: 1px dashed var(--amber-line);
-  border-radius: var(--r-m);
-  background: var(--amber-soft);
+  padding: 12px 14px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-s);
+  background: var(--bg-3);
   font-size: var(--fs-small);
   line-height: var(--lh-snug);
   cursor: pointer;

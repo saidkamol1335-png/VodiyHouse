@@ -1,0 +1,40 @@
+/* Квадратная кнопка-значок шапки (образец: p-2 rounded-lg, рамка gray-200). */
+.theme-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  padding: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.theme-toggle:hover {
+  background: var(--bg-4);
+  color: var(--fg);
+}
+
+/* Светлая — луна (перейти в тёмную), тёмная — солнце. */
+.theme-toggle__icon--sun,
+:root[data-theme="dark"] .theme-toggle__icon--moon {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle__icon--sun {
+  display: block;
+}
+
+@media (pointer: coarse) {
+  .theme-toggle {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+}

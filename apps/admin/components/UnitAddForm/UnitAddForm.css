@@ -4,7 +4,7 @@
   display: grid;
   gap: 12px;
   padding: 16px 18px;
-  border: 1px dashed var(--dash);
+  border: 1px solid var(--dash);
   border-radius: var(--r-m);
   animation: unit-add-reveal var(--dur-fast) var(--ease) both;
 }

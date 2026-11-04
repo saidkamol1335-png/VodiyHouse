@@ -10,6 +10,8 @@ const manrope = Manrope({
   weight: "variable",
   variable: "--font-manrope",
   display: "swap",
+  // Кабинет набран системным шрифтом (styles/skin-admin.css): Manrope заранее не грузим.
+  preload: false,
 });
 
 const cormorant = Cormorant_Garamond({

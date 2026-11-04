@@ -76,4 +76,34 @@
     text-align: center;
     white-space: normal;
   }
+
+  /* Ровно четыре варианта («Подарок · Рассрочка · Через банк · Старт продаж») — сетка 2 × 2 из
+     ровных сегментов в одну строку, а не четыре сжатые колонки с переносами. */
+  .choice-field__row
+    .choice-field__options:has(> .choice-field__option:nth-child(4)):not(
+      :has(> .choice-field__option:nth-child(5))
+    ) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .choice-field__row
+    .choice-field__options:has(> .choice-field__option:nth-child(4)):not(
+      :has(> .choice-field__option:nth-child(5))
+    )
+    .choice-field__option {
+    min-width: 0;
+    font-size: var(--fs-control);
+    white-space: nowrap;
+  }
+
+  /* Пять и больше коротких вариантов (комнаты: Ст · 1 … 6) — одна строка ровных сегментов. */
+  .choice-field__row
+    .choice-field__options:has(> .choice-field__option:nth-child(5))
+    .choice-field__option {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 2px;
+    white-space: nowrap;
+  }
 }

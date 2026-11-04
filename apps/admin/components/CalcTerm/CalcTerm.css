@@ -1,5 +1,5 @@
 /* Срок (мокап r1 «Срок», MobFlatTerm): кнопки-карточки «12 мес. / без наценки», «Свой» —
-   пунктир; степпер − [17 мес.] +; превышение — янтарная строка, подсказка — серая. */
+   на сером фоне; степпер − [17 мес.] +; превышение — янтарная строка, подсказка — серая. */
 
 .calc-term {
   display: grid;
@@ -62,7 +62,7 @@
 }
 
 .calc-term__button--custom {
-  border-style: dashed;
+  background: var(--bg-3);
 }
 
 .calc-term__button--active,
@@ -102,7 +102,7 @@
   width: var(--touch-target);
   height: var(--touch-target);
   border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: var(--bg-2);
   color: var(--fg);
   cursor: pointer;
@@ -177,7 +177,7 @@
   min-height: var(--touch-target);
   padding: 0 14px;
   border: 1px solid var(--badge-amber-border);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: var(--bg-2);
   color: var(--fg);
   font: inherit;

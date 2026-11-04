@@ -1,5 +1,5 @@
 /* Вкладка «Сданные объекты» (Д5): строки как таблица на сайте — ручка порядка · объект RU | UZ ·
-   план · факт · плашка и корзина; пунктир между строками. */
+   план · факт · плашка и корзина; тонкая черта между строками. */
 .developer-projects {
   display: grid;
   gap: 14px;
@@ -22,11 +22,13 @@
    каждой строки-сетки, поэтому фиксированная, иначе колонки соседних строк разъезжаются. */
 .developer-projects__row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 2.3fr) minmax(0, 1fr) minmax(0, 1fr) 190px;
+  /* Название — шире (RU и UZ рядом); план и факт — не уже 200 px: иначе «2 кв.» в списке
+     обрезается; 176 px последней колонки хватает на «Перенос на 24 мес.» и корзину. */
+  grid-template-columns: 36px minmax(0, 3fr) minmax(200px, 1fr) minmax(200px, 1fr) 176px;
   align-items: start;
   gap: 12px;
   padding: 14px 0;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
 }
 
 /* Перетаскиваемая строка чуть приподнята: только transform и тень, без перерисовки раскладки. */
@@ -55,9 +57,9 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: transparent;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
+  background: var(--control-bg);
   color: var(--fg-2);
   cursor: pointer;
   transition:
@@ -138,5 +140,13 @@
   .developer-projects__save {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+/* Корзина — под палец. */
+@media (pointer: coarse), (max-width: 560px) {
+  .developer-projects__remove {
+    width: var(--touch-target);
+    height: var(--touch-target);
   }
 }

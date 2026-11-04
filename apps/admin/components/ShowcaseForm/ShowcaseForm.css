@@ -19,13 +19,13 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* Адрес подборки на сайте — моно-строкой, как адрес застройщика. */
+/* Адрес подборки на сайте — подписью, как адрес застройщика. */
 .showcase-form__slug {
   margin: 0;
   color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-mono);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  letter-spacing: normal;
   overflow-wrap: anywhere;
 }
 
@@ -35,6 +35,16 @@
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/* Подпись ЖК — с отступом 7 px, как у прочих полей; пояснения — строками под ней. */
+.showcase-form__complexes > legend {
+  margin-bottom: 7px;
+  padding: 0;
+}
+
+.showcase-form__complexes > .field__meta + .field__meta {
+  margin-top: 4px;
 }
 
 .showcase-form__options {
@@ -53,7 +63,7 @@
   gap: 10px;
   min-height: 44px;
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   border-radius: var(--r-s);
   background: var(--panel-bg);
   cursor: pointer;
@@ -95,12 +105,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-s);
   background: var(--panel-bg);
   font-size: var(--fs-small-l);
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -109,13 +120,14 @@
   background: var(--chip-on-bg);
 }
 
-/* Условия фильтра — в пунктирной рамке, внизу адрес каталога, который они дают. */
+/* Условия фильтра — врезкой на сером фоне, внизу адрес каталога, который они дают. */
 .showcase-form__filter {
   display: grid;
   gap: 14px;
   padding: 16px;
-  border: 1px dashed var(--line);
-  border-radius: var(--r-l);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-3);
 }
 
 .showcase-form__filter-title {
@@ -127,18 +139,19 @@
 .showcase-form__query {
   margin: 0;
   color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-mono);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  letter-spacing: normal;
   overflow-wrap: anywhere;
 }
 
-/* Тумблер «На сайте» — на одной линии с полем порядка. */
+/* Тумблер «На сайте» — по центру поля порядка: подпись 16 + зазор 7, поле 40. */
 .showcase-form__active {
   display: flex;
+  align-self: start;
   align-items: center;
-  min-height: 48px;
-  padding-top: 22px;
+  min-height: 63px;
+  padding-top: 23px;
 }
 
 /* «← К списку», ответ сервера и кнопка — в одной строке, кнопка справа. */
@@ -151,15 +164,20 @@
 }
 
 .showcase-form__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
   margin-right: auto;
-  color: var(--amber-2);
-  font-size: var(--fs-caption);
-  font-weight: 700;
+  color: var(--fg-2);
+  font-size: var(--fs-control);
+  font-weight: 600;
   text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .showcase-form__back:hover {
-  text-decoration: underline;
+  color: var(--fg);
+  text-decoration: none;
 }
 
 .showcase-form__cover {
@@ -167,7 +185,7 @@
   gap: 12px;
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .showcase-form__delete {
@@ -204,6 +222,7 @@
   }
 
   .showcase-form__active {
+    min-height: var(--touch-target);
     padding-top: 0;
   }
 
@@ -213,5 +232,13 @@
 
   .showcase-form__back {
     width: 100%;
+    min-height: var(--touch-target);
+  }
+}
+
+/* Чипы — под палец на телефоне. */
+@media (max-width: 760px), (pointer: coarse) {
+  .showcase-form__chip {
+    min-height: var(--touch-target);
   }
 }

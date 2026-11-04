@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AdminBrand } from "@/components/AdminBrand";
 import { AdminNav } from "@/components/AdminNav";
 import { AdminUser } from "@/components/AdminUser";
+import { SideToggle } from "@/components/SideToggle";
 import type { CabinetViewer } from "@/lib/admin/access";
 import { visibleNav } from "@/lib/admin/nav";
 import { cabinetPerson } from "@/lib/admin/person";
@@ -23,6 +24,7 @@ export async function AdminShell({ viewer, children }: AdminShellProps) {
         <AdminBrand />
         <AdminNav items={items} variant="side" siteHref={siteHref} />
         <AdminUser person={person} />
+        <SideToggle />
       </aside>
       <div className="admin-shell__main">
         <AdminNav items={items} variant="strip" siteHref={siteHref} />

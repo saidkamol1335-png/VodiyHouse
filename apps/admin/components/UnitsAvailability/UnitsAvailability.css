@@ -37,7 +37,7 @@
 }
 
 .units-availability__row + .units-availability__row {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .units-availability__row--busy {

@@ -2,8 +2,8 @@
   position: relative;
   width: min(var(--login-card-w), 100%);
   padding: 30px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-2xl);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-card);
   background: var(--login-card-bg);
   box-shadow: var(--shadow-3);
   -webkit-backdrop-filter: var(--glass-filter);

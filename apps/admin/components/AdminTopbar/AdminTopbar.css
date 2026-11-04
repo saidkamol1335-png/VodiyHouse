@@ -1,4 +1,4 @@
-/* Мокап: .adm__top. Прилипает со стеклом решения Э2 (К4.2). */
+/* Мокап: .adm__top. Прилипает (К4.2); скин 04.11 — фон страницы и тонкая линия, без стекла. */
 .admin-topbar {
   position: sticky;
   top: 0;
@@ -9,10 +9,8 @@
   gap: 16px;
   min-height: var(--admin-topbar-h);
   padding: 12px var(--admin-content-pad);
-  border-bottom: 1px dashed var(--dash);
-  background: var(--glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
+  border-bottom: 1px var(--rule-style) var(--dash);
+  background: var(--bg);
 }
 
 .admin-topbar__text {
@@ -29,10 +27,10 @@
 }
 
 .admin-topbar__subtitle {
-  margin: 0;
-  color: var(--fg-3);
-  font-size: var(--fs-small);
-  font-weight: 600;
+  margin: 4px 0 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  font-weight: 400;
 }
 
 .admin-topbar__tools {
@@ -59,9 +57,8 @@
     gap: 8px;
   }
 
+  /* Подпись раздела переносится, а не обрезается многоточием. */
   .admin-topbar__subtitle {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 }

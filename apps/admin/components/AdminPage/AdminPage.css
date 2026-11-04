@@ -24,7 +24,7 @@
 .admin-page__note {
   margin: 0;
   padding: 10px 14px;
-  border: 1px dashed var(--dash);
+  border: 1px solid var(--dash);
   border-radius: var(--r-s);
   color: var(--fg-3);
   font-size: var(--fs-caption);

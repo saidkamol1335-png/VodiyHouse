@@ -4,23 +4,29 @@
   display: grid;
 }
 
+/* Свёрнутая тема — плотная строка без хвоста снизу; отступы — только у раскрытой. */
 .complex-details-form__topic {
   display: grid;
+  gap: 0;
+  padding: 0;
+}
+
+.complex-details-form__topic[open] {
   gap: 12px;
-  padding: 4px 0 14px;
+  padding-bottom: 14px;
 }
 
 .complex-details-form__topic + .complex-details-form__topic {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .complex-details-form__summary {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   min-height: 44px;
-  padding-top: 10px;
+  padding: 10px 0;
   font-weight: 650;
   cursor: pointer;
 }

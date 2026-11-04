@@ -1,8 +1,10 @@
 /* Вкладка «Планировки» (И5): переключатель блоков, как на сайте (MobJkPlans мокапа), и строки Д5
    с плиткой чертежа 64×44 — как «Мои отчёты» мобилографа; на телефоне — карточка на строку. */
+/* Отступ сверху — от плашки «Правило 1.2» над формой. */
 .complex-layouts {
   display: grid;
   gap: 14px;
+  margin-top: 14px;
 }
 
 /* Ширина — по блокам: segmented--lg иначе растянул бы на всю; два класса — поверх него при любом
@@ -69,7 +71,7 @@
 }
 
 .complex-layouts__rows > li + li {
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 .complex-layouts__actions {

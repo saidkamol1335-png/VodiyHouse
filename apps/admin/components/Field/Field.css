@@ -1,4 +1,4 @@
-/* Поля мокапа (.field, .inp). */
+/* Поля кабинета (образец: input rounded-lg): 40 px, рамка gray-200, обычный вес текста. */
 .field {
   display: flex;
   flex-direction: column;
@@ -19,8 +19,10 @@
 }
 
 .field__label {
-  font-family: var(--mono);
+  font-family: var(--font);
   font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 16px;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--fg-3);
@@ -32,19 +34,27 @@
 
 .field__input {
   width: 100%;
-  height: 48px;
-  padding: 0 15px;
-  border: 1px solid var(--line-2);
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--control-border);
   border-radius: var(--r-s);
   outline: none;
   background: var(--field-bg);
+  box-shadow: var(--control-shadow);
   color: var(--fg);
   font: inherit;
-  font-size: var(--fs-input);
-  font-weight: 600;
+  font-size: var(--fs-control);
+  font-weight: 400;
   transition:
     border-color var(--dur-fast) var(--ease),
     box-shadow var(--dur-base) var(--ease);
+}
+
+/* Телефон и касание — поле 44 px (цель касания). */
+@media (max-width: 767px), (pointer: coarse) {
+  .field__input:not(.field__input--multiline) {
+    height: var(--touch-target);
+  }
 }
 
 .field__input::placeholder {
@@ -91,15 +101,14 @@
   height: auto;
   min-height: 84px;
   max-height: var(--field-multiline-max);
-  padding: 12px 15px;
+  padding: 10px 12px;
   line-height: 1.45;
   field-sizing: content;
   resize: vertical;
 }
 
-/* Второй язык пуст, а первый заполнен — подсказка, не ошибка (решение Д3). */
+/* Второй язык пуст, а первый заполнен — подсказка, не ошибка (решение Д3): янтарная рамка. */
 .field__input--missing {
-  border-style: dashed;
   border-color: var(--amber-line);
 }
 
@@ -120,7 +129,7 @@
 
 .field__counter {
   margin-left: auto;
-  font-family: var(--mono);
+  font-family: var(--font);
   font-size: var(--fs-label);
   font-variant-numeric: tabular-nums;
 }

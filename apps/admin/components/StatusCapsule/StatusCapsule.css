@@ -1,14 +1,30 @@
-/* Статус ЖК или застройщика в шапке (AdminEntityHead): плашка и кнопки переходов — одна пунктирная
-   капсула, чтобы «Скрыть с сайта» не читалось как ещё одна вкладка; подтверждение архива и
-   ответы — строкой ниже, во всю ширину шапки. */
+/* Статус ЖК или застройщика в шапке (AdminEntityHead): плашка и кнопки переходов — одна группа
+   в рамке (образец: панель инструментов), чтобы «Скрыть с сайта» не читалось как ещё одна вкладка;
+   подтверждение архива и ответы — строкой ниже, во всю ширину шапки. */
 .status-capsule {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
+  width: fit-content;
+  max-width: 100%;
   padding: 3px;
-  border: 1px dashed var(--line-2);
-  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  border-radius: var(--r-m);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-1);
+}
+
+/* Высота группы — как у дорожки вкладок рядом (32 + 3·2 + 1·2 = 40 px). */
+.status-capsule > .button--sm {
+  height: 32px;
+}
+
+/* Телефон: цель 44 px, как сегменты вкладок на телефоне. */
+@media (max-width: 760px), (pointer: coarse) {
+  .status-capsule > .button--sm {
+    height: var(--touch-target);
+  }
 }
 
 .status-capsule__badge {
@@ -26,14 +42,14 @@
   display: none;
 }
 
-/* Подтверждение архива: пунктирная янтарная рамка, как уведомления кабинета. */
+/* Подтверждение архива: тонкая янтарная рамка, как уведомления кабинета. */
 .status-capsule__confirm {
   display: grid;
   gap: 10px;
   max-width: 560px;
   padding: 16px;
-  border: 1px dashed var(--amber-line);
-  border-radius: var(--r-m);
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-s);
   background: var(--amber-soft);
 }
 

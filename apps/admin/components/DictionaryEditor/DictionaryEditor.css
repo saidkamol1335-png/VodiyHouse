@@ -52,7 +52,7 @@
   align-items: center;
   gap: 8px 14px;
   padding: 10px 0;
-  border-top: 1px dashed var(--line);
+  border-top: 1px var(--rule-style) var(--line);
 }
 
 /* Менеджер (PLAN §10, п. 29): пункты без ручки и кнопок. */
@@ -121,7 +121,7 @@
   align-items: center;
   gap: 8px 12px;
   padding: 10px 14px;
-  border: 1px dashed var(--amber-line);
+  border: 1px solid var(--amber-line);
   border-radius: var(--r-s);
   background: var(--amber-soft);
   font-size: var(--fs-small);

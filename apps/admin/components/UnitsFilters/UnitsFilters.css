@@ -20,7 +20,7 @@
 
 .units-filters__search-input {
   height: 38px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
 }
 
 .units-filters__toggle {
@@ -31,7 +31,7 @@
   height: var(--touch-target);
   padding: 0 16px;
   border: 1px solid var(--chip-border);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   background: var(--chip-bg);
   color: var(--chip-fg);
   font: inherit;
@@ -88,14 +88,14 @@
 
 .units-filters__floor {
   width: 76px;
-  height: 32px;
+  height: 36px;
   padding: 0 10px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-s);
   font-size: var(--fs-small);
 }
 
 .units-filters__reset {
-  height: 32px;
+  height: 36px;
   padding: 0 4px;
   border: 0;
   background: none;
@@ -167,8 +167,8 @@
   justify-self: start;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px dashed var(--amber-line);
-  border-radius: 999px;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-s);
   background: transparent;
   color: var(--amber-2);
   font-weight: 700;

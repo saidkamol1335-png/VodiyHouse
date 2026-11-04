@@ -166,11 +166,26 @@
 }
 
 /* Нет отметки правила 1.2 у опубликованного застройщика — новый файл не выбрать; «Удалить» и
-   точка фокуса работают. */
-.media-drop--locked .media-drop__tile,
+   точка фокуса работают. Текст не гасим: он говорит, какие файлы подходят; гасим только значок. */
+.media-drop--locked .media-drop__tile:not(.media-drop__tile--filled),
 .media-drop--locked .media-drop__zone {
-  opacity: var(--opacity-unavailable);
+  border-color: var(--line-3);
+  background: var(--bg-3);
+  color: var(--fg-2);
   cursor: not-allowed;
+}
+
+.media-drop--locked .media-drop__tile-pick {
+  cursor: not-allowed;
+}
+
+.media-drop--locked .media-drop__icon,
+.media-drop--locked .media-drop__tile > svg {
+  opacity: var(--opacity-unavailable);
+}
+
+.media-drop--locked .media-drop__title {
+  color: var(--fg-2);
 }
 
 .media-drop__plain {

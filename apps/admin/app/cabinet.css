@@ -22,6 +22,8 @@
 @import "../components/AdminNav/AdminNav.css";
 @import "../components/AdminPage/AdminPage.css";
 @import "../components/AdminShell/AdminShell.css";
+@import "../components/SideToggle/SideToggle.css";
+@import "../components/ThemeToggle/ThemeToggle.css";
 @import "../components/AdminTopbar/AdminTopbar.css";
 @import "../components/AdminUser/AdminUser.css";
 @import "../components/AdminUserMenu/AdminUserMenu.css";

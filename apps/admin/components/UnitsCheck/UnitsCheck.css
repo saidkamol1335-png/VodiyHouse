@@ -10,12 +10,48 @@
   cursor: pointer;
 }
 
+/* Свой квадрат вместо родного: в тёмной теме Chromium рисует светлую заливку. Галочка тёмная
+   на янтаре; accent-color — запасной вариант. */
 .units-check__input {
+  display: grid;
+  place-content: center;
   width: 18px;
   height: 18px;
   margin: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--r-xs);
+  background: var(--control-bg);
   accent-color: var(--amber);
   cursor: pointer;
+  appearance: none;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.units-check__input:hover {
+  border-color: var(--line-3);
+}
+
+.units-check__input:checked {
+  border-color: var(--amber);
+  background: var(--amber)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%23101828' stroke-width='2'/%3E%3C/svg%3E")
+    center / 14px no-repeat;
+}
+
+.units-check__input:indeterminate {
+  border-color: var(--amber);
+  background: var(--amber)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='%23101828' stroke-width='2'/%3E%3C/svg%3E")
+    center / 14px no-repeat;
+}
+
+/* Режим высокой контрастности стирает заливку — там нужен родной квадрат. */
+@media (forced-colors: active) {
+  .units-check__input {
+    appearance: auto;
+  }
 }
 
 .units-check__input:focus-visible {

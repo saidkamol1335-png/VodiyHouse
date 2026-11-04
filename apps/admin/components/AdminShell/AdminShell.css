@@ -17,6 +17,19 @@ html:has(.admin-shell) {
   display: grid;
   grid-template-columns: var(--admin-side-w) minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns var(--dur-base) var(--ease);
+}
+
+/* Свёрнутая панель (SideToggle): полоса значков 72 px, как в образце. */
+@media (min-width: 981px) {
+  :root[data-side="collapsed"] {
+    --admin-side-w: 72px;
+  }
+
+  /* Подсказки пунктов выходят за край панели: прокрутку не включаем — значков немного. */
+  :root[data-side="collapsed"] .admin-shell__side {
+    overflow: visible;
+  }
 }
 
 /* Фон и граница колонки меню — на всю высоту страницы: сама панель прилипает и кончается
@@ -28,6 +41,7 @@ html:has(.admin-shell) {
   border-right: 1px solid var(--line);
   background: var(--admin-side-bg);
   content: "";
+  transition: width var(--dur-base) var(--ease);
 }
 
 .admin-shell__side {
@@ -35,10 +49,10 @@ html:has(.admin-shell) {
   top: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   height: 100vh;
   height: 100dvh;
-  padding: 18px 14px;
+  padding: 12px 8px 8px;
   overflow-y: auto;
   border-right: 1px solid var(--line);
   background: var(--admin-side-bg);

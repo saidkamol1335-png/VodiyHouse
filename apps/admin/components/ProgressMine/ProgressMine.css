@@ -23,7 +23,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-top: 1px dashed var(--line-2);
+  border-top: 1px var(--rule-style) var(--line-2);
 }
 
 .progress-mine__item:first-child {

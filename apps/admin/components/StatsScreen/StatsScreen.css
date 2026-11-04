@@ -93,15 +93,27 @@
   list-style: none;
 }
 
+/* Широкий экран: по три в ряд — подписи в одну строку, цифры на одной высоте. */
+@media (min-width: 1024px) {
+  .stats-screen__kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stats-progress__kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .stats-screen__kpi {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-  padding: 18px;
-  border: 1px solid var(--line);
+  padding: 20px;
+  border: 1px solid var(--card-border);
   border-radius: var(--r-l);
   background: var(--panel-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .stats-screen__kpi-label {
@@ -123,8 +135,9 @@
 
 .stats-screen__kpi-value {
   font-size: var(--fs-kpi);
-  font-weight: 500;
-  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: var(--lh-tight);
 }
 
@@ -182,7 +195,7 @@
 .stats-screen__divider {
   margin: 16px 0;
   border: 0;
-  border-top: 1px dashed var(--dash);
+  border-top: 1px var(--rule-style) var(--dash);
 }
 
 /* Полосы (мокап .hbars): подпись | полоса | число и доля. */
@@ -217,7 +230,7 @@
   height: 10px;
   overflow: hidden;
   border-radius: 4px;
-  background: var(--seg-bg);
+  background: var(--bg-4);
 }
 
 .stats-bars__track i {
@@ -263,7 +276,7 @@
 
 .stats-table__table th {
   padding: 8px 12px;
-  border-bottom: 1px dashed var(--dash);
+  border-bottom: 1px var(--rule-style) var(--dash);
   color: var(--fg-3);
   font-family: var(--mono);
   font-size: var(--fs-micro);
@@ -334,7 +347,7 @@
   height: 5px;
   overflow: hidden;
   border-radius: 3px;
-  background: var(--seg-bg);
+  background: var(--bg-4);
 }
 
 .stats-table__minibar i {
