@@ -1,5 +1,6 @@
 "use client";
 
+import { filterVisibility } from "@vh/shared/filterArchive";
 import { SlidersHorizontal } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -35,7 +36,11 @@ type CatalogResultsProps = {
   badges?: Record<string, LocalizedText>;
   /** Главная: ЖК «Скоро» в ленте нет, он есть только в каталоге (правило публикации v2). */
   hideSoon?: boolean;
+  /** id кнопок и блоков фильтра в архиве («Настройки → Фильтр сайта»): на сайте их нет. */
+  archived?: readonly string[];
 };
+
+const NO_ARCHIVE: readonly string[] = [];
 
 /** Сколько групп фильтра задано — счётчик на кнопке «Фильтры» телефона. */
 function activeGroups(filter: Filter): number {
@@ -50,7 +55,7 @@ function activeGroups(filter: Filter): number {
  * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
  * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false, archived = NO_ARCHIVE }: CatalogResultsProps) {
   // Все опубликованные — «Скоро» (первая публикация): на главной показываем их, а не «скоро появятся».
   const hideSoon = hideSoonWanted && withoutSoon(catalog.complexes).length > 0;
   const [shown, setShown] = useState(pageSize);
@@ -60,6 +65,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
   const closeSheet = () => setOpen(false);
   useFocusBack(open, filtersButton);
   const trackFilter = useFilterTracking();
+  const visibility = useMemo(() => filterVisibility(archived), [archived]);
   const { filter, collection, change, pick, reset } = useCatalogSelection(collections, (next) => {
     setShown(pageSize);
     trackFilter(next);
@@ -77,7 +83,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
   };
   return (
     <div className="catalog-results">
-      <CatalogFilter catalog={catalog} filter={filter} onChange={change} found={found.length} open={open} onClose={closeSheet} onShow={showResults} />
+      <CatalogFilter catalog={catalog} filter={filter} onChange={change} found={found.length} open={open} onClose={closeSheet} onShow={showResults} visibility={visibility} />
       {collectionsRow && collections.length > 0 ? (
         <CollectionsRow catalog={catalog} collections={collections} selected={collection?.id ?? null} onPick={pick} />
       ) : null}

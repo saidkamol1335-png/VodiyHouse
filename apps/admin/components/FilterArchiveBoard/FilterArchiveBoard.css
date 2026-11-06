@@ -1,0 +1,140 @@
+/* «Настройки → Фильтр сайта»: блоки фильтра каталога с кнопками, как на сайте; кнопка из архива —
+   пунктирная и зачёркнутая, скрытый блок — приглушён. Ниже — список архива с «Вернуть». */
+.filter-archive {
+  display: grid;
+  gap: 12px;
+}
+
+.filter-archive__lead,
+.filter-archive__note,
+.filter-archive__empty {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
+.filter-archive__warn {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+}
+
+.filter-archive__group {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0 4px;
+  border-top: 1px var(--rule-style) var(--dash);
+}
+
+.filter-archive__group--hidden .filter-archive__chips {
+  opacity: 0.45;
+}
+
+.filter-archive__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.filter-archive__title {
+  margin: 0;
+  color: var(--fg-2);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.filter-archive__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filter-archive__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 14px;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip-bg);
+  box-shadow: var(--control-shadow);
+  color: var(--chip-fg);
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.filter-archive__chip svg {
+  color: var(--fg-3);
+}
+
+.filter-archive__chip:hover:not(:disabled) {
+  background: var(--bg-3);
+  color: var(--fg);
+}
+
+.filter-archive__chip:disabled {
+  cursor: default;
+}
+
+.filter-archive__chip[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.filter-archive__chip--archived {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--fg-3);
+}
+
+.filter-archive__chip--archived .filter-archive__chip-label {
+  text-decoration: line-through;
+}
+
+.filter-archive__list {
+  display: grid;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filter-archive__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 0;
+  border-top: 1px var(--rule-style) var(--dash);
+}
+
+.filter-archive__row-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.filter-archive__row-meta {
+  color: var(--fg-3);
+  font-size: var(--fs-caption);
+}
+
+.filter-archive__empty {
+  margin-top: 12px;
+}

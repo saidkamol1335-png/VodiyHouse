@@ -40,6 +40,8 @@ export const ADMIN_ROUTES = {
   settings: `${ADMIN_ROUTE}/nastroyki`,
   dictionaries: `${ADMIN_ROUTE}/nastroyki/spravochniki`,
   contacts: `${ADMIN_ROUTE}/nastroyki/kontakty`,
+  /** Архив кнопок фильтра сайта (06.11.2026). */
+  filterArchive: `${ADMIN_ROUTE}/nastroyki/filtr`,
   journal: `${ADMIN_ROUTE}/nastroyki/zhurnal`,
   /** Памятка своей роли (фаза F, п. 42). */
   guide: `${ADMIN_ROUTE}/pamyatka`,
@@ -148,7 +150,7 @@ export function landingPath(role: StaffRole, items: readonly AdminNavItem[] = AD
   return visibleNav(role, items)[0]?.href ?? ADMIN_ROUTES.home;
 }
 
-export type SettingsTabKey = "staff" | "dictionaries" | "contacts" | "journal";
+export type SettingsTabKey = "staff" | "dictionaries" | "contacts" | "filter" | "journal";
 
 export type SettingsTab = {
   key: SettingsTabKey;
@@ -169,7 +171,21 @@ export const SETTINGS_TABS: readonly SettingsTab[] = [
     ready: true,
     roles: ["head", "manager"],
   },
-  { key: "contacts", segment: "kontakty", href: ADMIN_ROUTES.contacts, ready: true, roles: ["head"] },
+  {
+    key: "contacts",
+    segment: "kontakty",
+    href: ADMIN_ROUTES.contacts,
+    ready: true,
+    roles: ["head"],
+  },
+  // Архив кнопок фильтра сайта (06.11.2026): правят руководитель и менеджер (решение заказчика).
+  {
+    key: "filter",
+    segment: "filtr",
+    href: ADMIN_ROUTES.filterArchive,
+    ready: true,
+    roles: ["head", "manager"],
+  },
   { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true, roles: ["head"] },
 ];
 

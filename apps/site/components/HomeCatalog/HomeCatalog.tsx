@@ -7,6 +7,7 @@ import { Heading } from "@/components/Heading";
 import { Reveal } from "@/components/Reveal";
 import { CATALOG_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
+import { readArchivedFilterIds } from "@/lib/site/filterArchive";
 import { cardBadges, visibleCollections } from "@/lib/site/showcase/model";
 import type { SiteShowcase } from "@/lib/site/showcase/records";
 
@@ -18,7 +19,7 @@ type HomeCatalogProps = { id: string; catalog: SiteCatalog; pageSize: number; sh
  * порциями с бейджами спецпредложений. Якорь — для «Подобрать квартиру» первого экрана.
  */
 export async function HomeCatalog({ id, catalog, pageSize, showcase }: HomeCatalogProps) {
-  const [t, messages] = await Promise.all([getTranslations("home.catalog"), getMessages()]);
+  const [t, messages, archived] = await Promise.all([getTranslations("home.catalog"), getMessages(), readArchivedFilterIds()]);
   return (
     <section id={id} className="home-catalog" aria-labelledby={`${id}-title`}>
       <Container>
@@ -39,6 +40,7 @@ export async function HomeCatalog({ id, catalog, pageSize, showcase }: HomeCatal
             collectionsRow
             hideSoon
             badges={cardBadges(showcase)}
+            archived={archived}
           />
         </NextIntlClientProvider>
       </Container>

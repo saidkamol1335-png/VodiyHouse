@@ -10,6 +10,7 @@ import { CATALOG_MESSAGES, pickMessages } from "@/lib/i18n/clientMessages";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
+import { readArchivedFilterIds } from "@/lib/site/filterArchive";
 import { pageMetadata } from "@/lib/site/metadata";
 import { cardBadges, visibleCollections } from "@/lib/site/showcase/model";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * дважды, и LCP ждал второй (замер 3.4). Ряда подборок, рекламы и спецпредложений здесь нет (Ф3).
  */
 export default async function CatalogPage() {
-  const [t, catalog, messages, showcase] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages(), readSiteShowcase()]);
+  const [t, catalog, messages, showcase, archived] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages(), readSiteShowcase(), readArchivedFilterIds()]);
   return (
     <>
       <SiteHeader />
@@ -47,7 +48,7 @@ export default async function CatalogPage() {
           </Heading>
           {catalog ? (
             <NextIntlClientProvider messages={pickMessages(messages, CATALOG_MESSAGES)}>
-              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} collections={visibleCollections(catalog, showcase)} badges={cardBadges(showcase)} />
+              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} collections={visibleCollections(catalog, showcase)} badges={cardBadges(showcase)} archived={archived} />
             </NextIntlClientProvider>
           ) : (
             <p className="text-muted-foreground">{t("unavailable")}</p>

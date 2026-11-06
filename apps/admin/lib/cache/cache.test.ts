@@ -75,6 +75,8 @@ const CONTENT_FILES = [
   "complexFacade.ts",
   "complexMedia.ts",
   "contacts.ts",
+  // Архив кнопок фильтра сайта (06.11.2026): expireSiteSettings.
+  "filterArchive.ts",
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",

@@ -87,7 +87,9 @@ describe("меню кабинета", () => {
       "settings",
       "guide",
     ]);
-    expect(visibleNav("manager").find((item) => item.key === "settings")!.href).toBe(ADMIN_ROUTES.dictionaries);
+    expect(visibleNav("manager").find((item) => item.key === "settings")!.href).toBe(
+      ADMIN_ROUTES.dictionaries,
+    );
   });
 
   it("мобилограф видит только видео и «Памятку» (фаза F)", () => {
@@ -127,21 +129,23 @@ describe("доступ к разделам", () => {
     expect(landingPath("mobilographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 
-  it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Журнал — отдельные адреса", () => {
+  it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Фильтр сайта · Журнал — отдельные адреса", () => {
     expect(readySettingsTabs().map((tab) => [tab.key, tab.href, tab.segment])).toEqual([
       ["staff", "/nastroyki", null],
       ["dictionaries", "/nastroyki/spravochniki", "spravochniki"],
       ["contacts", "/nastroyki/kontakty", "kontakty"],
+      ["filter", "/nastroyki/filtr", "filtr"],
       ["journal", "/nastroyki/zhurnal", "zhurnal"],
     ]);
   });
 
-  it("вкладки настроек менеджера (п. 29): только «Справочники», остальные ведут туда", () => {
-    expect(readySettingsTabs("manager").map((tab) => tab.key)).toEqual(["dictionaries"]);
+  it("вкладки настроек менеджера (п. 29, архив фильтра 06.11): «Справочники» и «Фильтр сайта», остальные ведут в «Справочники»", () => {
+    expect(readySettingsTabs("manager").map((tab) => tab.key)).toEqual(["dictionaries", "filter"]);
     for (const key of ["staff", "contacts", "journal"] as const) {
       expect(settingsTabRedirect("manager", key)).toBe("/nastroyki/spravochniki");
       expect(settingsTabRedirect("head", key)).toBeNull();
     }
     expect(settingsTabRedirect("manager", "dictionaries")).toBeNull();
+    expect(settingsTabRedirect("manager", "filter")).toBeNull();
   });
 });
