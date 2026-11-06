@@ -105,9 +105,9 @@ export function parseSpecial(formData: FormData): SpecialParse {
   const fieldErrors = onlyIssues({
     developerId: fields.developerId ? undefined : "required",
     kind: isKind(fields.kind) ? undefined : "kindInvalid",
-    badge: publicTextIssue(fields.badge, { max: SHOWCASE_LIMITS.badgeMax, required: true }),
-    title: publicTextIssue(fields.title, { max: SHOWCASE_LIMITS.titleMax, required: true }),
-    text: publicTextIssue(fields.text, { max: SHOWCASE_LIMITS.textMax }),
+    badge: publicTextIssue(fields.badge, { max: SHOWCASE_LIMITS.badgeMax, required: true, allowDiscount: true }),
+    title: publicTextIssue(fields.title, { max: SHOWCASE_LIMITS.titleMax, required: true, allowDiscount: true }),
+    text: publicTextIssue(fields.text, { max: SHOWCASE_LIMITS.textMax, allowDiscount: true }),
     complexIds: fields.complexIds.length > 0 ? undefined : "noComplexes",
     ...periodIssues(fields),
     sort: sort.issue ?? undefined,

@@ -105,8 +105,8 @@ export function parseAd(formData: FormData): AdParse {
   const byComplexes = fields.target === "complexes";
   const fieldErrors = onlyIssues({
     developerId: fields.developerId ? undefined : "required",
-    title: publicTextIssue(fields.title, { max: SHOWCASE_LIMITS.titleMax, required: true }),
-    text: publicTextIssue(fields.text, { max: SHOWCASE_LIMITS.adTextMax }),
+    title: publicTextIssue(fields.title, { max: SHOWCASE_LIMITS.titleMax, required: true, allowDiscount: true }),
+    text: publicTextIssue(fields.text, { max: SHOWCASE_LIMITS.adTextMax, allowDiscount: true }),
     target: isTarget(fields.target) ? undefined : "kindInvalid",
     complexIds: byComplexes && fields.complexIds.length === 0 ? "noComplexes" : undefined,
     filter: !byComplexes && isTarget(fields.target) && isEmptyFilter(fields.filter) ? "noFilter" : undefined,

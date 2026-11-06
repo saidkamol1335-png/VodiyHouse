@@ -45,15 +45,19 @@ export type ShowcaseIssue =
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** Публичный текст: перевод и длина, затем правило 1.2 и «нет скидок» (PLAN §3.13). */
+/**
+ * Публичный текст: перевод и длина, затем правило 1.2 и «нет скидок» (PLAN §3.13). Скидки в
+ * условиях спецпредложений и рекламы разрешены с 06.11.2026 (allowDiscount; миграция
+ * 20261106150000_showcase_discounts.sql) — названия подборок по-прежнему без них.
+ */
 export function publicTextIssue(
   value: BilingualValue,
-  options: { max: number; required?: boolean },
+  options: { max: number; required?: boolean; allowDiscount?: boolean },
 ): ShowcaseIssue | undefined {
   const issue = bilingualIssue(value, options);
   if (issue) return issue;
   if (bilingualHasContact(value)) return "contacts";
-  return bilingualMentionsDiscount(value) ? "discount" : undefined;
+  return !options.allowDiscount && bilingualMentionsDiscount(value) ? "discount" : undefined;
 }
 
 export type PeriodFields = { validFrom: string; validTo: string };

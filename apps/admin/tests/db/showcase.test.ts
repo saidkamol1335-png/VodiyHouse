@@ -17,7 +17,7 @@ import {
 } from "./harness";
 
 // Шаг 3.16а: «Витрина» в базе (миграция 20261028150000_showcase.sql) — права руководителя, что
-// видит сайт, запрет «скидка», ЖК своего застройщика, уборка при удалении ЖК, обложки с отметкой
+// видит сайт, запрет «скидка» в названии подборки, ЖК своего застройщика, уборка при удалении ЖК, обложки с отметкой
 // правила 1.2, DEMO-сид и его удаление, журнал.
 
 const DEMO_DIR = path.resolve(import.meta.dirname, "../../../../supabase/demo");
@@ -127,16 +127,12 @@ describe("витрина: права, правила и DEMO", () => {
   });
 
   describe("правила", () => {
-    it("«скидка / chegirma» в тексте — отказ базы (на сайте скидок нет)", async () => {
-      await expect(insertSpecial(user(head), { title: "Скидка 15% при 100% оплате" })).rejects.toThrow(
-        /violates check constraint/,
-      );
-      // «−N%» — тоже скидка (ревью блока G, миграция 20261028230000); «взнос 30%» проходит.
-      await expect(insertSpecial(user(head), { title: "−10% на все квартиры" })).rejects.toThrow(/violates check constraint/);
-      await expect(insertSpecial(user(head), { title: "Первый взнос 10–30%, остальное в рассрочку" })).resolves.toBeTruthy();
-      await expect(insertSpecial(user(head), { title: "Цена —10% до пятницы" })).rejects.toThrow(/violates check constraint/);
-      // Удачная вставка не должна жить дальше теста: DEMO-подсчёт ниже ждёт свои четыре.
-      await db.admin.query("delete from specials where title ->> 'ru' like 'Первый взнос 10–30%%'");
+    it("скидка в условии предложения проходит (06.11.2026), в названии подборки — отказ базы", async () => {
+      // Миграция 20261106150000: условия застройщика со скидкой показываются как есть.
+      await expect(insertSpecial(user(head), { title: "Скидка 15% при 100% оплате" })).resolves.toBeTruthy();
+      await expect(insertSpecial(user(head), { title: "−10% на все квартиры" })).resolves.toBeTruthy();
+      // Удачные вставки не должны жить дальше теста: DEMO-подсчёт ниже ждёт свои четыре.
+      await db.admin.query("delete from specials where title ->> 'ru' in ('Скидка 15% при 100% оплате', '−10% на все квартиры')");
       await expect(
         asHead((tx) =>
           tx.query("insert into collections (slug, title, mode, filter) values ('chegirma', $1, 'filter', '{\"srok\": \"built\"}')", [

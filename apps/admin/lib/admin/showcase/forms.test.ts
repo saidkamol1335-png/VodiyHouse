@@ -54,7 +54,7 @@ describe("форма спецпредложения", () => {
     });
   });
 
-  it("«скидка» и контакты не проходят, половина перевода — тоже; без ЖК — noComplexes", () => {
+  it("скидка в условии проходит (06.11.2026), контакты и половина перевода — нет; без ЖК — noComplexes", () => {
     const parsed = parseSpecial(
       specialForm({
         "title.ru": "Скидка 15% при 100% оплате",
@@ -71,7 +71,6 @@ describe("форма спецпредложения", () => {
     expect(parsed.fieldErrors).toEqual({
       kind: "kindInvalid",
       badge: "missingUz",
-      title: "discount",
       text: "contacts",
       complexIds: "noComplexes",
     });
