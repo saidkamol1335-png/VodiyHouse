@@ -816,12 +816,12 @@ a.complex-picker__tag {
 }
 
 /* ─── Движение: подпись блока приподнимается (full), подсказка проявляется (full / lite) ─── */
-[data-motion="full"] .complex-picker__tag {
+:is([data-motion="full"], [data-motion="lite"]) .complex-picker__tag {
   transition: transform var(--dur-base) var(--ease);
 }
 
-[data-motion="full"] .complex-picker__tag--on,
-[data-motion="full"] .complex-picker__tag:hover {
+:is([data-motion="full"], [data-motion="lite"]) .complex-picker__tag--on,
+:is([data-motion="full"], [data-motion="lite"]) .complex-picker__tag:hover {
   transform: translate(-50%, -3px);
 }
 

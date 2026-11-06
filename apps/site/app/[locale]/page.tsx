@@ -17,7 +17,7 @@ import { Reviews } from "@/components/Reviews";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SitePreloader } from "@/components/SitePreloader";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
-import { OFFERS_ANCHOR, QUIZ_ANCHOR } from "@/lib/routes";
+import { AD_ANCHOR, OFFERS_ANCHOR, QUIZ_ANCHOR } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { availabilitySample, heroFound, homeStats, progressSample } from "@/lib/site/home/stats";
@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * Главная (шаг 3.9, мокап Main; порядок 09.10 — решение 3б): первый экран «Ufq» — светлый горизонт, из-за
  * которого при прокрутке встают рендеры-башни (03.11.2026, по схеме hero-1), бегущая строка,
  * каталог с подборками витрины (Ф3 A — тот же компонент, что /novostroyki, 6 карточек),
- * «Предложения от застройщиков» (3.16б), квиз «Подбор за 1 минуту» (3.17), «Vodiy House в двух
+ * реклама «Предложения от застройщиков» (3.16б, ТЗ 5.4), лента «Проекты» со спецпредложениями ЖК (ТЗ 5.6), квиз «Подбор за 1 минуту» (3.17), «Vodiy House в двух
  * словах», «Почему через Vodiy House» (с плиткой «Видео стройки» — фаза 5), «Вы застройщик?». Страница статичная: всё — из кэшированных
  * ответов каталога и витрины.
  */
@@ -73,8 +73,8 @@ export default async function HomePage() {
           <CatalogUnavailable id={CATALOG_ID} />
         )}
         {catalog ? <FlatPicker catalog={catalog} /> : null}
-        {catalog ? <HomeOffers id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
-        {catalog ? <JkGallery catalog={catalog} /> : null}
+        {catalog ? <HomeOffers id={AD_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
+        {catalog ? <JkGallery id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
         <QuizSection id={QUIZ_ANCHOR} catalog={catalog} variant="home" />
         <HomeManifesto />
         <HomeWhy

@@ -37,7 +37,8 @@
     "staffLogin": "Xodimlar uchun kirish",
     "privacy": "Maxfiylik siyosati",
     "instagram": "Instagram",
-    "hours": "Ish vaqti"
+    "hours": "Ish vaqti",
+    "callback": "Menga qo‘ng‘iroq qiling"
   },
   "home": {
     "hero": {
@@ -1084,6 +1085,21 @@
       "priceFrom": "{price} dan",
       "until": "{date} gacha",
       "slide": "{total} tadan {n}-taklif"
+    },
+    "house": {
+      "developers": "Hamkor quruvchilar",
+      "built2": {
+        "title": "Tayyor 2 xonali kvartiralar muddatli to‘lovga",
+        "text": "Topshirilgan uylar — darhol ko‘chib o‘tish mumkin. {m} oygacha muddatli to‘lov. Vodiy House tanlash va kuzatib borishni bepul qiladi."
+      },
+      "inst2": {
+        "title": "2 xonali kvartiralar muddatli to‘lovga",
+        "text": "Quruvchidan {m} oygacha muddatli to‘lov. Kvartira tanlaymiz va hujjatlarni tekshiramiz — siz uchun bepul."
+      },
+      "all": {
+        "title": "Farg‘ona yangi uylari — narx va mavjudlik bilan",
+        "text": "Kvartira tanlaymiz va hujjatlarni tekshiramiz — siz uchun bepul."
+      }
     }
   },
   "siteError": {
@@ -1427,7 +1443,8 @@
     },
     "s6": {
       "title": "Qanday bog‘lanish mumkin",
-      "text": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — Vodiy House telefoni yoki Telegrami orqali: kontaktlar sahifa pastida."
+      "text": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — sahifa pastidagi «Menga qo‘ng‘iroq qiling» arizasi orqali: Vodiy House menejeri qo‘ng‘iroq qiladi.",
+      "textContacts": "Ma’lumotlar bo‘yicha savollar va ularni o‘chirish so‘rovi — Vodiy House: {contacts}. Yoki sahifa pastidagi «Menga qo‘ng‘iroq qiling» arizasini qoldiring."
     },
     "edition": "Tahrir: 25.10.2026"
   },

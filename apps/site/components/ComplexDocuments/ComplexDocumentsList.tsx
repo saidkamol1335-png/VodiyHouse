@@ -198,7 +198,7 @@ function useHoverSprings(item: RefObject<HTMLLIElement | null>, letters: number,
   const kick = () => {
     if (!frame.current) frame.current = requestAnimationFrame(tick);
   };
-  const live = (event: PointerEvent) => fine && event.pointerType === "mouse" && getMotionTier() === "full";
+  const live = (event: PointerEvent) => fine && event.pointerType === "mouse" && getMotionTier() !== "none";
   return {
     enter: (event: PointerEvent<HTMLLIElement>) => {
       item.current?.setAttribute("data-hover", "");

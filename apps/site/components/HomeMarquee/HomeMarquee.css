@@ -16,7 +16,7 @@
   width: max-content;
 }
 
-[data-motion="full"] .home-marquee__track {
+:is([data-motion="full"], [data-motion="lite"]) .home-marquee__track {
   animation: home-marquee var(--dur-home-marquee) linear infinite;
 }
 

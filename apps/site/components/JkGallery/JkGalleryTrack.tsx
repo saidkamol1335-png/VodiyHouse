@@ -3,13 +3,24 @@
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, type RefObject } from "react";
 import { Eyebrow } from "@/components/Eyebrow";
-import { SitePhoto } from "@/components/SitePhoto";
 import { Link } from "@/lib/i18n/navigation";
-import { useMotion } from "@/lib/motion";
-import { complexRoute, ROUTES } from "@/lib/routes";
+import { useMotion, useReveal } from "@/lib/motion";
+import { ROUTES } from "@/lib/routes";
 import type { ProjectWidth } from "@/lib/site/home/projects";
 import type { SitePhotoData } from "@/lib/site/photo";
+import { GalleryCard } from "./JkGalleryCard";
 import { keepPlaceAbove, loadGsap, refreshWhenSettled, type GsapKit } from "@/lib/site/scroll/gsap";
+
+/** Предложение под названием ЖК: из «Витрины» (с бейджем и сроком) или условия оплаты ЖК. */
+export type JkGalleryOffer = {
+  badge: string | null;
+  title: string;
+  text: string | null;
+  /** «до 30.11.2026 · ещё 24 дня»; у условий оплаты — null. */
+  until: string | null;
+  /** Осталось три дня и меньше — срок подсвечен. */
+  hot: boolean;
+};
 
 export type JkGalleryCard = {
   slug: string;
@@ -17,6 +28,7 @@ export type JkGalleryCard = {
   label: string;
   photo: SitePhotoData;
   alt: string;
+  offer: JkGalleryOffer | null;
   width: ProjectWidth;
   meta: {
     place: string | null;
@@ -35,13 +47,8 @@ type JkGalleryText = {
   hint: string;
 };
 
-const SIZES: Record<ProjectWidth, string> = {
-  base: "(max-width: 767px) 86vw, 60vw",
-  wide: "(max-width: 767px) 86vw, 70vw",
-};
-
-/** Pin и горизонтальный трек — только full, ≥ 768 px и без reduced-motion (gsap.matchMedia). */
-const PINNED_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+/** Pin и горизонтальный трек — только full и ≥ 768 px (gsap.matchMedia); настройку ОС не слушаем. */
+const PINNED_QUERY = "(min-width: 768px)";
 
 /**
  * Лента ЖК. По умолчанию (lite, none, телефон, без JS) — нативная горизонтальная прокрутка со
@@ -49,21 +56,18 @@ const PINNED_QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-prefere
  * (scrub), названия — со своей скоростью (containerAnimation), фото въезжает 1.08 → 1. Tab по
  * карточкам прокручивает страницу к карточке. Анимируются только transform.
  */
-export function JkGalleryTrack({ cards, text }: { cards: JkGalleryCard[]; text: JkGalleryText }) {
+type JkGalleryTrackProps = { id: string; cards: JkGalleryCard[]; text: JkGalleryText };
+
+export function JkGalleryTrack({ id, cards, text }: JkGalleryTrackProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
   useGalleryPin(sectionRef, trackRef);
   return (
-    <section ref={sectionRef} className="jk-gallery" aria-labelledby="jk-gallery-title">
+    <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title">
       {/* Закрепляется обёртка, а не сама секция: GSAP переносит её в pin-spacer, а корень компонента
           остаётся там, где его ждёт React (иначе removeChild при размонтировании падает). */}
       <div className="jk-gallery__pin">
-        <div className="jk-gallery__head container">
-          <Eyebrow>{text.eyebrow}</Eyebrow>
-          <h2 id="jk-gallery-title" className="heading heading--h2 jk-gallery__heading">
-            {text.title} <span className="heading__accent">{text.titleAccent}</span>
-          </h2>
-        </div>
+        <GalleryHead text={text} />
         <div className="jk-gallery__viewport">
           <ul ref={trackRef} className="jk-gallery__track">
             {cards.map((card) => (
@@ -73,12 +77,7 @@ export function JkGalleryTrack({ cards, text }: { cards: JkGalleryCard[]; text: 
               <Link href={ROUTES.catalog} className="jk-gallery__link jk-gallery__link--all">
                 <span className="jk-gallery__all">
                   {text.all}{" "}
-                  <ArrowRight
-                    className="jk-gallery__all-arrow"
-                    size={40}
-                    strokeWidth={1.4}
-                    aria-hidden
-                  />
+                  <ArrowRight className="jk-gallery__all-arrow" size={40} strokeWidth={1.4} aria-hidden />
                 </span>
                 <span className="jk-gallery__all-note">{text.allNote}</span>
               </Link>
@@ -91,6 +90,19 @@ export function JkGalleryTrack({ cards, text }: { cards: JkGalleryCard[]; text: 
         </p>
       </div>
     </section>
+  );
+}
+
+/** Шапка ленты: проявляется при прокрутке (06.11.2026). */
+function GalleryHead({ text }: { text: JkGalleryText }) {
+  const headRef = useReveal<HTMLDivElement>();
+  return (
+    <div ref={headRef} className="jk-gallery__head container reveal">
+      <Eyebrow>{text.eyebrow}</Eyebrow>
+      <h2 id="jk-gallery-title" className="heading heading--h2 jk-gallery__heading">
+        {text.title} <span className="heading__accent">{text.titleAccent}</span>
+      </h2>
+    </div>
   );
 }
 
@@ -120,38 +132,6 @@ function useGalleryPin(
       revert?.();
     };
   }, [tier, sectionRef, trackRef]);
-}
-
-function GalleryCard({ card }: { card: JkGalleryCard }) {
-  return (
-    <li className={`jk-gallery__card jk-gallery__card--${card.width}`}>
-      <Link href={complexRoute(card.slug)} className="jk-gallery__link">
-        {/* Имя ссылки — название (видимое уходит в параллакс и скрыто от диктора) и подписи в углах. */}
-        <span className="sr-only">{card.label}</span>
-        <span className="jk-gallery__media">
-          <SitePhoto
-            photo={card.photo}
-            alt={card.alt}
-            frame="cover"
-            sizes={SIZES[card.width]}
-            className="jk-gallery__photo"
-          />
-        </span>
-        <span className="jk-gallery__title" aria-hidden>
-          {card.name}
-        </span>
-        <Meta corner="tl" value={card.meta.place} />
-        <Meta corner="tr" value={card.meta.developer} />
-        <Meta corner="bl" value={card.meta.price} />
-        <Meta corner="br" value={card.meta.deadline} />
-      </Link>
-    </li>
-  );
-}
-
-function Meta({ corner, value }: { corner: "tl" | "tr" | "bl" | "br"; value: string | null }) {
-  if (!value) return null;
-  return <span className={`jk-gallery__meta jk-gallery__meta--${corner}`}>{value}</span>;
 }
 
 /** Закрепление и трек; возвращает откат (снимает pin, стили и слушатели). */
@@ -211,10 +191,10 @@ function warmPhotos(
   });
 }
 
-/** Название — своя скорость (xPercent 20 → −20), фото въезжает 1.08 → 1: по движению трека. */
+/** Название с предложением — своя скорость (xPercent 20 → −20), фото въезжает 1.08 → 1: по движению трека. */
 function cardParallax(gsap: GsapKit["gsap"], track: HTMLElement, slide: gsap.core.Tween) {
   for (const card of track.querySelectorAll<HTMLElement>(".jk-gallery__card")) {
-    const title = card.querySelector(".jk-gallery__title");
+    const title = card.querySelector(".jk-gallery__caption");
     const media = card.querySelector(".jk-gallery__media");
     const along = { trigger: card, containerAnimation: slide, scrub: true } as const;
     if (title) {

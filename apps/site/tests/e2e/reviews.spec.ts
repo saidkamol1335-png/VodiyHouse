@@ -3,7 +3,7 @@ import { attachShot, collectPageErrors } from "./helpers";
 
 // «Отзывы тех, кто уже получил ключи» (PLAN §10, п. 47; Motion Kit №16). Настоящих отзывов нет —
 // dev-сервер e2e идёт с VH_DEMO_SECTIONS=1 (DEMO). full на ≥ 768 px: липкий 3D-ключ (Three.js грузится
-// у блока), активная строка у центра, финал — поворот в замке и CTA. lite, телефон, reduced-motion —
+// у блока), активная строка у центра, финал — поворот в замке и CTA. lite, телефон, ?motion=none —
 // кадр ключа в шапке, цитаты яркие. Правило «меньше трёх — блок скрыт» — юнит и тест базы.
 
 const reviews = (page: Page) => page.locator(".reviews");
@@ -88,17 +88,16 @@ test.describe("главная — отзывы с 3D-ключом", () => {
     expect(errors).toEqual([]);
   });
 
-  test("1440, lite и reduced-motion: без Three.js, кадр ключа в шапке, цитаты яркие", async ({
+  test("1440, lite и none: без Three.js, кадр ключа в шапке, цитаты яркие", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    for (const setup of ["lite", "reduce"] as const) {
+    for (const setup of ["lite", "none"] as const) {
       const three: string[] = [];
       page.on("request", (request) => {
         if (/three/i.test(request.url())) three.push(request.url());
       });
-      if (setup === "reduce") await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.goto(setup === "lite" ? "/ru?motion=lite" : "/ru");
+      await page.goto(`/ru?motion=${setup}`);
       await reviews(page).scrollIntoViewIfNeeded();
       await page.locator(".reviews__cta").scrollIntoViewIfNeeded();
       await page.waitForTimeout(800);

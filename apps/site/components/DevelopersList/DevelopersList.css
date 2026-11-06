@@ -69,7 +69,7 @@
   box-shadow: var(--shadow-2);
 }
 
-[data-motion="full"] .developers-list__row:hover {
+:is([data-motion="full"], [data-motion="lite"]) .developers-list__row:hover {
   transform: translateY(-2px);
 }
 

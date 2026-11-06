@@ -16,8 +16,8 @@ describe("decideFromSignals", () => {
     expect(decideFromSignals(strongDesktop)).toBe("candidate");
   });
 
-  it("prefers-reduced-motion — none поверх всего", () => {
-    expect(decideFromSignals({ ...strongDesktop, reducedMotion: true })).toBe("none");
+  it("«меньше движения» в ОС режим не снижает (решение 06.11.2026)", () => {
+    expect(decideFromSignals({ ...strongDesktop, reducedMotion: true })).toBe("candidate");
   });
 
   it.each<[string, Partial<MotionSignals>]>([

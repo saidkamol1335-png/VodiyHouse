@@ -376,19 +376,19 @@
 }
 
 /* full: карточка приподнимается, фото медленно приближается (мокап .jc:hover). */
-[data-motion="full"] .catalog-card {
+:is([data-motion="full"], [data-motion="lite"]) .catalog-card {
   transition: transform var(--dur-slow) var(--ease);
 }
 
-[data-motion="full"] .catalog-card:hover {
+:is([data-motion="full"], [data-motion="lite"]) .catalog-card:hover {
   transform: translateY(-4px);
 }
 
-[data-motion="full"] .catalog-card .site-photo__image {
+:is([data-motion="full"], [data-motion="lite"]) .catalog-card .site-photo__image {
   transition: transform var(--dur-photo-zoom) var(--ease);
 }
 
-[data-motion="full"] .catalog-card:hover .site-photo__image {
+:is([data-motion="full"], [data-motion="lite"]) .catalog-card:hover .site-photo__image {
   transform: scale(1.05);
 }
 

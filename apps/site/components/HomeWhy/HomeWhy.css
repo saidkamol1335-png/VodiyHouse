@@ -65,7 +65,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  [data-motion="full"] .home-why__tile:hover {
+  :is([data-motion="full"], [data-motion="lite"]) .home-why__tile:hover {
     transform: translateY(-3px);
   }
 }
@@ -1979,10 +1979,8 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .home-why *,
-  .home-why *::before,
-  .home-why *::after {
-    animation: none !important;
-  }
+[data-motion="none"] .home-why *,
+[data-motion="none"] .home-why *::before,
+[data-motion="none"] .home-why *::after {
+  animation: none !important;
 }

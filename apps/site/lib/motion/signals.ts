@@ -24,7 +24,8 @@ export const PHONE_MAX_WIDTH = 768;
 export const DESKTOP_MIN_WIDTH = 1024;
 
 export function decideFromSignals(signals: MotionSignals): SignalVerdict {
-  if (signals.reducedMotion) return "none";
+  // «Уменьшить движение» в ОС режим не меняет (решение исполнителя 06.11.2026): сайт анимируется
+  // всегда, выключить анимации можно только ручным ?motion=none. Сигнал читается для статистики.
   if (signals.deviceMemory !== undefined && signals.deviceMemory < MIN_DEVICE_MEMORY_GB) {
     return "lite";
   }

@@ -179,19 +179,19 @@
 }
 
 /* full: карточка приподнимается при наведении, чертёж слегка приближается (мокап .plan:hover). */
-[data-motion="full"] .complex-layout {
+:is([data-motion="full"], [data-motion="lite"]) .complex-layout {
   transition: transform var(--dur-slow) var(--ease);
 }
 
-[data-motion="full"] .complex-layout:hover {
+:is([data-motion="full"], [data-motion="lite"]) .complex-layout:hover {
   transform: translateY(-3px);
 }
 
-[data-motion="full"] .complex-layout__image {
+:is([data-motion="full"], [data-motion="lite"]) .complex-layout__image {
   transition: transform var(--dur-slower) var(--ease);
 }
 
-[data-motion="full"] .complex-layout__drawing:hover .complex-layout__image {
+:is([data-motion="full"], [data-motion="lite"]) .complex-layout__drawing:hover .complex-layout__image {
   transform: scale(1.05);
 }
 

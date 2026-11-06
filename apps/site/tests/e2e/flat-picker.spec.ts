@@ -3,7 +3,7 @@ import { attachShot, collectPageErrors } from "./helpers";
 
 // «Выберите свою квартиру» (PLAN §10, п. 47; Motion Kit №18). Кадров ещё нет: dev-сервер e2e идёт с
 // VH_DEMO_SECTIONS=1 и берёт заглушку public/assets/flat-placeholder (npm run frames:placeholder).
-// full на ≥ 768 px — pin ≈ 250svh и кадры на canvas; lite — два кадра; reduced-motion — сразу 3/4.
+// full на ≥ 768 px — pin ≈ 250svh и кадры на canvas; lite — два кадра; ?motion=none — сразу 3/4.
 
 const section = (page: Page) => page.locator(".flat-picker");
 const canvasFrame = (page: Page) => page.locator(".flat-picker__canvas").getAttribute("data-frame");
@@ -114,7 +114,7 @@ test.describe("главная — «Выберите свою квартиру»
     await expect(page.locator(".catalog-results__count")).toHaveText(`Найдено ${complexes} ЖК`);
   });
 
-  test("1440, lite и reduced-motion: без pin; lite — два кадра, reduced — сразу 3/4", async ({
+  test("1440, lite и none: без pin; lite — два кадра, none — сразу 3/4", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
@@ -132,8 +132,7 @@ test.describe("главная — «Выберите свою квартиру»
         .poll(() => page.locator(".flat-picker__still--angle").getAttribute("srcset"))
         .not.toBe(before);
     }
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/ru");
+    await page.goto("/ru?motion=none");
     await section(page).scrollIntoViewIfNeeded();
     await expect(page.locator(".flat-picker--pinned")).toHaveCount(0);
     await expect(page.locator(".flat-picker__still--angle")).toHaveCSS("opacity", "1");

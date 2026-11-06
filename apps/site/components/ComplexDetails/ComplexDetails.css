@@ -90,16 +90,16 @@
 /* Бег колонок образца (Magic UI Marquee vertical): копия уезжает на свою высоту + зазор за 40 с, по
    кругу; чётные колонки — вниз. Под мышью колонка встаёт, пока открыта линза — стоит вся стена.
    Только full; lite и none — стена стоит. */
-[data-motion="full"] .complex-details__copy {
+:is([data-motion="full"], [data-motion="lite"]) .complex-details__copy {
   animation: complex-details-marquee 40s linear infinite;
 }
 
-[data-motion="full"] .complex-details__column:nth-child(even) .complex-details__copy {
+:is([data-motion="full"], [data-motion="lite"]) .complex-details__column:nth-child(even) .complex-details__copy {
   animation-direction: reverse;
 }
 
-[data-motion="full"] .complex-details__column:hover .complex-details__copy,
-[data-motion="full"] .complex-details[data-lens="open"] .complex-details__copy {
+:is([data-motion="full"], [data-motion="lite"]) .complex-details__column:hover .complex-details__copy,
+:is([data-motion="full"], [data-motion="lite"]) .complex-details[data-lens="open"] .complex-details__copy {
   animation-play-state: paused;
 }
 

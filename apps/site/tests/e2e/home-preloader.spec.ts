@@ -2,7 +2,7 @@ import { expect, test, type Page } from "./fixtures";
 import { collectPageErrors } from "./helpers";
 
 // Экран загрузки при входе на главную (30.10.2026, как в артефакте «Закат»): собирается знак, идут
-// проценты, потом страница открывается. Один раз за сессию вкладки; не при #якоре, reduced-motion и
+// проценты, потом страница открывается. Один раз за сессию вкладки; не при #якоре, ?motion=none и
 // экономии трафика. Экран ждёт шрифты и постер первого экрана (ролика больше нет, 03.11.2026), под ним
 // вступление первого экрана стоит на первом кадре. ?e2e-preloader — общий fixtures не отмечает вход
 // пройденным.
@@ -91,16 +91,31 @@ test.describe("экран загрузки при входе", () => {
     await expect(html(page)).not.toHaveAttribute("data-preloader", /.*/);
   });
 
-  test("экономия трафика и reduced-motion — без экрана; reduced-motion — постер без движения", async ({
+  test("экономия трафика и ?motion=none — без экрана; none — постер без движения", async ({
     browser,
   }) => {
-    const reduced = await browser.newContext({ reducedMotion: "reduce" });
+    const reduced = await browser.newContext();
     const quiet = await reduced.newPage();
-    await quiet.goto(ENTRY);
+    await quiet.goto(`${ENTRY}&motion=none`);
     await expect(html(quiet)).not.toHaveAttribute("data-preloader", /.*/);
     await expect(hero(quiet)).toHaveClass(/home-hero--none/);
     await reduced.close();
+  });
 
+  // Решение 06.11.2026: «уменьшить движение» в ОС сайт не глушит — режим решают устройство и ?motion.
+  test("reduced-motion в ОС — анимации не выключаются", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/ru?motion=full");
+    await expect(html(page)).toHaveAttribute("data-motion", "full");
+    // Без параметра режим решает устройство, но не none.
+    await page.goto("/ru/novostroyki");
+    await expect(html(page)).toHaveAttribute("data-motion-ready", "", { timeout: 10_000 });
+    await expect(html(page)).not.toHaveAttribute("data-motion", "none");
+    await context.close();
+  });
+
+  test("экономия трафика — без экрана", async ({ browser }) => {
     const saving = await browser.newContext();
     await saving.addInitScript(() => {
       Object.defineProperty(Navigator.prototype, "connection", {

@@ -28,11 +28,11 @@
   border-radius: 0;
 }
 
-[data-motion="full"] .ad-card__photo {
+:is([data-motion="full"], [data-motion="lite"]) .ad-card__photo {
   transition: transform var(--dur-slower) var(--ease);
 }
 
-[data-motion="full"] .ad-card:hover .ad-card__photo {
+:is([data-motion="full"], [data-motion="lite"]) .ad-card:hover .ad-card__photo {
   transform: scale(1.04);
 }
 

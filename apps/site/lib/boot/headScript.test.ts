@@ -44,9 +44,9 @@ describe("HEAD_BOOT_SCRIPT", () => {
     expect(runBootScript({ search: "?motion=none" }).getAttribute("data-motion")).toBe("none");
   });
 
-  it("reduced-motion — none поверх сохранённого full", () => {
+  it("«меньше движения» в ОС не глушит сохранённый full (решение 06.11.2026)", () => {
     localStorage.setItem("vh-motion", "full");
-    expect(runBootScript({ reduced: true }).getAttribute("data-motion")).toBe("none");
+    expect(runBootScript({ reduced: true }).getAttribute("data-motion")).toBe("full");
   });
 
   it("экран загрузки: первая страница сессии — главная на любом языке, один раз", () => {
@@ -62,11 +62,11 @@ describe("HEAD_BOOT_SCRIPT", () => {
     expect(runBootScript({ path: "/uz" }).hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
   });
 
-  it("экран загрузки: нет при #якоре и reduced-motion", () => {
+  it("экран загрузки: нет при #якоре и ?motion=none", () => {
     expect(runBootScript({ search: "#podbor" }).hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
     sessionStorage.clear();
     document.documentElement.removeAttribute("data-anchor-start");
-    expect(runBootScript({ reduced: true }).hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
+    expect(runBootScript({ search: "?motion=none" }).hasAttribute(PRELOADER_ATTRIBUTE)).toBe(false);
   });
 
   // PLAN §10, п. 17: на телефоне первый экран — только постер, ждать экрану загрузки нечего.

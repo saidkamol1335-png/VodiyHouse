@@ -1,12 +1,13 @@
 import type { LocalizedText } from "@/lib/contacts";
 import { complexRoute, ROUTES } from "@/lib/routes";
-import { cardPrice, cheapest, type CardPrice } from "@/lib/site/catalog/card";
+import { cardPays, cardPrice, cheapest, type CardPrice } from "@/lib/site/catalog/card";
 import { NO_FILTER, type CatalogFilter } from "@/lib/site/catalog/filter";
 import { countMatchingFlats } from "@/lib/site/catalog/flats";
 import { searchFromFilter } from "@/lib/site/catalog/params";
 import { COLLECTION_PARAM } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog, withoutSoon } from "@/lib/site/catalog/sort";
+import { projectComplexes } from "@/lib/site/home/projects";
 import type { ShowcaseAd, ShowcaseCollection, ShowcaseSpecial, SiteShowcase } from "./records";
 
 // Витрина на сайте (3.16б): всё считается из одного ответа каталога — страница статичная. Подборка
@@ -146,6 +147,8 @@ export type AdView = {
   payment: CardPrice | null;
   /** Куда ведёт «Показать N квартир»: страница ЖК, подборка из нескольких или каталог с фильтром. */
   href: string;
+  /** Своя реклама Vodiy House (houseAd): без событий ad_view / ad_click — у неё нет записи в ads. */
+  house?: true;
 };
 
 /** Фильтр рекламы «по фильтру» — только ЖК своего застройщика: платная карточка не показывает чужие. */
@@ -173,6 +176,60 @@ function adViewOf(catalog: SiteCatalog, ad: ShowcaseAd): AdView | null {
   };
 }
 
+/**
+ * Своя реклама Vodiy House (мокап vmAd, ТЗ 5.4 «промо застройщика или акция Vodiy House»): место
+ * рекламы на главной не пустует, пока застройщик не купил его. Цифры — из каталога: сначала готовые
+ * 2-комнатные в рассрочку (как в мокапе), затем 2-комнатные в рассрочку, затем весь каталог.
+ */
+export type HouseAd = {
+  kind: "built2" | "inst2" | "all";
+  view: Omit<AdView, "ad">;
+  /** Наибольший срок рассрочки среди ЖК, мес.; null — рассрочки нет. */
+  months: number | null;
+  /** Один застройщик — его имя и slug; несколько — null («Застройщики-партнёры»). */
+  developer: { slug: string; name: string } | null;
+};
+
+const HOUSE_FILTERS: readonly { kind: HouseAd["kind"]; filter: CatalogFilter }[] = [
+  { kind: "built2", filter: { ...NO_FILTER, rooms: [2], deadline: "built", payments: ["inst"] } },
+  { kind: "inst2", filter: { ...NO_FILTER, rooms: [2], payments: ["inst"] } },
+  { kind: "all", filter: NO_FILTER },
+];
+
+export function houseAd(catalog: SiteCatalog): HouseAd | null {
+  for (const { kind, filter } of HOUSE_FILTERS) {
+    const complexes = withoutSoon(filterCatalog(catalog, filter));
+    if (complexes.length === 0) continue;
+    const count = { complexes: complexes.length, ...countFlats(complexes, catalog, filter) };
+    if (kind !== "all" && count.flats === 0) continue;
+    const payments = complexes.flatMap((complex) => {
+      const price = cardPrice(complex, catalog);
+      return price?.payment ? [{ ...price, amount: price.payment }] : [];
+    });
+    const developerIds = [...new Set(complexes.map((complex) => complex.developerId))];
+    const one = developerIds.length === 1 ? catalog.developers.find((entry) => entry.id === developerIds[0]) : undefined;
+    const months = complexes.flatMap((complex) => {
+      const developer = catalog.developers.find((entry) => entry.id === complex.developerId);
+      const value = cardPays(complex, developer).installmentMonths;
+      return value ? [value] : [];
+    });
+    return {
+      kind,
+      months: months.length > 0 ? Math.max(...months) : null,
+      developer: one ? { slug: one.slug, name: one.name } : null,
+      view: {
+        cover: coverOf(null, complexes),
+        complexes: complexes.map(refOf),
+        count,
+        price: priceFromOf(catalog, complexes),
+        payment: cheapest(payments, catalog.rate),
+        href: `${ROUTES.catalog}${searchFromFilter(filter)}`,
+      },
+    };
+  }
+  return null;
+}
+
 /** Первая действующая реклама по порядку руководителя (Г1 A) с цифрами; null — показывать нечего. */
 export function adView(catalog: SiteCatalog, showcase: SiteShowcase): AdView | null {
   for (const ad of showcase.ads) {
@@ -189,6 +246,28 @@ export function cardBadges(showcase: SiteShowcase): Record<string, LocalizedText
     for (const id of special.complexIds) badges[id] ??= special.badge;
   }
   return badges;
+}
+
+/**
+ * Спецпредложение ЖК для ленты «Проекты» на главной (ТЗ 5.6, решение 06.11.2026): первое по порядку
+ * руководителя предложение с этим ЖК (ключ — id ЖК).
+ */
+export function complexSpecials(showcase: SiteShowcase): Record<string, ShowcaseSpecial> {
+  const byComplex: Record<string, ShowcaseSpecial> = {};
+  for (const special of showcase.specials) {
+    for (const id of special.complexIds) byComplex[id] ??= special;
+  }
+  return byComplex;
+}
+
+/**
+ * Есть ли предложение на карточке ленты «Проекты»: по нему виден пункт «Спецпредложения» в меню (якорь
+ * ленты). ЖК «Скоро», без обложки или лента короче трёх ЖК — не в счёт: там предложения не видно.
+ */
+export function gallerySpecials(catalog: SiteCatalog | null, showcase: SiteShowcase): boolean {
+  if (!catalog || showcase.specials.length === 0) return false;
+  const byComplex = complexSpecials(showcase);
+  return projectComplexes(catalog.complexes).some((complex) => byComplex[complex.id]);
 }
 
 /** «Подарок» на карточке цены ЖК — первое действующее предложение-подарок с этим ЖК. */

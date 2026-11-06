@@ -67,13 +67,13 @@ export function whenMotionDecided(limitMs = 3000, doc: Document = document): Pro
   });
 }
 
-/** Порядок: reduced-motion → ?motion → сигналы → сохранённый результат → проба FPS. */
+/** Порядок: ?motion → сигналы → сохранённый результат → проба FPS. «Меньше движения» в ОС не учитывается. */
 export async function detectMotionTier(win: Window = window): Promise<MotionTier> {
-  const verdict = decideFromSignals(readSignals(win));
-  if (verdict === "none") return "none";
-
   const override = parseMotionOverride(win.location.search);
   if (override) return override;
+
+  const verdict = decideFromSignals(readSignals(win));
+  if (verdict === "none") return "none";
   if (verdict === "lite") return "lite";
 
   const saved = readSavedTier(win);

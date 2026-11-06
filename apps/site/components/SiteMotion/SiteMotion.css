@@ -178,6 +178,30 @@
     animation-range: entry 16% entry 71%;
   }
 
+  /* lite (06.11.2026): тот же подъём на view-timeline, но короче и без лесенки по столбцам — анимация
+     привязана к прокрутке и считается на compositor, слабому устройству не мешает. */
+  [data-surface="site"][data-motion="lite"]
+    :is(
+      .catalog-card,
+      .developers-list__row,
+      .partners-formats__card,
+      .site-steps__item,
+      .text-page__section,
+      .text-page__footer,
+      .about-office__title,
+      .about-office__lead,
+      .about-office__card,
+      .complex-documents__item,
+      .developer-about__text,
+      .developer-about__checks li,
+      .developer-objects__head
+    ) {
+    --scroll-rise: 10px;
+    animation: scroll-rise linear backwards;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+
   /* Фото героя застройщика и «О нас» едут в рамке медленнее страницы (тот же параллакс, что у
      карточек каталога). Рамки уже обрезают содержимое (overflow: hidden). */
   [data-surface="site"][data-motion="full"] :is(.developer-hero__cover, .about-hero__media) {
@@ -196,10 +220,10 @@
 /* ─── 4. Наведение ─────────────────────────────────────────────────────────────────────────────
    full: карточки приподнимаются, стрелки кнопок и ссылок шагают вперёд, логотипы чуть крупнее, главные
    кнопки тянутся за курсором («магнит», SiteMotion — только у мыши). Через отдельные свойства translate
-   и scale: transform остаётся появлению при прокрутке и нажатию кнопки. lite — без движения: только
-   проявление подчёркивания ссылок подвала. */
+   и scale: transform остаётся появлению при прокрутке и нажатию кнопки. lite (с 06.11.2026) — то же
+   наведение: переходы короче за счёт токенов --dur-* режима. */
 
-[data-surface="site"][data-motion="full"]
+[data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
   :is(
     .developer-programs__card,
     .partners-formats__card,
@@ -211,7 +235,7 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  [data-surface="site"][data-motion="full"]
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
     :is(
       .developer-programs__card,
       .partners-formats__card,
@@ -222,26 +246,26 @@
     translate: 0 -4px;
   }
 
-  [data-surface="site"][data-motion="full"]
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
     :is(.button, .developer-programs__calc)
     > svg:last-child {
     transition: translate var(--dur-base) var(--ease);
   }
 
   /* Первый ребёнок кнопки — слой пламени: стрелка шагает, только если перед ней есть текст в теге. */
-  [data-surface="site"][data-motion="full"] .button:not(:disabled):hover > svg:last-child:not(.button__flame + svg),
-  [data-surface="site"][data-motion="full"]
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"]) .button:not(:disabled):hover > svg:last-child:not(.button__flame + svg),
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
     .developer-programs__calc:hover
     > svg:last-child:not(:first-child) {
     translate: 3px 0;
   }
 
-  [data-surface="site"][data-motion="full"]
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
     :is(.developers-list__logo, .developer-others__logo, .partners-formats__icon) {
     transition: scale var(--dur-slow) var(--ease);
   }
 
-  [data-surface="site"][data-motion="full"]
+  [data-surface="site"]:is([data-motion="full"], [data-motion="lite"])
     :is(
       .developers-list__row:hover .developers-list__logo,
       .developer-others__card:hover .developer-others__logo,

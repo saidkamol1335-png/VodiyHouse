@@ -52,11 +52,11 @@
   transform: translate(-50%, -50%);
 }
 
-[data-motion="full"] .complex-videos__play {
+:is([data-motion="full"], [data-motion="lite"]) .complex-videos__play {
   transition: transform var(--dur-base) var(--ease);
 }
 
-[data-motion="full"] .complex-videos__poster:hover .complex-videos__play {
+:is([data-motion="full"], [data-motion="lite"]) .complex-videos__poster:hover .complex-videos__play {
   transform: translate(-50%, -50%) scale(1.08);
 }
 

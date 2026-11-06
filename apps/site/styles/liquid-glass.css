@@ -362,12 +362,10 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root[data-surface="site"]
-    :is(.button, .icon-button, .phone-button, .filter-pills__pill, .segmented__item),
-  :root[data-surface="site"]
-    :is(.button, .icon-button, .phone-button, .filter-pills__pill)::before {
-    transition: none;
-    animation: none;
-  }
+:root[data-surface="site"][data-motion="none"]
+  :is(.button, .icon-button, .phone-button, .filter-pills__pill, .segmented__item),
+:root[data-surface="site"][data-motion="none"]
+  :is(.button, .icon-button, .phone-button, .filter-pills__pill)::before {
+  transition: none;
+  animation: none;
 }

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "./fixtures";
 import { attachShot, collectPageErrors } from "./helpers";
 
 // «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17): full на ≥ 768 px — секция закрепляется, трек
-// едет влево, названия — параллакс; lite, телефон и reduced-motion — нативная лента со scroll-snap.
+// едет влево, названия — параллакс; lite, телефон и ?motion=none — нативная лента со scroll-snap.
 
 const gallery = (page: Page) => page.locator(".jk-gallery");
 const pinned = (page: Page) => page.locator(".jk-gallery--pinned");
@@ -43,7 +43,7 @@ test.describe("главная — «Проекты Vodiy House»", () => {
     await expect(cards.last()).toContainText("Все ЖК");
     const { top, length } = await pinPath(page);
     expect(length).toBeGreaterThan(200);
-    const title = page.locator(".jk-gallery__title").nth(1);
+    const title = page.locator(".jk-gallery__caption").nth(1);
     const titleShift = () =>
       title.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).m41);
     await scrollTo(page, top + 2);
@@ -93,13 +93,12 @@ test.describe("главная — «Проекты Vodiy House»", () => {
       .toBe(true);
   });
 
-  test("1440, lite и reduced-motion: лента без закрепления, прокручивается сама", async ({
+  test("1440, lite и none: лента без закрепления, прокручивается сама", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    for (const setup of ["lite", "reduce"] as const) {
-      if (setup === "reduce") await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.goto(setup === "lite" ? "/ru?motion=lite" : "/ru");
+    for (const setup of ["lite", "none"] as const) {
+      await page.goto(`/ru?motion=${setup}`);
       await gallery(page).scrollIntoViewIfNeeded();
       await page.waitForTimeout(800);
       await expect(pinned(page)).toHaveCount(0);

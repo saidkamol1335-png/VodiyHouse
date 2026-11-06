@@ -13,8 +13,10 @@ import { SiteMotion } from "@/components/SiteMotion";
 import { siteMessages } from "@/lib/i18n/clientMessages";
 import { isLocale, LOCALES } from "@/lib/i18n/routing";
 import { hiddenNav } from "@/lib/routes";
+import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { readSiteContacts } from "@/lib/site/contacts";
 import { SITE_NAME, siteOrigin } from "@/lib/site/metadata";
+import { gallerySpecials } from "@/lib/site/showcase/model";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
 import "../globals.css";
 import "../site.css";
@@ -42,13 +44,15 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SiteLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await rootLocale();
   if (!isLocale(locale)) notFound();
-  const [contacts, messages, showcase] = await Promise.all([
+  const [contacts, messages, showcase, catalog] = await Promise.all([
     readSiteContacts(),
     getMessages(),
     readSiteShowcase(),
+    readSiteCatalog(),
   ]);
-  // «Спецпредложения» в меню — якорь раздела главной: без действующих предложений и рекламы пункта нет.
-  const specials = showcase.specials.length > 0 || showcase.ads.length > 0;
+  // «Спецпредложения» в меню — якорь ленты «Проекты» на главной: пункт есть, только когда предложение
+  // видно на её карточке (ревью 06.11.2026).
+  const specials = gallerySpecials(catalog, showcase);
   return (
     <RootDocument lang={locale} surface="site" messages={siteMessages(messages)}>
       <SiteContactsProvider contacts={contacts}>

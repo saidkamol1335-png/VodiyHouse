@@ -140,7 +140,7 @@
   border-color: var(--amber-line);
 }
 
-[data-motion="full"] .quiz__thumb:hover {
+:is([data-motion="full"], [data-motion="lite"]) .quiz__thumb:hover {
   transform: translateY(-2px);
 }
 

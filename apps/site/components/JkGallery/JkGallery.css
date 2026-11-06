@@ -8,6 +8,7 @@
   --jk-card-h: min(80svh, 760px);
   --jk-fg: #faf8f4;
   --jk-fg-2: rgba(250, 248, 244, 0.84);
+  --jk-badge: var(--amber);
   --jk-scrim: linear-gradient(
     180deg,
     rgba(14, 12, 10, 0.5) 0%,
@@ -102,10 +103,18 @@
   border-radius: 0;
 }
 
-.jk-gallery__title {
+/* Название и предложение под ним — одной колонкой у нижнего края (с 06.11.2026, ТЗ 5.6). */
+.jk-gallery__caption {
   position: absolute;
   left: clamp(20px, 3vw, 44px);
   bottom: clamp(56px, 9%, 96px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(12px, 1.4vw, 20px);
+}
+
+.jk-gallery__title {
   max-width: none;
   font-size: var(--jk-title-size);
   font-weight: 600;
@@ -113,6 +122,62 @@
   line-height: 0.92;
   white-space: nowrap;
   text-shadow: 0 2px 30px rgba(14, 12, 10, 0.28);
+}
+
+.jk-gallery__offer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: min(52ch, 46vw);
+  color: var(--jk-fg);
+  text-shadow: 0 1px 18px rgba(14, 12, 10, 0.4);
+}
+
+.jk-gallery__badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--jk-badge);
+  color: #1d150a;
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+.jk-gallery__offer-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(20px, 2vw, 34px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.jk-gallery__offer-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: var(--jk-fg-2);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+}
+
+.jk-gallery__until {
+  color: var(--jk-fg-2);
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.jk-gallery__until--hot {
+  color: var(--jk-badge);
 }
 
 .jk-gallery__meta {
@@ -234,18 +299,18 @@
 }
 
 .jk-gallery--pinned[data-live] .jk-gallery__track,
-.jk-gallery--pinned[data-live] .jk-gallery__title,
+.jk-gallery--pinned[data-live] .jk-gallery__caption,
 .jk-gallery--pinned[data-live] .jk-gallery__media {
   will-change: transform;
 }
 
-/* Наведение на карточку — только full: фото чуть ближе (transform), на телефоне и в lite — нет. */
+/* Наведение на карточку — full и lite (с 06.11.2026): фото чуть ближе (transform); на телефоне — нет. */
 @media (hover: hover) {
-  :root[data-motion="full"] .jk-gallery__photo .site-photo__image {
+  :root:is([data-motion="full"], [data-motion="lite"]) .jk-gallery__photo .site-photo__image {
     transition: transform 0.7s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
-  :root[data-motion="full"] .jk-gallery__link:hover .site-photo__image {
+  :root:is([data-motion="full"], [data-motion="lite"]) .jk-gallery__link:hover .site-photo__image {
     transform: scale(1.03);
   }
 }
@@ -264,14 +329,23 @@
     width: 84vw;
   }
 
-  .jk-gallery__title {
+  .jk-gallery__caption {
     right: 20px;
+  }
+
+  .jk-gallery__title {
     white-space: normal;
+  }
+
+  .jk-gallery__offer {
+    max-width: none;
+  }
+
+  .jk-gallery__offer-text {
+    display: none;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .jk-gallery__viewport {
-    scroll-snap-type: none;
-  }
+[data-motion="none"] .jk-gallery__viewport {
+  scroll-snap-type: none;
 }

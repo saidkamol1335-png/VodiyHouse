@@ -42,7 +42,7 @@ Vodiy House — агентство новостроек в Фергане. Дв�
 - prettier — только по изменённым файлам, никогда по папке.
 
 ## Анимации
-Два режима через <html data-motion="full|lite">, старт в lite, prefers-reduced-motion → none. Только transform и opacity.
+Два режима через <html data-motion="full|lite">, старт в lite. prefers-reduced-motion сайт не глушит (решение исполнителя 06.11.2026): none — только ?motion=none; кабинет настройку ОС слушает. Только transform и opacity.
 Автоопределение уже сделано в lib/motion/ — не переписывать. Новая анимация = два CSS-варианта под [data-motion].
 Ручной переключатель для тестов: ?motion=full|lite|none (none — как reduced-motion: без анимаций, первый экран — только постер).
 

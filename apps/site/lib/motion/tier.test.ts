@@ -50,8 +50,8 @@ describe("parseMotionOverride", () => {
 describe("detectMotionTier", () => {
   beforeEach(() => vi.mocked(probeAverageFrameMs).mockReset());
 
-  it("reduced-motion — none даже с ?motion=full", async () => {
-    expect(await detectMotionTier(fakeWindow({ reduced: true, search: "?motion=full" }))).toBe("none");
+  it("«меньше движения» в ОС не мешает: ?motion=full — full", async () => {
+    expect(await detectMotionTier(fakeWindow({ reduced: true, search: "?motion=full" }))).toBe("full");
   });
 
   it("?motion=lite на мощном десктопе — lite без пробы", async () => {

@@ -42,7 +42,7 @@
 }
 
 /* Блик пробегает по кнопке раз в 3,6 с — только в full, через transform (CLAUDE.md §3). */
-[data-motion="full"] .button--primary::after {
+:is([data-motion="full"], [data-motion="lite"]) .button--primary::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -54,8 +54,8 @@
 
 /* Заливка поднимается снизу при наведении (мокап .rh), только full; в lite меняется лишь цвет. */
 @media (hover: hover) {
-  [data-motion="full"] .button--primary:not(:disabled)::before,
-  [data-motion="full"] .button--outline:not(:disabled)::before {
+  :is([data-motion="full"], [data-motion="lite"]) .button--primary:not(:disabled)::before,
+  :is([data-motion="full"], [data-motion="lite"]) .button--outline:not(:disabled)::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -65,16 +65,16 @@
     transition: transform var(--dur-slow) var(--ease);
   }
 
-  [data-motion="full"] .button--outline:not(:disabled)::before {
+  :is([data-motion="full"], [data-motion="lite"]) .button--outline:not(:disabled)::before {
     background: var(--glass-3);
   }
 
-  [data-motion="full"] .button--primary:not(:disabled):hover {
+  :is([data-motion="full"], [data-motion="lite"]) .button--primary:not(:disabled):hover {
     background: var(--action-bg, var(--amber));
   }
 
-  [data-motion="full"] .button--primary:not(:disabled):hover::before,
-  [data-motion="full"] .button--outline:not(:disabled):hover::before {
+  :is([data-motion="full"], [data-motion="lite"]) .button--primary:not(:disabled):hover::before,
+  :is([data-motion="full"], [data-motion="lite"]) .button--outline:not(:disabled):hover::before {
     transform: translateY(0);
   }
 }

@@ -26,7 +26,7 @@
   fill: currentColor;
 }
 
-[data-motion="full"] .favorite-button--on svg {
+:is([data-motion="full"], [data-motion="lite"]) .favorite-button--on svg {
   animation: favorite-button-beat var(--dur-base) var(--ease) both;
 }
 

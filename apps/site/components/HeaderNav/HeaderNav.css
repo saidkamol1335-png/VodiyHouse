@@ -37,7 +37,7 @@
 
 /* Соседи гаснут только в full: в lite наведение меняет лишь цвет. */
 @media (hover: hover) {
-  [data-motion="full"] .header-nav:hover .header-nav__link:not(:hover) {
+  :is([data-motion="full"], [data-motion="lite"]) .header-nav:hover .header-nav__link:not(:hover) {
     opacity: var(--dim-siblings);
   }
 }

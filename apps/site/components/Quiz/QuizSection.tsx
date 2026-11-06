@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Container } from "@/components/Container";
+import { Reveal } from "@/components/Reveal";
 import { pickMessages, QUIZ_MESSAGES } from "@/lib/i18n/clientMessages";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { Quiz, type QuizVariant } from "./Quiz";
@@ -15,6 +16,7 @@ type QuizSectionProps = {
 /** Раздел квиза (3.17): на главной — между предложениями и «в двух словах», на /podbor — вся страница. */
 export async function QuizSection({ id, catalog, variant }: QuizSectionProps) {
   const messages = await getMessages();
+  const liveCatalog = catalog && catalog.complexes.length > 0 ? catalog : null;
   return (
     <section
       id={id}
@@ -23,12 +25,15 @@ export async function QuizSection({ id, catalog, variant }: QuizSectionProps) {
     >
       <Container>
         <NextIntlClientProvider messages={pickMessages(messages, QUIZ_MESSAGES)}>
-          {/* Пустой каталог — без живого счётчика «0 подходит»: квиз остаётся заявкой на подбор. */}
-          <Quiz
-            id={id}
-            catalog={catalog && catalog.complexes.length > 0 ? catalog : null}
-            variant={variant}
-          />
+          {/* Пустой каталог — без живого счётчика «0 подходит»: квиз остаётся заявкой на подбор.
+              На главной квиз ниже первого экрана — проявляется при прокрутке (06.11.2026). */}
+          {variant === "home" ? (
+            <Reveal>
+              <Quiz id={id} catalog={liveCatalog} variant={variant} />
+            </Reveal>
+          ) : (
+            <Quiz id={id} catalog={liveCatalog} variant={variant} />
+          )}
         </NextIntlClientProvider>
       </Container>
     </section>

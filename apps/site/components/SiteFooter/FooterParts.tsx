@@ -4,6 +4,7 @@ import { Clock, Copy, MapPin, Phone, Send } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useNavItems } from "@/components/HiddenNav";
+import { LeadButton } from "@/components/LeadDialog";
 import { RollText } from "@/components/RollText";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { formatPhone, instagramHref, phoneHref, telegramHref } from "@/lib/contacts";
@@ -43,13 +44,15 @@ function InstagramIcon({ size = 18 }: { size?: number }) {
 }
 
 /**
- * «Контакты» с иконками (Hover Footer): только Vodiy House (правило ТЗ 1.2); не введённых в
- * «Настройки → Контакты» — строк нет.
+ * «Контакты» с иконками (Hover Footer, ТЗ 4.2): только Vodiy House (правило ТЗ 1.2); не введённых в
+ * «Настройки → Контакты» — строк нет. Telegram — аккаунт, а без него бот. «Перезвоните мне» есть
+ * всегда (06.11.2026): связаться с Vodiy House можно и без введённых контактов.
  */
 export function FooterContacts() {
   const t = useTranslations("contacts");
   const locale = useLocale() as Locale;
-  const { phone, telegram, instagram, hours } = useSiteContacts();
+  const { phone, instagram, hours, ...rest } = useSiteContacts();
+  const telegram = rest.telegram ?? rest.bot;
   return (
     <ul className="site-footer__contacts">
       {phone ? (
@@ -86,13 +89,27 @@ export function FooterContacts() {
           <span className="site-footer__muted">{hours[locale]}</span>
         </li>
       ) : null}
+      <FooterCallback />
     </ul>
   );
 }
 
-/** Соцсети под чертой (Hover Footer): только введённые Telegram и Instagram Vodiy House. */
+/** «Перезвоните мне» — всегда, и без введённых контактов (ТЗ 1.2: кнопки связи ведут на Vodiy House). */
+function FooterCallback() {
+  const t = useTranslations("contacts");
+  return (
+    <li className="site-footer__callback">
+      <LeadButton intent={{ type: "callback" }} variant="outline" size="sm">
+        {t("callback")}
+      </LeadButton>
+    </li>
+  );
+}
+
+/** Соцсети под чертой (Hover Footer): только введённые Telegram (или бот) и Instagram Vodiy House. */
 export function FooterSocials() {
-  const { telegram, instagram } = useSiteContacts();
+  const { instagram, ...rest } = useSiteContacts();
+  const telegram = rest.telegram ?? rest.bot;
   if (!telegram && !instagram) return <span />;
   return (
     <div className="site-footer__socials">

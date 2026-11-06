@@ -195,11 +195,11 @@
   }
 }
 
-[data-motion="full"] .complex-progress__thumb {
+:is([data-motion="full"], [data-motion="lite"]) .complex-progress__thumb {
   transition: transform var(--dur-base) var(--ease);
 }
 
-[data-motion="full"] .complex-progress__thumb:hover {
+:is([data-motion="full"], [data-motion="lite"]) .complex-progress__thumb:hover {
   transform: scale(1.03);
 }
 

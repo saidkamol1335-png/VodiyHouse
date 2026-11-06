@@ -98,7 +98,7 @@ test.describe("главная, избранное, подборка", () => {
     // Показ рекламы: карточка в кадре → ad_view один раз, уходит пачкой через 4 с. Ждём с самого
     // начала: снимок всей страницы ниже показывает карточку раньше явной прокрутки к ней.
     const sent = page.waitForRequest((request) => request.url().endsWith("/api/e") && request.method() === "POST" && (request.postData() ?? "").includes("ad_view"));
-    const section = page.locator("#spetspredlozheniya");
+    const section = page.locator("#reklama");
     const ad = section.locator(".ad-card");
     await expect(ad).toContainText("Реклама");
     await expect(ad).toContainText("Farg‘ona Sifat Qurilish");
@@ -107,23 +107,21 @@ test.describe("главная, избранное, подборка", () => {
     // Реклама «по фильтру» ограничена ЖК своего застройщика (реши сам 3.16б).
     await expect(ad.getByRole("link", { name: /Показать \d+ квартир/ })).toHaveAttribute("href", "/ru/novostroyki?komnat=2&srok=built&zastr=demo-sifat");
     await expect(ad.getByRole("link", { name: /ЖК Shodlik/ })).toHaveAttribute("href", "/ru/novostroyki/demo-shodlik");
-    const specials = section.locator(".special-card");
-    await expect(specials).toHaveCount(3);
-    const gift = specials.first();
-    await expect(gift.locator(".special-card__badge")).toHaveText("Подарок");
-    await expect(gift).toContainText(/ещё \d+ д/);
-    // Фото карточки — та же ссылка, но скрыта от диктора: доступная одна.
-    await expect(gift.getByRole("link", { name: /ЖК Shodlik · Фергана/ })).toHaveAttribute("href", "/ru/novostroyki/demo-shodlik");
-    await expect(gift.locator(".special-card__media")).toHaveAttribute("aria-hidden", "true");
-    await expect(gift).toContainText(/от \$\d/);
-    await expect(gift).toContainText(/до \d{2}\.\d{2}\.\d{4}/);
-    await expect(specials.nth(1).getByRole("link", { name: "2 ЖК" })).toHaveAttribute("href", /\/ru\/podborka\?zhk=demo-namuna(,|%2C)demo-yulduz$/);
     await expect(section.getByRole("link", { name: "Разместить рекламу" })).toHaveAttribute("href", "/ru/dlya-zastroyshchikov");
+    // Спецпредложения с 06.11.2026 — на карточках ленты «Проекты» (ТЗ 5.6): ЖК с предложением — первыми.
+    const gallery = page.locator("#spetspredlozheniya");
+    await expect(gallery.locator(".eyebrow")).toHaveText(/Спецпредложения/);
+    const offers = gallery.locator(".jk-gallery__offer--special");
+    await expect(offers.first().locator(".jk-gallery__badge")).toBeVisible();
+    await expect(offers.first()).toContainText(/до \d{2}\.\d{2}\.\d{4}( · (ещё \d+ д|последний день))?/);
+    const first = gallery.locator(".jk-gallery__card").first();
+    await expect(first.locator(".jk-gallery__offer--special")).toHaveCount(1);
+    await expect(first.getByRole("link")).toHaveAccessibleName(/ЖК .+ — .+ — до \d{2}\.\d{2}\.\d{4}/);
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
-    // «Хочу это условие» → заявка «Спецпредложение» с названием условия.
-    await gift.getByRole("button", { name: "Хочу это условие" }).click();
+    // «Хочу это условие» у рекламы → заявка «Спецпредложение» с названием условия.
+    await ad.getByRole("button", { name: "Хочу это условие" }).click();
     const dialog = page.getByRole("dialog", { name: "Спецпредложение" });
-    await expect(dialog).toContainText("Кухонный гарнитур в подарок");
+    await expect(dialog).toContainText("Готовые 2-комнатные квартиры в рассрочку");
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await section.scrollIntoViewIfNeeded();
@@ -137,8 +135,9 @@ test.describe("главная, избранное, подборка", () => {
     await page.goto("/uz");
     await expect(page.locator(".collections")).toContainText("Tayyor tanlovlar");
     await expect(page.locator(".collections__card").first()).toContainText("Topshirilgan uylar");
-    const section = page.locator("#spetspredlozheniya");
-    await expect(section.locator(".ad-card__tag")).toHaveText("Reklama");
-    await expect(section.locator(".special-card").first().getByRole("button", { name: "Shu shartni xohlayman" })).toBeVisible();
+    await expect(page.locator("#reklama .ad-card__tag")).toHaveText("Reklama");
+    await expect(page.locator("#reklama").getByRole("button", { name: "Shu shartni xohlayman" })).toBeVisible();
+    await expect(page.locator("#spetspredlozheniya .eyebrow")).toHaveText(/Maxsus takliflar/);
+    await expect(page.locator("#spetspredlozheniya .jk-gallery__until").first()).toContainText(/gacha/);
   });
 });

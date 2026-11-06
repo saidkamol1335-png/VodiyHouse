@@ -54,15 +54,24 @@ h2 {
   text-wrap: balance;
 }
 
-/* prefers-reduced-motion поверх обоих режимов: data-motion="none" ставит скрипт в <head>,
-   это правило — страховка до его выполнения. */
+/* Сайт анимируется и при «уменьшить движение» в ОС (решение исполнителя 06.11.2026): выключает
+   анимации только ручной ?motion=none. Кабинет по-прежнему слушает настройку ОС. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-surface="site"]) *,
+  :root:not([data-surface="site"]) *::before,
+  :root:not([data-surface="site"]) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+:root[data-surface="site"][data-motion="none"] *,
+:root[data-surface="site"][data-motion="none"] *::before,
+:root[data-surface="site"][data-motion="none"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }

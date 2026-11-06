@@ -9,7 +9,10 @@ import {
   collectionCount,
   collectionResults,
   complexGift,
+  complexSpecials,
   daysLeft,
+  gallerySpecials,
+  houseAd,
   searchWithCollection,
   specialView,
   visibleCollections,
@@ -218,5 +221,72 @@ describe("реклама (Г1 A)", () => {
 
   it("один ЖК — ссылка на его страницу", () => {
     expect(adView(catalog, showcase({ ads: [ad("one", { complexIds: ["id-c"] })] }))!.href).toBe("/novostroyki/c");
+  });
+});
+
+describe("лента «Проекты» со спецпредложениями (06.11.2026)", () => {
+  it("у ЖК — первое по порядку предложение с ним; без предложения — ключа нет", () => {
+    const list = showcase({
+      specials: [special("s1", { complexIds: ["id-a"] }), special("s2", { complexIds: ["id-a", "id-b"] })],
+    });
+    const byComplex = complexSpecials(list);
+    expect(byComplex["id-a"]?.id).toBe("s1");
+    expect(byComplex["id-b"]?.id).toBe("s2");
+    expect(byComplex["id-c"]).toBeUndefined();
+  });
+
+  it("пункт меню — только когда предложение видно на ленте (ЖК с обложкой, лента не короче трёх)", () => {
+    const withPhotos: SiteCatalog = {
+      ...catalog,
+      complexes: catalog.complexes.map((item) => ({ ...item, photos: [photo(`${item.slug}.jpg`)] })),
+    };
+    expect(gallerySpecials(withPhotos, showcase({ specials: [special("s1", { complexIds: ["id-c"] })] }))).toBe(true);
+    // c без обложки → в ленте два ЖК (меньше трёх) → ленты нет.
+    expect(gallerySpecials(catalog, showcase({ specials: [special("s1", { complexIds: ["id-a"] })] }))).toBe(false);
+    expect(gallerySpecials(withPhotos, showcase({}))).toBe(false);
+    expect(gallerySpecials(null, showcase({ specials: [special("s1", {})] }))).toBe(false);
+  });
+});
+
+describe("своя реклама Vodiy House (мокап vmAd)", () => {
+  const installment = {
+    id: "i",
+    program: {
+      type: "installment",
+      method: "tiers",
+      tiers: [{ minDownPct: 30, minMonths: 1, maxMonths: 36 }],
+      presetMonths: [12, 24, 36],
+      allowCustomMonths: true,
+      overMaxBehavior: "block",
+    },
+    bank: null,
+    blocksScope: "all",
+    blockIds: [],
+  } as unknown as SiteCatalog["developers"][number]["programs"][number];
+
+  it("готовые 2-комнатные в рассрочку: ЖК, застройщик, срок и ссылка на каталог с фильтром", () => {
+    const withInstallment: SiteCatalog = {
+      ...catalog,
+      developers: [{ ...sifat, programs: [installment] }, { ...kamalak, programs: [] }],
+    };
+    const house = houseAd(withInstallment)!;
+    expect(house.kind).toBe("built2");
+    expect(house.view.complexes.map((c) => c.slug)).toEqual(["c"]);
+    expect(house.developer).toEqual({ slug: "sifat", name: "Sifat" });
+    expect(house.months).toBe(36);
+    expect(house.view.href).toBe("/novostroyki?komnat=2&srok=built&oplata=inst");
+  });
+
+  it("без рассрочки — весь каталог, «Застройщики-партнёры» (developer null), срока нет", () => {
+    const house = houseAd(catalog)!;
+    expect(house.kind).toBe("all");
+    expect(house.view.complexes).toHaveLength(3);
+    expect(house.developer).toBeNull();
+    expect(house.months).toBeNull();
+    expect(house.view.href).toBe("/novostroyki");
+  });
+
+  it("пустой каталог — рекламы нет", () => {
+    expect(houseAd({ ...catalog, complexes: [] })).toBeNull();
   });
 });

@@ -105,7 +105,9 @@ function PhoneMenuNav() {
 function PhoneMenuContacts() {
   const t = useTranslations("contacts");
   const locale = useLocale() as Locale;
-  const { phone, telegram, instagram, hours } = useSiteContacts();
+  const { phone, instagram, hours, ...rest } = useSiteContacts();
+  // Telegram — аккаунт Vodiy House, а без него бот (ТЗ 10.5).
+  const telegram = rest.telegram ?? rest.bot;
   return (
     <div className="phone-menu__contacts">
       {phone ? <ContactRow icon={<Phone {...ICON} aria-hidden />} label={t("phone")} value={formatPhone(phone)} href={phoneHref(phone)} /> : null}

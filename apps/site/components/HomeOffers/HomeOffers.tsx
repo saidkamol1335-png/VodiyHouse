@@ -6,31 +6,35 @@ import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { Reveal } from "@/components/Reveal";
-import { SpecialsGrid } from "@/components/SpecialsGrid";
 import { pickMessages, SHOWCASE_MESSAGES } from "@/lib/i18n/clientMessages";
 import { Link } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/routes";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
-import { adView, visibleSpecials } from "@/lib/site/showcase/model";
+import { NO_FILTER } from "@/lib/site/catalog/filter";
+import { adView, houseAd, type AdView } from "@/lib/site/showcase/model";
 import type { SiteShowcase } from "@/lib/site/showcase/records";
 
 type HomeOffersProps = {
-  /** Якорь раздела — пункт «Спецпредложения» в шапке и подвале (OFFERS_ANCHOR). */
+  /** Якорь раздела рекламы (AD_ANCHOR); «Спецпредложения» в шапке с 06.11.2026 ведут в ленту «Проекты». */
   id: string;
   catalog: SiteCatalog;
   showcase: SiteShowcase;
 };
 
 /**
- * «Предложения от застройщиков» (3.16б, мокап .sec--spec): одна карточка рекламы по порядку
- * руководителя (Г1 A), ниже — спецпредложения: сетка на 1440, лента с точками на 390 (MobSpecials).
- * Справа — «Разместить рекламу» → «Застройщикам». Нет ни рекламы, ни предложений — раздела нет.
+ * «Предложения от застройщиков» (3.16б, мокап .sec--spec; ТЗ 5.4 «Рекламный баннер»): одна карточка
+ * рекламы по порядку руководителя (Г1 A); пока застройщик не купил место — своя реклама Vodiy House из
+ * каталога (мокап vmAd). Справа — «Разместить рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 —
+ * в ленте «Проекты» (JkGallery), здесь их нет. Нет каталога для карточки — раздела нет.
  */
 export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
-  const ad = adView(catalog, showcase);
-  const specials = visibleSpecials(catalog, showcase);
-  if (!ad && specials.length === 0) return null;
-  const [t, messages] = await Promise.all([getTranslations("showcase.offers"), getMessages()]);
+  const [t, house, messages] = await Promise.all([
+    getTranslations("showcase.offers"),
+    getTranslations("showcase.house"),
+    getMessages(),
+  ]);
+  const ad = adView(catalog, showcase) ?? houseAdView(catalog, house);
+  if (!ad) return null;
   return (
     <section id={id} className="home-offers" aria-labelledby={`${id}-title`}>
       <Container>
@@ -50,18 +54,36 @@ export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
           </Link>
         </Reveal>
         <NextIntlClientProvider messages={pickMessages(messages, SHOWCASE_MESSAGES)}>
-          {ad ? (
-            <Reveal>
-              <AdCard view={ad} />
-            </Reveal>
-          ) : null}
-          {specials.length > 0 ? (
-            <Reveal variant="group">
-              <SpecialsGrid specials={specials} />
-            </Reveal>
-          ) : null}
+          <Reveal>
+            <AdCard view={ad} />
+          </Reveal>
         </NextIntlClientProvider>
       </Container>
     </section>
   );
+}
+
+type HouseText = Awaited<ReturnType<typeof getTranslations<"showcase.house">>>;
+
+/** Своя реклама Vodiy House: цифры — houseAd, тексты — на языке страницы (страница статична по языку). */
+function houseAdView(catalog: SiteCatalog, t: HouseText): AdView | null {
+  const house = houseAd(catalog);
+  if (!house) return null;
+  const title = t(`${house.kind}.title`);
+  const text = house.months && house.kind !== "all" ? t(`${house.kind}.text`, { m: house.months }) : t("all.text");
+  const same = (value: string) => ({ ru: value, uz: value });
+  return {
+    ...house.view,
+    house: true,
+    ad: {
+      id: "vodiy-house",
+      title: same(title),
+      text: same(text),
+      developer: { id: "", slug: house.developer?.slug ?? "", name: house.developer?.name ?? t("developers") },
+      complexIds: [],
+      filter: NO_FILTER,
+      validTo: "",
+      cover: null,
+    },
+  };
 }

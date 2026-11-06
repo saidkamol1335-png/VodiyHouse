@@ -24,7 +24,6 @@ var n=performance.getEntriesByType("navigation")[0];if(n&&(n.type==="reload"||n.
 var p=new URLSearchParams(location.search);if(/\\/novostroyki\\/?$/.test(location.pathname)&&${JSON.stringify(CATALOG_FILTER_PARAMS)}.some(function(k){return p.has(k)})){d.setAttribute(${PENDING},"");setTimeout(function(){d.removeAttribute(${PENDING})},${CATALOG_PENDING_TIMEOUT_MS});}}catch(e){}try{
 var q=new URLSearchParams(location.search).get(${JSON.stringify(MOTION_QUERY_PARAM)});
 var m=(q==="full"||q==="lite"||q==="none")?q:localStorage.getItem(${JSON.stringify(MOTION_STORAGE_KEY)});
-if(matchMedia("(prefers-reduced-motion: reduce)").matches)m="none";
 if(m==="full"||m==="lite"||m==="none")d.setAttribute("data-motion",m);
 var s=sessionStorage.getItem(${JSON.stringify(PRELOADER_SEEN_KEY)});sessionStorage.setItem(${JSON.stringify(PRELOADER_SEEN_KEY)},"1");
 if(!s&&/^\\/(${LOCALES.join("|")})\\/?$/.test(location.pathname)&&!d.hasAttribute("${ANCHOR_START_ATTRIBUTE}")&&m!=="none"&&!matchMedia(${JSON.stringify(POSTER_ONLY_QUERY)}).matches&&!(navigator.connection&&navigator.connection.saveData)){d.setAttribute("${PRELOADER_ATTRIBUTE}","");setTimeout(function(){d.removeAttribute("${PRELOADER_ATTRIBUTE}")},${PRELOADER_FAILSAFE_MS});}}catch(e){}})();`;

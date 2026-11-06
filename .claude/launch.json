@@ -22,7 +22,7 @@
       "name": "vodiyhouse-prod-copy",
       "runtimeExecutable": "node",
       "runtimeArgs": [
-        "C:/Users/Alocomputers/Desktop/VH_release/apps/site/scripts/dev-prod-copy.mjs"
+        "C:/Users/Alocomputers/Desktop/VH_mijoz/apps/site/scripts/dev-prod-copy.mjs"
       ],
       "port": 3006
     },

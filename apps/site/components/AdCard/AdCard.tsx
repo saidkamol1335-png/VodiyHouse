@@ -27,12 +27,12 @@ export function AdCard({ view }: { view: AdView }) {
   const t = useTranslations("showcase");
   const locale = useLocale() as Locale;
   const card = useRef<HTMLElement>(null);
-  useAdView(card, view.ad.id);
+  useAdView(card, view.house ? null : view.ad.id);
   const title = view.ad.title[locale];
   const text = view.ad.text?.[locale];
   return (
     // Подсветка за курсором (мокап .adb.spot): только full и только мышь — решает CSS .spotlight.
-    <article ref={card} className="ad-card spotlight" onPointerMove={spotlight} data-track-entity={`ad:${view.ad.id}`} aria-label={t("ad.label", { title })}>
+    <article ref={card} className="ad-card spotlight" onPointerMove={spotlight} data-track-entity={view.house ? undefined : `ad:${view.ad.id}`} aria-label={t("ad.label", { title })}>
       <div className="ad-card__media">
         {view.cover ? <SitePhoto photo={view.cover} alt="" frame="card" sizes={SIZES} className="ad-card__photo" /> : null}
         <span className="ad-card__tag">{t("ad.tag")}</span>
@@ -42,13 +42,13 @@ export function AdCard({ view }: { view: AdView }) {
         <h3 className="ad-card__title">{title}</h3>
         {text ? <p className="ad-card__text">{text}</p> : null}
         <AdFacts view={view} />
-        <AdChips complexes={view.complexes} />
+        <AdChips complexes={view.complexes} tracked={!view.house} />
         <div className="ad-card__buttons">
-          <Link href={view.href} className="button button--primary ad-card__show" data-track="ad_click">
+          <Link href={view.href} className="button button--primary ad-card__show" data-track={view.house ? undefined : "ad_click"}>
             {view.count.flats > 0 ? t("ad.show", { n: view.count.flats }) : t("ad.showComplexes", { n: view.count.complexes })}
             <ArrowRight size={16} strokeWidth={2} aria-hidden />
           </Link>
-          <LeadButton intent={{ type: "promo", object: { developer: view.ad.developer.slug }, context: title, promo: { title } }} variant="outline" />
+          <LeadButton intent={{ type: "promo", object: view.ad.developer.slug ? { developer: view.ad.developer.slug } : {}, context: title, promo: { title } }} variant="outline" />
         </div>
       </div>
     </article>
@@ -82,7 +82,7 @@ function AdFacts({ view }: { view: AdView }) {
 }
 
 /** Чипы «ЖК Shodlik · Фергана →» (мокап .adb__jks): ведут на страницу ЖК, считаются кликом по рекламе. */
-function AdChips({ complexes }: { complexes: readonly ShowcaseComplexRef[] }) {
+function AdChips({ complexes, tracked }: { complexes: readonly ShowcaseComplexRef[]; tracked: boolean }) {
   const t = useTranslations("showcase");
   const locale = useLocale() as Locale;
   if (complexes.length === 0) return null;
@@ -91,7 +91,7 @@ function AdChips({ complexes }: { complexes: readonly ShowcaseComplexRef[] }) {
     <ul className="ad-card__complexes">
       {shown.map((complex) => (
         <li key={complex.id}>
-          <Link href={complexRoute(complex.slug)} className="ad-card__chip" data-track="ad_click">
+          <Link href={complexRoute(complex.slug)} className="ad-card__chip" data-track={tracked ? "ad_click" : undefined}>
             {[t("complex", { name: complex.name[locale] }), complex.location?.[locale]].filter(Boolean).join(" · ")}
             <ArrowRight size={12} strokeWidth={2} aria-hidden />
           </Link>

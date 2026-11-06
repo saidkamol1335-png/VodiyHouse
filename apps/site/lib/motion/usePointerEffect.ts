@@ -17,7 +17,7 @@ export type PointerEffect = PointerSubscriber & {
 export function usePointerEffect(create: () => PointerEffect, enabled = true): void {
   const tier = useMotion();
   const fine = useFinePointer();
-  const on = enabled && fine && tier === "full";
+  const on = enabled && fine && tier !== "none";
   useEffect(() => {
     if (!on) return;
     const effect = create();

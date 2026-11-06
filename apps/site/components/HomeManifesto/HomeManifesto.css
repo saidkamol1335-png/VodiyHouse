@@ -24,7 +24,7 @@
 }
 
 @supports (animation-timeline: view()) {
-  [data-motion="full"] .home-manifesto__word {
+  :is([data-motion="full"], [data-motion="lite"]) .home-manifesto__word {
     animation: home-manifesto-word linear both;
     animation-range: cover calc(6% + var(--word) * 36%) cover calc(15% + var(--word) * 36%);
     animation-timeline: view();
