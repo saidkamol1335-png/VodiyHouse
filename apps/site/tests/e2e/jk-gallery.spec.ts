@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "./fixtures";
 import { attachShot, collectPageErrors } from "./helpers";
 
-// «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17): full на ≥ 768 px — секция закрепляется, трек
-// едет влево, названия — параллакс; lite, телефон и ?motion=none — нативная лента со scroll-snap.
+// «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17): full и lite (с 06.11.2026) на ≥ 768 px —
+// секция закрепляется, трек едет влево, названия — параллакс; телефон и ?motion=none — нативная лента
+// со scroll-snap.
 
 const gallery = (page: Page) => page.locator(".jk-gallery");
 const pinned = (page: Page) => page.locator(".jk-gallery--pinned");
@@ -93,11 +94,15 @@ test.describe("главная — «Проекты Vodiy House»", () => {
       .toBe(true);
   });
 
-  test("1440, lite и none: лента без закрепления, прокручивается сама", async ({
+  test("1440: lite — закреплена, none — лента без закрепления, прокручивается сама", async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
-    for (const setup of ["lite", "none"] as const) {
+    await page.goto("/ru?motion=lite");
+    await gallery(page).scrollIntoViewIfNeeded();
+    await expect(pinned(page)).toHaveCount(1, { timeout: 15_000 });
+    await noPageOverflow(page);
+    for (const setup of ["none"] as const) {
       await page.goto(`/ru?motion=${setup}`);
       await gallery(page).scrollIntoViewIfNeeded();
       await page.waitForTimeout(800);

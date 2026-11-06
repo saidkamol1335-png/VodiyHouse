@@ -47,12 +47,13 @@ type JkGalleryText = {
   hint: string;
 };
 
-/** Pin и горизонтальный трек — только full и ≥ 768 px (gsap.matchMedia); настройку ОС не слушаем. */
+/** Pin и горизонтальный трек — full и lite на ≥ 768 px (gsap.matchMedia); настройку ОС не слушаем. */
 const PINNED_QUERY = "(min-width: 768px)";
 
 /**
- * Лента ЖК. По умолчанию (lite, none, телефон, без JS) — нативная горизонтальная прокрутка со
- * scroll-snap. В full на широком экране секция закрепляется, трек едет влево на всю свою длину
+ * Лента ЖК. По умолчанию (none, телефон, без JS) — нативная горизонтальная прокрутка со
+ * scroll-snap. В full и lite (с 06.11.2026, слово исполнителя: «при скролле должна листаться
+ * горизонтально») на широком экране секция закрепляется, трек едет влево на всю свою длину
  * (scrub), названия — со своей скоростью (containerAnimation), фото въезжает 1.08 → 1. Tab по
  * карточкам прокручивает страницу к карточке. Анимируются только transform.
  */
@@ -106,7 +107,7 @@ function GalleryHead({ text }: { text: JkGalleryText }) {
   );
 }
 
-/** Закрепление — только в full: GSAP грузится отдельным чанком, откат при смене режима. */
+/** Закрепление — в full и lite: GSAP грузится отдельным чанком, откат при смене режима (none — нет). */
 function useGalleryPin(
   sectionRef: RefObject<HTMLElement | null>,
   trackRef: RefObject<HTMLElement | null>,
@@ -115,7 +116,7 @@ function useGalleryPin(
   useEffect(() => {
     const section = sectionRef.current;
     const track = trackRef.current;
-    if (tier !== "full" || !section || !track) return;
+    if (tier === "none" || !section || !track) return;
     let cancelled = false;
     let revert: (() => void) | null = null;
     loadGsap()
