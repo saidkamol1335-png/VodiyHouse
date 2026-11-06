@@ -1,0 +1,28 @@
+/* «Витрина → Реклама»: карточка своей рекламы Vodiy House — пояснение, тумблер, что сейчас на главной. */
+.house-ad {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.house-ad__lead,
+.house-ad__now {
+  margin: 0;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}
+
+.house-ad__now {
+  color: var(--fg-2);
+}
+
+.house-ad__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

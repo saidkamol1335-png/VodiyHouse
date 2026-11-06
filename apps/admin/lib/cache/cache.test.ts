@@ -77,6 +77,8 @@ const CONTENT_FILES = [
   "contacts.ts",
   // Архив кнопок фильтра сайта (06.11.2026): expireSiteSettings.
   "filterArchive.ts",
+  // Своя реклама Vodiy House (06.11.2026): expireSiteSettings.
+  "houseAd.ts",
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",

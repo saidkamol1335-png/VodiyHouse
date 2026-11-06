@@ -11,6 +11,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/routes";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { NO_FILTER } from "@/lib/site/catalog/filter";
+import { readHouseAdSettings } from "@/lib/site/houseAd";
 import { adView, houseAd, type AdView } from "@/lib/site/showcase/model";
 import type { SiteShowcase } from "@/lib/site/showcase/records";
 
@@ -24,16 +25,18 @@ type HomeOffersProps = {
 /**
  * «Предложения от застройщиков» (3.16б, мокап .sec--spec; ТЗ 5.4 «Рекламный баннер»): одна карточка
  * рекламы по порядку руководителя (Г1 A); пока застройщик не купил место — своя реклама Vodiy House из
- * каталога (мокап vmAd). Справа — «Разместить рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 —
+ * каталога (мокап vmAd), если её не выключили в «Витрина → Реклама». Справа — «Разместить рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 —
  * в ленте «Проекты» (JkGallery), здесь их нет. Нет каталога для карточки — раздела нет.
  */
 export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
-  const [t, house, messages] = await Promise.all([
+  const [t, house, messages, houseSettings] = await Promise.all([
     getTranslations("showcase.offers"),
     getTranslations("showcase.house"),
     getMessages(),
+    readHouseAdSettings(),
   ]);
-  const ad = adView(catalog, showcase) ?? houseAdView(catalog, house);
+  // Своя реклама — только если руководитель её не выключил («Витрина → Реклама», 06.11.2026).
+  const ad = adView(catalog, showcase) ?? (houseSettings.enabled ? houseAdView(catalog, house) : null);
   if (!ad) return null;
   return (
     <section id={id} className="home-offers" aria-labelledby={`${id}-title`}>
