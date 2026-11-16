@@ -69,7 +69,7 @@ export function ComplexPlans({ sectionId, cards, hints, complexSlug, complexName
             />
             {calc.open?.layoutId === card.layout.id ? (
               <div className="complex-plans__calc">
-                <FlatCalculator key={`${card.layout.id}-${calc.open.round}`} id="complex-flat-calc" screen={calc.open.screen} initialParams={INITIAL_PARAMS} lead={leadEnabled ? { complex: complexSlug, layout: card.layout.id } : null} onClose={calc.close} hints={hints} />
+                <FlatCalculator key={`${card.layout.id}-${calc.open.round}`} id="complex-flat-calc" screen={calc.open.screen} initialParams={INITIAL_PARAMS} lead={leadEnabled ? { complex: complexSlug, layout: card.layout.id } : null} onClose={calc.close} hints={hints} onZoomPlan={() => setZoom(card)} />
               </div>
             ) : null}
           </Fragment>

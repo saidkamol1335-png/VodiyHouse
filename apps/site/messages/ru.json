@@ -375,6 +375,8 @@
       "rooms": "{count, plural, =0 {студия} other {#-комн.}}"
     },
     "down": {
+      "chipFrom": "Взнос от {pct}",
+      "chipUpTo": "— до {term}",
       "title": "Первоначальный взнос",
       "min": "минимум {pct}",
       "value": "{pct} · {amount}",
@@ -384,6 +386,9 @@
       "now": "сразу"
     },
     "term": {
+      "overMax": "По условиям застройщика — до {max} мес. Нужно дольше? Попробуем договориться",
+      "overMaxButton": "Оставить заявку",
+      "overMaxContext": "Рассрочка дольше {max} мес. — просят {months} мес.",
       "title": "Срок",
       "scheme": "без наценки",
       "markup": "наценка {rate}",
@@ -395,10 +400,8 @@
       "more": "Больше на месяц",
       "unit": "мес.",
       "hint": "Любое целое число месяцев: от {min} до {max} при взносе {down}",
-      "aboveMax": "При взносе {down} можно максимум {max} мес. — считаем на {max} мес.",
       "suggest": "{months} мес. — при взносе {from}–{to}. Сейчас считаем на {max} мес.",
       "suggestButton": "Подставить {from}",
-      "lead": "Больше {max} мес. при взносе {down} — уточним у застройщика",
       "belowMin": "Минимум {min} мес. — считаем на {min} мес."
     },
     "total": {
@@ -485,6 +488,7 @@
     "months": "{count} мес.",
     "years": "{count, plural, one {# год} few {# года} other {# лет}}",
     "flat": {
+      "planZoom": "Открыть чертёж крупно: {title}",
       "eyebrow": "Расчёт для этой квартиры",
       "title": "{rooms} · {area} м²",
       "place": "ЖК {complex} · Блок {block} · {developer}",

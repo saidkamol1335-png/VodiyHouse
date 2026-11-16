@@ -12,6 +12,7 @@ import { type CalcProgram, DOWN_MAX_PCT } from "@vh/shared/calc/programs";
 import type { CalcView } from "@vh/shared/calc/view";
 import { formatPercent } from "@vh/shared/format";
 import { type CalcLocale, type CalcT, approxIn, moneyIn, termText } from "@vh/shared/calc/text";
+import { useLeadOpener } from "@/components/LeadDialog";
 import { downChips, programChoices, termButtonsOf, termMessage } from "./inputParts";
 import type { PaymentCalculatorProps } from "./PaymentCalculator";
 
@@ -176,7 +177,8 @@ const termTexts = (t: CalcT): CalcTermTexts => ({
   more: t("term.more"),
 });
 
-function TermPart<P extends CalcProgram>({ id, view, update, t }: CalcInputsProps<P>) {
+function TermPart<P extends CalcProgram>({ id, view, update, t, leadObject }: CalcInputsProps<P>) {
+  const openLead = useLeadOpener();
   const calc = view.result?.ok ? view.result.calculation : null;
   const term = calc?.term ?? null;
   if (!calc || calc.months === 0) return null;
@@ -194,7 +196,15 @@ function TermPart<P extends CalcProgram>({ id, view, update, t }: CalcInputsProp
       customHint={hint}
       applied={calc.months}
       requested={view.requestedMonths}
-      message={termMessage(term, view.downPct, update, t)}
+      message={termMessage(
+        term,
+        view.downPct,
+        update,
+        t,
+        openLead && term
+          ? () => openLead({ type: "calc", object: leadObject ?? undefined, context: t("term.overMaxContext", { max: term.max, months: view.requestedMonths ?? term.max }) })
+          : undefined,
+      )}
       onChange={(months) => update({ months })}
     />
   );

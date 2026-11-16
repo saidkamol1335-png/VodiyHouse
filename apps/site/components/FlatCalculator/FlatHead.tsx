@@ -17,13 +17,14 @@ type FlatHeadProps = {
   view: CalcView<CalcProgram>;
   locale: CalcLocale;
   onClose: () => void;
+  onZoomPlan?: () => void;
 };
 
 /**
  * Шапка расчёта квартиры (мокап SiteJkCalc1, MobFlat): чертёж, «3-комн. · 78 м²», ЖК, блок и
  * застройщик, справа — стоимость выбранной квартиры, «Кв. 8 · 3 эт. · $704/м²» и «≈ … сум».
  */
-export function FlatHead({ id, screen, view, locale, onClose }: FlatHeadProps) {
+export function FlatHead({ id, screen, view, locale, onClose, onZoomPlan }: FlatHeadProps) {
   const t = useTranslations("calc");
   const title = t("flat.title", {
     rooms: t("price.rooms", { count: screen.layout.rooms }),
@@ -32,12 +33,7 @@ export function FlatHead({ id, screen, view, locale, onClose }: FlatHeadProps) {
   const planUrl = drawingUrl(screen.layout.drawing);
   return (
     <header className={planUrl ? "flat-calc__head flat-calc__head--plan" : "flat-calc__head"}>
-      {planUrl ? (
-        <figure className="flat-calc__plan">
-          {/* eslint-disable-next-line @next/next/no-img-element -- чертёж из бакета, размеры неизвестны */}
-          <img src={planUrl} alt={t("flat.plan", { title })} loading="lazy" decoding="async" />
-        </figure>
-      ) : null}
+      {planUrl ? <FlatPlan src={planUrl} alt={t("flat.plan", { title })} zoomLabel={t("flat.planZoom", { title })} onZoom={onZoomPlan} /> : null}
       {/* Заголовок и «Закрыть» — одна строка: в шторке она прилипает к верху (MobFlatTerm). */}
       <div className="flat-calc__bar">
         <div className="flat-calc__heading">
@@ -65,6 +61,26 @@ export function FlatHead({ id, screen, view, locale, onClose }: FlatHeadProps) {
       <FlatPrice screen={screen} view={view} locale={locale} />
     </header>
   );
+}
+
+/** Чертёж в шапке; есть onZoom — кнопка «во весь экран» (ТЗ 7.4; правки 15.11, п. 21). */
+function FlatPlan({ src, alt, zoomLabel, onZoom }: { src: string; alt: string; zoomLabel: string; onZoom?: () => void }) {
+  return (
+    <figure className="flat-calc__plan">
+      {onZoom ? (
+        <button type="button" className="flat-calc__plan-zoom" aria-label={zoomLabel} onClick={onZoom}>
+          <PlanImage src={src} alt={alt} />
+        </button>
+      ) : (
+        <PlanImage src={src} alt={alt} />
+      )}
+    </figure>
+  );
+}
+
+function PlanImage({ src, alt }: { src: string; alt: string }) {
+  // eslint-disable-next-line @next/next/no-img-element -- чертёж из бакета, размеры неизвестны
+  return <img src={src} alt={alt} loading="lazy" decoding="async" />;
 }
 
 /**

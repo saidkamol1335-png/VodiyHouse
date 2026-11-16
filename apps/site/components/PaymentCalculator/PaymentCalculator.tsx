@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useMemo, useRef } from "react";
 import { CalcCompare } from "@/components/CalcCompare";
 import { CalcSchedule } from "@/components/CalcSchedule";
 import { CalcStickyBar } from "@/components/CalcStickyBar";
@@ -15,7 +15,8 @@ import type { CalcParams, PriceMode } from "@vh/shared/calc/params";
 import type { CalcProgram } from "@vh/shared/calc/programs";
 import { type CalcData, type CalcView, calculatorView, pinProgramBlock } from "@vh/shared/calc/view";
 import { CalcInputs } from "./CalcInputs";
-import type { CalcExtras } from "./inputParts";
+import { atDeveloperMax, type CalcExtras } from "./inputParts";
+import type { LeadObject } from "@/lib/leads/types";
 import {
   type CalcTotalView,
   compareRows,
@@ -65,6 +66,8 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
   renderPrice?: (view: CalcView<P>, update: (patch: Partial<CalcParams>) => void) => ReactNode;
   /** Тексты «?» из справочника hints (шаг 2.8); нет текста — нет и «?». */
   hints?: CalcHints;
+  /** ЖК и планировка для заявки «Нужно дольше? Попробуем договориться» (правки 15.11, п. 21). */
+  leadObject?: LeadObject | null;
   renderActions?: (snapshot: CalcSnapshot<P>) => ReactNode;
   renderStickyAction?: (snapshot: CalcSnapshot<P>) => ReactNode;
 };
@@ -77,10 +80,10 @@ export type PaymentCalculatorProps<P extends CalcProgram> = {
 export function PaymentCalculator<P extends CalcProgram>(props: PaymentCalculatorProps<P>) {
   const t = useTranslations("calc");
   const locale = useLocale() as CalcLocale;
-  const pin = (candidate: CalcParams) => pinProgramBlock(props.data, candidate, props.modes);
-  const fromUrl = props.initialFromUrl ?? false;
-  const { params, update } = useCalcParams(props.initialParams, { pin, fromUrl });
-  const view = calculatorView(props.engine, props.data, params, props.modes);
+  const data = useMemo(() => atDeveloperMax(props.data), [props.data]);
+  const pin = (candidate: CalcParams) => pinProgramBlock(data, candidate, props.modes);
+  const { params, update } = useCalcParams(props.initialParams, { pin, fromUrl: props.initialFromUrl ?? false });
+  const view = calculatorView(props.engine, data, params, props.modes);
   const context: TotalContext = { out: view.outCurrency, rate: props.data.rate, t, locale };
   const snapshot: CalcSnapshot<P> = {
     view,

@@ -101,6 +101,12 @@ test.describe("страница ЖК", () => {
     await expect(calc.locator(".flat-calc__price")).toContainText(/\$30\s290/);
     expect(await calc.evaluate((dialog) => dialog.matches(":modal"))).toBe(isMobile);
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s35-complex-calc.png`, caret: "initial" });
+    // Правки 15.11, п. 21 (ТЗ 7.4): чертёж в расчёте — во весь экран по нажатию; Escape закрывает только его.
+    await calc.getByRole("button", { name: /^Открыть чертёж крупно/ }).click();
+    await expect(page.locator("dialog.complex-drawing")).toHaveAttribute("open", "");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog.complex-drawing")).toHaveCount(0);
+    await expect(calc).toHaveAttribute("open", "");
     // Повторное нажатие у открытого расчёта — «Свернуть» (мокап pcClose).
     if (!isMobile) {
       await page.locator(".complex-layout__calc").first().click();

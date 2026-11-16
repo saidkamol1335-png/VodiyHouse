@@ -41,10 +41,15 @@ describe("сравнение программ (сайт)", () => {
     expect(roundMoney(scheme.firstPayment * MOCKUP_RATE.usdUzs, "UZS")).toBe(28_931_000);
   });
 
-  it("без скидок 100 % и рассрочка 0 % вровень — «выгоднее всего» у обеих (MobFlatCmp)", () => {
-    expect(row(SIFAT_FULL).cheapest).toBe(true);
-    expect(row(SIFAT_SCHEME).cheapest).toBe(true);
+  it("без скидок 100 % и рассрочка 0 % вровень — «выгоднее всего» ни у кого (правки 15.11, п. 21)", () => {
+    expect(row(SIFAT_FULL).cheapest).toBe(false);
+    expect(row(SIFAT_SCHEME).cheapest).toBe(false);
     expect(row(SIFAT_IPOTEKA_INSTALLMENT).cheapest).toBe(false);
+  });
+
+  it("одна программа дешевле остальных — «выгоднее всего» только у неё", () => {
+    const { rows } = comparePrograms([SIFAT_SCHEME, SIFAT_IPOTEKA_INSTALLMENT], input);
+    expect(rows.filter((entry) => entry.cheapest).map((entry) => entry.program)).toEqual([SIFAT_SCHEME]);
   });
 
   it("«меньше платёж» — у ипотеки; у 100 % оплаты платежа нет", () => {

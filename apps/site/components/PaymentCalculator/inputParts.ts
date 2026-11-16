@@ -6,7 +6,7 @@ import type { DownOption, ProgramOption } from "@vh/shared/calc/options";
 import type { CalcStock } from "@vh/shared/calc/priceSource";
 import { type CalcProgram, isTiered } from "@vh/shared/calc/programs";
 import { type TermOutcome, tierIndexFor } from "@vh/shared/calc/terms";
-import type { CalcView } from "@vh/shared/calc/view";
+import type { CalcData, CalcView } from "@vh/shared/calc/view";
 import { formatPercent, initialsOf } from "@vh/shared/format";
 import {
   type CalcLocale,
@@ -76,11 +76,12 @@ export function downChips<P extends CalcProgram>(
   const selected = view.selected;
   if (!selected) return [];
   const { t, extras } = context;
+  // Правки 15.11, п. 21: «51% · 12 oygacha» было непонятно — «Boshlang‘ich to‘lov 51% dan — 12 oygacha».
   return view.downOptions.map((down) => ({
     key: `${down.targetId ?? "down"}-${down.downPct}`,
-    label: formatPercent(down.downPct),
+    label: down.maxMonths ? t("down.chipFrom", { pct: formatPercent(down.downPct) }) : formatPercent(down.downPct),
     note: down.maxMonths
-      ? t("down.upTo", { term: termText(down.maxMonths, t) })
+      ? t("down.chipUpTo", { term: termText(down.maxMonths, t) })
       : down.targetId
         ? t("down.now")
         : null,
@@ -114,22 +115,25 @@ export function termButtonsOf<P extends CalcProgram>(
   });
 }
 
-/** Строка под сроком (решение фазы 2): сверх максимума — block / suggest_tier / lead. */
+/**
+ * Строка под сроком. Сверх максимума (правки 15.11, п. 21): считаем на максимуме застройщика и пишем
+ * «По условиям застройщика — до N мес. Нужно дольше? Попробуем договориться» с кнопкой заявки (block и
+ * lead одинаково — молча на максимуме больше не считаем); suggest_tier с подходящей ступенью — как
+ * раньше, предлагает взнос побольше.
+ */
 export function termMessage(
   term: TermOutcome | null,
   downPct: number,
   update: Patch,
   t: CalcT,
+  askLonger?: () => void,
 ): CalcTermMessage | null {
   if (!term) return null;
-  const down = formatPercent(downPct);
   if (term.status === "belowMin")
     return { tone: "info", text: t("term.belowMin", { min: term.min }) };
   if (term.status !== "aboveMax") return null;
-  if (term.behavior === "lead")
-    return { tone: "warn", text: t("term.lead", { max: term.max, down }) };
-  const suggestion = term.suggestion;
-  if (term.behavior === "suggest_tier" && suggestion) {
+  const suggestion = term.behavior === "suggest_tier" ? term.suggestion : null;
+  if (suggestion) {
     const from = formatPercent(suggestion.fromDownPct);
     const values = {
       months: suggestion.months,
@@ -150,5 +154,24 @@ export function termMessage(
       },
     };
   }
-  return { tone: "warn", text: t("term.aboveMax", { down, max: term.max }) };
+  return {
+    tone: "warn",
+    text: t("term.overMax", { max: term.max, down: formatPercent(downPct) }),
+    action: askLonger ? { label: t("term.overMaxButton"), onClick: askLonger } : undefined,
+  };
+}
+
+/**
+ * Схема с «lead» на сайте считается на максимуме застройщика, как block (правки 15.11, п. 21: «сами
+ * не растянем»): просимый срок больше максимума — только повод для заявки. Кабинет считает по-своему.
+ */
+export function atDeveloperMax<P extends CalcProgram>(data: CalcData<P>): CalcData<P> {
+  const lead = (program: P) => isTiered(program) && program.overMaxBehavior === "lead";
+  if (!data.options.some((option) => lead(option.program))) return data;
+  return {
+    ...data,
+    options: data.options.map((option) =>
+      lead(option.program) ? { ...option, program: { ...option.program, overMaxBehavior: "block" } as P } : option,
+    ),
+  };
 }

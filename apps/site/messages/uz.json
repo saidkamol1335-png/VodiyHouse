@@ -375,6 +375,8 @@
       "rooms": "{count, plural, =0 {studiya} other {#-xonali}}"
     },
     "down": {
+      "chipFrom": "Boshlang‘ich to‘lov {pct} dan",
+      "chipUpTo": "— {term}gacha",
       "title": "Boshlang‘ich to‘lov",
       "min": "kamida {pct}",
       "value": "{pct} · {amount}",
@@ -384,6 +386,9 @@
       "now": "darhol"
     },
     "term": {
+      "overMax": "Quruvchi shartlari bo‘yicha — {max} oygacha. Uzoqroq kerakmi? Kelishishga harakat qilamiz",
+      "overMaxButton": "Ariza qoldirish",
+      "overMaxContext": "{max} oydan uzoq muddatli to‘lov — {months} oy so‘raladi",
       "title": "Muddat",
       "scheme": "ustamasiz",
       "markup": "ustama {rate}",
@@ -395,10 +400,8 @@
       "more": "Bir oy ko‘proq",
       "unit": "oy",
       "hint": "Istalgan butun oylar soni: {min}–{max} oy, boshlang‘ich to‘lov {down} bo‘lganda",
-      "aboveMax": "{down} boshlang‘ich to‘lovda ko‘pi bilan {max} oy — {max} oyga hisoblaymiz",
       "suggest": "{months} oy — {from}–{to} boshlang‘ich to‘lovda. Hozir {max} oyga hisoblaymiz",
       "suggestButton": "Boshlang‘ich to‘lov: {from}",
-      "lead": "{down} boshlang‘ich to‘lovda {max} oydan ko‘p — quruvchidan aniqlaymiz",
       "belowMin": "Kamida {min} oy — {min} oyga hisoblaymiz"
     },
     "total": {
@@ -485,6 +488,7 @@
     "months": "{count} oy",
     "years": "{count} yil",
     "flat": {
+      "planZoom": "Chizmani kattalashtirish: {title}",
       "eyebrow": "Shu kvartira uchun hisob-kitob",
       "title": "{rooms} · {area} m²",
       "place": "{complex} TJM · {block} blok · {developer}",

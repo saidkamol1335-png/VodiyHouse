@@ -45,6 +45,8 @@ type FlatCalculatorProps = {
   onClose: () => void;
   /** Тексты «?» из справочника hints (шаг 2.8). */
   hints?: CalcHints;
+  /** Чертёж во весь экран (ТЗ 7.4; правки 15.11, п. 21); нет — чертёж просто картинкой. */
+  onZoomPlan?: () => void;
 };
 
 /**
@@ -83,14 +85,7 @@ function useBarHeight(dialog: RefObject<HTMLDialogElement | null>) {
  * калькулятор, что /kalkulyator, без скидок; стоимость — свободные квартиры планировки. Один
  * <dialog>: на телефоне — модальная шторка, шире — открыт на месте (show), без затемнения.
  */
-export function FlatCalculator({
-  id,
-  screen,
-  initialParams,
-  lead,
-  onClose,
-  hints,
-}: FlatCalculatorProps) {
+export function FlatCalculator({ id, screen, initialParams, lead, onClose, hints, onZoomPlan }: FlatCalculatorProps) {
   const locale = useLocale() as CalcLocale;
   const dialog = useOpenDialog();
   const close = () => dialog.current?.close();
@@ -113,8 +108,9 @@ export function FlatCalculator({
         actualAt={screen.checkedAt}
         surface="bare"
         hints={hints}
+        leadObject={lead}
         renderHeader={({ view }) => (
-          <FlatHead id={id} screen={screen} view={view} locale={locale} onClose={close} />
+          <FlatHead id={id} screen={screen} view={view} locale={locale} onClose={close} onZoomPlan={onZoomPlan} />
         )}
         renderPrice={(view, update) => (
           <FlatUnits id={id} stock={screen.data.stock} price={view.price} onChange={update} />

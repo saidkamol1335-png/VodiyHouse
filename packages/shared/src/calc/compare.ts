@@ -57,9 +57,12 @@ export function comparePrograms<P extends CalcProgram>(
   );
   const minTotal = minimum(totals);
   const minPayment = minimum(payments);
+  // «Выгоднее всего» — только у одной программы с самым маленьким итогом (правки 15.11, п. 21): при
+  // равенстве (100 % и рассрочка 0 % — одна цена) метки нет ни у кого, иначе выгода не видна.
+  const cheapestCount = totals.filter((total) => total !== null && total === minTotal).length;
   const rows = computed.map((entry, index) => ({
     ...entry,
-    cheapest: totals[index] !== null && totals[index] === minTotal,
+    cheapest: cheapestCount === 1 && totals[index] !== null && totals[index] === minTotal,
     lowestPayment: payments[index] !== null && payments[index] === minPayment,
   }));
   return { rows, unavailable };
