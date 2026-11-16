@@ -1,15 +1,16 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { useEffect, useRef, type RefObject } from "react";
+import { useRef } from "react";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Link } from "@/lib/i18n/navigation";
-import { useMotion, useReveal } from "@/lib/motion";
+import { useReveal } from "@/lib/motion";
 import { ROUTES } from "@/lib/routes";
 import type { ProjectWidth } from "@/lib/site/home/projects";
 import type { SitePhotoData } from "@/lib/site/photo";
 import { GalleryCard } from "./JkGalleryCard";
-import { keepPlaceAbove, loadGsap, refreshWhenSettled, type GsapKit } from "@/lib/site/scroll/gsap";
+import { GalleryControls } from "./GalleryControls";
+import { useGallerySlider } from "./useGallerySlider";
 
 /** Предложение под названием ЖК: из «Витрины» (с бейджем и сроком) или условия оплаты ЖК. */
 export type JkGalleryOffer = {
@@ -44,52 +45,46 @@ type JkGalleryText = {
   titleAccent: string;
   all: string;
   allNote: string;
-  hint: string;
+  /** Подписи стрелок и точек слайдера (правки 15.11, п. 5). */
+  prev: string;
+  next: string;
+  /** «ЖК 2 из 6» — подпись каждой точки. */
+  slides: string[];
 };
 
-/** Pin и горизонтальный трек — full и lite на ≥ 768 px (gsap.matchMedia); настройку ОС не слушаем. */
-const PINNED_QUERY = "(min-width: 768px)";
-
 /**
- * Лента ЖК. По умолчанию (none, телефон, без JS) — нативная горизонтальная прокрутка со
- * scroll-snap. В full и lite (с 06.11.2026, слово исполнителя: «при скролле должна листаться
- * горизонтально») на широком экране секция закрепляется, трек едет влево на всю свою длину
- * (scrub), названия — со своей скоростью (containerAnimation), фото въезжает 1.08 → 1. Tab по
- * карточкам прокручивает страницу к карточке. Анимируются только transform.
+ * Лента ЖК — слайдер (правки 15.11, п. 5: «пусть крутится сам… захочу — переключу кнопкой»): нативная
+ * горизонтальная прокрутка со scroll-snap (свайп на телефоне), стрелки ‹ › и точки; к прокрутке страницы
+ * не привязана (закрепление GSAP убрано). Автопрокрутка — только в full: карточка в 5 с, пауза при
+ * наведении, касании, фокусе внутри и когда лента не в кадре; lite и none — без автопрокрутки.
  */
 type JkGalleryTrackProps = { id: string; cards: JkGalleryCard[]; text: JkGalleryText };
 
 export function JkGalleryTrack({ id, cards, text }: JkGalleryTrackProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLUListElement>(null);
-  useGalleryPin(sectionRef, trackRef);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const total = cards.length + 1;
+  const slider = useGallerySlider({ section: sectionRef, viewport: viewportRef, total });
   return (
-    <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title">
-      {/* Закрепляется обёртка, а не сама секция: GSAP переносит её в pin-spacer, а корень компонента
-          остаётся там, где его ждёт React (иначе removeChild при размонтировании падает). */}
-      <div className="jk-gallery__pin">
-        <GalleryHead text={text} />
-        <div className="jk-gallery__viewport">
-          <ul ref={trackRef} className="jk-gallery__track">
-            {cards.map((card) => (
-              <GalleryCard key={card.slug} card={card} />
-            ))}
-            <li className="jk-gallery__card jk-gallery__card--all">
-              <Link href={ROUTES.catalog} className="jk-gallery__link jk-gallery__link--all">
-                <span className="jk-gallery__all">
-                  {text.all}{" "}
-                  <ArrowRight className="jk-gallery__all-arrow" size={40} strokeWidth={1.4} aria-hidden />
-                </span>
-                <span className="jk-gallery__all-note">{text.allNote}</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <p className="jk-gallery__hint" aria-hidden>
-          <span className="jk-gallery__hint-line" />
-          {text.hint}
-        </p>
+    <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title" aria-roledescription="carousel">
+      <GalleryHead text={text} />
+      <div ref={viewportRef} className="jk-gallery__viewport" {...slider.pauseHandlers}>
+        <ul className="jk-gallery__track">
+          {cards.map((card) => (
+            <GalleryCard key={card.slug} card={card} />
+          ))}
+          <li className="jk-gallery__card jk-gallery__card--all">
+            <Link href={ROUTES.catalog} className="jk-gallery__link jk-gallery__link--all">
+              <span className="jk-gallery__all">
+                {text.all}{" "}
+                <ArrowRight className="jk-gallery__all-arrow" size={40} strokeWidth={1.4} aria-hidden />
+              </span>
+              <span className="jk-gallery__all-note">{text.allNote}</span>
+            </Link>
+          </li>
+        </ul>
       </div>
+      <GalleryControls current={slider.current} total={total} goTo={slider.goTo} text={text} />
     </section>
   );
 }
@@ -105,139 +100,4 @@ function GalleryHead({ text }: { text: JkGalleryText }) {
       </h2>
     </div>
   );
-}
-
-/** Закрепление — в full и lite: GSAP грузится отдельным чанком, откат при смене режима (none — нет). */
-function useGalleryPin(
-  sectionRef: RefObject<HTMLElement | null>,
-  trackRef: RefObject<HTMLElement | null>,
-) {
-  const tier = useMotion();
-  useEffect(() => {
-    const section = sectionRef.current;
-    const track = trackRef.current;
-    if (tier === "none" || !section || !track) return;
-    let cancelled = false;
-    let revert: (() => void) | null = null;
-    loadGsap()
-      .then((kit) => {
-        if (cancelled) return;
-        keepPlaceAbove(kit, section, () => {
-          revert = pinGallery(kit, section, track);
-        });
-      })
-      // GSAP не загрузился — остаётся нативная лента.
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-      revert?.();
-    };
-  }, [tier, sectionRef, trackRef]);
-}
-
-/** Закрепление и трек; возвращает откат (снимает pin, стили и слушатели). */
-function pinGallery(
-  { gsap, ScrollTrigger }: GsapKit,
-  section: HTMLElement,
-  track: HTMLElement,
-): () => void {
-  const mm = gsap.matchMedia();
-  mm.add(PINNED_QUERY, () => {
-    section.classList.add("jk-gallery--pinned");
-    // Ширина без полосы прокрутки: в конце пути последняя карточка видна целиком.
-    const distance = () => Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
-    const pin = section.querySelector<HTMLElement>(".jk-gallery__pin")!;
-    const slide = gsap.to(track, {
-      x: () => -distance(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: pin,
-        pin: true,
-        start: "top top",
-        end: () => `+=${distance()}`,
-        scrub: 1,
-        invalidateOnRefresh: true,
-        // will-change — только пока секция закреплена.
-        onToggle: (self) => section.toggleAttribute("data-live", self.isActive),
-      },
-    });
-    cardParallax(gsap, track, slide);
-    warmPhotos(ScrollTrigger, section, track);
-    const onFocus = focusToCard(slide, distance);
-    track.addEventListener("focusin", onFocus);
-    refreshWhenSettled({ gsap, ScrollTrigger }, section);
-    return () => {
-      track.removeEventListener("focusin", onFocus);
-      section.classList.remove("jk-gallery--pinned");
-      section.removeAttribute("data-live");
-    };
-  });
-  return () => mm.revert();
-}
-
-/**
- * Карточки за правым краем обрезаны overflow: clip — ленивые фото там не начали бы грузиться до
- * въезда. За экран до секции им ставится loading="eager".
- */
-function warmPhotos(
-  ScrollTrigger: GsapKit["ScrollTrigger"],
-  section: HTMLElement,
-  track: HTMLElement,
-) {
-  ScrollTrigger.create({
-    trigger: section,
-    start: "top bottom+=100%",
-    once: true,
-    onEnter: () => track.querySelectorAll("img").forEach((image) => (image.loading = "eager")),
-  });
-}
-
-/** Название с предложением — своя скорость (xPercent 20 → −20), фото въезжает 1.08 → 1: по движению трека. */
-function cardParallax(gsap: GsapKit["gsap"], track: HTMLElement, slide: gsap.core.Tween) {
-  for (const card of track.querySelectorAll<HTMLElement>(".jk-gallery__card")) {
-    const title = card.querySelector(".jk-gallery__caption");
-    const media = card.querySelector(".jk-gallery__media");
-    const along = { trigger: card, containerAnimation: slide, scrub: true } as const;
-    if (title) {
-      gsap.fromTo(
-        title,
-        { xPercent: 20 },
-        {
-          xPercent: -20,
-          ease: "none",
-          scrollTrigger: { ...along, start: "left right", end: "right left" },
-        },
-      );
-    }
-    if (media) {
-      gsap.fromTo(
-        media,
-        { scale: 1.08 },
-        {
-          scale: 1,
-          ease: "none",
-          scrollTrigger: { ...along, start: "left right", end: "left 35%" },
-        },
-      );
-    }
-  }
-}
-
-/** Tab по карточке: страница прокручивается так, чтобы карточка встала в кадр. */
-function focusToCard(slide: gsap.core.Tween, distance: () => number) {
-  return (event: FocusEvent) => {
-    // Только фокус с клавиатуры: щелчок мышью тоже фокусирует ссылку, но страницу двигать нельзя.
-    if (!(event.target as Element).matches(":focus-visible")) return;
-    const card = (event.target as Element).closest<HTMLElement>(".jk-gallery__card");
-    const trigger = slide.scrollTrigger;
-    if (!card || !trigger) return;
-    const max = distance();
-    const x = Math.min(
-      max,
-      Math.max(0, card.offsetLeft - (document.documentElement.clientWidth - card.offsetWidth) / 2),
-    );
-    const top = trigger.start + (max > 0 ? x / max : 0) * (trigger.end - trigger.start);
-    window.scrollTo({ top, behavior: "instant" });
-    trigger.update();
-  };
 }

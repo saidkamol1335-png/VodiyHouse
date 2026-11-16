@@ -149,7 +149,9 @@
       "titleAccent": "loyihalari",
       "all": "Barcha TJMlar",
       "allNote": "Saytda {n} ta TJM — narxlar, mavjud xonadonlar va rejalar bilan",
-      "hint": "Suring"
+      "prev": "Oldingi TJM",
+      "next": "Keyingi TJM",
+      "slide": "{total} tadan {n}"
     },
     "manifesto": {
       "eyebrow": "Vodiy House qisqacha",

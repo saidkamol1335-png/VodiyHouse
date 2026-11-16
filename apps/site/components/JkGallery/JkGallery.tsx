@@ -53,7 +53,10 @@ export async function JkGallery({
         titleAccent: t("titleAccent"),
         all: t("all"),
         allNote: t("allNote", { n: complexes.length }),
-        hint: t("hint"),
+        prev: t("prev"),
+        next: t("next"),
+        // Точка на каждую карточку и «Все ЖК» — подписи для диктора считаются здесь (функцию в клиент не передать).
+        slides: Array.from({ length: cards.length + 1 }, (_, index) => t("slide", { n: index + 1, total: cards.length + 1 })),
       }}
     />
   );

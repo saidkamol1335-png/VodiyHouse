@@ -149,7 +149,9 @@
       "titleAccent": "Vodiy House",
       "all": "Все ЖК",
       "allNote": "{n} ЖК на сайте — с ценами, наличием и планировками",
-      "hint": "Листайте"
+      "prev": "Предыдущий ЖК",
+      "next": "Следующий ЖК",
+      "slide": "{n} из {total}"
     },
     "manifesto": {
       "eyebrow": "Vodiy House в двух словах",

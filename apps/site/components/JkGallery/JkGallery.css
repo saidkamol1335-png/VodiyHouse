@@ -1,11 +1,11 @@
-/* «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17). По умолчанию — лента с нативной
-   горизонтальной прокруткой и scroll-snap (none, телефон, без JS). jk-gallery--pinned ставит
-   скрипт в full и lite (с 06.11.2026) на ≥ 768 px: секция на экран, трек едет влево (transform), названия — параллакс.
+/* «Проекты Vodiy House» (PLAN §10, п. 47; Motion Kit №17) — слайдер (правки 15.11, п. 5): лента с
+   нативной горизонтальной прокруткой и scroll-snap (свайп), под ней точки и стрелки; к прокрутке
+   страницы не привязана (закрепление убрано). Автопрокрутку ведёт скрипт только в full.
    Карточка — тёмное фото: светлый текст задают токены блока, а не тема. */
 .jk-gallery {
   --jk-edge: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
   --jk-gap: max(12px, 1vw);
-  --jk-card-h: min(80svh, 760px);
+  --jk-card-h: min(70svh, 640px);
   --jk-fg: #faf8f4;
   --jk-fg-2: rgba(250, 248, 244, 0.84);
   --jk-badge: var(--amber);
@@ -249,59 +249,82 @@
   font-size: var(--fs-body);
 }
 
-.jk-gallery__hint {
+/* Точки и стрелки под лентой (правки 15.11, п. 5): точка текущей карточки длиннее (scale), без
+   смены ширины — анимируются только transform и opacity. */
+.jk-gallery__controls {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 20px var(--jk-edge) 0;
-  color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
 }
 
-.jk-gallery__hint-line {
-  width: 48px;
-  height: 1px;
-  background: var(--line-3);
+.jk-gallery__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-/* Закреплённая секция (full и lite, ≥ 768 px): шапка, трек на остаток экрана, подсказка. */
-.jk-gallery--pinned {
+.jk-gallery__dot {
+  position: relative;
+  width: 28px;
+  height: 28px;
   padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
-.jk-gallery--pinned .jk-gallery__pin {
-  display: grid;
-  /* minmax(0, 1fr): иначе колонка растёт до ширины трека (max-content) и шапка уезжает вправо. */
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  height: 100svh;
-  padding: calc(var(--header-h) + 20px) 0 24px;
+.jk-gallery__dot::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 3px);
+  left: calc(50% - 9px);
+  width: 18px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--fg);
+  opacity: 0.22;
+  transform: scaleX(0.34);
 }
 
-.jk-gallery--pinned .jk-gallery__heading {
-  margin: 10px 0 20px;
+.jk-gallery__dot--on::before {
+  opacity: 1;
+  transform: none;
 }
 
-.jk-gallery--pinned .jk-gallery__viewport {
-  overflow: clip;
-  scroll-snap-type: none;
+.jk-gallery__dot:focus-visible,
+.jk-gallery__arrow:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
 }
 
-.jk-gallery--pinned .jk-gallery__track {
-  height: 100%;
+.jk-gallery__arrows {
+  display: flex;
+  gap: 8px;
 }
 
-.jk-gallery--pinned .jk-gallery__card {
-  height: 100%;
+.jk-gallery__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
 }
 
-.jk-gallery--pinned[data-live] .jk-gallery__track,
-.jk-gallery--pinned[data-live] .jk-gallery__caption,
-.jk-gallery--pinned[data-live] .jk-gallery__media {
-  will-change: transform;
+.jk-gallery__arrow:hover {
+  border-color: var(--amber-line);
+}
+
+:root:is([data-motion="full"], [data-motion="lite"]) .jk-gallery__dot::before {
+  transition:
+    transform 0.35s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity 0.35s ease-out;
 }
 
 /* Наведение на карточку — full и lite (с 06.11.2026): фото чуть ближе (transform); на телефоне — нет. */
@@ -344,8 +367,4 @@
   .jk-gallery__offer-text {
     display: none;
   }
-}
-
-[data-motion="none"] .jk-gallery__viewport {
-  scroll-snap-type: none;
 }
