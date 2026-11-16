@@ -29,10 +29,23 @@ test.describe("страница ЖК", () => {
     await expect(main).toContainText(/от \$30\s290/);
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
     // Разделов без данных нет: у Shodlik нет видео и деталей; «Ход строительства» — DEMO-отчёты (фаза 5).
-    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Наличие", "Выбрать квартиру", "Планировки", "Ход строительства", "Застройщик", "Документы"]);
-    await expect(main.locator("#o-zhk")).toContainText("перенесён с 2 кв. 2027");
+    // Правки 15.11, п. 17: расположение — сразу после «О ЖК», затем «Блоки и условия»; тот же порядок у разделов.
+    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Блоки и условия", "Наличие", "Выбрать квартиру", "Планировки", "Ход строительства", "Застройщик", "Документы"]);
+    const order = await main.locator("section[id]").evaluateAll((nodes) => nodes.map((node) => node.id));
+    expect(order.slice(0, 4)).toEqual(["o-zhk", "raspolozhenie", "bloki", "nalichie"]);
+    await expect(main.locator("#bloki")).toContainText("перенесён с 2 кв. 2027");
     await expect(main.locator("#raspolozhenie")).toContainText("Школа №46");
-    await expect(main.locator("#nalichie")).toContainText(/41\s*в продаже сейчас/);
+    // Карта — сразу картинкой, без кнопки «Показать на карте»; грузится лениво.
+    const map = main.locator("#raspolozhenie .complex-location__image");
+    await expect(map).toHaveAttribute("loading", "lazy");
+    await expect(map).toHaveAttribute("src", /^https:\/\/static-maps\.yandex\.ru\//);
+    await expect(main.getByRole("button", { name: "Показать на карте" })).toHaveCount(0);
+    // Итог «в продаже» = сумма по блокам (число в DEMO меняют e2e кабинета: было 41, 16.11 — 40).
+    const total = Number(await main.locator("#nalichie .complex-stock__number").textContent());
+    const perBlock = (await main.locator("#nalichie .complex-stock__blocks").textContent()) ?? "";
+    await expect(main.locator("#nalichie .complex-stock__caption")).toHaveText("в продаже сейчас");
+    expect(total).toBeGreaterThan(0);
+    expect(total).toBe([...perBlock.matchAll(/: (\d+)/g)].reduce((sum, match) => sum + Number(match[1]), 0));
     await expect(main.locator("#nalichie")).toContainText(/обновлено \d{2}\.\d{2}, \d{2}:\d{2}/i);
     await expect(main.locator("#planirovki h3")).toHaveCount(8);
     await expect(main.locator("#zastroyshchik")).toContainText("Farg‘ona Sifat Qurilish");
@@ -104,7 +117,7 @@ test.describe("страница ЖК", () => {
     await page.goto("/ru/novostroyki/demo-namuna");
     await expect(page.getByRole("navigation", { name: "Разделы страницы" }).getByRole("link", { name: "Детали проекта" })).toBeVisible();
     await expect(page.locator("#detali")).toContainText("Благоустройство");
-    await expect(page.locator("#o-zhk")).toContainText(/Место в подземном паркинге\s*отдельно, от \$9\s000/);
+    await expect(page.locator("#bloki")).toContainText(/Место в подземном паркинге\s*отдельно, от \$9\s000/);
   });
 
   test("UZ — тексты на узбекском; чужой адрес — 404", async ({ page }) => {

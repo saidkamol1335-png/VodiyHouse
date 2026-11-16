@@ -32,29 +32,16 @@ export function searchLink(point: GeoPoint, query: string): string {
   return `${MAPS}?${params}`;
 }
 
-/** Виджет карты во фрейме — интерактивная карта по нажатию (ключ не нужен). */
-export function mapWidgetSrc(point: GeoPoint, locale: MapLocale): string {
-  const params = new URLSearchParams({
-    ll: lngLat(point),
-    z: String(ZOOM),
-    pt: `${lngLat(point)},pm2rdm`,
-    lang: LANG[locale],
-  });
-  return `https://yandex.uz/map-widget/v1/?${params}`;
-}
-
-/** Картинка карты до нажатия — только с ключом Static API заказчика; нет ключа — null. */
-export function staticMapSrc(point: GeoPoint, locale: MapLocale, apiKey: string | undefined): string | null {
-  if (!apiKey) return null;
-  const params = new URLSearchParams({
-    ll: lngLat(point),
-    z: String(ZOOM),
-    size: "650,450",
-    pt: `${lngLat(point)},pm2rdm`,
-    lang: LANG[locale],
-    apikey: apiKey,
-  });
-  return `https://static-maps.yandex.ru/v1?${params}`;
+/**
+ * Статичная карта ЖК (правки 15.11, п. 17: «карта видна сразу, без кнопки»): с ключом Static API
+ * заказчика — v1, без ключа — бесплатный 1.x (ключ не нужен, до 650×450). Метку ставит сайт поверх
+ * картинки — своей у Яндекса нет, чтобы не было двух меток.
+ */
+export function staticMapSrc(point: GeoPoint, locale: MapLocale, apiKey: string | undefined): string {
+  const params = new URLSearchParams({ ll: lngLat(point), z: String(ZOOM), size: "650,450", lang: LANG[locale] });
+  if (apiKey) return `https://static-maps.yandex.ru/v1?${params}&${new URLSearchParams({ apikey: apiKey })}`;
+  params.set("l", "map");
+  return `https://static-maps.yandex.ru/1.x/?${params}`;
 }
 
 export type Distance = { unit: "m"; value: number } | { unit: "km"; value: number };

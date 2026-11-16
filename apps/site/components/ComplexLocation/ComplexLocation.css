@@ -88,19 +88,13 @@
   isolation: isolate;
 }
 
-.complex-location__frame,
+/* Статичная карта — сразу, без кнопки (правки 15.11, п. 17); пока грузится — фон кварталов. */
 .complex-location__preview {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.complex-location__preview {
-  padding: 0;
-  background: none;
-  cursor: pointer;
+  background:
+    repeating-linear-gradient(28deg, transparent 0 46px, var(--map-road) 46px 52px),
+    repeating-linear-gradient(-62deg, transparent 0 70px, var(--map-road) 70px 78px), var(--map-bg);
 }
 
 .complex-location__image {
@@ -109,15 +103,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Заглушка без ключа API: кварталы и улицы пунктиром — карта угадывается, текста нет. */
-.complex-location__pattern {
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(28deg, transparent 0 46px, var(--map-road) 46px 52px),
-    repeating-linear-gradient(-62deg, transparent 0 70px, var(--map-road) 70px 78px), var(--map-bg);
 }
 
 .complex-location__pin {
@@ -169,7 +154,6 @@
   white-space: nowrap;
 }
 
-.complex-location__show,
 .complex-location__open {
   position: absolute;
   z-index: 2;
@@ -185,11 +169,6 @@
   font-weight: 650;
   text-decoration: none;
   box-shadow: var(--map-chip-shadow);
-}
-
-.complex-location__show {
-  right: 12px;
-  bottom: 12px;
 }
 
 .complex-location__open {
@@ -395,12 +374,6 @@
 
   .complex-location__map {
     min-height: 300px;
-  }
-
-  /* Узко: «Показать на карте» — сверху, «Открыть в Яндекс Картах» остаётся снизу (мокап .omap__meta). */
-  .complex-location__show {
-    top: 12px;
-    bottom: auto;
   }
 
   .complex-location__chips {

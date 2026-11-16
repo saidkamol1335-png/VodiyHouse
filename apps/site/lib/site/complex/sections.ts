@@ -2,14 +2,16 @@ import { layoutCards } from "./layouts";
 import type { ComplexPage } from "./model";
 import { stockRows } from "./stock";
 
-// Разделы страницы ЖК и навигатор (ТЗ 7.2, мокап .jknav): порядок мокапа плюс разделы Ф4 на местах
-// ТЗ («Видеообзор» — после планировок, «Детали» — перед застройщиком). Раздел без данных скрыт
-// вместе со своим пунктом (PLAN 3а); «Выбрать квартиру» (фаза 4) — между наличием и планировками,
-// как в мокапе, только с фасадом и планами; «Ход строительства» (фаза 5) — сразу после планировок, как в мокапе.
+// Разделы страницы ЖК и навигатор (ТЗ 7.2, мокап .jknav). Порядок — правки 15.11, п. 17 («пусть сначала
+// узнает адрес, потом — данные дома»): о ЖК → расположение → блоки и условия покупки → наличие и
+// «Выбрать квартиру» → планировки → ход строительства (и видеообзор) → детали → застройщик → документы →
+// вопросы. Раздел без данных скрыт вместе со своим пунктом (PLAN 3а); тот же порядок — в «Разделах».
 
 export const COMPLEX_ANCHORS = {
   about: "o-zhk",
   location: "raspolozhenie",
+  // Правки 15.11, п. 17: «Блоки и условия покупки» — свой раздел после расположения (был внутри «О ЖК»).
+  blocks: "bloki",
   stock: "nalichie",
   pick: "vybrat-kvartiru",
   soon: "skoro",
@@ -32,6 +34,7 @@ export function complexSections(page: ComplexPage): ComplexSectionKey[] {
   const present: Record<ComplexSectionKey, boolean> = {
     about: page.blocks.length > 0,
     location: hasLocation(page),
+    blocks: page.blocks.length > 0,
     stock: stockRows(page).length > 0,
     // ЖК «Скоро»: вместо фасада, планировок и расчёта — блок с номером Vodiy House.
     pick: page.picker !== null && page.state !== "soon",

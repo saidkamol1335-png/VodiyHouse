@@ -8,6 +8,7 @@ import {
   FileText,
   HardHat,
   Hourglass,
+  Layers,
   LayoutPanelLeft,
   ListChecks,
   MapPin,
@@ -19,6 +20,7 @@ import type { ComplexSectionKey } from "@/lib/site/complex/sections";
 export const ICONS: Record<ComplexSectionKey, LucideIcon> = {
   about: Building2,
   location: MapPin,
+  blocks: Layers,
   stock: ListChecks,
   pick: DoorOpen,
   soon: Hourglass,

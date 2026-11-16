@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { layoutsLinkProps, parseLayoutsLink } from "./layoutsLink";
-import { distanceOf, mapLink, mapWidgetSrc, nearestSchool, routeLink, staticMapSrc } from "./location";
+import { distanceOf, mapLink, nearestSchool, routeLink, staticMapSrc } from "./location";
 import type { ComplexPage } from "./model";
 import { nearbyFrom, nearbyRecord } from "./nearby";
 import { blockFree } from "./stock";
@@ -45,15 +45,14 @@ describe("«Удобство локации» (Ф5)", () => {
 });
 
 describe("Яндекс Карты без ключа (Ф5)", () => {
-  it("долгота первой; маршрут — до ЖК на машине; виджет — на языке страницы", () => {
+  it("долгота первой; маршрут — до ЖК на машине", () => {
     expect(mapLink(POINT)).toBe("https://yandex.uz/maps/?ll=71.7843%2C40.3842&z=17&pt=71.7843%2C40.3842%2Cpm2rdm");
     expect(routeLink(POINT)).toBe("https://yandex.uz/maps/?rtext=%7E40.3842%2C71.7843&rtt=auto");
-    expect(mapWidgetSrc(POINT, "uz")).toContain("lang=uz_UZ");
   });
 
-  it("картинка карты — только с ключом заказчика", () => {
-    expect(staticMapSrc(POINT, "ru", undefined)).toBeNull();
-    expect(staticMapSrc(POINT, "ru", "key-123")).toContain("apikey=key-123");
+  it("картинка карты — сразу (правки 15.11, п. 17): без ключа — Static API 1.x, с ключом заказчика — v1", () => {
+    expect(staticMapSrc(POINT, "uz", undefined)).toBe("https://static-maps.yandex.ru/1.x/?ll=71.7843%2C40.3842&z=16&size=650%2C450&lang=uz_UZ&l=map");
+    expect(staticMapSrc(POINT, "ru", "key-123")).toBe("https://static-maps.yandex.ru/v1?ll=71.7843%2C40.3842&z=16&size=650%2C450&lang=ru_RU&apikey=key-123");
   });
 });
 

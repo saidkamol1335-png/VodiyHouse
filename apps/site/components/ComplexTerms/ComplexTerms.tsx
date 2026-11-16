@@ -5,7 +5,10 @@ import type { ComplexPage } from "@/lib/site/complex/model";
 import { BlockCard } from "./BlockCard";
 import { BlockTabs } from "./BlockTabs";
 
-/** «Блоки и условия покупки» (мокап .blocks, ТЗ 7.3в): карточка на блок; один блок — без вкладок. */
+/**
+ * «Блоки и условия покупки» (мокап .blocks, ТЗ 7.3в): карточка на блок; один блок — без вкладок. С правок
+ * 15.11 (п. 17) — свой раздел страницы с заголовком раздела, поэтому своего заголовка нет.
+ */
 export async function ComplexTerms({ page }: { page: ComplexPage }) {
   const t = await getTranslations("complex.blocks");
   const cards = page.blocks.map((block) => blockCard(page, block));
@@ -18,7 +21,6 @@ export async function ComplexTerms({ page }: { page: ComplexPage }) {
   }));
   return (
     <div className="complex-terms">
-      <h3 className="complex-terms__title">{t("title")}</h3>
       <BlockTabs label={t("title")} tabs={tabs}>
         {cards.map((card) => (
           <BlockCard key={card.block.id} card={card} calcLayoutId={cheapestCalculable(layouts, card.block.id)} />

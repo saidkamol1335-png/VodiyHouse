@@ -40,13 +40,13 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
   const cards = layoutCards(page);
   return (
     <>
-      {has("about") ? (
-        <ComplexSection id={COMPLEX_ANCHORS.about} title={t("about.title")} lead={page.shortDescription?.[locale]} tight>
-          <ComplexFacts facts={complexFacts(page, locale)} deadline={complexSummary(page).deadline} />
+      {has("about") ? <AboutSection page={page} locale={locale} /> : null}
+      {has("location") ? <LocationSection page={page} name={name} locale={locale} /> : null}
+      {has("blocks") ? (
+        <ComplexSection id={COMPLEX_ANCHORS.blocks} title={t("blocks.title")}>
           <ComplexTerms page={page} />
         </ComplexSection>
       ) : null}
-      {has("location") ? <LocationSection page={page} name={name} locale={locale} /> : null}
       {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("pick") && page.picker ? <PickSection page={page} name={name} /> : null}
       {has("soon") ? <ComplexSoon id={COMPLEX_ANCHORS.soon} /> : null}
@@ -77,6 +77,16 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       ) : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
     </>
+  );
+}
+
+/** «О ЖК»: описание и факты; блоки и условия покупки — свой раздел после расположения (правки 15.11, п. 17). */
+async function AboutSection({ page, locale }: { page: ComplexPage; locale: Locale }) {
+  const t = await getTranslations("complex.about");
+  return (
+    <ComplexSection id={COMPLEX_ANCHORS.about} title={t("title")} lead={page.shortDescription?.[locale]} tight>
+      <ComplexFacts facts={complexFacts(page, locale)} deadline={complexSummary(page).deadline} />
+    </ComplexSection>
   );
 }
 
