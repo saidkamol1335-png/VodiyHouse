@@ -75,8 +75,14 @@ test.describe("кадры стройки на главной и в катало�
   }) => {
     const errors = collectPageErrors(page);
     await page.goto("/ru?motion=none");
+    // Правки 15.11, п. 6: «Почему через Vodiy House?» — аккордеон, строки свёрнуты; открываем первую.
+    const why = page.locator(".home-why");
+    await expect(why.locator(".home-why__summary")).toHaveText([/01\s*Снимаем стройку каждый месяц/, /02/, /03/, /04/, /05\s*Наши услуги — бесплатно/]);
+    await expect(why.locator(".home-why__row[open]")).toHaveCount(0);
+    await why.getByText("Снимаем стройку каждый месяц").click();
     const tile = page.locator(".home-why__tile--video");
-    await expect(tile).toContainText("Снимаем, как идёт стройка");
+    await expect(tile).toBeVisible();
+    await expect(tile).toContainText("Не нужно ехать на объект");
     await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · .+ · блок \S+$/);
     const section = page.locator(".home-why");
     await section.scrollIntoViewIfNeeded();
@@ -84,6 +90,10 @@ test.describe("кадры стройки на главной и в катало�
     await section.screenshot({
       path: `test-results/screens/${test.info().project.name}/p5-home-video.png`,
     });
+    // «Наши услуги — бесплатно» — список услуг и «Итого для вас — 0 сум».
+    await why.getByText("Наши услуги — бесплатно").click();
+    await expect(why.locator(".home-why__tile--route")).toBeVisible();
+    await expect(why.locator(".home-why__tile--route")).toContainText(/Кадастр[\s\S]*0 сум/);
 
     const card = page
       .locator(".catalog-card", { has: page.locator(".catalog-card__caption") })

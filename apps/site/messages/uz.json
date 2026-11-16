@@ -158,9 +158,15 @@
       "text": "Farg‘ona viloyati yangi uylari — bitta katalogda. <a>TJM hujjatlarini tekshiramiz,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
     },
     "why": {
-      "eyebrow": "Nega Vodiy House orqali",
-      "title": "Narx o‘sha. ",
-      "titleAccent": "Xizmat — bepul.",
+      "accTitle": "Nega ",
+      "accTitleAccent": "Vodiy House orqali?",
+      "rows": {
+        "video": "Qurilish jarayonini har oy suratga olamiz",
+        "stock": "Har bir TJM qoldiqlari — onlayn",
+        "fee": "Narx — quruvchinikidek, ustama 0%",
+        "docs": "Hujjatlar tekshirilgan",
+        "route": "Xizmatlarimiz bepul"
+      },
       "priceKicker": "Ustama",
       "priceTitle": "Narx — quruvchinikidek",
       "priceText": "Komissiyani siz emas, quruvchi to‘laydi. Narx sotuv bo‘limidagi bilan bir xil.",
@@ -174,7 +180,6 @@
       "stockTitle": "Har bir TJM qoldiqlari",
       "stockText": "Bo‘sh kvartiralar soni kvartira band qilinishi yoki sotilishi bilan o‘zgaradi.",
       "stockCta": "Mavjudlikni ko‘rish",
-      "priceBig": "0%",
       "videoKicker": "Qurilish videosi",
       "videoTitle": "Qurilish jarayonini suratga olamiz",
       "videoText": "Obyektga borish shart emas — kvartira hozir qanday ko‘rinishini ko‘ring.",

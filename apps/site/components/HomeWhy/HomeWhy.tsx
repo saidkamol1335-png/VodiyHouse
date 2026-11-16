@@ -3,7 +3,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { CSSProperties } from "react";
 import { Button } from "@/components/Button";
 import { Container } from "@/components/Container";
-import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { Reveal } from "@/components/Reveal";
 import type { Locale } from "@/lib/i18n/routing";
@@ -15,6 +14,7 @@ import { DocsTile } from "./DocsTile";
 import { RouteTile } from "./RouteTile";
 import { VideoTile } from "./VideoTile";
 import { Copy, Kicker } from "./WhyParts";
+import { WhyAccordion } from "./WhyAccordion";
 import { WhyCard } from "./WhyCard";
 
 type HomeWhyProps = {
@@ -25,36 +25,39 @@ type HomeWhyProps = {
 };
 
 /**
- * «Почему через Vodiy House» — вариант А «Янтарь бренда» (артефакт «Сервис — бесплатно · анимации»,
- * 04.11.2026): бенто из 12 колонок — видео стройки во всю ширину, наличие (7) и янтарная «0%» (5),
- * проверка (4) и маршрут бесплатных услуг (8). У каждой карточки свой сюжет при появлении: full — как
- * в образце, lite — короткое проявление, none — сразу итог. Данные — настоящие: типы и остатки первого
- * ЖК ленты, кадр последнего отчёта, пункты проверки — ТЗ 8.4.
+ * «Nega Vodiy House orqali?» / «Почему через Vodiy House?» — аккордеон (правки 15.11, п. 6: «нажал —
+ * открылась подробная информация»): пять строк одной строкой, по умолчанию свёрнуты; внутри — карточки
+ * варианта А «Янтарь бренда» (04.11.2026) со своими сюжетами: видео стройки, остатки, «0%» с пояснением,
+ * проверка документов, бесплатные услуги. Сюжет карточки играет, когда строку открыли (full — как в
+ * образце, lite — короткое проявление, none — сразу итог). Данные — настоящие: типы и остатки первого ЖК
+ * ленты, кадр последнего отчёта, пункты проверки — ТЗ 8.4.
  */
 export async function HomeWhy({ sample, video = null }: HomeWhyProps) {
   const t = await getTranslations("home.why");
+  const rows = [
+    ...(video
+      ? [{ key: "video", title: t("rows.video"), tile: (
+          <WhyCard className="home-why__tile--video">
+            <VideoTile video={video} />
+          </WhyCard>
+        ) }]
+      : []),
+    { key: "stock", title: t("rows.stock"), tile: <StockTile sample={sample} /> },
+    { key: "fee", title: t("rows.fee"), tile: <FeeTile /> },
+    { key: "docs", title: t("rows.docs"), tile: <DocsTile /> },
+    { key: "route", title: t("rows.route"), tile: <RouteTile /> },
+  ];
   return (
     <section className="home-why" aria-labelledby="home-why-title">
       <Container>
         <Reveal variant="words">
-          <Eyebrow>{t("eyebrow")}</Eyebrow>
           <div id="home-why-title" className="home-why__title">
-            <Heading level={2} accent={t("titleAccent")}>
-              {t("title")}
+            <Heading level={2} accent={t("accTitleAccent")}>
+              {t("accTitle")}
             </Heading>
           </div>
         </Reveal>
-        <div className="home-why__grid">
-          {video ? (
-            <WhyCard className="home-why__tile--video">
-              <VideoTile video={video} />
-            </WhyCard>
-          ) : null}
-          <StockTile sample={sample} />
-          <FeeTile />
-          <DocsTile />
-          <RouteTile />
-        </div>
+        <WhyAccordion rows={rows} />
       </Container>
     </section>
   );
