@@ -79,7 +79,7 @@ function BlockHead({ card, t }: PartProps) {
   return (
     <>
       <header className="complex-block__head">
-        <h4 className="complex-block__name">{t("blocks.block", { name: block.name })}</h4>
+        <h3 className="complex-block__name">{t("blocks.block", { name: block.name })}</h3>
         <span className={status.kind === "built" ? "complex-block__status complex-block__status--built" : "complex-block__status"}>
           {status.kind === "built" ? t("blocks.built") : status.pct === null ? t("blocks.building") : t("blocks.buildingPct", { pct: status.pct })}
         </span>

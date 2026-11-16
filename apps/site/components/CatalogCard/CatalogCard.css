@@ -364,6 +364,16 @@
   min-width: 0;
 }
 
+/* Длинная uz-подпись («Menejerdan batafsil ma’lumot oling») на узкой карточке — в две строки, не обрезается. */
+.catalog-card__buttons .catalog-card__ask {
+  height: auto;
+  min-height: var(--control-sm);
+  padding-block: 6px;
+  line-height: 1.2;
+  white-space: normal;
+  text-align: center;
+}
+
 /* Кружок Telegram (мокап .ibtn--sm): Vodiy House — бот или аккаунт, не застройщик (правило 1.2). */
 .catalog-card__telegram {
   display: inline-flex;

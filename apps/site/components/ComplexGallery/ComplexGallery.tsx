@@ -2,7 +2,7 @@
 
 import { Maximize2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, type MouseEvent, type ReactNode, type RefObject, useRef, useState } from "react";
+import { type CSSProperties, type MouseEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 import { SitePhoto } from "@/components/SitePhoto";
 import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
@@ -43,6 +43,7 @@ const frameOf = ({ width, height }: CatalogPhoto) => ({ "--gallery-ratio": `${wi
 export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryProps) {
   const t = useTranslations("complex.gallery");
   const [viewer, setViewer] = useState<number | null>(null);
+  const warm = useAfterLoad();
   const { root, thumb, button, label, base, target: targetIndex, next: nextIndex, layers, advance, onLayerDone, jump } = usePortalCarousel(photos.length);
   const [cover] = photos;
   if (!cover) return null;
@@ -53,7 +54,8 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
   const target = photos[targetIndex] ?? cover;
   // Нажатие на фото — во весь экран на том кадре, к которому идёт карусель; кнопки — своё.
   const onRootClick = (event: MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("a, button, input, select, textarea, [role='button']")) return;
+    // Клик внутри открытого окна всплывает сюда — окно уже открыто.
+    if (viewer !== null || (event.target as HTMLElement).closest("a, button, input, select, textarea, dialog, [role='button']")) return;
     setViewer(targetIndex);
   };
   return (
@@ -61,7 +63,7 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
       <div className="complex-gallery__base" style={blurOf(current)}>
         <SitePhoto key={current.path} photo={current} alt={altOf(current)} frame="cover" fit="contain" sizes={SIZES} preload={base === 0} className="complex-gallery__photo" />
       </div>
-      {photos.length > 1 ? <GalleryPreload photos={[next, at(targetIndex - 1)]} thumb={at(nextIndex + 1)} /> : null}
+      {photos.length > 1 && warm ? <GalleryPreload photos={[next, at(targetIndex - 1)]} thumb={at(nextIndex + 1)} /> : null}
       <div className="complex-gallery__layers">
         {layers.map((layer) => {
           const photo = photos[layer.index];
@@ -72,7 +74,7 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
       {photos.length > 1 ? <GalleryThumb thumbRef={thumb} buttonRef={button} labelRef={label} photo={next} label={t("next")} tag={t("nextLabel")} onAdvance={advance} /> : null}
       <div className="complex-gallery__tools">
         {tools}
-        <button type="button" className="complex-gallery__expand" aria-label={t("open")} onClick={() => setViewer(base)}>
+        <button type="button" className="complex-gallery__expand" aria-label={t("open")} onClick={() => setViewer(targetIndex)}>
           <Maximize2 size={16} aria-hidden />
         </button>
       </div>
@@ -82,6 +84,24 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
       {viewer !== null ? <GalleryViewer photos={photos} start={viewer} altOf={altOf} onClose={(index) => { setViewer(null); jump(index); }} /> : null}
     </div>
   );
+}
+
+/**
+ * Соседние кадры — только после загрузки страницы: обложка галереи (LCP) не делит сеть с ними (ревью
+ * блока A правок 15.11).
+ */
+function useAfterLoad(): boolean {
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    const done = () => setLoaded(true);
+    if (document.readyState === "complete") {
+      const frame = requestAnimationFrame(done);
+      return () => cancelAnimationFrame(frame);
+    }
+    window.addEventListener("load", done, { once: true });
+    return () => window.removeEventListener("load", done);
+  }, []);
+  return loaded;
 }
 
 /**

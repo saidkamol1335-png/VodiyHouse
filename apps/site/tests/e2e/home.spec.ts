@@ -113,6 +113,7 @@ test.describe("главная, избранное, подборка", () => {
     await expect(gallery.locator(".eyebrow")).toHaveText(/Спецпредложения/);
     // Правки 15.11, п. 3: «Проекты Vodiy House» выше рекламы; над рекламой — «Реклама», не «Спецпредложения».
     await expect(section.locator(".eyebrow")).toHaveText("Реклама");
+    await expect(section.getByRole("heading", { level: 2 })).toHaveText("Предложения от застройщиков");
     const order = await page.evaluate(() => {
       const projects = document.getElementById("spetspredlozheniya");
       const ads = document.getElementById("reklama");
