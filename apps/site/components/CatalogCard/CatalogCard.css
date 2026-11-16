@@ -346,12 +346,6 @@
   font-weight: 550;
 }
 
-.catalog-card__monthly {
-  margin: 0;
-  color: var(--amber-2);
-  font-size: var(--fs-small-l);
-  font-weight: 650;
-}
 
 /* Над растянутой ссылкой карточки: нажатие — по кнопке, а не переход на ЖК (мокап .jc__btns). */
 .catalog-card__buttons {

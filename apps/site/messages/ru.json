@@ -629,7 +629,6 @@
       "priceFrom": "от {price}",
       "perM2From": "от {price}/м²",
       "priceOnRequest": "Цена по запросу",
-      "monthlyFrom": "Платёж от {price}/мес",
       "photo": "Фото {n} из {total}",
       "prevPhoto": "Предыдущее фото",
       "nextPhoto": "Следующее фото",

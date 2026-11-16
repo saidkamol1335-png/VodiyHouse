@@ -107,13 +107,12 @@ export function CardPriceRow({ price }: { price: CardPrice | null }) {
   const locale = useLocale() as Locale;
   if (!price) return <p className="catalog-card__price">{t("priceOnRequest")}</p>;
   const money = (amount: number) => formatPrice(amount, price.currency, locale);
+  // Правки 15.11, п. 9: без «Платёж от … / мес» — его считали по самой маленькой квартире на долгий срок,
+  // и большая сумма отпугивала; платёж — у каждой планировки на странице ЖК. Цена «от» и за м² — остаются.
   return (
-    <>
-      <p className="catalog-card__price">
-        <span className="catalog-card__amount">{t("priceFrom", { price: money(price.amount) })}</span>
-        {price.perM2 ? <span className="catalog-card__per-m2">{t("perM2From", { price: money(price.perM2) })}</span> : null}
-      </p>
-      {price.payment ? <p className="catalog-card__monthly">{t("monthlyFrom", { price: money(price.payment) })}</p> : null}
-    </>
+    <p className="catalog-card__price">
+      <span className="catalog-card__amount">{t("priceFrom", { price: money(price.amount) })}</span>
+      {price.perM2 ? <span className="catalog-card__per-m2">{t("perM2From", { price: money(price.perM2) })}</span> : null}
+    </p>
   );
 }

@@ -20,6 +20,10 @@ test.describe("каталог /novostroyki", () => {
     await expect(shodlik).toContainText("Есть сданные · остальные до 4 кв. 2027");
     await expect(shodlik).toContainText(/1-комн\. от 42,5 м²\s*осталось 14/);
     await expect(shodlik).toContainText(/от \$\d/);
+    // Правки 15.11, п. 9: без «Платёж от … / мес» на карточке; цена «от» и за м² остаются.
+    await expect(shodlik).toContainText(/от \$[\d\s]+\/м²/);
+    await expect(page.locator(".catalog-card", { hasText: /Платёж от/ })).toHaveCount(0);
+    await expect(page.locator(".catalog-card__monthly")).toHaveCount(0);
     // Правки 15.11, п. 10: условия оплаты — плашки фирменного янтаря #F89B0D с тёмным текстом, 12,5 px.
     const pay = shodlik.locator(".catalog-card__pay").first();
     await expect(pay).toHaveCSS("background-color", "rgb(248, 155, 13)");

@@ -330,10 +330,6 @@
   letter-spacing: -0.02em;
 }
 
-:root[data-surface="site"] .catalog-card__monthly {
-  color: var(--fg-2);
-  font-weight: 550;
-}
 
 :root[data-surface="site"] :is(.catalog-card__soon, .catalog-card__promo, .catalog-card__class) {
   font-weight: 600;
