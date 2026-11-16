@@ -8,7 +8,6 @@ import {
   collectionComplexes,
   collectionCount,
   collectionResults,
-  complexGift,
   complexSpecials,
   daysLeft,
   gallerySpecials,
@@ -184,7 +183,7 @@ describe("спецпредложения", () => {
     expect(visibleSpecials(catalog, list).map((view) => view.special.id)).toEqual(["s1", "s3"]);
   });
 
-  it("бейдж на карточке ЖК — первое предложение с этим ЖК; «Подарок» — только вида gift", () => {
+  it("бейдж на карточке ЖК — первое предложение с этим ЖК", () => {
     const list = showcase({
       specials: [
         special("s1", { kind: "installment", complexIds: ["id-a", "id-c"] }),
@@ -192,8 +191,6 @@ describe("спецпредложения", () => {
       ],
     });
     expect(cardBadges(list)).toEqual({ "id-a": text("бейдж s1"), "id-c": text("бейдж s1") });
-    expect(complexGift(list, "id-a")?.id).toBe("s2");
-    expect(complexGift(list, "id-c")).toBeNull();
   });
 });
 

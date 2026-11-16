@@ -269,8 +269,3 @@ export function gallerySpecials(catalog: SiteCatalog | null, showcase: SiteShowc
   const byComplex = complexSpecials(showcase);
   return projectComplexes(catalog.complexes).some((complex) => byComplex[complex.id]);
 }
-
-/** «Подарок» на карточке цены ЖК — первое действующее предложение-подарок с этим ЖК. */
-export function complexGift(showcase: SiteShowcase, complexId: string): ShowcaseSpecial | null {
-  return showcase.specials.find((special) => special.kind === "gift" && special.complexIds.includes(complexId)) ?? null;
-}

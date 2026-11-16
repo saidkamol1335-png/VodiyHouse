@@ -36,8 +36,12 @@ test.describe("сайт · заявки", () => {
   });
 
   test("«Записаться на просмотр»: ошибки полей и фокус, выбор просмотра, «Заявка отправлена» с номером", async ({ page }) => {
+    // Правки 15.11, п. 16: карточки цены с «Записаться на просмотр» под галереей больше нет — кнопка
+    // осталась в нижней панели телефона (ТЗ 7.12): открываем ЖК на 390 и прокручиваем первый экран.
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${COMPLEX}?utm_source=instagram&utm_content=e2e_reels`);
     await page.waitForLoadState("networkidle");
+    await page.mouse.wheel(0, 1200);
     await page.getByRole("button", { name: "Записаться на просмотр" }).first().click();
     const dialog = page.getByRole("dialog", { name: "Запись на просмотр" });
     await expect(dialog).toBeVisible();

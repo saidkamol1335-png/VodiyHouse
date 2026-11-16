@@ -456,14 +456,7 @@
   font-weight: 600;
 }
 
-:root[data-surface="site"] .complex-offer__amount {
-  font-weight: 400;
-  letter-spacing: -0.03em;
-}
 
-:root[data-surface="site"] .complex-offer__free {
-  box-shadow: inset 2px 0 0 var(--ok);
-}
 
 :root[data-surface="site"][data-motion="full"] .beam::before {
   display: none;

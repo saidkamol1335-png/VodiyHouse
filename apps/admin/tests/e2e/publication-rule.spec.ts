@@ -85,7 +85,8 @@ test.describe("сайт · правило публикации", () => {
     await expect(page.locator("#nalichie")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /Рассчитать/ })).toHaveCount(0);
     await expect(soon.locator("form")).toHaveCount(0);
-    await expect(page.locator(".complex-offer__amount")).toHaveText("Цены скоро");
+    // Правки 15.11, п. 16: плашки цены под галереей нет — «Цены скоро» только в разделе ЖК «Скоро».
+    await expect(page.locator(".complex-offer")).toHaveCount(0);
 
     const phone = await sitePhone();
     if (phone) {

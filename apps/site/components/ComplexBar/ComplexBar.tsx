@@ -8,29 +8,17 @@ import { useSiteContacts } from "@/components/SiteContacts";
 import { TelegramButton } from "@/components/TelegramButton";
 import { phoneHref } from "@/lib/contacts";
 
-/** Запасной порог, если карточки цены на странице нет: первый экран ушёл наверх. */
+/** Панель появляется, когда первый экран (название и галерея) ушёл наверх (мокап MobJk). */
 const SHOW_AFTER_SCREENS = 0.9;
-/** Высота шапки (токен --header-h): кнопки карточки цены «ушли», когда скрылись под ней (мокап .bb). */
-const headerHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 0;
 
-/** Панель появляется, когда кнопки карточки цены ушли под шапку (мокап MobJk), — не раньше. */
+/** Порог — 0,9 экрана: до правок 15.11 (п. 16) панель ждала ухода кнопок карточки цены, её больше нет. */
 function useScrolledPastOffer() {
   const [shown, setShown] = useState(false);
   useEffect(() => {
-    const cta = document.querySelector(".complex-offer__cta");
-    if (!cta) {
-      const check = () => setShown(window.scrollY > window.innerHeight * SHOW_AFTER_SCREENS);
-      window.addEventListener("scroll", check, { passive: true });
-      check();
-      return () => window.removeEventListener("scroll", check);
-    }
-    const header = headerHeight();
-    const observer = new IntersectionObserver(
-      ([entry]) => setShown(Boolean(entry && !entry.isIntersecting && entry.boundingClientRect.bottom <= header)),
-      { rootMargin: `-${header}px 0px 0px 0px` },
-    );
-    observer.observe(cta);
-    return () => observer.disconnect();
+    const check = () => setShown(window.scrollY > window.innerHeight * SHOW_AFTER_SCREENS);
+    window.addEventListener("scroll", check, { passive: true });
+    check();
+    return () => window.removeEventListener("scroll", check);
   }, []);
   return shown;
 }

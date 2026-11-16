@@ -6,7 +6,6 @@ import { ComplexBar } from "@/components/ComplexBar";
 import { ComplexGallery } from "@/components/ComplexGallery";
 import { ComplexHero } from "@/components/ComplexHero";
 import { ComplexNav } from "@/components/ComplexNav";
-import { ComplexOffer } from "@/components/ComplexOffer";
 import { ComplexPreviewBanner } from "@/components/ComplexPreviewBanner";
 import { Container } from "@/components/Container";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -18,15 +17,11 @@ import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
 import { complexRoute, ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
-import { readSiteContacts } from "@/lib/site/contacts";
 import type { ComplexPage } from "@/lib/site/complex/model";
 import { readComplexPage } from "@/lib/site/complex/read";
 import { complexSlugState } from "@/lib/site/complex/retired";
 import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
-import { complexSummary } from "@/lib/site/complex/summary";
 import { pageMetadata } from "@/lib/site/metadata";
-import { complexGift } from "@/lib/site/showcase/model";
-import { readSiteShowcase } from "@/lib/site/showcase/read";
 import { ComplexSections } from "./sections";
 import { complexDescription, ComplexJsonLd } from "./seo";
 
@@ -80,7 +75,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/novostro
 export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/novostroyki/[slug]">) {
   const [{ slug }, messages, localeRaw] = await Promise.all([params, getMessages(), getLocale()]);
   const locale = (isLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE) as Locale;
-  const [result, contacts, t, showcase] = await Promise.all([readComplexPage(slug), readSiteContacts(), getTranslations("complex"), readSiteShowcase()]);
+  const [result, t] = await Promise.all([readComplexPage(slug), getTranslations("complex")]);
   if (result.kind === "missing") return goneOrNotFound(slug, locale);
   if (result.kind === "unavailable") {
     return (
@@ -105,8 +100,9 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
           <ComplexHero
             page={page}
             gallery={<ComplexGallery photos={page.photos} name={name} locale={locale} tools={<ComplexTools page={page} name={name} locale={locale} />} />}
-            offer={<ComplexOffer name={name} slug={page.slug} soon={page.state === "soon"} summary={complexSummary(page)} contacts={contacts} gift={complexGift(showcase, page.id)?.title ?? null} />}
           />
+          {/* Правки 15.11, п. 16: плашки цены под галереей нет — цена и платёж у планировок, срок — в блоках,
+              документы — ниже, связь — в шапке сайта, форме внизу и панели телефона. */}
         </Container>
         <ComplexNav label={t("nav.label")} folderLabel={t("nav.folder")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`), section: key }))} />
         <Container>

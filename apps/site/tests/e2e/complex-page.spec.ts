@@ -33,6 +33,9 @@ test.describe("страница ЖК", () => {
     await expect(head.getByRole("link", { name: "Farg‘ona Sifat Qurilish" })).toBeVisible();
     await expect(head).not.toContainText(/Ориентир|до центра|Мустакиллик|Комфорт/);
     await expect(main.locator("#o-zhk")).toContainText("Комфорт");
+    // П. 16: под галереей нет плашки цены (цена, платёж, срок, документы, «Записаться», «Показать телефон»).
+    await expect(main.locator(".complex-offer")).toHaveCount(0);
+    await expect(main.locator(".complex-hero").getByRole("button", { name: /Записаться на просмотр|Показать телефон/ })).toHaveCount(0);
     await expect(main).toContainText(/от \$30\s290/);
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
     // Разделов без данных нет: у Shodlik нет видео и деталей; «Ход строительства» — DEMO-отчёты (фаза 5).

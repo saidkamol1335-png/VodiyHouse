@@ -9,18 +9,17 @@ import { COMPLEX_ANCHORS } from "@/lib/site/complex/sections";
 
 type ComplexHeroProps = {
   page: ComplexPage;
-  /** Галерея и карточка цены — клиентские части первого экрана. */
+  /** Галерея — клиентская часть первого экрана. */
   gallery: ReactNode;
-  offer: ReactNode;
 };
 
 /**
  * Первый экран страницы ЖК (мокап .jkh--stack, ТЗ 7.1): крошки, название с «Проверено Vodiy House» и
- * застройщик; ниже — галерея. Правки 15.11, п. 14: без адреса, ориентира, «до центра N мин» (всё это —
+ * застройщик; ниже — галерея (карточки цены нет — п. 16). Правки 15.11, п. 14: без адреса, ориентира, «до центра N мин» (всё это —
  * в «Расположении» сразу после «О ЖК») и без плашки класса («Бизнес» — в фактах «О ЖК»). На телефоне
  * (MobJk) — сначала фото во всю ширину под шапкой, потом плашка и название, крошек нет.
  */
-export async function ComplexHero({ page, gallery, offer }: ComplexHeroProps) {
+export async function ComplexHero({ page, gallery }: ComplexHeroProps) {
   const [t, tNav] = await Promise.all([getTranslations("complex"), getTranslations("nav")]);
   const locale = (await getLocale()) as Locale;
   const name = t("name", { name: page.name[locale] });
@@ -53,7 +52,6 @@ export async function ComplexHero({ page, gallery, offer }: ComplexHeroProps) {
         <HeroMeta page={page} />
       </div>
       <div className="complex-hero__gallery">{gallery}</div>
-      {offer}
     </div>
   );
 }
