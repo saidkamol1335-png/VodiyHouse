@@ -26,6 +26,13 @@ test.describe("страница ЖК", () => {
     await page.goto(SHODLIK);
     await expect(page.getByRole("heading", { level: 1, name: "ЖК Shodlik" })).toBeVisible();
     const main = page.locator("main");
+    // Правки 15.11, п. 14: в шапке — название, «Проверено Vodiy House» и застройщик; без адреса, ориентира,
+    // «до центра» и плашки класса (класс — в «О ЖК»).
+    const head = main.locator(".complex-hero__head");
+    await expect(head).toContainText("Проверено Vodiy House");
+    await expect(head.getByRole("link", { name: "Farg‘ona Sifat Qurilish" })).toBeVisible();
+    await expect(head).not.toContainText(/Ориентир|до центра|Мустакиллик|Комфорт/);
+    await expect(main.locator("#o-zhk")).toContainText("Комфорт");
     await expect(main).toContainText(/от \$30\s290/);
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
     // Разделов без данных нет: у Shodlik нет видео и деталей; «Ход строительства» — DEMO-отчёты (фаза 5).

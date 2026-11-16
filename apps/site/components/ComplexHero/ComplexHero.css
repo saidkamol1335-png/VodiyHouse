@@ -62,7 +62,7 @@
   gap: 8px;
 }
 
-/* Плашки мокапа (.badge--line, .badge--amber): класс ЖК — пунктиром, проверка — янтарём. */
+/* Плашка мокапа (.badge--amber): «Проверено Vodiy House»; класса ЖК в шапке нет (правки 15.11, п. 14). */
 .complex-hero__badge {
   display: inline-flex;
   align-items: center;
@@ -91,8 +91,7 @@
   font-size: var(--fs-control);
 }
 
-.complex-hero__developer,
-.complex-hero__mark {
+.complex-hero__developer {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -101,13 +100,8 @@
   text-decoration: none;
 }
 
-.complex-hero__developer:hover,
-.complex-hero__mark:hover {
+.complex-hero__developer:hover {
   color: var(--amber-2);
-}
-
-.complex-hero__address {
-  color: var(--fg-2);
 }
 
 @media (max-width: 760px) {
@@ -155,17 +149,5 @@
     color: var(--amber-2);
     font-size: var(--fs-control-l);
     font-weight: 700;
-  }
-
-  .complex-hero__address {
-    font-size: var(--fs-control-l);
-  }
-
-  .complex-hero__mark {
-    align-items: flex-start;
-    color: var(--fg-3);
-    font-size: var(--fs-small-l);
-    font-weight: 500;
-    line-height: 1.4;
   }
 }
