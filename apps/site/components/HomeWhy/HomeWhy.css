@@ -48,8 +48,8 @@
 }
 
 /* ─── Аккордеон (правки 15.11, п. 6) ─────────────────────────────────────────────────────────
-   Пять строк одной строкой; открытая — показывает свою карточку на всю ширину. Контейнер why остаётся
-   на списке — на него смотрят @container карточек. */
+   Пять строк одной строкой; открытая — показывает свою карточку на всю ширину, её вход и сюжет играет
+   метка data-revealed (WhyCard). Контейнер why остаётся на списке — на него смотрят @container карточек. */
 
 .home-why__list {
   display: block;
@@ -100,6 +100,9 @@
 
 .home-why__question {
   flex: 1 1 auto;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 .home-why__chevron {
@@ -124,30 +127,9 @@
   transition: transform 0.3s var(--why-ease-out);
 }
 
-[data-motion="full"] .home-why__row[open] .home-why__panel {
-  animation: home-why-open 0.45s var(--why-ease-out) both;
-}
-
-[data-motion="lite"] .home-why__row[open] .home-why__panel {
-  animation: home-why-open-lite 0.2s ease-out both;
-}
-
 @media (hover: hover) {
   .home-why__summary:hover .home-why__question {
     color: var(--why-accent-ink);
-  }
-}
-
-@keyframes home-why-open {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0);
-  }
-}
-
-@keyframes home-why-open-lite {
-  0% {
-    opacity: 0;
   }
 }
 

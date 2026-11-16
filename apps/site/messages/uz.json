@@ -151,7 +151,7 @@
       "allNote": "Saytda {n} ta TJM — narxlar, mavjud xonadonlar va rejalar bilan",
       "prev": "Oldingi TJM",
       "next": "Keyingi TJM",
-      "slide": "{total} tadan {n}"
+      "slide": "{total} tadan {n}-TJM"
     },
     "manifesto": {
       "eyebrow": "Vodiy House qisqacha",
@@ -386,7 +386,8 @@
       "now": "darhol"
     },
     "term": {
-      "overMax": "Quruvchi shartlari bo‘yicha — {max} oygacha. Uzoqroq kerakmi? Kelishishga harakat qilamiz",
+      "overMaxRow": "{months} oy so‘raladi (quruvchi shartlari bo‘yicha — {max} oygacha)",
+      "overMax": "Quruvchi shartlari bo‘yicha — {max} oygacha, {max} oyga hisoblaymiz. Uzoqroq kerakmi? Kelishishga harakat qilamiz",
       "overMaxButton": "Ariza qoldirish",
       "overMaxContext": "{max} oydan uzoq muddatli to‘lov — {months} oy so‘raladi",
       "title": "Muddat",

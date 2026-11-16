@@ -75,7 +75,8 @@ function defaultSchemeMonths(program: TieredProgram, buttons: number[], max: num
 
 /**
  * Срок схемы застройщика. Сверх максимума: block — считаем на максимуме (как мокап),
- * suggest_tier — тоже на максимуме и подсказка взноса, lead — на просимом сроке.
+ * suggest_tier — тоже на максимуме и подсказка взноса, lead — на просимом сроке (так считает кабинет;
+ * сайт переводит lead в block — atDeveloperMax, правки 15.11, п. 21).
  */
 export function resolveSchemeMonths(
   program: TieredProgram,

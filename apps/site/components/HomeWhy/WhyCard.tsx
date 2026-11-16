@@ -16,7 +16,8 @@ type WhyCardProps = {
  * запускает въезд карточки и её сюжет (видоискатель, одометр, «0%», сканер, маршрут).
  */
 export function WhyCard({ className, delay = 0, children }: WhyCardProps) {
-  const reveal = useReveal<HTMLElement>("0px 0px -12% 0px");
+  // Карточка в строке аккордеона: проявляется, как только строку открыли, даже у нижнего края экрана.
+  const reveal = useReveal<HTMLElement>("0px");
   const spot = useSpotlight();
   return (
     <article

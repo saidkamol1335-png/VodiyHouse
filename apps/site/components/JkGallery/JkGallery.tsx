@@ -55,8 +55,7 @@ export async function JkGallery({
         allNote: t("allNote", { n: complexes.length }),
         prev: t("prev"),
         next: t("next"),
-        // Точка на каждую карточку и «Все ЖК» — подписи для диктора считаются здесь (функцию в клиент не передать).
-        slides: Array.from({ length: cards.length + 1 }, (_, index) => t("slide", { n: index + 1, total: cards.length + 1 })),
+        slide: t.raw("slide") as string,
       }}
     />
   );

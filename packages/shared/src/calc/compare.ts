@@ -7,7 +7,7 @@ import { type CalcProgram, isTermsProgram, isTiered, maxMonthsOf, minDownOf } fr
 export type ComparisonRow<P extends CalcProgram> = {
   program: P;
   calculation: Calculation;
-  /** «Выгоднее всего» — наименьший итог (у всех, кто вровень). */
+  /** «Выгоднее всего» — наименьший итог, только если он у одной программы (вровень — ни у кого, правки 15.11). */
   cheapest: boolean;
   /** «Меньше платёж» — наименьший первый платёж среди программ с платежами. */
   lowestPayment: boolean;

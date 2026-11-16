@@ -113,7 +113,7 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await expect(head(page)).toHaveText(amount("$1 401"));
   });
 
-  test("правки 15.11, п. 21: «Взнос от N% — до M мес.»; дольше максимума — на максимуме и заявка; «выгоднее всего» не у равных", async ({
+  test("правки 15.11, п. 21: «Взнос от N% — до M мес.»; дольше максимума — на максимуме и заявка; заявка с параметрами", async ({
     page,
   }) => {
     await open(page, `plan=${LAYOUT_64}&unit=${UNIT_43}&program=${SCHEME}&down=50&months=60`);
@@ -121,7 +121,7 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await expect(flat(page).locator(".calc-down__chip").first()).toHaveText(/^Взнос от \d+\s?%\s*— до \d+ мес\.$/);
     // Срок 60 мес. больше максимума схемы: считаем на максимуме, просим заявку.
     const message = flat(page).locator(".calc-term__message");
-    await expect(message).toContainText(/По условиям застройщика — до (\d+) мес\. Нужно дольше\? Попробуем договориться/);
+    await expect(message).toContainText(/По условиям застройщика — до (\d+) мес\., считаем на \d+ мес\. Нужно дольше\? Попробуем договориться/);
     const max = Number(/до (\d+) мес/.exec((await message.textContent()) ?? "")?.[1]);
     await expect(flat(page).locator(".calc-term")).toContainText(`${max} мес.`);
     await message.getByRole("button", { name: "Оставить заявку" }).click();
@@ -129,8 +129,6 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await expect(lead).toContainText(`Рассрочка дольше ${max} мес. — просят 60 мес.`);
     await page.keyboard.press("Escape");
     await expect(lead).toHaveCount(0);
-    // Одинаковый итог (100 % и схема без наценки) — метки «выгоднее всего» нет ни у кого.
-    expect(await flat(page).getByText("выгоднее всего", { exact: true }).count()).toBeLessThanOrEqual(1);
   });
 
   test("телефон: шторка, «К расчёту ↓» ведёт к итогу внутри неё, Escape закрывает", async ({

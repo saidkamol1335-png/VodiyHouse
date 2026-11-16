@@ -253,6 +253,8 @@
    смены ширины — анимируются только transform и opacity. */
 .jk-gallery__controls {
   display: flex;
+  width: min(100% - 2 * var(--gutter), var(--container) - 2 * var(--gutter));
+  margin-inline: auto;
   align-items: center;
   justify-content: space-between;
   gap: 16px;

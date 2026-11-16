@@ -33,11 +33,19 @@ test.describe("главная — «Проекты Vodiy House» слайдер�
     const errors = collectPageErrors(page);
     await openGallery(page, "full");
     await expect(page.locator(".jk-gallery--pinned, .jk-gallery__pin")).toHaveCount(0);
+    // Пока ничего не трогали — через ~5 с лента сама листает дальше.
+    await expect.poll(() => currentDot(page), { timeout: 9_000 }).toBe(1);
+    await page.getByRole("button", { name: "Следующий ЖК" }).hover();
+    await dots(page).first().click();
+    await expect.poll(() => currentDot(page)).toBe(0);
     const cards = page.locator(".jk-gallery__card");
     expect(await cards.count()).toBeGreaterThanOrEqual(4);
     await expect(cards.last()).toContainText("Все ЖК");
-    await expect(dots(page)).toHaveCount(await cards.count());
-    await expect(dots(page).nth(1)).toHaveAccessibleName(`2 из ${await cards.count()}`);
+    // Точки — по остановкам ленты (последние карточки на широком экране — одна остановка «конец»).
+    const stops = await dots(page).count();
+    expect(stops).toBeGreaterThanOrEqual(2);
+    expect(stops).toBeLessThanOrEqual(await cards.count());
+    await expect(dots(page).nth(1)).toHaveAccessibleName(`ЖК 2 из ${stops}`);
     // Наведение мышью — пауза: дольше интервала лента стоит.
     await viewport(page).hover();
     await page.waitForTimeout(6_000);
@@ -49,9 +57,10 @@ test.describe("главная — «Проекты Vodiy House» слайдер�
     await expect.poll(() => currentDot(page)).toBe(2);
     await page.getByRole("button", { name: "Предыдущий ЖК" }).click();
     await expect.poll(() => currentDot(page)).toBe(1);
-    // Мышь ушла — через ~5 с лента сама листает дальше.
+    // Своё листание выключило автопрокрутку насовсем: мышь ушла, а лента стоит.
     await page.mouse.move(2, 2);
-    await expect.poll(() => currentDot(page), { timeout: 9_000 }).toBe(2);
+    await page.waitForTimeout(6_000);
+    expect(await currentDot(page)).toBe(1);
     // Прокрутка страницы ленту не двигает.
     const before = await scrollLeft(page);
     await page.mouse.wheel(0, 300);

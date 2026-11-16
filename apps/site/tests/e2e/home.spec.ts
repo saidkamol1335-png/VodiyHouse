@@ -150,4 +150,16 @@ test.describe("главная, избранное, подборка", () => {
     await expect(page.locator("#spetspredlozheniya .eyebrow")).toHaveText(/Maxsus takliflar/);
     await expect(page.locator("#spetspredlozheniya .jk-gallery__until").first()).toContainText(/gacha/);
   });
+
+  test("«Почему через Vodiy House?» в full: строки свёрнуты, открытая показывает карточку (правки 15.11, п. 6)", async ({ page }) => {
+    await page.goto("/ru?motion=full");
+    const why = page.locator(".home-why");
+    await expect(why.getByRole("heading", { level: 3 })).toHaveCount(await why.locator(".home-why__summary").count());
+    await expect(why.locator(".home-why__row[open]")).toHaveCount(0);
+    await why.getByRole("heading", { name: "Цена как у застройщика, наценка 0%" }).click();
+    const tile = why.locator(".home-why__tile--fee");
+    await expect(tile).toBeVisible();
+    await expect(tile).toHaveCSS("opacity", "1", { timeout: 5_000 });
+    await expect(tile).toContainText("Комиссию платит застройщик");
+  });
 });

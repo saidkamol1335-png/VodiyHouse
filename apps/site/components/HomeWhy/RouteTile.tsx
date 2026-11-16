@@ -17,7 +17,7 @@ export async function RouteTile() {
     </>
   );
   return (
-    <WhyCard className="home-why__tile--route" delay={120}>
+    <WhyCard className="home-why__tile--route">
       <div className="home-why__split home-why__split--route">
         <div className="home-why__copy">
           <Kicker index="05" text={t("freeKicker")} />

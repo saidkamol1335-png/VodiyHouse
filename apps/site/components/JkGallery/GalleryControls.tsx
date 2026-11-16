@@ -6,7 +6,7 @@ type GalleryControlsProps = {
   current: number;
   total: number;
   goTo: (index: number) => void;
-  text: { prev: string; next: string; slides: string[] };
+  text: { prev: string; next: string; slide: string };
 };
 
 /**
@@ -15,14 +15,14 @@ type GalleryControlsProps = {
  */
 export function GalleryControls({ current, total, goTo, text }: GalleryControlsProps) {
   return (
-    <div className="jk-gallery__controls container">
+    <div className="jk-gallery__controls">
       <div className="jk-gallery__dots">
         {Array.from({ length: total }, (_, index) => (
           <button
             key={index}
             type="button"
             className={index === current ? "jk-gallery__dot jk-gallery__dot--on" : "jk-gallery__dot"}
-            aria-label={text.slides[index]}
+            aria-label={text.slide.replace("{n}", String(index + 1)).replace("{total}", String(total))}
             aria-current={index === current ? "true" : undefined}
             onClick={() => goTo(index)}
           />

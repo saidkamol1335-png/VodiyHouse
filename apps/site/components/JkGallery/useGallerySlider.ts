@@ -5,54 +5,74 @@ import { getMotionTier, useMotion } from "@/lib/motion";
 
 /** Карточка в кадре столько, потом лента сама листает дальше (только full). */
 export const AUTOPLAY_MS = 5_000;
-/** После касания пальцем лента ждёт столько, прежде чем снова листать сама. */
-const TOUCH_RESUME_MS = 6_000;
 
 type SliderRefs = { section: RefObject<HTMLElement | null>; viewport: RefObject<HTMLElement | null>; total: number };
 
-/** Карточки ленты и отступ snap слева (у первой карточки — поле контейнера). */
 function cardsOf(viewport: HTMLElement): HTMLElement[] {
   return [...viewport.querySelectorAll<HTMLElement>(".jk-gallery__card")];
 }
 
-/** Ближайшая к левому краю кадра карточка; в конце ленты — последняя (её левый край может не дойти). */
-function currentOf(viewport: HTMLElement): number {
+/** Сдвиг прокрутки, при котором карточка встаёт к левому краю (у первой — поле контейнера). */
+const offsetOf = (cards: HTMLElement[], index: number) => (cards[index]?.offsetLeft ?? 0) - (cards[0]?.offsetLeft ?? 0);
+
+/**
+ * Сколько остановок у ленты: карточки, чей левый край доезжает до края кадра, и конец ленты. Последние
+ * карточки на широком экране целиком видны в конце — у них одна общая остановка (иначе точка, которая
+ * никогда не станет текущей).
+ */
+function stopsOf(viewport: HTMLElement): number {
   const cards = cardsOf(viewport);
-  const first = cards[0]?.offsetLeft ?? 0;
-  if (viewport.scrollLeft + viewport.clientWidth >= viewport.scrollWidth - 4) return cards.length - 1;
+  const end = viewport.scrollWidth - viewport.clientWidth;
+  const reachable = cards.filter((_, index) => offsetOf(cards, index) < end - 4).length;
+  return Math.max(1, Math.min(cards.length, reachable + 1));
+}
+
+/** Текущая остановка — ближайшая к прокрутке; в самом конце — последняя. */
+function currentOf(viewport: HTMLElement, stops: number): number {
+  const cards = cardsOf(viewport);
+  const end = viewport.scrollWidth - viewport.clientWidth;
+  if (viewport.scrollLeft >= end - 4) return stops - 1;
   let best = 0;
-  cards.forEach((card, index) => {
-    if (Math.abs(card.offsetLeft - first - viewport.scrollLeft) < Math.abs((cards[best]?.offsetLeft ?? 0) - first - viewport.scrollLeft)) best = index;
-  });
+  for (let index = 0; index < stops - 1; index += 1) {
+    if (Math.abs(offsetOf(cards, index) - viewport.scrollLeft) < Math.abs(offsetOf(cards, best) - viewport.scrollLeft)) best = index;
+  }
   return best;
 }
 
-/** Прокрутка к карточке: плавно только в full (lite и none — сразу). */
-function scrollToCard(viewport: HTMLElement, index: number) {
+/** Прокрутка к остановке: последняя — конец ленты; плавно только в full. */
+function scrollToStop(viewport: HTMLElement, index: number, stops: number) {
   const cards = cardsOf(viewport);
-  const card = cards[index];
-  if (!card) return;
-  viewport.scrollTo({ left: card.offsetLeft - (cards[0]?.offsetLeft ?? 0), behavior: getMotionTier() === "full" ? "smooth" : "auto" });
+  const left = index >= stops - 1 ? viewport.scrollWidth : offsetOf(cards, index);
+  viewport.scrollTo({ left, behavior: getMotionTier() === "full" ? "smooth" : "auto" });
 }
 
-/** Номер карточки в кадре — по прокрутке ленты (свайп, стрелки, автопрокрутка). */
-function useCurrent(viewport: RefObject<HTMLElement | null>) {
+/** Остановки и текущая — по прокрутке и размеру ленты (свайп, стрелки, автопрокрутка, поворот экрана). */
+function useStops(viewport: RefObject<HTMLElement | null>, total: number) {
+  const [stops, setStops] = useState(total);
   const [current, setCurrent] = useState(0);
   useEffect(() => {
     const node = viewport.current;
     if (!node) return;
     let frame = 0;
-    const onScroll = () => {
+    const measure = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => setCurrent(currentOf(node)));
+      frame = requestAnimationFrame(() => {
+        const count = stopsOf(node);
+        setStops(count);
+        setCurrent(currentOf(node, count));
+      });
     };
-    node.addEventListener("scroll", onScroll, { passive: true });
+    measure();
+    const sizes = new ResizeObserver(measure);
+    sizes.observe(node);
+    node.addEventListener("scroll", measure, { passive: true });
     return () => {
       cancelAnimationFrame(frame);
-      node.removeEventListener("scroll", onScroll);
+      sizes.disconnect();
+      node.removeEventListener("scroll", measure);
     };
   }, [viewport]);
-  return current;
+  return { stops, current };
 }
 
 /** Лента в кадре — автопрокрутка не листает то, чего не видно. */
@@ -69,45 +89,51 @@ function useInView(section: RefObject<HTMLElement | null>) {
 }
 
 /**
- * Слайдер ленты «Проекты Vodiy House» (правки 15.11, п. 5): текущая карточка, переход к карточке и
- * автопрокрутка — только в full, пауза при наведении мышью, касании (и 6 с после него), фокусе внутри,
- * скрытой вкладке и когда лента не в кадре. После последней карточки — снова первая.
+ * Слайдер ленты «Проекты Vodiy House» (правки 15.11, п. 5): остановки, текущая и переход. Автопрокрутка —
+ * только в full; пауза, пока мышь или фокус в секции (лента, стрелки, точки), вкладка скрыта или лента не
+ * в кадре. Любое своё листание (стрелка, точка, касание, свайп) выключает автопрокрутку насовсем — так её
+ * можно остановить и с клавиатуры, и диктором (WCAG 2.2.2). После последней остановки — снова первая.
  */
 export function useGallerySlider({ section, viewport, total }: SliderRefs) {
   const tier = useMotion();
-  const current = useCurrent(viewport);
+  const { stops, current } = useStops(viewport, total);
   const inView = useInView(section);
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
-  const [touchedAt, setTouchedAt] = useState(0);
-  const currentRef = useRef(current);
+  const [stopped, setStopped] = useState(false);
+  const position = useRef({ current, stops });
   useEffect(() => {
-    currentRef.current = current;
-  }, [current]);
-  const goTo = useCallback(
+    position.current = { current, stops };
+  }, [current, stops]);
+  const scrollTo = useCallback(
     (index: number) => {
       const node = viewport.current;
-      if (node) scrollToCard(node, ((index % total) + total) % total);
+      const count = position.current.stops;
+      if (node) scrollToStop(node, ((index % count) + count) % count, count);
     },
-    [viewport, total],
+    [viewport],
   );
-  const paused = tier !== "full" || !inView || hover || focus;
+  const paused = tier !== "full" || stopped || !inView || hover || focus;
   useEffect(() => {
     if (paused) return;
     const timer = window.setInterval(() => {
-      if (document.hidden || Date.now() - touchedAt < TOUCH_RESUME_MS) return;
-      goTo(currentRef.current + 1);
+      if (!document.hidden) scrollTo(position.current.current + 1);
     }, AUTOPLAY_MS);
     return () => window.clearInterval(timer);
-  }, [paused, touchedAt, goTo]);
+  }, [paused, scrollTo]);
+  const goTo = (index: number) => {
+    setStopped(true);
+    scrollTo(index);
+  };
   const pauseHandlers = {
     onPointerEnter: (event: PointerEvent) => event.pointerType === "mouse" && setHover(true),
     onPointerLeave: (event: PointerEvent) => event.pointerType === "mouse" && setHover(false),
-    onPointerDown: (event: PointerEvent) => event.pointerType !== "mouse" && setTouchedAt(Date.now()),
+    // Палец на ленте — человек листает сам.
+    onPointerDown: (event: PointerEvent) => event.pointerType !== "mouse" && setStopped(true),
     onFocus: () => setFocus(true),
     onBlur: (event: FocusEvent) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocus(false);
     },
   };
-  return { current, goTo, pauseHandlers, autoplay: !paused };
+  return { current, stops, goTo, pauseHandlers, autoplay: !paused };
 }

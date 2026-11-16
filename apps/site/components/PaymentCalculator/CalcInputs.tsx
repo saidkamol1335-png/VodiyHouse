@@ -11,8 +11,10 @@ import type { CalcParams } from "@vh/shared/calc/params";
 import { type CalcProgram, DOWN_MAX_PCT } from "@vh/shared/calc/programs";
 import type { CalcView } from "@vh/shared/calc/view";
 import { formatPercent } from "@vh/shared/format";
-import { type CalcLocale, type CalcT, approxIn, moneyIn, termText } from "@vh/shared/calc/text";
+import { type CalcLocale, type CalcT, approxIn, moneyIn, programName, termText } from "@vh/shared/calc/text";
 import { useLeadOpener } from "@/components/LeadDialog";
+import type { LeadIntent } from "@/components/LeadForm";
+import type { LeadObject } from "@/lib/leads/types";
 import { downChips, programChoices, termButtonsOf, termMessage } from "./inputParts";
 import type { PaymentCalculatorProps } from "./PaymentCalculator";
 
@@ -177,7 +179,7 @@ const termTexts = (t: CalcT): CalcTermTexts => ({
   more: t("term.more"),
 });
 
-function TermPart<P extends CalcProgram>({ id, view, update, t, leadObject }: CalcInputsProps<P>) {
+function TermPart<P extends CalcProgram>({ id, view, params, update, t, locale, leadObject }: CalcInputsProps<P>) {
   const openLead = useLeadOpener();
   const calc = view.result?.ok ? view.result.calculation : null;
   const term = calc?.term ?? null;
@@ -186,6 +188,11 @@ function TermPart<P extends CalcProgram>({ id, view, update, t, leadObject }: Ca
     view.customMonths && term
       ? t("term.hint", { min: term.min, max: term.max, down: formatPercent(view.downPct) })
       : null;
+  // «Нужно дольше? Попробуем договориться» — только там, где есть заявка расчёта (ЖК и планировка).
+  const askLonger =
+    openLead && leadObject && term
+      ? () => openLead(longerTermLead({ view, params, t, locale, leadObject, max: term.max }))
+      : undefined;
   return (
     <CalcTerm
       key={view.selected?.id}
@@ -196,16 +203,53 @@ function TermPart<P extends CalcProgram>({ id, view, update, t, leadObject }: Ca
       customHint={hint}
       applied={calc.months}
       requested={view.requestedMonths}
-      message={termMessage(
-        term,
-        view.downPct,
-        update,
-        t,
-        openLead && term
-          ? () => openLead({ type: "calc", object: leadObject ?? undefined, context: t("term.overMaxContext", { max: term.max, months: view.requestedMonths ?? term.max }) })
-          : undefined,
-      )}
+      message={termMessage(term, view.downPct, update, t, askLonger)}
       onChange={(months) => update({ months })}
     />
   );
+}
+
+type LongerTermInput<P extends CalcProgram> = {
+  view: CalcView<P>;
+  params: CalcParams;
+  t: CalcT;
+  locale: CalcLocale;
+  leadObject: LeadObject;
+  max: number;
+};
+
+/**
+ * Заявка «Нужно дольше» (правки 15.11, п. 21): менеджер видит программу, взнос, просимый срок и
+ * предел застройщика, а в базе — снимок расчёта (как у «Получить точный расчёт»).
+ */
+function longerTermLead<P extends CalcProgram>({ view, params, t, locale, leadObject, max }: LongerTermInput<P>): LeadIntent {
+  const requested = view.requestedMonths ?? max;
+  const { price } = view;
+  const object =
+    price.mode === "unit" && price.unitId
+      ? { ...leadObject, unit: price.unitId }
+      : price.mode === "layout" && price.layoutId
+        ? { ...leadObject, layout: price.layoutId }
+        : leadObject;
+  const rows = [
+    ...(view.selected ? [{ label: t("programs.title"), value: programName(view.selected, t, locale) }] : []),
+    { label: t("down.title"), value: formatPercent(view.downPct) },
+    { label: t("term.title"), value: t("term.overMaxRow", { months: requested, max }) },
+  ];
+  const calculation = view.result?.ok ? view.result.calculation : null;
+  return {
+    type: "calc",
+    object,
+    context: t("term.overMaxContext", { max, months: requested }),
+    calcRows: rows,
+    ...(view.selected && calculation
+      ? {
+          calc: {
+            program: view.selected.id,
+            input: { params, price: view.price, language: locale },
+            result: calculation as unknown as Record<string, unknown>,
+          },
+        }
+      : {}),
+  };
 }

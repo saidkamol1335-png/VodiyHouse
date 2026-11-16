@@ -48,15 +48,15 @@ type JkGalleryText = {
   /** Подписи стрелок и точек слайдера (правки 15.11, п. 5). */
   prev: string;
   next: string;
-  /** «ЖК 2 из 6» — подпись каждой точки. */
-  slides: string[];
+  /** «ЖК {n} из {total}» — шаблон подписи точки (число остановок узнаёт браузер). */
+  slide: string;
 };
 
 /**
  * Лента ЖК — слайдер (правки 15.11, п. 5: «пусть крутится сам… захочу — переключу кнопкой»): нативная
  * горизонтальная прокрутка со scroll-snap (свайп на телефоне), стрелки ‹ › и точки; к прокрутке страницы
  * не привязана (закрепление GSAP убрано). Автопрокрутка — только в full: карточка в 5 с, пауза при
- * наведении, касании, фокусе внутри и когда лента не в кадре; lite и none — без автопрокрутки.
+ * наведении и фокусе в секции и когда лента не в кадре; своё листание выключает её; lite и none — без неё.
  */
 type JkGalleryTrackProps = { id: string; cards: JkGalleryCard[]; text: JkGalleryText };
 
@@ -66,9 +66,9 @@ export function JkGalleryTrack({ id, cards, text }: JkGalleryTrackProps) {
   const total = cards.length + 1;
   const slider = useGallerySlider({ section: sectionRef, viewport: viewportRef, total });
   return (
-    <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title" aria-roledescription="carousel">
+    <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title" aria-roledescription="carousel" {...slider.pauseHandlers}>
       <GalleryHead text={text} />
-      <div ref={viewportRef} className="jk-gallery__viewport" {...slider.pauseHandlers}>
+      <div ref={viewportRef} className="jk-gallery__viewport">
         <ul className="jk-gallery__track">
           {cards.map((card) => (
             <GalleryCard key={card.slug} card={card} />
@@ -84,7 +84,7 @@ export function JkGalleryTrack({ id, cards, text }: JkGalleryTrackProps) {
           </li>
         </ul>
       </div>
-      <GalleryControls current={slider.current} total={total} goTo={slider.goTo} text={text} />
+      <GalleryControls current={slider.current} total={slider.stops} goTo={slider.goTo} text={text} />
     </section>
   );
 }

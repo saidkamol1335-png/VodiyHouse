@@ -153,7 +153,7 @@ async function StockPanel({ sample }: { sample: NonNullable<HomeWhyProps["sample
 async function FeeTile() {
   const t = await getTranslations("home.why");
   return (
-    <WhyCard className="home-why__tile--fee" delay={120}>
+    <WhyCard className="home-why__tile--fee">
       <div className="home-why__fee">
         <Kicker index="03" text={t("priceKicker")} />
         {/* Заголовок — раньше равенства: диктор по заголовкам не пропускает его; на экране он внизу (order). */}
