@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardDeadline, cardPays, cardPrice, cardRoomTypes } from "./card";
+import { cardDeadline, cardPays, cardPrice, cardRoomTypes, shownRoomTypes } from "./card";
 import type { CatalogBlock, CatalogComplex, CatalogDeveloper, CatalogOffer, SiteCatalog } from "./records";
 
 const offer = (rooms: number, area: number, price: number | null, free: number | null = 2): CatalogOffer => ({
@@ -102,5 +102,19 @@ describe("цена «от» без курса", () => {
     const first = block("s1", { currency: "UZS", offers: [offer(1, 40, 800_000_000)] });
     const second = block("s2", { currency: "UZS", offers: [offer(1, 40, 500_000_000)] });
     expect(cardPrice(complex([first, second]), catalog)).toMatchObject({ amount: 500_000_000, currency: "UZS" });
+  });
+});
+
+describe("типы на карточке (правки 15.11, п. 11)", () => {
+  const type = (rooms: number, available = true) => ({ rooms, areaFrom: 40 + rooms * 10, available, free: available ? 3 : 0 });
+
+  it("до трёх — все, без «ещё»", () => {
+    expect(shownRoomTypes([type(1), type(2), type(3)])).toEqual({ shown: [type(1), type(2), type(3)], more: 0 });
+  });
+
+  it("больше трёх — первые три в продаже, остальные — «ещё N»; проданные — в конец", () => {
+    const { shown, more } = shownRoomTypes([type(0, false), type(1), type(2), type(3), type(4), type(5)]);
+    expect(shown.map((entry) => entry.rooms)).toEqual([1, 2, 3]);
+    expect(more).toBe(3);
   });
 });

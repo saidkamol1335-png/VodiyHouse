@@ -339,20 +339,13 @@
   font-weight: 600;
 }
 
-/* Пилюли оплаты — строкой текста через точку */
-:root[data-surface="site"] .catalog-card__pays .badge {
-  height: auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--fg-2);
-  font-weight: 500;
-}
-
-:root[data-surface="site"] .catalog-card__pays .badge + .badge::before {
-  content: "·";
-  margin-right: 6px;
-  color: var(--fg-3);
+/* Условия оплаты (правки 15.11, п. 10: «заметнее, оранжевым, как логотип») — плашки янтаря знака
+   с тёмным текстом; цвета — токены блока в CatalogCard.css. Раньше здесь была строка через точку. */
+:root[data-surface="site"] .catalog-card__pays .catalog-card__pay {
+  border-color: var(--card-pay-bg);
+  background: var(--card-pay-bg);
+  color: var(--card-pay-fg);
+  font-weight: 650;
 }
 
 /* Остатки «N ta qoldi»: точка статуса вместо цветной пилюли — сигнал остаётся */

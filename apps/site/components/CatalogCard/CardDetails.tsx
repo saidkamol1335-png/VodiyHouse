@@ -5,7 +5,7 @@ import { Badge, type BadgeTone } from "@/components/Badge";
 import { phoneHref } from "@/lib/contacts";
 import { formatArea, formatPrice } from "@vh/shared/format";
 import type { Locale } from "@/lib/i18n/routing";
-import type { CardDeadline, CardPays, CardPrice, CardRoomType } from "@/lib/site/catalog/card";
+import { type CardDeadline, type CardPays, type CardPrice, type CardRoomType, shownRoomTypes } from "@/lib/site/catalog/card";
 
 // Строки тела карточки ЖК (мокап .jc__facts, .jc__types, .jc__pays, .jc__price): только вывод —
 // числа считает lib/site/catalog/card.ts.
@@ -46,9 +46,10 @@ export function CardTypes({ types }: { types: CardRoomType[] }) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
   const roomsLabel = useRoomsLabel();
+  const { shown, more } = shownRoomTypes(types);
   return (
     <ul className="catalog-card__types">
-      {types.map((type) => {
+      {shown.map((type) => {
         const badge = leftBadge(type);
         const label = type.areaFrom === null
           ? roomsLabel(type.rooms)
@@ -56,16 +57,16 @@ export function CardTypes({ types }: { types: CardRoomType[] }) {
         return (
           <li key={type.rooms} className="catalog-card__type">
             <span>{label}</span>
-            <Badge tone={badge.tone} size="sm">
-              {t(badge.key, { n: type.free ?? 0 })}
-            </Badge>
+            <Badge tone={badge.tone}>{t(badge.key, { n: type.free ?? 0 })}</Badge>
           </li>
         );
       })}
+      {more > 0 ? <li className="catalog-card__type catalog-card__type--more">{t("typesMore", { n: more })}</li> : null}
     </ul>
   );
 }
 
+/** Условия оплаты (правки 15.11, п. 10; ТЗ 6.2) — плашки фирменного янтаря #F89B0D с тёмным текстом, на 1,5 px крупнее прочих. */
 export function CardPayChips({ pays }: { pays: CardPays }) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
@@ -78,7 +79,7 @@ export function CardPayChips({ pays }: { pays: CardPays }) {
   return (
     <p className="catalog-card__pays">
       {chips.map((chip) => (
-        <Badge key={chip} tone="line" size="sm">
+        <Badge key={chip} className="catalog-card__pay">
           {chip}
         </Badge>
       ))}

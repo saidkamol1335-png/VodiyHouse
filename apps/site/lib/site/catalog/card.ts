@@ -35,6 +35,15 @@ export function cardRoomTypes(complex: CatalogComplex): CardRoomType[] {
   return [...byRooms.values()].sort((a, b) => a.rooms - b.rooms);
 }
 
+/** Типов на карточке (правки 15.11, п. 11): у ЖК с 5–6 типами список не растягивает карточку. */
+export const CARD_TYPES_SHOWN = 3;
+
+/** Первые CARD_TYPES_SHOWN типов — сначала те, что есть в продаже (по комнатам), остальные — «ещё N». */
+export function shownRoomTypes(types: CardRoomType[]): { shown: CardRoomType[]; more: number } {
+  const ordered = [...types.filter((type) => type.available), ...types.filter((type) => !type.available)];
+  return { shown: ordered.slice(0, CARD_TYPES_SHOWN), more: Math.max(0, ordered.length - CARD_TYPES_SHOWN) };
+}
+
 export function cardDeadline(complex: CatalogComplex): CardDeadline {
   const building = complex.blocks.filter((block) => block.buildStatus !== "delivered");
   if (complex.blocks.length > 0 && building.length === 0) return { kind: "built" };

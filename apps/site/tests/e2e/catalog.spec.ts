@@ -20,6 +20,12 @@ test.describe("каталог /novostroyki", () => {
     await expect(shodlik).toContainText("Есть сданные · остальные до 4 кв. 2027");
     await expect(shodlik).toContainText(/1-комн\. от 42,5 м²\s*осталось 14/);
     await expect(shodlik).toContainText(/от \$\d/);
+    // Правки 15.11, п. 10: условия оплаты — плашки фирменного янтаря #F89B0D с тёмным текстом, 12,5 px.
+    const pay = shodlik.locator(".catalog-card__pay").first();
+    await expect(pay).toHaveCSS("background-color", "rgb(248, 155, 13)");
+    await expect(pay).toHaveCSS("font-size", "12.5px");
+    // П. 11: не больше трёх типов на карточке, остальные — «ещё N».
+    for (const card of await cards.all()) expect(await card.locator(".catalog-card__type:not(.catalog-card__type--more)").count()).toBeLessThanOrEqual(3);
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-catalog-ru.png`, fullPage: true, caret: "initial" });
     expect(errors).toEqual([]);

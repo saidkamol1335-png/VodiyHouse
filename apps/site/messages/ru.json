@@ -623,6 +623,7 @@
       "left": "осталось {n}",
       "leftUnknown": "есть в продаже",
       "leftNone": "нет в наличии",
+      "typesMore": "ещё {n, plural, one {# тип} few {# типа} many {# типов} other {# типа}}",
       "payFull": "100% оплата",
       "installmentUpTo": "Рассрочка до {n} мес.",
       "priceFrom": "от {price}",

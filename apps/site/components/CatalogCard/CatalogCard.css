@@ -296,11 +296,26 @@
   font-weight: 600;
 }
 
+/* «ещё N типов» (правки 15.11, п. 11): подпись без плашки, остальное — на странице ЖК. */
+.catalog-card__type--more {
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
 .catalog-card__pays {
+  /* Правки 15.11, п. 10: янтарь знака (скин сайта не трогает --brand-amber) и тёмный текст (ТЗ 2). */
+  --card-pay-bg: var(--brand-amber);
+  --card-pay-fg: var(--fg);
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 4px 0 0;
+}
+
+.catalog-card__pays .catalog-card__pay {
+  border-color: var(--card-pay-bg);
+  background: var(--card-pay-bg);
+  color: var(--card-pay-fg);
 }
 
 .catalog-card__bottom {
