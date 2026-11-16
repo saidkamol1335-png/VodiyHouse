@@ -8,7 +8,7 @@ import { useCallback, useState, useTransition } from "react";
 import { ActionToast, type ToastMessage } from "@/components/ActionToast";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Button } from "@/components/Button";
-import type { FilterArchiveMode, FilterArchiveResult } from "@/lib/admin/actions/filterArchive";
+import type { FilterArchiveMode, FilterArchiveResult } from "@/lib/admin/filterArchive/result";
 import type { FilterArchiveGroup, FilterArchiveOption } from "@/lib/admin/filterArchive/groups";
 import { settle } from "@/lib/ui/settle";
 

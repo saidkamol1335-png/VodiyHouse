@@ -6,7 +6,7 @@ import { useCallback, useState, useTransition } from "react";
 import { ActionToast, type ToastMessage } from "@/components/ActionToast";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Switch } from "@/components/Switch";
-import type { HouseAdResult } from "@/lib/admin/actions/houseAd";
+import type { HouseAdResult } from "@/lib/admin/houseAdResult";
 import { settle } from "@/lib/ui/settle";
 
 type HouseAdPanelProps = {

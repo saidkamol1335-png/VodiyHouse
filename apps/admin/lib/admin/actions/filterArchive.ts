@@ -4,13 +4,13 @@ import {
   archiveFilterItem,
   FILTER_ARCHIVE_KEY,
   FILTER_ARCHIVE_MAX,
-  type FilterArchive,
   isFilterArchiveId,
   restoreFilterItem,
 } from "@vh/shared/filterArchive";
-import { contentDbErrorCode, type ContentErrorCode } from "@/lib/admin/developers/errors";
+import { contentDbErrorCode } from "@/lib/admin/developers/errors";
+import type { FilterArchiveMode, FilterArchiveResult } from "@/lib/admin/filterArchive/result";
 import { readFilterArchiveRow } from "@/lib/admin/server/filterArchive";
-import { type ActionGuardCode, requireActionViewer } from "@/lib/admin/session";
+import { requireActionViewer } from "@/lib/admin/session";
 import { expireSiteSettings } from "@/lib/cache";
 
 // «Настройки → Фильтр сайта» (06.11.2026): кнопку или блок фильтра — в архив и обратно. Правят
@@ -19,11 +19,6 @@ import { expireSiteSettings } from "@/lib/cache";
 // Запись — целым значением, но с проверкой версии (updated_at): два сотрудника одновременно не
 // затирают правки друг друга — второй перечитывает архив и применяет своё поверх.
 
-export type FilterArchiveResult =
-  | { status: "saved"; archive: FilterArchive }
-  | { status: "error"; error: ContentErrorCode | ActionGuardCode | "busy" };
-
-export type FilterArchiveMode = "archive" | "restore";
 
 /** Попыток записи при одновременной правке: больше двух подряд у кабинета не бывает. */
 const ATTEMPTS = 3;
