@@ -111,6 +111,14 @@ test.describe("главная, избранное, подборка", () => {
     // Спецпредложения с 06.11.2026 — на карточках ленты «Проекты» (ТЗ 5.6): ЖК с предложением — первыми.
     const gallery = page.locator("#spetspredlozheniya");
     await expect(gallery.locator(".eyebrow")).toHaveText(/Спецпредложения/);
+    // Правки 15.11, п. 3: «Проекты Vodiy House» выше рекламы; над рекламой — «Реклама», не «Спецпредложения».
+    await expect(section.locator(".eyebrow")).toHaveText("Реклама");
+    const order = await page.evaluate(() => {
+      const projects = document.getElementById("spetspredlozheniya");
+      const ads = document.getElementById("reklama");
+      return projects && ads ? projects.compareDocumentPosition(ads) & Node.DOCUMENT_POSITION_FOLLOWING : 0;
+    });
+    expect(order).toBeTruthy();
     const offers = gallery.locator(".jk-gallery__offer--special");
     await expect(offers.first().locator(".jk-gallery__badge")).toBeVisible();
     await expect(offers.first()).toContainText(/до \d{2}\.\d{2}\.\d{4}( · (ещё \d+ д|последний день))?/);
@@ -136,6 +144,7 @@ test.describe("главная, избранное, подборка", () => {
     await expect(page.locator(".collections")).toContainText("Tayyor tanlovlar");
     await expect(page.locator(".collections__card").first()).toContainText("Topshirilgan uylar");
     await expect(page.locator("#reklama .ad-card__tag")).toHaveText("Reklama");
+    await expect(page.locator("#reklama .eyebrow")).toHaveText("Reklama");
     await expect(page.locator("#reklama").getByRole("button", { name: "Shu shartni xohlayman" })).toBeVisible();
     await expect(page.locator("#spetspredlozheniya .eyebrow")).toHaveText(/Maxsus takliflar/);
     await expect(page.locator("#spetspredlozheniya .jk-gallery__until").first()).toContainText(/gacha/);
