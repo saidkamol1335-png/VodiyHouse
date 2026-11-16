@@ -17,7 +17,7 @@ export type HeroRender = {
   focus: string;
 };
 
-/** Порядок показа: первый — LCP и постер режима none (бронза и шампань скина). */
+/** Порядок показа: первый — центральная рамка первого экрана (бронза и шампань скина). */
 export const HERO_RENDERS: readonly HeroRender[] = [
   {
     slug: "bronze-tower-sunset",
@@ -57,14 +57,14 @@ export const HERO_RENDERS: readonly HeroRender[] = [
 ];
 
 /**
- * Ширина нарисованной картинки первого экрана (heroRise) — рамка выше на 1/safe, картинка шире
- * рамки: центральная на десктопе разложена в размере «нырка» (до ~560 px), боковые — ~330, крайние —
- * ~460. На DPR 2 браузер берёт файл 736; крупнее файлов нет — оригиналы ≥ 1500 px у заказчика (TODO).
+ * Ширина нарисованной картинки первого экрана — по рамкам колоннады (правки 15.11, п. 1: без «нырка»):
+ * центральная на десктопе 298 px, ближние 238, крайние 203; на DPR 2 браузер берёт файл 736. Крупнее
+ * файлов нет — оригиналы ≥ 1500 px у заказчика (TODO).
  */
 export const HERO_SIZES = {
-  c: "(min-width: 1024px) 560px, (min-width: 768px) 240px, 150px",
-  side1: "(min-width: 1024px) 330px, (min-width: 768px) 210px, 120px",
-  side2: "460px",
+  c: "(min-width: 1024px) 300px, (min-width: 768px) 240px, 150px",
+  side1: "(min-width: 1024px) 240px, (min-width: 768px) 192px, 100px",
+  side2: "205px",
 } as const;
 
 export const HERO_RENDER_SIZES = HERO_SIZES.c;

@@ -10,20 +10,15 @@ type HeroSkylineProps = {
 
 /**
  * Колоннада рендеров: прямоугольные рамки без скруглений, тонкая бронзовая линия по краю, центральная
- * шире. В покое все за горизонтом; прокрутка выводит их целиком, затем камера «ныряет» в центральную,
- * и она раскалывается на две половины (одна картинка — одна загрузка), открывая следующую страницу.
- * Раскладку и движение пишет useHeroScroll; без липкой сцены рамки стоят по CSS.
+ * шире. Стоят над горизонтом сразу (правки 15.11, п. 1), раскладка — CSS; в full и lite — короткое
+ * появление снизу, в none — без движения.
  */
 export function HeroSkyline({ label, noteId }: HeroSkylineProps) {
   return (
     <div className="home-hero__skyline" role="img" aria-label={label} aria-describedby={noteId}>
-      {SKYLINE.map((tower) =>
-        tower.slot === "c" ? (
-          <CenterTower key={tower.slot} tower={tower} />
-        ) : (
-          <SideTower key={tower.slot} tower={tower} />
-        ),
-      )}
+      {SKYLINE.map((tower) => (
+        <Tower key={tower.slot} tower={tower} />
+      ))}
     </div>
   );
 }
@@ -66,14 +61,15 @@ function RenderPicture({ tower }: { tower: HeroTower }) {
         height={render.height}
         alt=""
         loading={tower.rank === 2 ? "lazy" : "eager"}
-        fetchPriority="low"
+        // Центральная видна сразу (п. 1) — без понижения приоритета; боковые — после неё.
+        fetchPriority={tower.rank === 0 ? undefined : "low"}
         decoding="async"
       />
     </picture>
   );
 }
 
-function SideTower({ tower }: { tower: HeroTower }) {
+function Tower({ tower }: { tower: HeroTower }) {
   return (
     <div className={towerClass(tower)} style={frameStyle(tower)} aria-hidden="true">
       <div className="home-hero__frame">
@@ -81,22 +77,6 @@ function SideTower({ tower }: { tower: HeroTower }) {
           <RenderPicture tower={tower} />
         </div>
       </div>
-    </div>
-  );
-}
-
-/** Центральная рамка — две половины одной картинки: по ним идёт раскол. */
-function CenterTower({ tower }: { tower: HeroTower }) {
-  return (
-    <div className={towerClass(tower)} style={frameStyle(tower)} aria-hidden="true">
-      {(["top", "bottom"] as const).map((half) => (
-        <div key={half} className={`home-hero__half home-hero__half--${half}`}>
-          <div className="home-hero__shift">
-            <RenderPicture tower={tower} />
-          </div>
-        </div>
-      ))}
-      <span className="home-hero__edge" />
     </div>
   );
 }

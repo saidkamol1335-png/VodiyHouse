@@ -4,8 +4,6 @@ import type { HeroStat, HeroText } from "./types";
 
 type HeroFactsProps = {
   text: HeroText;
-  /** Цифры из каталога; пусто — каталог не прочитался, экран без цифр. */
-  stats: readonly HeroStat[];
   /** «Найдено сейчас» (HeroQuickPick) — плашка справа от цифр. */
   found: ReactNode;
   /** id подписи «иллюстративный характер»: на неё ссылается группа рендеров. */
@@ -13,11 +11,11 @@ type HeroFactsProps = {
 };
 
 /**
- * Полоса под горизонтом: диск-горизонт с подписью «Визуализации носят иллюстративный характер»
- * (__horizon — в сцене опускается, освобождая место рамкам), три «бесплатно» (уходят), цифры каталога
- * (у квартир — точка «live») и «Найдено сейчас». Цвет диска — фон страницы.
+ * Полоса под горизонтом: диск-горизонт с подписью «Визуализации носят иллюстративный характер», три
+ * «бесплатно» и «Найдено сейчас». Цифры каталога (у квартир — точка «live») — под кнопками, в HeroCopy
+ * (правки 15.11, п. 1). Цвет диска — фон страницы.
  */
-export function HeroFacts({ text, stats, found, noteId }: HeroFactsProps) {
+export function HeroFacts({ text, found, noteId }: HeroFactsProps) {
   return (
     <div className="home-hero__ledger">
       <div className="home-hero__horizon">
@@ -34,18 +32,13 @@ export function HeroFacts({ text, stats, found, noteId }: HeroFactsProps) {
           </li>
         ))}
       </ul>
-      {stats.length > 0 || found ? (
-        <div className="home-hero__facts-row">
-          {stats.length > 0 ? <HeroStats stats={stats} label={text.statsLabel} /> : null}
-          {found}
-        </div>
-      ) : null}
+      {found ? <div className="home-hero__facts-row">{found}</div> : null}
     </div>
   );
 }
 
 /** Число над подписью на экране; в разметке подпись (dt) первая — так читает диктор. */
-function HeroStats({ stats, label }: { stats: readonly HeroStat[]; label: string }) {
+export function HeroStats({ stats, label }: { stats: readonly HeroStat[]; label: string }) {
   return (
     <dl
       className="home-hero__stats"

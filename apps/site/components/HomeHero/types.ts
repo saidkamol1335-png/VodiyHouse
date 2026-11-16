@@ -8,8 +8,6 @@ export type HeroText = {
   /** «Для вас бесплатно» (ТЗ 1а) — три пункта с галочками. */
   perks: readonly string[];
   statsLabel: string;
-  /** Только full: «Листайте» у кнопок. */
-  scrollCue: string;
   slides: HeroSlidesText;
 };
 

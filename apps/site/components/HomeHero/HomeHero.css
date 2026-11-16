@@ -1,12 +1,9 @@
-/* Первый экран главной «Ufq · Раскол» (03.11.2026, по схеме hero-1 с 21st.dev в палитре Vodiy House;
-   переходы — motion kit Oryzo): светлое небо из кости с чертёжной сеткой, по центру пилюля, заголовок
-   (графитовый градиент, курсив Cormorant бронзой), обещание и кнопки; внизу — травертиновый
-   диск-горизонт с тёплым ободом, на нём подпись, «бесплатно», цифры и «Найдено сейчас». Рендеры —
-   прямоугольники без скруглений за горизонтом. Прокрутка (useHeroScroll, heroRise): на десктопе ≥
-   1024×720 сцена липнет — текст уходит, заголовок уменьшается к шапке, рамки выходят целиком, камера
-   «ныряет» в центральную, экран раскалывается по ней — в щель поднимается каталог; ниже — рамки
-   выходят, пока экран уезжает; none — готовая картина. Движение пишет скроллер прямо в transform и
-   opacity листьев: переменных на секции нет — браузер не пересчитывает весь экран (60 к/с). */
+/* Первый экран главной «Ufq» (03.11.2026, по схеме hero-1 с 21st.dev в палитре Vodiy House; переходы —
+   motion kit Oryzo): светлое небо из кости с чертёжной сеткой, по центру пилюля, заголовок (графитовый
+   градиент, курсив Cormorant бронзой), обещание, кнопки и цифры каталога; ниже — колоннада рендеров ЖК
+   (прямоугольники без скруглений) над травертиновым диском-горизонтом, на нём подпись, «бесплатно» и
+   «Найдено сейчас». Правки 15.11, п. 1: рендеры и цифры видны сразу, без прокрутки, во всех режимах;
+   сцена «Раскол» (рамки за горизонтом, липкий экран, нырок и раскол) убрана. */
 
 .home-hero {
   --hh-bone: #f8fafb;
@@ -21,7 +18,6 @@
   --hh-e-out: cubic-bezier(0.16, 1, 0.3, 1);
   --hh-e-soft: cubic-bezier(0.25, 1, 0.5, 1);
   --home-hero-edge: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
-  --home-hero-travel: 384svh;
   --disc-w: 1000px;
   --disc-h: 440px;
 
@@ -207,6 +203,13 @@
   text-wrap: pretty;
 }
 
+/* Цифры каталога — под кнопками (правки 15.11, п. 1: «рядом с кнопками»). */
+.home-hero__out--stats {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
 .home-hero__actions {
   display: grid;
   gap: 10px;
@@ -273,45 +276,6 @@
 }
 
 /* «Листайте»: только full на липком экране высотой от 820 (раскладка — там же, без сдвигов). */
-.home-hero__out--cue {
-  display: none;
-  margin-top: 20px;
-}
-
-.home-hero__cue {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  color: var(--fg-3);
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.home-hero__cue-line {
-  position: relative;
-  width: 1px;
-  height: 28px;
-  background: rgba(98, 92, 83, 0.45);
-}
-
-.home-hero__cue-line::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -2px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #7a5634;
-}
-
-/* ---------- рамки рендеров ---------- */
-
 /* Ряд рамок над горизонтом. В липкой сцене рамки ставит скроллер по измеренной раскладке
    (инлайн left/top/width/height) относительно сцены; без неё — по размерам ниже, низом на 20 px
    над горизонтом. */
@@ -336,14 +300,8 @@
   background: var(--tint);
 }
 
-/* Центральная — без своего фона: цвет-заглушка на половинах, они уходят вместе с картинкой. */
 .home-hero__tower--c {
   z-index: 3;
-  background: none;
-}
-
-.home-hero__half {
-  background: var(--tint);
 }
 
 .home-hero__tower--l1,
@@ -363,14 +321,8 @@
   display: none;
 }
 
-/* Пока скроллер не поставил позу — рамка спрятана за горизонтом (без вспышки при загрузке). */
-:root[data-js]:not([data-motion="none"]) .home-hero__tower {
-  transform: translate3d(0, calc(100% + 160px), 0);
-}
-
 /* Прямоугольник без скруглений и теней; по краю — тонкая бронзовая линия. */
-.home-hero__frame,
-.home-hero__half {
+.home-hero__frame {
   position: absolute;
   right: 0;
   left: 0;
@@ -383,24 +335,12 @@
   bottom: 0;
 }
 
-.home-hero__frame::after,
-.home-hero__edge {
+.home-hero__frame::after {
   content: "";
   position: absolute;
   inset: 0;
   box-shadow: inset 0 0 0 1px var(--hh-line);
   pointer-events: none;
-}
-
-/* Центральная — две половины одной картинки: по шву между ними идёт раскол. */
-.home-hero__half--top {
-  top: 0;
-  height: calc(50% + 1px);
-}
-
-.home-hero__half--bottom {
-  top: 50%;
-  height: 50%;
 }
 
 .home-hero__shift {
@@ -409,15 +349,6 @@
   right: 0;
   left: 0;
   height: 100%;
-}
-
-.home-hero__half--top .home-hero__shift {
-  height: calc((100% - 1px) * 2);
-}
-
-.home-hero__half--bottom .home-hero__shift {
-  top: -100%;
-  height: 200%;
 }
 
 .home-hero__picture {
@@ -432,59 +363,6 @@
   height: calc(100% / var(--safe, 0.85));
   object-fit: cover;
   object-position: var(--focus);
-}
-
-/* Пластины раскола: травертин под всей сценой, в финале расходятся вверх и вниз. Только в липкой сцене. */
-.home-hero__plate {
-  display: none;
-  position: absolute;
-  right: 0;
-  left: 0;
-  z-index: 0;
-  background: var(--hh-trav);
-}
-
-.home-hero__plate--top {
-  top: 0;
-  height: 50%;
-}
-
-.home-hero__plate--bottom {
-  top: 50%;
-  height: calc(50% + 40px);
-}
-
-.home-hero__plate--top::after,
-.home-hero__plate--bottom::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: rgba(122, 86, 52, 0.32);
-}
-
-.home-hero__plate--top::after {
-  bottom: 0;
-}
-
-.home-hero__plate--bottom::before {
-  top: 0;
-}
-
-/* Подпись «иллюстративный характер» — и на нижней пластине, пока виден только центральный рендер. */
-.home-hero__plate-note {
-  position: absolute;
-  right: 0;
-  bottom: 56px;
-  left: 0;
-  margin: 0;
-  color: var(--fg-3);
-  font-family: var(--font);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-align: center;
 }
 
 /* Ореол над горизонтом: шампань, не больше .26. */
@@ -886,17 +764,21 @@
     --disc-h: 750px;
   }
 
+  /* Экран — текст, цифры и колоннада; полоса под горизонтом («бесплатно», «Найдено сейчас») — ниже
+     сгиба, на экране от неё только край диска (правки 15.11, п. 1). */
   .home-hero__stage {
-    grid-template-rows: auto minmax(410px, 1fr) auto;
-    min-height: max(100svh, 640px);
+    --hh-ledger-below: 150px;
+
+    grid-template-rows: auto minmax(300px, 1fr) auto;
+    min-height: calc(max(100svh, 640px) + var(--hh-ledger-below));
   }
 
   .home-hero__copy {
-    padding: calc(var(--header-h) + 56px) var(--home-hero-edge) 0;
+    padding: calc(var(--header-h) + 36px) var(--home-hero-edge) 0;
   }
 
   .home-hero__h1 {
-    font-size: clamp(40px, min(5.2vw, 8.4svh), 76px);
+    font-size: clamp(40px, min(4.6vw, 6.6svh), 66px);
     line-height: 1;
   }
 
@@ -940,7 +822,7 @@
 
 @media (min-width: 1024px) and (max-height: 780px) {
   .home-hero__copy {
-    padding-top: calc(var(--header-h) + 36px);
+    padding-top: calc(var(--header-h) + 20px);
   }
 }
 
@@ -950,153 +832,48 @@
   }
 }
 
-/* none: готовая картина в обычном потоке — колоннада поднята, центральная шире, крайние — на широком. */
+/* Колоннада на десктопе — над горизонтом сразу (правки 15.11, п. 1): рамки растягиваются на высоту
+   своего ряда (он забирает остаток экрана после текста и цифр), центральная шире, крайние — на широком. */
 @media (min-width: 1024px) {
-  [data-motion="none"] .home-hero__stage {
-    grid-template-rows: auto 560px auto;
-    min-height: 0;
-  }
-
-  [data-motion="none"] .home-hero__tower {
+  .home-hero__tower {
     --w: 298px;
-    --h: 514px;
+
+    top: 12px;
+    height: auto;
   }
 
-  [data-motion="none"] :is(.home-hero__tower--l1, .home-hero__tower--r1) {
+  :is(.home-hero__tower--l1, .home-hero__tower--r1) {
     --w: 238px;
     --x: -292px;
+
+    top: 56px;
   }
 
-  [data-motion="none"] .home-hero__tower--r1 {
+  .home-hero__tower--r1 {
     --x: 292px;
   }
 }
 
 @media (min-width: 1360px) {
-  [data-motion="none"] .home-hero__tower--wide-only {
+  .home-hero__tower--wide-only {
     display: block;
     --w: 203px;
     --x: -536.5px;
+
+    top: 96px;
   }
 
-  [data-motion="none"] .home-hero__tower--r2 {
+  .home-hero__tower--r2 {
     --x: 536.5px;
   }
 }
-
-/* ---------- липкая сцена (десктоп ≥ 1024×720, lite и full) ----------
-   Трек: экран + путь сцены; низ трека заходит под следующую страницу на экран (margin-bottom −100svh),
-   поэтому бегущая строка и каталог уже стоят под пластинами, когда сцена раскалывается, и поднимаются
-   в щель. Секция — выше следующих (z-index), сцена — один изолированный слой. Позы пишет скроллер. */
-
-@media (min-width: 1024px) and (min-height: 720px) {
-  /* Секция лежит поверх следующей страницы на экран: клики ловит только сама сцена — а когда она
-     пройдена (visibility: hidden), они уходят каталогу. */
-  :root[data-js]:not([data-motion="none"]) .home-hero {
-    z-index: 4;
-    overflow: visible;
-    overflow-x: clip;
-    background: none;
-    pointer-events: none;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__track {
-    height: calc(100svh + var(--home-hero-travel));
-    margin-bottom: -100svh;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__stage {
-    position: sticky;
-    top: 0;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    height: 100svh;
-    min-height: 0;
-    background: none;
-    isolation: isolate;
-    contain: layout paint;
-    pointer-events: auto;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__skyline {
-    position: static;
-  }
-
-  /* Страница открыта не сверху (якорь, перезагрузка, «Назад») или скрипты не ожили: пока сцена не
-     поставила позу (data-hero-ready), её не видно и она не ловит клики — каталог под ней доступен. */
-  :root[data-js][data-reveal-off]:not([data-hero-ready]) .home-hero__stage {
-    visibility: hidden;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__tower {
-    bottom: auto;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__plate {
-    display: block;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__sky {
-    z-index: 1;
-  }
-
-  :root[data-js]:not([data-motion="none"]) .home-hero__copy {
-    z-index: 5;
-  }
-
-  /* Заголовок уменьшается к шапке от верхней кромки. */
-  :root[data-js]:not([data-motion="none"]) .home-hero__title {
-    transform-origin: 50% 0;
-  }
-
-  /* Слои — отдельные, пока первый экран рядом с окном (data-live — один раз, не в сцене). */
-  .home-hero[data-live]
-    :is(
-      .home-hero__tower,
-      .home-hero__half,
-      .home-hero__plate,
-      .home-hero__sky,
-      .home-hero__ledger,
-      .home-hero__horizon,
-      .home-hero__title,
-      .home-hero__out
-    ) {
-    will-change: transform, opacity;
-  }
-
-  :root[data-motion="full"] .home-hero[data-live] .home-hero__shift {
-    will-change: transform;
-  }
-}
-
-@supports not (overflow: clip) {
-  .home-hero__track {
-    margin-bottom: 0 !important;
-  }
-
-  .home-hero__plate {
-    display: none !important;
-  }
-}
-
-@media (min-width: 1024px) and (min-height: 820px) {
-  :root[data-js]:not([data-motion="none"]) .home-hero__out--cue {
-    display: block;
-  }
-
-  :root:not([data-motion="full"]) .home-hero__out--cue {
-    visibility: hidden;
-  }
-}
-
-/* data-phase на секции — только метка для e2e: ни один селектор на неё не смотрит (иначе браузер
-   пересчитывал бы стили экрана на каждой смене такта). */
 
 /* ---------- вступление ----------
    Играет CSS сам, с первой отрисовки; под экраном загрузки (html[data-preloader]) стоит на первом
    кадре и трогается, когда экран ушёл. Не играет: страница открыта не сверху (data-reveal-off) и уже
    сыграно (data-entered — смена lite → full и «Назад» не повторяют его). full — сетка проявляется,
-   диск всплывает (как у hero-1), текст — снизу; заголовок не бывает невидимым (LCP); рендеры спрятаны
-   за горизонтом — их выводит прокрутка. lite — короткое проявление, заголовок без анимации. */
+   диск всплывает (как у hero-1), текст и цифры — снизу, рамки поднимаются над горизонтом; заголовок не
+   бывает невидимым (LCP). lite — короткое проявление, заголовок без анимации, рамки — без сдвига. */
 
 [data-motion="full"] .home-hero__grid {
   animation: hh-fade 1.2s ease-out both;
@@ -1138,12 +915,24 @@
   animation-delay: 0.52s;
 }
 
-[data-motion="full"] .home-hero__cue {
-  animation: hh-fade 0.6s ease-out 1.3s both;
+[data-motion="full"] .home-hero__stats {
+  --from: 12px;
+
+  animation: hh-up 0.7s var(--hh-e-soft) 0.6s both;
 }
 
-[data-motion="full"] .home-hero__cue-line::after {
-  animation: hh-cue 2.2s var(--hh-e-soft) 1.9s 2 both;
+[data-motion="full"] .home-hero__tower {
+  --from: 56px;
+
+  animation: hh-up 0.9s var(--hh-e-soft) 0.55s both;
+}
+
+[data-motion="full"] :is(.home-hero__tower--l1, .home-hero__tower--r1) {
+  animation-delay: 0.66s;
+}
+
+[data-motion="full"] .home-hero__tower--wide-only {
+  animation-delay: 0.76s;
 }
 
 [data-motion="full"] .home-hero__note {
@@ -1187,6 +976,16 @@
   animation-delay: 0.12s;
 }
 
+[data-motion="lite"] .home-hero__stats {
+  --from: 8px;
+
+  animation: hh-up 0.45s ease-out 0.16s both;
+}
+
+[data-motion="lite"] .home-hero__tower {
+  animation: hh-fade 0.45s ease-out 0.2s both;
+}
+
 [data-motion="lite"] :is(.home-hero__note, .home-hero__perks, .home-hero__facts-row) {
   --from: 8px;
 
@@ -1205,7 +1004,8 @@ html[data-preloader]
     .home-hero__actions,
     .home-hero__cta,
     .home-hero__quiz,
-    .home-hero__cue,
+    .home-hero__stats,
+    .home-hero__tower,
     .home-hero__note,
     .home-hero__perks,
     .home-hero__perk,
@@ -1216,7 +1016,6 @@ html[data-preloader]
 
 /* Псевдоэлементы внутри :is() не работают — отдельными селекторами. */
 html[data-preloader] .home-hero__glow::before,
-html[data-preloader] .home-hero__cue-line::after,
 html[data-preloader] .home-hero__stat-value::before {
   animation-play-state: paused;
 }
@@ -1237,7 +1036,8 @@ html[data-reveal-off]
     .home-hero__actions,
     .home-hero__cta,
     .home-hero__quiz,
-    .home-hero__cue,
+    .home-hero__stats,
+    .home-hero__tower,
     .home-hero__note,
     .home-hero__perks,
     .home-hero__perk,
@@ -1253,7 +1053,8 @@ html[data-reveal-off]
     .home-hero__actions,
     .home-hero__cta,
     .home-hero__quiz,
-    .home-hero__cue,
+    .home-hero__stats,
+    .home-hero__tower,
     .home-hero__note,
     .home-hero__perks,
     .home-hero__perk,
@@ -1287,23 +1088,6 @@ html[data-reveal-off]
 @keyframes hh-rise-x {
   0% {
     transform: translate3d(-50%, var(--from), 0);
-  }
-}
-
-@keyframes hh-cue {
-  0% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-
-  15%,
-  85% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(22px);
   }
 }
 

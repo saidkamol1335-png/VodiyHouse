@@ -12,7 +12,7 @@ import {
 const PUBLIC = path.join(import.meta.dirname, "../../../public");
 
 describe("heroRenders", () => {
-  it("пять кадров, первый — бронзовая башня (LCP)", () => {
+  it("пять кадров, первый — бронзовая башня (центральная рамка)", () => {
     expect(HERO_RENDERS).toHaveLength(5);
     expect(HERO_RENDERS[0]?.slug).toBe("bronze-tower-sunset");
     expect(new Set(HERO_RENDERS.map((render) => render.slug)).size).toBe(5);
@@ -36,6 +36,6 @@ describe("heroRenders", () => {
 
   it("размеры — по рамке центральной башни", () => {
     expect(HERO_RENDER_SIZES).toBe(HERO_SIZES.c);
-    expect(HERO_RENDER_SIZES.startsWith("(min-width: 1024px) 560px")).toBe(true);
+    expect(HERO_RENDER_SIZES.startsWith("(min-width: 1024px) 300px")).toBe(true);
   });
 });

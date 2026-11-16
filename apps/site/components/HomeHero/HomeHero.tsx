@@ -29,7 +29,6 @@ export async function HomeHero({ stats, found, catalogId }: HomeHeroProps) {
     cta: t("cta"),
     perks: PERK_KEYS.map((key) => t(`free.${key}`)),
     statsLabel: t("stats.label"),
-    scrollCue: t("scrollCue"),
     slides: {
       label: t("slides.label"),
       note: t("slides.note"),
