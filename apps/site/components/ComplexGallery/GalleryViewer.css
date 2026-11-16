@@ -34,6 +34,12 @@
   position: relative;
   flex: 0 0 100%;
   margin: 0;
+  /* Пока фото грузится — его размытое превью (--viewer-blur), не пустой тёмный кадр (правки 15.11, п. 15);
+     притушено, чтобы светлые рендеры не гасили счётчик и кнопки. */
+  --viewer-dim: rgba(11, 10, 9, 0.62);
+  background:
+    linear-gradient(var(--viewer-dim), var(--viewer-dim)),
+    var(--viewer-blur, none) center / cover no-repeat;
   scroll-snap-align: start;
 }
 

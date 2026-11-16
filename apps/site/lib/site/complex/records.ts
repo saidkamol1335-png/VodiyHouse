@@ -239,7 +239,9 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
     nearby: nearbyFrom(complex.nearby),
     stockUpdatedAt: complex.stock_updated_at,
     developer: developerFrom(record.developer),
-    photos: catalogComplex.photos,
+    // Все кадры — с размытым превью (правки 15.11, п. 15): в каталоге оно урезано до двух (BLUR_PHOTOS),
+    // а в галерее ЖК без него кадр 3+ открывался чёрным, пока грузится.
+    photos: record.photos.flatMap((photo) => photoFrom(photo) ?? []),
     blocks: record.blocks.map((block, index) => blockFrom(block, catalogComplex.blocks[index]!)),
     layouts: record.layouts.map(layoutFrom),
     documents: record.documents.map(({ checked_on, ...rest }) => ({

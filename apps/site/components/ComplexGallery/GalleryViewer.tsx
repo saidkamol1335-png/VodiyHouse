@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type KeyboardEvent, type UIEvent } from "react";
+import { type CSSProperties, useEffect, useRef, useState, type KeyboardEvent, type UIEvent } from "react";
 import { mediaPublicUrl } from "@/lib/media";
 import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
@@ -15,6 +15,9 @@ type GalleryViewerProps = {
   /** Закрыли — на каком кадре: галерея на странице встаёт туда же. */
   onClose: (index: number) => void;
 };
+
+/** Сколько кадров по обе стороны от текущего грузится заранее (правки 15.11, п. 15). */
+const NEIGHBOURS = 2;
 
 const srcOf = (photo: CatalogPhoto) => mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", photo.path);
 
@@ -66,8 +69,20 @@ export function GalleryViewer({ photos, start, altOf, onClose }: GalleryViewerPr
     >
       <div ref={track} className="complex-viewer__track" onScroll={onScroll}>
         {photos.map((photo, index) => (
-          <figure key={photo.path} className="complex-viewer__slide" aria-hidden={index !== current}>
-            {Math.abs(index - current) <= 1 ? <Image src={srcOf(photo)} alt={altOf(photo)} fill sizes="100vw" className="complex-viewer__image" /> : null}
+          <figure key={photo.path} className="complex-viewer__slide" aria-hidden={index !== current} style={photo.blur ? ({ "--viewer-blur": `url("${photo.blur}")` } as CSSProperties) : undefined}>
+            {Math.abs(index - current) <= NEIGHBOURS ? (
+              <Image
+                src={srcOf(photo)}
+                alt={altOf(photo)}
+                fill
+                sizes="100vw"
+                className="complex-viewer__image"
+                // Соседи — сразу, не лениво: в горизонтальной ленте ленивая картинка ждёт прокрутки.
+                loading="eager"
+                placeholder={photo.blur ? "blur" : "empty"}
+                blurDataURL={photo.blur ?? undefined}
+              />
+            ) : null}
           </figure>
         ))}
       </div>

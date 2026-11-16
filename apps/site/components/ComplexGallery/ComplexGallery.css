@@ -11,8 +11,9 @@
   max-height: max(520px, calc(100svh - 160px));
   overflow: hidden;
   border-radius: var(--r-xl);
-  background: #000;
-  cursor: pointer;
+  background: var(--photo-bg);
+  /* Нажатие на фото — во весь экран (правки 15.11, п. 15). */
+  cursor: zoom-in;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -25,7 +26,7 @@
 }
 
 .complex-gallery__base {
-  background: #000 center / cover no-repeat;
+  background: var(--photo-bg) center / cover no-repeat;
 }
 
 .complex-gallery__layers {
@@ -40,14 +41,20 @@
   background: transparent;
 }
 
-/* Следующий рендер грузится тем же кандидатом под базой — портал раскрывается без ожидания сети. */
-.complex-gallery .complex-gallery__preload {
+/* Соседние кадры и следующее превью грузятся теми же кандидатами под базой (правки 15.11, п. 15) —
+   портал и полный экран раскрываются без ожидания сети. */
+.complex-gallery__preload {
   position: absolute;
   inset: 0;
   z-index: -1;
-  aspect-ratio: auto;
   opacity: 0;
   pointer-events: none;
+}
+
+.complex-gallery__preload .site-photo {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
 }
 
 /* z-index — свои 1–6 внутри изолированного блока (isolation), не глобальная шкала. */
@@ -56,7 +63,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #000 center / cover no-repeat;
+  background: var(--photo-bg) center / cover no-repeat;
   transform-origin: 0 0;
   will-change: transform;
 }
@@ -171,7 +178,7 @@
   padding: 0;
   overflow: hidden;
   border: 0;
-  background: #000;
+  background: var(--photo-bg);
   outline: none;
   cursor: pointer;
   pointer-events: auto;

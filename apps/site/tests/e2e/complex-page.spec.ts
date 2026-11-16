@@ -44,6 +44,29 @@ test.describe("страница ЖК", () => {
     expect(errors).toEqual([]);
   });
 
+  test("галерея: нажатие на фото — во весь экран, у кадров размытое превью; «Далее» листает (правки 15.11, п. 15)", async ({ page }) => {
+    const errors = collectPageErrors(page);
+    await page.goto(`${SHODLIK}?motion=lite`);
+    const gallery = page.getByRole("group", { name: "Фото: ЖК Shodlik" });
+    await expect(gallery).toHaveCSS("cursor", "zoom-in");
+    // Заранее — следующий и предыдущий кадры и следующее превью.
+    await expect(gallery.locator(".complex-gallery__preload .site-photo")).toHaveCount(3);
+    // Галерея ожила (гидратация): превью «Далее» встало в угол.
+    await expect(gallery.locator(".complex-gallery__thumb")).toHaveAttribute("style", /translate3d/);
+    await gallery.getByRole("button", { name: "Следующее фото" }).click();
+    await expect(gallery.locator(".sr-only")).toHaveText(/Фото 2 из \d+/);
+    await gallery.click({ position: { x: 60, y: 260 } });
+    const viewer = page.getByRole("dialog", { name: /Фото 2 из \d+/ });
+    await expect(viewer).toBeVisible();
+    // Пока кадр грузится — его размытое превью, а не тёмный пустой кадр (было: 4/9 чёрным).
+    const slides = viewer.locator(".complex-viewer__slide");
+    const blurred = await slides.evaluateAll((nodes) => nodes.filter((node) => (node as HTMLElement).style.getPropertyValue("--viewer-blur").startsWith("url(")).length);
+    expect(blurred).toBe(await slides.count());
+    await page.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
   test("«Рассчитать платёж» у планировки: расчёт открывается на месте (телефон — шторкой)", async ({ page, isMobile }) => {
     const errors = collectPageErrors(page);
     await page.goto(`${SHODLIK}#planirovki`);

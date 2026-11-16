@@ -26,32 +26,42 @@ const THUMB_SIZES = "200px";
 const POP_MS = 450;
 const EXPO_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
+/** Размытое превью кадра под фото: пока грузится, вместо пустого фона. */
+const blurOf = (photo: CatalogPhoto): CSSProperties | undefined => (photo.blur ? { backgroundImage: `url("${photo.blur}")` } : undefined);
+
 /** Рамка — в родных пропорциях обложки (решение исполнителя 03.11.2026: рендеры без обрезки). */
 const frameOf = ({ width, height }: CatalogPhoto) => ({ "--gallery-ratio": `${width} / ${height}` }) as CSSProperties;
 
 /**
- * Галерея ЖК (ТЗ 7.3а) — Portal Carousel (@hyperiux, MIT) один в один (04.11.2026): за курсором идёт
- * превью следующего рендера с меткой «Далее», клик в любом месте раскрывает его порталом на весь кадр,
- * слева перекатываются счётчик и подпись; по кругу. Во весь экран — кнопка ⤢ (решение исполнителя).
+ * Галерея ЖК (ТЗ 7.3а) — по образцу Portal Carousel (@hyperiux, MIT, 04.11.2026): превью следующего
+ * рендера с меткой «Далее» в правом нижнем углу раскрывает его порталом на весь кадр, слева
+ * перекатываются счётчик и подпись; по кругу. Нажатие на само фото — во весь экран (правки 15.11,
+ * п. 15: «как на Uzum»; раньше клик листал, а полный экран был только у кнопки ⤢ — она осталась).
+ * Соседние кадры и следующее превью грузятся заранее; пока грузится — размытое превью, не чёрное.
  * Рендеры — целиком, без обрезки (решение исполнителя 03.11).
  */
 export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryProps) {
   const t = useTranslations("complex.gallery");
-  const { root, thumb, button, label, base, target: targetIndex, next: nextIndex, layers, advance, onLayerDone, onRootClick, jump } = usePortalCarousel(photos.length);
   const [viewer, setViewer] = useState<number | null>(null);
+  const { root, thumb, button, label, base, target: targetIndex, next: nextIndex, layers, advance, onLayerDone, jump } = usePortalCarousel(photos.length);
   const [cover] = photos;
   if (!cover) return null;
   const altOf = (photo: CatalogPhoto) => photo.alt?.[locale] || name;
+  const at = (index: number) => photos[(index + photos.length) % photos.length] ?? cover;
   const current = photos[base] ?? cover;
   const next = photos[nextIndex] ?? cover;
   const target = photos[targetIndex] ?? cover;
+  // Нажатие на фото — во весь экран на том кадре, к которому идёт карусель; кнопки — своё.
+  const onRootClick = (event: MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("a, button, input, select, textarea, [role='button']")) return;
+    setViewer(targetIndex);
+  };
   return (
     <div ref={root} className="complex-gallery" style={frameOf(cover)} role="group" aria-roledescription="carousel" aria-label={t("label", { name })} onClick={onRootClick}>
-      <div className="complex-gallery__base" style={current.blur ? { backgroundImage: `url("${current.blur}")` } : undefined}>
+      <div className="complex-gallery__base" style={blurOf(current)}>
         <SitePhoto key={current.path} photo={current} alt={altOf(current)} frame="cover" fit="contain" sizes={SIZES} preload={base === 0} className="complex-gallery__photo" />
       </div>
-      {/* Следующий рендер грузится заранее тем же кандидатом — портал не ждёт сети. */}
-      {photos.length > 1 ? <SitePhoto key={`pre-${next.path}`} photo={next} alt="" frame="cover" fit="contain" sizes={SIZES} className="complex-gallery__preload" /> : null}
+      {photos.length > 1 ? <GalleryPreload photos={[next, at(targetIndex - 1)]} thumb={at(nextIndex + 1)} /> : null}
       <div className="complex-gallery__layers">
         {layers.map((layer) => {
           const photo = photos[layer.index];
@@ -70,6 +80,22 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
         {t("photo", { n: base + 1, total: photos.length })}
       </p>
       {viewer !== null ? <GalleryViewer photos={photos} start={viewer} altOf={altOf} onClose={(index) => { setViewer(null); jump(index); }} /> : null}
+    </div>
+  );
+}
+
+/**
+ * Заранее, теми же кандидатами (правки 15.11, п. 15): следующий и предыдущий кадры и превью «Далее»
+ * после следующего — портал и полный экран не ждут сети. Повторы (у 2 фото сосед один) — один раз.
+ */
+function GalleryPreload({ photos, thumb }: { photos: CatalogPhoto[]; thumb: CatalogPhoto }) {
+  const unique = photos.filter((photo, index) => photos.findIndex((other) => other.path === photo.path) === index);
+  return (
+    <div className="complex-gallery__preload" aria-hidden="true">
+      {unique.map((photo) => (
+        <SitePhoto key={`pre-${photo.path}`} photo={photo} alt="" frame="cover" fit="contain" sizes={SIZES} />
+      ))}
+      <SitePhoto key={`pre-thumb-${thumb.path}`} photo={thumb} alt="" frame="card" sizes={THUMB_SIZES} />
     </div>
   );
 }
@@ -97,7 +123,7 @@ type ThumbProps = {
   onAdvance: () => void;
 };
 
-/** Квадратное превью следующего рендера (min(200px, 42vw)) и метка «Далее». */
+/** Квадратное превью следующего рендера (min(200px, 42vw)) с меткой «Далее» — в правом нижнем углу. */
 function GalleryThumb({ thumbRef, buttonRef, labelRef, photo, label, tag, onAdvance }: ThumbProps) {
   return (
     <>
@@ -142,14 +168,9 @@ function usePortalCarousel(count: number) {
     if (layer) setBase(layer.index);
     setLayers((previous) => previous.filter((item) => item.id > id));
   };
-  const onRootClick = (event: MouseEvent<HTMLDivElement>) => {
-    const interactive = (event.target as HTMLElement).closest("a, button, input, select, textarea, [role='button']");
-    if (interactive && interactive !== button.current) return;
-    advance();
-  };
   const jump = (index: number) => {
     setLayers([]);
     setBase(wrap(index));
   };
-  return { root, thumb, button, label, base, target, next, layers, advance, onLayerDone, onRootClick, jump };
+  return { root, thumb, button, label, base, target, next, layers, advance, onLayerDone, jump };
 }
