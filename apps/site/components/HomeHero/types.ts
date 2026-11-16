@@ -5,8 +5,6 @@ export type HeroText = {
   titleAccent: string;
   lead: string;
   cta: string;
-  /** «Для вас бесплатно» (ТЗ 1а) — три пункта с галочками. */
-  perks: readonly string[];
   statsLabel: string;
   slides: HeroSlidesText;
 };

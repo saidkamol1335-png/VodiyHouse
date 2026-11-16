@@ -42,6 +42,15 @@ test.describe("первый экран главной — рендеры и ци
       const stats = page.locator(".home-hero__copy .home-hero__stats");
       await expect(stats.locator(".home-hero__stat-label")).toHaveText([/turar-joy majmuasi/, /quruvchi/, /kvartira sotuvda/]);
       await expect(stats.locator(".home-hero__stat-value").first()).toHaveText(/^\d+$/);
+      // П. 2 (вариант A): заголовок — одна строка на 1440, строка под ним — тоже.
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Farg‘ona yangi uylari — quruvchi narxida");
+      if (testInfo.project.name === "desktop-1440") {
+        for (const selector of [".home-hero__h1", ".home-hero__lead"]) {
+          const lines = await page.locator(selector).evaluate((element) => Math.round(element.getBoundingClientRect().height / parseFloat(getComputedStyle(element).lineHeight)));
+          expect(lines, selector).toBe(1);
+        }
+      }
+      await expect(page.locator(".home-hero__perks")).toHaveCount(0);
       const numbers = await aboveFold(page, ".home-hero__stats");
       expect(numbers.box.y + numbers.box.height).toBeLessThanOrEqual(numbers.fold);
       const actions = (await page.locator(".home-hero__actions").boundingBox())!;

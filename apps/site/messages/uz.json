@@ -43,20 +43,15 @@
   "home": {
     "hero": {
       "eyebrow": "Yangi uylar · Farg‘ona",
-      "titleLead": "Farg‘onadagi yangi binolarda kvartiralar —",
+      "titleLead": "Farg‘ona yangi uylari —",
       "titleAccent": "quruvchi narxida",
-      "lead": "Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.",
+      "lead": "Vodiy House portalida: narx quruvchinikidek, tanlash va ko‘rsatish — bepul.",
       "cta": "Kvartira tanlash",
       "slides": {
         "label": "Yangi uylar vizualizatsiyalari",
         "note": "Vizualizatsiyalar namunaviy xarakterga ega"
       },
       "loading": "Sayt yuklanmoqda",
-      "free": {
-        "price": "Narx — quruvchinikidek",
-        "service": "Tanlash va ko‘rsatish — bepul",
-        "docs": "TJM hujjatlari tekshirilgan"
-      },
       "stats": {
         "label": "Vodiy House raqamlarda",
         "complexes": "{count, plural, other {turar-joy majmuasi}}",

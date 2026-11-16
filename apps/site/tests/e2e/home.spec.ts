@@ -12,7 +12,8 @@ test.describe("главная, избранное, подборка", () => {
     const errors = collectPageErrors(page);
     // lite: режим не зависит от пробы FPS машины — снимок главной ровный.
     await page.goto("/ru?motion=lite");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Квартиры в новостройках Ферганы");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Новостройки Ферганы — по цене застройщика");
+    await expect(page.locator(".home-hero__lead")).toHaveText("На портале Vodiy House: цена как у застройщика, подбор и показ — бесплатно.");
     await expect(page.getByRole("link", { name: /Подобрать квартиру/ }).first()).toHaveAttribute("href", /#katalog$/);
     await expect(page.locator("#katalog .catalog-card").first()).toBeVisible();
     const complexes = page.locator(".home-hero__stat").first();

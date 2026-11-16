@@ -1,5 +1,7 @@
 # П. 2 — тексты первого экрана главной: варианты на выбор (к 19.11)
 
+**Выбран вариант A** (исполнитель, 16.11.2026) — на сайте с коммита «правки 15.11: п. 2».
+
 Заказчик: заголовок короче — **максимум одна строка**; сразу под ним — одна строка вроде «Vodiy House portalida: narx quruvchinikidek, tanlash va ko‘rish…» вместо длинного текста. Три галочки под заголовком («Narx — quruvchinikidek», «Tanlash va ko‘rsatish — bepul», «TJM hujjatlari tekshirilgan») уходят в эту строку, их место занимают цифры «N turar-joy majmuasi · N quruvchi · N kvartira sotuvda» (п. 1).
 
 Сейчас: «Farg‘onadagi yangi binolarda kvartiralar — quruvchi narxida» (60 знаков) + «Vodiy House ishlaydigan barcha turar-joy majmualari: quruvchi narxlari, bo‘sh kvartiralar va tekshirilgan hujjatlar.» / ru «Квартиры в новостройках Ферганы — по цене застройщика» + «Все ЖК, с которыми работает Vodiy House: цены застройщика, наличие квартир и проверенные документы.»

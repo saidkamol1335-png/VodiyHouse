@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import type { HeroStat, HeroText } from "./types";
 
@@ -11,8 +10,8 @@ type HeroFactsProps = {
 };
 
 /**
- * Полоса под горизонтом: диск-горизонт с подписью «Визуализации носят иллюстративный характер», три
- * «бесплатно» и «Найдено сейчас». Цифры каталога (у квартир — точка «live») — под кнопками, в HeroCopy
+ * Полоса под горизонтом: диск-горизонт с подписью «Визуализации носят иллюстративный характер» и
+ * «Найдено сейчас»; три «бесплатно» вошли в строку под заголовком (правки 15.11, п. 2). Цифры каталога (у квартир — точка «live») — под кнопками, в HeroCopy
  * (правки 15.11, п. 1). Цвет диска — фон страницы.
  */
 export function HeroFacts({ text, found, noteId }: HeroFactsProps) {
@@ -24,14 +23,6 @@ export function HeroFacts({ text, found, noteId }: HeroFactsProps) {
           {text.slides.note}
         </p>
       </div>
-      <ul className="home-hero__perks">
-        {text.perks.map((perk) => (
-          <li key={perk} className="home-hero__perk">
-            <Check size={15} aria-hidden="true" />
-            {perk}
-          </li>
-        ))}
-      </ul>
       {found ? <div className="home-hero__facts-row">{found}</div> : null}
     </div>
   );

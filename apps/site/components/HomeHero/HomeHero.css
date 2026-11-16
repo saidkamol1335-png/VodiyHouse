@@ -453,36 +453,9 @@
   background: #7a5634;
 }
 
-.home-hero__perks,
 .home-hero__facts-row {
   position: relative;
   z-index: 1;
-}
-
-.home-hero__perks {
-  display: grid;
-  gap: 6px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.home-hero__perk {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--fg-2);
-  font-family: var(--font);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: -0.005em;
-}
-
-.home-hero__perk svg {
-  flex: none;
-  color: #7a5634;
 }
 
 .home-hero__facts-row {
@@ -693,23 +666,6 @@
 
   .home-hero__horizon {
     padding-top: 56px;
-  }
-
-  .home-hero__perks {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px 0;
-    margin-top: 14px;
-  }
-
-  .home-hero__perk + .home-hero__perk::before {
-    content: "";
-    width: 1px;
-    height: 14px;
-    margin-right: 28px;
-    margin-left: 28px;
-    background: rgba(30, 28, 25, 0.16);
   }
 
   .home-hero__facts-row {
@@ -937,18 +893,10 @@
   animation: hh-fade 0.6s ease-out 1s both;
 }
 
-[data-motion="full"] :is(.home-hero__perk, .home-hero__facts-row) {
+[data-motion="full"] .home-hero__facts-row {
   --from: 10px;
 
   animation: hh-up 0.6s var(--hh-e-soft) 1.05s both;
-}
-
-[data-motion="full"] .home-hero__perk:nth-child(2) {
-  animation-delay: 1.11s;
-}
-
-[data-motion="full"] .home-hero__perk:nth-child(3) {
-  animation-delay: 1.17s;
 }
 
 [data-motion="full"] .home-hero__facts-row {
@@ -984,7 +932,7 @@
   animation: hh-fade 0.45s ease-out 0.2s both;
 }
 
-[data-motion="lite"] :is(.home-hero__note, .home-hero__perks, .home-hero__facts-row) {
+[data-motion="lite"] :is(.home-hero__note, .home-hero__facts-row) {
   --from: 8px;
 
   animation: hh-up 0.45s ease-out 0.24s both;
@@ -1005,8 +953,6 @@ html[data-preloader]
     .home-hero__stats,
     .home-hero__tower,
     .home-hero__note,
-    .home-hero__perks,
-    .home-hero__perk,
     .home-hero__facts-row
   ) {
   animation-play-state: paused;
@@ -1037,8 +983,6 @@ html[data-reveal-off]
     .home-hero__stats,
     .home-hero__tower,
     .home-hero__note,
-    .home-hero__perks,
-    .home-hero__perk,
     .home-hero__facts-row
   ),
 .home-hero[data-entered]
@@ -1054,8 +998,6 @@ html[data-reveal-off]
     .home-hero__stats,
     .home-hero__tower,
     .home-hero__note,
-    .home-hero__perks,
-    .home-hero__perk,
     .home-hero__facts-row
   ) {
   animation: none;

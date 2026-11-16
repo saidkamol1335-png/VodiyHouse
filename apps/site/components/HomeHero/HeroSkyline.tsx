@@ -61,8 +61,9 @@ function RenderPicture({ tower }: { tower: HeroTower }) {
         height={render.height}
         alt=""
         loading={tower.rank === 2 ? "lazy" : "eager"}
-        // Центральная видна сразу (п. 1) — без понижения приоритета; боковые — после неё.
-        fetchPriority={tower.rank === 0 ? undefined : "low"}
+        // Центральная — крупнейшая картинка первого экрана (с короткой строкой заголовка, п. 2, — вероятный
+        // LCP): грузится первой; боковые — после неё.
+        fetchPriority={tower.rank === 0 ? "high" : "low"}
         decoding="async"
       />
     </picture>
