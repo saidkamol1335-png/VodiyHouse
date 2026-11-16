@@ -352,9 +352,16 @@
   position: relative;
   z-index: 1;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
   margin-top: 6px;
+}
+
+/* Одна кнопка заявки менеджеру на всю ширину рядом с кружком Telegram (правки 15.11, п. 12). */
+.catalog-card__ask {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* Кружок Telegram (мокап .ibtn--sm): Vodiy House — бот или аккаунт, не застройщик (правило 1.2). */
@@ -412,8 +419,7 @@
 }
 
 @media (pointer: coarse) {
-  .catalog-card__phone,
-  .catalog-card__callback {
+  .catalog-card__ask {
     min-height: 44px;
   }
 

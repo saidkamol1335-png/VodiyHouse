@@ -542,6 +542,7 @@
       "leftUnknown": "sotuvda bor",
       "leftNone": "mavjud emas",
       "typesMore": "yana {n} ta tur",
+      "askManager": "Menejerdan batafsil ma’lumot oling",
       "payFull": "100% to‘lov",
       "installmentUpTo": "{n} oygacha muddatli to‘lov",
       "priceFrom": "{price} dan",

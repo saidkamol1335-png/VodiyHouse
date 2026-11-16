@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { LeadButton } from "@/components/LeadDialog";
 import type { LeadIntent } from "@/components/LeadForm";
-import { PhoneButton } from "@/components/PhoneButton";
 import { ShareButton } from "@/components/ShareButton";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { TelegramButton } from "@/components/TelegramButton";
@@ -38,7 +37,7 @@ function cardFrames(complex: CatalogComplex, caption: string): CardFrame[] {
 /**
  * Карточка ЖК каталога (мокап .jc): фото, застройщик и «Проверено Vodiy House», название — ссылка
  * на всю карточку, адрес и ориентир, срок, этажность и отделка, типы с остатком, способы оплаты,
- * цена «от» в валюте блока (Ф6) и «Платёж от», «Показать телефон» и «Перезвоните мне» (ТЗ 10.1).
+ * цена «от» в валюте блока (Ф6) и за м², заявка менеджеру и Telegram (правки 15.11, п. 9 и 12).
  * Без скидок (PLAN §3.13). Связь — только Vodiy House.
  */
 export function CatalogCard({ complex, catalog, preload = false, badge = null }: CatalogCardProps) {
@@ -75,7 +74,7 @@ export function CatalogCard({ complex, catalog, preload = false, badge = null }:
         <CardPayChips pays={cardPays(complex, developer)} />
         <div className="catalog-card__bottom">
           {soon ? <CardSoonRow phone={phone} /> : <CardPriceRow price={cardPrice(complex, catalog)} />}
-          <CardButtons phone={phone} intent={{ type: "callback", object: { complex: complex.slug }, context: name }} />
+          <CardButtons intent={{ type: "callback", object: { complex: complex.slug }, context: name }} />
         </div>
       </div>
     </article>
@@ -107,13 +106,19 @@ function CardTools({ complex, name }: { complex: CatalogComplex; name: string })
   );
 }
 
-/** «Показать телефон», «Перезвоните мне» и Telegram (мокап .jc__btns) — над растянутой ссылкой карточки. */
-function CardButtons({ phone, intent }: { phone: string | null; intent: LeadIntent }) {
+/**
+ * Одна кнопка — заявка менеджеру Vodiy House — и значок Telegram (правки 15.11, п. 12: «одной кнопки
+ * хватит»; было «Показать телефон», «Перезвоните мне» и Telegram, ТЗ 6.2). Текст кнопки временный —
+ * TODO-заказчик: согласовать. Над растянутой ссылкой карточки; связь — только Vodiy House (правило 1.2).
+ */
+function CardButtons({ intent }: { intent: LeadIntent }) {
   const t = useTranslations("lead.buttons");
+  const tCard = useTranslations("catalog.card");
   return (
     <div className="catalog-card__buttons">
-      {phone ? <PhoneButton phone={phone} className="catalog-card__phone" /> : null}
-      <LeadButton intent={intent} variant="outline" size="sm" className="catalog-card__callback" />
+      <LeadButton intent={intent} size="sm" className="catalog-card__ask">
+        {tCard("askManager")}
+      </LeadButton>
       <TelegramButton object={intent.object ?? {}} className="catalog-card__telegram" aria-label={t("telegram")}>
         <Send size={16} strokeWidth={1.9} aria-hidden />
       </TelegramButton>

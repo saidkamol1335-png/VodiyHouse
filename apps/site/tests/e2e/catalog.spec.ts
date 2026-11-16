@@ -24,6 +24,13 @@ test.describe("каталог /novostroyki", () => {
     await expect(shodlik).toContainText(/от \$[\d\s]+\/м²/);
     await expect(page.locator(".catalog-card", { hasText: /Платёж от/ })).toHaveCount(0);
     await expect(page.locator(".catalog-card__monthly")).toHaveCount(0);
+    // П. 12: одна кнопка — заявка менеджеру — и Telegram; «Показать телефон» и «Перезвоните мне» на карточке нет.
+    await expect(shodlik.getByRole("button", { name: "Показать телефон" })).toHaveCount(0);
+    await expect(shodlik.getByRole("button", { name: "Перезвоните мне" })).toHaveCount(0);
+    await expect(shodlik.getByRole("link", { name: "Написать в Telegram" })).toBeVisible();
+    await shodlik.getByRole("button", { name: "Узнать у менеджера" }).click();
+    await expect(page.getByRole("dialog")).toContainText("ЖК Shodlik");
+    await page.keyboard.press("Escape");
     // Правки 15.11, п. 10: условия оплаты — плашки фирменного янтаря #F89B0D с тёмным текстом, 12,5 px.
     const pay = shodlik.locator(".catalog-card__pay").first();
     await expect(pay).toHaveCSS("background-color", "rgb(248, 155, 13)");
