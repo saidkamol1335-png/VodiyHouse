@@ -262,8 +262,26 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
         ]),
       ]),
     );
-    // Порядок на сайте — по справочнику тем, а не по вводу.
-    expect((await page("demo-yulduz"))!.details.map((d) => d.text.ru)).toEqual(["О проекте", "Качество"]);
+    // Порядок на сайте — как в кабинете (правки 15.11, п. 22), а не по справочнику тем.
+    expect((await page("demo-yulduz"))!.details.map((d) => d.text.ru)).toEqual(["Качество", "О проекте"]);
+    // Одна тема — в нескольких пунктах; правка по id, порядок меняется, неизвестный id — отказ.
+    const saved = (await db.admin.query<{ id: string; text: string }>("select id, text ->> 'ru' as text from complex_details where complex_id = $1 order by sort", [id])).rows;
+    await asHead((tx) =>
+      tx.query("select save_complex_details($1, $2)", [
+        id,
+        JSON.stringify([
+          { id: saved[1]!.id, topic_id: topics[0]!.id, text: { ru: "О проекте", uz: "Loyiha haqida" } },
+          { id: saved[0]!.id, topic_id: topics[1]!.id, text: { ru: "Качество, фасад", uz: "Sifat, fasad" } },
+          { topic_id: topics[1]!.id, text: { ru: "Качество, двор", uz: "Sifat, hovli" } },
+        ]),
+      ]),
+    );
+    expect((await page("demo-yulduz"))!.details.map((d) => d.text.ru)).toEqual(["О проекте", "Качество, фасад", "Качество, двор"]);
+    expect((await db.admin.query("select 1 from complex_details where id = $1", [saved[0]!.id])).rows).toHaveLength(1);
+    await expectHint(
+      asHead((tx) => tx.query("select save_complex_details($1, $2)", [id, JSON.stringify([{ id: crypto.randomUUID(), topic_id: topics[0]!.id, text: { ru: "a", uz: "b" } }])])),
+      "vh:invalid",
+    );
     const orzu = await complexId("demo-orzu");
     const foreignPhoto = (
       await db.admin.query<{ id: string }>("insert into media_assets (complex_id, kind, path, width, height) values ($1, 'photo', $2, 10, 10) returning id", [
@@ -351,7 +369,8 @@ describe.skipIf(isRemoteTarget)("страница ЖК: site_complex() и вкл
     await rpc("save_complex_documents", [{ type_id: permit, checked_on: "2026-09-01" }]);
     await rpc("save_complex_documents", [{ type_id: permit, checked_on: "2026-09-02" }]);
     await rpc("save_complex_details", [{ topic_id: topic.id, text: { ru: "Было", uz: "Edi" } }]);
-    await rpc("save_complex_details", [{ topic_id: topic.id, text: { ru: "Стало", uz: "Bo'ldi" } }]);
+    const detail = (await db.admin.query<{ id: string }>("select id from complex_details where complex_id = $1", [id])).rows[0]!.id;
+    await rpc("save_complex_details", [{ id: detail, topic_id: topic.id, text: { ru: "Стало", uz: "Bo'ldi" } }]);
     await rpc("save_complex_videos", [{ youtube_id: "ccccccccccc", title: { ru: "Обзор", uz: "Sharh" } }]);
     await rpc("save_complex_videos", [{ youtube_id: "ccccccccccc", title: { ru: "Двор", uz: "Hovli" } }]);
     for (const fn of ["save_complex_documents", "save_complex_details", "save_complex_videos"]) await rpc(fn, []);

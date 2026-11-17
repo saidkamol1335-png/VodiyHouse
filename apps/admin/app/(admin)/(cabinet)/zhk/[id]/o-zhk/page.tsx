@@ -31,7 +31,7 @@ export default async function ComplexAboutPage({ params }: { params: Promise<{ i
   return (
     <>
       <ComplexMainForm key={`${complex.id}-about`} section="about" action={saveComplexMainAction} {...mainForm} />
-      <ComplexDetailsForm key={`${complex.id}-details`} complexId={complex.id} details={details} photos={photos} action={saveComplexDetailsAction} />
+      <ComplexDetailsForm key={`${complex.id}-details`} complexId={complex.id} details={details.details} topics={details.topics} photos={photos} action={saveComplexDetailsAction} />
       <ComplexVideosForm key={`${complex.id}-videos`} complexId={complex.id} videos={videos} action={saveComplexVideosAction} />
       <ComplexFaqForm key={`${complex.id}-faq`} complexId={complex.id} faq={faq} action={saveComplexFaqAction} />
     </>

@@ -72,8 +72,11 @@
 }
 
 @media (max-width: 760px) {
+  /* nowrap: с wrap ряд в колонке растягивался по содержимому (лента комнат 541 px на экране 390) —
+     страница уезжала вбок, а окна во весь экран выходили шире экрана (правки 15.11, п. 22). */
   .complex-plans__filters {
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
     gap: 12px;
   }

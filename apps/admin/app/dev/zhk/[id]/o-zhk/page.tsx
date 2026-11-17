@@ -18,7 +18,7 @@ export default async function DevComplexAboutPage({ params }: { params: Promise<
   return (
     <>
       <ComplexMainForm key={`${complex.id}-about`} section="about" {...await demoMainFormProps(complex, HEAD_STAND.base)} />
-      <ComplexDetailsForm key={`${complex.id}-details`} complexId={complex.id} details={demoDetails(complex.id)} photos={[]} action={demoSaveDetailsAction} />
+      <ComplexDetailsForm key={`${complex.id}-details`} complexId={complex.id} {...demoDetails(complex.id)} photos={[]} action={demoSaveDetailsAction} />
       <ComplexVideosForm key={`${complex.id}-videos`} complexId={complex.id} videos={demoVideos()} action={demoSaveVideosAction} />
       <ComplexFaqForm key={`${complex.id}-faq`} complexId={complex.id} faq={[]} action={demoSaveFaqAction} />
     </>

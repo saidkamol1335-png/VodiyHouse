@@ -1,7 +1,7 @@
 import { SEED_DICTIONARIES } from "../dictionaries/seed";
 import type { DeadlineChange } from "./deadlines";
 import { DEMO_COMPLEX_ROWS } from "./demo";
-import { detailRows, type DetailRow } from "./details";
+import { detailDrafts, detailTopics, type DetailDraft, type DetailTopic } from "./details";
 import { documentRows, type DocumentRow } from "./documents";
 import type { VideoDraft } from "./videos";
 
@@ -27,15 +27,15 @@ export function demoDocuments(id: string): DocumentRow[] {
   return documentRows(SEED_DICTIONARIES.document_types, records);
 }
 
-export function demoDetails(id: string): DetailRow[] {
+export function demoDetails(id: string): { details: DetailDraft[]; topics: DetailTopic[] } {
   const records =
     slugOf(id) === "demo-namuna"
       ? [
-          { topic_id: topicId("about"), text: { ru: "DEMO: башня бизнес-класса в центре Ферганы.", uz: "DEMO: Farg‘ona markazidagi biznes sinf minorasi." }, photo_id: null },
-          { topic_id: topicId("landscaping"), text: { ru: "DEMO: закрытый двор без машин.", uz: "DEMO: mashinasiz yopiq hovli." }, photo_id: null },
+          { id: "00000000-0000-4000-8000-0000000d0001", topic_id: topicId("about"), text: { ru: "DEMO: башня бизнес-класса в центре Ферганы.", uz: "DEMO: Farg‘ona markazidagi biznes sinf minorasi." }, photo_id: null },
+          { id: "00000000-0000-4000-8000-0000000d0002", topic_id: topicId("landscaping"), text: { ru: "DEMO: закрытый двор без машин.", uz: "DEMO: mashinasiz yopiq hovli." }, photo_id: null },
         ]
       : [];
-  return detailRows(SEED_DICTIONARIES.detail_topics, records);
+  return { details: detailDrafts(records), topics: detailTopics(SEED_DICTIONARIES.detail_topics, records) };
 }
 
 export function demoVideos(): VideoDraft[] {

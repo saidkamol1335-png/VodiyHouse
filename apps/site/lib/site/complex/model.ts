@@ -81,7 +81,7 @@ export type ComplexPage = Omit<
   layouts: ComplexLayout[];
   documents: { slug: string; name: LocalizedText; hint: LocalizedText | null; checkedOn: string }[];
   videos: { youtubeId: string; title: LocalizedText | null }[];
-  details: { slug: string; name: LocalizedText; text: LocalizedText; photo: CatalogPhoto | null }[];
+  details: { id: string; slug: string; name: LocalizedText; text: LocalizedText; photo: CatalogPhoto | null }[];
   others: OtherComplex[];
   /** Курс и программы застройщика в виде каталога — для «Платёж от» и цены «от» (card.ts). */
   catalog: SiteCatalog;

@@ -92,7 +92,8 @@ export type ComplexPageRecord = {
     checked_on: string;
   }[];
   videos: { youtube_id: string; title: LocalizedText | null }[];
-  details: { slug: string; name: LocalizedText; text: LocalizedText; photo: PhotoRecord | null }[];
+  /** id — с правок 15.11 (п. 22); в старой записи кэша его нет — ключ из slug и номера. */
+  details: { id?: string; slug: string; name: LocalizedText; text: LocalizedText; photo: PhotoRecord | null }[];
   others: {
     slug: string;
     name: LocalizedText;
@@ -248,7 +249,7 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
       checkedOn: checked_on,
     })),
     videos: record.videos.map((video) => ({ youtubeId: video.youtube_id, title: video.title })),
-    details: record.details.map((detail) => ({ ...detail, photo: photoFrom(detail.photo) })),
+    details: record.details.map((detail, index) => ({ ...detail, id: detail.id ?? `${detail.slug}-${index}`, photo: photoFrom(detail.photo) })),
     others: record.others.map((other) => ({
       ...other,
       photo: photoFrom(other.photo),

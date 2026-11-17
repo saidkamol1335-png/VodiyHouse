@@ -979,7 +979,8 @@
     },
     "details": {
       "title": "Loyiha tafsilotlari",
-      "readMore": "Batafsil o‘qish",
+      "open": "Kattalashtirish: {name}",
+      "counter": "{n} / {total}",
       "close": "Yopish",
       "prev": "Orqaga",
       "next": "Oldinga"

@@ -87,7 +87,7 @@ export async function saveComplexDetailsAction(formData: FormData): Promise<Deta
   const guard = await editGuard();
   if (!guard.ok) return failed(guard.code, {});
   const parsed = parseDetails(formData);
-  if (!parsed.ok) return failed(null, parsed.errors);
+  if (!parsed.ok) return parsed.error ? failed(parsed.error, {}) : failed(null, parsed.errors);
   const id = readUuid(formData);
   if (!id) return failed("notFound", {});
   const { error } = await guard.supabase.rpc("save_complex_details", { p_complex: id, p_details: parsed.payload });

@@ -36,7 +36,8 @@ export async function demoRemoveDeadlineChangeAction(): Promise<RemoveDeadlineCh
 export async function demoSaveDetailsAction(formData: FormData): Promise<DetailsResult> {
   devOnly();
   const parsed = parseDetails(formData);
-  return parsed.ok ? saved() : { status: "error", error: null, errors: parsed.errors, broken: [] };
+  if (parsed.ok) return saved();
+  return parsed.error ? { status: "error", error: parsed.error, errors: {}, broken: [] } : { status: "error", error: null, errors: parsed.errors, broken: [] };
 }
 
 export async function demoSaveFaqAction(formData: FormData): Promise<FaqResult> {

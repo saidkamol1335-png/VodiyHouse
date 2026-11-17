@@ -2,7 +2,7 @@ import "server-only";
 import { faqDrafts, type FaqDraft } from "../complexes/faq";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { DeadlineChange } from "../complexes/deadlines";
-import { detailRows, type DetailRecord, type DetailRow } from "../complexes/details";
+import { detailDrafts, detailTopics, type DetailDraft, type DetailRecord, type DetailTopic } from "../complexes/details";
 import { documentRows, type DocumentRecord, type DocumentRow } from "../complexes/documents";
 import { videoDrafts, type VideoDraft, type VideoRecord } from "../complexes/videos";
 import { readDictionary } from "./developers";
@@ -29,13 +29,18 @@ export async function readComplexVideos(supabase: SupabaseClient, complexId: str
   return videoDrafts((data ?? []) as VideoRecord[]);
 }
 
-export async function readComplexDetails(supabase: SupabaseClient, complexId: string): Promise<DetailRow[]> {
+/** «Детали проекта» (правки 15.11, п. 22): пункты в порядке сайта и темы для выбора. */
+export async function readComplexDetails(
+  supabase: SupabaseClient,
+  complexId: string,
+): Promise<{ details: DetailDraft[]; topics: DetailTopic[] }> {
   const [topics, records] = await Promise.all([
     readDictionary(supabase, "detail_topics"),
-    supabase.from("complex_details").select("topic_id, text, photo_id").eq("complex_id", complexId),
+    supabase.from("complex_details").select("id, topic_id, text, photo_id").eq("complex_id", complexId).order("sort").order("id"),
   ]);
   if (records.error) unavailable("complex-details", records.error);
-  return detailRows(topics, (records.data ?? []) as DetailRecord[]);
+  const rows = (records.data ?? []) as DetailRecord[];
+  return { details: detailDrafts(rows), topics: detailTopics(topics, rows) };
 }
 
 type DeadlineRow = {

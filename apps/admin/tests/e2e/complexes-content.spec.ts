@@ -82,19 +82,30 @@ test.describe("кабинет · ЖК · видео, детали, докуме�
     await expect(videos.getByRole("checkbox", { name: /Правило 1\.2/ })).not.toBeChecked();
   });
 
-  test("«Детали» на «О ЖК»: половина текста и контакты застройщика — ошибки темы; темы без текста — «пусто»", async ({ page }) => {
+  test("«Детали» на «О ЖК» (правки 15.11, п. 22): пункты списком — половина текста и контакты застройщика — ошибка пункта; новый пункт с той же темой", async ({ page }) => {
     await open(page, `${NAMUNA}/o-zhk`);
     const details = panel(page, "Детали проекта");
-    const about = details.locator("details").filter({ hasText: "О проекте" });
-    await expect(about).toHaveAttribute("open", "");
-    await expect(details.locator("details").filter({ hasText: "Качество и стиль" })).toContainText("пусто");
-    await about.getByLabel("Matn · UZ").fill("");
+    const first = details.getByRole("group", { name: "Пункт 1" });
+    await expect(first.getByLabel("Тема")).toHaveValue(/\d+/);
+    await first.getByLabel("Matn · UZ").fill("");
     await save(details);
-    await expect(about).toContainText("Нужен текст на узбекском");
-    await about.getByLabel("Matn · UZ").fill("Biz bilan: t.me/sifat_qurilish");
+    await expect(first).toContainText("Нужен текст на узбекском");
+    await first.getByLabel("Matn · UZ").fill("Biz bilan: t.me/sifat_qurilish");
     await save(details);
-    await expect(about).toContainText("правило 1.2");
-    await about.getByLabel("Matn · UZ").fill("DEMO: biznes sinf minorasi.");
+    await expect(first).toContainText("правило 1.2");
+    await first.getByLabel("Matn · UZ").fill("DEMO: biznes sinf minorasi.");
+    // Новый пункт без темы — ошибка; с темой первого пункта — сохраняется (одна тема дважды).
+    await details.getByRole("button", { name: "+ Добавить пункт" }).click();
+    const added = details.getByRole("group", { name: /Пункт \d+/ }).last();
+    await added.getByLabel("Текст · RU").fill("DEMO: фасад из клинкера.");
+    await added.getByLabel("Matn · UZ").fill("DEMO: klinker fasad.");
+    await save(details);
+    await expect(added).toContainText("Выберите тему пункта");
+    await added.getByLabel("Тема").selectOption(await first.getByLabel("Тема").inputValue());
+    await save(details);
+    await saved(details);
+    // Вернуть, как было: новый пункт — убрать.
+    await added.getByRole("button", { name: "Убрать пункт" }).click();
     await save(details);
     await saved(details);
   });

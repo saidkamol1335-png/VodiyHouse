@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DictionaryItem } from "../dictionaries/definitions";
-import { detailField, detailRows, parseDetails } from "./details";
+import { detailDrafts, detailField, detailTopics, parseDetails } from "./details";
 import { documentField, documentRows, parseDocuments, todayInTashkent } from "./documents";
 import { parseVideos, videoDrafts, videoField, youtubeIdFrom } from "./videos";
 
@@ -143,35 +143,40 @@ describe("«Документы»", () => {
   });
 });
 
-describe("«Детали»", () => {
-  const topic = (id: number, ru: string, uz: string, photo = ""): [string, string][] => [
-    ["detailTopic", String(id)],
-    [`${detailField(id, "text")}.ru`, ru],
-    [`${detailField(id, "text")}.uz`, uz],
-    [detailField(id, "photo"), photo],
+describe("«Детали» (правки 15.11, п. 22: пункты с порядком)", () => {
+  const row = (key: string, topic: number | "", ru: string, uz: string, photo = "", id = ""): [string, string][] => [
+    ["detailKey", key],
+    [detailField(key, "id"), id],
+    [detailField(key, "topic"), String(topic)],
+    [`${detailField(key, "text")}.ru`, ru],
+    [`${detailField(key, "text")}.uz`, uz],
+    [detailField(key, "photo"), photo],
   ];
 
-  it("тема с текстом — на сайт, с фото из галереи; пустая — нет", () => {
-    expect(parseDetails(form([...topic(1, "О проекте", "Loyiha haqida", PHOTO), ...topic(2, "", "")]))).toEqual({
+  it("пункты — в порядке формы, одна тема дважды, id сохранённого — на месте; пустой — нет", () => {
+    expect(parseDetails(form([...row("a", 3, "Двор", "Hovli", PHOTO, PHOTO), ...row("b", 3, "Фасад", "Fasad"), ...row("c", 1, "", "")]))).toEqual({
       ok: true,
-      payload: [{ topic_id: 1, text: { ru: "О проекте", uz: "Loyiha haqida" }, photo_id: PHOTO }],
+      payload: [
+        { id: PHOTO, topic_id: 3, text: { ru: "Двор", uz: "Hovli" }, photo_id: PHOTO },
+        { id: null, topic_id: 3, text: { ru: "Фасад", uz: "Fasad" }, photo_id: null },
+      ],
     });
   });
 
-  it("половина текста, длинный текст и контакты застройщика — ошибка у темы", () => {
-    const parsed = parseDetails(form([...topic(1, "О проекте", ""), ...topic(2, "a".repeat(2001), "b"), ...topic(3, "Звоните: t.me/sifat", "Qo‘ng‘iroq")]));
-    expect(parsed).toEqual({ ok: false, errors: { 1: "missingUz", 2: "tooLong", 3: "contacts" } });
+  it("половина текста, длинный текст, контакты застройщика, нет темы — ошибка у пункта", () => {
+    const parsed = parseDetails(form([...row("a", 1, "О проекте", ""), ...row("b", 2, "a".repeat(2001), "b"), ...row("c", 3, "Звоните: t.me/sifat", "Qo‘ng‘iroq"), ...row("d", "", "Текст", "Matn")]));
+    expect(parsed).toEqual({ ok: false, error: null, errors: { a: "missingUz", b: "tooLong", c: "contacts", d: "topicMissing" } });
   });
 
-  it("фото у темы без текста — ошибка у темы, а не молча пропало", () => {
-    expect(parseDetails(form([...topic(1, "", "", PHOTO)]))).toEqual({ ok: false, errors: { 1: "photoWithoutText" } });
+  it("фото у пункта без текста — ошибка, а не молча пропало; больше 20 — отказ", () => {
+    expect(parseDetails(form([...row("a", 1, "", "", PHOTO)]))).toEqual({ ok: false, error: null, errors: { a: "photoWithoutText" } });
+    expect(parseDetails(form(Array.from({ length: 21 }, (_, n) => row(`k${n}`, 1, "Текст", "Matn")).flat()))).toEqual({ ok: false, error: "tooMany" });
   });
 
-  it("строки — по справочнику; выключенная тема — только если у ЖК есть текст", () => {
-    const rows = detailRows([item(1), item(2, false), item(3, false)], [{ topic_id: 2, text: { ru: "a", uz: "b" }, photo_id: null }]);
-    expect(rows.map((row) => [row.topicId, row.text.ru])).toEqual([
-      [1, ""],
-      [2, "a"],
-    ]);
+  it("сохранённые — строками формы; темы — включённые и уже выбранные", () => {
+    const records = [{ id: PHOTO, topic_id: 2, text: { ru: "a", uz: "b" }, photo_id: null }];
+    expect(detailDrafts(records).map((draft) => [draft.key, draft.topicId, draft.text.ru])).toEqual([[PHOTO, 2, "a"]]);
+    expect(detailTopics([item(1), item(2, false), item(3, false)], records).map((topic) => topic.id)).toEqual([1, 2]);
   });
 });
+

@@ -1,48 +1,5 @@
-/* «Детали» (шаг 3.5): тема — раскрывающаяся строка; внутри текст RU | UZ и превью галереи
-   радиокнопками (выбранное — янтарная рамка). */
-.complex-details-form {
-  display: grid;
-}
-
-/* Свёрнутая тема — плотная строка без хвоста снизу; отступы — только у раскрытой. */
-.complex-details-form__topic {
-  display: grid;
-  gap: 0;
-  padding: 0;
-}
-
-.complex-details-form__topic[open] {
-  gap: 12px;
-  padding-bottom: 14px;
-}
-
-.complex-details-form__topic + .complex-details-form__topic {
-  border-top: 1px var(--rule-style) var(--line);
-}
-
-.complex-details-form__summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 44px;
-  padding: 10px 0;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.complex-details-form__summary small {
-  color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: var(--fs-label);
-  font-weight: 500;
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-
-.complex-details-form__topic[open] > .complex-details-form__summary {
-  margin-bottom: 12px;
-}
+/* «Детали проекта» (правки 15.11, п. 22): строки — как у «Частых вопросов» (ComplexFaqForm), здесь —
+   выбор фото пункта из галереи ЖК превью-радиокнопками. */
 
 .complex-details-form__photos {
   display: flex;

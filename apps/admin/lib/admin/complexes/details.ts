@@ -3,39 +3,58 @@ import { bilingualFrom, bilingualIssue, readBilingual, type BilingualIssue, type
 import { bilingualHasContact } from "../contactGuard";
 import type { DictionaryItem } from "../dictionaries/definitions";
 
-// Вкладка «Детали» (ТЗ 7.7, Ф4): строка на тему справочника — текст RU | UZ и фото из галереи ЖК.
-// Пустой текст — темы нет на сайте; порядок — по справочнику. Пределы — как check и
-// save_complex_details в миграции 20261025180000.
+// «Детали проекта» (ТЗ 7.7; правки 15.11, п. 22 — карусель «фото + подпись», как на Cian): список
+// пунктов в порядке сайта — тема из справочника (одна тема может повторяться: фасад, двор, лифт…),
+// текст RU | UZ и фото из галереи ЖК (без фото — пункт только текстом). Пределы — как check и
+// save_complex_details в миграциях 20261025180000 и 20261117110000.
 
-export const DETAIL_LIMITS = { textMax: 2000 } as const;
+export const DETAIL_LIMITS = { textMax: 2000, maxRows: 20 } as const;
 
-export type DetailRow = {
-  topicId: number;
-  name: BilingualValue;
+export type DetailDraft = {
+  /** Ключ строки формы: id пункта в базе или новый uuid. */
+  key: string;
+  /** null — новый пункт. */
+  id: string | null;
+  topicId: number | null;
   text: BilingualValue;
   photoId: string | null;
 };
 
-export type DetailIssue = BilingualIssue | "contacts" | "photoWithoutText";
-/** Ошибки по теме (topicId). */
+export type DetailTopic = { id: number; name: BilingualValue };
+
+export type DetailIssue = BilingualIssue | "contacts" | "photoWithoutText" | "topicMissing";
+/** Ошибки по ключу строки. */
 export type DetailsErrors = Record<string, DetailIssue>;
-export type DetailPayload = { topic_id: number; text: BilingualValue; photo_id: string | null };
+export type DetailPayload = { id: string | null; topic_id: number; text: BilingualValue; photo_id: string | null };
 
-export type DetailsParse = { ok: true; payload: DetailPayload[] } | { ok: false; errors: DetailsErrors };
+export type DetailsParse =
+  | { ok: true; payload: DetailPayload[] }
+  | { ok: false; error: "tooMany" }
+  | { ok: false; error: null; errors: DetailsErrors };
 
-export const detailField = (topicId: number, part: "text" | "photo") => `detail-${topicId}-${part}`;
+export const detailField = (key: string, part: "id" | "topic" | "text" | "photo") => `detail-${key}-${part}`;
 
-export type DetailRecord = { topic_id: number; text: unknown; photo_id: string | null };
+export type DetailRecord = { id: string; topic_id: number; text: unknown; photo_id: string | null };
 
-/** Строки вкладки: темы справочника по порядку; выключенная тема — только если у ЖК есть текст. */
-export function detailRows(topics: readonly DictionaryItem[], records: readonly DetailRecord[]): DetailRow[] {
-  const byTopic = new Map(records.map((record) => [Number(record.topic_id), record]));
-  return topics
-    .filter((topic) => topic.isActive || byTopic.has(topic.id))
-    .map((topic) => {
-      const record = byTopic.get(topic.id);
-      return { topicId: topic.id, name: topic.name, text: bilingualFrom(record?.text), photoId: record?.photo_id ?? null };
-    });
+export function newDetailDraft(): DetailDraft {
+  return { key: crypto.randomUUID(), id: null, topicId: null, text: { ru: "", uz: "" }, photoId: null };
+}
+
+/** Сохранённые пункты (по sort из базы) → строки формы. */
+export function detailDrafts(records: readonly DetailRecord[]): DetailDraft[] {
+  return records.map((record) => ({
+    key: record.id,
+    id: record.id,
+    topicId: Number(record.topic_id),
+    text: bilingualFrom(record.text),
+    photoId: record.photo_id ?? null,
+  }));
+}
+
+/** Темы для выбора: включённые и те, что уже стоят в пунктах ЖК (выключенную не теряем). */
+export function detailTopics(topics: readonly DictionaryItem[], records: readonly DetailRecord[]): DetailTopic[] {
+  const used = new Set(records.map((record) => Number(record.topic_id)));
+  return topics.filter((topic) => topic.isActive || used.has(topic.id)).map((topic) => ({ id: topic.id, name: topic.name }));
 }
 
 function detailIssue(text: BilingualValue): DetailIssue | null {
@@ -44,22 +63,30 @@ function detailIssue(text: BilingualValue): DetailIssue | null {
   return bilingualHasContact(text) ? "contacts" : null;
 }
 
-/** Поля: detailTopic (по одному на тему), detail-<id>-text.ru|uz, detail-<id>-photo (id фото или пусто). */
+/**
+ * Поля: detailKey (по строке, в порядке сайта), detail-<key>-id, detail-<key>-topic,
+ * detail-<key>-text.ru|uz, detail-<key>-photo (id фото или пусто). Пустая строка не сохраняется.
+ */
 export function parseDetails(formData: FormData): DetailsParse {
-  const topicIds = formData.getAll("detailTopic").map(Number).filter(Number.isInteger);
+  const rows = formData.getAll("detailKey").map(String).map((key) => ({
+    key,
+    id: readUuid(formData, detailField(key, "id")),
+    topicId: Number(formData.get(detailField(key, "topic")) || NaN),
+    text: readBilingual(formData, detailField(key, "text")),
+    photo: readUuid(formData, detailField(key, "photo")),
+  }));
   const errors: DetailsErrors = {};
   const payload: DetailPayload[] = [];
-  for (const topicId of topicIds) {
-    const text = readBilingual(formData, detailField(topicId, "text"));
-    const photo = readUuid(formData, detailField(topicId, "photo"));
-    if (!text.ru && !text.uz) {
-      // Пустая тема не сохраняется — выбранное к ней фото пропало бы молча.
-      if (photo) errors[topicId] = "photoWithoutText";
+  for (const row of rows) {
+    if (!row.text.ru && !row.text.uz) {
+      // Пустой пункт не сохраняется — выбранное к нему фото пропало бы молча.
+      if (row.photo) errors[row.key] = "photoWithoutText";
       continue;
     }
-    const issue = detailIssue(text);
-    if (issue) errors[topicId] = issue;
-    else payload.push({ topic_id: topicId, text, photo_id: photo });
+    const issue = Number.isInteger(row.topicId) ? detailIssue(row.text) : "topicMissing";
+    if (issue) errors[row.key] = issue;
+    else payload.push({ id: row.id, topic_id: row.topicId, text: row.text, photo_id: row.photo });
   }
-  return Object.keys(errors).length > 0 ? { ok: false, errors } : { ok: true, payload };
+  if (payload.length + Object.keys(errors).length > DETAIL_LIMITS.maxRows) return { ok: false, error: "tooMany" };
+  return Object.keys(errors).length > 0 ? { ok: false, error: null, errors } : { ok: true, payload };
 }

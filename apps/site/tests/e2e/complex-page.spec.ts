@@ -133,6 +133,20 @@ test.describe("страница ЖК", () => {
     await page.goto("/ru/novostroyki/demo-namuna");
     await expect(page.getByRole("navigation", { name: "Разделы страницы" }).getByRole("link", { name: "Детали проекта" })).toBeVisible();
     await expect(page.locator("#detali")).toContainText("Благоустройство");
+    // Правки 15.11, п. 22: карусель «фото + подпись»; нажатие — окно с текстом, стрелки и счётчик «1 / N».
+    const cards = page.locator("#detali .complex-details__card");
+    const total = await cards.count();
+    expect(total).toBeGreaterThanOrEqual(2);
+    await cards.first().click();
+    const viewer = page.locator("dialog.detail-viewer");
+    await expect(viewer).toHaveAttribute("open", "");
+    await expect(viewer.locator(".detail-viewer__count")).toHaveText(`1 / ${total}`);
+    await viewer.getByRole("button", { name: "Вперёд" }).click();
+    await expect(viewer.locator(".detail-viewer__count")).toHaveText(`2 / ${total}`);
+    await page.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    // Страница не шире экрана — иначе окна во весь экран уезжают (лента комнат на телефоне).
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
     await expect(page.locator("#bloki")).toContainText(/Место в подземном паркинге\s*отдельно, от \$9\s000/);
   });
 

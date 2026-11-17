@@ -27,6 +27,16 @@
   display: none;
 }
 
+/* На телефоне поле контейнера меньше 24 px: лента — ровно до краёв экрана, страница не уезжает вбок
+   (правки 15.11: окна во весь экран выходили шире экрана). */
+@media (max-width: 760px) {
+  .complex-progress__months {
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+  }
+}
+
 .complex-progress__comment {
   margin: 18px 0 0;
   color: var(--fg);
