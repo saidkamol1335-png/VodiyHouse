@@ -1,8 +1,10 @@
 "use server";
 
-import { ABOUT_HISTORY_KEY, ABOUT_TEAM_KEY } from "@vh/shared/about";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { ABOUT_HISTORY_KEY, ABOUT_TEAM_KEY, aboutTeamFrom } from "@vh/shared/about";
 import { type AboutParse, type AboutResult, parseHistory, parseTeam } from "@/lib/admin/about/forms";
 import { contentDbErrorCode } from "@/lib/admin/developers/errors";
+import { removeMediaFiles } from "@/lib/admin/server/mediaFiles";
 import { type ActionGuard, requireActionViewer } from "@/lib/admin/session";
 import { expireSiteSettings } from "@/lib/cache";
 
@@ -30,10 +32,27 @@ export async function saveAboutHistoryAction(formData: FormData): Promise<AboutR
   return result;
 }
 
-/** «Сохранить» у «Команды»: сотрудники в порядке формы, каждый — с отметкой согласия. */
+/** Портреты команды в записи сейчас (пути в бакете media). */
+async function teamPhotoPaths(supabase: SupabaseClient): Promise<string[]> {
+  const { data } = await supabase.from("settings").select("value").eq("key", ABOUT_TEAM_KEY).maybeSingle();
+  return aboutTeamFrom(data?.value).flatMap((member) => (member.photo ? [member.photo.path] : []));
+}
+
+/**
+ * «Сохранить» у «Команды»: сотрудники в порядке формы, каждый — с отметкой согласия. Портрет, который
+ * убрали или заменили (или сотрудника удалили), удаляется из бакета: публичная ссылка на фото
+ * человека, отозвавшего согласие, жить не должна.
+ */
 export async function saveAboutTeamAction(formData: FormData): Promise<AboutResult> {
   const guard = await requireActionViewer(["head"]);
-  const result = await saveSetting(guard, ABOUT_TEAM_KEY, parseTeam(formData));
-  if (result.status === "saved") expireSiteSettings();
+  const parsed = parseTeam(formData);
+  const before = guard.ok && parsed.ok ? await teamPhotoPaths(guard.supabase) : [];
+  const result = await saveSetting(guard, ABOUT_TEAM_KEY, parsed);
+  if (result.status !== "saved") return result;
+  expireSiteSettings();
+  if (guard.ok && parsed.ok) {
+    const kept = new Set(parsed.payload.flatMap((member) => (member.photo ? [member.photo.path] : [])));
+    await removeMediaFiles(guard.supabase, before.filter((path) => !kept.has(path)));
+  }
   return result;
 }

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createStaff, createTestDb, expectDenied, expectHint, user, type TestDb } from "./harness";
+import { anon, createStaff, createTestDb, expectDenied, expectHint, user, type TestDb } from "./harness";
 
 // Реклама — баннер (20261117130000_ad_banner_kinds.sql, 20261117140000_ad_banners.sql; правки 15.11,
 // п. 4 + 13): кнопка cta, картинки banner и banner_mobile — только у рекламы, по одной каждого вида,
@@ -71,6 +71,23 @@ describe("реклама — баннер", () => {
         `specials/${special}/${crypto.randomUUID()}.jpg`,
       ]),
     ).rejects.toThrow(/media_assets_kind_by_owner/);
+  });
+
+  it("скидки: пока выключатель выключен, site_showcase() не отдаёт спецпредложение со скидкой (20261117150000)", async () => {
+    await db.admin.query(
+      `insert into specials (developer_id, kind, badge, title, valid_to, is_active) values
+         ($1, 'gift', '{"ru": "Скидка 5%", "uz": "5% chegirma"}', '{"ru": "Скидка на старте", "uz": "Chegirma"}', current_date + 5, true),
+         ($1, 'gift', '{"ru": "Подарок", "uz": "Sovg‘a"}', '{"ru": "Кухня в подарок", "uz": "Oshxona sovg‘a"}', current_date + 5, true)`,
+      [developer],
+    );
+    const titles = async () =>
+      (
+        await db.as(anon, (tx) => tx.query<{ v: { title: { ru: string } }[] }>("select site_showcase() -> 'specials' as v"))
+      ).rows[0]!.v.map((special) => special.title.ru);
+    expect(await titles()).toEqual(["Кухня в подарок"]);
+    await db.admin.query(`insert into settings (key, value, is_public) values ('site.show_discounts', '{"enabled": true}', true)`);
+    expect((await titles()).sort()).toEqual(["Кухня в подарок", "Скидка на старте"]);
+    await db.admin.query("delete from settings where key = 'site.show_discounts'");
   });
 
   it("заявка типа ad есть в enum; менеджер настройки скидок не правит", async () => {

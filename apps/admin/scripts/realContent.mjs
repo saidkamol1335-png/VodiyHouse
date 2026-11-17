@@ -458,9 +458,14 @@ async function fillDrawings(id, complex) {
 async function fillContent(id, complex) {
   for (const [topic, text] of Object.entries(complex.details ?? {})) {
     const { rowCount } = await client.query(
-      `insert into public.complex_details (complex_id, topic_id, text)
-       select $1, t.id, $3::jsonb::public.i18n_text from public.detail_topics t where t.slug = $2
-       on conflict (complex_id, topic_id) do nothing`,
+      // С правок 15.11 (п. 22) у темы может быть несколько пунктов — уникального (ЖК, тема) больше нет:
+      // повторный импорт не дублирует пункт, если у ЖК уже есть пункт этой темы.
+      `insert into public.complex_details (complex_id, topic_id, text, sort)
+       select $1, t.id, $3::jsonb::public.i18n_text,
+              coalesce((select max(d.sort) from public.complex_details d where d.complex_id = $1), 0) + 10
+       from public.detail_topics t
+       where t.slug = $2
+         and not exists (select 1 from public.complex_details d where d.complex_id = $1 and d.topic_id = t.id)`,
       [id, topic, JSON.stringify(text)],
     );
     counts.details += rowCount;

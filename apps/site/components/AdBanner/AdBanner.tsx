@@ -18,6 +18,8 @@ type AdBannerProps = {
   phone: string | null;
   /** slide — слайдер на главной; slot — место в сетке каталога (вся строка). */
   variant: "slide" | "slot";
+  /** false — повтор той же рекламы ниже в каталоге: показ (ad_view) уже засчитан первым баннером. */
+  countView?: boolean;
 };
 
 /** Баннер на ПК не шире контейнера (1200 px), на телефоне — во всю ширину. */
@@ -30,13 +32,13 @@ const srcOf = (photo: CatalogPhoto) => mediaPublicUrl(process.env.NEXT_PUBLIC_SU
  * Реклама застройщика — баннер (правки 15.11, п. 4 + 13): картинка для ПК и для телефона (`<picture>`),
  * метка «Reklama», под картинкой — застройщик и одна кнопка: телефон Vodiy House или «Ariza qoldirish»
  * (заявка типа «Реклама»). Контактов застройщика нет (ТЗ 1.2): на файле их нет — руководитель отмечает
- * это при загрузке. Показ — ad_view, кнопка — ad_click.
+ * это при загрузке. Показ — ad_view, заявка — ad_click, звонок — phone_click с рекламой (data-track-entity).
  */
-export function AdBanner({ ad, phone, variant }: AdBannerProps) {
+export function AdBanner({ ad, phone, variant, countView = true }: AdBannerProps) {
   const t = useTranslations("showcase.banner");
   const locale = useLocale() as Locale;
   const root = useRef<HTMLElement>(null);
-  useAdView(root, ad.id);
+  useAdView(root, countView ? ad.id : null);
   const alt = ad.title[locale];
   const mobile = ad.bannerMobile;
   const {
@@ -58,15 +60,17 @@ export function AdBanner({ ad, phone, variant }: AdBannerProps) {
       </div>
       <div className="ad-banner__bar">
         <p className="ad-banner__developer">{ad.developer.name}</p>
-        <div className="ad-banner__cta" data-track="ad_click">
+        <div className="ad-banner__cta">
           {ad.cta === "phone" && phone ? (
-            <a href={phoneHref(phone)} className="button button--primary ad-banner__call" data-track="ad_click">
+            <a href={phoneHref(phone)} className="button button--primary ad-banner__call">
               <Phone size={16} strokeWidth={2} aria-hidden />
               <span>{t("call")}</span>
               <span className="ad-banner__number">{formatPhone(phone)}</span>
             </a>
           ) : (
-            <LeadButton intent={{ type: "ad", object: { developer: ad.developer.slug }, context: ad.developer.name }} />
+            <span className="ad-banner__lead" data-track="ad_click">
+              <LeadButton intent={{ type: "ad", object: { developer: ad.developer.slug }, context: ad.developer.name }} />
+            </span>
           )}
         </div>
       </div>

@@ -251,7 +251,8 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
       expect(rows.map((row) => row.name)).toEqual([
         "can_see_complex", "exchange_rate", "has_role", "is_contour", "is_public_complex", "is_public_developer",
         "is_staff", "is_unit_contours", "mentions_discount", "showcase_public_complexes", "showcase_visible",
-        "staff_role", "tashkent_today", "uuid_or_null",
+        // Выключатель «Скидки на сайте» (20261117150000): читает публичную запись settings.
+        "site_shows_discounts", "staff_role", "tashkent_today", "uuid_or_null",
       ]);
     });
 

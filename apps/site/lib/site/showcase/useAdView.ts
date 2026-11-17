@@ -4,6 +4,7 @@ import { useEffect, type RefObject } from "react";
 import { track } from "@/lib/events/client";
 
 /** Показ рекламы (3.16б; баннер — правки 15.11): баннер наполовину в кадре — одно событие ad_view на открытие страницы. */
+/** id null — без события (повтор той же рекламы ниже по странице). */
 export function useAdView(card: RefObject<HTMLElement | null>, id: string | null): void {
   useEffect(() => {
     const node = card.current;
