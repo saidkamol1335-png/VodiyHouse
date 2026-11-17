@@ -77,7 +77,7 @@ export function PeriodFields({ validFrom, validTo, issue, idPrefix }: PeriodFiel
 type OrderAndActiveProps = {
   sort: string;
   isActive: boolean;
-  issue: (field: "sort") => string | undefined;
+  issue: (field: "sort" | "isActive") => string | undefined;
   idPrefix: string;
 };
 
@@ -97,7 +97,11 @@ export function OrderAndActive({ sort, isActive, issue, idPrefix }: OrderAndActi
         defaultValue={sort}
         error={issue("sort")}
       />
-      <ActiveSwitch initial={isActive} />
+      <div>
+        <ActiveSwitch initial={isActive} />
+        {/* Реклама без картинки для ПК (правки 15.11): «На сайте» не включить. */}
+        {issue("isActive") ? <FormStatus tone="error">{issue("isActive")}</FormStatus> : null}
+      </div>
     </div>
   );
 }

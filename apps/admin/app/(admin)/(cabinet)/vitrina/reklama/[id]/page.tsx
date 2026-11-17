@@ -9,15 +9,16 @@ import { SHOWCASE_MEDIA_ACTIONS } from "../../mediaActions";
 
 export const instant = false;
 
-/** Реклама: новая («novoe») или правка. */
+/** Реклама — баннер (правки 15.11, п. 4 + 13): новая («novoe») или правка. */
 export default async function AdPage({ params }: { params: Promise<{ id: string }> }) {
   if (!(await showcaseOpen())) return null;
   const id = await showcaseEntityId(params);
   const supabase = await createSupabaseServerClient();
-  const [record, options, cover] = await Promise.all([
+  const [record, options, banner, bannerMobile] = await Promise.all([
     id ? readAd(supabase, id) : null,
     readShowcaseOptions(supabase),
-    id ? readShowcaseCover(supabase, "ad", id) : null,
+    id ? readShowcaseCover(supabase, "ad", id, "banner") : null,
+    id ? readShowcaseCover(supabase, "ad", id, "banner_mobile") : null,
   ]);
   if (id && !record) notFound();
   return (
@@ -26,7 +27,7 @@ export default async function AdPage({ params }: { params: Promise<{ id: string 
       record={record}
       options={options}
       action={saveAdAction}
-      cover={cover}
+      banners={{ banner, bannerMobile }}
       mediaActions={SHOWCASE_MEDIA_ACTIONS}
       deleteAction={deleteShowcaseAction}
       base={ADMIN_ROUTES.showcase}

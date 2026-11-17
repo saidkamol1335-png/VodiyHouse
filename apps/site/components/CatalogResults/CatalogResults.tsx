@@ -19,7 +19,7 @@ import { CATALOG_SORTS, NO_FILTER, type CatalogFilter as Filter, type CatalogSor
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog, withoutSoon } from "@/lib/site/catalog/sort";
 import { collectionResults } from "@/lib/site/showcase/model";
-import type { ShowcaseCollection } from "@/lib/site/showcase/records";
+import type { ShowcaseAd, ShowcaseCollection } from "@/lib/site/showcase/records";
 import { useCatalogSelection } from "./collection";
 import { filterLabels, pickIntent, useFilterTracking, useFocusOnMore } from "./results";
 
@@ -38,6 +38,10 @@ type CatalogResultsProps = {
   hideSoon?: boolean;
   /** id кнопок и блоков фильтра в архиве («Настройки → Фильтр сайта»): на сайте их нет. */
   archived?: readonly string[];
+  /** Баннеры рекламы — слот после каждой 6-й карточки (правки 15.11, п. 4 + 13; только /novostroyki). */
+  ads?: readonly ShowcaseAd[];
+  /** Телефон Vodiy House для кнопки баннера. */
+  phone?: string | null;
 };
 
 const NO_ARCHIVE: readonly string[] = [];
@@ -55,7 +59,7 @@ function activeGroups(filter: Filter): number {
  * сортировка, карточки порциями и пустой результат. Фильтр и подборка живут в браузере и в адресе —
  * без перехода страницы (history.replaceState).
  */
-export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false, archived = NO_ARCHIVE }: CatalogResultsProps) {
+export function CatalogResults({ catalog, pageSize, preloadFirst = true, collections = [], collectionsRow = false, badges, hideSoon: hideSoonWanted = false, archived = NO_ARCHIVE, ads, phone }: CatalogResultsProps) {
   // Все опубликованные — «Скоро» (первая публикация): на главной показываем их, а не «скоро появятся».
   const hideSoon = hideSoonWanted && withoutSoon(catalog.complexes).length > 0;
   const [shown, setShown] = useState(pageSize);
@@ -91,7 +95,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
       <div className="catalog-results__body" inert={open}>
         {collection ? <AppliedCollection collection={collection} onReset={reset} /> : null}
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
-        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} badges={badges} onMore={() => setShown(shown + pageSize)} onReset={reset} />
+        <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} badges={badges} ads={ads} phone={phone} onMore={() => setShown(shown + pageSize)} onReset={reset} />
       </div>
     </div>
   );
@@ -136,12 +140,14 @@ type ResultsListProps = {
   shown: number;
   pageSize: number;
   badges?: Record<string, LocalizedText>;
+  ads?: readonly ShowcaseAd[];
+  phone?: string | null;
   onMore: () => void;
   onReset: () => void;
 };
 
 /** Карточки порциями и «Показать ещё»; пусто — «Подберём вручную» и «Сбросить фильтры». */
-function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, badges, onMore, onReset }: ResultsListProps) {
+function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, badges, ads, phone, onMore, onReset }: ResultsListProps) {
   const t = useTranslations("catalog.filter");
   const { list, more } = useFocusOnMore(shown, onMore);
   if (found.length === 0) {
@@ -161,7 +167,7 @@ function ResultsList({ catalog, found, filter, shown, pageSize, preloadFirst, ba
   return (
     <>
       <div ref={list}>
-        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} badges={badges} />
+        <CatalogGrid catalog={catalog} complexes={found.slice(0, shown)} preloadFirst={preloadFirst} badges={badges} ads={ads} phone={phone} />
       </div>
       {found.length > shown ? (
         <div className="catalog-results__more">

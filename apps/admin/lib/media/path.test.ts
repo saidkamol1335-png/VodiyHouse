@@ -45,7 +45,7 @@ describe("путь файла в бакете", () => {
     );
   });
 
-  it("логотип и фон — у застройщика, остальное — у ЖК", () => {
+  it("логотип и фон — у застройщика, баннер — у рекламы, остальное — у ЖК", () => {
     const owners = Object.fromEntries(MEDIA_KINDS.map((kind) => [kind, ownerTypeOf(kind)]));
     expect(owners).toEqual({
       photo: "complex",
@@ -54,6 +54,8 @@ describe("путь файла в бакете", () => {
       logo: "developer",
       cover: "developer",
       floor_plan: "complex",
+      banner: "ad",
+      banner_mobile: "ad",
     });
   });
 });

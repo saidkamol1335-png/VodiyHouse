@@ -96,11 +96,25 @@ export async function saveAdAction(formData: FormData): Promise<SaveShowcaseResu
   if (!guard.ok) return fail(guard.code);
   if (!parsed.ok) return { status: "error", error: null, fieldErrors: parsed.fieldErrors, fields: parsed.fields };
   const id = editedId(formData);
+  // Баннер (правки 15.11, п. 4 + 13): «На сайте» — только с картинкой для ПК; новая реклама её ещё не
+  // имеет — сначала сохранить выключенной и загрузить картинку.
+  if (parsed.value.isActive && !(id && (await hasDesktopBanner(guard.supabase, id)))) {
+    return { status: "error", error: null, fieldErrors: { isActive: "noBanner" }, fields: parsed.fields };
+  }
   const saved = await persist(guard.supabase, "ad", id, adRow(parsed.value));
   if ("error" in saved) return fail(saved.error);
   expireShowcase();
   if (!id) redirect(showcaseItemHref("ad", saved.id));
   return { status: "saved", at: Date.now() };
+}
+
+async function hasDesktopBanner(supabase: SupabaseClient, id: string): Promise<boolean> {
+  const { count, error } = await supabase
+    .from("media_assets")
+    .select("id", { count: "exact", head: true })
+    .eq("ad_id", id)
+    .eq("kind", "banner");
+  return !error && (count ?? 0) > 0;
 }
 
 /** Адрес подборки — из русского названия; занятый получает -2, -3… (как у застройщиков). */
@@ -151,12 +165,17 @@ export async function deleteShowcaseAction(formData: FormData): Promise<DeleteSh
   if (!isShowcaseKind(kind) || !id) return { status: "error", error: "invalid" };
   if (readText(formData, "confirm") !== "on") return { status: "error", error: "confirmName" };
 
-  const cover = await guard.supabase.rpc("remove_showcase_media", { p_owner: kind, p_id: id });
-  if (cover.error) return { status: "error", error: contentDbErrorCode(cover.error) };
+  // Обложка и у рекламы ещё баннеры (правки 15.11, п. 4 + 13): строки — каскадом, файлы — Storage API.
+  const files: string[] = [];
+  for (const media of kind === "ad" ? ["cover", "banner", "banner_mobile"] : ["cover"]) {
+    const removed = await guard.supabase.rpc("remove_showcase_media", { p_owner: kind, p_id: id, p_kind: media });
+    if (removed.error) return { status: "error", error: contentDbErrorCode(removed.error) };
+    if (typeof removed.data === "string") files.push(removed.data);
+  }
   const { data, error } = await guard.supabase.from(TABLE[kind]).delete().eq("id", id).select("id");
   if (error) return { status: "error", error: contentDbErrorCode(error) };
   if (!data?.length) return { status: "error", error: "notFound" };
-  await removeMediaFiles(guard.supabase, cover.data);
+  await removeMediaFiles(guard.supabase, files);
   expireShowcase();
   redirect(showcaseListHref(kind));
 }

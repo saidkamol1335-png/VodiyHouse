@@ -1,0 +1,14 @@
+/* «Витрина → Спецпредложения»: выключатель скидок на сайте — пояснение и тумблер (правки 15.11). */
+.discounts-panel {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.discounts-panel__lead {
+  margin: 0;
+  max-width: 720px;
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+}

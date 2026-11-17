@@ -10,7 +10,7 @@ import type { ProjectWidth } from "@/lib/site/home/projects";
 import type { SitePhotoData } from "@/lib/site/photo";
 import { GalleryCard } from "./JkGalleryCard";
 import { GalleryControls } from "./GalleryControls";
-import { useGallerySlider } from "./useGallerySlider";
+import { useSlider } from "@/lib/ui/useSlider";
 
 /** Предложение под названием ЖК: из «Витрины» (с бейджем и сроком) или условия оплаты ЖК. */
 export type JkGalleryOffer = {
@@ -64,7 +64,7 @@ export function JkGalleryTrack({ id, cards, text }: JkGalleryTrackProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const total = cards.length + 1;
-  const slider = useGallerySlider({ section: sectionRef, viewport: viewportRef, total });
+  const slider = useSlider({ section: sectionRef, viewport: viewportRef, total, item: ".jk-gallery__card" });
   return (
     <section ref={sectionRef} id={id} className="jk-gallery" aria-labelledby="jk-gallery-title" aria-roledescription="carousel" {...slider.pauseHandlers}>
       <GalleryHead text={text} />

@@ -1,0 +1,1 @@
+export { AdSlider } from "./AdSlider";

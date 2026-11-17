@@ -2,8 +2,11 @@
 // отклоняет слабые и тяжёлые исходники и уменьшает остальное до одного файла ≤ 3200 px.
 // Размеры и AVIF/WebP для сайта делает next/image по запросу.
 
-/** Виды файлов — как enum media_kind в базе. Фото ЖК, чертёж, фасад, план этажа; логотип и фон застройщика. */
-export const MEDIA_KINDS = ["photo", "drawing", "facade", "logo", "cover", "floor_plan"] as const;
+/**
+ * Виды файлов — как enum media_kind в базе. Фото ЖК, чертёж, фасад, план этажа; логотип и фон застройщика;
+ * баннер рекламы для ПК и для телефона (правки 15.11, п. 4 + 13).
+ */
+export const MEDIA_KINDS = ["photo", "drawing", "facade", "logo", "cover", "floor_plan", "banner", "banner_mobile"] as const;
 
 export type MediaKind = (typeof MEDIA_KINDS)[number];
 
@@ -41,7 +44,29 @@ export const MEDIA_KIND_RULES: Record<MediaKind, KindRule> = {
   // План этажа (фаза 4) — тот же лист, что чертёж: PNG на белом, контуры квартир рисуются по нему.
   floor_plan: { minLongSide: 1200, maxLongSide: 3200, output: "image/png", opaque: true },
   logo: { minLongSide: 400, maxLongSide: 1600, output: "image/png", opaque: false },
+  // Баннер рекламы: на ПК — 3:1 во всю ширину контейнера (2400 × 800 — с запасом для экранов ×2),
+  // на телефоне — 4:5 во всю ширину (1080 × 1350).
+  banner: { minLongSide: 2400, maxLongSide: 3200, output: "image/jpeg", opaque: true },
+  banner_mobile: { minLongSide: 1350, maxLongSide: 2400, output: "image/jpeg", opaque: true },
 };
+
+export type BannerKind = "banner" | "banner_mobile";
+
+/** Пропорция баннера (ширина / высота): сайт показывает его в таком кадре без обрезки. */
+export const BANNER_RATIOS: Record<BannerKind, { ratio: number; label: string; example: string }> = {
+  banner: { ratio: 3, label: "3:1", example: "2400 × 800" },
+  banner_mobile: { ratio: 0.8, label: "4:5", example: "1080 × 1350" },
+};
+
+/** Отклонение пропорции, которое ещё незаметно в кадре (край срежется на пару процентов). */
+const BANNER_RATIO_TOLERANCE = 0.06;
+
+/** Подходит ли картинка в кадр баннера: пропорция ±6 %. */
+export function fitsBanner(kind: BannerKind, size: ImageSize): boolean {
+  if (size.width <= 0 || size.height <= 0) return false;
+  const { ratio } = BANNER_RATIOS[kind];
+  return Math.abs(size.width / size.height / ratio - 1) <= BANNER_RATIO_TOLERANCE;
+}
 
 export const JPEG_QUALITY = 0.9;
 

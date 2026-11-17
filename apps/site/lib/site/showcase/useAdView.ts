@@ -3,11 +3,10 @@
 import { useEffect, type RefObject } from "react";
 import { track } from "@/lib/events/client";
 
-/** Показ рекламы (3.16б): карточка наполовину в кадре — одно событие ad_view на открытие страницы. */
+/** Показ рекламы (3.16б; баннер — правки 15.11): баннер наполовину в кадре — одно событие ad_view на открытие страницы. */
 export function useAdView(card: RefObject<HTMLElement | null>, id: string | null): void {
   useEffect(() => {
     const node = card.current;
-    // Своя реклама Vodiy House (id null) — без событий: у неё нет записи в ads.
     if (!node || !id) return;
     const seen = () => track("ad_view", { entity_type: "ad", entity_id: id });
     if (typeof IntersectionObserver === "undefined") {

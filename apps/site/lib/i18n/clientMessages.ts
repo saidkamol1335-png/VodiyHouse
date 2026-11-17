@@ -64,11 +64,14 @@ export const CATALOG_NAMESPACE = "catalog";
 export const SHARE_NAMESPACE = "share";
 /** Подборки витрины над выдачей (3.16б): ряд карточек и плашка «Подборка применена» — в каталоге. */
 export const COLLECTIONS_MESSAGES = "showcase.collections";
+/** Баннер рекламы — слот каталога (правки 15.11, п. 4 + 13). */
+export const AD_BANNER_MESSAGES = "showcase.banner";
 export const CATALOG_MESSAGES = [
   CATALOG_NAMESPACE,
   LEAD_BUTTON_MESSAGES,
   SHARE_NAMESPACE,
   COLLECTIONS_MESSAGES,
+  AD_BANNER_MESSAGES,
   ...SITE_SHELL_MESSAGES,
 ] as const;
 

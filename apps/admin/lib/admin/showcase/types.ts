@@ -42,13 +42,12 @@ export type CollectionRecord = {
   sort: number;
 };
 
+/** Реклама — баннер (правки 15.11, п. 4 + 13): картинки — media_assets banner и banner_mobile. */
 export type AdRecord = {
   id: string;
   developerId: string;
   title: BilingualValue;
-  text: BilingualValue | null;
-  complexIds: string[];
-  filter: FilterSearch;
+  cta: "lead" | "phone";
   validFrom: string;
   validTo: string;
   isActive: boolean;

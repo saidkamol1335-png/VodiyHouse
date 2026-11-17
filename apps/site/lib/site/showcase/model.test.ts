@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { NO_FILTER } from "@/lib/site/catalog/filter";
 import type { CatalogBlock, CatalogComplex, CatalogOffer, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
 import {
-  adView,
   cardBadges,
   collectionBySlug,
   collectionComplexes,
@@ -17,7 +16,7 @@ import {
   visibleCollections,
   visibleSpecials,
 } from "./model";
-import type { ShowcaseAd, ShowcaseCollection, ShowcaseSpecial, SiteShowcase } from "./records";
+import { withoutDiscounts, type ShowcaseAd, type ShowcaseCollection, type ShowcaseSpecial, type SiteShowcase } from "./records";
 
 // Витрина на сайте (3.16б): подборки, цифры рекламы и спецпредложений — из одного ответа каталога.
 
@@ -108,12 +107,11 @@ const special = (id: string, patch: Partial<ShowcaseSpecial>): ShowcaseSpecial =
 const ad = (id: string, patch: Partial<ShowcaseAd>): ShowcaseAd => ({
   id,
   title: text(`реклама ${id}`),
-  text: null,
+  cta: "lead",
   developer: sifat,
-  complexIds: [],
-  filter: NO_FILTER,
   validTo: "2026-11-30",
-  cover: null,
+  banner: photo(`${id}.jpg`),
+  bannerMobile: null,
   ...patch,
 });
 
@@ -194,30 +192,21 @@ describe("спецпредложения", () => {
   });
 });
 
-describe("реклама (Г1 A)", () => {
-  it("первая действующая по порядку; без ЖК на сайте — следующая; null — нечего показывать", () => {
-    const list = showcase({ ads: [ad("x", { complexIds: ["net-takogo"] }), ad("y", { complexIds: ["id-a", "id-c"] })] });
-    const view = adView(catalog, list)!;
-    expect(view.ad.id).toBe("y");
-    expect(view.href).toBe("/podborka?zhk=a,c");
-    expect(view.cover?.path).toBe("a.jpg");
-    expect(view.count).toEqual({ complexes: 2, flats: 5, partial: true });
-    expect(view.price).toMatchObject({ amount: 35000, currency: "USD" });
-    expect(adView(catalog, showcase({ ads: [ad("x", { complexIds: ["net-takogo"] })] }))).toBeNull();
-  });
-
-  it("по фильтру — только ЖК своего застройщика, ссылка на каталог с его фильтром", () => {
-    const view = adView(catalog, showcase({ ads: [ad("f", { filter: { ...NO_FILTER, rooms: [2] } })] }))!;
-    expect(view.complexes.map((c) => c.slug)).toEqual(["a", "c"]);
-    expect(view.href).toBe("/novostroyki?komnat=2&zastr=sifat");
-    expect(view.count).toEqual({ complexes: 2, flats: 2, partial: true });
-    const single = adView(catalog, showcase({ ads: [ad("g", { developer: kamalak, filter: { ...NO_FILTER, deadline: "built" } })] }))!;
-    expect(single.complexes.map((c) => c.slug)).toEqual(["b"]);
-    expect(single.href).toBe("/novostroyki?srok=built&zastr=kamalak");
-  });
-
-  it("один ЖК — ссылка на его страницу", () => {
-    expect(adView(catalog, showcase({ ads: [ad("one", { complexIds: ["id-c"] })] }))!.href).toBe("/novostroyki/c");
+describe("скидки выключены (правки 15.11, п. 4 + 21)", () => {
+  it("спецпредложения со скидкой в бейдже, заголовке или тексте пропадают; остальное — как было", () => {
+    const list = showcase({
+      specials: [
+        special("gift", {}),
+        special("badge", { badge: text("Скидка 5%") }),
+        special("title", { title: { ru: "Подарок", uz: "10% chegirma" } }),
+        special("text", { text: text("Цены −10 % на 3-комнатные") }),
+      ],
+      ads: [ad("plain", {}), ad("sale", { title: text("Скидка на старте продаж") })],
+    });
+    const shown = withoutDiscounts(list);
+    expect(shown.specials.map((item) => item.id)).toEqual(["gift"]);
+    expect(shown.ads.map((item) => item.title.ru)).toEqual(["реклама plain", sifat.name]);
+    expect(shown.ads[1]!.banner.path).toBe("sale.jpg");
   });
 });
 

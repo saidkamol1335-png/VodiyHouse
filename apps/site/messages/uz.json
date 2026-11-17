@@ -1089,6 +1089,15 @@
       "showComplexes": "{n, plural, one {# ta TJMni ko‘rsatish} other {# ta TJMni ko‘rsatish}}",
       "more": "yana {n}"
     },
+    "banner": {
+      "tag": "Reklama",
+      "label": "Reklama · {developer}",
+      "call": "Qo‘ng‘iroq qilish",
+      "region": "Quruvchilar reklamasi",
+      "prev": "Oldingi banner",
+      "next": "Keyingi banner",
+      "slide": "Banner {n} / {total}"
+    },
     "special": {
       "label": "Maxsus takliflar",
       "daysLeft": "{n, plural, one {yana # kun} other {yana # kun}}",
@@ -1135,6 +1144,7 @@
       "complex": "TJM bo‘yicha ariza",
       "partner": "Quruvchi arizasi",
       "promo": "Maxsus taklif",
+      "ad": "Reklama bo‘yicha ariza",
       "tg": "Telegramda yozish",
       "quiz": "1 daqiqada tanlash"
     },
@@ -1151,6 +1161,7 @@
       "tg": "Telegramda yozish",
       "quiz": "Tanlovni olish",
       "promo": "Shu shartni xohlayman",
+      "ad": "Ariza qoldirish",
       "telegram": "Telegramda yozish"
     },
     "name": "Ism",

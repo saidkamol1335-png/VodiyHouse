@@ -23,8 +23,12 @@ const FOLDERS: Record<MediaOwnerType, string> = {
 export const MEDIA_PATH_PATTERN =
   /^(complexes|developers|specials|collections|ads|team)\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png)$/;
 
-/** Логотип и фон — у застройщика, остальное — у ЖК (как check в media_assets); обложки витрины — по владельцу. */
+/**
+ * Логотип и фон — у застройщика, баннер — у рекламы, остальное — у ЖК (как check в media_assets);
+ * обложки витрины — по владельцу.
+ */
 export function ownerTypeOf(kind: MediaKind): MediaOwner["type"] {
+  if (kind === "banner" || kind === "banner_mobile") return "ad";
   return kind === "logo" || kind === "cover" ? "developer" : "complex";
 }
 

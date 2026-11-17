@@ -914,6 +914,7 @@
       "complex": "TJM bo‘yicha ariza",
       "partner": "Quruvchi arizasi",
       "promo": "Maxsus taklif",
+      "ad": "Reklama bo‘yicha ariza",
       "tg": "Telegramda yozish",
       "quiz": "1 daqiqada tanlash"
     },
@@ -930,6 +931,7 @@
       "tg": "Telegramda yozish",
       "quiz": "Tanlovni olish",
       "promo": "Shu shartni xohlayman",
+      "ad": "Ariza qoldirish",
       "telegram": "Telegramda yozish"
     },
     "name": "Ism",

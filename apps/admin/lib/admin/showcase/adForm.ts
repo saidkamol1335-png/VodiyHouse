@@ -1,36 +1,32 @@
 import { EMPTY_BILINGUAL, type BilingualValue } from "../bilingual";
 import { readText } from "../credentials";
-import { isEmptyFilter, readFilterSearch } from "./filterForm";
 import {
   defaultPeriod,
   onlyIssues,
-  optionalText,
   periodIssues,
   publicTextIssue,
   readActive,
   readBilingual,
-  readComplexIds,
   readPeriod,
   readSort,
   readUuidField,
   SHOWCASE_LIMITS,
   type ShowcaseIssue,
 } from "./forms";
-import type { AdRecord, FilterSearch } from "./types";
+import type { AdRecord } from "./types";
 
-// Реклама застройщика (3.16а, мокап ad*): заголовок и текст, цель — ЖК застройщика или фильтр
-// каталога («Показать N квартир» ведёт туда), период, порядок очереди (Г1 A), «на сайте».
+// Реклама застройщика — баннер (правки 15.11, п. 4 + 13): застройщик, название (подпись картинки на
+// сайте и строка списка), кнопка — телефон Vodiy House или «Ariza qoldirish», период, порядок в
+// слайдере и в каталоге, «на сайте». Картинки для ПК и телефона — под формой (ShowcaseFooter). Тексты,
+// ЖК и фильтр прежней карточки рекламы при сохранении очищаются: сайт их больше не показывает.
 
-export const AD_TARGETS = ["complexes", "filter"] as const;
-export type AdTarget = (typeof AD_TARGETS)[number];
+export const AD_CTAS = ["lead", "phone"] as const;
+export type AdCta = (typeof AD_CTAS)[number];
 
 export type AdFields = {
   developerId: string;
   title: BilingualValue;
-  text: BilingualValue;
-  target: string;
-  complexIds: string[];
-  filter: FilterSearch;
+  cta: string;
   validFrom: string;
   validTo: string;
   isActive: boolean;
@@ -42,9 +38,7 @@ export type AdErrors = Partial<Record<keyof AdFields, ShowcaseIssue>>;
 export type AdInput = {
   developerId: string;
   title: BilingualValue;
-  text: BilingualValue | null;
-  complexIds: string[];
-  filter: FilterSearch;
+  cta: AdCta;
   validFrom: string;
   validTo: string;
   isActive: boolean;
@@ -55,29 +49,16 @@ export type AdParse =
   | { ok: true; value: AdInput; fields: AdFields }
   | { ok: false; fields: AdFields; fieldErrors: AdErrors };
 
-const isTarget = (value: string): value is AdTarget => (AD_TARGETS as readonly string[]).includes(value);
+export const isAdCta = (value: unknown): value is AdCta => (AD_CTAS as readonly unknown[]).includes(value);
 
 export function adFieldsOf(record: AdRecord | null): AdFields {
   if (!record) {
-    return {
-      developerId: "",
-      title: EMPTY_BILINGUAL,
-      text: EMPTY_BILINGUAL,
-      target: "complexes",
-      complexIds: [],
-      filter: {},
-      ...defaultPeriod(),
-      isActive: false,
-      sort: "",
-    };
+    return { developerId: "", title: EMPTY_BILINGUAL, cta: "lead", ...defaultPeriod(), isActive: false, sort: "" };
   }
   return {
     developerId: record.developerId,
     title: record.title,
-    text: record.text ?? EMPTY_BILINGUAL,
-    target: record.complexIds.length > 0 ? "complexes" : "filter",
-    complexIds: record.complexIds,
-    filter: record.filter,
+    cta: record.cta,
     validFrom: record.validFrom,
     validTo: record.validTo,
     isActive: record.isActive,
@@ -89,10 +70,7 @@ function readFields(formData: FormData): AdFields {
   return {
     developerId: readUuidField(formData, "developerId"),
     title: readBilingual(formData, "title"),
-    text: readBilingual(formData, "text"),
-    target: (readText(formData, "target") ?? "").trim(),
-    complexIds: readComplexIds(formData, SHOWCASE_LIMITS.complexesMax),
-    filter: readFilterSearch(formData),
+    cta: (readText(formData, "cta") ?? "").trim(),
     ...readPeriod(formData),
     isActive: readActive(formData),
     sort: readSort(formData).raw,
@@ -102,27 +80,21 @@ function readFields(formData: FormData): AdFields {
 export function parseAd(formData: FormData): AdParse {
   const fields = readFields(formData);
   const sort = readSort(formData).parsed;
-  const byComplexes = fields.target === "complexes";
   const fieldErrors = onlyIssues({
     developerId: fields.developerId ? undefined : "required",
     title: publicTextIssue(fields.title, { max: SHOWCASE_LIMITS.titleMax, required: true, allowDiscount: true }),
-    text: publicTextIssue(fields.text, { max: SHOWCASE_LIMITS.adTextMax, allowDiscount: true }),
-    target: isTarget(fields.target) ? undefined : "kindInvalid",
-    complexIds: byComplexes && fields.complexIds.length === 0 ? "noComplexes" : undefined,
-    filter: !byComplexes && isTarget(fields.target) && isEmptyFilter(fields.filter) ? "noFilter" : undefined,
+    cta: isAdCta(fields.cta) ? undefined : "kindInvalid",
     ...periodIssues(fields),
     sort: sort.issue ?? undefined,
   });
-  if (Object.keys(fieldErrors).length > 0) return { ok: false, fields, fieldErrors };
+  if (Object.keys(fieldErrors).length > 0 || !isAdCta(fields.cta)) return { ok: false, fields, fieldErrors };
   return {
     ok: true,
     fields,
     value: {
       developerId: fields.developerId,
       title: fields.title,
-      text: optionalText(fields.text),
-      complexIds: byComplexes ? fields.complexIds : [],
-      filter: byComplexes ? {} : fields.filter,
+      cta: fields.cta,
       validFrom: fields.validFrom,
       validTo: fields.validTo,
       isActive: fields.isActive,
@@ -131,14 +103,15 @@ export function parseAd(formData: FormData): AdParse {
   };
 }
 
-/** Строка для insert / update ads. */
+/** Строка для insert / update ads: прежние текст, ЖК и фильтр карточки — пустые. */
 export function adRow(input: AdInput) {
   return {
     developer_id: input.developerId,
     title: input.title,
-    text: input.text,
-    complex_ids: input.complexIds,
-    filter: input.filter,
+    cta: input.cta,
+    text: null,
+    complex_ids: [],
+    filter: {},
     valid_from: input.validFrom,
     valid_to: input.validTo,
     is_active: input.isActive,

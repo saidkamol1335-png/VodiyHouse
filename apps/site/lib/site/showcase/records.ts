@@ -1,3 +1,4 @@
+import { textsMentionDiscount } from "@vh/shared/discounts";
 import type { LocalizedText } from "@/lib/contacts";
 import { filterFromSearch } from "@/lib/site/catalog/params";
 import type { CatalogFilter } from "@/lib/site/catalog/filter";
@@ -31,15 +32,16 @@ export type SpecialRecord = {
   cover: PhotoRecord | null;
 };
 
+/** Реклама — баннер (правки 15.11, п. 4 + 13): без баннера для ПК база её не отдаёт. */
 export type AdRecord = {
   id: string;
+  /** Название рекламы — подпись картинки (alt). */
   title: LocalizedText;
-  text: LocalizedText | null;
+  cta: string;
   developer: ShowcaseDeveloperRecord;
-  complex_ids: string[];
-  filter: Record<string, unknown>;
   valid_to: string;
-  cover: PhotoRecord | null;
+  banner: PhotoRecord;
+  banner_mobile: PhotoRecord | null;
 };
 
 export type SiteShowcaseRecord = {
@@ -72,15 +74,18 @@ export type ShowcaseSpecial = {
   cover: CatalogPhoto | null;
 };
 
+/** Кнопка баннера: телефон Vodiy House (tel:) или «Ariza qoldirish» — заявка типа «Реклама». */
+export type AdCta = "phone" | "lead";
+
 export type ShowcaseAd = {
   id: string;
   title: LocalizedText;
-  text: LocalizedText | null;
+  cta: AdCta;
   developer: ShowcaseDeveloperRecord;
-  complexIds: string[];
-  filter: CatalogFilter;
   validTo: string;
-  cover: CatalogPhoto | null;
+  banner: CatalogPhoto;
+  /** Картинка для телефона; null — та же, что для ПК. */
+  bannerMobile: CatalogPhoto | null;
 };
 
 export type SiteShowcase = {
@@ -124,16 +129,36 @@ export function showcaseFrom(record: SiteShowcaseRecord): SiteShowcase {
       validTo: item.valid_to,
       cover: cover(item.cover),
     })),
-    ads: (record.ads ?? []).map((item) => ({
-      id: item.id,
-      title: item.title,
-      text: item.text,
-      developer: item.developer,
-      complexIds: item.complex_ids ?? [],
-      filter: filterOf(item.filter),
-      validTo: item.valid_to,
-      cover: cover(item.cover),
-    })),
+    ads: (record.ads ?? []).flatMap((item) =>
+      item.banner
+        ? [
+            {
+              id: item.id,
+              title: item.title,
+              cta: item.cta === "phone" ? "phone" : "lead",
+              developer: item.developer,
+              validTo: item.valid_to,
+              banner: photoFrom(item.banner),
+              bannerMobile: cover(item.banner_mobile),
+            } satisfies ShowcaseAd,
+          ]
+        : [],
+    ),
     today: record.today ?? "",
+  };
+}
+
+/**
+ * Скидки выключены («Витрина → Спецпредложения», по умолчанию — п. 4 + 21 правок 15.11): спецпредложения
+ * со скидкой в бейдже, заголовке или тексте сайт не показывает; название рекламы со скидкой не идёт в
+ * подпись картинки — вместо него имя застройщика.
+ */
+export function withoutDiscounts(showcase: SiteShowcase): SiteShowcase {
+  return {
+    ...showcase,
+    specials: showcase.specials.filter((special) => !textsMentionDiscount(special.badge, special.title, special.text)),
+    ads: showcase.ads.map((ad) =>
+      textsMentionDiscount(ad.title) ? { ...ad, title: { ru: ad.developer.name, uz: ad.developer.name } } : ad,
+    ),
   };
 }

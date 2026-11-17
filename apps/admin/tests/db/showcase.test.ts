@@ -271,7 +271,8 @@ describe("витрина: права, правила и DEMO", () => {
     it("сид: 4 спецпредложения (3 идут, «Старт продаж» ждёт), 2 рекламы (одна идёт), 5 подборок; remove убирает всё", async () => {
       await db.admin.exec(await readDemo("remove.sql"));
       await db.admin.exec(await readDemo("seed.sql"));
-      expect(await demoCounts()).toEqual({ specials: 3, ads: 1, collections: 5, staffSpecials: 4, staffAds: 2 });
+      // Реклама — баннер (правки 15.11): у DEMO-рекламы картинок нет — на сайте её нет, в кабинете обе.
+      expect(await demoCounts()).toEqual({ specials: 3, ads: 0, collections: 5, staffSpecials: 4, staffAds: 2 });
       const manual = await db.admin.query<{ n: number }>(
         "select cardinality(complex_ids) as n from collections where slug = 'demo-tsentr-fergany'",
       );

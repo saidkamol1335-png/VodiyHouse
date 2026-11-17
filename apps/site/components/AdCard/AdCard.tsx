@@ -2,7 +2,6 @@
 
 import { ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRef } from "react";
 import { LeadButton } from "@/components/LeadDialog";
 import { SitePhoto } from "@/components/SitePhoto";
 import { formatPrice } from "@vh/shared/format";
@@ -10,7 +9,6 @@ import { Link } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/routing";
 import { complexRoute } from "@/lib/routes";
 import type { AdView, ShowcaseComplexRef } from "@/lib/site/showcase/model";
-import { useAdView } from "./useAdView";
 import { useSpotlight } from "@/components/Spotlight";
 
 const SIZES = "(max-width: 980px) 100vw, 640px";
@@ -18,21 +16,20 @@ const SIZES = "(max-width: 980px) 100vw, 640px";
 const CHIPS_MAX = 4;
 
 /**
- * Карточка рекламы на главной (3.16б, мокап .adb, Г1 A): фото или обложка первого ЖК с пометкой
- * «Реклама», застройщик, заголовок и текст, «В продаже · Цена от · Платёж от» из каталога, чипы ЖК,
- * «Показать N квартир» и «Хочу это условие» → заявка promo. Показ и клики — события ad_view / ad_click.
+ * Своя реклама Vodiy House на главной (3.16б, мокап .adb; с правок 15.11 реклама застройщика — баннер,
+ * AdBanner): обложка первого ЖК с пометкой «Реклама», заголовок и текст, «В продаже · Цена от · Платёж
+ * от» из каталога, чипы ЖК, «Показать N квартир» и «Хочу это условие» → заявка promo. Без событий
+ * ad_view / ad_click: у своей рекламы нет записи в ads.
  */
 export function AdCard({ view }: { view: AdView }) {
   const spotlight = useSpotlight();
   const t = useTranslations("showcase");
   const locale = useLocale() as Locale;
-  const card = useRef<HTMLElement>(null);
-  useAdView(card, view.house ? null : view.ad.id);
   const title = view.ad.title[locale];
   const text = view.ad.text?.[locale];
   return (
     // Подсветка за курсором (мокап .adb.spot): только full и только мышь — решает CSS .spotlight.
-    <article ref={card} className="ad-card spotlight" onPointerMove={spotlight} data-track-entity={view.house ? undefined : `ad:${view.ad.id}`} aria-label={t("ad.label", { title })}>
+    <article className="ad-card spotlight" onPointerMove={spotlight} aria-label={t("ad.label", { title })}>
       <div className="ad-card__media">
         {view.cover ? <SitePhoto photo={view.cover} alt="" frame="card" sizes={SIZES} className="ad-card__photo" /> : null}
         <span className="ad-card__tag">{t("ad.tag")}</span>
@@ -42,9 +39,9 @@ export function AdCard({ view }: { view: AdView }) {
         <h3 className="ad-card__title">{title}</h3>
         {text ? <p className="ad-card__text">{text}</p> : null}
         <AdFacts view={view} />
-        <AdChips complexes={view.complexes} tracked={!view.house} />
+        <AdChips complexes={view.complexes} />
         <div className="ad-card__buttons">
-          <Link href={view.href} className="button button--primary ad-card__show" data-track={view.house ? undefined : "ad_click"}>
+          <Link href={view.href} className="button button--primary ad-card__show">
             {view.count.flats > 0 ? t("ad.show", { n: view.count.flats }) : t("ad.showComplexes", { n: view.count.complexes })}
             <ArrowRight size={16} strokeWidth={2} aria-hidden />
           </Link>
@@ -81,8 +78,8 @@ function AdFacts({ view }: { view: AdView }) {
   );
 }
 
-/** Чипы «ЖК Shodlik · Фергана →» (мокап .adb__jks): ведут на страницу ЖК, считаются кликом по рекламе. */
-function AdChips({ complexes, tracked }: { complexes: readonly ShowcaseComplexRef[]; tracked: boolean }) {
+/** Чипы «ЖК Shodlik · Фергана →» (мокап .adb__jks): ведут на страницу ЖК. */
+function AdChips({ complexes }: { complexes: readonly ShowcaseComplexRef[] }) {
   const t = useTranslations("showcase");
   const locale = useLocale() as Locale;
   if (complexes.length === 0) return null;
@@ -91,7 +88,7 @@ function AdChips({ complexes, tracked }: { complexes: readonly ShowcaseComplexRe
     <ul className="ad-card__complexes">
       {shown.map((complex) => (
         <li key={complex.id}>
-          <Link href={complexRoute(complex.slug)} className="ad-card__chip" data-track={tracked ? "ad_click" : undefined}>
+          <Link href={complexRoute(complex.slug)} className="ad-card__chip">
             {[t("complex", { name: complex.name[locale] }), complex.location?.[locale]].filter(Boolean).join(" · ")}
             <ArrowRight size={12} strokeWidth={2} aria-hidden />
           </Link>

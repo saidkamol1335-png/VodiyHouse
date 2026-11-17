@@ -1,0 +1,75 @@
+"use client";
+
+import { Phone } from "lucide-react";
+import { getImageProps } from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { useRef } from "react";
+import { LeadButton } from "@/components/LeadDialog";
+import { formatPhone, phoneHref } from "@/lib/contacts";
+import type { Locale } from "@/lib/i18n/routing";
+import { mediaPublicUrl } from "@/lib/media";
+import type { CatalogPhoto } from "@/lib/site/catalog/records";
+import type { ShowcaseAd } from "@/lib/site/showcase/records";
+import { useAdView } from "@/lib/site/showcase/useAdView";
+
+type AdBannerProps = {
+  ad: ShowcaseAd;
+  /** Телефон Vodiy House (+998…); нет — у «телефонной» рекламы кнопка заявки. */
+  phone: string | null;
+  /** slide — слайдер на главной; slot — место в сетке каталога (вся строка). */
+  variant: "slide" | "slot";
+};
+
+/** Баннер на ПК не шире контейнера (1200 px), на телефоне — во всю ширину. */
+const SIZES = "(max-width: 1240px) 100vw, 1200px";
+const PHONE_MEDIA = "(max-width: 640px)";
+
+const srcOf = (photo: CatalogPhoto) => mediaPublicUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", photo.path);
+
+/**
+ * Реклама застройщика — баннер (правки 15.11, п. 4 + 13): картинка для ПК и для телефона (`<picture>`),
+ * метка «Reklama», под картинкой — застройщик и одна кнопка: телефон Vodiy House или «Ariza qoldirish»
+ * (заявка типа «Реклама»). Контактов застройщика нет (ТЗ 1.2): на файле их нет — руководитель отмечает
+ * это при загрузке. Показ — ad_view, кнопка — ad_click.
+ */
+export function AdBanner({ ad, phone, variant }: AdBannerProps) {
+  const t = useTranslations("showcase.banner");
+  const locale = useLocale() as Locale;
+  const root = useRef<HTMLElement>(null);
+  useAdView(root, ad.id);
+  const alt = ad.title[locale];
+  const mobile = ad.bannerMobile;
+  const {
+    props: { srcSet: desktopSet, ...image },
+  } = getImageProps({ src: srcOf(ad.banner), alt, width: ad.banner.width, height: ad.banner.height, sizes: SIZES });
+  const mobileSet = mobile
+    ? getImageProps({ src: srcOf(mobile), alt, width: mobile.width, height: mobile.height, sizes: "100vw" }).props.srcSet
+    : null;
+  const classes = ["ad-banner", `ad-banner--${variant}`, mobile ? "ad-banner--phone-art" : null].filter(Boolean).join(" ");
+  return (
+    <article ref={root} className={classes} data-track-entity={`ad:${ad.id}`} aria-label={t("label", { developer: ad.developer.name })}>
+      <div className="ad-banner__media">
+        <picture>
+          {mobileSet ? <source media={PHONE_MEDIA} srcSet={mobileSet} sizes="100vw" /> : null}
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- alt приходит в image из getImageProps */}
+          <img {...image} srcSet={desktopSet} className="ad-banner__image" loading="lazy" decoding="async" />
+        </picture>
+        <span className="ad-banner__tag">{t("tag")}</span>
+      </div>
+      <div className="ad-banner__bar">
+        <p className="ad-banner__developer">{ad.developer.name}</p>
+        <div className="ad-banner__cta" data-track="ad_click">
+          {ad.cta === "phone" && phone ? (
+            <a href={phoneHref(phone)} className="button button--primary ad-banner__call" data-track="ad_click">
+              <Phone size={16} strokeWidth={2} aria-hidden />
+              <span>{t("call")}</span>
+              <span className="ad-banner__number">{formatPhone(phone)}</span>
+            </a>
+          ) : (
+            <LeadButton intent={{ type: "ad", object: { developer: ad.developer.slug }, context: ad.developer.name }} />
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}

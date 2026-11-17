@@ -1,0 +1,100 @@
+/* Слайдер баннеров на главной (правки 15.11, п. 4 + 13): баннер во всю ширину контейнера, нативная
+   горизонтальная прокрутка со scroll-snap; под ней точки слева и стрелки справа — как у ленты «Проекты». */
+.ad-slider__viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.ad-slider__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.ad-slider__track {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-slider__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.ad-slider__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.ad-slider__dots {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.ad-slider__dot {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.ad-slider__dot::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 3px);
+  left: calc(50% - 9px);
+  width: 18px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--fg);
+  opacity: 0.22;
+  transform: scaleX(0.34);
+}
+
+.ad-slider__dot--on::before {
+  opacity: 1;
+  transform: none;
+}
+
+.ad-slider__arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.ad-slider__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: 1px solid var(--control-border);
+  border-radius: 50%;
+  background: var(--control-bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.ad-slider__arrow:hover {
+  border-color: var(--amber-line);
+}
+
+.ad-slider__dot:focus-visible,
+.ad-slider__arrow:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+:root:is([data-motion="full"], [data-motion="lite"]) .ad-slider__dot::before {
+  transition:
+    transform 0.35s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
+    opacity 0.35s ease-out;
+}

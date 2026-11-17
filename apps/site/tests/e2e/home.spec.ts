@@ -91,23 +91,18 @@ test.describe("главная, избранное, подборка", () => {
     expect(errors).toEqual([]);
   });
 
-  test("реклама и спецпредложения: карточка рекламы с цифрами и «Показать N квартир», карточки условий, заявка, показ рекламы", async ({ page }) => {
+  test("реклама и спецпредложения: без баннеров — своя реклама Vodiy House с цифрами, карточки условий, заявка", async ({ page }) => {
     const errors = collectPageErrors(page);
-    // Без sendBeacon очередь событий уходит fetch-ом — его тело видно тесту (у beacon тела нет).
-    await page.addInitScript(() => Object.defineProperty(navigator, "sendBeacon", { value: undefined }));
     await page.goto("/ru");
-    // Показ рекламы: карточка в кадре → ad_view один раз, уходит пачкой через 4 с. Ждём с самого
-    // начала: снимок всей страницы ниже показывает карточку раньше явной прокрутки к ней.
-    const sent = page.waitForRequest((request) => request.url().endsWith("/api/e") && request.method() === "POST" && (request.postData() ?? "").includes("ad_view"));
+    // Правки 15.11, п. 4 + 13: реклама застройщика — баннер; у DEMO-рекламы картинки нет, поэтому здесь —
+    // своя реклама Vodiy House из каталога (баннер проверяет кабинетная ad-banner.spec.ts).
     const section = page.locator("#reklama");
     const ad = section.locator(".ad-card");
+    await expect(section.locator(".ad-banner")).toHaveCount(0);
     await expect(ad).toContainText("Реклама");
-    await expect(ad).toContainText("Farg‘ona Sifat Qurilish");
-    await expect(ad.getByRole("heading", { name: "Готовые 2-комнатные квартиры в рассрочку" })).toBeVisible();
-    await expect(ad).toContainText(/В продаже\s*\d+ квартир/);
-    // Реклама «по фильтру» ограничена ЖК своего застройщика (реши сам 3.16б).
-    await expect(ad.getByRole("link", { name: /Показать \d+ квартир/ })).toHaveAttribute("href", "/ru/novostroyki?komnat=2&srok=built&zastr=demo-sifat");
-    await expect(ad.getByRole("link", { name: /ЖК Shodlik/ })).toHaveAttribute("href", "/ru/novostroyki/demo-shodlik");
+    await expect(ad.getByRole("heading", { level: 3 })).toBeVisible();
+    await expect(ad).toContainText(/В продаже\s*\d+ (квартир|ЖК)/);
+    await expect(ad.getByRole("link", { name: /Показать \d+ (квартир|ЖК)/ })).toHaveAttribute("href", /^\/ru\/novostroyki/);
     await expect(section.getByRole("link", { name: "Разместить рекламу" })).toHaveAttribute("href", "/ru/dlya-zastroyshchikov");
     // Спецпредложения с 06.11.2026 — на карточках ленты «Проекты» (ТЗ 5.6): ЖК с предложением — первыми.
     const gallery = page.locator("#spetspredlozheniya");
@@ -128,16 +123,15 @@ test.describe("главная, избранное, подборка", () => {
     await expect(first.locator(".jk-gallery__offer--special")).toHaveCount(1);
     await expect(first.getByRole("link")).toHaveAccessibleName(/ЖК .+ — .+ — до \d{2}\.\d{2}\.\d{4}/);
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
-    // «Хочу это условие» у рекламы → заявка «Спецпредложение» с названием условия.
+    // «Хочу это условие» у своей рекламы → заявка «Спецпредложение» с её заголовком.
+    const heading = (await ad.getByRole("heading", { level: 3 }).textContent()) ?? "";
     await ad.getByRole("button", { name: "Хочу это условие" }).click();
     const dialog = page.getByRole("dialog", { name: "Спецпредложение" });
-    await expect(dialog).toContainText("Готовые 2-комнатные квартиры в рассрочку");
+    await expect(dialog).toContainText(heading.trim());
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await section.scrollIntoViewIfNeeded();
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s316-offers.png`, fullPage: true, caret: "initial" });
-    await ad.scrollIntoViewIfNeeded();
-    await sent;
     expect(errors).toEqual([]);
   });
 

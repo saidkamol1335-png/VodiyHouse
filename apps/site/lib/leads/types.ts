@@ -1,7 +1,7 @@
 // Заявки (шаг 3.7, ТЗ 10.1): типы, поля по типу и что форма отправляет серверу. Без импортов SDK —
 // модуль подключают и формы сайта, и сервер, и кабинет.
 
-/** Типы заявки — enum lead_type базы (миграция 20261026090000_leads.sql). */
+/** Типы заявки — enum lead_type базы (20261026090000_leads.sql; ad — 20261117130000_ad_banner_kinds.sql). */
 export const LEAD_TYPES = [
   "callback",
   "view",
@@ -15,6 +15,8 @@ export const LEAD_TYPES = [
   "consult",
   "quiz",
   "promo",
+  /** «Ariza qoldirish» с баннера рекламы застройщика (правки 15.11, п. 4 + 13): застройщик — в предмете. */
+  "ad",
 ] as const;
 
 export type LeadType = (typeof LEAD_TYPES)[number];

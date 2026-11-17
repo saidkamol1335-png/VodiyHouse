@@ -19,7 +19,7 @@ import { refuseUpload, UploadRefused } from "../storageUpload";
 // браузер кладёт файл в бакет сессией руководителя, сервер привязывает его к владельцу; без облака
 // (служебный стенд) превью живёт только в браузере.
 
-export type OwnedMediaKind = "logo" | "cover";
+export type OwnedMediaKind = "logo" | "cover" | "banner" | "banner_mobile";
 
 export type OwnedMediaActionResult = { status: "done" } | { status: "error"; error: ContentErrorCode };
 type OwnedMediaAction = (formData: FormData) => Promise<OwnedMediaActionResult>;

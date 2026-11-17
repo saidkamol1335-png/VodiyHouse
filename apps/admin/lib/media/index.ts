@@ -23,8 +23,9 @@ export {
 } from "./path";
 export type { ProcessResult, ProcessedImage } from "./process";
 export { processImage } from "./process";
-export type { ImageSize, MediaIssue, MediaKind } from "./rules";
+export type { BannerKind, ImageSize, MediaIssue, MediaKind } from "./rules";
 export {
+  BANNER_RATIOS,
   MEDIA_KINDS,
   MEDIA_KIND_RULES,
   MEDIA_LIMITS,
@@ -32,5 +33,6 @@ export {
   checkResolution,
   checkSourceFile,
   checkStoredSize,
+  fitsBanner,
   longSideOf,
 } from "./rules";

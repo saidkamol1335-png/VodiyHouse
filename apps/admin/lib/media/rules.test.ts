@@ -6,6 +6,7 @@ import {
   checkResolution,
   checkSourceFile,
   checkStoredSize,
+  fitsBanner,
 } from "./rules";
 
 const MB = 1024 * 1024;
@@ -42,11 +43,20 @@ describe("правила фото · разрешение (PLAN 3а)", () => {
     }
   });
 
-  it("пороги по длинной стороне: галерея 1600, обложка и фасад 2400, чертёж и план этажа 1200, логотип 400", () => {
+  it("пороги по длинной стороне: галерея 1600, обложка, фасад и баннер 2400, чертёж и план этажа 1200, логотип 400, баннер для телефона 1350", () => {
     const minimums = Object.fromEntries(
       MEDIA_KINDS.map((kind) => [kind, MEDIA_KIND_RULES[kind].minLongSide]),
     );
-    expect(minimums).toEqual({ photo: 1600, cover: 2400, facade: 2400, drawing: 1200, logo: 400, floor_plan: 1200 });
+    expect(minimums).toEqual({ photo: 1600, cover: 2400, facade: 2400, drawing: 1200, logo: 400, floor_plan: 1200, banner: 2400, banner_mobile: 1350 });
+  });
+
+  it("баннер — пропорция кадра сайта ±6 %: 3:1 для ПК, 4:5 для телефона", () => {
+    expect(fitsBanner("banner", { width: 2400, height: 800 })).toBe(true);
+    expect(fitsBanner("banner", { width: 3000, height: 1050 })).toBe(true);
+    expect(fitsBanner("banner", { width: 2400, height: 1350 })).toBe(false);
+    expect(fitsBanner("banner_mobile", { width: 1080, height: 1350 })).toBe(true);
+    expect(fitsBanner("banner_mobile", { width: 1350, height: 1080 })).toBe(false);
+    expect(fitsBanner("banner", { width: 0, height: 0 })).toBe(false);
   });
 
   it("вертикальное фото считается по длинной стороне", () => {

@@ -1,0 +1,112 @@
+/* Баннер рекламы застройщика (правки 15.11, п. 4 + 13): картинка в кадре 3:1 (на телефоне — 4:5, если
+   есть картинка для телефона), метка «Reklama» в углу, под картинкой — застройщик и кнопка. Кадр
+   совпадает с пропорцией, которую требует кабинет, — картинка не обрезается. Янтарная рамка — как у
+   своей рекламы (AdCard). */
+.ad-banner {
+  overflow: hidden;
+  border: 1px solid var(--amber-line);
+  border-radius: var(--r-2xl);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.ad-banner__media {
+  position: relative;
+  aspect-ratio: 3 / 1;
+  overflow: hidden;
+  background: var(--bg-4);
+}
+
+.ad-banner__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-banner__tag {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--over-photo-line);
+  border-radius: var(--r-pill);
+  background: var(--over-photo-chip-strong);
+  color: var(--over-photo-fg);
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+}
+
+.ad-banner__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+}
+
+.ad-banner__developer {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fg-2);
+  font-size: var(--fs-small-l);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-banner__cta {
+  flex: none;
+}
+
+.ad-banner__call {
+  gap: 8px;
+}
+
+.ad-banner__number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Слот каталога — вся строка сетки (CatalogGrid). */
+.ad-banner--slot {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .ad-banner--phone-art .ad-banner__media {
+    aspect-ratio: 4 / 5;
+  }
+
+  .ad-banner__bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px 14px;
+  }
+
+  .ad-banner__cta > * {
+    width: 100%;
+  }
+
+  /* На телефоне кнопка — «Позвонить», номер не помещается рядом. */
+  .ad-banner__number {
+    display: none;
+  }
+}
+
+/* Наведение (full и lite): картинка чуть ближе — только transform. */
+@media (hover: hover) {
+  :root:is([data-motion="full"], [data-motion="lite"]) .ad-banner__image {
+    transition: transform 0.7s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  :root[data-motion="full"] .ad-banner:hover .ad-banner__image {
+    transform: scale(1.02);
+  }
+}

@@ -6,10 +6,16 @@ import { getMotionTier, useMotion } from "@/lib/motion";
 /** Карточка в кадре столько, потом лента сама листает дальше (только full). */
 export const AUTOPLAY_MS = 5_000;
 
-type SliderRefs = { section: RefObject<HTMLElement | null>; viewport: RefObject<HTMLElement | null>; total: number };
+type SliderRefs = {
+  section: RefObject<HTMLElement | null>;
+  viewport: RefObject<HTMLElement | null>;
+  total: number;
+  /** Слайды в ленте: «.jk-gallery__card», «.ad-slider__slide». */
+  item: string;
+};
 
-function cardsOf(viewport: HTMLElement): HTMLElement[] {
-  return [...viewport.querySelectorAll<HTMLElement>(".jk-gallery__card")];
+function cardsOf(viewport: HTMLElement, item: string): HTMLElement[] {
+  return [...viewport.querySelectorAll<HTMLElement>(item)];
 }
 
 /** Сдвиг прокрутки, при котором карточка встаёт к левому краю (у первой — поле контейнера). */
@@ -20,16 +26,16 @@ const offsetOf = (cards: HTMLElement[], index: number) => (cards[index]?.offsetL
  * карточки на широком экране целиком видны в конце — у них одна общая остановка (иначе точка, которая
  * никогда не станет текущей).
  */
-function stopsOf(viewport: HTMLElement): number {
-  const cards = cardsOf(viewport);
+function stopsOf(viewport: HTMLElement, item: string): number {
+  const cards = cardsOf(viewport, item);
   const end = viewport.scrollWidth - viewport.clientWidth;
   const reachable = cards.filter((_, index) => offsetOf(cards, index) < end - 4).length;
   return Math.max(1, Math.min(cards.length, reachable + 1));
 }
 
 /** Текущая остановка — ближайшая к прокрутке; в самом конце — последняя. */
-function currentOf(viewport: HTMLElement, stops: number): number {
-  const cards = cardsOf(viewport);
+function currentOf(viewport: HTMLElement, stops: number, item: string): number {
+  const cards = cardsOf(viewport, item);
   const end = viewport.scrollWidth - viewport.clientWidth;
   if (viewport.scrollLeft >= end - 4) return stops - 1;
   let best = 0;
@@ -40,14 +46,14 @@ function currentOf(viewport: HTMLElement, stops: number): number {
 }
 
 /** Прокрутка к остановке: последняя — конец ленты; плавно только в full. */
-function scrollToStop(viewport: HTMLElement, index: number, stops: number) {
-  const cards = cardsOf(viewport);
+function scrollToStop(viewport: HTMLElement, index: number, stops: number, item: string) {
+  const cards = cardsOf(viewport, item);
   const left = index >= stops - 1 ? viewport.scrollWidth : offsetOf(cards, index);
   viewport.scrollTo({ left, behavior: getMotionTier() === "full" ? "smooth" : "auto" });
 }
 
 /** Остановки и текущая — по прокрутке и размеру ленты (свайп, стрелки, автопрокрутка, поворот экрана). */
-function useStops(viewport: RefObject<HTMLElement | null>, total: number) {
+function useStops(viewport: RefObject<HTMLElement | null>, total: number, item: string) {
   const [stops, setStops] = useState(total);
   const [current, setCurrent] = useState(0);
   useEffect(() => {
@@ -57,9 +63,9 @@ function useStops(viewport: RefObject<HTMLElement | null>, total: number) {
     const measure = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const count = stopsOf(node);
+        const count = stopsOf(node, item);
         setStops(count);
-        setCurrent(currentOf(node, count));
+        setCurrent(currentOf(node, count, item));
       });
     };
     measure();
@@ -71,7 +77,7 @@ function useStops(viewport: RefObject<HTMLElement | null>, total: number) {
       sizes.disconnect();
       node.removeEventListener("scroll", measure);
     };
-  }, [viewport]);
+  }, [viewport, item]);
   return { stops, current };
 }
 
@@ -89,14 +95,14 @@ function useInView(section: RefObject<HTMLElement | null>) {
 }
 
 /**
- * Слайдер ленты «Проекты Vodiy House» (правки 15.11, п. 5): остановки, текущая и переход. Автопрокрутка —
+ * Слайдер ленты (правки 15.11: «Проекты Vodiy House», п. 5; баннеры рекламы, п. 4 + 13): остановки, текущая и переход. Автопрокрутка —
  * только в full; пауза, пока мышь или фокус в секции (лента, стрелки, точки), вкладка скрыта или лента не
  * в кадре. Любое своё листание (стрелка, точка, касание, свайп) выключает автопрокрутку насовсем — так её
  * можно остановить и с клавиатуры, и диктором (WCAG 2.2.2). После последней остановки — снова первая.
  */
-export function useGallerySlider({ section, viewport, total }: SliderRefs) {
+export function useSlider({ section, viewport, total, item }: SliderRefs) {
   const tier = useMotion();
-  const { stops, current } = useStops(viewport, total);
+  const { stops, current } = useStops(viewport, total, item);
   const inView = useInView(section);
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -109,9 +115,9 @@ export function useGallerySlider({ section, viewport, total }: SliderRefs) {
     (index: number) => {
       const node = viewport.current;
       const count = position.current.stops;
-      if (node) scrollToStop(node, ((index % count) + count) % count, count);
+      if (node) scrollToStop(node, ((index % count) + count) % count, count, item);
     },
-    [viewport],
+    [viewport, item],
   );
   const paused = tier !== "full" || stopped || !inView || hover || focus;
   useEffect(() => {

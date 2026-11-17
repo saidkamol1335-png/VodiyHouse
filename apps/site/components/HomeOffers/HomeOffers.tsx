@@ -2,6 +2,7 @@ import { Megaphone } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { AdCard } from "@/components/AdCard";
+import { AdSlider } from "@/components/AdSlider";
 import { Container } from "@/components/Container";
 import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
@@ -10,9 +11,9 @@ import { pickMessages, SHOWCASE_MESSAGES } from "@/lib/i18n/clientMessages";
 import { Link } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/routes";
 import type { SiteCatalog } from "@/lib/site/catalog/records";
-import { NO_FILTER } from "@/lib/site/catalog/filter";
+import { readSiteContacts } from "@/lib/site/contacts";
 import { readHouseAdSettings } from "@/lib/site/houseAd";
-import { adView, houseAd, type AdView } from "@/lib/site/showcase/model";
+import { houseAd, type AdView } from "@/lib/site/showcase/model";
 import type { SiteShowcase } from "@/lib/site/showcase/records";
 
 type HomeOffersProps = {
@@ -23,21 +24,24 @@ type HomeOffersProps = {
 };
 
 /**
- * «Предложения от застройщиков» (3.16б, мокап .sec--spec; ТЗ 5.4 «Рекламный баннер»): одна карточка
- * рекламы по порядку руководителя (Г1 A); пока застройщик не купил место — своя реклама Vodiy House из
- * каталога (мокап vmAd), если её не выключили в «Витрина → Реклама». Справа — «Разместить рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 —
- * в ленте «Проекты» (JkGallery), здесь их нет. Нет каталога для карточки — раздела нет.
+ * «Предложения от застройщиков» (3.16б, мокап .sec--spec; ТЗ 5.4 «Рекламный баннер»): с правок 15.11
+ * (п. 4 + 13) — слайдер баннеров застройщиков по порядку руководителя; пока баннеров нет — своя реклама
+ * Vodiy House из каталога (мокап vmAd), если её не выключили в «Витрина → Реклама». Справа — «Разместить
+ * рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 — в ленте «Проекты» (JkGallery). Показать
+ * нечего — раздела нет.
  */
 export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
-  const [t, house, messages, houseSettings] = await Promise.all([
+  const [t, house, messages, houseSettings, contacts] = await Promise.all([
     getTranslations("showcase.offers"),
     getTranslations("showcase.house"),
     getMessages(),
     readHouseAdSettings(),
+    readSiteContacts(),
   ]);
-  // Своя реклама — только если руководитель её не выключил («Витрина → Реклама», 06.11.2026).
-  const ad = adView(catalog, showcase) ?? (houseSettings.enabled ? houseAdView(catalog, house) : null);
-  if (!ad) return null;
+  const banners = showcase.ads;
+  // Своя реклама — только без баннеров и если руководитель её не выключил («Витрина → Реклама», 06.11.2026).
+  const ad = banners.length === 0 && houseSettings.enabled ? houseAdView(catalog, house) : null;
+  if (banners.length === 0 && !ad) return null;
   return (
     <section id={id} className="home-offers" aria-labelledby={`${id}-title`}>
       <Container>
@@ -57,9 +61,7 @@ export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
           </Link>
         </Reveal>
         <NextIntlClientProvider messages={pickMessages(messages, SHOWCASE_MESSAGES)}>
-          <Reveal>
-            <AdCard view={ad} />
-          </Reveal>
+          <Reveal>{ad ? <AdCard view={ad} /> : <AdSlider ads={banners} phone={contacts.phone} />}</Reveal>
         </NextIntlClientProvider>
       </Container>
     </section>
@@ -83,10 +85,6 @@ function houseAdView(catalog: SiteCatalog, t: HouseText): AdView | null {
       title: same(title),
       text: same(text),
       developer: { id: "", slug: house.developer?.slug ?? "", name: house.developer?.name ?? t("developers") },
-      complexIds: [],
-      filter: NO_FILTER,
-      validTo: "",
-      cover: null,
     },
   };
 }

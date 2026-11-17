@@ -52,13 +52,14 @@ type Row = {
   is_active: boolean;
   sort: number;
   created_at: string;
+  cta?: string;
   developers?: { name: string } | null;
 };
 
 const COLUMNS = {
   special: "id, developer_id, kind, badge, title, text, complex_ids, valid_from, valid_to, is_active, sort, created_at, developers(name)",
   collection: "id, slug, title, mode, complex_ids, filter, is_active, sort, created_at",
-  ad: "id, developer_id, title, text, complex_ids, filter, valid_from, valid_to, is_active, sort, created_at, developers(name)",
+  ad: "id, developer_id, title, cta, complex_ids, valid_from, valid_to, is_active, sort, created_at, developers(name)",
 } as const;
 
 async function readRows(supabase: SupabaseClient, kind: ShowcaseKind, id?: string): Promise<Row[]> {
@@ -70,6 +71,11 @@ async function readRows(supabase: SupabaseClient, kind: ShowcaseKind, id?: strin
   return (data ?? []) as unknown as Row[];
 }
 
+export type ShowcaseMediaKind = "cover" | "banner" | "banner_mobile";
+
+/** Картинка строки списка: обложка; у рекламы — баннер для ПК (правки 15.11). */
+const LIST_MEDIA: Record<ShowcaseKind, ShowcaseMediaKind> = { special: "cover", collection: "cover", ad: "banner" };
+
 /** Пути обложек по владельцу: один запрос на вкладку. */
 async function readCovers(supabase: SupabaseClient, kind: ShowcaseKind, ids: string[]): Promise<Map<string, string>> {
   if (ids.length === 0) return new Map();
@@ -77,14 +83,11 @@ async function readCovers(supabase: SupabaseClient, kind: ShowcaseKind, ids: str
   const { data, error } = await supabase
     .from("media_assets")
     .select(`${column}, path`)
-    .eq("kind", "cover")
+    .eq("kind", LIST_MEDIA[kind])
     .in(column, ids);
   if (error) unavailable("showcase-covers", error);
   return new Map(((data ?? []) as unknown as Record<string, string>[]).map((row) => [row[column]!, row.path!]));
 }
-
-const hasFilter = (filter: unknown): boolean =>
-  typeof filter === "object" && filter !== null && !Array.isArray(filter) && Object.keys(filter).length > 0;
 
 function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): ShowcaseListRow {
   const complexCount = row.complex_ids?.length ?? 0;
@@ -94,8 +97,8 @@ function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): Showca
     title: bilingualFrom(row.title).ru,
     developerName: row.developers?.name ?? null,
     complexCount,
-    // Подборка вручную или реклама «по ЖК», у которых ЖК удалили (массив опустел), — не «по фильтру».
-    byFilter: kind === "collection" ? row.mode === "filter" : kind === "ad" ? hasFilter(row.filter) : false,
+    // Реклама с правок 15.11 — баннер, без ЖК и фильтра.
+    byFilter: kind === "collection" ? row.mode === "filter" : false,
     validFrom: row.valid_from ?? null,
     validTo: row.valid_to ?? null,
     isActive: row.is_active,
@@ -155,9 +158,7 @@ export async function readAd(supabase: SupabaseClient, id: string): Promise<AdRe
     id: row.id,
     developerId: row.developer_id ?? "",
     title: bilingualFrom(row.title),
-    text: row.text ? bilingualFrom(row.text) : null,
-    complexIds: row.complex_ids ?? [],
-    filter: filterSearchFrom(row.filter),
+    cta: row.cta === "phone" ? "phone" : "lead",
     validFrom: row.valid_from ?? "",
     validTo: row.valid_to ?? "",
     isActive: row.is_active,
@@ -203,11 +204,17 @@ export async function readShowcaseOptions(supabase: SupabaseClient): Promise<Sho
 type CoverRow = { path: string; width: number; height: number; focus_x: number; focus_y: number };
 
 /** Обложка записи для MediaDrop; null — нет. */
-export async function readShowcaseCover(supabase: SupabaseClient, kind: ShowcaseKind, id: string): Promise<MediaPreview | null> {
+/** Обложка записи витрины или баннер рекламы (media — вид файла). */
+export async function readShowcaseCover(
+  supabase: SupabaseClient,
+  kind: ShowcaseKind,
+  id: string,
+  media: ShowcaseMediaKind = "cover",
+): Promise<MediaPreview | null> {
   const { data, error } = await supabase
     .from("media_assets")
     .select("path, width, height, focus_x, focus_y")
-    .eq("kind", "cover")
+    .eq("kind", media)
     .eq(OWNER_COLUMN[kind], id)
     .maybeSingle();
   if (error) unavailable("showcase-cover", error);

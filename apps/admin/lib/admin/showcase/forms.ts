@@ -40,7 +40,9 @@ export type ShowcaseIssue =
   | "noComplexes"
   | "noFilter"
   | "kindInvalid"
-  | "notWholeNumber";
+  | "notWholeNumber"
+  /** Реклама «На сайте» без картинки для ПК (правки 15.11, п. 4 + 13). */
+  | "noBanner";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DAY_MS = 24 * 60 * 60 * 1000;

@@ -14,7 +14,7 @@ type Showcase = {
   today: string;
   collections: { slug: string; mode: string; complex_ids: string[]; filter: Record<string, string>; cover: unknown }[];
   specials: { id: string; kind: string; title: Text; developer: { slug: string }; complex_ids: string[]; valid_to: string; cover: unknown }[];
-  ads: { id: string; title: Text; developer: { slug: string }; complex_ids: string[]; filter: Record<string, string> }[];
+  ads: { id: string; title: Text; cta: string; developer: { slug: string }; banner: { path: string }; banner_mobile: { path: string } | null }[];
 };
 type Reminder = { kind: string; id: string; title: Text; developer: string; valid_to: string };
 
@@ -33,7 +33,7 @@ describe.skipIf(isRemoteTarget)("витрина на сайте: site_showcase()
   });
   afterAll(() => db.close());
 
-  it("посетитель видит действующее по порядку руководителя: 3 спецпредложения, 1 реклама, 5 подборок", async () => {
+  it("посетитель видит действующее по порядку руководителя: 3 спецпредложения, 5 подборок; реклама — только с баннером", async () => {
     const data = await showcase();
     expect(data.today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(data.specials.map((special) => special.title.ru)).toEqual([
@@ -43,8 +43,18 @@ describe.skipIf(isRemoteTarget)("витрина на сайте: site_showcase()
     ]);
     expect(data.specials[0]).toMatchObject({ kind: "gift", developer: { slug: "demo-sifat" }, cover: null });
     expect(data.specials[0]!.complex_ids).toEqual([await complexId("demo-shodlik")]);
-    expect(data.ads.map((ad) => ad.title.ru)).toEqual(["Готовые 2-комнатные квартиры в рассрочку"]);
-    expect(data.ads[0]).toMatchObject({ complex_ids: [], filter: { komnat: "2", srok: "built" } });
+    // Правки 15.11, п. 4 + 13: реклама — баннер; у DEMO-рекламы картинки нет — на сайт она не выходит.
+    expect(data.ads).toEqual([]);
+    const ad = (await db.admin.query<{ id: string }>("select id from ads where title ->> 'ru' like 'Готовые 2-комнатные%'")).rows[0]!.id;
+    const banner = `ads/${ad}/${crypto.randomUUID()}.jpg`;
+    await db.admin.query(
+      "insert into media_assets (ad_id, kind, path, width, height) values ($1, 'banner', $2, 2400, 800)",
+      [ad, banner],
+    );
+    const shown = (await showcase()).ads;
+    expect(shown.map((item) => item.title.ru)).toEqual(["Готовые 2-комнатные квартиры в рассрочку"]);
+    expect(shown[0]).toMatchObject({ cta: "lead", developer: { slug: "demo-sifat" }, banner: { path: banner }, banner_mobile: null });
+    await db.admin.query("delete from media_assets where path = $1", [banner]);
     expect(data.collections.map((collection) => collection.slug)).toEqual([
       "demo-sdannye-doma",
       "demo-rassrochka-cherez-bank",

@@ -8,7 +8,7 @@ import { COLLECTION_PARAM } from "@/lib/site/catalog/pending";
 import type { CatalogComplex, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
 import { filterCatalog, withoutSoon } from "@/lib/site/catalog/sort";
 import { projectComplexes } from "@/lib/site/home/projects";
-import type { ShowcaseAd, ShowcaseCollection, ShowcaseSpecial, SiteShowcase } from "./records";
+import type { ShowcaseCollection, ShowcaseSpecial, SiteShowcase } from "./records";
 
 // Витрина на сайте (3.16б): всё считается из одного ответа каталога — страница статичная. Подборка
 // вручную — список ЖК, по фильтру — фильтр каталога; у рекламы и спецпредложения цифры «в продаже»,
@@ -137,44 +137,23 @@ export function visibleSpecials(catalog: SiteCatalog, showcase: SiteShowcase): S
   });
 }
 
+/**
+ * Карточка рекламы из данных (AdCard) — с правок 15.11 только своя реклама Vodiy House: реклама
+ * застройщика — баннер (AdSlider). Тексты карточки — на языке страницы.
+ */
 export type AdView = {
-  ad: ShowcaseAd;
+  ad: { id: string; title: LocalizedText; text: LocalizedText | null; developer: { id: string; slug: string; name: string } };
   cover: CatalogPhoto | null;
   complexes: ShowcaseComplexRef[];
   count: ShowcaseCount;
   price: CardPrice | null;
   /** «Платёж от» — наименьший среди ЖК (в валюте цены «от» того же ЖК). */
   payment: CardPrice | null;
-  /** Куда ведёт «Показать N квартир»: страница ЖК, подборка из нескольких или каталог с фильтром. */
+  /** Куда ведёт «Показать N квартир»: каталог с фильтром своей рекламы. */
   href: string;
-  /** Своя реклама Vodiy House (houseAd): без событий ad_view / ad_click — у неё нет записи в ads. */
-  house?: true;
+  /** Своя реклама Vodiy House: без событий ad_view / ad_click — у неё нет записи в ads. */
+  house: true;
 };
-
-/** Фильтр рекламы «по фильтру» — только ЖК своего застройщика: платная карточка не показывает чужие. */
-export function adFilter(ad: ShowcaseAd): CatalogFilter {
-  return { ...ad.filter, developers: [ad.developer.slug] };
-}
-
-function adViewOf(catalog: SiteCatalog, ad: ShowcaseAd): AdView | null {
-  const byComplexes = ad.complexIds.length > 0;
-  const complexes = byComplexes ? byIds(catalog, ad.complexIds) : withoutSoon(filterCatalog(catalog, adFilter(ad)));
-  if (complexes.length === 0) return null;
-  const filter = byComplexes ? NO_FILTER : adFilter(ad);
-  const payments = complexes.flatMap((complex) => {
-    const price = cardPrice(complex, catalog);
-    return price?.payment ? [{ ...price, amount: price.payment }] : [];
-  });
-  return {
-    ad,
-    cover: coverOf(ad.cover, complexes),
-    complexes: complexes.map(refOf),
-    count: { complexes: complexes.length, ...countFlats(complexes, catalog, filter) },
-    price: priceFromOf(catalog, complexes),
-    payment: cheapest(payments, catalog.rate),
-    href: byComplexes ? complexesHref(complexes) : `${ROUTES.catalog}${searchFromFilter(filter)}`,
-  };
-}
 
 /**
  * Своя реклама Vodiy House (мокап vmAd, ТЗ 5.4 «промо застройщика или акция Vodiy House»): место
@@ -183,7 +162,7 @@ function adViewOf(catalog: SiteCatalog, ad: ShowcaseAd): AdView | null {
  */
 export type HouseAd = {
   kind: "built2" | "inst2" | "all";
-  view: Omit<AdView, "ad">;
+  view: Omit<AdView, "ad" | "house">;
   /** Наибольший срок рассрочки среди ЖК, мес.; null — рассрочки нет. */
   months: number | null;
   /** Один застройщик — его имя и slug; несколько — null («Застройщики-партнёры»). */
@@ -226,15 +205,6 @@ export function houseAd(catalog: SiteCatalog): HouseAd | null {
         href: `${ROUTES.catalog}${searchFromFilter(filter)}`,
       },
     };
-  }
-  return null;
-}
-
-/** Первая действующая реклама по порядку руководителя (Г1 A) с цифрами; null — показывать нечего. */
-export function adView(catalog: SiteCatalog, showcase: SiteShowcase): AdView | null {
-  for (const ad of showcase.ads) {
-    const view = adViewOf(catalog, ad);
-    if (view) return view;
   }
   return null;
 }

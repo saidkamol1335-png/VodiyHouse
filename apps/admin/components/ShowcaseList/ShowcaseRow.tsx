@@ -63,11 +63,15 @@ function ShowcaseMark({ row }: { row: ShowcaseListItem }) {
   );
 }
 
-/** «Застройщик · 2 ЖК · 01.11.2026 – 30.11.2026»; у подборки по фильтру — «по фильтру». */
+/**
+ * «Застройщик · 2 ЖК · 01.11.2026 – 30.11.2026»; у подборки по фильтру — «по фильтру»; у рекламы
+ * (баннер, правки 15.11) вместо ЖК — пометка, если нет картинки для ПК.
+ */
 function metaLine(row: ShowcaseListItem, t: Translate): string {
   const parts: string[] = [];
   if (row.developerName) parts.push(row.developerName);
-  parts.push(row.byFilter ? t("byFilter") : t("complexes", { count: row.complexCount }));
+  if (row.kind !== "ad") parts.push(row.byFilter ? t("byFilter") : t("complexes", { count: row.complexCount }));
+  else if (!row.coverPath) parts.push(t("noBanner"));
   if (row.validFrom && row.validTo) {
     parts.push(t("period", { from: dayLabel(row.validFrom), to: dayLabel(row.validTo) }));
   }

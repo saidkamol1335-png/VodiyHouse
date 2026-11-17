@@ -13,6 +13,7 @@ import { readSiteCatalog } from "@/lib/site/catalog/read";
 import { readArchivedFilterIds } from "@/lib/site/filterArchive";
 import { pageMetadata } from "@/lib/site/metadata";
 import { cardBadges, visibleCollections } from "@/lib/site/showcase/model";
+import { readSiteContacts } from "@/lib/site/contacts";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
 
 /** Карточек на порцию: 4 ряда по 3 на десктопе (на главной — 6, Ф3). */
@@ -33,10 +34,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * /novostroyki (Ф3): каталог без обложки, страница статичная — карточки в первом HTML (LCP).
  * Фильтр и подборка витрины (?podborka=, 3.16б) из адреса применяет браузер сразу после загрузки
  * (CatalogResults); чтение searchParams на сервере делало выдачу потоковой — список рисовался
- * дважды, и LCP ждал второй (замер 3.4). Ряда подборок, рекламы и спецпредложений здесь нет (Ф3).
+ * дважды, и LCP ждал второй (замер 3.4). Ряда подборок и спецпредложений здесь нет (Ф3); баннер рекламы —
+ * слот после каждой 6-й карточки (правки 15.11, п. 4 + 13).
  */
 export default async function CatalogPage() {
-  const [t, catalog, messages, showcase, archived] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages(), readSiteShowcase(), readArchivedFilterIds()]);
+  const [t, catalog, messages, showcase, archived, contacts] = await Promise.all([getTranslations("catalog.page"), readSiteCatalog(), getMessages(), readSiteShowcase(), readArchivedFilterIds(), readSiteContacts()]);
   return (
     <>
       <SiteHeader />
@@ -48,7 +50,7 @@ export default async function CatalogPage() {
           </Heading>
           {catalog ? (
             <NextIntlClientProvider messages={pickMessages(messages, CATALOG_MESSAGES)}>
-              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} collections={visibleCollections(catalog, showcase)} badges={cardBadges(showcase)} archived={archived} />
+              <CatalogResults catalog={catalog} pageSize={PAGE_SIZE} collections={visibleCollections(catalog, showcase)} badges={cardBadges(showcase)} archived={archived} ads={showcase.ads} phone={contacts.phone} />
             </NextIntlClientProvider>
           ) : (
             <p className="text-muted-foreground">{t("unavailable")}</p>

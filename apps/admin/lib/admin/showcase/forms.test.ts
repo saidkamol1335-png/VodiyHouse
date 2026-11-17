@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adFieldsOf, parseAd } from "./adForm";
+import { adFieldsOf, adRow, parseAd } from "./adForm";
 import { collectionFieldsOf, parseCollection } from "./collectionForm";
 import { defaultPeriod, periodIssues, readComplexIds, readSort } from "./forms";
 import { filterShowcaseRows, showcaseCounts } from "./list";
@@ -114,35 +114,33 @@ describe("форма подборки", () => {
   });
 });
 
-describe("форма рекламы", () => {
-  it("цель — ЖК застройщика или фильтр; запись с ЖК открывается на «ЖК»", () => {
-    const base = {
-      developerId: DEVELOPER,
-      "title.ru": "Готовые 2-комнатные",
-      "title.uz": "Tayyor 2 xonali",
-      validFrom: "2026-11-01",
-      validTo: "2026-11-20",
-    };
-    const noTarget = parseAd(form({ ...base, target: "filter" }));
-    expect(noTarget.ok).toBe(false);
-    if (!noTarget.ok) expect(noTarget.fieldErrors).toEqual({ filter: "noFilter" });
-    const ok = parseAd(form({ ...base, target: "filter", "filter.komnat": "2", "filter.srok": "built" }));
+describe("форма рекламы (баннер, правки 15.11)", () => {
+  const base = {
+    developerId: DEVELOPER,
+    "title.ru": "Старт продаж ЖК Shodlik",
+    "title.uz": "Shodlik TJM sotuv boshlandi",
+    validFrom: "2026-11-01",
+    validTo: "2026-11-20",
+  };
+
+  it("кнопка — телефон или заявка; прежние текст, ЖК и фильтр карточки при сохранении очищаются", () => {
+    const wrong = parseAd(form({ ...base, cta: "site" }));
+    expect(wrong.ok).toBe(false);
+    if (!wrong.ok) expect(wrong.fieldErrors).toEqual({ cta: "kindInvalid" });
+    const ok = parseAd(form({ ...base, cta: "phone" }));
     expect(ok.ok).toBe(true);
-    if (ok.ok) expect(ok.value).toMatchObject({ complexIds: [], filter: { komnat: "2", srok: "built" }, isActive: false, sort: 0 });
-    expect(
-      adFieldsOf({
-        id: "a",
-        developerId: DEVELOPER,
-        title: { ru: "x", uz: "y" },
-        text: null,
-        complexIds: [COMPLEX],
-        filter: {},
-        validFrom: "2026-11-01",
-        validTo: "2026-11-20",
-        isActive: true,
-        sort: 1,
-      }).target,
-    ).toBe("complexes");
+    if (!ok.ok) return;
+    expect(ok.value).toMatchObject({ cta: "phone", isActive: false, sort: 0 });
+    expect(adRow(ok.value)).toMatchObject({ cta: "phone", text: null, complex_ids: [], filter: {} });
+  });
+
+  it("контакты в названии — нельзя (1.2); новая реклама — кнопка заявки", () => {
+    const contact = parseAd(form({ ...base, cta: "lead", "title.ru": "Звоните +998 90 123 45 67" }));
+    expect(contact.ok).toBe(false);
+    if (!contact.ok) expect(contact.fieldErrors.title).toBe("contacts");
+    expect(adFieldsOf(null).cta).toBe("lead");
+    const record = { id: "a", developerId: DEVELOPER, title: { ru: "x", uz: "y" }, cta: "phone" as const, validFrom: "2026-11-01", validTo: "2026-11-20", isActive: true, sort: 1 };
+    expect(adFieldsOf(record).cta).toBe("phone");
   });
 });
 
