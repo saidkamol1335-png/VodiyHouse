@@ -2,6 +2,7 @@ import { calculate, type CalcInput, type CalcResult } from "./calculate";
 import { comparePrograms, type ComparisonRow } from "./compare";
 import { type CalcProgram, isTiered, type ProgramKind } from "./programs";
 import type { BilingualRecord } from "./records";
+import { fullBenefitPricing } from "./fullBenefit";
 
 // Программа в калькуляторе (кабинет, /kalkulyator, расчёт квартиры): условия для lib/calc и то,
 // что нужно интерфейсу. Чем считать — «движок»: сайт — calculate, кабинет — со скидками
@@ -56,8 +57,9 @@ export function baseDownOptions(program: CalcProgram): DownOption[] {
   return downs.map((downPct) => ({ downPct, maxMonths: null, targetId: null }));
 }
 
+/** Сайт: цены без скидок, кроме выгоды за 100 %, если база её отдала (calc/fullBenefit.ts). */
 export const SITE_ENGINE: CalcEngine<CalcProgram> = {
-  calculate: (program, input) => calculate(program, input),
-  compare: (programs, input) => comparePrograms(programs, input),
+  calculate: (program, input) => calculate(program, input, fullBenefitPricing(program)),
+  compare: (programs, input) => comparePrograms(programs, input, fullBenefitPricing),
   downOptions: (option) => baseDownOptions(option.program),
 };

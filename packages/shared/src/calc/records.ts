@@ -34,6 +34,8 @@ export type SiteProgramRecord = {
   block_ids: string[];
   /** «Условия актуальны на» — позднее из правки и отметки «проверены» (Р5). */
   updated_at: string;
+  /** Выгода за 100 % — только у «100% оплаты» и только при включённых «Скидках на сайте». */
+  benefit_pct?: number | string | null;
 };
 
 export type SiteProgramsRecord = {
@@ -60,7 +62,10 @@ function termsPart(record: SiteProgramRecord): Omit<TermsProgram, "type" | "meth
 }
 
 export function programFromRecord(record: SiteProgramRecord): CalcProgram {
-  if (record.type === "full") return { type: "full" };
+  if (record.type === "full") {
+    const pct = Number(record.benefit_pct ?? 0);
+    return pct > 0 && pct <= 50 ? { type: "full", benefitPct: pct } : { type: "full" };
+  }
   if (record.method === "tiers") {
     return {
       type: "installment",

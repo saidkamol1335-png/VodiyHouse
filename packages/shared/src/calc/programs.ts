@@ -17,7 +17,11 @@ export type TermRow = { months: number; ratePct: number };
 /** Разовый платёж: сумма в валюте программы или % от суммы кредита. */
 export type FeeRule = { name: FeeName; kind: "fixed" | "pct"; value: number };
 
-export type FullPaymentProgram = { type: "full" };
+/**
+ * «100% оплата». benefitPct — выгода (скидка) за 100 %, есть только когда сайту разрешено её показывать
+ * (правки 15.11, п. 21; calc/fullBenefit.ts). У кабинета скидка — своим полем (calc/cabinet).
+ */
+export type FullPaymentProgram = { type: "full"; benefitPct?: number };
 
 /** Схема застройщика: правила сроков (PLAN §3б) есть только у неё. */
 export type TieredProgram = {

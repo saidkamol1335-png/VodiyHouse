@@ -362,6 +362,23 @@ describe("программы оплаты", () => {
       ]);
     });
 
+    it("«Скидки на сайте» включены — у «100% оплаты» приходит benefit_pct, у ступеней схемы скидок нет (20261117170000)", async () => {
+      const shown = await save(head, scheme());
+      const fullId = await save(head, full());
+      await setActive(shown, true);
+      await setActive(fullId, true);
+      await db.admin.query(`insert into settings (key, value, is_public) values ('site.show_discounts', '{"enabled": true}', true)`);
+      try {
+        const programs = (await sitePrograms()).developers.flatMap((developer) => developer.programs);
+        const program = (id: string) => programs.find((item) => item.id === id) as unknown as Record<string, unknown>;
+        expect(Number(program(fullId).benefit_pct)).toBe(12);
+        expect(program(shown)).not.toHaveProperty("benefit_pct");
+        expect(JSON.stringify(program(shown).tiers)).not.toMatch(/discount/);
+      } finally {
+        await db.admin.query("delete from settings where key = 'site.show_discounts'");
+      }
+    });
+
     it("программа на выбранных блоках видна, пока хоть один из них на сайте; удалённый блок уходит", async () => {
       const onDraft = await save(
         head,

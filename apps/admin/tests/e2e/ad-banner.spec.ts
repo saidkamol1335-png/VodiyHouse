@@ -89,13 +89,34 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     expect(errors).toEqual([]);
   });
 
-  test("«Скидки на сайте»: по умолчанию выключено, включить и вернуть", async ({ page }) => {
+  test("«Скидки на сайте»: по умолчанию выключено; включено — выгода за 100% в расчёте под планировкой (п. 21); вернуть", async ({ page }) => {
+    test.setTimeout(120_000);
     await page.goto("/vitrina/spetspredlozheniya");
     const toggle = page.getByRole("switch", { name: "Показывать скидки на сайте" });
     await expect(toggle).toHaveAttribute("aria-checked", "false");
+    // Выключено: «100% оплата» DEMO-застройщика (12% в программе) — без выгоды.
+    const calcOf = async () => {
+      await page.goto(site("/ru/novostroyki/demo-shodlik#planirovki"));
+      await page.waitForLoadState("networkidle");
+      await page.locator(".complex-layout__calc").first().click();
+      const calc = page.locator("dialog.flat-calc");
+      await expect(calc).toHaveAttribute("open", "");
+      return calc;
+    };
+    await expect(await calcOf()).not.toContainText("100% оплата · −12%");
+    await page.goto("/vitrina/spetspredlozheniya");
     await toggle.click();
     await expect(page.getByTestId("action-toast")).toHaveText("Спецпредложения со скидкой снова на сайте");
-    await page.reload();
+    await expect(async () => {
+      const calc = await calcOf();
+      await expect(calc).toContainText("100% оплата · −12%", { timeout: 2_000 });
+    }).toPass({ timeout: 40_000 });
+    const calc = page.locator("dialog.flat-calc");
+    await calc.getByText("100% оплата · −12%").first().click();
+    await expect(calc).toContainText("Выгода при 100% оплате");
+    await expect(calc).toContainText("Цена при 100% оплате");
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-full-benefit.png`, caret: "initial" });
+    await page.goto("/vitrina/spetspredlozheniya");
     await expect(toggle).toHaveAttribute("aria-checked", "true");
     await toggle.click();
     await expect(page.getByTestId("action-toast")).toHaveText("Скидки скрыты — спецпредложений со скидкой на сайте больше нет");

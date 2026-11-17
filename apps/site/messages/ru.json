@@ -412,6 +412,9 @@
       "approx": "≈ {amount}",
       "price": "Стоимость",
       "programPrice": "Цена по программе",
+      "listPrice": "Цена по прайсу",
+      "fullBenefit": "Выгода при 100% оплате",
+      "fullPrice": "Цена при 100% оплате",
       "down": "Первоначальный взнос · {pct}",
       "rest": "Остаток",
       "restNote": "без наценки · {term}",
@@ -464,7 +467,8 @@
       "perMonth": "{amount}/мес",
       "now": "К оплате сразу",
       "none": "—",
-      "unavailable": "Не посчитать без курса: {names}"
+      "unavailable": "Не посчитать без курса: {names}",
+      "fullBenefit": "{name} · −{pct}"
     },
     "telegram": {
       "copy": "Скопировать для Telegram",
