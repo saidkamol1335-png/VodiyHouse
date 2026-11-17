@@ -72,9 +72,9 @@ function PlanBody({ blockName, choice, failed, onRetry }: { blockName: string; c
       <Floors floors={choice.floors} floor={choice.floor} onFloor={choice.pickFloor} />
       <div className="complex-picker__plan-main">
         <Entrances entrances={choice.entrances} entrance={choice.entrance} onEntrance={choice.pickEntrance} />
-        {choice.plan && choice.floor !== null ? (
+        {choice.floor !== null ? (
           <PickerFloorPlan
-            key={`${choice.plan.id}-${choice.floor}`}
+            key={`${choice.plan?.id ?? "grid"}-${choice.floor}`}
             plan={choice.plan}
             floor={choice.floor}
             blockName={blockName}

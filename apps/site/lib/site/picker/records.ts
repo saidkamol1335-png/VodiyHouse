@@ -40,14 +40,15 @@ export type FloorPlan = {
 
 export type ComplexPicker = {
   facade: CatalogPhoto;
-  /** Блоки с контуром на фасаде: с квартирами — только при плане этажа, остальные — всегда. */
+  /** Блоки с контуром на фасаде (с правок 15.11, п. 19, — и без плана этажа: этаж показывается сеткой). */
   blocks: { id: string; contour: Point[]; state: PickerBlockState }[];
   plans: FloorPlan[];
 };
 
 /**
- * Раздел есть, когда есть фасад и хотя бы один блок, на который можно нажать (PLAN §7: «без фасада
- * или планов — раздел скрыт»). Блок с квартирами без плана на фасад не выводится: нажать было бы некуда.
+ * Раздел есть, когда есть фасад и хотя бы один блок, на который можно нажать (PLAN §7: «без фасада —
+ * раздел скрыт»). Блок с квартирами без плана этажа — тоже на фасаде (правки 15.11, п. 19): этаж
+ * показывается сеткой квартир по подъездам (PickerFloorGrid).
  */
 export function pickerFrom(record: PickerRecord | null): ComplexPicker | null {
   if (!record?.facade) return null;
@@ -60,9 +61,7 @@ export function pickerFrom(record: PickerRecord | null): ComplexPicker | null {
     image: photoFrom(plan.image),
     contours: plan.contours,
   }));
-  const blocks = record.blocks
-    .map((block) => ({ ...block, state: block.state ?? ("open" as const) }))
-    .filter((block) => block.state !== "open" || plans.some((plan) => plan.blockId === block.id));
+  const blocks = record.blocks.map((block) => ({ ...block, state: block.state ?? ("open" as const) }));
   return blocks.some((block) => block.state !== "soon") ? { facade: photoFrom(record.facade), blocks, plans } : null;
 }
 

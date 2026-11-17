@@ -840,7 +840,99 @@ a.complex-picker__tag {
 }
 
 /* ─── Телефон (мокап MobJkFacade / MobJkFloor) ─── */
+/* Этаж без картинки плана (правки 15.11, п. 19): квартиры по подъездам плитками, цвет — статус, как на
+   плане этажа. Плитки — по стоякам слева направо; шахматки нет — только выбранный этаж. */
+.complex-picker__grid {
+  display: grid;
+  gap: 18px;
+}
+
+.complex-picker__cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.complex-picker__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 12px;
+  border: 1.5px solid transparent;
+  border-radius: var(--r-md);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.complex-picker__cell--free {
+  border-color: var(--picker-unit-free-b);
+  background: var(--picker-unit-free);
+  color: var(--picker-unit-free-t);
+}
+
+.complex-picker__cell--reserved {
+  border-color: var(--picker-unit-res-b);
+  background: var(--picker-unit-res);
+  color: var(--picker-unit-res-t);
+}
+
+.complex-picker__cell--sold {
+  border-color: var(--picker-unit-sold-b);
+  background: var(--picker-unit-sold);
+  color: var(--picker-unit-sold-t);
+}
+
+.complex-picker__cell--pending {
+  border-color: var(--picker-unit-pending-b);
+  background: var(--picker-unit-pending);
+  color: var(--picker-unit-pending-t);
+}
+
+.complex-picker__cell--selected,
+.complex-picker__cell:focus-visible {
+  outline: 3px solid var(--amber-2);
+  outline-offset: 2px;
+}
+
+.complex-picker__cell-number {
+  font-size: var(--fs-control);
+  font-weight: 800;
+}
+
+.complex-picker__cell-meta {
+  font-size: var(--fs-caption);
+  opacity: 0.85;
+}
+
+.complex-picker__cell-price {
+  margin-top: auto;
+  font-size: var(--fs-control);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+:root:is([data-motion="full"], [data-motion="lite"]) .complex-picker__cell {
+  transition: transform var(--dur-fast, 0.15s) var(--ease-out, ease-out);
+}
+
+@media (hover: hover) {
+  :root:is([data-motion="full"], [data-motion="lite"]) .complex-picker__cell--free:hover {
+    transform: translateY(-2px);
+  }
+}
+
 @media (max-width: 760px) {
+  .complex-picker__cells {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
+
   .complex-picker__lead-wide,
   .complex-picker__hint-wide,
   .complex-picker__tip {

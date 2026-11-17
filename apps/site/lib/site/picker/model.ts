@@ -23,9 +23,12 @@ const countOf = (units: readonly PickerUnit[]) => ({
   total: units.length,
 });
 
-/** Этажи блока, на которые есть план, — сверху вниз, со свободными и всего квартир. */
+/**
+ * Этажи блока — сверху вниз, со свободными и всего квартир: где есть план, и где есть квартиры (этаж без
+ * плана — сеткой, правки 15.11, п. 19).
+ */
 export function blockFloors(plans: readonly FloorPlan[], blockId: string, units: readonly PickerUnit[]): FloorCount[] {
-  const floors = new Set<number>();
+  const floors = new Set<number>(units.map((unit) => unit.floor));
   for (const plan of plans) {
     if (plan.blockId !== blockId) continue;
     for (let floor = plan.floorFrom; floor <= plan.floorTo; floor += 1) floors.add(floor);
@@ -96,4 +99,15 @@ export function placeUnits(plan: FloorPlan, floor: number, units: readonly Picke
         (unit) => unit.floor === floor && unit.entrance === contour.entrance && unit.position === contour.position,
       ) ?? null,
   }));
+}
+
+export type EntranceGroup = { entrance: number; units: PickerUnit[] };
+
+/** Сетка этажа без плана: квартиры по подъездам, в подъезде — по стоякам (позиции). */
+export function entranceGroups(units: readonly PickerUnit[]): EntranceGroup[] {
+  const groups = new Map<number, PickerUnit[]>();
+  for (const unit of units) groups.set(unit.entrance, [...(groups.get(unit.entrance) ?? []), unit]);
+  return [...groups.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([entrance, list]) => ({ entrance, units: [...list].sort((a, b) => a.position - b.position || a.number.localeCompare(b.number)) }));
 }

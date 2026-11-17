@@ -4,6 +4,7 @@ import {
   bestFloor,
   blockFloors,
   boxOf,
+  entranceGroups,
   floorEntrances,
   placeUnits,
   planFor,
@@ -50,7 +51,7 @@ const unit = (entrance: number, floor: number, position: number, status: PickerU
 });
 
 describe("выбор квартиры на фасаде: данные", () => {
-  it("раздел — только с фасадом и блоком, у которого есть и контур, и план", () => {
+  it("раздел — с фасадом и блоком с контуром; блок с квартирами — и без плана этажа (правки 15.11, п. 19)", () => {
     const record: PickerRecord = {
       complex_id: "c",
       facade: photo,
@@ -60,9 +61,10 @@ describe("выбор квартиры на фасаде: данные", () => {
       ],
       plans: [{ id: "p1", block_id: "A", entrance: 1, floor_from: 2, floor_to: 4, image: photo, contours: [] }],
     };
-    expect(pickerFrom(record)?.blocks.map((block) => block.id)).toEqual(["A"]);
+    expect(pickerFrom(record)?.blocks.map((block) => block.id)).toEqual(["A", "B"]);
     expect(pickerFrom({ ...record, facade: null })).toBeNull();
-    expect(pickerFrom({ ...record, plans: [] })).toBeNull();
+    expect(pickerFrom({ ...record, plans: [] })?.blocks.map((block) => block.id)).toEqual(["A", "B"]);
+    expect(pickerFrom({ ...record, blocks: [{ id: "A", contour: rect(10, 10, 40, 90), state: "soon" }] })).toBeNull();
     expect(pickerFrom(null)).toBeNull();
   });
 
@@ -113,6 +115,16 @@ describe("выбор квартиры на фасаде: данные", () => {
     const units = [unit(1, 3, 1, "free"), unit(1, 2, 2, "reserved")];
     const placed = placeUnits(plan(), 3, units);
     expect(placed.map((item) => item.unit?.status ?? null)).toEqual(["free", null]);
+  });
+
+  it("этаж без плана: этажи — по квартирам, сетка — подъезды по порядку, в подъезде — по стоякам", () => {
+    const units = [unit(2, 5, 2, "free"), unit(1, 5, 3, "sold"), unit(1, 5, 1, "reserved"), unit(2, 5, 1, "free"), unit(1, 6, 1, "free")];
+    expect(blockFloors([], "A", units).map((floor) => floor.floor)).toEqual([6, 5]);
+    const groups = entranceGroups(units.filter((item) => item.floor === 5));
+    expect(groups.map((group) => [group.entrance, group.units.map((item) => item.position)])).toEqual([
+      [1, [1, 3]],
+      [2, [1, 2]],
+    ]);
   });
 
   it("геометрия и короткая цена", () => {

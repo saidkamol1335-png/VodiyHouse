@@ -2,18 +2,19 @@
 
 import { Hand } from "lucide-react";
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { useSiteContacts } from "@/components/SiteContacts";
 import { formatPhone, phoneHref } from "@/lib/contacts";
-import { formatPriceShort, formatUsdThousands } from "@vh/shared/format";
-import type { Locale } from "@/lib/i18n/routing";
 import { mediaPublicUrl } from "@/lib/media";
 import { boxOf, placeUnits, polygonPoints, type PlacedUnit } from "@/lib/site/picker/model";
 import type { FloorPlan, PickerUnit } from "@/lib/site/picker/records";
+import { PickerFloorGrid } from "./PickerFloorGrid";
+import { useUnitTexts } from "./unitTexts";
 
 type PickerFloorPlanProps = {
-  plan: FloorPlan;
+  /** null — у этажа нет картинки плана: квартиры сеткой по подъездам (правки 15.11, п. 19). */
+  plan: FloorPlan | null;
   floor: number;
   blockName: string;
   units: PickerUnit[];
@@ -32,8 +33,9 @@ export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUni
   const t = useTranslations("complex.pick");
   const { phone } = useSiteContacts();
   const [note, setNote] = useState<ReactNode>(null);
-  const placed = placeUnits(plan, floor, units).filter((item): item is PlacedUnit & { unit: PickerUnit } => item.unit !== null);
-  const free = placed.filter((item) => item.unit.status === "free").length;
+  const placed = plan ? placeUnits(plan, floor, units).filter((item): item is PlacedUnit & { unit: PickerUnit } => item.unit !== null) : null;
+  const shown = placed ? placed.map((item) => item.unit) : units.filter((unit) => unit.floor === floor);
+  const free = shown.filter((unit) => unit.status === "free").length;
   const pick = ({ unit }: { unit: PickerUnit }) => {
     if (unit.status === "free") {
       setNote(null);
@@ -44,14 +46,14 @@ export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUni
     }
     setNote(`${t(unit.status === "reserved" ? "reservedNote" : "soldNote", { number: unit.number })}. ${t("seeGreen")}`);
   };
-  const title = [t("planTitle", { floor, block: blockName }), plan.entrance !== null ? t("planEntrance", { n: plan.entrance }) : null].filter(Boolean).join(" · ");
+  const title = [t("planTitle", { floor, block: blockName }), plan?.entrance != null ? t("planEntrance", { n: plan.entrance }) : null].filter(Boolean).join(" · ");
   return (
     <div className="complex-picker__sheet">
       <p className="complex-picker__sheet-head">
         <span>{title}</span>
-        <span>{t("planFree", { free, total: placed.length })}</span>
+        <span>{t("planFree", { free, total: shown.length })}</span>
       </p>
-      <PlanSheet plan={plan} placed={placed} selected={selected} onPick={pick} />
+      {plan && placed ? <PlanSheet plan={plan} placed={placed} selected={selected} onPick={pick} /> : <PickerFloorGrid units={shown} selected={selected} onPick={(unit) => pick({ unit })} />}
       <p className="complex-picker__note" role="status">
         {note}
       </p>
@@ -110,14 +112,9 @@ function PlanSheet({ plan, placed, selected, onPick }: { plan: FloorPlan; placed
 }
 
 function UnitTile({ item, selected, onPick }: { item: Placed; selected: boolean; onPick: () => void }) {
-  const t = useTranslations("complex.pick");
-  const tRooms = useTranslations("complex.rooms");
-  const tLegend = useTranslations("complex.pick.legend");
-  const locale = useLocale() as Locale;
   const { unit } = item;
   const box = boxOf(item.contour.points);
-  const rooms = unit.rooms === null ? "" : unit.rooms <= 4 ? tRooms(String(unit.rooms) as "0") : tRooms("more", { n: unit.rooms });
-  const price = unit.price === null ? null : unit.currency === "USD" ? formatUsdThousands(unit.price) : formatPriceShort(unit.price, unit.currency, locale);
+  const texts = useUnitTexts(unit);
   return (
     <button
       type="button"
@@ -125,12 +122,12 @@ function UnitTile({ item, selected, onPick }: { item: Placed; selected: boolean;
       style={{ left: `${box.x0}%`, top: `${box.y0}%`, width: `${box.x1 - box.x0}%`, height: `${box.y1 - box.y0}%` }}
       aria-pressed={unit.status === "free" ? selected : undefined}
       data-unit-id={unit.id}
-      aria-label={[t("unitAria", { number: unit.number }), rooms, unit.status === "free" ? price : null, tLegend(unit.status)].filter(Boolean).join(", ")}
+      aria-label={texts.aria}
       onClick={onPick}
     >
       <span className="complex-picker__unit-number">№{unit.number}</span>
-      {unit.rooms !== null ? <span className="complex-picker__unit-rooms">{t("roomsShort", { rooms: unit.rooms })}</span> : null}
-      {unit.status === "free" ? (price ? <span className="complex-picker__unit-price">{price}</span> : null) : <span className="complex-picker__unit-tag">{unit.status === "pending" ? t("pendingTag") : tLegend(unit.status)}</span>}
+      {texts.roomsShort ? <span className="complex-picker__unit-rooms">{texts.roomsShort}</span> : null}
+      {unit.status === "free" ? (texts.price ? <span className="complex-picker__unit-price">{texts.price}</span> : null) : <span className="complex-picker__unit-tag">{texts.tag}</span>}
     </button>
   );
 }
