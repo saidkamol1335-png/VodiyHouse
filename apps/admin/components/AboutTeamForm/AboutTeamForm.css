@@ -1,0 +1,27 @@
+/* «Команда» в «Настройки → О компании» (правки 15.11, п. 25): строки — как у «Частых вопросов»
+   (ComplexFaqForm), здесь — портрет слева и отметка согласия. */
+.about-team-form__photo {
+  width: 96px;
+}
+
+.about-team-form__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--fg-2);
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.about-team-form__consent input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--amber);
+}
+
+.about-team-form__consent small {
+  color: var(--fg-3);
+}

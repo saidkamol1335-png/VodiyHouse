@@ -1358,6 +1358,14 @@
     }
   },
   "about": {
+    "history": {
+      "eyebrow": "Vodiy House",
+      "title": "Tarix"
+    },
+    "team": {
+      "eyebrow": "Vodiy House",
+      "title": "Jamoa"
+    },
     "metaTitle": "Biz haqimizda — Vodiy House",
     "metaDescription": "Farg‘ona viloyati yangi uylar agentligi: kvartira tanlash, obyektlarni ko‘rsatish va quruvchilar hujjatlarini tekshirish. Xaridor uchun — bepul.",
     "hero": {

@@ -1,0 +1,57 @@
+/* «История» на /o-nas (правки 15.11, п. 25): лента по годам — год крупно, линия слева; на телефоне год
+   над текстом. */
+.about-history {
+  padding: 96px 0 0;
+}
+
+.about-history__title {
+  margin-top: 12px;
+}
+
+.about-history__list {
+  display: grid;
+  max-width: 880px;
+  margin: 32px 0 0;
+  padding: 0;
+  border-left: 1px solid var(--line);
+  list-style: none;
+}
+
+.about-history__item {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 24px;
+  padding: 0 0 28px 24px;
+}
+
+.about-history__year {
+  color: var(--amber-2);
+  font-family: var(--display);
+  font-size: 32px;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.about-history__name {
+  margin: 4px 0 0;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-snug);
+}
+
+.about-history__text {
+  margin: 8px 0 0;
+  color: var(--fg-2);
+  white-space: pre-line;
+}
+
+@media (max-width: 760px) {
+  .about-history {
+    padding-top: 64px;
+  }
+
+  .about-history__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding-left: 16px;
+  }
+}

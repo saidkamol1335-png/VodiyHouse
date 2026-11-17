@@ -44,6 +44,8 @@ export const ADMIN_ROUTES = {
   filterArchive: `${ADMIN_ROUTE}/nastroyki/filtr`,
   /** Общие частые вопросы Vodiy House (правки 15.11, п. 7 + 23). */
   siteFaq: `${ADMIN_ROUTE}/nastroyki/voprosy`,
+  /** «О компании»: история и команда на «О нас» сайта (правки 15.11, п. 25). */
+  aboutCompany: `${ADMIN_ROUTE}/nastroyki/o-kompanii`,
   journal: `${ADMIN_ROUTE}/nastroyki/zhurnal`,
   /** Памятка своей роли (фаза F, п. 42). */
   guide: `${ADMIN_ROUTE}/pamyatka`,
@@ -152,7 +154,7 @@ export function landingPath(role: StaffRole, items: readonly AdminNavItem[] = AD
   return visibleNav(role, items)[0]?.href ?? ADMIN_ROUTES.home;
 }
 
-export type SettingsTabKey = "staff" | "dictionaries" | "contacts" | "filter" | "faq" | "journal";
+export type SettingsTabKey = "staff" | "dictionaries" | "contacts" | "filter" | "faq" | "about" | "journal";
 
 export type SettingsTab = {
   key: SettingsTabKey;
@@ -190,6 +192,8 @@ export const SETTINGS_TABS: readonly SettingsTab[] = [
   },
   // Общие частые вопросы сайта (правки 15.11, п. 7 + 23): как вопросы ЖК — руководитель и менеджер.
   { key: "faq", segment: "voprosy", href: ADMIN_ROUTES.siteFaq, ready: true, roles: ["head", "manager"] },
+  // История и команда «О нас» (правки 15.11, п. 25): как контакты — руководитель.
+  { key: "about", segment: "o-kompanii", href: ADMIN_ROUTES.aboutCompany, ready: true, roles: ["head"] },
   { key: "journal", segment: "zhurnal", href: ADMIN_ROUTES.journal, ready: true, roles: ["head"] },
 ];
 

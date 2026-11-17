@@ -13,10 +13,11 @@ import {
   type TestDb,
 } from "./harness";
 
-// Шаблон пути переопределён в миграции витрины (3.16а): папки specials / collections / ads.
+// Шаблон пути переопределён в миграции витрины (3.16а: specials / collections / ads) и «О компании»
+// (правки 15.11, п. 25: team).
 const STORAGE_MIGRATION = path.resolve(
   import.meta.dirname,
-  "../../../../supabase/migrations/20261028150000_showcase.sql",
+  "../../../../supabase/migrations/20261117120000_about_page.sql",
 );
 
 // Хранилище фото (шаг 9): сайт читает файлы по публичной ссылке, загружает и удаляет только

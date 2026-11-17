@@ -3,6 +3,8 @@
 
 @import "../components/AboutCta/AboutCta.css";
 @import "../components/AboutHero/AboutHero.css";
+@import "../components/AboutHistory/AboutHistory.css";
+@import "../components/AboutTeam/AboutTeam.css";
 @import "../components/AboutOffice/AboutOffice.css";
 @import "../components/AdCard/AdCard.css";
 @import "../components/CatalogCard/CatalogCard.css";

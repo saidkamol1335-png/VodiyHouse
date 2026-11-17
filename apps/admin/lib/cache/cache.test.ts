@@ -81,6 +81,8 @@ const CONTENT_FILES = [
   "houseAd.ts",
   // Общие частые вопросы (правки 15.11, п. 7 + 23): expireSiteSettings.
   "siteFaq.ts",
+  // «О компании» — история и команда (правки 15.11, п. 25): expireSiteSettings.
+  "about.ts",
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",

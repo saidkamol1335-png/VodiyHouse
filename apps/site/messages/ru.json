@@ -1440,6 +1440,14 @@
     }
   },
   "about": {
+    "history": {
+      "eyebrow": "Vodiy House",
+      "title": "История"
+    },
+    "team": {
+      "eyebrow": "Vodiy House",
+      "title": "Команда"
+    },
     "metaTitle": "О нас — Vodiy House",
     "metaDescription": "Агентство новостроек Ферганской области: подбор квартиры, показ объектов и проверка документов застройщиков. Для покупателя — бесплатно.",
     "hero": {

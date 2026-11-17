@@ -1,0 +1,60 @@
+/* «Команда» на /o-nas (правки 15.11, п. 25): карточки 4:5 с фото, имя и должность под ним; без фото —
+   инициалы на тёплом фоне. */
+.about-team {
+  padding: 96px 0 0;
+}
+
+.about-team__title {
+  margin-top: 12px;
+}
+
+.about-team__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px 20px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-team__member {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.about-team .about-team__photo,
+.about-team__initials {
+  border-radius: var(--r-card);
+}
+
+.about-team__initials {
+  display: grid;
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  background: var(--amber-soft);
+  color: var(--amber-2);
+  font-family: var(--display);
+  font-size: 48px;
+}
+
+.about-team__name {
+  margin-top: 6px;
+  font-size: var(--fs-body);
+}
+
+.about-team__position {
+  color: var(--fg-3);
+  font-size: var(--fs-small-l);
+}
+
+@media (max-width: 760px) {
+  .about-team {
+    padding-top: 64px;
+  }
+
+  .about-team__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+}
