@@ -367,7 +367,10 @@ describe("программы оплаты", () => {
       const fullId = await save(head, full());
       await setActive(shown, true);
       await setActive(fullId, true);
-      await db.admin.query(`insert into settings (key, value, is_public) values ('site.show_discounts', '{"enabled": true}', true)`);
+      await db.admin.query(
+        `insert into settings (key, value, is_public) values ('site.show_discounts', '{"enabled": true}', true)
+           on conflict (key) do update set value = excluded.value`,
+      );
       try {
         const programs = (await sitePrograms()).developers.flatMap((developer) => developer.programs);
         const program = (id: string) => programs.find((item) => item.id === id) as unknown as Record<string, unknown>;

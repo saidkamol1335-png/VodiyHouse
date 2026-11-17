@@ -1,5 +1,5 @@
 import type { useTranslations } from "next-intl";
-import { type Currency, convertMoney, type ExchangeRate } from "./money";
+import { type Currency, convertMoney, type ExchangeRate, roundMoney } from "./money";
 import type { ProgramOption } from "./options";
 import type { CalcStock } from "./priceSource";
 import { type CalcProgram, isTiered } from "./programs";
@@ -28,6 +28,24 @@ export function moneyIn(
   return converted === null
     ? formatPrice(amount, from, locale)
     : formatPrice(converted, to, locale);
+}
+
+/**
+ * Разница двух сумм в валюте итога — из уже округлённых сумм, а не округлённая разница: строки «цена по
+ * прайсу − выгода» на экране сходятся до последнего шага (ревью блока D, 17.11).
+ */
+export function moneyDiffIn(
+  minuend: number,
+  subtrahend: number,
+  from: Currency,
+  to: Currency,
+  rate: ExchangeRate | null,
+  locale: CalcLocale,
+): string {
+  const a = convertMoney(minuend, from, to, rate);
+  const b = convertMoney(subtrahend, from, to, rate);
+  const [x, y, currency] = a === null || b === null ? [minuend, subtrahend, from] : [a, b, to];
+  return formatPrice(roundMoney(x, currency) - roundMoney(y, currency), currency, locale);
 }
 
 /** Коротко для тесных мест: «22,5 млн сум»; доллары — как есть. */

@@ -13,7 +13,7 @@ import type { CalcProgram, ProgramKind } from "@vh/shared/calc/programs";
 import type { CalcView } from "@vh/shared/calc/view";
 import { fullBenefitPct } from "@vh/shared/calc/fullBenefit";
 import { formatDate, formatMinus, formatPercent, formatRate } from "@vh/shared/format";
-import { type CalcT, moneyIn, programName, termText } from "@vh/shared/calc/text";
+import { type CalcT, moneyDiffIn, moneyIn, programName, termText } from "@vh/shared/calc/text";
 
 // Итог, сравнение и сноски калькулятора — из состояния (lib/calc/view). Строки скидки кабинет
 // добавляет своей функцией decorate; сайт знает одну скидку — за 100 % оплату, и только когда база её
@@ -74,23 +74,22 @@ export function totalView<P extends CalcProgram>(
 }
 
 /**
- * «100% оплата» с выгодой (правки 15.11, п. 21): вместо «Стоимость» — «Цена по прайсу», «Выгода при 100%
- * оплате · N%» и «Цена при 100% оплате»; разница — от тех же чисел, что итог. Без выгоды — строки как были.
+ * «100% оплата» с выгодой (правки 15.11, п. 21): вместо «Стоимость» — «Цена по прайсу» и «Выгода при 100%
+ * оплате · N%», ниже — «Итого» с ценой при 100 %; выгода — разность уже округлённых сумм, строки сходятся.
+ * Без выгоды — строки как были.
  */
 export const fullBenefitRows: DecorateRows = (rows, calc, context, program) => {
   const pct = fullBenefitPct(program);
   if (pct <= 0 || calc.programPrice >= calc.price) return rows;
   const { t } = context;
-  const money = (amount: number) => moneyIn(amount, calc.currency, context.out, context.rate, context.locale);
   const benefit: TotalRow = {
     key: "benefit",
     label: t("total.fullBenefit"),
     note: formatPercent(pct),
-    value: formatMinus(money(calc.price - calc.programPrice)),
+    value: formatMinus(moneyDiffIn(calc.price, calc.programPrice, calc.currency, context.out, context.rate, context.locale)),
     tone: "minus",
   };
-  const fullPrice: TotalRow = { key: "programPrice", label: t("total.fullPrice"), value: money(calc.programPrice) };
-  return rows.flatMap((row) => (row.key === "price" ? [{ ...row, label: t("total.listPrice") }, benefit, fullPrice] : [row]));
+  return rows.flatMap((row) => (row.key === "price" ? [{ ...row, label: t("total.listPrice") }, benefit] : [row]));
 };
 
 /** Сноски итога: «иллюстративный», «Условия актуальны на», курс — если считали через него. */

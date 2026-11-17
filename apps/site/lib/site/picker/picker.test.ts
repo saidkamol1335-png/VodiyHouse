@@ -117,6 +117,17 @@ describe("выбор квартиры на фасаде: данные", () => {
     expect(placed.map((item) => item.unit?.status ?? null)).toEqual(["free", null]);
   });
 
+  it("план есть не у всех подъездов этажа: подъезд без плана — в переключателе, без плана (сетка)", () => {
+    const units = [unit(1, 3, 1, "free"), unit(2, 3, 1, "free"), unit(2, 3, 2, "sold")];
+    const entrances = floorEntrances([plan()], "A", 3, units);
+    expect(entrances).toEqual([
+      { entrance: 1, free: 1, total: 1 },
+      { entrance: 2, free: 1, total: 2 },
+    ]);
+    expect(planFor([plan()], "A", 3, 2)).toBeNull();
+    expect(floorEntrances([], "A", 3, units)).toEqual([]);
+  });
+
   it("этаж без плана: этажи — по квартирам, сетка — подъезды по порядку, в подъезде — по стоякам", () => {
     const units = [unit(2, 5, 2, "free"), unit(1, 5, 3, "sold"), unit(1, 5, 1, "reserved"), unit(2, 5, 1, "free"), unit(1, 6, 1, "free")];
     expect(blockFloors([], "A", units).map((floor) => floor.floor)).toEqual([6, 5]);

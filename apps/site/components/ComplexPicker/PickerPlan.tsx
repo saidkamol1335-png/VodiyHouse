@@ -74,9 +74,10 @@ function PlanBody({ blockName, choice, failed, onRetry }: { blockName: string; c
         <Entrances entrances={choice.entrances} entrance={choice.entrance} onEntrance={choice.pickEntrance} />
         {choice.floor !== null ? (
           <PickerFloorPlan
-            key={`${choice.plan?.id ?? "grid"}-${choice.floor}`}
+            key={`${choice.plan?.id ?? `grid-${choice.entrance ?? "all"}`}-${choice.floor}`}
             plan={choice.plan}
             floor={choice.floor}
+            entrance={choice.plan ? null : choice.entrance}
             blockName={blockName}
             units={choice.units}
             selected={choice.unit?.id ?? null}

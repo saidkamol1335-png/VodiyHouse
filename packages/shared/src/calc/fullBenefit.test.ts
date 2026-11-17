@@ -5,6 +5,7 @@ import { fullBenefitPct, fullBenefitPricing } from "./fullBenefit";
 import { SITE_ENGINE } from "./options";
 import type { FullPaymentProgram } from "./programs";
 import { programFromRecord, type SiteProgramRecord } from "./records";
+import { moneyDiffIn, moneyIn } from "./text";
 
 // Выгода (скидка) за 100 % на сайте (правки 15.11, п. 21, блок D): процент приходит из базы только при
 // включённых «Скидках на сайте»; без него расчёт как раньше.
@@ -31,6 +32,19 @@ describe("скидка за 100 % оплату на сайте", () => {
     expect(rows.filter((row) => row.cheapest).map((row) => row.program)).toEqual([discounted]);
     const { rows: plain } = SITE_ENGINE.compare([SIFAT_FULL, SIFAT_SCHEME], input);
     expect(plain.some((row) => row.cheapest)).toBe(false);
+  });
+
+  it("на экране «прайс − выгода = итог» сходится: выгода — разность округлённых сумм (ревью блока D)", () => {
+    const rate = { usdUzs: 12_850.37, date: "2026-11-17", source: "cbu" as const };
+    const digits = (text: string) => Number(text.replace(/[^\d]/g, ""));
+    for (const [price, pct] of [[40_050, 3], [40_001, 5], [52_777, 7]] as const) {
+      const programPrice = price * (1 - pct / 100);
+      for (const out of ["USD", "UZS"] as const) {
+        const list = digits(moneyIn(price, "USD", out, rate, "ru"));
+        const total = digits(moneyIn(programPrice, "USD", out, rate, "ru"));
+        expect(list - digits(moneyDiffIn(price, programPrice, "USD", out, rate, "ru"))).toBe(total);
+      }
+    }
   });
 
   it("запись базы: процент читается только у «100% оплаты» и только в пределах 0–50", () => {

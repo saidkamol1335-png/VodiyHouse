@@ -10,7 +10,8 @@ import { site } from "./site";
 
 const LIST = "/vitrina/reklama";
 
-const rowOf = (page: Page, title: string | RegExp) => page.getByRole("link", { name: typeof title === "string" ? `Открыть ${title}` : title });
+const rowOf = (page: Page, title: string | RegExp) =>
+  page.getByRole("link", { name: typeof title === "string" ? `Открыть ${title}` : title });
 
 /** Удалить рекламу из списка (и хвосты прошлых упавших прогонов). */
 async function deleteAds(page: Page, title: string | RegExp) {
@@ -27,7 +28,9 @@ test.describe("кабинет · реклама-баннер → сайт", () =
   test.beforeEach(() => test.skip(!hasCloud, NO_CLOUD));
   test.use({ storageState: cabinetState("head") });
 
-  test("баннер: без картинки — не на сайт; ПК и телефон с 1.2; главная и каталог; удалить", async ({ page }) => {
+  test("баннер: без картинки — не на сайт; ПК и телефон с 1.2; главная и каталог; удалить", async ({
+    page,
+  }) => {
     test.setTimeout(150_000);
     const errors = collectPageErrors(page);
     const title = `e2e Баннер ${Date.now().toString(36)}`;
@@ -48,21 +51,32 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     const desktop = page.locator("#ad-banner");
     await expect(desktop).toBeDisabled();
     await page.locator("#ad-banner-rule12").check();
-    await desktop.setInputFiles(await imageFile(page, { width: 2400, height: 1600, type: "image/jpeg" }));
+    await desktop.setInputFiles(
+      await imageFile(page, { width: 2400, height: 1600, type: "image/jpeg" }),
+    );
     await expect(page.getByText(/Нужна пропорция 3:1/)).toBeVisible();
-    await desktop.setInputFiles(await imageFile(page, { width: 2400, height: 800, type: "image/jpeg" }));
+    await desktop.setInputFiles(
+      await imageFile(page, { width: 2400, height: 800, type: "image/jpeg" }),
+    );
     await expect(page.locator("#ad-banner-rule12")).not.toBeChecked({ timeout: 20_000 });
     await page.locator("#ad-banner_mobile-rule12").check();
-    await page.locator("#ad-banner_mobile").setInputFiles(await imageFile(page, { width: 1080, height: 1350, type: "image/jpeg" }));
+    await page
+      .locator("#ad-banner_mobile")
+      .setInputFiles(await imageFile(page, { width: 1080, height: 1350, type: "image/jpeg" }));
     await expect(page.locator("#ad-banner_mobile-rule12")).not.toBeChecked({ timeout: 20_000 });
 
     await page.getByRole("switch", { name: "На сайте" }).click();
     await page.getByRole("button", { name: "Сохранить" }).click();
     await expect(page.locator(".showcase-form").getByText("Сохранено")).toBeVisible();
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-form.png`, fullPage: true });
+    await page.screenshot({
+      path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-form.png`,
+      fullPage: true,
+    });
 
     // Главная: баннер с меткой и кнопкой заявки; застройщик — подписью, контактов застройщика нет.
-    const banner = page.locator("#reklama .ad-banner").filter({ has: page.locator(`img[alt="${title}"]`) });
+    const banner = page
+      .locator("#reklama .ad-banner")
+      .filter({ has: page.locator(`img[alt="${title}"]`) });
     await expect(async () => {
       await page.goto(site("/ru"));
       await expect(banner).toBeVisible({ timeout: 2_000 });
@@ -70,7 +84,10 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     await expect(banner.locator(".ad-banner__tag")).toHaveText("Реклама");
     await expect(banner).toContainText("Farg‘ona Sifat Qurilish");
     await banner.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-home.png`, caret: "initial" });
+    await page.screenshot({
+      path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-home.png`,
+      caret: "initial",
+    });
     await banner.getByRole("button", { name: "Оставить заявку" }).click();
     const dialog = page.getByRole("dialog", { name: "Заявка по рекламе" });
     await expect(dialog).toBeVisible();
@@ -82,14 +99,19 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     await expect(slot).toBeVisible();
     expect(await slot.evaluate((node) => [...node.parentElement!.children].indexOf(node))).toBe(6);
     await slot.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-catalog.png`, caret: "initial" });
+    await page.screenshot({
+      path: `test-results/screens/${test.info().project.name}/pravki-1511-ad-catalog.png`,
+      caret: "initial",
+    });
 
     await deleteAds(page, title);
     await expect(rowOf(page, title)).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 
-  test("«Скидки на сайте»: по умолчанию выключено; включено — выгода за 100% в расчёте под планировкой (п. 21); вернуть", async ({ page }) => {
+  test("«Скидки на сайте»: по умолчанию выключено; включено — выгода за 100% в расчёте под планировкой (п. 21); вернуть", async ({
+    page,
+  }) => {
     test.setTimeout(120_000);
     await page.goto("/vitrina/spetspredlozheniya");
     const toggle = page.getByRole("switch", { name: "Показывать скидки на сайте" });
@@ -106,20 +128,30 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     await expect(await calcOf()).not.toContainText("100% оплата · −12%");
     await page.goto("/vitrina/spetspredlozheniya");
     await toggle.click();
-    await expect(page.getByTestId("action-toast")).toHaveText("Спецпредложения со скидкой снова на сайте");
-    await expect(async () => {
-      const calc = await calcOf();
-      await expect(calc).toContainText("100% оплата · −12%", { timeout: 2_000 });
-    }).toPass({ timeout: 40_000 });
-    const calc = page.locator("dialog.flat-calc");
-    await calc.getByText("100% оплата · −12%").first().click();
-    await expect(calc).toContainText("Выгода при 100% оплате");
-    await expect(calc).toContainText("Цена при 100% оплате");
-    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-full-benefit.png`, caret: "initial" });
-    await page.goto("/vitrina/spetspredlozheniya");
-    await expect(toggle).toHaveAttribute("aria-checked", "true");
-    await toggle.click();
-    await expect(page.getByTestId("action-toast")).toHaveText("Скидки скрыты — спецпредложений со скидкой на сайте больше нет");
-    await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expect(page.getByTestId("action-toast")).toHaveText(
+      "Скидки снова на сайте — спецпредложения со скидкой и выгода за 100% оплату",
+    );
+    // Запись общая для тестового облака: что бы ни упало дальше — выключатель возвращается в «выкл.».
+    test.info().annotations.push({ type: "cleanup", description: "site.show_discounts → false" });
+    try {
+      await expect(async () => {
+        const calc = await calcOf();
+        await expect(calc).toContainText("100% оплата · −12%", { timeout: 2_000 });
+      }).toPass({ timeout: 40_000 });
+      const calc = page.locator("dialog.flat-calc");
+      await calc.getByText("100% оплата · −12%").first().click();
+      await expect(calc).toContainText("Выгода при 100% оплате");
+      await page.screenshot({
+        path: `test-results/screens/${test.info().project.name}/pravki-1511-full-benefit.png`,
+        caret: "initial",
+      });
+    } finally {
+      await page.goto("/vitrina/spetspredlozheniya");
+      if ((await toggle.getAttribute("aria-checked")) === "true") await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-checked", "false");
+    }
+    await expect(page.getByTestId("action-toast")).toHaveText(
+      "Скидки скрыты — на сайте нет спецпредложений со скидкой и выгоды за 100% оплату",
+    );
   });
 });

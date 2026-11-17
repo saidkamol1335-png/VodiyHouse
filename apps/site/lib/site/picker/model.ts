@@ -47,7 +47,10 @@ export function bestFloor(floors: readonly FloorCount[]): number | null {
 
 export type EntranceCount = { entrance: number | null; free: number; total: number };
 
-/** Подъезды этажа, у которых есть план (null — один план на весь этаж). */
+/**
+ * Подъезды этажа (null — один план на весь этаж). Этаж без планов — [] (сетка всех подъездов сразу);
+ * этаж, где план есть не у всех подъездов, — и подъезды без плана: их квартиры — сеткой (ревью блока D).
+ */
 export function floorEntrances(
   plans: readonly FloorPlan[],
   blockId: string,
@@ -56,12 +59,13 @@ export function floorEntrances(
 ): EntranceCount[] {
   const onFloor = plans.filter((plan) => plan.blockId === blockId && plan.floorFrom <= floor && floor <= plan.floorTo);
   const floorUnits = units.filter((unit) => unit.floor === floor);
-  return onFloor
-    .map((plan) => ({
-      entrance: plan.entrance,
-      ...countOf(plan.entrance === null ? floorUnits : floorUnits.filter((unit) => unit.entrance === plan.entrance)),
-    }))
-    .sort((a, b) => (a.entrance ?? 0) - (b.entrance ?? 0));
+  if (onFloor.length === 0 || onFloor.some((plan) => plan.entrance === null)) {
+    return onFloor.map((plan) => ({ entrance: plan.entrance, ...countOf(floorUnits) }));
+  }
+  const entrances = new Set<number>([...onFloor.map((plan) => plan.entrance!), ...floorUnits.map((unit) => unit.entrance)]);
+  return [...entrances]
+    .sort((a, b) => a - b)
+    .map((entrance) => ({ entrance, ...countOf(floorUnits.filter((unit) => unit.entrance === entrance)) }));
 }
 
 /** Подъезд по умолчанию — где свободных больше, при равенстве — первый. */

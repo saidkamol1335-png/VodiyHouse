@@ -16,6 +16,8 @@ type PickerFloorPlanProps = {
   /** null — у этажа нет картинки плана: квартиры сеткой по подъездам (правки 15.11, п. 19). */
   plan: FloorPlan | null;
   floor: number;
+  /** Подъезд из переключателя: у этажа без плана этого подъезда сетка — только его квартиры. */
+  entrance: number | null;
   blockName: string;
   units: PickerUnit[];
   selected: string | null;
@@ -29,12 +31,14 @@ const STATUS_CLASS = { free: "free", reserved: "reserved", sold: "sold", pending
  * с номером, комнатами и ценой свободной. Свободная — открывает квартиру; бронь и продана — строка
  * «Квартира № 44 уже продана · Зелёные квартиры на этом этаже свободны».
  */
-export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUnit }: PickerFloorPlanProps) {
+export function PickerFloorPlan({ plan, floor, entrance, blockName, units, selected, onUnit }: PickerFloorPlanProps) {
   const t = useTranslations("complex.pick");
   const { phone } = useSiteContacts();
   const [note, setNote] = useState<ReactNode>(null);
   const placed = plan ? placeUnits(plan, floor, units).filter((item): item is PlacedUnit & { unit: PickerUnit } => item.unit !== null) : null;
-  const shown = placed ? placed.map((item) => item.unit) : units.filter((unit) => unit.floor === floor);
+  const shown = placed
+    ? placed.map((item) => item.unit)
+    : units.filter((unit) => unit.floor === floor && (entrance === null || unit.entrance === entrance));
   const free = shown.filter((unit) => unit.status === "free").length;
   const pick = ({ unit }: { unit: PickerUnit }) => {
     if (unit.status === "free") {
@@ -46,7 +50,8 @@ export function PickerFloorPlan({ plan, floor, blockName, units, selected, onUni
     }
     setNote(`${t(unit.status === "reserved" ? "reservedNote" : "soldNote", { number: unit.number })}. ${t("seeGreen")}`);
   };
-  const title = [t("planTitle", { floor, block: blockName }), plan?.entrance != null ? t("planEntrance", { n: plan.entrance }) : null].filter(Boolean).join(" · ");
+  const shownEntrance = plan ? plan.entrance : entrance;
+  const title = [t("planTitle", { floor, block: blockName }), shownEntrance !== null ? t("planEntrance", { n: shownEntrance }) : null].filter(Boolean).join(" · ");
   return (
     <div className="complex-picker__sheet">
       <p className="complex-picker__sheet-head">
