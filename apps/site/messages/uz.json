@@ -892,7 +892,7 @@
       "lead": "Korpusga olib boring, qavatni oching va bo‘sh kvartirani bosing — narx va to‘lov hisobi darhol chiqadi. Mavjudlik jonli yangilanadi.",
       "leadPhone": "Korpusni bosing — qavatlar ochiladi. Qavatni tanlang va yashil kvartirani bosing: narx va to‘lov hisobi darhol chiqadi.",
       "live": "yangilandi: {time}",
-      "hint": "Korpusga olib boring — qoldiqlar ko‘rinadi. Bosing — qavatlar va reja ochiladi.",
+      "hint": "Korpusga olib boring — qoldiqlar ko‘rinadi. Bosing — qavatlar va kvartiralar ochiladi.",
       "hintPhone": "Korpusni bosing",
       "light": "Yoritish",
       "lights": {
@@ -904,7 +904,7 @@
       "total": "Jami kvartiralar",
       "freeLabel": "Bo‘sh",
       "roomsCount": "{count} ta",
-      "go": "Bosing — qavatlar",
+      "go": "Bosing — qavatlar va kvartiralar",
       "back": "Barcha korpuslar",
       "floor": "Qavat",
       "floorFree": "{count, plural, =0 {yo‘q} other {# bo‘sh}}",
