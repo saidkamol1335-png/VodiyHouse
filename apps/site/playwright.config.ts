@@ -38,6 +38,8 @@ const extraProjects = [
 // Размеры приёмки — CLAUDE.md: 390×844 (телефон) и 1440×900 (десктоп).
 export default defineConfig({
   testDir: "tests/e2e",
+  // Страницы со generateStaticParams — по очереди до воркеров (tests/e2e/warmup.ts).
+  globalSetup: "./tests/e2e/warmup.ts",
   fullyParallel: true,
   // Узкое место — один dev-сервер, а не браузеры: 16 воркеров (половина ядер) при фоновой нагрузке
   // на машину растягивали переходы дольше 5 с, 8 — так же быстро и без сбоев (22.10.2026).

@@ -31,10 +31,12 @@ type ComplexSectionsProps = {
   sections: readonly ComplexSectionKey[];
   name: string;
   locale: Locale;
+  /** Сколько первых вопросов — вопросы самого ЖК (в FAQPage идут только они). */
+  ownFaq: number;
 };
 
 /** Разделы страницы ЖК под навигатором — по порядку и только те, у которых есть данные. */
-export async function ComplexSections({ page, sections, name, locale }: ComplexSectionsProps) {
+export async function ComplexSections({ page, sections, name, locale, ownFaq }: ComplexSectionsProps) {
   const t = await getTranslations("complex");
   const has = (key: ComplexSectionKey) => sections.includes(key);
   const cards = layoutCards(page);
@@ -72,7 +74,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
       {has("faq") ? (
         <ComplexSection id={COMPLEX_ANCHORS.faq} title={t("faq.title")}>
-          <FaqAccordion items={page.faq} />
+          <FaqAccordion items={page.faq} markup={ownFaq} />
         </ComplexSection>
       ) : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />

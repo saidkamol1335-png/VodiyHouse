@@ -223,7 +223,7 @@
   cursor: pointer;
 }
 
-.detail-viewer__arrow[aria-disabled="true"] {
+.detail-viewer__arrow:disabled {
   opacity: 0.35;
   cursor: default;
 }

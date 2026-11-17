@@ -1,6 +1,6 @@
 import { expect, test } from "./fixtures";
 import { cabinetState, hasCloud, NO_CLOUD } from "./cloud";
-import { collectPageErrors } from "./helpers";
+import { collectPageErrors, imageFile } from "./helpers";
 import { site } from "./site";
 
 // «Настройки → О компании» (правки 15.11, п. 25): руководитель ведёт «История» и «Команда» страницы «О
@@ -35,6 +35,9 @@ test.describe("кабинет · «О компании» → сайт /o-nas", (
     await person.getByLabel("Имя и фамилия").fill(PERSON);
     await person.getByLabel("Должность · RU").fill("Менеджер по продажам");
     await person.getByLabel("Lavozimi · UZ").fill("Sotuv menejeri");
+    // Портрет — сразу в бакет media/team/<id>/ (C3; полировка 17.11 — загрузка в e2e).
+    await person.locator("input[type=file]").setInputFiles(await imageFile(page, { width: 1600, height: 2000, type: "image/jpeg" }));
+    await expect(person.locator("img")).toBeVisible({ timeout: 20_000 });
     await team.getByRole("button", { name: "Сохранить вкладку" }).click();
     await expect(person).toContainText("Без согласия сотрудника на сайт нельзя");
     await person.getByRole("checkbox", { name: /письменное согласие/ }).check();
@@ -48,6 +51,7 @@ test.describe("кабинет · «О компании» → сайт /o-nas", (
     await expect(page.locator(".about-history")).toContainText("2019");
     await expect(page.locator(".about-team")).toContainText(PERSON);
     await expect(page.locator(".about-team")).toContainText("Менеджер по продажам");
+    await expect(page.locator(".about-team img")).toHaveCount(1);
     await expect(page.locator(".about-office")).toBeVisible();
     await page.locator(".about-history").scrollIntoViewIfNeeded();
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-1511-about.png` });

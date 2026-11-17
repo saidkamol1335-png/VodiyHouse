@@ -36,6 +36,12 @@ export function AboutTeamForm({ members, action }: AboutTeamFormProps) {
   const save = useTabSave(action, tc("unsaved"));
   const draft = useDraftRows(members, { dirty: save.dirty, savedAt: save.savedAt, markDirty: save.onInput });
   const errors: AboutErrors = save.state.status === "error" ? save.state.errors : {};
+  // Портрет, загруженный, но ещё не сохранённый в запись: заменили или убрали — файл удаляется сразу
+  // (сохранённые убирает действие «Сохранить», lib/admin/actions/about.ts). Иначе — сирота в media/team/.
+  const saved = new Set(members.flatMap((member) => (member.photo ? [member.photo.path] : [])));
+  const dropUnsaved = (photo: TeamPhoto | null) => {
+    if (photo && !saved.has(photo.path)) void createSupabaseBrowserClient().storage.from(MEDIA_BUCKET).remove([photo.path]);
+  };
   const add = (
     <Button variant="ghost" size="sm" disabled={draft.rows.length >= TEAM_LIMITS.maxRows} onClick={() => draft.change((rows) => [...rows, newTeamDraft()])}>
       + {t("add")}
@@ -53,8 +59,14 @@ export function AboutTeamForm({ members, action }: AboutTeamFormProps) {
             last={index === draft.rows.length - 1}
             errors={errors[row.key]}
             onMove={(by) => draft.change((rows) => swapped(rows, index, index + by))}
-            onRemove={() => draft.remove(row.key)}
-            onPhoto={(photo) => draft.change((rows) => rows.map((item) => (item.key === row.key ? { ...item, photo } : item)))}
+            onRemove={() => {
+              dropUnsaved(row.photo);
+              draft.remove(row.key);
+            }}
+            onPhoto={(photo) => {
+              dropUnsaved(row.photo);
+              draft.change((rows) => rows.map((item) => (item.key === row.key ? { ...item, photo } : item)));
+            }}
           />
         ))}
       </ol>

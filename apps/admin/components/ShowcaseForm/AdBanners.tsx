@@ -51,7 +51,7 @@ function BannerDrop({ id, kind, initial, actions }: BannerDropProps) {
   const desktop = kind === "banner";
   return (
     <div className="showcase-form__cover">
-      <Rule12Check id={`ad-${kind}-rule12`} checked={rule12} onChange={setRule12} context="showcase" />
+      <Rule12Check id={`ad-${kind}-rule12`} checked={rule12} onChange={setRule12} context="banner" />
       <MediaDrop
         id={`ad-${kind}`}
         kind={kind}

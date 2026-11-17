@@ -59,6 +59,7 @@ export function ComplexDetailsForm({ complexId, details, topics, photos, action 
               topics={topics}
               photos={photos}
               error={issue ? t(`issues.${issue}`) : undefined}
+              onTopic={issue === "topicMissing"}
               onMove={(by) => move(index, by)}
               onRemove={() => draft.remove(row.key)}
             />
@@ -83,12 +84,14 @@ type DetailRowProps = {
   topics: ComplexDetailsFormProps["topics"];
   photos: ComplexDetailsFormProps["photos"];
   error: string | undefined;
+  /** Ошибка — про тему: показать под «Тема», а не под текстом. */
+  onTopic: boolean;
   onMove: (by: -1 | 1) => void;
   onRemove: () => void;
 };
 
 /** Пункт: тема, текст RU | UZ, фото; справа — порядок и корзина (как у «Частых вопросов»). */
-function DetailRow({ row, index, last, topics, photos, error, onMove, onRemove }: DetailRowProps) {
+function DetailRow({ row, index, last, topics, photos, error, onTopic, onMove, onRemove }: DetailRowProps) {
   const t = useTranslations("admin.complexes.details");
   return (
     <li className="complex-faq-form__row" role="group" aria-label={t("row", { n: index + 1 })}>
@@ -103,6 +106,7 @@ function DetailRow({ row, index, last, topics, photos, error, onMove, onRemove }
           placeholder={t("topicPlaceholder")}
           defaultValue={row.topicId === null ? "" : String(row.topicId)}
           options={topics.map((topic) => ({ value: String(topic.id), label: topic.name.ru }))}
+          error={onTopic ? error : undefined}
         />
         <BilingualField
           id={`complex-${detailField(row.key, "text")}`}
@@ -112,7 +116,7 @@ function DetailRow({ row, index, last, topics, photos, error, onMove, onRemove }
           maxLength={DETAIL_LIMITS.textMax}
           multiline
           defaultValue={row.text}
-          error={error}
+          error={onTopic ? undefined : error}
         />
         <PhotoChoice rowKey={row.key} photos={photos} selected={row.photoId} />
       </div>

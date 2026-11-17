@@ -34,7 +34,9 @@ export function ComplexDetails({ details, complexName }: { details: readonly Com
   const step = (by: -1 | 1) => {
     const node = track.current;
     const card = node?.querySelector<HTMLElement>(".complex-details__item");
-    if (node && card) node.scrollBy({ left: by * (card.offsetWidth + 16), behavior: getMotionTier() === "full" ? "smooth" : "auto" });
+    // Шаг — карточка и зазор ленты (column-gap из CSS, не числом здесь).
+    const gap = node ? Number.parseFloat(getComputedStyle(node).columnGap) || 0 : 0;
+    if (node && card) node.scrollBy({ left: by * (card.offsetWidth + gap), behavior: getMotionTier() === "full" ? "smooth" : "auto" });
   };
   return (
     <div className="complex-details">

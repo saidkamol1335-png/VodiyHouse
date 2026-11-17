@@ -30,11 +30,14 @@ async function openGallery(page: Page, motion: "full" | "lite" | "none", locale 
 test.describe("главная — «Проекты Vodiy House» слайдером", () => {
   test("1440, full: не закрепляется; стрелки и точки листают; сама листает, наведение — пауза", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-1440", "десктоп");
+    // Две паузы по 6 с и ожидание автопрокрутки — дольше общих 30 с под нагрузкой.
+    test.setTimeout(60_000);
     const errors = collectPageErrors(page);
     await openGallery(page, "full");
     await expect(page.locator(".jk-gallery--pinned, .jk-gallery__pin")).toHaveCount(0);
-    // Пока ничего не трогали — через ~5 с лента сама листает дальше.
-    await expect.poll(() => currentDot(page), { timeout: 9_000 }).toBe(1);
+    // Пока ничего не трогали — через ~5 с лента сама листает дальше (запас — на гидрацию под общей нагрузкой
+    // прогона: 9 с не хватило в прогоне 4 спек, полировка блока C 17.11).
+    await expect.poll(() => currentDot(page), { timeout: 15_000 }).toBe(1);
     await page.getByRole("button", { name: "Следующий ЖК" }).hover();
     await dots(page).first().click();
     await expect.poll(() => currentDot(page)).toBe(0);

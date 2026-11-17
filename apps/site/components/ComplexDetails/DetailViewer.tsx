@@ -79,10 +79,10 @@ export function DetailViewer({ details, start, locale, complexName, onClose }: D
         <span className="detail-viewer__count">{t("counter", { n: current + 1, total: details.length })}</span>
         {details.length > 1 ? (
           <span className="detail-viewer__nav">
-            <button type="button" className="detail-viewer__arrow" aria-label={t("prev")} aria-disabled={current === 0} onClick={() => goTo(current - 1)}>
+            <button type="button" className="detail-viewer__arrow" aria-label={t("prev")} disabled={current === 0} onClick={() => goTo(current - 1)}>
               <ChevronLeft size={20} aria-hidden="true" />
             </button>
-            <button type="button" className="detail-viewer__arrow" aria-label={t("next")} aria-disabled={current >= details.length - 1} onClick={() => goTo(current + 1)}>
+            <button type="button" className="detail-viewer__arrow" aria-label={t("next")} disabled={current >= details.length - 1} onClick={() => goTo(current + 1)}>
               <ChevronRight size={20} aria-hidden="true" />
             </button>
           </span>

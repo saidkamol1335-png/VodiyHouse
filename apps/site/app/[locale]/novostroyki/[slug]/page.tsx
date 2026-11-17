@@ -108,7 +108,7 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
         </Container>
         <ComplexNav label={t("nav.label")} folderLabel={t("nav.folder")} items={sections.map((key) => ({ id: COMPLEX_ANCHORS[key], label: t(`nav.${key}`), section: key }))} />
         <Container>
-          <ComplexSections page={page} sections={sections} name={name} locale={locale} />
+          <ComplexSections page={page} sections={sections} name={name} locale={locale} ownFaq={result.page.faq.length} />
         </Container>
         <ComplexBar slug={page.slug} name={name} />
         <ComplexPreviewBanner page={page} />

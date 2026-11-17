@@ -7,11 +7,14 @@ import type { Locale } from "@/lib/i18n/routing";
 /**
  * «Частые вопросы» — один компонент для главной и страницы ЖК (правки 15.11, п. 7 + 23; раньше —
  * ComplexFaq, PLAN §10, п. 21): вопрос — раскрывающийся пункт без скриптов (details), под ним — FAQPage
- * для поиска. Вопросов нет — нет ничего.
+ * для поиска. Вопросов нет — нет ничего. markup — сколько первых вопросов идёт в FAQPage: на странице ЖК
+ * только его собственные, общие вопросы Vodiy House — в разметке главной (одинаковые вопросы на десятках
+ * страниц поисковики считают дублями).
  */
-export async function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
-  const locale = (await getLocale()) as Locale;
+export async function FaqAccordion({ items, markup = items.length }: { items: readonly FaqItem[]; markup?: number }) {
   if (items.length === 0) return null;
+  const locale = (await getLocale()) as Locale;
+  const marked = items.slice(0, markup);
   return (
     <>
       <ul className="faq-accordion">
@@ -27,17 +30,19 @@ export async function FaqAccordion({ items }: { items: readonly FaqItem[] }) {
           </li>
         ))}
       </ul>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: items.map((item) => ({
-            "@type": "Question",
-            name: item.q[locale],
-            acceptedAnswer: { "@type": "Answer", text: item.a[locale] },
-          })),
-        }}
-      />
+      {marked.length > 0 ? (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: marked.map((item) => ({
+              "@type": "Question",
+              name: item.q[locale],
+              acceptedAnswer: { "@type": "Answer", text: item.a[locale] },
+            })),
+          }}
+        />
+      ) : null}
     </>
   );
 }
