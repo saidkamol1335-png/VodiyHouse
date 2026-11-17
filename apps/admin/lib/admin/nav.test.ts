@@ -129,23 +129,26 @@ describe("доступ к разделам", () => {
     expect(landingPath("mobilographer", allReady)).toBe(ADMIN_ROUTES.video);
   });
 
-  it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Фильтр сайта · Журнал — отдельные адреса", () => {
+  it("вкладки настроек (Д6): Сотрудники · Справочники · Контакты · Фильтр сайта · Частые вопросы · Журнал — отдельные адреса", () => {
     expect(readySettingsTabs().map((tab) => [tab.key, tab.href, tab.segment])).toEqual([
       ["staff", "/nastroyki", null],
       ["dictionaries", "/nastroyki/spravochniki", "spravochniki"],
       ["contacts", "/nastroyki/kontakty", "kontakty"],
       ["filter", "/nastroyki/filtr", "filtr"],
+      ["faq", "/nastroyki/voprosy", "voprosy"],
       ["journal", "/nastroyki/zhurnal", "zhurnal"],
     ]);
   });
 
   it("вкладки настроек менеджера (п. 29, архив фильтра 06.11): «Справочники» и «Фильтр сайта», остальные ведут в «Справочники»", () => {
-    expect(readySettingsTabs("manager").map((tab) => tab.key)).toEqual(["dictionaries", "filter"]);
+    expect(readySettingsTabs("manager").map((tab) => tab.key)).toEqual(["dictionaries", "filter", "faq"]);
     for (const key of ["staff", "contacts", "journal"] as const) {
       expect(settingsTabRedirect("manager", key)).toBe("/nastroyki/spravochniki");
       expect(settingsTabRedirect("head", key)).toBeNull();
     }
     expect(settingsTabRedirect("manager", "dictionaries")).toBeNull();
     expect(settingsTabRedirect("manager", "filter")).toBeNull();
+    // Правки 15.11, п. 7 + 23: общие частые вопросы правит и менеджер.
+    expect(settingsTabRedirect("manager", "faq")).toBeNull();
   });
 });

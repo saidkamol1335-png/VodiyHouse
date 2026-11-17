@@ -1,4 +1,5 @@
 import type { LocalizedText } from "@/lib/contacts";
+import type { FaqItem } from "@vh/shared/faq";
 import type { Currency } from "@vh/shared/calc/money";
 import type { CatalogBlock, CatalogPhoto, SiteCatalog } from "@/lib/site/catalog/records";
 import type { ComplexPicker } from "@/lib/site/picker/records";
@@ -89,5 +90,6 @@ export type ComplexPage = Omit<
   /** «Ход строительства» (фаза 5): опубликованные отчёты блоков, новые сверху; пусто — раздела нет. */
   progress: ProgressReport[];
   /** «Частые вопросы» (PLAN §10, п. 21): пары вопрос — ответ; пусто — раздела нет. */
-  faq: { q: LocalizedText; a: LocalizedText }[];
+  /** Вопросы ЖК, а за ними общие вопросы Vodiy House (правки 15.11, п. 23). */
+  faq: FaqItem[];
 };

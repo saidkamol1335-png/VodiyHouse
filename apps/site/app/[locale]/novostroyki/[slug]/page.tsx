@@ -19,6 +19,7 @@ import { complexRoute, ROUTES } from "@/lib/routes";
 import { readSiteCatalog } from "@/lib/site/catalog/read";
 import type { ComplexPage } from "@/lib/site/complex/model";
 import { readComplexPage } from "@/lib/site/complex/read";
+import { readSiteFaq } from "@/lib/site/faq";
 import { complexSlugState } from "@/lib/site/complex/retired";
 import { COMPLEX_ANCHORS, complexSections } from "@/lib/site/complex/sections";
 import { pageMetadata } from "@/lib/site/metadata";
@@ -75,7 +76,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/novostro
 export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/novostroyki/[slug]">) {
   const [{ slug }, messages, localeRaw] = await Promise.all([params, getMessages(), getLocale()]);
   const locale = (isLocale(localeRaw) ? localeRaw : DEFAULT_LOCALE) as Locale;
-  const [result, t] = await Promise.all([readComplexPage(slug), getTranslations("complex")]);
+  const [result, t, generalFaq] = await Promise.all([readComplexPage(slug), getTranslations("complex"), readSiteFaq()]);
   if (result.kind === "missing") return goneOrNotFound(slug, locale);
   if (result.kind === "unavailable") {
     return (
@@ -87,7 +88,8 @@ export default async function ComplexPageRoute({ params }: PageProps<"/[locale]/
       </>
     );
   }
-  const { page } = result;
+  // Вопросы ЖК, а за ними общие вопросы Vodiy House — один раздел перед формой (правки 15.11, п. 23).
+  const page = { ...result.page, faq: [...result.page.faq, ...generalFaq] };
   const name = t("name", { name: page.name[locale] });
   const sections = complexSections(page);
   return (

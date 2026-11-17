@@ -10,7 +10,8 @@ import { pickerFrom, type PickerRecord } from "@/lib/site/picker/records";
 import { progressReportsFrom, type ProgressReportRecord } from "@/lib/site/progress/records";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ComplexPage } from "./model";
-import { complexPageFrom, faqFrom, type ComplexPageRecord } from "./records";
+import { faqItemsFrom } from "@vh/shared/faq";
+import { complexPageFrom, type ComplexPageRecord } from "./records";
 
 // Страница ЖК (шаг 3.5): site_complex(slug) ролью посетителя, в кэше страницы (PLAN 3а: страницы
 // ЖК статичные, обновляются по тегу). Теги — по договору lib/cache: ЖК и его застройщик; «не найден»
@@ -34,7 +35,7 @@ async function withPicker(client: SupabaseClient, page: ComplexPage): Promise<Co
     ...page,
     picker: picker.error ? null : pickerFrom(picker.data as PickerRecord | null),
     progress: progress.error ? [] : progressReportsFrom(progress.data as ProgressReportRecord[] | null),
-    faq: faq.error ? [] : faqFrom(faq.data),
+    faq: faq.error ? [] : faqItemsFrom(faq.data),
   };
 }
 

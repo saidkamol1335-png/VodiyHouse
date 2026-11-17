@@ -1,0 +1,19 @@
+/* «Частые вопросы» на главной (правки 15.11, п. 7): после «Quruvchimisiz?», список — FaqAccordion. */
+.home-faq {
+  padding: 0 0 96px;
+}
+
+.home-faq__title {
+  margin-top: 12px;
+}
+
+.home-faq__list {
+  max-width: 880px;
+  margin-top: 28px;
+}
+
+@media (max-width: 760px) {
+  .home-faq {
+    padding-bottom: 64px;
+  }
+}

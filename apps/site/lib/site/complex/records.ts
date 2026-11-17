@@ -1,6 +1,5 @@
 import type { LocalizedText } from "@/lib/contacts";
 import type { Currency } from "@vh/shared/calc/money";
-import { bilingualRecord } from "@vh/shared/calc/stockRecords";
 import type { RateRecord, SiteProgramRecord } from "@vh/shared/calc/records";
 import {
   catalogFrom,
@@ -261,14 +260,4 @@ export function complexPageFrom(record: ComplexPageRecord): ComplexPage {
     catalog,
     ...SEPARATE_SECTIONS,
   };
-}
-
-/** «Частые вопросы» из site_complex_faq: чужая запись — без неё, а не без страницы. */
-export function faqFrom(value: unknown): ComplexPage["faq"] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item: { q?: unknown; a?: unknown }) => {
-    const q = bilingualRecord(item?.q);
-    const a = bilingualRecord(item?.a);
-    return q.ru && q.uz && a.ru && a.uz ? [{ q, a }] : [];
-  });
 }

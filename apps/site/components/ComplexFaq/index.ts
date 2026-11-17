@@ -1,1 +1,0 @@
-export { ComplexFaq } from "./ComplexFaq";

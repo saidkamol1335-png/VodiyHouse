@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
 import { FlatPicker } from "@/components/FlatPicker";
 import { HomeCatalog } from "@/components/HomeCatalog";
+import { HomeFaq } from "@/components/HomeFaq";
 import { HomeHero } from "@/components/HomeHero";
 import { HomeManifesto } from "@/components/HomeManifesto";
 import { HomeMarquee } from "@/components/HomeMarquee";
@@ -23,6 +24,7 @@ import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { availabilitySample, heroFound, homeStats, progressSample } from "@/lib/site/home/stats";
 import { readProgressFrames } from "@/lib/site/progress/read";
 import { readSiteContacts } from "@/lib/site/contacts";
+import { readSiteFaq } from "@/lib/site/faq";
 import { pageMetadata, siteOrigin } from "@/lib/site/metadata";
 import { agencyLd } from "@/lib/site/seo/jsonLd";
 import { readSiteShowcase } from "@/lib/site/showcase/read";
@@ -52,10 +54,11 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function HomePage() {
   const locale = (await rootLocale()) as Locale;
-  const [catalog, showcase, frames] = await Promise.all([
+  const [catalog, showcase, frames, faq] = await Promise.all([
     readSiteCatalog(),
     readSiteShowcase(),
     readProgressFrames(),
+    readSiteFaq(),
   ]);
   return (
     <>
@@ -85,6 +88,8 @@ export default async function HomePage() {
         />
         <Reviews />
         <HomePartner />
+        {/* Правки 15.11, п. 7: частые вопросы о Vodiy House — после «Quruvchimisiz?»; пусто — нет блока. */}
+        <HomeFaq items={faq} />
       </main>
       <AgencyJsonLd locale={locale} />
     </>

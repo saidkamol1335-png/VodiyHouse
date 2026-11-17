@@ -79,6 +79,8 @@ const CONTENT_FILES = [
   "filterArchive.ts",
   // Своя реклама Vodiy House (06.11.2026): expireSiteSettings.
   "houseAd.ts",
+  // Общие частые вопросы (правки 15.11, п. 7 + 23): expireSiteSettings.
+  "siteFaq.ts",
   "developers.ts",
   "developerMedia.ts",
   "dictionaries.ts",

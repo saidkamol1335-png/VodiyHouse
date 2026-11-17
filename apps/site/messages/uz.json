@@ -210,6 +210,10 @@
       "title": "Quruvchimisiz?",
       "text": "Saytda reklama va Vodiy House rieltorlari bilan birgalikda sotuv.",
       "cta": "Hamkor bo‘lish"
+    },
+    "faq": {
+      "eyebrow": "Vodiy House",
+      "title": "Ko‘p beriladigan savollar"
     }
   },
   "timelapse": {

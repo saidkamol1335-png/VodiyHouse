@@ -107,6 +107,8 @@ describe("Server Actions кабинета", () => {
       ),
       // Справочники заполнения ЖК: менеджер добавляет пункты (п. 29) — ключ проверяет действие.
       addDictionaryItemAction: /requireActionViewer\(\["head", "manager"\]\)/,
+      // «Настройки → Частые вопросы» (правки 15.11, п. 7 + 23): руководитель и менеджер.
+      saveSiteFaqAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Настройки → Фильтр сайта» (06.11.2026): архив кнопок фильтра правят руководитель и менеджер.
       setFilterArchiveAction: /requireActionViewer\(\["head", "manager"\]\)/,
       // «Запросить у руководителя» (п. 25): просит и отзывает менеджер, отклоняет руководитель.

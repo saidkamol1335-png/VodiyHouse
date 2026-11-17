@@ -12,13 +12,16 @@ import { useDraftRows } from "@/lib/ui/useDraftRows";
 import { useTabSave } from "@/lib/ui/useTabSave";
 
 type ComplexFaqFormProps = {
-  complexId: string;
+  /** ЖК вкладки «О ЖК»; без него — общие вопросы Vodiy House (правки 15.11, п. 7 + 23). */
+  complexId?: string;
   faq: readonly FaqDraft[];
   action: FormAction<FaqResult>;
+  /** Заголовок и пояснение вместо «Частые вопросы» ЖК. */
+  texts?: { title: string; lead: string };
 };
 
 /** «Частые вопросы» на «О ЖК» (PLAN §10, п. 21): до 8 пар, порядок — как на сайте. */
-export function ComplexFaqForm({ complexId, faq, action }: ComplexFaqFormProps) {
+export function ComplexFaqForm({ complexId, faq, action, texts }: ComplexFaqFormProps) {
   const t = useTranslations("admin.complexes");
   const save = useTabSave(action, t("unsaved"));
   const draft = useDraftRows(faq, { dirty: save.dirty, savedAt: save.savedAt, markDirty: save.onInput });
@@ -40,7 +43,7 @@ export function ComplexFaqForm({ complexId, faq, action }: ComplexFaqFormProps) 
     </Button>
   );
   return (
-    <ComplexTabForm title={t("faq.title")} lead={t("faq.lead")} complexId={complexId} save={save} extra={add}>
+    <ComplexTabForm title={texts?.title ?? t("faq.title")} lead={texts?.lead ?? t("faq.lead")} complexId={complexId} save={save} extra={add}>
       {draft.rows.length === 0 ? <p className="complex-faq-form__empty">{t("faq.empty")}</p> : null}
       <ol className="complex-faq-form">
         {draft.rows.map((row, index) => (

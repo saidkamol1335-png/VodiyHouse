@@ -9,7 +9,8 @@ import { ComplexSaveFeedback } from "@/components/ComplexSaveFeedback";
 type ComplexTabFormProps = {
   title: string;
   lead: ReactNode;
-  complexId: string;
+  /** ЖК вкладки; без него — общая форма («Настройки → Частые вопросы»). */
+  complexId?: string;
   /** useTabSave: ответ действия, отправка без сброса, «Уйти без сохранения?». */
   save: {
     state: Parameters<typeof ComplexSaveFeedback>[0]["state"];
@@ -28,7 +29,7 @@ export function ComplexTabForm({ title, lead, complexId, save, extra, children }
   return (
     <AdminPanel title={title} wide>
       <form className="complex-tab" onSubmit={save.onSubmit} onInput={save.onInput} noValidate>
-        <input type="hidden" name="id" value={complexId} />
+        {complexId ? <input type="hidden" name="id" value={complexId} /> : null}
         <p className="complex-tab__lead">{lead}</p>
         {children}
         <div className="complex-tab__actions">

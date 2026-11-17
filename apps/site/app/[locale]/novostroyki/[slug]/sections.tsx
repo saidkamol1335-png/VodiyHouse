@@ -4,7 +4,7 @@ import { ComplexTerms } from "@/components/ComplexTerms";
 import { ComplexDetails } from "@/components/ComplexDetails";
 import { ComplexDeveloper } from "@/components/ComplexDeveloper";
 import { ComplexDocuments } from "@/components/ComplexDocuments";
-import { ComplexFaq } from "@/components/ComplexFaq";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { ComplexFacts } from "@/components/ComplexFacts";
 import { ComplexPicker } from "@/components/ComplexPicker";
 import { ComplexPlans } from "@/components/ComplexPlans";
@@ -72,7 +72,7 @@ export async function ComplexSections({ page, sections, name, locale }: ComplexS
       {has("documents") ? <DocumentsSection page={page} name={name} /> : null}
       {has("faq") ? (
         <ComplexSection id={COMPLEX_ANCHORS.faq} title={t("faq.title")}>
-          <ComplexFaq faq={page.faq} />
+          <FaqAccordion items={page.faq} />
         </ComplexSection>
       ) : null}
       <LeadMore intent={{ type: "complex", object: { complex: page.slug } }} />
