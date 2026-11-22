@@ -93,8 +93,16 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // Каталог: баннер — сразу после 6-й карточки, во всю строку.
+    // Каталог (п. 13, уточнение 20.11): баннер над списком ЖК — до «Найдено N», тонкий 3:1 и на телефоне;
+    // и после 6-й карточки, во всю строку.
     await page.goto(site("/ru/novostroyki"));
+    const top = page.locator(".catalog-results__body > .ad-banner--top");
+    await expect(top.locator(`img[alt="${title}"]`)).toBeVisible();
+    await expect(top.locator(".ad-banner__tag")).toHaveText("Реклама");
+    expect(await top.evaluate((node) => node.compareDocumentPosition(document.querySelector(".catalog-results__count")!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBeTruthy();
+    const media = (await top.locator(".ad-banner__media").boundingBox())!;
+    expect(media.width / media.height).toBeCloseTo(3, 1);
+    await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-2011-ad-catalog-top.png`, caret: "initial" });
     const slot = page.locator(".catalog-grid > .ad-banner").first();
     await expect(slot).toBeVisible();
     expect(await slot.evaluate((node) => [...node.parentElement!.children].indexOf(node))).toBe(6);

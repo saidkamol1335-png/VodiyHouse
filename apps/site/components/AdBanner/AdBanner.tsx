@@ -16,8 +16,11 @@ type AdBannerProps = {
   ad: ShowcaseAd;
   /** Телефон Vodiy House (+998…); нет — у «телефонной» рекламы кнопка заявки. */
   phone: string | null;
-  /** slide — слайдер на главной; slot — место в сетке каталога (вся строка). */
-  variant: "slide" | "slot";
+  /**
+   * slide — слайдер на главной; slot — место в сетке каталога (вся строка); top — над списком каталога
+   * (п. 13, 20.11): и на телефоне — тонкая картинка 3:1, «не такой толстый».
+   */
+  variant: "slide" | "slot" | "top";
   /** false — повтор той же рекламы ниже в каталоге: показ (ad_view) уже засчитан первым баннером. */
   countView?: boolean;
 };
@@ -40,7 +43,7 @@ export function AdBanner({ ad, phone, variant, countView = true }: AdBannerProps
   const root = useRef<HTMLElement>(null);
   useAdView(root, countView ? ad.id : null);
   const alt = ad.title[locale];
-  const mobile = ad.bannerMobile;
+  const mobile = variant === "top" ? null : ad.bannerMobile;
   const {
     props: { srcSet: desktopSet, ...image },
   } = getImageProps({ src: srcOf(ad.banner), alt, width: ad.banner.width, height: ad.banner.height, sizes: SIZES });
@@ -54,7 +57,7 @@ export function AdBanner({ ad, phone, variant, countView = true }: AdBannerProps
         <picture>
           {mobileSet ? <source media={PHONE_MEDIA} srcSet={mobileSet} sizes="100vw" /> : null}
           {/* eslint-disable-next-line jsx-a11y/alt-text -- alt приходит в image из getImageProps */}
-          <img {...image} srcSet={desktopSet} className="ad-banner__image" loading="lazy" decoding="async" />
+          <img {...image} srcSet={desktopSet} className="ad-banner__image" loading={variant === "top" ? "eager" : "lazy"} decoding="async" />
         </picture>
         <span className="ad-banner__tag">{t("tag")}</span>
       </div>

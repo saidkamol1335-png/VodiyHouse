@@ -4,6 +4,7 @@ import { filterVisibility } from "@vh/shared/filterArchive";
 import { SlidersHorizontal } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AdBanner } from "@/components/AdBanner";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { CatalogFilter } from "@/components/CatalogFilter";
@@ -38,7 +39,7 @@ type CatalogResultsProps = {
   hideSoon?: boolean;
   /** id кнопок и блоков фильтра в архиве («Настройки → Фильтр сайта»): на сайте их нет. */
   archived?: readonly string[];
-  /** Баннеры рекламы — слот после каждой 6-й карточки (правки 15.11, п. 4 + 13; только /novostroyki). */
+  /** Баннеры рекламы — над списком и после каждой 6-й карточки (правки 15.11, п. 4 + 13; только /novostroyki). */
   ads?: readonly ShowcaseAd[];
   /** Телефон Vodiy House для кнопки баннера. */
   phone?: string | null;
@@ -93,6 +94,7 @@ export function CatalogResults({ catalog, pageSize, preloadFirst = true, collect
       ) : null}
       {/* Пока открыт экран фильтра телефона, выдача за ним недоступна (диалог). */}
       <div className="catalog-results__body" inert={open}>
+        {ads?.[0] ? <AdBanner ad={ads[0]} phone={phone ?? null} variant="top" /> : null}
         {collection ? <AppliedCollection collection={collection} onReset={reset} /> : null}
         <ResultsTop ref={results} filtersRef={filtersButton} found={found.length} filter={filter} onChange={change} onOpenFilter={() => setOpen(true)} />
         <ResultsList catalog={catalog} found={found} filter={filter} shown={shown} pageSize={pageSize} preloadFirst={preloadFirst} badges={badges} ads={ads} phone={phone} onMore={() => setShown(shown + pageSize)} onReset={reset} />

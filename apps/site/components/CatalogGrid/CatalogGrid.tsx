@@ -5,7 +5,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { CatalogCard } from "@/components/CatalogCard";
 import type { LocalizedText } from "@/lib/contacts";
 import type { CatalogComplex, SiteCatalog } from "@/lib/site/catalog/records";
-import { AD_SLOT_EVERY, adSlotAfter } from "@/lib/site/showcase/slots";
+import { adSlotAfter, adSlotCounts } from "@/lib/site/showcase/slots";
 import type { ShowcaseAd } from "@/lib/site/showcase/records";
 
 /** Заранее грузится обложка первой карточки — LCP; на телефоне виден один ряд из одной карточки. */
@@ -31,7 +31,7 @@ export function CatalogGrid({ catalog, complexes, preloadFirst = true, badges, a
       {complexes.map((complex, index) => {
         const ad = adSlotAfter(index, ads);
         // Первый круг баннеров засчитывает показ; повтор той же рекламы ниже — уже нет.
-        const firstRound = (index + 1) / AD_SLOT_EVERY <= ads.length;
+        const firstRound = adSlotCounts(index, ads);
         return (
           <Fragment key={complex.id}>
             <CatalogCard complex={complex} catalog={catalog} preload={preloadFirst && index < PRELOAD_CARDS} badge={badges?.[complex.id] ?? null} />

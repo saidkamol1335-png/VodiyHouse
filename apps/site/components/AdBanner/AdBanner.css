@@ -116,3 +116,17 @@
     transform: scale(1.02);
   }
 }
+
+/* Над списком каталога (п. 13, 20.11): тонкий — и на телефоне подпись и кнопка в одну строку. */
+@media (max-width: 640px) {
+  .ad-banner--top .ad-banner__bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+  }
+
+  .ad-banner--top .ad-banner__cta > *,
+  .ad-banner--top .ad-banner__lead > * {
+    width: auto;
+  }
+}
