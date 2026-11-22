@@ -710,7 +710,6 @@
       "counter": "{n} / {total}",
       "prev": "Oldingi surat",
       "next": "Keyingi surat",
-      "nextLabel": "Keyingi",
       "thumb": "{n}-suratni ko‘rsatish",
       "open": "Suratni kattalashtirish",
       "close": "Yopish"

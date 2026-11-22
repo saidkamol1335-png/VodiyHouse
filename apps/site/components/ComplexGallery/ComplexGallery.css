@@ -1,7 +1,7 @@
-/* Галерея ЖК — Portal Carousel (@hyperiux, MIT) один в один (04.11.2026): чёрный кадр, за курсором —
-   квадратное превью следующего рендера с чёрной меткой «Далее», клик в любом месте раскрывает его
-   порталом (PortalLayer), слева посередине перекатываются счётчик и подпись. Значения — из образца:
-   превью min(200px, 42vw), метка 10px / .2em, счётчик 14px / 500 / белый 70%, подпись clamp(24–44px). */
+/* Галерея ЖК — по образцу Portal Carousel (@hyperiux, MIT, 04.11.2026): кадр, стрелки ‹ › по краям
+   (правки 15.11, п. 15, уточнение 20.11 — «как в Uzum Market»; было превью «Далее» в углу), новый кадр
+   раскрывается порталом (PortalLayer), слева перекатываются счётчик и подпись. Счётчик 14px / 500 /
+   белый 70%, подпись clamp(24–44px) — из образца. */
 .complex-gallery {
   position: relative;
   isolation: isolate;
@@ -14,6 +14,8 @@
   background: var(--photo-bg);
   /* Нажатие на фото — во весь экран (правки 15.11, п. 15). */
   cursor: zoom-in;
+  /* Свайп по фото листает (useSwipe), вертикальный жест — прокрутка страницы. */
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -158,60 +160,37 @@
   display: block;
 }
 
-/* Превью следующего: квадрат min(200px, 42vw), двигает только useThumbFollow (transform). */
-.complex-gallery__thumb {
+/* Стрелки ‹ › по краям (ТЗ 7.3а) — над слоями портала, тем же «стеклом», что ⤢; видны и на телефоне. */
+.complex-gallery__nav {
   position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 4;
-  width: min(200px, 42vw);
-  aspect-ratio: 1;
-  pointer-events: none;
-  will-change: transform;
-}
-
-.complex-gallery__thumb-button {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
   padding: 0;
-  overflow: hidden;
-  border: 0;
-  background: var(--photo-bg);
-  outline: none;
+  border: 1px solid var(--over-photo-line);
+  border-radius: 50%;
+  background: var(--over-photo-button);
+  color: var(--over-photo-fg);
+  -webkit-backdrop-filter: var(--over-photo-filter);
+  backdrop-filter: var(--over-photo-filter);
   cursor: pointer;
-  pointer-events: auto;
 }
 
-.complex-gallery__thumb-button:focus-visible {
-  box-shadow:
-    0 0 0 2px #000,
-    0 0 0 4px #fff;
+.complex-gallery__nav--prev {
+  left: clamp(10px, 2vw, 24px);
 }
 
-.complex-gallery .complex-gallery__thumb-photo {
-  width: 100%;
-  height: 100%;
-  aspect-ratio: auto;
-  border-radius: 0;
+.complex-gallery__nav--next {
+  right: clamp(10px, 2vw, 24px);
 }
 
-.complex-gallery__label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
-  padding: 4px 8px;
-  background: #000;
-  color: #fff;
-  font-size: 0.625rem;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  pointer-events: none;
-  will-change: transform;
+.complex-gallery__nav:focus-visible {
+  outline: 2px solid var(--over-photo-fg);
+  outline-offset: 2px;
 }
 
 /* Сердце, «Поделиться» и «Во весь экран» — правый верхний угол, над всеми слоями. */

@@ -1,15 +1,13 @@
 "use client";
 
-import { Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, type MouseEvent, type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import { SitePhoto } from "@/components/SitePhoto";
-import { getMotionTier } from "@/lib/motion";
 import type { CatalogPhoto } from "@/lib/site/catalog/records";
 import { GalleryViewer } from "./GalleryViewer";
 import { type PortalLayerData, PortalLayer } from "./PortalLayer";
 import { RollingText } from "./RollingText";
-import { useThumbFollow } from "./useThumbFollow";
 
 type ComplexGalleryProps = {
   photos: readonly CatalogPhoto[];
@@ -21,10 +19,8 @@ type ComplexGalleryProps = {
 };
 
 const SIZES = "(max-width: 760px) 100vw, (max-width: 1280px) calc(100vw - 64px), 1216px";
-const THUMB_SIZES = "200px";
-/** Выпрыгивание превью после клика: scale .2 → 1 за 0,45 с expo.out. */
-const POP_MS = 450;
-const EXPO_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
+/** Свайп на телефоне: от 40 px по горизонтали и больше, чем по вертикали (иначе — прокрутка страницы). */
+const SWIPE_PX = 40;
 
 /** Размытое превью кадра под фото: пока грузится, вместо пустого фона. */
 const blurOf = (photo: CatalogPhoto): CSSProperties | undefined => (photo.blur ? { backgroundImage: `url("${photo.blur}")` } : undefined);
@@ -33,37 +29,37 @@ const blurOf = (photo: CatalogPhoto): CSSProperties | undefined => (photo.blur ?
 const frameOf = ({ width, height }: CatalogPhoto) => ({ "--gallery-ratio": `${width} / ${height}` }) as CSSProperties;
 
 /**
- * Галерея ЖК (ТЗ 7.3а) — по образцу Portal Carousel (@hyperiux, MIT, 04.11.2026): превью следующего
- * рендера с меткой «Далее» в правом нижнем углу раскрывает его порталом на весь кадр, слева
- * перекатываются счётчик и подпись; по кругу. Нажатие на само фото — во весь экран (правки 15.11,
- * п. 15: «как на Uzum»; раньше клик листал, а полный экран был только у кнопки ⤢ — она осталась).
- * Соседние кадры и следующее превью грузятся заранее; пока грузится — размытое превью, не чёрное.
- * Рендеры — целиком, без обрезки (решение исполнителя 03.11).
+ * Галерея ЖК (ТЗ 7.3а; правки 15.11, п. 15, уточнение 20.11 — «как в Uzum Market»): стрелки ‹ › по
+ * краям фото и счётчик «2 / 9» с подписью; по кругу, свайп на телефоне, ← → с клавиатуры. Новый кадр
+ * раскрывается порталом от нажатой стрелки (образец Portal Carousel, @hyperiux, MIT: full — рост,
+ * lite — проявление, none — сразу). Нажатие (тап) на само фото — во весь экран; кнопка ⤢ осталась.
+ * Соседние кадры грузятся заранее; пока грузится — размытое превью, не чёрное. Рендеры — целиком,
+ * без обрезки (решение исполнителя 03.11).
  */
 export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryProps) {
   const t = useTranslations("complex.gallery");
   const [viewer, setViewer] = useState<number | null>(null);
   const warm = useAfterLoad();
-  const { root, thumb, button, label, base, target: targetIndex, next: nextIndex, layers, advance, onLayerDone, jump } = usePortalCarousel(photos.length);
+  const { root, base, target: targetIndex, layers, step, onLayerDone, jump } = usePortalCarousel(photos.length);
+  const gestures = useGalleryGestures((delta) => step(delta, null), viewer !== null);
   const [cover] = photos;
   if (!cover) return null;
   const altOf = (photo: CatalogPhoto) => photo.alt?.[locale] || name;
   const at = (index: number) => photos[(index + photos.length) % photos.length] ?? cover;
   const current = photos[base] ?? cover;
-  const next = photos[nextIndex] ?? cover;
   const target = photos[targetIndex] ?? cover;
   // Нажатие на фото — во весь экран на том кадре, к которому идёт карусель; кнопки — своё.
   const onRootClick = (event: MouseEvent<HTMLDivElement>) => {
     // Клик внутри открытого окна всплывает сюда — окно уже открыто.
-    if (viewer !== null || (event.target as HTMLElement).closest("a, button, input, select, textarea, dialog, [role='button']")) return;
+    if (viewer !== null || gestures.swiped() || (event.target as HTMLElement).closest("a, button, input, select, textarea, dialog, [role='button']")) return;
     setViewer(targetIndex);
   };
   return (
-    <div ref={root} className="complex-gallery" style={frameOf(cover)} role="group" aria-roledescription="carousel" aria-label={t("label", { name })} onClick={onRootClick}>
+    <div ref={root} className="complex-gallery" style={frameOf(cover)} role="group" aria-roledescription="carousel" aria-label={t("label", { name })} onClick={onRootClick} {...gestures.handlers}>
       <div className="complex-gallery__base" style={blurOf(current)}>
         <SitePhoto key={current.path} photo={current} alt={altOf(current)} frame="cover" fit="contain" sizes={SIZES} preload={base === 0} className="complex-gallery__photo" />
       </div>
-      {photos.length > 1 && warm ? <GalleryPreload photos={[next, at(targetIndex - 1)]} thumb={at(nextIndex + 1)} /> : null}
+      {photos.length > 1 && warm ? <GalleryPreload photos={[at(targetIndex + 1), at(targetIndex - 1)]} /> : null}
       <div className="complex-gallery__layers">
         {layers.map((layer) => {
           const photo = photos[layer.index];
@@ -71,7 +67,7 @@ export function ComplexGallery({ photos, name, locale, tools }: ComplexGalleryPr
         })}
       </div>
       <GalleryCaption index={targetIndex} total={photos.length} title={target.alt?.[locale] || name} />
-      {photos.length > 1 ? <GalleryThumb thumbRef={thumb} buttonRef={button} labelRef={label} photo={next} label={t("next")} tag={t("nextLabel")} onAdvance={advance} /> : null}
+      {photos.length > 1 ? <GalleryArrows prev={t("prev")} next={t("next")} onStep={step} /> : null}
       <div className="complex-gallery__tools">
         {tools}
         <button type="button" className="complex-gallery__expand" aria-label={t("open")} onClick={() => setViewer(targetIndex)}>
@@ -105,17 +101,16 @@ function useAfterLoad(): boolean {
 }
 
 /**
- * Заранее, теми же кандидатами (правки 15.11, п. 15): следующий и предыдущий кадры и превью «Далее»
- * после следующего — портал и полный экран не ждут сети. Повторы (у 2 фото сосед один) — один раз.
+ * Заранее, теми же кандидатами (правки 15.11, п. 15): следующий и предыдущий кадры — портал и полный
+ * экран не ждут сети. Повторы (у 2 фото сосед один) — один раз.
  */
-function GalleryPreload({ photos, thumb }: { photos: CatalogPhoto[]; thumb: CatalogPhoto }) {
+function GalleryPreload({ photos }: { photos: CatalogPhoto[] }) {
   const unique = photos.filter((photo, index) => photos.findIndex((other) => other.path === photo.path) === index);
   return (
     <div className="complex-gallery__preload" aria-hidden="true">
       {unique.map((photo) => (
         <SitePhoto key={`pre-${photo.path}`} photo={photo} alt="" frame="cover" fit="contain" sizes={SIZES} />
       ))}
-      <SitePhoto key={`pre-thumb-${thumb.path}`} photo={thumb} alt="" frame="card" sizes={THUMB_SIZES} />
     </div>
   );
 }
@@ -133,55 +128,79 @@ function GalleryCaption({ index, total, title }: { index: number; total: number;
   );
 }
 
-type ThumbProps = {
-  thumbRef: RefObject<HTMLDivElement | null>;
-  buttonRef: RefObject<HTMLButtonElement | null>;
-  labelRef: RefObject<HTMLSpanElement | null>;
-  photo: CatalogPhoto;
-  label: string;
-  tag: string;
-  onAdvance: () => void;
-};
+type StepFn = (delta: 1 | -1, source: HTMLElement | null) => void;
 
-/** Квадратное превью следующего рендера (min(200px, 42vw)) с меткой «Далее» — в правом нижнем углу. */
-function GalleryThumb({ thumbRef, buttonRef, labelRef, photo, label, tag, onAdvance }: ThumbProps) {
+/** Стрелки ‹ › по краям фото (ТЗ 7.3а; правки 15.11, п. 15 — «как в Uzum Market»). */
+function GalleryArrows({ prev, next, onStep }: { prev: string; next: string; onStep: StepFn }) {
   return (
     <>
-      <div ref={thumbRef} className="complex-gallery__thumb">
-        <button ref={buttonRef} type="button" className="complex-gallery__thumb-button" aria-label={label} onClick={(event) => { event.stopPropagation(); onAdvance(); }}>
-          <SitePhoto key={photo.path} photo={photo} alt="" frame="card" sizes={THUMB_SIZES} className="complex-gallery__thumb-photo" />
-        </button>
-      </div>
-      <span ref={labelRef} className="complex-gallery__label" aria-hidden="true">
-        {tag}
-      </span>
+      <button type="button" className="complex-gallery__nav complex-gallery__nav--prev" aria-label={prev} onClick={(event) => onStep(-1, event.currentTarget)}>
+        <ChevronLeft size={22} strokeWidth={1.8} aria-hidden />
+      </button>
+      <button type="button" className="complex-gallery__nav complex-gallery__nav--next" aria-label={next} onClick={(event) => onStep(1, event.currentTarget)}>
+        <ChevronRight size={22} strokeWidth={1.8} aria-hidden />
+      </button>
     </>
   );
+}
+
+/**
+ * Свайп по фото (телефон, правки 15.11, п. 15): горизонтальный жест листает, следующий за ним клик
+ * не открывает полный экран; вертикальный — обычная прокрутка (touch-action: pan-y в CSS). ← → —
+ * то же с клавиатуры, когда фокус в галерее; при открытом полном экране — его стрелки.
+ */
+function useGalleryGestures(onStep: (delta: 1 | -1) => void, paused: boolean) {
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const moved = useRef(false);
+  const handlers = {
+    onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+      start.current = { x: event.clientX, y: event.clientY };
+      moved.current = false;
+    },
+    onPointerUp: (event: PointerEvent<HTMLDivElement>) => {
+      const from = start.current;
+      start.current = null;
+      if (!from || paused) return;
+      const dx = event.clientX - from.x;
+      if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) <= Math.abs(event.clientY - from.y)) return;
+      moved.current = true;
+      onStep(dx < 0 ? 1 : -1);
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+      if (paused || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+      event.preventDefault();
+      onStep(event.key === "ArrowRight" ? 1 : -1);
+    },
+  };
+  return {
+    handlers,
+    /** Был ли свайп перед этим кликом (сбрасывается при чтении). */
+    swiped: () => {
+      const was = moved.current;
+      moved.current = false;
+      return was;
+    },
+  };
 }
 
 /** Состояние карусели образца: база (current), слои-порталы в пути, цель — последний слой. */
 function usePortalCarousel(count: number) {
   const root = useRef<HTMLDivElement>(null);
-  const thumb = useRef<HTMLDivElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
-  const label = useRef<HTMLSpanElement>(null);
   const ids = useRef(0);
   const [base, setBase] = useState(0);
   const [layers, setLayers] = useState<PortalLayerData[]>([]);
-  useThumbFollow({ root, thumb, label }, count > 1);
   const wrap = (n: number) => ((n % count) + count) % count;
   const target = layers.length ? (layers[layers.length - 1]?.index ?? base) : base;
-  const next = wrap(target + 1);
-  const advance = () => {
+  /** Шаг вперёд или назад: портал растёт от нажатой стрелки; свайп и клавиши (source null) — весь кадр. */
+  const step = (delta: 1 | -1, source: HTMLElement | null) => {
     const host = root.current;
-    const source = button.current;
-    if (!host || !source || count < 2) return;
+    if (!host || count < 2) return;
     const frame = host.getBoundingClientRect();
-    const rect = source.getBoundingClientRect();
+    const rect = source ? source.getBoundingClientRect() : frame;
     ids.current += 1;
     const id = ids.current;
-    setLayers((previous) => [...previous, { id, index: next, origin: { x: rect.left - frame.left, y: rect.top - frame.top, w: rect.width, h: rect.height } }]);
-    if (getMotionTier() === "full") source.animate([{ transform: "scale(0.2)" }, { transform: "scale(1)" }], { duration: POP_MS, easing: EXPO_OUT });
+    const index = wrap(target + delta);
+    setLayers((previous) => [...previous, { id, index, origin: { x: rect.left - frame.left, y: rect.top - frame.top, w: rect.width, h: rect.height } }]);
   };
   const onLayerDone = (id: number) => {
     const layer = layers.find((item) => item.id === id);
@@ -192,5 +211,5 @@ function usePortalCarousel(count: number) {
     setLayers([]);
     setBase(wrap(index));
   };
-  return { root, thumb, button, label, base, target, next, layers, advance, onLayerDone, jump };
+  return { root, base, target, layers, step, onLayerDone, jump };
 }

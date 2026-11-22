@@ -426,7 +426,7 @@
 
 /* Кость с графитовой иконкой — одинаково читается над любым кадром, в full, lite и none */
 :root[data-surface="site"]
-  :is(.catalog-card__tools, .complex-gallery__tools) {
+  :is(.catalog-card__tools, .complex-gallery__tools, .complex-gallery__nav) {
   --over-photo-button: rgba(248, 250, 251, 0.9);
   --over-photo-button-strong: rgba(248, 250, 251, 0.94);
   --over-photo-fg: #1e1c19;

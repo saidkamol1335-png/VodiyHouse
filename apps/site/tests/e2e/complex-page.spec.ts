@@ -83,18 +83,40 @@ test.describe("страница ЖК", () => {
     expect(errors).toEqual([]);
   });
 
-  test("галерея: нажатие на фото — во весь экран, у кадров размытое превью; «Далее» листает (правки 15.11, п. 15)", async ({ page }) => {
+  test("галерея: стрелки ‹ › и счётчик, нажатие на фото — во весь экран, свайп, размытое превью (правки 15.11, п. 15)", async ({ page, isMobile }) => {
     const errors = collectPageErrors(page);
     await page.goto(`${SHODLIK}?motion=lite`);
     const gallery = page.getByRole("group", { name: "Фото: ЖК Shodlik" });
     await expect(gallery).toHaveCSS("cursor", "zoom-in");
-    // Заранее — следующий и предыдущий кадры и следующее превью.
-    await expect(gallery.locator(".complex-gallery__preload .site-photo")).toHaveCount(3);
-    // Галерея ожила (гидратация): превью «Далее» встало в угол.
-    await expect(gallery.locator(".complex-gallery__thumb")).toHaveAttribute("style", /translate3d/);
-    await gallery.getByRole("button", { name: "Следующее фото" }).click();
+    // Заранее — следующий и предыдущий кадры.
+    await expect(gallery.locator(".complex-gallery__preload .site-photo")).toHaveCount(2);
+    // Уточнение 20.11: вместо превью с меткой «Далее» — стрелки по краям (видны и на телефоне) и счётчик.
+    await expect(gallery.locator(".complex-gallery__thumb, .complex-gallery__label")).toHaveCount(0);
+    const prev = gallery.getByRole("button", { name: "Предыдущее фото" });
+    const next = gallery.getByRole("button", { name: "Следующее фото" });
+    await expect(prev).toBeVisible();
+    await expect(next).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    const total = Number(/из (\d+)/.exec((await gallery.locator(".sr-only").textContent()) ?? "")?.[1]);
+    await expect(gallery.locator(".complex-gallery__counter")).toContainText(`/ ${total}`);
+    await prev.click();
+    await expect(gallery.locator(".sr-only")).toHaveText(`Фото ${total} из ${total}`);
+    await next.click();
+    await next.click();
     await expect(gallery.locator(".sr-only")).toHaveText(/Фото 2 из \d+/);
-    await gallery.click({ position: { x: 60, y: 260 } });
+    if (isMobile) await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-2011-gallery.png`, caret: "initial" });
+    // Свайп влево — следующий кадр, полный экран не открывается.
+    const box = (await gallery.locator(".complex-gallery__base").boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect(gallery.locator(".sr-only")).toHaveText(/Фото 3 из \d+/);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await prev.click();
+    await expect(gallery.locator(".sr-only")).toHaveText(/Фото 2 из \d+/);
+    // Нажатие на само фото (середина кадра) — во весь экран.
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     const viewer = page.getByRole("dialog", { name: /Фото 2 из \d+/ });
     await expect(viewer).toBeVisible();
     // Пока кадр грузится — его размытое превью, а не тёмный пустой кадр (было: 4/9 чёрным).
