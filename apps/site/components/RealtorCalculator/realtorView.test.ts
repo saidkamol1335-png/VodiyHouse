@@ -41,21 +41,19 @@ const row = (state: RealtorState, key: string) =>
   plain(view(state).rows.find((item) => item.key === key)?.value);
 
 describe("итог риелторского калькулятора", () => {
-  it("ипотека по умолчанию: 600 млн, взнос 20 %, 15 лет под 17,5 % — платёж, кредит, проценты", () => {
+  it("ипотека по умолчанию — как uysot.uz: 600 млн, взнос 100 млн, 20 лет, 17,5 % → 7 524 700 · 1 305 930 315 · 1 805 930 300", () => {
     const result = view(REALTOR_DEFAULTS);
     expect(result.problem).toBeNull();
     expect(plain(result.eyebrow)).toBe("Ипотека · Аннуитетный");
     expect(result.head?.label).toBe("Платёж в месяц");
-    expect(plain(result.head?.value)).toBe("7 558 000 сум");
-    expect(result.rows.map((item) => item.key)).toEqual([
-      "price",
-      "down",
-      "loan",
-      "extra",
-      "overpayment",
-      "total",
-    ]);
-    expect(row(REALTOR_DEFAULTS, "loan")).toBe("480 000 000 сум");
+    expect(plain(result.head?.value)).toBe("7 524 700 сум");
+    expect(result.rows.map((item) => item.key)).toEqual(["price", "down", "loan", "extra", "total"]);
+    expect(row(REALTOR_DEFAULTS, "loan")).toBe("500 000 000 сум");
+    expect(row(REALTOR_DEFAULTS, "extra")).toBe("1 305 930 315 сум");
+    expect(row(REALTOR_DEFAULTS, "total")).toBe("1 805 930 300 сум");
+    expect(result.rows.at(-1)?.label).toBe("Общая сумма");
+    // На «Сколько могу купить» переходит платёж до сума, как у uysot на «Оплате».
+    expect(result.monthlyFloor).toBe(7_524_709);
   });
 
   it("дифференцированный: крупно — первый платёж, строкой — последний", () => {
@@ -65,22 +63,30 @@ describe("итог риелторского калькулятора", () => {
     expect(plain(result.eyebrow)).toBe("Ипотека · Дифференцированный");
   });
 
-  it("рассрочка без наценки — без строк «Наценка» и «Переплата»; с наценкой — с ними", () => {
-    const installment = { ...REALTOR_DEFAULTS, tab: "installment" as const, months: 24 };
-    const keys = view(installment).rows.map((item) => item.key);
-    expect(keys).toEqual(["price", "down", "loan", "total"]);
-    expect(plain(view(installment).head?.value)).toBe("20 000 000 сум");
-    expect(row({ ...installment, markup: "10" }, "extra")).toBe("48 000 000 сум");
+  it("рассрочка без наценки — как uysot: платёж и общая сумма; с наценкой — остаток и наценка", () => {
+    expect(plain(view({ ...REALTOR_DEFAULTS, tab: "installment" }).head?.value)).toBe("8 333 300 сум");
+    const installment = { ...REALTOR_DEFAULTS, tab: "installment" as const, months: 84 };
+    expect(view(installment).rows.map((item) => item.key)).toEqual(["price", "down", "total"]);
+    expect(plain(view(installment).head?.value)).toBe("5 952 400 сум");
+    expect(row(installment, "total")).toBe("500 000 000 сум");
+    const markup = { ...installment, months: 60, markup: "10" };
+    expect(view(markup).rows.map((item) => item.key)).toEqual(["price", "down", "loan", "extra", "total"]);
+    expect(row(markup, "extra")).toBe("50 000 000 сум");
+    expect(row(markup, "total")).toBe("550 000 000 сум");
   });
 
-  it("сколько могу купить: 8 млн в месяц, 15 лет, 17,5 % + взнос 120 млн → цена квартиры", () => {
+  it("сколько могу купить — как uysot «Оплата»: 7 524 709 · 100 млн · 20 лет · 17,5 % → 600 000 000", () => {
     const afford = { ...REALTOR_DEFAULTS, tab: "afford" as const };
     const result = view(afford);
     expect(result.head?.label).toBe("Квартира по карману до");
+    expect(plain(result.head?.value)).toBe("600 000 000 сум");
     expect(result.rows[0]?.key).toBe("monthly");
-    expect(plain(result.rows[0]?.value)).toBe("8 000 000 сум");
+    expect(plain(result.rows[0]?.value)).toBe("7 524 709 сум");
     expect(result.rows.some((item) => item.key === "price")).toBe(false);
-    expect(plain(result.head?.value)).toMatch(/^\d{3} \d{3} 000 сум$/);
+    expect(row(afford, "loan")).toBe("500 000 000 сум");
+    expect(row(afford, "extra")).toBe("1 305 930 202 сум");
+    expect(row(afford, "total")).toBe("1 805 930 200 сум");
+    expect(result.monthlyFloor).toBeNull();
   });
 
   it("нет стоимости, платежа или ставки — подсказка вместо итога", () => {
@@ -94,6 +100,22 @@ describe("итог риелторского калькулятора", () => {
   it("ставка 0 % — это ставка, а не «пусто»", () => {
     expect(view({ ...REALTOR_DEFAULTS, rate: "0" }).problem).toBeNull();
     expect(row({ ...REALTOR_DEFAULTS, rate: "0" }, "extra")).toBe("0 сум");
+  });
+
+  it("площадь × цена м² без шума float: 32,3 × 5 300 000 = 171 190 000, а не …999", () => {
+    const state = { ...REALTOR_DEFAULTS, priceMode: "area" as const, area: "32,3", perM2: "5 300 000", first: "0" };
+    expect(row(state, "price")).toBe("171 190 000 сум");
+    expect(row(state, "loan")).toBe("171 190 000 сум");
+  });
+
+  it("доллары — без floor: платёж $601,98 → $602 (как в графике), в сумах — по курсу 7 224 000", () => {
+    const usd = { ...REALTOR_DEFAULTS, inCurrency: "USD" as const, outCurrency: "USD" as const, sum: "50 000", first: "10 000" };
+    expect(plain(view(usd).head?.value)).toBe("$602");
+    expect(plain(view({ ...usd, outCurrency: "UZS" }).head?.value)).toBe("7 224 000 сум");
+  });
+
+  it("с рассрочки платёж на «Сколько могу купить» не переносится — только с ипотеки", () => {
+    expect(view({ ...REALTOR_DEFAULTS, tab: "installment" }).monthlyFloor).toBeNull();
   });
 
   it("площадь × цена м²: 60 × 10 млн = 600 млн, место в тексте Telegram", () => {
@@ -111,11 +133,11 @@ describe("итог риелторского калькулятора", () => {
 
   it("итог в $ по курсу ЦБ — сноска с курсом; ввод в $ — суммы в полях пересчитаны", () => {
     const usdOut = { ...REALTOR_DEFAULTS, outCurrency: "USD" as const };
-    expect(plain(view(usdOut).head?.value)).toBe("$630");
+    expect(plain(view(usdOut).head?.value)).toBe("$627");
     expect(plain(view(usdOut).footnotes.at(-1))).toBe("Курс ЦБ: 1 $ = 12 000,00 сум на 04.11.2026.");
     const usdIn = switchCurrency(REALTOR_DEFAULTS, "USD", RATE);
     expect(plain(usdIn.sum)).toBe("50 000");
-    expect(plain(usdIn.first)).toBe("10 000");
+    expect(plain(usdIn.first)).toBe("8 333");
     expect(usdIn.outCurrency).toBe("USD");
     expect(switchCurrency(REALTOR_DEFAULTS, "USD", null).sum).toBe(REALTOR_DEFAULTS.sum);
   });
@@ -124,7 +146,8 @@ describe("итог риелторского калькулятора", () => {
     const result = view(REALTOR_DEFAULTS, tUz, "uz");
     expect(plain(result.eyebrow)).toBe("Ipoteka · Annuitet");
     expect(result.head?.label).toBe("Oylik to‘lov");
-    expect(plain(result.head?.value)).toBe("7 558 000 so‘m");
+    expect(plain(result.head?.value)).toBe("7 524 700 so‘m");
+    expect(result.rows.at(-1)?.label).toBe("Umumiy summa");
   });
 });
 
@@ -139,11 +162,13 @@ describe("заявка и Telegram", () => {
       "Срок",
       "Ставка банка",
       "Платёж в месяц",
-      "Переплата",
-      "Итоговая стоимость",
+      "Проценты банка",
+      "Общая сумма",
     ]);
+    expect(plain(rows[1]?.value)).toBe("600 000 000 сум");
     expect(plain(rows[4]?.value)).toBe("17,5% · Аннуитетный");
-    expect(plain(rows[3]?.value)).toBe("15 лет");
+    expect(plain(rows[3]?.value)).toBe("20 лет");
+    expect(plain(rows[6]?.value)).toBe("1 305 930 315 сум");
   });
 
   it("сколько могу купить: в заявке — платёж в месяц, цена — один раз", () => {
@@ -164,8 +189,9 @@ describe("заявка и Telegram", () => {
     const text = plain(telegramOf(REALTOR_DEFAULTS, view(REALTOR_DEFAULTS), ctx(REALTOR_DEFAULTS), "https://x/ru/kalkulyator?tab=mortgage"));
     const lines = text.split("\n");
     expect(lines[0]).toBe("Ипотека · Аннуитетный");
-    expect(text).toContain("Срок: 15 лет");
-    expect(text).toContain("Платёж в месяц: 7 558 000 сум");
+    expect(text).toContain("Срок: 20 лет");
+    expect(text).toContain("Платёж в месяц: 7 524 700 сум");
+    expect(text).toContain("Общая сумма (кредит + проценты, без взноса): 1 805 930 300 сум");
     expect(text).toContain("Расчёт: https://x/ru/kalkulyator?tab=mortgage");
     expect(lines.at(-1)).toBe("Vodiy House");
   });
@@ -199,7 +225,7 @@ describe("адрес", () => {
     expect(state.rate).toBe("17,5");
   });
 
-  it("очищенное поле переживает адрес: пустой взнос не возвращается к 120 млн, пустая ставка — к 17,5 %", () => {
+  it("очищенное поле переживает адрес: пустой взнос не возвращается к 100 млн, пустая ставка — к 17,5 %", () => {
     const state = { ...REALTOR_DEFAULTS, first: "", rate: "" };
     const back = stateFrom(readRealtorParams(new URLSearchParams(realtorSearch("", state))));
     expect(back.first).toBe("");
@@ -233,11 +259,11 @@ describe("адрес", () => {
 describe("остаток долга по периодам (п. 49)", () => {
   const calcOf = (state: RealtorState) => view(state).calc!;
 
-  it("ипотека 15 лет — по годам: 16 столбиков, от суммы кредита до нуля, по убыванию", () => {
+  it("ипотека 20 лет — по годам: 21 столбик, от суммы кредита до нуля, по убыванию", () => {
     const bars = balanceBars(calcOf(REALTOR_DEFAULTS));
-    expect(bars).toHaveLength(16);
-    expect(bars[0]).toEqual({ at: 0, balance: 480_000_000 });
-    expect(bars.at(-1)).toEqual({ at: 180, balance: 0 });
+    expect(bars).toHaveLength(21);
+    expect(bars[0]).toEqual({ at: 0, balance: 500_000_000 });
+    expect(bars.at(-1)).toEqual({ at: 240, balance: 0 });
     expect(bars.every((bar, index) => index === 0 || bar.balance < bars[index - 1]!.balance)).toBe(true);
   });
 

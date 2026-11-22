@@ -5,8 +5,9 @@ import { useId, useState } from "react";
 import type { CalcLocale, CalcT } from "@vh/shared/calc/text";
 import type { Calculation } from "@vh/shared/calc/calculate";
 import type { Currency, ExchangeRate } from "@vh/shared/calc/money";
-import { formatDate, formatPrice } from "@vh/shared/format";
+import { formatDate, formatPrice, formatPriceExact } from "@vh/shared/format";
 import { paymentDate } from "@vh/shared/calc/realtor";
+import { exactSchedule } from "@vh/shared/calc/realtorFigures";
 import { type ScheduleRow, scheduleIn, scheduleTotals } from "@vh/shared/calc/schedule";
 import { type ScheduleColumn, scheduleColumns } from "./scheduleRows";
 
@@ -20,7 +21,13 @@ type CalcScheduleProps = {
   locale: CalcLocale;
   /** «2026-12» — месяц первого платежа: колонка «Дата» (риелторский калькулятор, п. 48). */
   firstMonth?: string;
+  /** Суммы до сума, как у uysot.uz (риелторский калькулятор, 22.11); в сумах без пересчёта валюты. */
+  exact?: boolean;
+  /** «Всего» точного графика — числа итога (строки до сума в сумме дали бы на сотни сумов меньше). */
+  totals?: ScheduleTotals;
 };
+
+type ScheduleTotals = { payment: number; principal: number; interest: number };
 
 /**
  * График платежей (В8 B): раскрытие на всю ширину, первые 12 строк и «Показать все N», без
@@ -57,13 +64,15 @@ function SchedulePanel({
   t,
   locale,
   firstMonth,
+  exact,
+  totals,
   id,
 }: CalcScheduleProps & { id: string }) {
   const [all, setAll] = useState(false);
-  const { rows, currency } = scheduleIn(calculation, out, rate);
+  const { rows, money, isExact } = scheduleView({ calculation, out, rate, locale, exact });
+  const sums = isExact && totals ? totals : scheduleTotals(rows);
   const shown = all ? rows : rows.slice(0, FIRST_ROWS);
   const columns = scheduleColumns(calculation);
-  const money = (amount: number) => formatPrice(amount, currency, locale);
   return (
     <div id={id} className="calc-schedule__panel">
       <table className="calc-schedule__table">
@@ -74,7 +83,7 @@ function SchedulePanel({
             <ScheduleLine key={row.month} row={row} columns={columns} money={money} firstMonth={firstMonth} />
           ))}
         </tbody>
-        <ScheduleFoot columns={columns} rows={rows} money={money} t={t} dated={!!firstMonth} />
+        <ScheduleFoot columns={columns} totals={sums} money={money} t={t} dated={!!firstMonth} />
       </table>
       {rows.length > FIRST_ROWS ? (
         // Одна кнопка на месте: «Показать все N» ↔ «Свернуть» — фокус не теряется.
@@ -89,6 +98,25 @@ function SchedulePanel({
       ) : null}
     </div>
   );
+}
+
+/** Строки и формат сумм: как у uysot (до сума) — только в сумах без пересчёта; иначе шагом валюты. */
+function scheduleView({
+  calculation,
+  out,
+  rate,
+  locale,
+  exact,
+}: Pick<CalcScheduleProps, "calculation" | "out" | "rate" | "locale" | "exact">) {
+  if (exact && calculation.currency === "UZS" && out === "UZS") {
+    return {
+      rows: exactSchedule(calculation),
+      money: (amount: number) => formatPriceExact(amount, "UZS", locale),
+      isExact: true,
+    };
+  }
+  const { rows, currency } = scheduleIn(calculation, out, rate);
+  return { rows, money: (amount: number) => formatPrice(amount, currency, locale), isExact: false };
 }
 
 type LineProps = {
@@ -154,14 +182,13 @@ function ScheduleHead({ columns, calculation, t, dated }: HeadProps) {
 
 type FootProps = {
   columns: readonly ScheduleColumn[];
-  rows: Parameters<typeof scheduleTotals>[0];
+  totals: ScheduleTotals;
   money: (amount: number) => string;
   t: CalcT;
   dated: boolean;
 };
 
-function ScheduleFoot({ columns, rows, money, t, dated }: FootProps) {
-  const totals = scheduleTotals(rows);
+function ScheduleFoot({ columns, totals, money, t, dated }: FootProps) {
   return (
     <tfoot>
       <tr>

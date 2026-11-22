@@ -223,11 +223,11 @@
   "calc": {
     "page": {
       "metaTitle": "Ipoteka va muddatli to‘lov kalkulyatori — Vodiy House",
-      "metaDescription": "Kvartira uchun oylik to‘lov, ortiqcha to‘lov va yakuniy narxni hisoblang: bank foizi, boshlang‘ich to‘lov va muddatni o‘zingiz kiritasiz. Ipoteka, muddatli to‘lov va to‘lov bo‘yicha kvartira tanlash.",
+      "metaDescription": "Kvartira uchun oylik to‘lov, bank foizlari va umumiy summani hisoblang: bank foizi, boshlang‘ich to‘lov va muddatni o‘zingiz kiritasiz. Ipoteka, muddatli to‘lov va to‘lov bo‘yicha kvartira tanlash.",
       "eyebrow": "Kalkulyator",
       "title": "Kalkulyator:",
       "titleAccent": "muddatli to‘lov va ipoteka",
-      "lead": "Narx, boshlang‘ich to‘lov, muddat va bank foizini kiriting — oylik to‘lov, ortiqcha to‘lov va jadval darhol hisoblanadi. Bank yoki quruvchi shartlarini o‘zingiz kiritasiz."
+      "lead": "Narx, boshlang‘ich to‘lov, muddat va bank foizini kiriting — oylik to‘lov, bank foizlari, umumiy summa va jadval darhol hisoblanadi. Bank yoki quruvchi shartlarini o‘zingiz kiritasiz."
     },
     "realtor": {
       "tabs": {
@@ -292,6 +292,10 @@
       "total": {
         "afford": "Kvartira narxi, ko‘pi bilan",
         "last": "Oxirgi to‘lov",
+        "sum": "Umumiy summa",
+        "sumLoan": "kredit + foizlar, boshlang‘ich to‘lovsiz",
+        "sumRest": "boshlang‘ich to‘lovsiz",
+        "sumMarkup": "qoldiq + ustama, boshlang‘ich to‘lovsiz",
         "noMonthly": "Oylik to‘lovni kiriting — kvartira narxini hisoblaymiz"
       },
       "lead": {

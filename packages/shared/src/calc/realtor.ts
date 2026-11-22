@@ -1,7 +1,7 @@
 import { type CalcResult, calculate } from "./calculate";
-import { monthlyRate } from "./formulas";
 import type { Currency } from "./money";
 import { DOWN_MAX_PCT, type TermsProgram } from "./programs";
+import { uysotLoan } from "./realtorFigures";
 import { APP_TIME_ZONE } from "../format";
 
 // Риелторский калькулятор /kalkulyator (PLAN §10, п. 48): условия вводит сам посетитель, программ
@@ -63,7 +63,9 @@ export function downPctOf(down: number, price: number): number {
 
 /** Ипотека и рассрочка: расчёт общим calculate(); «Сколько могу купить» — через доступную цену. */
 export function realtorCalculate(input: RealtorInput): CalcResult {
-  const price = input.mode === "afford" ? affordablePrice(input) : input.price;
+  // «Сколько могу купить» в сумах — от floor(кредит + взнос), как c3 у uysot: график сходится до сума.
+  const pv = input.mode === "afford" ? affordablePrice(input) : 0;
+  const price = input.mode !== "afford" ? input.price : input.currency === "UZS" ? Math.floor(pv) : pv;
   const down = input.mode === "afford" ? Math.min(input.down, price) : input.down;
   return calculate(realtorProgram(input), {
     price,
@@ -84,11 +86,8 @@ export function affordableLoan(
   months: number,
   method: RealtorMethod,
 ): number {
-  if (!(monthly > 0) || !(months >= 1)) return 0;
-  const rate = monthlyRate(annualRatePct);
-  if (rate === 0) return monthly * months;
-  if (method === "differentiated") return monthly / (1 / months + rate);
-  return (monthly * (1 - Math.pow(1 + rate, -months))) / rate;
+  // Запись uysot (realtorFigures): та же формула, тот же float.
+  return uysotLoan(monthly, annualRatePct, months, method);
 }
 
 /**

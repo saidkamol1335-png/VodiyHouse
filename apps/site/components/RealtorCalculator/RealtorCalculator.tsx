@@ -12,6 +12,8 @@ import type { Calculation } from "@vh/shared/calc/calculate";
 import type { CalcHints } from "@vh/shared/calc/hints";
 import type { ExchangeRate } from "@vh/shared/calc/money";
 import { firstPaymentMonth } from "@vh/shared/calc/realtor";
+import type { RealtorFigures } from "@vh/shared/calc/realtorFigures";
+import { formatAmount } from "@vh/shared/format";
 import type { CalcLocale, CalcT } from "@vh/shared/calc/text";
 import { RealtorBalance, RealtorBreakdown } from "./RealtorCharts";
 import { Choice } from "./RealtorFields";
@@ -52,7 +54,7 @@ export function RealtorCalculator({ id, initialState, rate, leadEnabled, hints }
           label={t("realtor.tabs.label")}
           value={state.tab}
           labels={tabLabels(t)}
-          onChange={(tab) => update({ tab })}
+          onChange={(tab) => update(tabPatch(tab, state, view))}
         />
         <div className="realtor-calc__main">
           <div
@@ -70,7 +72,7 @@ export function RealtorCalculator({ id, initialState, rate, leadEnabled, hints }
             <RealtorResult state={state} view={view} context={context} leadEnabled={leadEnabled} update={update} />
           </div>
         </div>
-        {view.calc ? <RealtorFooter calc={view.calc} context={context} /> : null}
+        {view.calc ? <RealtorFooter calc={view.calc} figures={view.figures} context={context} /> : null}
         <CalcStickyBar
           watch={totalRef}
           label={view.head?.label ?? t("sticky.monthly")}
@@ -84,12 +86,24 @@ export function RealtorCalculator({ id, initialState, rate, leadEnabled, hints }
 
 const NO_HINTS: CalcHints = {};
 
-/** Под калькулятором: остаток долга по периодам и график платежей с датами. */
-function RealtorFooter({ calc, context }: { calc: Calculation; context: TotalContext }) {
+/**
+ * Смена вкладки. С «Ипотеки» на «Сколько могу купить» переходит платёж до сума — как у uysot.uz на
+ * вкладку «Оплата» (22.11): цена там выходит той же квартирой.
+ */
+function tabPatch(tab: RealtorState["tab"], state: RealtorState, view: RealtorView): Partial<RealtorState> {
+  if (tab !== "afford" || state.tab === "afford" || view.monthlyFloor === null) return { tab };
+  return { tab, monthly: formatAmount(view.monthlyFloor) };
+}
+
+type FooterProps = { calc: Calculation; figures: RealtorFigures | null; context: TotalContext };
+
+/** Под калькулятором: остаток долга по периодам и график платежей с датами; «Всего» — числа итога. */
+function RealtorFooter({ calc, figures, context }: FooterProps) {
+  const totals = figures ? { payment: figures.total, principal: figures.loan, interest: figures.interest } : undefined;
   return (
     <div className="realtor-calc__footer">
       <RealtorBalance calc={calc} context={context} />
-      <CalcSchedule calculation={calc} {...context} firstMonth={firstPaymentMonth(new Date())} />
+      <CalcSchedule calculation={calc} {...context} firstMonth={firstPaymentMonth(new Date())} exact totals={totals} />
     </div>
   );
 }

@@ -76,8 +76,8 @@ test.describe("сайт · страница калькулятора", () => {
     expect(await noHorizontalScroll(page)).toBe(0);
     const bar = page.locator(".calc-sticky-bar");
     if (!isPhone(page)) return expect(bar).toBeHidden();
-    // 600 млн − взнос 120 млн = 480 млн / 24 мес.
-    await expect(bar).toContainText(/Платёж в месяц\s*20 млн сум/);
+    // 600 млн − взнос 100 млн = 500 млн / 24 мес. = 20 833 300 (сотнями, как uysot).
+    await expect(bar).toContainText(/Платёж в месяц\s*20,8 млн сум/);
     await bar.getByRole("button", { name: "К расчёту" }).click();
     const total = page.getByTestId("calc-total");
     await expect(total).toBeInViewport();
@@ -107,16 +107,17 @@ test.describe("сайт · страница калькулятора", () => {
     await page.waitForLoadState("networkidle");
     const total = page.getByTestId("calc-total");
     // Сумма — одной строкой для диктора и копирования; ленты разрядов — рисунок CSS.
-    await expect(total.locator(".calc-total__value")).toHaveText(/^7\s558\s000\sсум$/);
+    // По умолчанию — как uysot (22.11): 600 млн, взнос 100 млн, 20 лет, 17,5 %.
+    await expect(total.locator(".calc-total__value")).toHaveText(/^7\s524\s700\sсум$/);
     await expect(total.locator(".rolling-number__reel").first()).toHaveCSS("transition-duration", "0.45s");
-    await expect(total.locator(".realtor-calc__legend-item")).toHaveText([/Взнос\s*8%/, /Тело кредита\s*32%/, /Проценты банка\s*59%/]);
-    await expect(page.locator(".realtor-calc__column")).toHaveCount(16);
-    await expect(page.getByRole("img", { name: /^Остаток долга: в начале 480\s000\s000 сум/ })).toBeVisible();
+    await expect(total.locator(".realtor-calc__legend-item")).toHaveText([/Взнос\s*5%/, /Тело кредита\s*26%/, /Проценты банка\s*69%/]);
+    await expect(page.locator(".realtor-calc__column")).toHaveCount(21);
+    await expect(page.getByRole("img", { name: /^Остаток долга: в начале 500\s000\s000 сум/ })).toBeVisible();
     const indicator = page.locator(".realtor-calc__tab-indicator");
     const before = await indicator.evaluate((element) => element.style.getPropertyValue("--tab-x"));
     await page.getByRole("tab", { name: "Рассрочка" }).click();
     await expect.poll(() => indicator.evaluate((element) => element.style.getPropertyValue("--tab-x"))).not.toBe(before);
-    await expect(total.locator(".calc-total__value")).toHaveText(/^20\s000\s000\sсум$/);
+    await expect(total.locator(".calc-total__value")).toHaveText(/^8\s333\s300\sсум$/);
     await expect(total.locator(".realtor-calc__legend-item")).toHaveCount(2);
     await page.goto("/ru/kalkulyator?motion=none");
     await page.waitForLoadState("networkidle");

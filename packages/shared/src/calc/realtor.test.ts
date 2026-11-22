@@ -119,7 +119,8 @@ describe("сколько могу купить", () => {
   it("дифференцированный — по первому платежу", () => {
     const input = { ...afford, ratePct: 24, months: 120, method: "differentiated" as const };
     const calc = ok(input);
-    expect(calc.firstPayment).toBeCloseTo(8_333_333, 2);
+    // В сумах цена — floor(кредит + взнос), как у uysot: платёж меньше на доли сума.
+    expect(calc.firstPayment).toBeCloseTo(8_333_333, -1);
   });
 
   it("взнос больше 90 % цены: цена — по кредиту, взнос урезан до 90 %", () => {

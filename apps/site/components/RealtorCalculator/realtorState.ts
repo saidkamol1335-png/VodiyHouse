@@ -23,9 +23,10 @@ export type RealtorState = {
 };
 
 /**
- * Старт без адреса: квартира 60 м² за 600 млн сум, взнос 20 %, ипотека на 15 лет. Ставка 17,5 % —
- * нижняя граница ипотеки на первичном рынке у банков Узбекистана в 2026 году (uysot.uz, 04.11);
- * посетитель меняет её на ставку своего банка.
+ * Старт без адреса — как у uysot.uz/mortgage-calculator (22.11): 600 млн сум, взнос 100 млн, ипотека
+ * на 20 лет под 17,5 %, рассрочка на 5 лет (60 мес.) без наценки, платёж для подбора — платёж этой
+ * ипотеки (7 524 709 сум: uysot переносит его на вкладку «Оплата»). Ставка 17,5 % — нижняя граница
+ * ипотеки на первичке; посетитель меняет её на ставку своего банка.
  */
 export const REALTOR_DEFAULTS: RealtorState = {
   tab: "mortgage",
@@ -33,10 +34,10 @@ export const REALTOR_DEFAULTS: RealtorState = {
   sum: formatAmount(600_000_000),
   area: "60",
   perM2: formatAmount(10_000_000),
-  first: formatAmount(120_000_000),
-  monthly: formatAmount(8_000_000),
-  years: 15,
-  months: 24,
+  first: formatAmount(100_000_000),
+  monthly: formatAmount(7_524_709),
+  years: 20,
+  months: 60,
   rate: formatAmount(17.5),
   method: "annuity",
   markup: "0",

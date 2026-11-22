@@ -164,6 +164,15 @@ export function formatPrice(amount: number, currency: Currency, locale: Locale =
   return currency === "USD" ? `$${rounded}` : `${rounded} ${SUM_WORD[locale]}`;
 }
 
+/**
+ * Сумма до сума, без шага вывода — риелторский калькулятор /kalkulyator считает как uysot.uz:
+ * «7 524 700 сум», проценты «1 305 930 315 сум» (22.11). Доллары — как formatPrice.
+ */
+export function formatPriceExact(amount: number, currency: Currency, locale: Locale = "ru"): string {
+  if (currency === "USD") return formatPrice(amount, currency, locale);
+  return `${GROUPED.format(Math.floor(amount) + 0)} ${SUM_WORD[locale]}`;
+}
+
 const SHORT_SCALES = [
   { from: 1_000_000_000, ru: "млрд", uz: "mlrd" },
   { from: 1_000_000, ru: "млн", uz: "mln" },
