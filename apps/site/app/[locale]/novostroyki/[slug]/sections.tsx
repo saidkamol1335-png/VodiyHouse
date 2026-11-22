@@ -2,6 +2,7 @@ import { FileText } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { ComplexTerms } from "@/components/ComplexTerms";
 import { ComplexDetails } from "@/components/ComplexDetails";
+import { ComplexIntro } from "@/components/ComplexIntro";
 import { ComplexDeveloper } from "@/components/ComplexDeveloper";
 import { ComplexDocuments } from "@/components/ComplexDocuments";
 import { FaqAccordion } from "@/components/FaqAccordion";
@@ -58,14 +59,13 @@ export async function ComplexSections({ page, sections, name, locale, ownFaq }: 
         </ComplexSection>
       ) : null}
       {has("progress") ? <ProgressSection page={page} /> : null}
-      {has("video") ? (
-        <ComplexSection id={COMPLEX_ANCHORS.video} title={t("video.title")}>
-          <ComplexVideos videos={page.videos} name={page.name[locale]} />
-        </ComplexSection>
-      ) : null}
       {has("details") ? (
         <ComplexSection id={COMPLEX_ANCHORS.details} title={t("details.title")}>
-          <ComplexDetails details={page.details} complexName={name} />
+          <ComplexIntro
+            text={page.shortDescription?.[locale] || null}
+            video={page.videos.length > 0 ? <ComplexVideos videos={page.videos} name={page.name[locale]} /> : null}
+          />
+          {page.details.length > 0 ? <ComplexDetails details={page.details} complexName={name} /> : null}
         </ComplexSection>
       ) : null}
       <ComplexSection id={COMPLEX_ANCHORS.developer} title={t("developer.title")}>
@@ -82,11 +82,14 @@ export async function ComplexSections({ page, sections, name, locale, ownFaq }: 
   );
 }
 
-/** «О ЖК»: описание и факты; блоки и условия покупки — свой раздел после расположения (правки 15.11, п. 17). */
+/**
+ * «О ЖК»: характеристики сеткой (п. 28); короткое описание — над «Деталями проекта» (п. 22); блоки и условия
+ * покупки — свой раздел после расположения (правки 15.11, п. 17).
+ */
 async function AboutSection({ page, locale }: { page: ComplexPage; locale: Locale }) {
   const t = await getTranslations("complex.about");
   return (
-    <ComplexSection id={COMPLEX_ANCHORS.about} title={t("title")} lead={page.shortDescription?.[locale]} tight>
+    <ComplexSection id={COMPLEX_ANCHORS.about} title={t("title")} tight>
       <ComplexFacts facts={complexFacts(page, locale)} deadline={complexSummary(page).deadline} />
     </ComplexSection>
   );

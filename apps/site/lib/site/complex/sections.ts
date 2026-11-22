@@ -4,7 +4,7 @@ import { stockRows } from "./stock";
 
 // Разделы страницы ЖК и навигатор (ТЗ 7.2, мокап .jknav). Порядок — правки 15.11, п. 17 («пусть сначала
 // узнает адрес, потом — данные дома»): о ЖК → расположение → блоки и условия покупки → «Выбрать квартиру»
-// (п. 19, 20.11: на месте таблицы «Наличие»; таблица — только пока выбора с квартирами нет) → планировки → ход строительства (и видеообзор) → детали → застройщик → документы →
+// (п. 19, 20.11: на месте таблицы «Наличие»; таблица — только пока выбора с квартирами нет) → планировки → ход строительства → детали (описание, видео, особенности) → застройщик → документы →
 // вопросы. Раздел без данных скрыт вместе со своим пунктом (PLAN 3а); тот же порядок — в «Разделах».
 
 export const COMPLEX_ANCHORS = {
@@ -17,7 +17,7 @@ export const COMPLEX_ANCHORS = {
   soon: "skoro",
   layouts: "planirovki",
   progress: "hod-stroitelstva",
-  video: "video",
+  // Правки 15.11, п. 22 (20.11): описание и видео застройщика — над каруселью «Деталей», своего раздела нет.
   details: "detali",
   developer: "zastroyshchik",
   documents: "dokumenty",
@@ -46,8 +46,7 @@ export function complexSections(page: ComplexPage): ComplexSectionKey[] {
     soon: page.state === "soon",
     layouts: layoutCards(page).length > 0,
     progress: page.progress.length > 0,
-    video: page.videos.length > 0,
-    details: page.details.length > 0,
+    details: page.details.length > 0 || page.videos.length > 0 || Boolean(page.shortDescription?.ru || page.shortDescription?.uz),
     developer: true,
     documents: page.documents.length > 0,
     faq: page.faq.length > 0,

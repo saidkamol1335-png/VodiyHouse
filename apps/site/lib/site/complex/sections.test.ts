@@ -7,7 +7,7 @@ vi.mock("./stock", () => ({ stockRows: () => [{ rooms: 1 }] }));
 vi.mock("./layouts", () => ({ layoutCards: () => [] }));
 
 // Правки 15.11, п. 19 (20.11): выбор блок → этаж → квартира — на месте таблицы «Наличие».
-const page = (picker: { state: "open" | "layouts" | "soon" }[] | null) =>
+const page = (picker: { state: "open" | "layouts" | "soon" }[] | null, patch: Record<string, unknown> = {}) =>
   ({
     state: "open",
     blocks: [{}],
@@ -22,6 +22,8 @@ const page = (picker: { state: "open" | "layouts" | "soon" }[] | null) =>
     details: [],
     documents: [],
     faq: [],
+    shortDescription: null,
+    ...patch,
   }) as unknown as ComplexPage;
 
 describe("разделы страницы ЖК: выбор квартиры вместо «Наличия»", () => {
@@ -36,5 +38,14 @@ describe("разделы страницы ЖК: выбор квартиры вм
     const layoutsOnly = complexSections(page([{ state: "layouts" }]));
     expect(layoutsOnly).toContain("pick");
     expect(layoutsOnly.indexOf("pick")).toBeLessThan(layoutsOnly.indexOf("stock"));
+  });
+});
+
+describe("«Детали проекта»: описание и видео над каруселью (правки 15.11, п. 22)", () => {
+  it("раздел есть и с одним описанием или одним видео; своего раздела видео нет", () => {
+    expect(complexSections(page(null))).not.toContain("details");
+    expect(complexSections(page(null, { shortDescription: { ru: "Коротко", uz: "Qisqa" } }))).toContain("details");
+    expect(complexSections(page(null, { videos: [{ youtubeId: "abc", title: null }] }))).toContain("details");
+    expect(complexSections(page(null, { videos: [{ youtubeId: "abc", title: null }] }))).not.toContain("video");
   });
 });

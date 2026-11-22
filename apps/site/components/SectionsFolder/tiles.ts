@@ -1,7 +1,6 @@
 import {
   BriefcaseBusiness,
   Building2,
-  Clapperboard,
   CircleHelp,
   ClipboardList,
   DoorOpen,
@@ -26,7 +25,6 @@ export const ICONS: Record<ComplexSectionKey, LucideIcon> = {
   soon: Hourglass,
   layouts: LayoutPanelLeft,
   progress: HardHat,
-  video: Clapperboard,
   details: ClipboardList,
   developer: BriefcaseBusiness,
   documents: FileText,
