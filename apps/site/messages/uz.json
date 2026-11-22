@@ -143,14 +143,14 @@
       "title": "Vodiy House",
       "titleAccent": "loyihalari",
       "all": "Barcha TJMlar",
-      "allNote": "Saytda {n} ta TJM — narxlar, mavjud xonadonlar va rejalar bilan",
+      "allNote": "Saytda {n} ta TJM",
       "prev": "Oldingi TJM",
       "next": "Keyingi TJM",
       "slide": "{total} tadan {n}-TJM"
     },
     "manifesto": {
       "eyebrow": "Vodiy House qisqacha",
-      "text": "Farg‘ona viloyati yangi uylari — bitta katalogda. <a>TJM hujjatlarini tekshiramiz,</a> narx esa quruvchinikidek — <a>ustamasiz.</a> Tanlash, ko‘rsatish va bitimni kuzatib borish — <a>siz uchun bepul.</a>"
+      "text": "Farg‘ona viloyati yangi uylari — bitta katalogda. <a>Hujjatlar tekshirilgan,</a> narx — <a>quruvchinikidek,</a> tanlash va ko‘rsatish — <a>bepul.</a>"
     },
     "why": {
       "accTitle": "Nega ",
@@ -1057,7 +1057,7 @@
       "eyebrow": "Tayyor tanlovlar",
       "title": "TJM tanlovlari — ",
       "titleAccent": "bir bosishda",
-      "lead": "Tanlovni bosing — quyidagi katalog darhol mos TJMlarni ko‘rsatadi. Filtrli havolani Telegramga yuborish mumkin.",
+      "lead": "Tanlovni bosing — katalog mos TJMlarni ko‘rsatadi.",
       "label": "TJM tanlovlari",
       "prev": "Oldingi tanlovlar",
       "next": "Keyingi tanlovlar",
@@ -1072,7 +1072,7 @@
     "offers": {
       "title": "Quruvchilardan ",
       "titleAccent": "takliflar",
-      "lead": "Hamkor quruvchilarning reklamasi va shartlari: muddatli to‘lov, sovg‘alar, savdo boshlanishi. Kartochkadagi sanagacha amal qiladi.",
+      "lead": "Hamkorlar reklamasi: muddatli to‘lov, sovg‘alar, savdo boshlanishi.",
       "place": "Reklama joylashtirish"
     },
     "ad": {
@@ -1487,7 +1487,7 @@
     "eyebrow": "1 daqiqada tanlash",
     "title": "Nimani tanlashni bilmaysizmi? ",
     "titleAccent": "1 daqiqada tanlab beramiz",
-    "lead": "To‘rtta savol — mos TJMlar darhol ko‘rinadi. Menejer rejalar bilan tanlovni Telegramga yuboradi.",
+    "lead": "To‘rtta savol — mos TJMlar darhol ko‘rinadi.",
     "start": "Tanlashni boshlash",
     "time": "≈ 40 soniya",
     "step": "{a}-savol, jami {b}",
