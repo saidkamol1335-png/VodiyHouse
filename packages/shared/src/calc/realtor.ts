@@ -16,7 +16,8 @@ export const REALTOR_MODES: readonly RealtorMode[] = ["mortgage", "installment",
 /** Границы полей: ипотека — в годах, рассрочка — в месяцах (п. 48). */
 export const REALTOR_LIMITS = {
   years: { min: 1, max: 25, presets: [5, 10, 15, 20] },
-  months: { min: 3, max: 60, presets: [12, 24, 36, 48] },
+  // Рассрочка до 20 лет — как у uysot (22.11, сверка uysotCases); кнопки — ходовые сроки застройщиков.
+  months: { min: 3, max: 240, presets: [12, 24, 36, 48] },
   ratePct: { min: 0, max: 60 },
   markupPct: { min: 0, max: 100 },
   downPresets: [10, 20, 30, 40],
