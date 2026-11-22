@@ -67,6 +67,10 @@ test.describe("сайт · этаж без плана — сетка по под
     await expect(section.locator(".complex-picker__floor-plan")).toHaveCount(0);
     await expect(grid.getByRole("region", { name: "Подъезд 1" }).locator(".complex-picker__cell")).toHaveCount(2);
     await expect(grid.getByRole("region", { name: "Подъезд 2" }).locator(".complex-picker__cell--reserved")).toHaveCount(1);
+    // Правки 15.11, п. 19 (20.11): в каждом подъезде — лифт и лестница схемой, не плитка квартиры.
+    await expect(grid.getByRole("region", { name: "Подъезд 1" }).locator(".complex-picker__core")).toContainText("Лифт · лестница");
+    await expect(grid.locator(".complex-picker__core")).toHaveCount(2);
+    await grid.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-2011-floor-grid.png` });
     await expect(section.getByText("свободно 1 из 3")).toBeVisible();
     await grid.locator(".complex-picker__cell--sold").click();
     await expect(section.locator(".complex-picker__note")).toContainText("Квартира № e2e-12 уже продана");

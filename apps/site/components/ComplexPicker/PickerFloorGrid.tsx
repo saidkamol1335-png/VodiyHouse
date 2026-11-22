@@ -1,9 +1,10 @@
 "use client";
 
+import { ArrowUpDown, Footprints } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatArea } from "@vh/shared/format";
 import type { Locale } from "@/lib/i18n/routing";
-import { entranceGroups } from "@/lib/site/picker/model";
+import { coreSplit, entranceGroups } from "@/lib/site/picker/model";
 import type { PickerUnit } from "@/lib/site/picker/records";
 import { useUnitTexts } from "./unitTexts";
 
@@ -28,7 +29,20 @@ export function PickerFloorGrid({ units, selected, onPick }: PickerFloorGridProp
         <section key={group.entrance} className="complex-picker__cells-group" aria-label={t("entrance", { n: group.entrance })}>
           {groups.length > 1 ? <p className="complex-picker__label">{t("entrance", { n: group.entrance })}</p> : null}
           <ul className="complex-picker__cells">
-            {group.units.map((unit) => (
+            {coreSplit(group.units).before.map((unit) => (
+              <li key={unit.id}>
+                <GridCell unit={unit} selected={unit.id === selected} onPick={() => onPick(unit)} />
+              </li>
+            ))}
+            <li className="complex-picker__core" aria-hidden="true">
+              <span className="complex-picker__core-icons">
+                <ArrowUpDown size={16} strokeWidth={1.8} />
+                <Footprints size={16} strokeWidth={1.8} />
+              </span>
+              <span>{t("core")}</span>
+              <small>{t("coreNote")}</small>
+            </li>
+            {coreSplit(group.units).after.map((unit) => (
               <li key={unit.id}>
                 <GridCell unit={unit} selected={unit.id === selected} onPick={() => onPick(unit)} />
               </li>

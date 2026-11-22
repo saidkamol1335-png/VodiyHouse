@@ -49,8 +49,8 @@ export async function ComplexSections({ page, sections, name, locale, ownFaq }: 
           <ComplexTerms page={page} />
         </ComplexSection>
       ) : null}
-      {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("pick") && page.picker ? <PickSection page={page} name={name} /> : null}
+      {has("stock") ? <StockSection page={page} cards={cards} /> : null}
       {has("soon") ? <ComplexSoon id={COMPLEX_ANCHORS.soon} /> : null}
       {has("layouts") ? (
         <ComplexSection id={COMPLEX_ANCHORS.layouts} title={t("layouts.title")}>
@@ -107,7 +107,7 @@ async function ProgressSection({ page }: { page: ComplexPage }) {
   );
 }
 
-/** «Выбрать квартиру» на фасаде (фаза 4): заголовок с акцентом и подзаголовок — разный на 1440 и телефоне. */
+/** «Выбрать квартиру» на фасаде (фаза 4; правки 15.11, п. 19 — на месте таблицы «Наличие»): заголовок с акцентом и подзаголовок — разный на 1440 и телефоне. */
 async function PickSection({ page, name }: { page: ComplexPage; name: string }) {
   const t = await getTranslations("complex.pick");
   const lead = (

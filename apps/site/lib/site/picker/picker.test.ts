@@ -4,6 +4,7 @@ import {
   bestFloor,
   blockFloors,
   boxOf,
+  coreSplit,
   entranceGroups,
   floorEntrances,
   placeUnits,
@@ -136,6 +137,17 @@ describe("выбор квартиры на фасаде: данные", () => {
       [1, [1, 3]],
       [2, [1, 2]],
     ]);
+  });
+
+  it("лифт и лестница — схемой посередине подъезда (правки 15.11, п. 19)", () => {
+    const list = (n: number) => Array.from({ length: n }, (_, index) => ({ id: String(index) }) as unknown as PickerUnit);
+    const sizes = (n: number) => {
+      const { before, after } = coreSplit(list(n));
+      return [before.length, after.length];
+    };
+    expect(sizes(4)).toEqual([2, 2]);
+    expect(sizes(3)).toEqual([2, 1]);
+    expect(sizes(1)).toEqual([1, 0]);
   });
 
   it("геометрия и короткая цена", () => {

@@ -107,6 +107,15 @@ export function placeUnits(plan: FloorPlan, floor: number, units: readonly Picke
 
 export type EntranceGroup = { entrance: number; units: PickerUnit[] };
 
+/**
+ * Лифт и лестница в подъезде — схемой посередине (правки 15.11, п. 19, 20.11: «lift o‘rni, zina»):
+ * где они на самом деле, в данных нет — квартиры подъезда делятся пополам по стоякам.
+ */
+export function coreSplit(units: readonly PickerUnit[]): { before: PickerUnit[]; after: PickerUnit[] } {
+  const half = Math.ceil(units.length / 2);
+  return { before: units.slice(0, half), after: units.slice(half) };
+}
+
 /** Сетка этажа без плана: квартиры по подъездам, в подъезде — по стоякам (позиции). */
 export function entranceGroups(units: readonly PickerUnit[]): EntranceGroup[] {
   const groups = new Map<number, PickerUnit[]>();

@@ -33,7 +33,15 @@ type PickerFacadeProps = {
 const freeOf = (units: readonly PickerUnit[] | undefined) =>
   units ? units.filter((unit) => unit.status === "free").length : null;
 
-type Placed = { block: PickerBlockView; contour: Point[]; state: PickerBlockState; box: Box; free: number | null };
+type Placed = {
+  block: PickerBlockView;
+  contour: Point[];
+  state: PickerBlockState;
+  box: Box;
+  free: number | null;
+  /** Свободные по комнатам — строкой под блоком на телефоне (правки 15.11, п. 18). */
+  rooms: { rooms: number; free: number }[];
+};
 
 const LAYOUTS_HREF = `#${COMPLEX_ANCHORS.layouts}`;
 
@@ -56,7 +64,7 @@ export function PickerFacade({ facade, contours, blocks, units, light, onLight, 
   }, [focusBlock]);
   const placed: Placed[] = blocks.flatMap((block) => {
     const item = contours.find((entry) => entry.id === block.id);
-    return item ? [{ block, contour: item.contour, state: item.state, box: boxOf(item.contour), free: freeOf(units[block.id]) }] : [];
+    return item ? [{ block, contour: item.contour, state: item.state, box: boxOf(item.contour), free: freeOf(units[block.id]), rooms: freeByRooms(units[block.id] ?? []) }] : [];
   });
   return (
     <div ref={root} className="complex-picker__facade">
@@ -168,10 +176,15 @@ function FacadeHint() {
 /** Телефон (мокап .vbl): блоки списком под фасадом — статус и свободные. */
 function FacadeList({ placed, onPick }: { placed: Placed[]; onPick: (id: string) => void }) {
   const t = useTranslations("complex.pick");
+  const tRooms = useTranslations("complex.rooms");
   const labels = useBlockLabels();
+  const roomsLine = (rooms: Placed["rooms"]) =>
+    rooms
+      .map(({ rooms: n, free }) => `${n <= 4 ? tRooms(String(n) as "0") : tRooms("more", { n })} — ${t("roomsCount", { count: free })}`)
+      .join(" · ");
   return (
     <ul className="complex-picker__blocks">
-      {placed.map(({ block, free, state }) => (
+      {placed.map(({ block, free, state, rooms }) => (
         <li key={block.id}>
           {state === "soon" ? (
             <p className="complex-picker__block complex-picker__block--soon">
@@ -194,6 +207,7 @@ function FacadeList({ placed, onPick }: { placed: Placed[]; onPick: (id: string)
               </span>
             ) : null}
             <ChevronRight size={18} aria-hidden="true" />
+            {rooms.length > 0 ? <span className="complex-picker__block-rooms">{roomsLine(rooms)}</span> : null}
           </button>
           )}
         </li>

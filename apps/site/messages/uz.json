@@ -902,6 +902,8 @@
       "total": "Jami kvartiralar",
       "freeLabel": "Bo‘sh",
       "roomsCount": "{count} ta",
+      "core": "Lift · zina",
+      "coreNote": "sxema",
       "go": "Bosing — qavatlar va kvartiralar",
       "back": "Barcha korpuslar",
       "floor": "Qavat",

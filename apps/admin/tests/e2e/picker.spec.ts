@@ -35,6 +35,14 @@ async function openBlock(page: Page, name: "A" | "B") {
   // Телефон (до 760 px) — список блоков под фасадом; шире — подписи на фасаде.
   const isPhone = (page.viewportSize()?.width ?? 1440) <= 760;
   const label = `Блок ${name}`;
+  // Правки 15.11, п. 18: свободные по комнатам — в подсказке блока (ПК) и строкой под блоком (телефон).
+  if (isPhone) {
+    await expect(section.locator(".complex-picker__block", { hasText: label }).locator(".complex-picker__block-rooms")).toHaveText(/\d-комн\. — \d+ шт\./);
+  } else {
+    await section.locator(".complex-picker__tag", { hasText: label }).hover();
+    await expect(section.locator(".complex-picker__tip")).toContainText(/\d-комн\./);
+    await expect(section.locator(".complex-picker__tip")).toContainText("этажи и квартиры");
+  }
   await (isPhone ? section.locator(".complex-picker__block", { hasText: label }) : section.locator(".complex-picker__tag", { hasText: label })).click();
   await expect(section.getByRole("button", { name: "Все корпуса" })).toBeVisible();
   return section;

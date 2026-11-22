@@ -56,9 +56,11 @@ test.describe("страница ЖК", () => {
     const nav = page.getByRole("navigation", { name: "Разделы страницы" });
     // Разделов без данных нет: у Shodlik нет видео и деталей; «Ход строительства» — DEMO-отчёты (фаза 5).
     // Правки 15.11, п. 17: расположение — сразу после «О ЖК», затем «Блоки и условия»; тот же порядок у разделов.
-    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Блоки и условия", "Наличие", "Выбрать квартиру", "Планировки", "Ход строительства", "Застройщик", "Документы"]);
+    // П. 19 (20.11): выбор квартиры — на месте таблицы «Наличие», следом — «Планировки».
+    await expect(nav.getByRole("link")).toHaveText(["О ЖК", "Расположение", "Блоки и условия", "Выбрать квартиру", "Планировки", "Ход строительства", "Застройщик", "Документы"]);
     const order = await main.locator("section[id]").evaluateAll((nodes) => nodes.map((node) => node.id));
-    expect(order.slice(0, 4)).toEqual(["o-zhk", "raspolozhenie", "bloki", "nalichie"]);
+    expect(order.slice(0, 5)).toEqual(["o-zhk", "raspolozhenie", "bloki", "vybrat-kvartiru", "planirovki"]);
+    await expect(main.locator("#nalichie")).toHaveCount(0);
     await expect(main.locator("#bloki")).toContainText("перенесён с 2 кв. 2027");
     await expect(main.locator("#raspolozhenie")).toContainText("Школа №46");
     // Карта — сразу картинкой, без кнопки «Показать на карте»; грузится лениво.
@@ -66,13 +68,6 @@ test.describe("страница ЖК", () => {
     await expect(map).toHaveAttribute("loading", "lazy");
     await expect(map).toHaveAttribute("src", /^https:\/\/static-maps\.yandex\.ru\//);
     await expect(main.getByRole("button", { name: "Показать на карте" })).toHaveCount(0);
-    // Итог «в продаже» = сумма по блокам (число в DEMO меняют e2e кабинета: было 41, 16.11 — 40).
-    const total = Number(await main.locator("#nalichie .complex-stock__number").textContent());
-    const perBlock = (await main.locator("#nalichie .complex-stock__blocks").textContent()) ?? "";
-    await expect(main.locator("#nalichie .complex-stock__caption")).toHaveText("в продаже сейчас");
-    expect(total).toBeGreaterThan(0);
-    expect(total).toBe([...perBlock.matchAll(/: (\d+)/g)].reduce((sum, match) => sum + Number(match[1]), 0));
-    await expect(main.locator("#nalichie")).toContainText(/обновлено \d{2}\.\d{2}, \d{2}:\d{2}/i);
     await expect(main.locator("#planirovki h3")).toHaveCount(8);
     await expect(main.locator("#zastroyshchik")).toContainText("Farg‘ona Sifat Qurilish");
     await expect(main.locator("#zastroyshchik")).toContainText("Строится 2 ЖК");
@@ -188,10 +183,25 @@ test.describe("страница ЖК", () => {
     await expect(page.locator("#bloki")).toContainText(/Место в подземном паркинге\s*отдельно, от \$9\s000/);
   });
 
+  test("без выбора квартиры на фасаде — таблица «Наличие»: итог = сумма по блокам (правки 15.11, п. 19)", async ({ page }) => {
+    // У реальных ЖК тестового облака фасада с контурами пока нет (DEMO — все с выбором квартиры).
+    await page.goto("/ru/novostroyki/shodlik");
+    const main = page.locator("main");
+    await expect(main.locator("#vybrat-kvartiru")).toHaveCount(0);
+    const total = Number(await main.locator("#nalichie .complex-stock__number").textContent());
+    const perBlock = (await main.locator("#nalichie .complex-stock__blocks").textContent()) ?? "";
+    await expect(main.locator("#nalichie .complex-stock__caption")).toHaveText("в продаже сейчас");
+    expect(total).toBeGreaterThan(0);
+    if (perBlock) expect(total).toBe([...perBlock.matchAll(/: (\d+)/g)].reduce((sum, match) => sum + Number(match[1]), 0));
+    await expect(main.locator("#nalichie")).toContainText(/обновлено \d{2}\.\d{2}, \d{2}:\d{2}/i);
+    await page.goto("/uz/novostroyki/shodlik");
+    await expect(page.locator("#nalichie")).toContainText("ta qoldi");
+  });
+
   test("UZ — тексты на узбекском; чужой адрес — 404", async ({ page }) => {
     await page.goto("/uz/novostroyki/demo-shodlik");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Shodlik TJM");
-    await expect(page.locator("#nalichie")).toContainText("ta qoldi");
+    await expect(page.locator("#vybrat-kvartiru")).toBeVisible();
     const response = await page.goto("/ru/novostroyki/net-takogo-zhk");
     expect(response?.status()).toBe(404);
   });

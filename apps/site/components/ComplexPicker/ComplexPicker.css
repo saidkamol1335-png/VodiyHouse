@@ -846,6 +846,41 @@ a.complex-picker__tag {
   gap: 18px;
 }
 
+/* Лифт и лестница подъезда — схема посередине (п. 19, 20.11): не плитка квартиры, не нажимается. */
+.complex-picker__core {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-height: 84px;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--line-2);
+  border-radius: var(--r-m);
+  color: var(--fg-3);
+  font-size: var(--fs-small);
+}
+
+.complex-picker__core-icons {
+  display: flex;
+  gap: 6px;
+}
+
+.complex-picker__core small {
+  font-family: var(--font-mono);
+  font-size: var(--fs-tiny);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Подъезды рядом, как в прототипе (1024+); на телефоне и планшете — друг под другом. */
+@media (min-width: 1024px) {
+  .complex-picker__grid:has(> .complex-picker__cells-group + .complex-picker__cells-group) {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: start;
+  }
+}
+
 .complex-picker__cells {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
@@ -1034,6 +1069,19 @@ a.complex-picker__tag {
 
   .complex-picker__block-free--none {
     color: var(--fg-3);
+  }
+
+  /* Свободные по комнатам — второй строкой (правки 15.11, п. 18). */
+  .complex-picker__block:has(.complex-picker__block-rooms) {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    padding-block: 10px;
+  }
+
+  .complex-picker__block-rooms {
+    flex: 1 0 100%;
+    color: var(--fg-3);
+    font-size: var(--fs-caption);
   }
 
   .complex-picker__plan {
