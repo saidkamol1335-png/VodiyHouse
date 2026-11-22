@@ -2,66 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "vodiyhouse",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
-      "port": 3000
-    },
-    {
-      "name": "mockup",
-      "runtimeExecutable": "node",
-      "runtimeArgs": [
-        "docs/mockup/tools/serve.mjs"
-      ],
-      "port": 4599
-    },
-    {
       "name": "vodiyhouse-prod-copy",
       "runtimeExecutable": "node",
       "runtimeArgs": [
         "C:/Users/Alocomputers/Desktop/VH_mijoz/apps/site/scripts/dev-prod-copy.mjs"
       ],
       "port": 3006
-    },
-    {
-      "name": "vodiyhouse-prod",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "start",
-        "-w",
-        "@vh/site",
-        "--",
-        "--port",
-        "3010"
-      ],
-      "port": 3010
-    },
-    {
-      "name": "vodiyhouse-release-demo",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": [
-        "/c",
-        "cd /d C:/Users/Alocomputers/Desktop/VH_release && set VH_DEMO_SECTIONS=1&& npm run dev -w @vh/site -- --port 3002"
-      ],
-      "port": 3002
-    },
-    {
-      "name": "vodiyhouse-site-3002",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev",
-        "-w",
-        "@vh/site",
-        "--",
-        "--port",
-        "3002"
-      ],
-      "port": 3002
     }
   ]
 }
