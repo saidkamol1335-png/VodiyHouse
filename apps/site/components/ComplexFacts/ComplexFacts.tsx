@@ -45,40 +45,7 @@ type ComplexFactsProps = {
  * своей анимации: раздел проявляется целиком (ComplexSection).
  */
 export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
-  const t = await getTranslations("complex");
-  const valueOf = (fact: Fact): string => {
-    switch (fact.key) {
-      case "class":
-        return t(`class.${fact.value}`);
-      case "floors":
-        return t("about.floorsValue", { n: fact.value });
-      case "houseType":
-        return t(`about.houseType.${fact.value}`);
-      case "ceilings":
-        return t("about.ceilingsValue", { n: CEILING.format(fact.value) });
-      case "parking":
-        return t(`about.parking.${fact.value}`);
-      case "toCenter":
-        return t("about.toCenterValue", { n: fact.value });
-      default:
-        return fact.value.join(fact.key === "blocks" ? " · " : " / ");
-    }
-  };
-  const items: FactItem[] = facts.map((fact) => ({
-    id: fact.key,
-    label: t(`about.facts.${fact.key}`),
-    value: valueOf(fact),
-  }));
-  if (deadline) {
-    items.unshift({
-      id: "deadline",
-      label: t("offer.deadline"),
-      value:
-        deadline.kind === "built"
-          ? t("offer.built")
-          : t("quarter", { q: deadline.quarter, year: deadline.year }),
-    });
-  }
+  const items = factItems(facts, deadline, await getTranslations("complex"));
   if (items.length === 0) return null;
   return (
     <dl className="complex-facts">
@@ -94,4 +61,45 @@ export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
       })}
     </dl>
   );
+}
+
+type ComplexT = Awaited<ReturnType<typeof getTranslations<"complex">>>;
+
+/** Плашки по порядку: срок сдачи — первым, затем факты из complexFacts. */
+function factItems(facts: readonly Fact[], deadline: CardDeadline, t: ComplexT): FactItem[] {
+  const items: FactItem[] = facts.map((fact) => ({
+    id: fact.key,
+    label: t(`about.facts.${fact.key}`),
+    value: factValue(fact, t),
+  }));
+  if (deadline) {
+    items.unshift({
+      id: "deadline",
+      label: t("offer.deadline"),
+      value:
+        deadline.kind === "built"
+          ? t("offer.built")
+          : t("quarter", { q: deadline.quarter, year: deadline.year }),
+    });
+  }
+  return items;
+}
+
+function factValue(fact: Fact, t: ComplexT): string {
+  switch (fact.key) {
+    case "class":
+      return t(`class.${fact.value}`);
+    case "floors":
+      return t("about.floorsValue", { n: fact.value });
+    case "houseType":
+      return t(`about.houseType.${fact.value}`);
+    case "ceilings":
+      return t("about.ceilingsValue", { n: CEILING.format(fact.value) });
+    case "parking":
+      return t(`about.parking.${fact.value}`);
+    case "toCenter":
+      return t("about.toCenterValue", { n: fact.value });
+    default:
+      return fact.value.join(fact.key === "blocks" ? " · " : " / ");
+  }
 }
