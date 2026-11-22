@@ -48,6 +48,20 @@
         "cd /d C:/Users/Alocomputers/Desktop/VH_release && set VH_DEMO_SECTIONS=1&& npm run dev -w @vh/site -- --port 3002"
       ],
       "port": 3002
+    },
+    {
+      "name": "vodiyhouse-site-3002",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "@vh/site",
+        "--",
+        "--port",
+        "3002"
+      ],
+      "port": 3002
     }
   ]
 }

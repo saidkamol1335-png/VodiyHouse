@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { locale as rootLocale } from "next/root-params";
+import { unstable_rethrow } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/Container";
 import { FlatPicker } from "@/components/FlatPicker";
@@ -24,6 +25,7 @@ import type { SiteCatalog } from "@/lib/site/catalog/records";
 import { availabilitySample, heroFound, homeStats, progressSample } from "@/lib/site/home/stats";
 import { readProgressFrames } from "@/lib/site/progress/read";
 import { readSiteContacts } from "@/lib/site/contacts";
+import { readSiteDevelopers } from "@/lib/site/developers/read";
 import { readSiteFaq } from "@/lib/site/faq";
 import { pageMetadata, siteOrigin } from "@/lib/site/metadata";
 import { agencyLd } from "@/lib/site/seo/jsonLd";
@@ -52,13 +54,24 @@ export async function generateMetadata(): Promise<Metadata> {
  * словах», «Почему через Vodiy House» (с плиткой «Видео стройки» — фаза 5), «Вы застройщик?». Страница статичная: всё — из кэшированных
  * ответов каталога и витрины.
  */
+/** Логотипы для строки под первым экраном (правки 15.11, п. 27): сбой базы — строки нет, главная работает. */
+async function readStripDevelopers() {
+  try {
+    return await readSiteDevelopers();
+  } catch (error) {
+    unstable_rethrow(error);
+    return null;
+  }
+}
+
 export default async function HomePage() {
   const locale = (await rootLocale()) as Locale;
-  const [catalog, showcase, frames, faq] = await Promise.all([
+  const [catalog, showcase, frames, faq, developers] = await Promise.all([
     readSiteCatalog(),
     readSiteShowcase(),
     readProgressFrames(),
     readSiteFaq(),
+    readStripDevelopers(),
   ]);
   return (
     <>
@@ -70,7 +83,7 @@ export default async function HomePage() {
           found={catalog ? heroFoundOrNull(catalog) : null}
           catalogId={CATALOG_ID}
         />
-        <HomeMarquee />
+        <HomeMarquee developers={developers} />
         {catalog ? (
           <HomeCatalog id={CATALOG_ID} catalog={catalog} pageSize={PAGE_SIZE} showcase={showcase} />
         ) : (
