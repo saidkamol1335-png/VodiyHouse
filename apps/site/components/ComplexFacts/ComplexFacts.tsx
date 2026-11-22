@@ -53,8 +53,10 @@ export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
         const Icon = ICONS[item.id];
         return (
           <div key={item.id} className="complex-facts__item" data-fact={item.id}>
-            <Icon className="complex-facts__icon" size={20} strokeWidth={1.6} aria-hidden />
-            <dt className="complex-facts__label">{item.label}</dt>
+            <dt className="complex-facts__label">
+              <Icon className="complex-facts__icon" size={20} strokeWidth={1.6} aria-hidden />
+              {item.label}
+            </dt>
             <dd className="complex-facts__value">{item.value}</dd>
           </div>
         );

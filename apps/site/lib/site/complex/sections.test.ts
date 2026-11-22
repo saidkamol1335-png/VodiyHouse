@@ -10,7 +10,7 @@ vi.mock("./layouts", () => ({ layoutCards: () => [] }));
 const page = (picker: { state: "open" | "layouts" | "soon" }[] | null, patch: Record<string, unknown> = {}) =>
   ({
     state: "open",
-    blocks: [{}],
+    blocks: [{ id: "0", offers: [{ available: true }] }],
     picker: picker === null ? null : { blocks: picker.map((block, index) => ({ id: String(index), contour: [], state: block.state })) },
     address: null,
     point: null,
@@ -38,6 +38,11 @@ describe("разделы страницы ЖК: выбор квартиры вм
     const layoutsOnly = complexSections(page([{ state: "layouts" }]));
     expect(layoutsOnly).toContain("pick");
     expect(layoutsOnly.indexOf("pick")).toBeLessThan(layoutsOnly.indexOf("stock"));
+  });
+
+  it("контур есть не у всех блоков с продажей — таблица остаётся (наличие блока без контура не пропадает)", () => {
+    const twoBlocks = page([{ state: "open" }], { blocks: [{ id: "0", offers: [{ available: true }] }, { id: "1", offers: [{ available: true }] }] });
+    expect(complexSections(twoBlocks)).toContain("stock");
   });
 });
 

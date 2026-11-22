@@ -113,6 +113,8 @@ describe("реклама — баннер", () => {
       ).rows[0]!.v;
     const shown = await ads();
     expect(shown.find((item) => item.id === other)).toMatchObject({ advertiser: "Ofis Mebel", developer: null });
+    // Таблицу ads посетитель напрямую не читает (аудит 29.10) — только через site_showcase().
+    await expectDenied(db.as(anon, (tx) => tx.query("select id from ads")));
     expect(shown.find((item) => item.id === ad)).toMatchObject({ advertiser: "Ad Dev", developer: { slug: "ad-dev" } });
     // Реклама скрытого застройщика на сайт не попадает; без застройщика — по своему периоду.
     const hidden = (

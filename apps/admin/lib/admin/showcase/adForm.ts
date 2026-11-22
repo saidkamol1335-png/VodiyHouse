@@ -1,4 +1,5 @@
 import { EMPTY_BILINGUAL, type BilingualValue } from "../bilingual";
+import { mentionsDiscount } from "@vh/shared/discounts";
 import { containsContact } from "../contactGuard";
 import { readText } from "../credentials";
 import {
@@ -117,7 +118,9 @@ export function parseAd(formData: FormData): AdParse {
 function advertiserIssue({ developerId, advertiser }: AdFields): ShowcaseIssue | undefined {
   if (!developerId && !advertiser) return "required";
   if (advertiser.length > ADVERTISER_MAX) return "tooLong";
-  return containsContact(advertiser) ? "contacts" : undefined;
+  if (containsContact(advertiser)) return "contacts";
+  // Подпись баннера — без скидок (сайт показывает их только по выключателю, PLAN §3.12).
+  return mentionsDiscount(advertiser) ? "discount" : undefined;
 }
 
 /** Строка для insert / update ads: прежние текст, ЖК и фильтр карточки — пустые. */

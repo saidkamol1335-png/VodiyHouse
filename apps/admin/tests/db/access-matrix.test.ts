@@ -249,8 +249,6 @@ describe("матрица доступа по ролям (PLAN §5)", () => {
          order by 1`,
       );
       expect(rows.map((row) => row.name)).toEqual([
-        // Видимость рекламы с застройщиком и без (20261122100000, правки 15.11, п. 4) — для политики ads.
-        "ad_visible",
         "can_see_complex", "exchange_rate", "has_role", "is_contour", "is_public_complex", "is_public_developer",
         "is_staff", "is_unit_contours", "mentions_discount", "showcase_public_complexes", "showcase_visible",
         // Выключатель «Скидки на сайте» (20261117150000): читает публичную запись settings.

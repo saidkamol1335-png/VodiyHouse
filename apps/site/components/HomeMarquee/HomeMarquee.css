@@ -63,6 +63,33 @@
   animation: home-marquee var(--dur-home-marquee) linear infinite;
 }
 
+/* Копия ленты не уже полосы: при 5–8 логотипах в конце круга нет пустого хвоста. */
+[data-motion="full"] .home-marquee--running .home-marquee__list {
+  min-width: 100vw;
+  justify-content: space-around;
+}
+
+/* 5+ логотипов, но не full (lite — телефон и старт, none): тот же статичный ряд, без копии и маски. */
+:root:not([data-motion="full"]) .home-marquee--running {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+:root:not([data-motion="full"]) .home-marquee--running .home-marquee__track {
+  width: auto;
+  justify-content: center;
+}
+
+:root:not([data-motion="full"]) .home-marquee--running .home-marquee__list {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px 48px;
+}
+
+:root:not([data-motion="full"]) .home-marquee--running .home-marquee__list[aria-hidden] {
+  display: none;
+}
+
 .home-marquee--running:is(:hover, :focus-within) .home-marquee__track {
   animation-play-state: paused;
 }
@@ -71,6 +98,27 @@
 @media (prefers-reduced-motion: reduce) {
   .home-marquee__track {
     animation: none !important;
+  }
+
+  .home-marquee--running {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  :root .home-marquee .home-marquee__track {
+    width: auto;
+    justify-content: center;
+  }
+
+  :root .home-marquee--running .home-marquee__list {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px 48px;
+  }
+
+  .home-marquee--running .home-marquee__list[aria-hidden] {
+    display: none;
   }
 }
 

@@ -10,7 +10,7 @@
 
 .complex-facts__item {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto 1fr;
   align-content: start;
   gap: 6px;
   min-width: 0;
@@ -22,6 +22,8 @@
 }
 
 .complex-facts__icon {
+  display: block;
+  margin-bottom: 6px;
   color: var(--amber-2);
 }
 

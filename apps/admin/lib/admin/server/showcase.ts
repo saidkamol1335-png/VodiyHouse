@@ -96,7 +96,8 @@ function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): Showca
     id: row.id,
     kind,
     title: bilingualFrom(row.title).ru,
-    developerName: row.developers?.name ?? row.advertiser ?? null,
+    // Как на сайте (site_showcase): название рекламодателя важнее имени застройщика.
+    developerName: row.advertiser?.trim() || row.developers?.name || null,
     complexCount,
     // Реклама с правок 15.11 — баннер, без ЖК и фильтра.
     byFilter: kind === "collection" ? row.mode === "filter" : false,

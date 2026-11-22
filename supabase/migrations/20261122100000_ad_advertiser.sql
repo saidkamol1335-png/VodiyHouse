@@ -14,7 +14,9 @@ alter table public.ads
 comment on column public.ads.advertiser is
   'Рекламодатель не из застройщиков (правки 15.11, п. 4, 20.11) — подпись баннера на сайте; у застройщика — его имя.';
 
--- Реклама на сайте: включена, период идёт; у застройщика — он опубликован.
+-- Реклама на сайте: включена, период идёт; у застройщика — он опубликован. Только для site_showcase()
+-- (security definer): таблицу ads посетитель напрямую не читает — политика «читают сотрудники» из
+-- 20261029070000_audit_access.sql остаётся как есть.
 create function private.ad_visible(p_active boolean, p_from date, p_to date, p_developer uuid)
 returns boolean
 language sql
@@ -26,26 +28,7 @@ as $$
     and (p_developer is null or private.is_public_developer(p_developer))
 $$;
 
-revoke all on function private.ad_visible(boolean, date, date, uuid) from public;
-grant execute on function private.ad_visible(boolean, date, date, uuid) to anon, authenticated, service_role;
-
--- Прежняя политика чтения (имя длиннее 63 байт — в базе оно обрезано): ищем по таблице и команде.
-do $$
-declare
-  old_policy record;
-begin
-  for old_policy in
-    select policyname from pg_policies
-    where schemaname = 'public' and tablename = 'ads' and cmd = 'SELECT' and policyname like 'ads: сайт%'
-  loop
-    execute format('drop policy %I on public.ads', old_policy.policyname);
-  end loop;
-end;
-$$;
-
-create policy "ads: сайт — действующие, сотрудники — все"
-  on public.ads for select to anon, authenticated
-  using (private.ad_visible(is_active, valid_from, valid_to, developer_id) or (select private.is_staff()));
+revoke all on function private.ad_visible(boolean, date, date, uuid) from public, anon, authenticated;
 
 create or replace function public.site_showcase()
 returns jsonb

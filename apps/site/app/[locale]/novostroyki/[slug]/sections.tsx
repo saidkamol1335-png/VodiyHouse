@@ -62,7 +62,7 @@ export async function ComplexSections({ page, sections, name, locale, ownFaq }: 
       {has("details") ? (
         <ComplexSection id={COMPLEX_ANCHORS.details} title={t("details.title")}>
           <ComplexIntro
-            text={page.shortDescription?.[locale] || null}
+            text={page.shortDescription?.[locale] || page.shortDescription?.ru || page.shortDescription?.uz || null}
             video={page.videos.length > 0 ? <ComplexVideos videos={page.videos} name={page.name[locale]} /> : null}
           />
           {page.details.length > 0 ? <ComplexDetails details={page.details} complexName={name} /> : null}

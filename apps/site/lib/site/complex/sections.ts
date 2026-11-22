@@ -29,9 +29,16 @@ export type ComplexSectionKey = keyof typeof COMPLEX_ANCHORS;
 
 const hasLocation = (page: ComplexPage) => Boolean(page.address || page.point || page.landmark || page.nearby.length > 0);
 
-/** Выбор квартиры показывает наличие: на фасаде есть блок с квартирами (не только планировки или «скоро»). */
-const pickShowsStock = (page: ComplexPage) =>
-  page.picker !== null && page.state !== "soon" && page.picker.blocks.some((block) => block.state === "open");
+/**
+ * Выбор квартиры показывает всё наличие: каждый блок, где что-то продаётся, есть на фасаде с квартирами
+ * (контур нарисован не у всех блоков — таблица остаётся, иначе наличие блока без контура пропало бы).
+ */
+function pickShowsStock(page: ComplexPage): boolean {
+  if (page.picker === null || page.state === "soon") return false;
+  const open = new Set(page.picker.blocks.filter((block) => block.state === "open").map((block) => block.id));
+  const selling = page.blocks.filter((block) => block.offers.some((offer) => offer.available));
+  return open.size > 0 && selling.every((block) => open.has(block.id));
+}
 
 /** Разделы, которые есть у этого ЖК, по порядку страницы. */
 export function complexSections(page: ComplexPage): ComplexSectionKey[] {

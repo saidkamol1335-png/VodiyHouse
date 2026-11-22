@@ -15,7 +15,7 @@
   /* Нажатие на фото — во весь экран (правки 15.11, п. 15). */
   cursor: zoom-in;
   /* Свайп по фото листает (useSwipe), вертикальный жест — прокрутка страницы. */
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
 }

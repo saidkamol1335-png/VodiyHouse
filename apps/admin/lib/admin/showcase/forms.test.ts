@@ -153,6 +153,9 @@ describe("форма рекламы (баннер, правки 15.11)", () => {
     const contact = parseAd(form({ ...base, developerId: "", advertiser: "t.me/ofis", cta: "lead" }));
     if (!contact.ok) expect(contact.fieldErrors.advertiser).toBe("contacts");
     expect(contact.ok).toBe(false);
+    const sale = parseAd(form({ ...base, developerId: "", advertiser: "Ofis Mebel −20%", cta: "lead" }));
+    if (!sale.ok) expect(sale.fieldErrors.advertiser).toBe("discount");
+    expect(sale.ok).toBe(false);
     const developerOnly = parseAd(form({ ...base, cta: "lead" }));
     if (developerOnly.ok) expect(adRow(developerOnly.value)).toMatchObject({ developer_id: DEVELOPER, advertiser: null });
   });

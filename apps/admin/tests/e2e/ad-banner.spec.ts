@@ -102,6 +102,8 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     expect(await top.evaluate((node) => node.compareDocumentPosition(document.querySelector(".catalog-results__count")!) & Node.DOCUMENT_POSITION_FOLLOWING)).toBeTruthy();
     const media = (await top.locator(".ad-banner__media").boundingBox())!;
     expect(media.width / media.height).toBeCloseTo(3, 1);
+    // Тонкий и на телефоне: подпись и кнопка — одной строкой.
+    await expect(top.locator(".ad-banner__bar")).toHaveCSS("flex-direction", "row");
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-2011-ad-catalog-top.png`, caret: "initial" });
     const slot = page.locator(".catalog-grid > .ad-banner").first();
     await expect(slot).toBeVisible();

@@ -154,7 +154,8 @@ function useGalleryGestures(onStep: (delta: 1 | -1) => void, paused: boolean) {
   const moved = useRef(false);
   const handlers = {
     onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
-      start.current = { x: event.clientX, y: event.clientY };
+      // Второй палец — щипок (увеличение), не свайп.
+      start.current = event.isPrimary ? { x: event.clientX, y: event.clientY } : null;
       moved.current = false;
     },
     onPointerUp: (event: PointerEvent<HTMLDivElement>) => {
