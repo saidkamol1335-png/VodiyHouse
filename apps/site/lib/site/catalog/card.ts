@@ -19,7 +19,7 @@ export type CardPays = { full: boolean; installmentMonths: number | null; banks:
 
 export type CardPrice = { amount: number; currency: Currency; perM2: number | null; payment: number | null };
 
-/** Тип комнат по всем блокам: площадь «от», свободно (null — где-то число неизвестно). */
+/** Тип комнат по всем блокам (на карточке — все, правки 15.11 п. 11, уточнение 20.11): площадь «от», свободно (null — где-то число неизвестно). */
 export function cardRoomTypes(complex: CatalogComplex): CardRoomType[] {
   const byRooms = new Map<number, CardRoomType>();
   for (const offer of complex.blocks.flatMap((block) => block.offers)) {
@@ -33,15 +33,6 @@ export function cardRoomTypes(complex: CatalogComplex): CardRoomType[] {
     });
   }
   return [...byRooms.values()].sort((a, b) => a.rooms - b.rooms);
-}
-
-/** Типов на карточке (правки 15.11, п. 11): у ЖК с 5–6 типами список не растягивает карточку. */
-export const CARD_TYPES_SHOWN = 3;
-
-/** Первые CARD_TYPES_SHOWN типов — сначала те, что есть в продаже (по комнатам), остальные — «ещё N». */
-export function shownRoomTypes(types: CardRoomType[]): { shown: CardRoomType[]; more: number } {
-  const ordered = [...types.filter((type) => type.available), ...types.filter((type) => !type.available)];
-  return { shown: ordered.slice(0, CARD_TYPES_SHOWN), more: Math.max(0, ordered.length - CARD_TYPES_SHOWN) };
 }
 
 export function cardDeadline(complex: CatalogComplex): CardDeadline {

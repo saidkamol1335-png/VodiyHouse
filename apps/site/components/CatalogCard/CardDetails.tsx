@@ -5,7 +5,7 @@ import { Badge, type BadgeTone } from "@/components/Badge";
 import { phoneHref } from "@/lib/contacts";
 import { formatArea, formatPrice } from "@vh/shared/format";
 import type { Locale } from "@/lib/i18n/routing";
-import { type CardDeadline, type CardPays, type CardPrice, type CardRoomType, shownRoomTypes } from "@/lib/site/catalog/card";
+import { type CardDeadline, type CardPays, type CardPrice, type CardRoomType } from "@/lib/site/catalog/card";
 
 // Строки тела карточки ЖК (мокап .jc__facts, .jc__types, .jc__pays, .jc__price): только вывод —
 // числа считает lib/site/catalog/card.ts.
@@ -46,10 +46,9 @@ export function CardTypes({ types }: { types: CardRoomType[] }) {
   const t = useTranslations("catalog.card");
   const locale = useLocale() as Locale;
   const roomsLabel = useRoomsLabel();
-  const { shown, more } = shownRoomTypes(types);
   return (
     <ul className="catalog-card__types">
-      {shown.map((type) => {
+      {types.map((type) => {
         const badge = leftBadge(type);
         const label = type.areaFrom === null
           ? roomsLabel(type.rooms)
@@ -61,7 +60,6 @@ export function CardTypes({ types }: { types: CardRoomType[] }) {
           </li>
         );
       })}
-      {more > 0 ? <li className="catalog-card__type catalog-card__type--more">{t("typesMore", { n: more })}</li> : null}
     </ul>
   );
 }

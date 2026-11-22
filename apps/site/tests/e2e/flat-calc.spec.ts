@@ -121,8 +121,9 @@ test.describe("сайт · расчёт для этой квартиры", () =>
     await expect(flat(page).locator(".calc-down__chip").first()).toHaveText(/^Взнос от \d+\s?%\s*— до \d+ мес\.$/);
     // Срок 60 мес. больше максимума схемы: считаем на максимуме, просим заявку.
     const message = flat(page).locator(".calc-term__message");
-    await expect(message).toContainText(/По условиям застройщика — до (\d+) мес\., считаем на \d+ мес\. Нужно дольше\? Попробуем договориться/);
-    const max = Number(/до (\d+) мес/.exec((await message.textContent()) ?? "")?.[1]);
+    // Уточнение 20.11: сообщение прежнее, с 15.11 (заказчику понравилось), к нему — «Нужно дольше?» и кнопка.
+    await expect(message).toContainText(/При взносе \d+\s?% можно максимум (\d+) мес\. — считаем на \d+ мес\. Нужно дольше\? Попробуем договориться/);
+    const max = Number(/максимум (\d+) мес/.exec((await message.textContent()) ?? "")?.[1]);
     await expect(flat(page).locator(".calc-term")).toContainText(`${max} мес.`);
     await message.getByRole("button", { name: "Оставить заявку" }).click();
     const lead = page.getByRole("dialog", { name: "Точный расчёт" });

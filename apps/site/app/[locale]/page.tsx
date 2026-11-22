@@ -77,7 +77,7 @@ export default async function HomePage() {
           <CatalogUnavailable id={CATALOG_ID} />
         )}
         {catalog ? <FlatPicker catalog={catalog} /> : null}
-        {/* Правки 15.11, п. 3: сначала проекты Vodiy House, ниже — реклама застройщиков с пометкой «Reklama». */}
+        {/* Правки 15.11, п. 3: сначала проекты Vodiy House, ниже — реклама застройщиков; «Reklama» — только на баннере (20.11). */}
         {catalog ? <JkGallery id={OFFERS_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
         {catalog ? <HomeOffers id={AD_ANCHOR} catalog={catalog} showcase={showcase} /> : null}
         <QuizSection id={QUIZ_ANCHOR} catalog={catalog} variant="home" />

@@ -116,10 +116,11 @@ export function termButtonsOf<P extends CalcProgram>(
 }
 
 /**
- * Строка под сроком. Сверх максимума (правки 15.11, п. 21): считаем на максимуме застройщика и пишем
- * «По условиям застройщика — до N мес. Нужно дольше? Попробуем договориться» с кнопкой заявки (block и
- * lead одинаково — молча на максимуме больше не считаем); suggest_tier с подходящей ступенью — как
- * раньше, предлагает взнос побольше.
+ * Строка под сроком. Сверх максимума (правки 15.11, п. 21, уточнение 20.11): считаем на максимуме
+ * застройщика, сообщение прежнее («При взносе N% можно максимум M мес. — считаем на M мес.» — заказчику
+ * понравилось), а при форме заявки к нему добавляется «Нужно дольше? Попробуем договориться» и кнопка
+ * (block и lead одинаково); без формы — только прежнее сообщение. suggest_tier с подходящей ступенью —
+ * как раньше, предлагает взнос побольше.
  */
 export function termMessage(
   term: TermOutcome | null,
@@ -154,9 +155,10 @@ export function termMessage(
       },
     };
   }
+  const above = t("term.aboveMax", { max: term.max, down: formatPercent(downPct) });
   return {
     tone: "warn",
-    text: t("term.overMax", { max: term.max, down: formatPercent(downPct) }),
+    text: askLonger ? `${above} ${t("term.overMaxAsk")}` : above,
     action: askLonger ? { label: t("term.overMaxButton"), onClick: askLonger } : undefined,
   };
 }

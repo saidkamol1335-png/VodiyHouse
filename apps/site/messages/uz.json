@@ -386,7 +386,8 @@
     },
     "term": {
       "overMaxRow": "{months} oy so‘raladi (quruvchi shartlari bo‘yicha — {max} oygacha)",
-      "overMax": "Quruvchi shartlari bo‘yicha — {max} oygacha, {max} oyga hisoblaymiz. Uzoqroq kerakmi? Kelishishga harakat qilamiz",
+      "aboveMax": "{down} boshlang‘ich to‘lovda ko‘pi bilan {max} oy — {max} oyga hisoblaymiz",
+      "overMaxAsk": "Uzoqroq kerakmi? Gaplashib ko‘ramiz",
       "overMaxButton": "Ariza qoldirish",
       "overMaxContext": "{max} oydan uzoq muddatli to‘lov — {months} oy so‘raladi",
       "title": "Muddat",
@@ -554,7 +555,6 @@
       "left": "{n} ta qoldi",
       "leftUnknown": "sotuvda bor",
       "leftNone": "mavjud emas",
-      "typesMore": "yana {n} ta tur",
       "askManager": "Menejerdan batafsil ma’lumot oling",
       "payFull": "100% to‘lov",
       "installmentUpTo": "{n} oygacha muddatli to‘lov",
@@ -1070,7 +1070,6 @@
       "flatsUnknown": "Mavjudlikni menejerdan bilib oling"
     },
     "offers": {
-      "eyebrow": "Reklama",
       "title": "Quruvchilardan ",
       "titleAccent": "takliflar",
       "lead": "Hamkor quruvchilarning reklamasi va shartlari: muddatli to‘lov, sovg‘alar, savdo boshlanishi. Kartochkadagi sanagacha amal qiladi.",

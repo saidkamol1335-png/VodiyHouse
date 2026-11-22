@@ -35,8 +35,9 @@ test.describe("каталог /novostroyki", () => {
     const pay = shodlik.locator(".catalog-card__pay").first();
     await expect(pay).toHaveCSS("background-color", "rgb(248, 155, 13)");
     await expect(pay).toHaveCSS("font-size", "12.5px");
-    // П. 11: не больше трёх типов на карточке, остальные — «ещё N».
-    for (const card of await cards.all()) expect(await card.locator(".catalog-card__type:not(.catalog-card__type--more)").count()).toBeLessThanOrEqual(3);
+    // П. 11 (уточнение 20.11): все типы квартир, без «ещё N»; «N осталось» — крупнее (12,5 px).
+    await expect(page.locator(".catalog-card__type--more")).toHaveCount(0);
+    await expect(shodlik.locator(".catalog-card__type .badge").first()).toHaveCSS("font-size", "12.5px");
     await expect(page.locator("main")).not.toContainText(/скидк|−\d+%|-\d+%/i);
     await page.screenshot({ path: `test-results/screens/${test.info().project.name}/s34-catalog-ru.png`, fullPage: true, caret: "initial" });
     expect(errors).toEqual([]);

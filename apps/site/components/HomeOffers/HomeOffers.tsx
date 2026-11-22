@@ -4,7 +4,6 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { AdCard } from "@/components/AdCard";
 import { AdSlider } from "@/components/AdSlider";
 import { Container } from "@/components/Container";
-import { Eyebrow } from "@/components/Eyebrow";
 import { Heading } from "@/components/Heading";
 import { Reveal } from "@/components/Reveal";
 import { pickMessages, SHOWCASE_MESSAGES } from "@/lib/i18n/clientMessages";
@@ -28,7 +27,7 @@ type HomeOffersProps = {
  * (п. 4 + 13) — слайдер баннеров застройщиков по порядку руководителя; пока баннеров нет — своя реклама
  * Vodiy House из каталога (мокап vmAd), если её не выключили в «Витрина → Реклама». Справа — «Разместить
  * рекламу» → «Застройщикам». Спецпредложения с 06.11.2026 — в ленте «Проекты» (JkGallery). Показать
- * нечего — раздела нет.
+ * нечего — раздела нет. Надписи над разделом нет (уточнение 20.11, п. 3): метка «Reklama» — только на баннере.
  */
 export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
   const [t, house, messages, houseSettings, contacts] = await Promise.all([
@@ -47,7 +46,6 @@ export async function HomeOffers({ id, catalog, showcase }: HomeOffersProps) {
       <Container>
         <Reveal variant="words" className="home-offers__head">
           <div>
-            <Eyebrow>{t("eyebrow")}</Eyebrow>
             <div id={`${id}-title`} className="home-offers__title">
               <Heading level={2} accent={t("titleAccent")}>
                 {t("title")}
