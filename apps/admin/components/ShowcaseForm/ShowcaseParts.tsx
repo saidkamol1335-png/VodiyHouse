@@ -30,17 +30,19 @@ type DeveloperSelectProps = {
   value: string;
   onChange: (id: string) => void;
   error?: string;
+  /** У рекламы застройщик необязателен: пустое значение — «не застройщик» (правки 15.11, п. 4). */
+  placeholder?: string;
 };
 
 /** Застройщик спецпредложения или рекламы — его ЖК появляются в отметках ниже. */
-export function DeveloperSelect({ idPrefix, developers, value, onChange, error }: DeveloperSelectProps) {
+export function DeveloperSelect({ idPrefix, developers, value, onChange, error, placeholder }: DeveloperSelectProps) {
   const t = useTranslations("admin.showcase.form");
   return (
     <SelectField
       id={`${idPrefix}-developer`}
       name="developerId"
       label={t("developer")}
-      placeholder={t("developerPlaceholder")}
+      placeholder={placeholder ?? t("developerPlaceholder")}
       options={developers.map((developer) => ({ value: developer.id, label: developer.name }))}
       value={value}
       onChange={(event: ChangeEvent<HTMLSelectElement>) => onChange(event.target.value)}

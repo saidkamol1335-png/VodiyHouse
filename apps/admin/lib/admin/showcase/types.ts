@@ -45,7 +45,9 @@ export type CollectionRecord = {
 /** Реклама — баннер (правки 15.11, п. 4 + 13): картинки — media_assets banner и banner_mobile. */
 export type AdRecord = {
   id: string;
+  /** Пусто — рекламодатель не застройщик (правки 15.11, п. 4, 20.11). */
   developerId: string;
+  advertiser: string | null;
   title: BilingualValue;
   cta: "lead" | "phone";
   validFrom: string;

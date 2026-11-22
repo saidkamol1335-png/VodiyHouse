@@ -37,7 +37,7 @@ test.describe("кабинет · реклама-баннер → сайт", () =
     await deleteAds(page, /^Открыть e2e Баннер /);
 
     await page.goto(`${LIST}/novoe`);
-    await page.getByLabel("Застройщик").selectOption({ label: "Farg‘ona Sifat Qurilish" });
+    await page.getByLabel("Застройщик", { exact: true }).selectOption({ label: "Farg‘ona Sifat Qurilish" });
     await page.locator("#ad-title-ru").fill(title);
     await page.locator("#ad-title-uz").fill(`e2e Banner ${Date.now().toString(36)}`);
     await page.getByRole("switch", { name: "На сайте" }).click();
@@ -114,6 +114,47 @@ test.describe("кабинет · реклама-баннер → сайт", () =
 
     await deleteAds(page, title);
     await expect(rowOf(page, title)).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("рекламодатель не застройщик (п. 4, 20.11): название вместо застройщика — подпись баннера и заявка; без обоих — нельзя", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const errors = collectPageErrors(page);
+    const title = `e2e Мебель ${Date.now().toString(36)}`;
+    await deleteAds(page, /^Открыть e2e Мебель /);
+    await page.goto(`${LIST}/novoe`);
+    await page.locator("#ad-title-ru").fill(title);
+    await page.locator("#ad-title-uz").fill(`e2e Mebel ${Date.now().toString(36)}`);
+    // Ни застройщика, ни рекламодателя — нельзя; в названии контакты — нельзя (1.2).
+    await page.getByRole("button", { name: "Создать" }).click();
+    await expect(page.locator("#ad-advertiser-error")).toHaveText("Заполните поле");
+    await page.getByLabel("Рекламодатель (если не застройщик)").fill("Ofis Mebel t.me/ofis");
+    await page.getByRole("button", { name: "Создать" }).click();
+    await expect(page.locator("#ad-advertiser-error")).toContainText("правило 1.2");
+    await page.getByLabel("Рекламодатель (если не застройщик)").fill("E2E Ofis Mebel");
+    await page.getByRole("button", { name: "Создать" }).click();
+    await expect(page).toHaveURL(/\/vitrina\/reklama\/[0-9a-f-]{36}$/, { timeout: 15_000 });
+    await page.locator("#ad-banner-rule12").check();
+    await page.locator("#ad-banner").setInputFiles(await imageFile(page, { width: 2400, height: 800, type: "image/jpeg" }));
+    await expect(page.locator("#ad-banner-rule12")).not.toBeChecked({ timeout: 20_000 });
+    await page.getByRole("switch", { name: "На сайте" }).click();
+    await page.getByRole("button", { name: "Сохранить" }).click();
+    await expect(page.locator(".showcase-form").getByText("Сохранено")).toBeVisible();
+    await page.goto(LIST);
+    await expect(page.locator("li", { has: rowOf(page, title) })).toContainText("E2E Ofis Mebel");
+
+    // Сайт: подпись — рекламодатель, заявка открывается; контактов рекламодателя нет.
+    const banner = page.locator("#reklama .ad-banner").filter({ has: page.locator(`img[alt="${title}"]`) });
+    await expect(async () => {
+      await page.goto(site("/ru"));
+      await expect(banner).toBeAttached({ timeout: 2_000 });
+    }).toPass({ timeout: 40_000 });
+    await expect(banner.locator(".ad-banner__advertiser")).toHaveText("E2E Ofis Mebel");
+    await expect(banner).toHaveAttribute("aria-label", "Реклама · E2E Ofis Mebel");
+
+    await deleteAds(page, title);
     expect(errors).toEqual([]);
   });
 

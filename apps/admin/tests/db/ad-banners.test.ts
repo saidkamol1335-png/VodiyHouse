@@ -90,6 +90,57 @@ describe("реклама — баннер", () => {
     await db.admin.query("delete from settings where key = 'site.show_discounts'");
   });
 
+  it("рекламодатель не застройщик (20261122100000, п. 4): название вместо застройщика; без обоих — нельзя", async () => {
+    const other = (
+      await db.admin.query<{ id: string }>(
+        `insert into ads (advertiser, title, valid_to, is_active) values ('Ofis Mebel', '{"ru": "Мебель", "uz": "Mebel"}', current_date + 10, true) returning id`,
+      )
+    ).rows[0]!.id;
+    await db.admin.query("insert into media_assets (ad_id, kind, path, width, height) values ($1, 'banner', $2, 2400, 800)", [
+      other,
+      `ads/${other}/${crypto.randomUUID()}.jpg`,
+    ]);
+    await db.admin.query("update ads set is_active = true where id = $1", [ad]);
+    await db.admin.query(
+      "insert into media_assets (ad_id, kind, path, width, height) select $1, 'banner', $2, 2400, 800 where not exists (select 1 from media_assets where ad_id = $1 and kind = 'banner')",
+      [ad, `ads/${ad}/${crypto.randomUUID()}.jpg`],
+    );
+    const ads = async () =>
+      (
+        await db.as(anon, (tx) =>
+          tx.query<{ v: { id: string; advertiser: string; developer: { slug: string } | null }[] }>("select site_showcase() -> 'ads' as v"),
+        )
+      ).rows[0]!.v;
+    const shown = await ads();
+    expect(shown.find((item) => item.id === other)).toMatchObject({ advertiser: "Ofis Mebel", developer: null });
+    expect(shown.find((item) => item.id === ad)).toMatchObject({ advertiser: "Ad Dev", developer: { slug: "ad-dev" } });
+    // Реклама скрытого застройщика на сайт не попадает; без застройщика — по своему периоду.
+    const hidden = (
+      await db.admin.query<{ id: string }>("insert into developers (slug, name, status) values ('ad-hidden', 'Hidden', 'draft') returning id")
+    ).rows[0]!.id;
+    const hiddenAd = (
+      await db.admin.query<{ id: string }>(
+        `insert into ads (developer_id, title, valid_to, is_active) values ($1, '{"ru": "Скрыт", "uz": "Yashirin"}', current_date + 10, true) returning id`,
+        [hidden],
+      )
+    ).rows[0]!.id;
+    await db.admin.query("insert into media_assets (ad_id, kind, path, width, height) values ($1, 'banner', $2, 2400, 800)", [
+      hiddenAd,
+      `ads/${hiddenAd}/${crypto.randomUUID()}.jpg`,
+    ]);
+    expect((await ads()).map((item) => item.id)).not.toContain(hiddenAd);
+    await expect(db.admin.query(`insert into ads (title, valid_to) values ('{"ru": "x", "uz": "x"}', current_date + 1)`)).rejects.toThrow(
+      /ads_advertiser_present/,
+    );
+    await expect(
+      db.admin.query(`insert into ads (advertiser, title, valid_to) values ('  ', '{"ru": "x", "uz": "x"}', current_date + 1)`),
+    ).rejects.toThrow(/check/);
+    // Напоминание о конце периода — с названием рекламодателя.
+    await db.admin.query("update ads set valid_to = current_date + 1 where id = $1", [other]);
+    const reminders = await db.admin.query<{ v: { id: string; developer: string }[] }>("select take_showcase_reminders() as v");
+    expect(reminders.rows[0]!.v.find((item) => item.id === other)?.developer).toBe("Ofis Mebel");
+  });
+
   it("заявка типа ad есть в enum; менеджер настройки скидок не правит", async () => {
     const types = await db.admin.query<{ v: string }>("select unnest(enum_range(null::lead_type))::text as v");
     expect(types.rows.map((row) => row.v)).toContain("ad");

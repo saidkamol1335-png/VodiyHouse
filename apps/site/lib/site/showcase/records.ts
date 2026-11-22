@@ -38,7 +38,10 @@ export type AdRecord = {
   /** Название рекламы — подпись картинки (alt). */
   title: LocalizedText;
   cta: string;
-  developer: ShowcaseDeveloperRecord;
+  /** Подпись баннера: рекламодатель или имя застройщика (20261122100000; до миграции поля нет). */
+  advertiser?: string | null;
+  /** null — рекламодатель не застройщик (правки 15.11, п. 4, 20.11). */
+  developer: ShowcaseDeveloperRecord | null;
   valid_to: string;
   banner: PhotoRecord;
   banner_mobile: PhotoRecord | null;
@@ -81,7 +84,9 @@ export type ShowcaseAd = {
   id: string;
   title: LocalizedText;
   cta: AdCta;
-  developer: ShowcaseDeveloperRecord;
+  /** Подпись под баннером: рекламодатель (застройщик или другая компания — правки 15.11, п. 4, 20.11). */
+  advertiser: string;
+  developer: ShowcaseDeveloperRecord | null;
   validTo: string;
   banner: CatalogPhoto;
   /** Картинка для телефона; null — та же, что для ПК. */
@@ -136,7 +141,8 @@ export function showcaseFrom(record: SiteShowcaseRecord): SiteShowcase {
               id: item.id,
               title: item.title,
               cta: item.cta === "phone" ? "phone" : "lead",
-              developer: item.developer,
+              advertiser: item.advertiser || item.developer?.name || "",
+              developer: item.developer ?? null,
               validTo: item.valid_to,
               banner: photoFrom(item.banner),
               bannerMobile: cover(item.banner_mobile),
@@ -151,14 +157,14 @@ export function showcaseFrom(record: SiteShowcaseRecord): SiteShowcase {
 /**
  * Скидки выключены («Витрина → Спецпредложения», по умолчанию — п. 4 + 21 правок 15.11): спецпредложения
  * со скидкой в бейдже, заголовке или тексте сайт не показывает; название рекламы со скидкой не идёт в
- * подпись картинки — вместо него имя застройщика.
+ * подпись картинки — вместо него имя рекламодателя.
  */
 export function withoutDiscounts(showcase: SiteShowcase): SiteShowcase {
   return {
     ...showcase,
     specials: showcase.specials.filter((special) => !textsMentionDiscount(special.badge, special.title, special.text)),
     ads: showcase.ads.map((ad) =>
-      textsMentionDiscount(ad.title) ? { ...ad, title: { ru: ad.developer.name, uz: ad.developer.name } } : ad,
+      textsMentionDiscount(ad.title) ? { ...ad, title: { ru: ad.advertiser, uz: ad.advertiser } } : ad,
     ),
   };
 }

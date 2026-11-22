@@ -139,8 +139,22 @@ describe("форма рекламы (баннер, правки 15.11)", () => {
     expect(contact.ok).toBe(false);
     if (!contact.ok) expect(contact.fieldErrors.title).toBe("contacts");
     expect(adFieldsOf(null).cta).toBe("lead");
-    const record = { id: "a", developerId: DEVELOPER, title: { ru: "x", uz: "y" }, cta: "phone" as const, validFrom: "2026-11-01", validTo: "2026-11-20", isActive: true, sort: 1 };
+    const record = { id: "a", developerId: DEVELOPER, advertiser: null, title: { ru: "x", uz: "y" }, cta: "phone" as const, validFrom: "2026-11-01", validTo: "2026-11-20", isActive: true, sort: 1 };
     expect(adFieldsOf(record).cta).toBe("phone");
+  });
+
+  it("рекламодатель не застройщик (20.11): название вместо застройщика; без обоих — нельзя; контакты — нельзя", () => {
+    const other = parseAd(form({ ...base, developerId: "", advertiser: "  Ofis Mebel ", cta: "lead" }));
+    expect(other.ok).toBe(true);
+    if (other.ok) expect(adRow(other.value)).toMatchObject({ developer_id: null, advertiser: "Ofis Mebel" });
+    const none = parseAd(form({ ...base, developerId: "", cta: "lead" }));
+    expect(none.ok).toBe(false);
+    if (!none.ok) expect(none.fieldErrors.advertiser).toBe("required");
+    const contact = parseAd(form({ ...base, developerId: "", advertiser: "t.me/ofis", cta: "lead" }));
+    if (!contact.ok) expect(contact.fieldErrors.advertiser).toBe("contacts");
+    expect(contact.ok).toBe(false);
+    const developerOnly = parseAd(form({ ...base, cta: "lead" }));
+    if (developerOnly.ok) expect(adRow(developerOnly.value)).toMatchObject({ developer_id: DEVELOPER, advertiser: null });
   });
 });
 

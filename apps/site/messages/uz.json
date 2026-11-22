@@ -1094,9 +1094,9 @@
     },
     "banner": {
       "tag": "Reklama",
-      "label": "Reklama · {developer}",
+      "label": "Reklama · {advertiser}",
       "call": "Qo‘ng‘iroq qilish",
-      "region": "Quruvchilar reklamasi",
+      "region": "Reklama",
       "prev": "Oldingi banner",
       "next": "Keyingi banner",
       "slide": "Banner {n} / {total}"

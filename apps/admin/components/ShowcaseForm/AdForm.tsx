@@ -7,7 +7,8 @@ import { BilingualField } from "@/components/BilingualField";
 import { ChoiceField } from "@/components/ChoiceField";
 import type { MediaPreview } from "@/components/MediaDrop";
 import { NEW_SHOWCASE_ID, showcaseListHref } from "@/lib/admin/nav";
-import { AD_CTAS, adFieldsOf, type AdErrors, type AdFields } from "@/lib/admin/showcase/adForm";
+import { Field } from "@/components/Field";
+import { AD_CTAS, ADVERTISER_MAX, adFieldsOf, type AdErrors, type AdFields } from "@/lib/admin/showcase/adForm";
 import { SHOWCASE_LIMITS } from "@/lib/admin/showcase/forms";
 import type {
   AdRecord,
@@ -35,7 +36,7 @@ export type AdFormProps = {
 };
 
 /**
- * Реклама — баннер (правки 15.11, п. 4 + 13): застройщик, название, кнопка (телефон Vodiy House или
+ * Реклама — баннер (правки 15.11, п. 4 + 13): застройщик или другой рекламодатель (20.11), название, кнопка (телефон Vodiy House или
  * заявка), период, порядок в слайдере и каталоге; под формой — картинки для ПК и телефона с отметкой
  * правила 1.2 на каждую загрузку и «Удалить».
  */
@@ -54,7 +55,7 @@ export function AdForm(props: AdFormProps) {
     <AdminPanel title={record ? t("editTitle.ad") : t("newTitle.ad")} wide>
       <form className="showcase-form" onSubmit={submitKeepingForm(formAction)} noValidate>
         <input type="hidden" name="id" value={record?.id ?? NEW_SHOWCASE_ID} />
-        <DeveloperSelect idPrefix="ad" developers={props.options.developers} value={developerId} onChange={setDeveloperId} error={issue("developerId")} />
+        <AdAdvertiser fields={fields} developers={props.options.developers} developerId={developerId} onDeveloper={setDeveloperId} issue={issue} />
         <AdTitleAndCta fields={fields} issue={issue} />
         <PeriodFields idPrefix="ad" validFrom={fields.validFrom} validTo={fields.validTo} issue={issue} />
         <OrderAndActive idPrefix="ad" sort={fields.sort} isActive={fields.isActive} issue={issue} />
@@ -73,6 +74,36 @@ export function AdForm(props: AdFormProps) {
 }
 
 type Issue = (field: keyof AdFields) => string | undefined;
+
+type AdAdvertiserProps = {
+  fields: AdFields;
+  developers: ShowcaseOptions["developers"];
+  developerId: string;
+  onDeveloper: (id: string) => void;
+  issue: Issue;
+};
+
+/**
+ * Рекламодатель (правки 15.11, п. 4, 20.11): застройщик из списка или другая компания — названием.
+ * Подпись баннера на сайте — название, иначе имя застройщика; кнопка — всё равно Vodiy House (1.2).
+ */
+function AdAdvertiser({ fields, developers, developerId, onDeveloper, issue }: AdAdvertiserProps) {
+  const t = useTranslations("admin.showcase.form");
+  return (
+    <>
+      <DeveloperSelect idPrefix="ad" developers={developers} value={developerId} onChange={onDeveloper} placeholder={t("developerNone")} />
+      <Field
+        id="ad-advertiser"
+        name="advertiser"
+        label={t("advertiser")}
+        hint={t("advertiserHint")}
+        maxLength={ADVERTISER_MAX}
+        defaultValue={fields.advertiser}
+        error={issue("advertiser")}
+      />
+    </>
+  );
+}
 
 /** Название (подпись картинки) и кнопка под баннером: телефон Vodiy House или заявка. */
 function AdTitleAndCta({ fields, issue }: { fields: AdFields; issue: Issue }) {

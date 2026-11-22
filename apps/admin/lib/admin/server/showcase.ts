@@ -53,13 +53,14 @@ type Row = {
   sort: number;
   created_at: string;
   cta?: string;
+  advertiser?: string | null;
   developers?: { name: string } | null;
 };
 
 const COLUMNS = {
   special: "id, developer_id, kind, badge, title, text, complex_ids, valid_from, valid_to, is_active, sort, created_at, developers(name)",
   collection: "id, slug, title, mode, complex_ids, filter, is_active, sort, created_at",
-  ad: "id, developer_id, title, cta, complex_ids, valid_from, valid_to, is_active, sort, created_at, developers(name)",
+  ad: "id, developer_id, advertiser, title, cta, complex_ids, valid_from, valid_to, is_active, sort, created_at, developers(name)",
 } as const;
 
 async function readRows(supabase: SupabaseClient, kind: ShowcaseKind, id?: string): Promise<Row[]> {
@@ -95,7 +96,7 @@ function listRow(kind: ShowcaseKind, row: Row, coverPath: string | null): Showca
     id: row.id,
     kind,
     title: bilingualFrom(row.title).ru,
-    developerName: row.developers?.name ?? null,
+    developerName: row.developers?.name ?? row.advertiser ?? null,
     complexCount,
     // Реклама с правок 15.11 — баннер, без ЖК и фильтра.
     byFilter: kind === "collection" ? row.mode === "filter" : false,
@@ -157,6 +158,7 @@ export async function readAd(supabase: SupabaseClient, id: string): Promise<AdRe
   return {
     id: row.id,
     developerId: row.developer_id ?? "",
+    advertiser: row.advertiser ?? null,
     title: bilingualFrom(row.title),
     cta: row.cta === "phone" ? "phone" : "lead",
     validFrom: row.valid_from ?? "",

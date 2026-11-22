@@ -108,6 +108,7 @@ const ad = (id: string, patch: Partial<ShowcaseAd>): ShowcaseAd => ({
   id,
   title: text(`реклама ${id}`),
   cta: "lead",
+  advertiser: sifat.name,
   developer: sifat,
   validTo: "2026-11-30",
   banner: photo(`${id}.jpg`),
