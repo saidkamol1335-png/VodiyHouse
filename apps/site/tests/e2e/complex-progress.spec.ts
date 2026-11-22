@@ -83,7 +83,9 @@ test.describe("кадры стройки на главной и в катало�
     const tile = page.locator(".home-why__tile--video");
     await expect(tile).toBeVisible();
     await expect(tile).toContainText("Не нужно ехать на объект");
-    await expect(tile.locator(".home-why__rec")).toHaveText(/^REC · .+ · блок \S+$/);
+    // Уточнение 20.11: постер — без REC, таймкода и полосы; ничего не играет само.
+    await expect(tile.locator(".home-why__rec")).toHaveText(/^Отчёт стройки · .+ · блок \S+$/);
+    await expect(tile.locator(".home-why__tc, .home-why__bar, .home-why__frame--soft")).toHaveCount(0);
     const section = page.locator(".home-why");
     await section.scrollIntoViewIfNeeded();
     await expect(tile.locator(".home-why__frame img").first()).toHaveJSProperty("complete", true);

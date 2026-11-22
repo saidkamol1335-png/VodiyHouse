@@ -1219,33 +1219,8 @@
   animation: home-why-up-lite 0.2s ease-out backwards;
 }
 
-/* Видео: наезд камеры, автофокус, рамка защёлкивается, фокус мигает, полоса, REC. */
-[data-motion="full"]
-  .home-why__tile[data-revealed]
-  .home-why__frame:not(.home-why__frame--soft)
-  .home-why__photo {
-  animation: home-why-kb 18s ease-in-out 1.2s infinite alternate backwards;
-}
-
-[data-motion="full"] .home-why__tile[data-revealed="full"] .home-why__frame--soft {
-  animation: home-why-soft 1.3s var(--why-ease) 0.45s backwards;
-}
-
-[data-motion="full"] .home-why__tile[data-revealed="full"] .home-why__vf {
-  animation: home-why-vf 0.75s cubic-bezier(0.3, 1.4, 0.5, 1) 0.55s backwards;
-}
-
-[data-motion="full"] .home-why__tile[data-revealed="full"] .home-why__af {
-  animation: home-why-af 1.5s ease-out 1s backwards;
-}
-
-[data-motion="full"] .home-why__tile[data-revealed] .home-why__bar-fill {
-  animation: home-why-progress 14s linear 1.2s infinite backwards;
-}
-
-[data-motion="full"] .home-why__rec i {
-  animation: home-why-blink 1.6s ease-in-out infinite;
-}
+/* Видео — постер (правки 15.11, п. 6, 20.11): после раскрытия ничего не играет само — без наезда,
+   автофокуса, полосы, таймкода и мигающего REC; только вход карточки, как у остальных. */
 
 [data-motion="full"] .home-why__live i::after {
   animation: home-why-ping 2.2s var(--why-ease) infinite;
@@ -1546,82 +1521,6 @@
   from {
     opacity: 0;
     transform: translateY(44px) scale(0.985);
-  }
-}
-
-@keyframes home-why-kb {
-  from {
-    transform: scale(1.03);
-  }
-
-  to {
-    transform: scale(1.12) translate3d(-1.8%, 1%, 0);
-  }
-}
-
-@keyframes home-why-soft {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes home-why-vf {
-  from {
-    opacity: 0;
-    transform: translate(var(--vx), var(--vy));
-  }
-}
-
-@keyframes home-why-af {
-  0% {
-    opacity: 0;
-    transform: scale(1.5);
-  }
-
-  28% {
-    opacity: 1;
-    transform: none;
-  }
-
-  40% {
-    opacity: 0.3;
-  }
-
-  52% {
-    opacity: 1;
-  }
-
-  64% {
-    opacity: 0.3;
-  }
-
-  76% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: none;
-  }
-}
-
-@keyframes home-why-blink {
-  50% {
-    opacity: 0.25;
-  }
-}
-
-@keyframes home-why-progress {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: scaleX(1);
   }
 }
 

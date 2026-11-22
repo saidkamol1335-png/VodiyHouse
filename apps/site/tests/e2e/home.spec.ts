@@ -156,5 +156,13 @@ test.describe("главная, избранное, подборка", () => {
     await expect(tile).toBeVisible();
     await expect(tile).toHaveCSS("opacity", "1", { timeout: 5_000 });
     await expect(tile).toContainText("Комиссию платит застройщик");
+    // П. 6 (20.11): видео стройки — постер; после раскрытия в full кадр не двигается и таймкода нет.
+    const video = why.locator(".home-why__tile--video");
+    if (await video.count()) {
+      await why.getByRole("heading", { name: "Снимаем стройку каждый месяц" }).click();
+      await expect(video).toBeVisible();
+      await expect(video.locator(".home-why__photo").first()).toHaveCSS("animation-name", "none");
+      await expect(video.locator(".home-why__tc")).toHaveCount(0);
+    }
   });
 });

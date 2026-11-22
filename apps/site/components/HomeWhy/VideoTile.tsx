@@ -12,9 +12,9 @@ import { Copy, Kicker } from "./WhyParts";
 
 /**
  * «Видео стройки» (вариант А): слева текст и «Смотреть пример» — раздел «Ход строительства» этого ЖК,
- * справа видоискатель с первым кадром последнего отчёта. full — автофокус (размытая копия гаснет),
- * рамка защёлкивается, рамка фокуса мигает, медленный наезд камеры, REC мигает, идёт таймкод и полоса;
- * lite и none — кадр стоит.
+ * справа постер — первый кадр последнего отчёта в рамке видоискателя и Play. Ничего не играет само
+ * (правки 15.11, п. 6, уточнение 20.11: заказчик не понял, зачем «видео» запускается само): ни наезда,
+ * ни автофокуса, ни REC и таймкода; ролик — по нажатию, в «Ходе строительства» ЖК.
  */
 export async function VideoTile({ video }: { video: ProgressSample }) {
   const t = await getTranslations("home.why");
@@ -43,9 +43,7 @@ export async function VideoTile({ video }: { video: ProgressSample }) {
       </div>
       <WhyMedia href={href}>
         <ViewfinderShot photo={photo} />
-        <ViewfinderShot photo={photo} soft />
         <span className="home-why__rec">
-          <i aria-hidden="true" />
           <span className="home-why__rec-text">
             {t("videoRec", { complex: complex.name[locale], block: frame.block })}
           </span>
@@ -55,13 +53,10 @@ export async function VideoTile({ video }: { video: ProgressSample }) {
   );
 }
 
-/** Кадр видоискателя; soft — размытая копия поверх, в full гаснет («автофокус»). */
-function ViewfinderShot({ photo, soft = false }: { photo: SitePhotoData; soft?: boolean }) {
+/** Кадр-постер видоискателя. */
+function ViewfinderShot({ photo }: { photo: SitePhotoData }) {
   return (
-    <span
-      className={soft ? "home-why__frame home-why__frame--soft" : "home-why__frame"}
-      aria-hidden="true"
-    >
+    <span className="home-why__frame" aria-hidden="true">
       <SitePhoto
         photo={photo}
         alt=""
