@@ -1,12 +1,37 @@
+import {
+  BrickWall,
+  Building2,
+  CalendarCheck,
+  Gem,
+  LayoutGrid,
+  type LucideIcon,
+  MapPin,
+  MoveVertical,
+  PaintRoller,
+  SquareParking,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { CardDeadline } from "@/lib/site/catalog/card";
 import type { Fact } from "@/lib/site/complex/summary";
-import { FactsSteps, type FactStep } from "./FactsSteps";
 
 const CEILING = new Intl.NumberFormat("ru-RU", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2,
 });
+
+type FactItem = { id: Fact["key"] | "deadline"; label: string; value: string };
+
+const ICONS: Record<FactItem["id"], LucideIcon> = {
+  class: Gem,
+  floors: Building2,
+  houseType: BrickWall,
+  ceilings: MoveVertical,
+  finishing: PaintRoller,
+  parking: SquareParking,
+  toCenter: MapPin,
+  blocks: LayoutGrid,
+  deadline: CalendarCheck,
+};
 
 type ComplexFactsProps = {
   facts: readonly Fact[];
@@ -14,9 +39,10 @@ type ComplexFactsProps = {
 };
 
 /**
- * «О ЖК» (мокап .facts, ТЗ 7.3б): факты ЖК — шаги вертикальной ленты по образцу «How I work» портфолио
- * исполнителя (04.11.2026): подпись — что это, крупно — значение; срок сдачи — последним шагом. Пустое
- * поле не выводится.
+ * «TJM haqida» (ТЗ 7.3б «плашки с иконками», мокап .facts; правки 15.11, п. 28): компактная сетка
+ * «значок · подпись · значение» — все характеристики на одном экране (1440 — 5 в ряд, телефон — 2), как
+ * характеристики ЖК на Cian. Срок сдачи — первым, как «Сдача» у Cian. Пустое поле не выводится. Без JS и
+ * своей анимации: раздел проявляется целиком (ComplexSection).
  */
 export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
   const t = await getTranslations("complex");
@@ -38,13 +64,13 @@ export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
         return fact.value.join(fact.key === "blocks" ? " · " : " / ");
     }
   };
-  const steps: FactStep[] = facts.map((fact) => ({
+  const items: FactItem[] = facts.map((fact) => ({
     id: fact.key,
     label: t(`about.facts.${fact.key}`),
     value: valueOf(fact),
   }));
   if (deadline) {
-    steps.push({
+    items.unshift({
       id: "deadline",
       label: t("offer.deadline"),
       value:
@@ -53,6 +79,19 @@ export async function ComplexFacts({ facts, deadline }: ComplexFactsProps) {
           : t("quarter", { q: deadline.quarter, year: deadline.year }),
     });
   }
-  if (steps.length === 0) return null;
-  return <FactsSteps steps={steps} />;
+  if (items.length === 0) return null;
+  return (
+    <dl className="complex-facts">
+      {items.map((item) => {
+        const Icon = ICONS[item.id];
+        return (
+          <div key={item.id} className="complex-facts__item" data-fact={item.id}>
+            <Icon className="complex-facts__icon" size={20} strokeWidth={1.6} aria-hidden />
+            <dt className="complex-facts__label">{item.label}</dt>
+            <dd className="complex-facts__value">{item.value}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
 }

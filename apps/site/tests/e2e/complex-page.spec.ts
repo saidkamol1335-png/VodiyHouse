@@ -33,6 +33,22 @@ test.describe("страница ЖК", () => {
     await expect(head.getByRole("link", { name: "Farg‘ona Sifat Qurilish" })).toBeVisible();
     await expect(head).not.toContainText(/Ориентир|до центра|Мустакиллик|Комфорт/);
     await expect(main.locator("#o-zhk")).toContainText("Комфорт");
+    // П. 28 (20.11): «О ЖК» — сетка «значок · подпись · значение» в одном экране (1440 — 5 в ряд, телефон — 2),
+    // срок сдачи — первым; ленты 01–09 нет.
+    const facts = main.locator("#o-zhk .complex-facts__item");
+    const count = await facts.count();
+    expect(count).toBeGreaterThanOrEqual(5);
+    await expect(facts.first()).toHaveAttribute("data-fact", "deadline");
+    await expect(facts.locator(".complex-facts__icon")).toHaveCount(count);
+    await expect(main.locator("#o-zhk .complex-facts__rail")).toHaveCount(0);
+    const viewport = page.viewportSize() ?? { width: 1440, height: 900 };
+    const grid = await main.locator("#o-zhk .complex-facts").boundingBox();
+    expect(grid?.height ?? Infinity).toBeLessThan(viewport.height * 0.7);
+    const tops = await facts.evaluateAll((nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().top)));
+    expect(tops.filter((top) => top === tops[0]).length).toBe(Math.min(count, viewport.width >= 1024 ? 5 : 2));
+    await main.locator("#o-zhk").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1500); // раздел проявляется при входе в кадр
+    await main.locator("#o-zhk").screenshot({ path: `test-results/screens/${test.info().project.name}/pravki-2011-facts.png` });
     // П. 16: под галереей нет плашки цены (цена, платёж, срок, документы, «Записаться», «Показать телефон»).
     await expect(main.locator(".complex-offer")).toHaveCount(0);
     await expect(main.locator(".complex-hero").getByRole("button", { name: /Записаться на просмотр|Показать телефон/ })).toHaveCount(0);
